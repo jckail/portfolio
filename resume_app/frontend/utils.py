@@ -1,72 +1,70 @@
-import base64
-
-def get_pdf_download_link(file_path):
-    with open(file_path, "rb") as f:
-        bytes = f.read()
-        b64 = base64.b64encode(bytes).decode()
-        href = f'data:application/pdf;base64,{b64}'
-    return href
-
-def add_script_for_download_and_navigation():
-    return """
+def add_script_for_download_and_navigation(api_url):
+    return f"""
     <script>
-    function downloadResume() {
-        const link = document.createElement('a');
-        link.href = '""" + get_pdf_download_link("resume_app/backend/assets/JordanKailResume.pdf") + """';
-        link.download = 'JordanKailResume.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    function downloadResume() {{
+        fetch('{api_url}/download_resume')
+            .then(response => response.blob())
+            .then(blob => {{
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'JordanKailResume.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }})
+            .catch(() => alert('An error occurred while downloading the resume.'));
+    }}
 
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {{
+        anchor.addEventListener('click', function (e) {{
             e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
+            document.querySelector(this.getAttribute('href')).scrollIntoView({{
                 behavior: 'smooth'
-            });
-        });
-    });
+            }});
+        }});
+    }});
 
-    let timeout;
     let lastScrollTop = 0;
-    let isScrolling = false;
+    let isNavVisible = false;
+    const scrollThreshold = 100;
 
-    function showNavigation() {
+    function toggleNavigation(show) {{
         const expander = document.querySelector('.streamlit-expanderHeader');
-        if (expander) {
-            expander.click();
-        }
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            if (expander) {
+        if (expander) {{
+            if (show && !isNavVisible) {{
                 expander.click();
-            }
-            isScrolling = false;
-        }, 3000);
-    }
+                isNavVisible = true;
+            }} else if (!show && isNavVisible) {{
+                expander.click();
+                isNavVisible = false;
+            }}
+        }}
+    }}
 
-    function handleScroll() {
+    function handleScroll() {{
         const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
-        if (!isScrolling) {
-            isScrolling = true;
-            showNavigation();
-        }
+        if (!isNavVisible && currentScrollTop > lastScrollTop) {{
+            toggleNavigation(true);
+        }} else if (isNavVisible && Math.abs(currentScrollTop - lastScrollTop) > scrollThreshold) {{
+            toggleNavigation(false);
+        }}
         
         const sections = ['experience', 'skills', 'achievements'];
-        sections.forEach(section => {
+        sections.forEach(section => {{
             const element = document.getElementById(section);
-            if (element.getBoundingClientRect().top <= window.innerHeight / 2) {
-                document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            if (element.getBoundingClientRect().top <= window.innerHeight / 2) {{
+                document.querySelectorAll('.sidebar-nav a').forEach(link => {{
                     link.style.color = '#ffffff';
-                });
-                document.querySelector(`.sidebar-nav a[href="#${section}"]`).style.color = '#00ff3c';
-            }
-        });
+                }});
+                document.querySelector(`.sidebar-nav a[href="#${{section}}"]`).style.color = '#00ff3c';
+            }}
+        }});
         
         lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
-    }
+    }}
 
     window.addEventListener('scroll', handleScroll);
     </script>

@@ -3,11 +3,10 @@ import requests
 import streamlit.components.v1 as components
 from styles import css
 from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_achievements_section
-from utils import add_script_for_download_and_navigation
 from particles import particles_js
 
 # API URL for fetching resume data
-API_URL = "http://localhost:8000"
+API_URL = "http://127.0.0.1:8000"
 
 # Set the page configuration
 st.set_page_config(page_title="Jordan Kail's Resume", layout="wide")
@@ -30,9 +29,9 @@ components.html(particles_js, height=0)
 create_header(resume_data['name'], resume_data['contact'])
 
 # Create navigation in sidebar
-with st.sidebar:
-    with st.expander("Navigation", expanded=False):
-        create_navigation()
+# with st.sidebar:
+#     with st.expander("Navigation", expanded=False):
+#         create_navigation()
 
 # Display the resume content
 st.markdown("<div class='content'>", unsafe_allow_html=True)
@@ -48,6 +47,3 @@ create_section("Achievements", create_achievements_section(resume_data['achievem
 
 # Close the content div
 st.markdown("</div>", unsafe_allow_html=True)
-
-# Add JavaScript for smooth scrolling, navigation, and resume download
-st.markdown(add_script_for_download_and_navigation(), unsafe_allow_html=True)

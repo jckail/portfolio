@@ -21,10 +21,10 @@ body {
 particlesJS('particles-js', {
   "particles": {
     "number": {
-      "value": 90,
+      "value": 60,
       "density": {
         "enable": true,
-        "value_area": 900
+        "value_area": 800
       }
     },
     "color": {
@@ -52,7 +52,7 @@ particlesJS('particles-js', {
       "random": true,
       "anim": {
         "enable": true,
-        "speed": 0.01,
+        "speed": 0.005,
         "size_min": 0.1,
         "sync": true
       }
@@ -66,7 +66,7 @@ particlesJS('particles-js', {
     },
     "move": {
       "enable": true,
-      "speed": 0.3,
+      "speed": 0.03,
       "direction": "none",
       "random": true,
       "straight": false,

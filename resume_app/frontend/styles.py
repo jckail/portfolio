@@ -106,7 +106,7 @@ iframe {
 }
 /* Sidebar styles */
 .css-1d391kg {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.1) !important;
 }
 .sidebar-nav {
     padding: 10px;
@@ -124,11 +124,11 @@ iframe {
 }
 /* Expander styles */
 .streamlit-expanderHeader {
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    background-color: rgba(0, 0, 0, 0.2) !important;
     color: #ffffff !important;
 }
 .streamlit-expanderContent {
-    background-color: rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
 }
 </style>
 """
