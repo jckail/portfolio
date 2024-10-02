@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import streamlit.components.v1 as components
+import base64
 
 # API URL for fetching resume data
 API_URL = "http://localhost:8000"
@@ -12,6 +13,14 @@ st.set_page_config(page_title="Jordan Kail's Resume", layout="wide")
 def fetch_resume_data():
     response = requests.get(f"{API_URL}/resume")
     return response.json()
+
+# Function to create a download link for the resume PDF
+def get_pdf_download_link(file_path):
+    with open(file_path, "rb") as f:
+        bytes = f.read()
+        b64 = base64.b64encode(bytes).decode()
+        href = f'<a href="data:application/pdf;base64,{b64}" download="JordanKailResume.pdf">Download Resume</a>'
+        return href
 
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
@@ -83,13 +92,6 @@ st.markdown(
     .content {
         padding-top: 180px;
     }
-    .content h2 {
-        border-bottom: 2px solid #00ff3c;
-        padding-bottom: 10px;
-        margin-top: 30px;
-        font-size: 1.8em;
-        color: #ffffff !important;
-    }
     .experience-item {
         margin-bottom: 30px;
     }
@@ -115,6 +117,16 @@ st.markdown(
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
         font-weight: bold !important;
         color: #ffffff !important;
+    }
+    /* Section marker styles */
+    .section-marker {
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin: 40px 0 20px 0;
+        color: #00ff3c !important;
+        border-bottom: 2px solid #00ff3c;
+        padding-bottom: 10px;
     }
     </style>
     """,
@@ -264,6 +276,7 @@ st.markdown(f"""
             <a href="#experience">Experience</a>
             <a href="#skills">Skills</a>
             <a href="#achievements">Achievements</a>
+            {get_pdf_download_link("resume_app/backend/assets/JordanKailResume.pdf")}
         </div>
     </div>
 """, unsafe_allow_html=True)
@@ -273,7 +286,7 @@ st.markdown(f"""
 st.markdown("<div class='content'>", unsafe_allow_html=True)
 
 # Experience Section
-st.markdown("<h2 id='experience'>Experience</h2>", unsafe_allow_html=True)
+st.markdown('<div class="section-marker" id="experience">⚡️ Experience ⚡️</div>', unsafe_allow_html=True)
 for job in resume_data['experience']:
     st.markdown(f"""
     <div class="experience-item">
@@ -286,13 +299,13 @@ for job in resume_data['experience']:
     """, unsafe_allow_html=True)
 
 # Skills Section
-st.markdown("<h2 id='skills'>Skills</h2>", unsafe_allow_html=True)
+st.markdown('<div class="section-marker" id="skills">🛠 Skills 🛠</div>', unsafe_allow_html=True)
 for category, skills in resume_data['skills'].items():
     st.markdown(f"<h3>{category}</h3>", unsafe_allow_html=True)
     st.write(", ".join(skills))
 
 # Achievements Section
-st.markdown("<h2 id='achievements'>Achievements</h2>", unsafe_allow_html=True)
+st.markdown('<div class="section-marker" id="achievements">🏆 Achievements 🏆</div>', unsafe_allow_html=True)
 for achievement in resume_data['achievements']:
     st.markdown(f"<h3>{achievement['title']}</h3>", unsafe_allow_html=True)
     st.write(achievement['description'])
