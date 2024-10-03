@@ -17,7 +17,7 @@ COPY entrypoint.sh .
 # Make the entrypoint script executable
 RUN chmod +x entrypoint.sh
 
-# Set environment variables
+# Set default environment variable for API_URL
 ENV API_URL=http://localhost:8000
 
 # Expose the ports for both frontend and backend
