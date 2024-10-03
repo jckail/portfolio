@@ -23,23 +23,22 @@ def create_header(name, contact):
         <p>
             📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} | 🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
         </p>
-        
     </div>
 
     <style>
     .header {{
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;  /* Reduced from 20px */
     }}
     .header h1 {{
-        margin-bottom: 10px;
+        margin-bottom: 5px;  /* Reduced from 10px */
     }}
     .header p {{
-        margin-bottom: 15px;
+        margin-bottom: 10px;  /* Reduced from 15px */
     }}
     .download-button {{
         display: inline-block;
-        padding: 10px 20px;
+        padding: 5px 10px;  /* Reduced padding */
         background-color: #4CAF50;
         color: white;
         text-decoration: none;
@@ -53,6 +52,14 @@ def create_header(name, contact):
     .error-message {{
         color: red;
         font-weight: bold;
+    }}
+    /* Custom CSS to control overall layout spacing */
+    .content {{
+        margin-top: -20px;  /* Negative margin to pull content up */
+    }}
+    .section-marker {{
+        margin-top: 10px;  /* Reduced top margin for sections */
+        margin-bottom: 5px;  /* Added small bottom margin */
     }}
     </style>
     """, unsafe_allow_html=True)

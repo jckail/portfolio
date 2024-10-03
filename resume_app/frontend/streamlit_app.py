@@ -28,20 +28,8 @@ def fetch_resume_data():
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
 
-# Inject CSS based on the theme
-if st.session_state['theme'] == 'dark':
-    st.markdown(dark_mode_css, unsafe_allow_html=True)
-    components.html(dark_mode_particles_js, height=0)
-else:
-    st.markdown(light_mode_css, unsafe_allow_html=True)
-    components.html(light_mode_particles_js, height=0)
-
-# Inject particles background (only in dark mode)
-#if st.session_state['theme'] == 'dark':
-
-
-# Custom CSS for the toggle button
-toggle_button_css = """
+# Custom CSS for the toggle button and overall layout
+custom_css = """
 <style>
 .stCheckbox {
     position: fixed !important;
@@ -50,35 +38,51 @@ toggle_button_css = """
     z-index: 1002 !important;
 }
 .stCheckbox > label {
-    background-color: #4CAF50 !important;
+    background-color: #4f4caf !important;
     border: none !important;
     color: white !important;
-    padding: 10px 20px !important;
+    padding: 5px 10px !important;
     text-align: center !important;
     text-decoration: none !important;
     display: inline-block !important;
-    font-size: 16px !important;
-    margin: 4px 2px !important;
+    font-size: 14px !important;
+    margin: 2px 1px !important;
     cursor: pointer !important;
-    border-radius: 20px !important;
+    border-radius: 15px !important;
+}
+.content {
+    margin-top: 20px;
+}
+.section-marker {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+.header {
+    padding-top: 40px;
 }
 </style>
 """
 
-st.markdown(toggle_button_css, unsafe_allow_html=True)
+# Inject CSS based on the theme
+if st.session_state['theme'] == 'dark':
+    st.markdown(dark_mode_css, unsafe_allow_html=True)
+    components.html(dark_mode_particles_js, height=0)
+else:
+    st.markdown(light_mode_css, unsafe_allow_html=True)
+    components.html(light_mode_particles_js, height=0)
+
+# Inject custom CSS
+st.markdown(custom_css, unsafe_allow_html=True)
 
 # Add theme toggle checkbox
 theme_icon = '🌙' if st.session_state['theme'] == 'dark' else '☀️'
 st.checkbox(f"{theme_icon} Toggle Theme", value=st.session_state['theme'] == 'dark', key="theme_toggle", on_change=toggle_theme)
 
-# Add a visual indicator of the current theme (for debugging)
-#st.sidebar.write(f"Current theme: {st.session_state['theme']}")
-
 # Create header
 create_header(resume_data['name'], resume_data['contact'])
 
 # Display the resume content
-st.markdown("<div class='content'>", unsafe_allow_html=True)
+st.markdown('<div class="content">', unsafe_allow_html=True)
 
 # Experience Section
 create_section("Experience", "".join(create_experience_item(job) for job in resume_data['experience']))

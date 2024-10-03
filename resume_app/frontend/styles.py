@@ -32,11 +32,11 @@ iframe {
     top: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0);
-    backdrop-filter: blur(5px);
-    padding: 20px;
-    z-index: 998;
+    background-color: transparent;
+    backdrop-filter: blur(15px);
+    z-index: 98;
     text-align: center;
+    border-radius: 100px;
 }
 .header h1 {
     margin: 0;
@@ -79,14 +79,20 @@ iframe {
     font-size: 1.4em;
     margin-bottom: 5px;
     color: #ffffff !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 .experience-item p {
     margin-bottom: 10px;
     color: #ffffff !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 .experience-item ul {
     margin-top: 0;
     color: #ffffff !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 /* Override Streamlit's default styles */
 .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {
@@ -140,19 +146,22 @@ iframe {
     top: 20px;
     right: 20px;
     z-index: 1001;
+    font-color: #00ff3c;
 }
 .stCheckbox > label {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 8px 15px;
     border-radius: 20px;
     border: 2px solid #00ff3c;
-    color: #ffffff !important;
+    color: #000000 !important;
+    font-color: #00ff3c;
     font-weight: bold;
     box-shadow: 0 0 10px rgba(0, 255, 60, 0.5);
 }
 .stCheckbox > label:hover {
     background-color: rgba(0, 0, 0, 0.9);
     box-shadow: 0 0 15px rgba(0, 255, 60, 0.7);
+    font-color: #00ff3c;
 }
 </style>
 """
@@ -189,11 +198,11 @@ iframe {
     top: 0;
     left: 0;
     right: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(5px);
-    padding: 20px;
-    z-index: 998;
+    background-color: transparent;
+    backdrop-filter: blur(15px);
+    z-index: 98;
     text-align: center;
+    border-radius: 100px;
 }
 .header h1 {
     margin: 0;
@@ -236,14 +245,20 @@ iframe {
     font-size: 1.4em;
     margin-bottom: 5px;
     color: #000000 !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 .experience-item p {
     margin-bottom: 10px;
     color: #000000 !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 .experience-item ul {
     margin-top: 0;
     color: #000000 !important;
+    backdrop-filter: blur(1px);
+    border-radius: 10px;
 }
 /* Override Streamlit's default styles */
 .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {
