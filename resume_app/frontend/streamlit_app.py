@@ -28,28 +28,9 @@ def fetch_resume_data():
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
 
-# Custom CSS for the toggle button and overall layout
+# Custom CSS for the overall layout
 custom_css = """
 <style>
-.stCheckbox {
-    position: fixed !important;
-    top: 10px !important;
-    right: 10px !important;
-    z-index: 1002 !important;
-}
-.stCheckbox > label {
-    background-color: #4f4caf !important;
-    border: none !important;
-    color: white !important;
-    padding: 5px 10px !important;
-    text-align: center !important;
-    text-decoration: none !important;
-    display: inline-block !important;
-    font-size: 14px !important;
-    margin: 2px 1px !important;
-    cursor: pointer !important;
-    border-radius: 15px !important;
-}
 .content {
     margin-top: 20px;
 }
@@ -58,7 +39,7 @@ custom_css = """
     margin-bottom: 10px;
 }
 .header {
-    padding-top: 40px;
+    padding-top: 20px;
 }
 </style>
 """
@@ -74,12 +55,9 @@ else:
 # Inject custom CSS
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# Add theme toggle checkbox
+# Create header with theme toggle
 theme_icon = '🌙' if st.session_state['theme'] == 'dark' else '☀️'
-st.checkbox(f"{theme_icon} Toggle Theme", value=st.session_state['theme'] == 'dark', key="theme_toggle", on_change=toggle_theme)
-
-# Create header
-create_header(resume_data['name'], resume_data['contact'])
+create_header(resume_data['name'], resume_data['contact'], theme_icon, st.session_state['theme'] == 'dark', toggle_theme)
 
 # Display the resume content
 st.markdown('<div class="content">', unsafe_allow_html=True)

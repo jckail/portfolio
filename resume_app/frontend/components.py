@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import base64
 
-def create_header(name, contact):
+def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     # Fetch the resume from your backend
     resume_url = "http://127.0.0.1:8000/download_resume"
     response = requests.get(resume_url)
@@ -17,50 +17,82 @@ def create_header(name, contact):
     # Header with HTML formatting for name, contact details, and download button
     download_button = '📄 <a href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" >Download Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
     
-    st.markdown(f"""
-    <div class="header">
-        <h1>{name}</h1>
-        <p>
-            📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} | 🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
-        </p>
-    </div>
+    # Create a container for the header
+    header_container = st.container()
 
+    # Use columns to create a layout
+    with header_container:
+        col1, col2, col3 = st.columns([1, 3, 1])
+
+        with col1:
+            st.empty()
+
+        with col2:
+            st.markdown(f"""
+            <div class="header" style="background-color: transparent; padding: 10px;">
+                <h1>{name}</h1>
+                <p>
+                    📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} | 🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col3:
+            st.markdown('<div style="background-color: transparent; height: 100px; display: flex; justify-content: flex-end; align-items: center; padding-right: 10px;">', unsafe_allow_html=True)
+            # Add theme toggle widget
+            st.toggle(theme_icon, value=theme_value, key="theme_toggle", on_change=toggle_theme)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("""
     <style>
-    .header {{
+    .header {
         text-align: center;
-        margin-bottom: 10px;  /* Reduced from 20px */
-    }}
-    .header h1 {{
-        margin-bottom: 5px;  /* Reduced from 10px */
-    }}
-    .header p {{
-        margin-bottom: 10px;  /* Reduced from 15px */
-    }}
-    .download-button {{
+        margin-bottom: 10px;
+    }
+    .header h1 {
+        margin-bottom: 5px;
+    }
+    .header p {
+        margin-bottom: 10px;
+    }
+    .download-button {
         display: inline-block;
-        padding: 5px 10px;  /* Reduced padding */
+        padding: 5px 10px;
         background-color: #4CAF50;
         color: white;
         text-decoration: none;
         border-radius: 5px;
         font-weight: bold;
         transition: background-color 0.3s;
-    }}
-    .download-button:hover {{
+    }
+    .download-button:hover {
         background-color: #45a049;
-    }}
-    .error-message {{
+    }
+    .error-message {
         color: red;
         font-weight: bold;
-    }}
+    }
     /* Custom CSS to control overall layout spacing */
-    .content {{
-        margin-top: -20px;  /* Negative margin to pull content up */
-    }}
-    .section-marker {{
-        margin-top: 10px;  /* Reduced top margin for sections */
-        margin-bottom: 5px;  /* Added small bottom margin */
-    }}
+    .content {
+        margin-top: -20px;
+    }
+    .section-marker {
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+    /* Style for the toggle widget */
+    .stToggle {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 20px;
+    }
+    .stToggle > label {
+        font-size: 24px !important;
+        font-weight: bold !important;
+    }
+    .stToggle .st-bw {
+        background-color: #4f4caf !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 

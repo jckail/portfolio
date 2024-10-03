@@ -152,11 +152,11 @@ iframe {
     background-color: rgba(0, 0, 0, 0.7);
     padding: 8px 15px;
     border-radius: 20px;
-    border: 2px solid #00ff3c;
+    border: 1px solid #000000;
     color: #000000 !important;
     font-color: #00ff3c;
     font-weight: bold;
-    box-shadow: 0 0 10px rgba(0, 255, 60, 0.5);
+    box-shadow: 0 0 1px rgba(0, 255, 60, 0.5);
 }
 .stCheckbox > label:hover {
     background-color: rgba(0, 0, 0, 0.9);
