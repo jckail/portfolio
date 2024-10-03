@@ -70,8 +70,9 @@ To run the application locally, follow these steps:
    ```
 
 6. Access the application:
-   - The frontend will be available at `http://localhost:8080`
+   - The frontend will be available at `http://localhost:8501`
    - The backend will be available at `http://localhost:8000`
+   - Api Docs will be available at `http://localhost:8000/docs`
 
 7. To stop the application, press `Ctrl+C` in the terminal where the entrypoint script is running.
 

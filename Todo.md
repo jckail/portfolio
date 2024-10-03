@@ -21,6 +21,9 @@
     - Implement an endpoint for automatic updates
 15. Continue updating offline projects and bringing them into public repos
 
+## Add In CI/CD + testing
+Ugh no this one doesn't sound fun
+
 ## Additional Ideas
 
 16. Implement a dark mode toggle for better user experience -- WIP almost done.
@@ -35,6 +38,9 @@
 25. Add a "What I'm Learning Now" section to highlight current focus areas
 
 ## Long-term Goal
+
+- Have Users Be able to run this repo (outside of resume_app) to generate their resume data file (creating an RAG LLM to parse out a pdf or text file) then they can generate their own. 
+- One click deploy or chose your own adventure game style (maybe even a command line tool) 
 
 - Transform the portfolio into a template for easy replication
   - Develop a system for syncing with GitHub to automatically display projects
