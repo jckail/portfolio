@@ -1,4 +1,4 @@
-# Welcome to my Portfolio website
+# Welcome to my portfolio website's repository
 
 This repository contains the code for my personal website that serves as a hub for skills, projects, resume, and potentially a blog. The website is built using Python with Streamlit for the frontend and FastAPI for the backend.
 
