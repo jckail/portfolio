@@ -1,13 +1,14 @@
 import streamlit as st
 import requests
 import streamlit.components.v1 as components
+import os
 
 from styles import dark_mode_css, light_mode_css
 from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_achievements_section
 from particles import dark_mode_particles_js, light_mode_particles_js
 
 # API URL for fetching resume data
-API_URL = "http://127.0.0.1:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Set the page configuration
 st.set_page_config(page_title="Jordan Kail's Resume", layout="wide")
