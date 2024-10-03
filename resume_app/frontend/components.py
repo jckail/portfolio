@@ -32,7 +32,10 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
             <div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
                 <h1>{name}</h1>
                 <p>
-                    📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} | 🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
+                    📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} 
+                </p>
+                <p>
+                     🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
                 </p>
             </div>
             """, unsafe_allow_html=True)
