@@ -11,6 +11,12 @@ The project consists of two main components:
 
 The application is containerized using Docker, making it easy to deploy and run in various environments.
 
+### Why FastAPI and Streamlit?
+
+- **FastAPI** was chosen for its high performance, easy integration with other services, and built-in support for asynchronous programming. It allows for efficient handling of multiple requests and easy linking of various components to the personal website.
+
+- **Streamlit** was selected as a challenge to explore a different approach to web development, moving away from traditional frameworks like React or Svelte. It offers rapid prototyping capabilities and seamless integration with Python-based backends, making it an excellent choice for this dynamic resume project.
+
 ## How It Works
 
 1. The backend (FastAPI) serves the resume data through various endpoints:
@@ -22,10 +28,15 @@ The application is containerized using Docker, making it easy to deploy and run 
    - It uses custom components and styling to create an attractive layout
    - Implements a dark/light mode toggle for user preference
    - Displays sections for Experience, Skills, and Achievements
+   - Generates content dynamically at runtime, making the website highly adaptable and easy to update
 
 3. The application uses environment variables (e.g., `API_URL`) to configure the connection between frontend and backend.
 
 4. Docker is used to package both frontend and backend into a single container, simplifying deployment.
+
+### Particles.js Integration
+
+The frontend incorporates particles.js to create dynamic, interactive backgrounds, enhancing the visual appeal of the website. Special thanks to Vincent Garreau for creating this amazing library. You can find more about particles.js at https://vincentgarreau.com/particles.js/
 
 ## Local Development
 
@@ -149,5 +160,14 @@ To adapt this project for another individual:
 
 4. Update the domain name:
    - Replace jckail.com with the new domain name in the deployment instructions and environment variables
+
+## Learn More
+
+For more detailed information about the backend and frontend implementations, please refer to their respective README files:
+
+- [Backend README](resume_app/backend/README.md)
+- [Frontend README](resume_app/frontend/README.md)
+
+These files contain in-depth explanations of the technologies used, features implemented, and the rationale behind certain design decisions.
 
 By following these instructions, you can run the application locally for development and deploy it to Google Cloud Run at jckail.com. The application will automatically use the appropriate API URL based on the environment, allowing for seamless local development and cloud deployment.
