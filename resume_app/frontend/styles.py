@@ -37,6 +37,8 @@ iframe {
     z-index: 98;
     text-align: center;
     border-radius: 100px;
+    max-width: 80%; /* Added max-width */
+    margin: 0 auto; /* Center the header */
 }
 .header h1 {
     margin: 0;
@@ -203,6 +205,8 @@ iframe {
     z-index: 98;
     text-align: center;
     border-radius: 100px;
+    max-width: 80%; /* Added max-width */
+    margin: 0 auto; /* Center the header */
 }
 .header h1 {
     margin: 0;
@@ -328,5 +332,3 @@ iframe {
 }
 </style>
 """
-
-

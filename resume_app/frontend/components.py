@@ -22,14 +22,14 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
 
     # Use columns to create a layout
     with header_container:
-        col1, col2, col3 = st.columns([1, 3, 1])
+        col1, col2, col3 = st.columns([2, 6, 2])
 
         with col1:
             st.empty()
 
         with col2:
             st.markdown(f"""
-            <div class="header" style="background-color: transparent; padding: 10px;">
+            <div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
                 <h1>{name}</h1>
                 <p>
                     📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} | 🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
@@ -48,6 +48,9 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     .header {
         text-align: center;
         margin-bottom: 10px;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
     }
     .header h1 {
         margin-bottom: 5px;
