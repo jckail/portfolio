@@ -33,14 +33,14 @@ resume_data = fetch_resume_data()
 custom_css = """
 <style>
 .content {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 .section-marker {
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 .header {
-    padding-top: 20px;
+    padding-top: 10px;
 }
 </style>
 """

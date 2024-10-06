@@ -28,11 +28,11 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <!-- First column: Name -->
         <div class="column" style="flex: 1; text-align: left;">
-            <h1>    Data Engineer</h1>
+            <h2>    Data Engineer</h2>
         </div>
         <!-- Second column: Social Links -->
         <div class="column" style="flex: 1; text-align: center;">
-                        <h2>{name}</h2>
+                        <h1>{name}</h1>
             <p>🤖 <a href="{contact['github']}">GitHub</a> | 👔 <a href="{contact['linkedin']}">LinkedIn</a> |{download_button}</p>
         </div>
         <!-- Third column: Download Button -->
@@ -50,7 +50,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("""
-    <style>
+<style>
     .header {
         text-align: center;
         margin-bottom: 10px;
@@ -58,51 +58,57 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         margin-left: auto;
         margin-right: auto;
     }
+
     .header h1 {
         margin-bottom: 5px;
+        font-size: 4vw; /* Fluid font size that adjusts with screen width */
     }
+
+    .header h2 {
+        margin-bottom: 5px;
+        font-size: 3vw; /* Fluid font size */
+    }
+
     .header p {
         margin-bottom: 10px;
+        font-size: 2vw; /* Fluid font size */
     }
-    .download-button {
-        display: inline-block;
-        padding: 5px 10px;
-        background-color: #4CAF50;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        font-weight: bold;
-        transition: background-color 0.3s;
-    }
-    .download-button:hover {
-        background-color: #45a049;
-    }
-    .error-message {
-        color: red;
-        font-weight: bold;
-    }
-    /* Custom CSS to control overall layout spacing */
-    .content {
-        margin-top: -20px;
-    }
-    .section-marker {
-        margin-top: 10px;
-        margin-bottom: 5px;
-    }
-    /* Style for the toggle widget */
-    .stToggle {
+
+    .container {
         display: flex;
-        justify-content: flex-end;
-        padding-top: 20px;
+        justify-content: space-between;
+        align-items: center;
     }
-    .stToggle > label {
-        font-size: 24px !important;
-        font-weight: bold !important;
+
+    .column {
+        flex: 1;
+        text-align: center;
     }
-    .stToggle .st-bw {
-        background-color: #4f4caf !important;
+
+    /* Media queries to ensure proper layout on smaller screens */
+    @media (max-width: 768px) {
+        .header h1 {
+            font-size: 6vw; /* Larger text for smaller screens */
+        }
+
+        .header h2 {
+            font-size: 4.5vw;
+        }
+
+        .header p {
+            font-size: 3.5vw;
+        }
+
+        .container {
+            flex-direction: column; /* Stacks the elements on top of each other */
+        }
+
+        .column {
+            text-align: center; /* Keep text centered when stacked */
+            margin-bottom: 10px; /* Add space between stacked columns */
+        }
     }
-    </style>
+</style>
     """, unsafe_allow_html=True)
 
 def create_navigation():

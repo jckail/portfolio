@@ -68,7 +68,7 @@ iframe {
 }
 /* Adjust content padding to account for floating header and navigation bar */
 .content {
-    padding-top: 100px; /* Reduced padding to decrease space */
+    padding-top: 10px; /* Reduced padding to decrease space */
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
@@ -236,7 +236,7 @@ iframe {
 }
 /* Adjust content padding to account for floating header and navigation bar */
 .content {
-    padding-top: 150px; /* Reduced padding to decrease space */
+    padding-top: 10px; /* Reduced padding to decrease space */
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
