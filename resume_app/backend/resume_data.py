@@ -18,9 +18,9 @@ resume_data = {
             "date": "06/2023 - Ongoing",
             "location": "Denver, CO",
             "highlights": [
-                "Leading company-wide core product refactor from on-prem Java + Oracle to cloud GO + Postgres, cutting response time to 120ms and opex by 95%.",
-                "Developed AI-powered Retrieval-Augmented Generation (RAG) pipelines using LangChain and OpenAI, enabling ad-hoc analytics on product usage and automating 150 human-hours per week.",
-                "Implemented an event-driven data streaming platform using Go and Kafka, migrating over 1,000 batch jobs to real-time processing, resulting in significant operational efficiencies and data availability improvements.",
+                "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing response time to 120ms and operational expenses by 95%.",
+                "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with LangChain and OpenAI, automating 150+ human-hours weekly.",
+                "Deployed an event-driven data streaming platform with Go and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing operational efficiency and data availability.",
             ],
         },
         {
@@ -29,10 +29,10 @@ resume_data = {
             "date": "01/2021 - 09/2022",
             "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
             "highlights": [
-                "Lead Data Engineer for Facebook Public Groups and Community Chats, managing 10 individual contributors and mentoring 5 others, including interns and junior engineers.",
-                "Built ML pipelines and Transformer models in PyTorch for NLP, machine vision, and user segmentation, driving ads, feeds, features, and notifications for billions of users.",
-                "Created a framework to programmatically generate thousands of data pipelines, boosting compute efficiency by 66%.",
-                "Re-architected petabyte-scale data models, cutting storage costs by 25%.",
+                "Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team of 10 engineers.",
+                "Developed 100+ ML pipelines using Airflow, Spark, and PyTorch for NLP, computer vision, and user segmentation, enhancing ad targeting and notifications for billions of users.",
+                "Designed an automated framework to generate thousands of Spark data pipelines, improving compute efficiency by 66%.",
+                "Re-architected petabyte-scale data models, reducing storage costs by 25%.",
             ],
         },
         {
@@ -42,8 +42,8 @@ resume_data = {
             "location": "Atlanta, GA + Menlo Park, CA",
             "highlights": [
                 "Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.",
-                "Optimized exabyte scale video reliability metrics calculation reducing daily run time by 90% while increasing the scope of metrics calculated.",
-                "Led 20+ consultants across multiple Fortune 50 engagements, translating client needs into concrete requirements and ensuring timely delivery of technical products.",
+                "Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.",
+                "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.",
             ],
         },
         {
@@ -52,8 +52,8 @@ resume_data = {
             "date": "11/2017 - 12/2018",
             "location": "Denver, CO",
             "highlights": [
-                "Developed ML web applications, increasing field service upgrades by 22% YoY by leveraging custom classification and churn propensity models.",
-                "Managed a team of 5 data practitioners, supporting business intelligence and data insights for sales, product, and engineering teams across the company.",
+                "Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.",
+                "Led a team of 5 direct report data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
             ],
         },
         {
@@ -71,7 +71,7 @@ resume_data = {
             "date": "04/2013 - 09/2016",
             "location": "Boulder, CO",
             "highlights": [
-                "Built a custom invoicing system, driving $300M+ in annual recurring revenue using a combination of rule-based algorithms and machine learning (KNN)."
+                "Built a custom invoicing system, driving $300M+ in annual recurring revenue using a combination of rule-based algorithms and machine learning."
             ],
         },
     ],
@@ -180,7 +180,7 @@ resume_data = {
         },
         {
             "title": "Algorithmic Crypto Trading Project",
-            "description": "Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. On AWS Sage maker via BOTO3, Django, pandas, and beautiful soup.",
+            "description": "Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. On AWS SageMaker with Flask, Boto3, pandas, Athena, and Beautiful Soup.",
             "link": "https://github.com/jckail/crypto_trader",
         },
         {
