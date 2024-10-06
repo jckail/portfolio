@@ -1,12 +1,23 @@
+
+PRIMARY = "#0403ff"
+BLACK = "#000000"
+WHITE = "#ffffff"
+
 particle_config = {
     "dark": {
-        "background_color": "#000000",
-        "particle_color": ["#0403ff", "#ffffff", "#0403ff"],
-        "line_color": "#0403ff"
+        "background_color": BLACK,
+        "particle_color": [PRIMARY, WHITE, PRIMARY],
+        "line_color": PRIMARY
     },
     "light": {
-        "background_color": "#ffffff",
-        "particle_color": ["#0403ff", "#000000", "#0403ff"],
-        "line_color": "#0403ff"
+        "background_color": WHITE,
+        "particle_color": [PRIMARY, BLACK, PRIMARY],
+        "line_color": PRIMARY
     }
+}
+
+styles_config = {
+
+
+
 }
