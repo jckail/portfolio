@@ -1,367 +1,318 @@
-# Dark mode CSS
-dark_mode_css = """
-<style>
-/* Existing dark mode styles */
-#root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
-header {visibility: hidden;}
-.stApp {
-    background-color: transparent;
-}
-/* Include Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-body {
-    font-family: 'Roboto', sans-serif;
-    font-size: 18px;
-}
-/* Global text color */
-body, .stApp, .content, .content *, .stMarkdown, .stMarkdown p, .stMarkdown div,
-h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
-    color: #ffffff !important;
-}
-iframe {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: -1;
-}
-/* Floating header styles */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: transparent;
-    backdrop-filter: blur(15px);
-    z-index: 98;
-    text-align: center;
-    border-radius: 100px;
-    max-width: 80%; /* Added max-width */
-    margin: 0 auto; /* Center the header */
-}
-.header h1 {
-    margin: 0;
-    font-size: 2.5em;
-    color: #ffffff !important;
-}
-.header p {
-    margin: 10px 0;
-}
-.header a {
-    color: #ffffff !important;
-    text-decoration: none;
-}
-.header a:hover {
-    text-decoration: underline;
-}
-.nav-menu {
-    display: flex;
-    justify-content: center;
-    margin-top: 15px;
-}
-.nav-menu a {
-    margin: 0 20px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #ffffff !important;
-}
-/* Adjust content padding to account for floating header and navigation bar */
-.content {
-    padding-top: 40px; /* Reduced padding to decrease space */
-    padding-left: 20px;
-    padding-right: 20px;
-    position: relative;
-    z-index: 999; /* Ensure content is above the header */
-}
-.experience-item {
-    margin-bottom: 30px;
-}
-.experience-item h3 {
-    font-size: 1.4em;
-    margin-bottom: 5px;
-    color: #ffffff !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-.experience-item p {
-    margin-bottom: 10px;
-    color: #ffffff !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-.experience-item ul {
-    margin-top: 0;
-    color: #ffffff !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-/* Override Streamlit's default styles */
-.stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {
-    opacity: 1 !important;
-    font-size: 18px !important;
-    color: #ffffff !important;
-}
-.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-    font-weight: bold !important;
-    color: #ffffff !important;
-}
-/* Section marker styles */
-.section-marker {
-    text-align: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 40px 0 20px 0;
-    color: #0403ff !important;
-    border-bottom: 2px solid #0403ff;
-    padding-bottom: 10px;
-}
-/* Sidebar styles */
-.st-emotion-cache-rpj0dg {
-    background-color: transparent;
-}
-.css-1d391kg {
-    background-color: rgb(4, 3, 255) !important;
-}
-.sidebar-nav {
-    padding: 10px;
-}
-.sidebar-nav a {
-    display: block;
-    color: #ffffff;
-    text-decoration: none;
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: 0.9em;
-}
-.sidebar-nav a:hover {
-    color: #0403ff;
-}
-/* Expander styles */
-.streamlit-expanderHeader {
-    background-color: rgba(0, 0, 0, 0.2) !important;
-    color: #ffffff !important;
-}
-.streamlit-expanderContent {
-    background-color: transparent !important;
-}
-/* Dark mode toggle styles */
-.stCheckbox {
-    position: fixed;
-    top: 2px;
-    right: 15px;
-    font-color: #0403ff;
-}
+# styles.py
 
-.stCheckbox > label {
-    background-color: rgba(0, 0, 0, 0.7);
-    border-radius: 20px;
-    border: 0px solid #000000;
-    color: #000000 !important;
-    font-color: #0403ff;
-    font-weight: bold;
-    box-shadow: 0 0 1px rgba(0, 255, 60, 0.5);
-}
-.stCheckbox > label:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-    box-shadow: 0 0 15px rgba(13, 81, 29, 0.7);
-    font-color: #0403ff;
-}
-/* Styling hyperlinks in experience, skills, and project sections */
-a {
-    color: #ffffff !important; /* Bright green for visibility */
-    text-decoration: none; /* No underline by default */
-}
-a:hover {
-    color: #0403ff !important; /* Change to white on hover for contrast */
-    text-decoration: underline; /* Underline on hover */
-}
-@media (max-width: 768px) {
-    .stCheckbox {
-        right: 10px; /* Slightly adjust for smaller screens */
-    }
 
-    .stCheckbox > label {
-        padding: 6px 10px; /* Adjust the padding for smaller screens */
-        font-size: 1.5vw; /* Reduce the font size for the label */
-    }
-}
-</style>
-"""
-light_mode_css = """
-<style>
-/* Existing light mode styles */
-#root > div:nth-child(1) > div > div > div > div > section > div {padding-top: 0rem;}
-header {visibility: hidden;}
-.stApp {
-    background-color: transparent;
-}
-/* Include Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-body {
-    font-family: 'Roboto', sans-serif;
-    font-size: 18px;
-}
-/* Global text color */
-body, .stApp, .content, .content *, .stMarkdown, .stMarkdown p, .stMarkdown div,
-h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {
-    color: #000000 !important;
-}
-iframe {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    z-index: -1;
-}
-/* Floating header styles */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: transparent;
-    backdrop-filter: blur(15px);
-    z-index: 98;
-    text-align: center;
-    border-radius: 100px;
-    max-width: 80%; /* Added max-width */
-    margin: 0 auto; /* Center the header */
-}
-.header h1 {
-    margin: 0;
-    font-size: 2.5em;
-    color: #000000 !important;
-}
-.header p {
-    margin: 10px 0;
-}
-.header a {
-    color: #000000 !important;
-    text-decoration: none;
-}
-.header a:hover {
-    text-decoration: underline;
-}
-.nav-menu {
-    display: flex;
-    justify-content: center;
-    margin-top: 15px;
-}
-.nav-menu a {
-    margin: 0 20px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #000000 !important;
-}
-/* Adjust content padding to account for floating header and navigation bar */
-.content {
-    padding-top: 40px; /* Reduced padding to decrease space */
-    padding-left: 20px;
-    padding-right: 20px;
-    position: relative;
-    z-index: 999; /* Ensure content is above the header */
-}
-.experience-item {
-    margin-bottom: 30px;
-}
-.experience-item h3 {
-    font-size: 1.4em;
-    margin-bottom: 5px;
-    color: #000000 !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-.experience-item p {
-    margin-bottom: 10px;
-    color: #000000 !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-.experience-item ul {
-    margin-top: 0;
-    color: #000000 !important;
-    backdrop-filter: blur(1px);
-    border-radius: 10px;
-}
-/* Override Streamlit's default styles */
-.stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {
-    opacity: 1 !important;
-    font-size: 18px !important;
-    color: #000000 !important;
-}
-.stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-    font-weight: bold !important;
-    color: #000000 !important;
-}
-/* Section marker styles */
-.section-marker {
-    text-align: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 40px 0 20px 0;
-    color: #000000 !important;
-    border-bottom: 2px solid #000000;
-    padding-bottom: 10px;
-}
+def get_styles_css(selection, configs):
+    x = """<style>
+    /* Import Google Font */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    /* Base styles */
+    body {{
+        font-family: 'Roboto', sans-serif;
+        font-size: 18px;
+    }}
+
+    /* Global text color */
+    body, .stApp, .content, .content *, .stMarkdown, .stMarkdown p, .stMarkdown div,
+    h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5, .stMarkdown h6 {{
+        color: {text_color} !important;
+    }}
+
+    /* Reset padding and hide default header */
+    #root > div:nth-child(1) > div > div > div > div > section > div {{
+        padding-top: 0rem;
+    }}
+    header {{
+        visibility: hidden;
+    }}
+    .stApp {{
+        background-color: {background_color};
+    }}
+
+    /* Iframe styles */
+    iframe {{
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: -1;
+    }}
+
+    /* Content styles */
+    .content {{
+        margin-top: 5px;
+        padding-top: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
+        position: relative;
+        z-index: 1;
+    }}
+
+    /* Section marker styles */
+    .section-marker {{
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin: 40px 0 20px 0;
+        color: {link_color} !important;
+        border-bottom: 2px solid {link_color};
+        padding-bottom: 10px;
+        padding-top: 120px;
+        margin-top: -120px;
+    }}
+
+    /* Header styles */
+    .header {{
+        position: fixed;
+        top: 10px;
+        left: 0;
+        right: 0;
+        background-color: {header_background};
+        backdrop-filter: blur(5px);
+        z-index: 2;
+        text-align: center;
+        border-radius: 10px;
+        margin: 0 auto;
+        padding: 10px;
+        min-width: 100%;
+        max-width: 100%;
+        min-height: 10%;
+        max-height: 10%;
+    }}
+    .header h2{{
+        margin: 0;
+        font-size: 3vw;
+        color: {hover_color} !important;
+    }}
+    .header p {{
+        margin: 10px 0;
+    }}
+    .header a {{
+        color: {navbar_link_color} !important;
+        text-decoration: none;
+        font-size: 2vw;
+        margin: 0 0px;
+    }}
+    .header a:hover {{
+        color: {navbar_hover_color} !important;
+        text-decoration: underline;
+    }}
+
+    .link-container {{
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        font-size: 1vw;
+    }}
+
+
+
+    /* Experience item styles */
+    .experience-item {{
+        margin-bottom: 30px;
+    }}
+    .experience-item h3, .experience-item p, .experience-item ul {{
+        color: {text_color} !important;
+        backdrop-filter: blur(2px);
+        border-radius: 10px;
+    }}
+    .experience-item h3 {{
+        font-size: 1.4em;
+        margin-bottom: 5px;
+    }}
+    .experience-item p {{
+        margin-bottom: 10px;
+    }}
+    .experience-item ul {{
+        margin-top: 0;
+    }}
+
+    /* Override Streamlit's default styles */
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {{
+        opacity: 1 !important;
+        font-size: 25px !important;
+        color: {text_color} !important;
+    }}
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
+        font-weight: bold !important;
+        color: {text_color} !important;
+    }}
+
+    
+
+    /* Dark mode toggle styles */
+    .stCheckbox {{
+        position: fixed;
+        top: 2px;
+        right: 15px;
+        z-index: 3;
+    }}
+    .st-ao {{
+    background-color: {button_text};
+}}
+.st-bw {{
+    background-color: {button_text};
+}}
+
+    .stCheckbox > label {{
+        background-color: {button_background};
+        border-radius: 20px;
+        border: 1px solid {button_boarder};
+        color: {button_text} !important;
+        font-weight: bold;
+        box-shadow: 0 0 1px {button_background};
+        z-index: 3;
+        
+    }}
+    .stCheckbox > label:hover {{
+        background-color: {button_hover_background};
+        box-shadow: 0 0 15px {button_background};
+        z-index: 3;
+    }}
+
+    /* Hyperlink styles */
+    a {{
+        color: {link_color} !important;
+        text-decoration: none;
+    }}
+    a:hover {{
+        color: {hover_color} !important;
+        text-decoration: underline;
+    }}
+
+    /* Responsive styles for smaller screens */
+    @media (max-width: 900px) {{
+        .stCheckbox {{
+            right: 10px;
+        }}
+        .stCheckbox > label {{
+            padding: 6px 10px;
+            font-size: 1.5vw;
+        }}
+        .header h1, .header h3, .header h4 {{
+            font-size: 3.5vw;
+        }}
+        .header p {{
+            font-size: 3vw;
+        }}
+        .header a {{
+            font-size: 3vw;
+        }}
+        .column.links {{
+            margin-top: 10px;
+            text-align: center;
+        }}
+        .header .link-container {{
+            flex-direction: column;
+            gap: 10px;
+        }}
+    }}
+
+    /* Flexbox for responsiveness */
+    .container {{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }}
+    .column {{
+        flex: 1;
+        text-align: center;
+    }}
 /* Sidebar styles */
-.st-emotion-cache-rpj0dg {
-    background-color: transparent;
-}
-.css-1d391kg {
-    background-color: rgb(3, 3, 255) !important;
-}
-.sidebar-nav {
-    padding: 10px;
-}
-.sidebar-nav a {
-    display: block;
-    color: #0403ff;
-    text-decoration: none;
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: 0.9em;
-}
-.sidebar-nav a:hover {
-    color: #0403ff;
-}
-/* Expander styles */
-.streamlit-expanderHeader {
-    background-color: rgba(255, 255, 255, 0) !important;
-    color: #00000000 !important;
-}
-.streamlit-expanderContent {
-    background-color: transparent !important;
-}
-/* Dark mode toggle styles */
-.stCheckbox {
-    position: fixed;
-    top: 5px;
-    right: 5px;
-    z-index: 1001;
-}
-.stCheckbox > label {
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 1px 1px;
-    border-radius: 20px;
-    border: 2px solid #000000;
-    color: #000000 !important;
-    font-weight: bold;
-    box-shadow: 0 0 10px rgba(4, 3, 255, .5));
-}
-.stCheckbox > label:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 15px rgba(4, 3, 255, 1);
-}
-/* Styling hyperlinks in experience, skills, and project sections */
-a {
-    color: #000000 !important; /* Black for light mode */
-    text-decoration: none; /* No underline by default */
-}
-a:hover {
-    color: #0403ff !important; /* Red on hover for visibility */
-    text-decoration: underline; /* Underline on hover */
-}
-</style>
-"""
+    /* Navigation menu styles */
+    .nav-menu {{
+        display: flex;
+        justify-content: center;
+        margin-top: 1px;
+    }}
+    .nav-menu a {{
+        margin: 0 1px;
+        font-size: 1.1em;
+        font-weight: bold;
+        color: {navbar_link_color} !important;
+    }}
+
+
+    .sidebar-nav a {{
+        display: block;
+        color: {navbar_link_color};
+        text-decoration: none;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 0.9em;
+    }}
+    .sidebar-nav a:hover {{
+        color: {navbar_hover_color};
+    }}
+
+    /* Expander styles */
+    .streamlit-expanderHeader {{
+        background-color: rgb(255, 0, 0) !important;
+        color: {text_color} !important;
+    }}
+    .streamlit-expanderContent {{
+        background-color: transparent !important;
+    }}
+
+    .st-emotion-cache-13na8ym {{
+            background-color: {button_background} !important;
+            border-radius: 5px;
+    border: 1px solid {text_color};
+    backdrop-filter: blur(5px);
+    }}
+    
+    /* Left styles */
+    .st-emotion-cache-1y9tyez {{
+    background-color: {button_background};
+
+    color: {button_text} !important;
+    z-index: 3;
+    color: {text_color} !important;
+    margin-top: 1.5rem;
+    
+
+}}
+
+/* Right styles */
+.st-emotion-cache-1f3w014  {{
+    z-index: 4;
+    color: {text_color} !important;
+    margin-top: .5rem;
+            background-color: {button_background} !important;
+            border-radius: 5px;
+    border: 1px solid {text_color};
+    backdrop-filter: blur(1px);
+}}
+    .st-emotion-cache-rpj0dg {{
+    z-index: 3;
+        background-color: {button_background} !important;
+            border-radius: 5px;
+    border: 1px solid {button_boarder};
+    backdrop-filter: blur(1px);
+        min-width: 150px;
+        max-width: 250px;
+    }}
+
+    </style>
+    """
+
+    return x.format(
+        background_color=configs[selection]["background_color"],
+        text_color=configs[selection]["text_color"],
+        link_color=configs[selection]["link_color"],
+        hover_color=configs[selection]["hover_color"],
+        button_background=configs[selection]["button_background"],
+        button_text=configs[selection]["button_text"],
+        button_hover_background=configs[selection]["button_hover_background"],
+        button_boarder=configs[selection]["button_boarder"],
+        header_background=configs[selection]["header_background"],
+        header_text_color=configs[selection]["header_text_color"],
+        footer_background=configs[selection]["footer_background"],
+        footer_text_color=configs[selection]["footer_text_color"],
+        navbar_background=configs[selection]["navbar_background"],
+        navbar_link_color=configs[selection]["navbar_link_color"],
+        navbar_hover_background=configs[selection]["navbar_hover_background"],
+        navbar_hover_color=configs[selection]["navbar_hover_color"],
+    )

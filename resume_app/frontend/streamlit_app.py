@@ -3,10 +3,10 @@ import requests
 import streamlit.components.v1 as components
 import os
 
-from styles import dark_mode_css, light_mode_css
+from styles import get_styles_css
 from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_projects_section
 from particles import get_particle_js
-from configs import particle_config
+from configs import particle_config,styles_config
 
 # API URL for fetching resume data
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
@@ -21,6 +21,7 @@ if 'theme' not in st.session_state:
 # Function to toggle theme
 def toggle_theme():
     st.session_state['theme'] = 'light' if st.session_state['theme'] == 'dark' else 'dark'
+    
 
 # Function to fetch resume data
 def fetch_resume_data():
@@ -30,32 +31,11 @@ def fetch_resume_data():
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
 
-# Custom CSS for the overall layout
-custom_css = """
-<style>
-.content {
-    margin-top: 5px;
-}
-.section-marker {
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-.header {
-    padding-top: 5px;
-}
-</style>
-"""
+
 
 # Inject CSS based on the theme
-if st.session_state['theme'] == 'dark':
-    st.markdown(dark_mode_css, unsafe_allow_html=True)
-    components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
-else:
-    st.markdown(light_mode_css, unsafe_allow_html=True)
-    components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
-
-# Inject custom CSS
-st.markdown(custom_css, unsafe_allow_html=True)
+st.markdown(get_styles_css(st.session_state['theme'],styles_config), unsafe_allow_html=True)
+components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
 
 # Create header with theme toggle
 theme_icon = '🌙' if st.session_state['theme'] == 'dark' else '☀️'

@@ -29,14 +29,14 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     # Use columns to create a layout
     with header_container:
         st.markdown(f"""
-<div class="header" style="background-color: transparent; padding: 10px; max-width: 90%; margin: 0 auto;">
+<div class="header" style="background-color: transparent; padding: 5px; max-width: 100%; margin: 0 auto;">
     <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
         <!-- First column: Name -->
         <div class="column" style="flex: 1; text-align: center;">
             <h2>{name}</h2>
         </div>
         <!-- Links and Download Button -->
-        <div class="column links" style="flex: 1; text-align: center; margin-top: 10px;">
+        <div class="column links" style="flex: 1; text-align: center;">
             <div class="link-container">
                 <a href="{contact['github']}">🤖 GitHub</a>
                 <a href="{contact['linkedin']}">👔 LinkedIn</a>
@@ -53,90 +53,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
             st.toggle(theme_icon, value=theme_value, key="theme_toggle", on_change=toggle_theme)
             st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("""
-<style>
 
-/* Floating header styles */
-.header {
-    position: fixed;
-    top: 40px; /* Padding from top of the page */
-    left: 0;
-    right: 0;
-    background-color: transparent;
-    backdrop-filter: blur(15px);
-    z-index: 98;
-    text-align: center;
-    border-radius: 10px;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 10px;
-}
-
-/* Styling for Name and Title */
-.header h3, .header h4 {
-    margin: 0;
-    font-size: 2vw; /* Adjusted size for 'Jordan Kail' and 'Data Engineer' */
-    color: #ffffff !important;
-}
-
-/* Styling for links */
-.header .link-container {
-    display: flex;
-    justify-content: center;
-    gap: 15px; /* Space between links */
-}
-
-.header a {
-    color: #ffffff !important;
-    text-decoration: none;
-    font-size: 1.5vw;
-    display: inline-block;
-    margin: 0 5px;
-}
-
-.header a:hover {
-    text-decoration: underline;
-}
-
-/* Flexbox ensures elements wrap on narrow screens */
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.column {
-    flex: 1;
-    text-align: center;
-}
-
-/* Mobile-specific adjustments for screens smaller than 768px */
-@media (max-width: 768px) {
-    .header h3, .header h4 {
-        font-size: 3.5vw; /* Larger header text for small screens */
-    }
-
-    .header p {
-        font-size: 3vw; /* Reduce link size on mobile for readability */
-    }
-
-    .header a {
-        font-size: 3vw; /* Reduce link size on mobile */
-    }
-
-    .column.links {
-        margin-top: 10px;
-        text-align: center; /* Align links below the headers */
-    }
-
-    .header .link-container {
-        flex-direction: column; /* Stack links vertically on narrow screens */
-        gap: 10px; /* Space between stacked links */
-    }
-}
-</style>
-    """, unsafe_allow_html=True)
 def create_navigation():
     st.markdown("""
     <nav class="sidebar-nav">
