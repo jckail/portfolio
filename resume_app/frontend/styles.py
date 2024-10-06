@@ -41,12 +41,26 @@ def get_styles_css(selection, configs):
 
     /* Content styles */
     .content {{
-        margin-top: 5px;
+        margin-top: 50px;
         padding-top: 40px;
         padding-left: 20px;
         padding-right: 20px;
         position: relative;
-        z-index: 1;
+        z-index: 4;
+    }}
+
+        /* Section marker styles */
+    .section-marker {{
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin: 40px 0 50px 0;
+        color: {link_color} !important;
+        border-bottom: 2px solid {link_color};
+        padding-bottom: 10px;
+        padding-top: 150px;
+        margin-top: -150px;
+        
     }}
 
     /* Section marker styles */
@@ -54,32 +68,43 @@ def get_styles_css(selection, configs):
         text-align: center;
         font-size: 1.8em;
         font-weight: bold;
-        margin: 40px 0 20px 0;
+        margin: 40px 0 50px 0;
         color: {link_color} !important;
         border-bottom: 2px solid {link_color};
         padding-bottom: 10px;
-        padding-top: 120px;
-        margin-top: -120px;
+        padding-top: 150px;
+        margin-top: -150px;
+        
     }}
 
     /* Header styles */
-    .header {{
-        position: fixed;
-        top: 10px;
-        left: 0;
-        right: 0;
-        background-color: {header_background};
-        backdrop-filter: blur(5px);
-        z-index: 2;
-        text-align: center;
-        border-radius: 10px;
-        margin: 0 auto;
-        padding: 10px;
-        min-width: 100%;
-        max-width: 100%;
-        min-height: 10%;
-        max-height: 10%;
+.stHorizontalBlock {{
+    position: fixed;
+    
+    left: 0;
+    right: 0;
+    background-color: #1a1a1a;
+    backdrop-filter: blur(5px);
+    z-index: 2;
+    text-align: center;
+    border-radius: 5px;
+    margin: 0 auto;
+    padding: 5px;
+    min-width: 100%;
+    max-width: 100%;
+    min-height: 10%;
+    max-height: 10%;
+    background-color: transparent;
+}}
+    .link-container {{
+        padding-top: 20px;
+        display: flex;
+        justify-content: center;
+        font-size: 4vw;
+        gap: 15px;
+        text-decoration: underline;
     }}
+
     .header h2{{
         margin: 0;
         font-size: 3vw;
@@ -99,12 +124,7 @@ def get_styles_css(selection, configs):
         text-decoration: underline;
     }}
 
-    .link-container {{
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        font-size: 1vw;
-    }}
+
 
 
 
@@ -143,7 +163,7 @@ def get_styles_css(selection, configs):
 
     /* Dark mode toggle styles */
     .stCheckbox {{
-        position: fixed;
+        
         top: 2px;
         right: 15px;
         z-index: 3;
@@ -181,33 +201,7 @@ def get_styles_css(selection, configs):
         text-decoration: underline;
     }}
 
-    /* Responsive styles for smaller screens */
-    @media (max-width: 900px) {{
-        .stCheckbox {{
-            right: 10px;
-        }}
-        .stCheckbox > label {{
-            padding: 6px 10px;
-            font-size: 1.5vw;
-        }}
-        .header h1, .header h3, .header h4 {{
-            font-size: 3.5vw;
-        }}
-        .header p {{
-            font-size: 3vw;
-        }}
-        .header a {{
-            font-size: 3vw;
-        }}
-        .column.links {{
-            margin-top: 10px;
-            text-align: center;
-        }}
-        .header .link-container {{
-            flex-direction: column;
-            gap: 10px;
-        }}
-    }}
+
 
     /* Flexbox for responsiveness */
     .container {{
@@ -294,7 +288,63 @@ def get_styles_css(selection, configs):
         min-width: 150px;
         max-width: 250px;
     }}
-
+    /* Responsive styles for smaller screens */
+    @media (max-width: 900px) {{
+        .stCheckbox {{
+            right: 10px;
+        }}
+        .stCheckbox > label {{
+            padding: 6px 10px;
+            font-size: 1.5vw;
+        }}
+        .header h1, .header h3, .header h4 {{
+            font-size: 3.5vw;
+        }}
+        .header p {{
+            font-size: 3vw;
+        }}
+        .header a {{
+            font-size: 3vw;
+        }}
+        .column.links {{
+            margin-top: 5px;
+            text-align: center;
+        }}
+        .link-container {{
+                    padding-top: 20px;
+        display: flex;
+        justify-content: center;
+        font-size: 1vw;
+        gap: 15px;
+        text-decoration: underline;
+            
+        }}
+        .stHorizontalBlock {{
+    position: fixed;
+    left: 0;
+    right: 0;
+    background-color: #1a1a1a;
+    backdrop-filter: blur(5px);
+    z-index: 2;
+    text-align: center;
+    border-radius: 5px;
+    margin: 0 auto;
+    padding: 5px;
+    min-width: 100%;
+    max-width: 100%;
+    min-height: 10%;
+    max-height: 30%;
+    background-color: transparent;
+}}
+            .content {{
+        margin-top: 150px;
+        padding-top: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
+        position: relative;
+        z-index: 1;
+    }}
+    }}
     </style>
     """
 

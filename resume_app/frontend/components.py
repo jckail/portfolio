@@ -21,47 +21,42 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         download_link = None
     
     # Header with HTML formatting for name, contact details, and download button
-    download_button = '<a href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > 📄 Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
+    download_button = '<p href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > 📄 Resume</p>' if download_link else '<span class="error-message">Failed to load resume</span>'
 
     # Create a container for the header
-    header_container = st.container()
 
-    # Use columns to create a layout
-    with header_container:
+    [col0, col1, col2,col3]= st.columns([.05, .30,.55,.1])
+    with col0:
+        st.markdown("""
+        <nav class="sidebar-nav">
+            <a href="#experience"></a>
+            <a href="#skills"></a>
+            <a href="#achievements"></a>
+        </nav>
+        """, unsafe_allow_html=True)
+    with col1:
         st.markdown(f"""
-<div class="header" style="background-color: transparent; padding: 5px; max-width: 100%; margin: 0 auto;">
-    <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
-        <!-- First column: Name -->
-        <div class="column" style="flex: 1; text-align: center;">
-            <h2>{name}</h2>
-        </div>
-        <!-- Links and Download Button -->
-        <div class="column links" style="flex: 1; text-align: center;">
+    <div class="name-container">
+        <h1> {name} </h1>
+    </div>
+            """, unsafe_allow_html=True)
+        
+    with col2:
+        st.markdown(f"""
+            
             <div class="link-container">
                 <a href="{contact['github']}">🤖 GitHub</a>
                 <a href="{contact['linkedin']}">👔 LinkedIn</a>
                 {download_button}
             </div>
-        </div>
-    </div>
-</div>
             """, unsafe_allow_html=True)
+        
+    
+    
+    with col3:
+        st.toggle(theme_icon, value=theme_value, key="theme_toggle", on_change=toggle_theme)
 
-        # Add theme toggle widget in a separate row
-        with st.columns([.9, .1])[1]:
-            st.markdown('<div class = "st-bk" style="background-color: transparent; display: flex; justify-content: flex-end; align-items: right; padding-right: 10px;">', unsafe_allow_html=True)
-            st.toggle(theme_icon, value=theme_value, key="theme_toggle", on_change=toggle_theme)
-            st.markdown('</div>', unsafe_allow_html=True)
 
-
-def create_navigation():
-    st.markdown("""
-    <nav class="sidebar-nav">
-        <a href="#experience">Experience</a>
-        <a href="#skills">Skills</a>
-        <a href="#achievements">Achievements</a>
-    </nav>
-    """, unsafe_allow_html=True)
 
 def create_section(title, content):
     st.markdown(f'<div class="section-marker" id="{title.lower()}">{"⚡️" if title == "Experience" else "🛠" if title == "Skills" else "🏆"} {title} {"⚡️" if title == "Experience" else "🛠" if title == "Skills" else "🏆"}</div>', unsafe_allow_html=True)

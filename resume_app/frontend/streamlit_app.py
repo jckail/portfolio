@@ -4,7 +4,7 @@ import streamlit.components.v1 as components
 import os
 
 from styles import get_styles_css
-from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_projects_section
+from components import create_header, create_section, create_experience_item, create_skills_section, create_projects_section
 from particles import get_particle_js
 from configs import particle_config,styles_config
 
