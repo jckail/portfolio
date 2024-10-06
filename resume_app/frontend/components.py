@@ -15,7 +15,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         download_link = None
     
     # Header with HTML formatting for name, contact details, and download button
-    download_button = '📄 <a href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" >Download Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
+    download_button = ' 📄 <a href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > Download Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
     
     # Create a container for the header
     header_container = st.container()
@@ -32,10 +32,10 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
             <div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
                 <h1>{name}</h1>
                 <p>
-                    📞 {contact['phone']} | 📧 <a href="mailto:{contact['email']}">{contact['email']}</a> | 📍 {contact['location']} 
+                    📞 {contact['phone']}</a> | 📧 <a href="mailto:{contact['email']}"> {contact['email']}</a> | 📍 {contact['location']} 
                 </p>
                 <p>
-                     🔗 <a href="{contact['github']}">GitHub</a> | {download_button}    
+                     🤖 <a href="{contact['github']}"> GitHub</a> |  👔 <a href="{contact['linkedin']}"> LinkedIn</a> | {download_button}    
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -118,7 +118,7 @@ def create_section(title, content):
 def create_experience_item(job):
     return f"""
     <div class="experience-item">
-        <h2>{job['company']}</h2>
+        <h2><a href="{job["link"]}">{job["company"]}</a></h2>
         <h4>{job['title']} </h4>
         <p>{job['date']} | {job['location']}</p>
         <ul>
@@ -135,9 +135,9 @@ def create_skills_section(skills):
         content += "<br><br>"
     return content
 
-def create_achievements_section(achievements):
+def create_projects_section(projects):
     content = ""
-    for achievement in achievements:
-        content += f'<h3><a href="{achievement["link"]}">{achievement["title"]}</a></h3>'
-        content += f"<p>{achievement['description']}</p>"
+    for project in projects:
+        content += f'<h3><a href="{project["link"]}">{project["title"]}</a></h3>'
+        content += f"<p>{project['description']}</p>"
     return content
