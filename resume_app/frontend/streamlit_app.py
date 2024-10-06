@@ -5,7 +5,8 @@ import os
 
 from styles import dark_mode_css, light_mode_css
 from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_projects_section
-from particles import dark_mode_particles_js, light_mode_particles_js
+from particles import get_particle_js
+from configs import particle_config
 
 # API URL for fetching resume data
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
@@ -48,10 +49,10 @@ custom_css = """
 # Inject CSS based on the theme
 if st.session_state['theme'] == 'dark':
     st.markdown(dark_mode_css, unsafe_allow_html=True)
-    components.html(dark_mode_particles_js, height=0)
+    components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
 else:
     st.markdown(light_mode_css, unsafe_allow_html=True)
-    components.html(light_mode_particles_js, height=0)
+    components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
 
 # Inject custom CSS
 st.markdown(custom_css, unsafe_allow_html=True)
