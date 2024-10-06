@@ -28,11 +28,11 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <!-- First column: Name -->
         <div class="column" style="flex: 1; text-align: left;">
-            <h2>    Data Engineer</h2>
+            <h3>    Data Engineer</h3>
         </div>
         <!-- Second column: Social Links -->
         <div class="column" style="flex: 1; text-align: center;">
-                        <h1>{name}</h1>
+                        <h3>{name}</h3>
             <p>🤖 <a href="{contact['github']}">GitHub</a> | 👔 <a href="{contact['linkedin']}">LinkedIn</a> |{download_button}</p>
         </div>
         <!-- Third column: Download Button -->

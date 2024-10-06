@@ -165,6 +165,16 @@ iframe {
     box-shadow: 0 0 15px rgba(0, 255, 60, 0.7);
     font-color: #00ff3c;
 }
+/* Styling hyperlinks in experience, skills, and project sections */
+a {
+    color: #ffffff !important; /* Bright green for visibility */
+    text-decoration: none; /* No underline by default */
+}
+a:hover {
+    color: #00ff3c !important; /* Change to white on hover for contrast */
+    text-decoration: underline; /* Underline on hover */
+}
+</style>
 </style>
 """
 light_mode_css = """
@@ -329,6 +339,15 @@ iframe {
 .stCheckbox > label:hover {
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+}
+/* Styling hyperlinks in experience, skills, and project sections */
+a {
+    color: #000000 !important; /* Black for light mode */
+    text-decoration: none; /* No underline by default */
+}
+a:hover {
+    color: #ff0000 !important; /* Red on hover for visibility */
+    text-decoration: underline; /* Underline on hover */
 }
 </style>
 """
