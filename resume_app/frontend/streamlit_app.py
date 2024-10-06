@@ -4,7 +4,7 @@ import streamlit.components.v1 as components
 import os
 
 from styles import dark_mode_css, light_mode_css
-from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_achievements_section
+from components import create_header, create_navigation, create_section, create_experience_item, create_skills_section, create_projects_section
 from particles import dark_mode_particles_js, light_mode_particles_js
 
 # API URL for fetching resume data
@@ -70,7 +70,7 @@ create_section("Experience", "".join(create_experience_item(job) for job in resu
 create_section("Skills", create_skills_section(resume_data['skills']))
 
 # Achievements Section
-create_section("Achievements", create_achievements_section(resume_data['achievements']))
+create_section("Projects", create_projects_section(resume_data['projects']))
 
 # Close the content div
 st.markdown("</div>", unsafe_allow_html=True)

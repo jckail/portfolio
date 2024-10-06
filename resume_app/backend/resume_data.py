@@ -7,6 +7,7 @@ resume_data = {
         "website": "https://jordan-kail.com/",
         "location": "Denver, CO - Open to relocation",
         "github": "https://github.com/jckail",
+        "linkedin": "https://www.linkedin.com/in/jckail/",
     },
     "About Me": """I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. When I'm not knee-deep in building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side.
 
@@ -14,14 +15,15 @@ resume_data = {
     "experience": [
         {
             "company": "Prove Identity",
-            "title": "Staff Data Engineer",
+            "title": "Staff Engineer - Data Platform",
             "date": "06/2023 - Ongoing",
             "location": "Denver, CO",
             "highlights": [
-                "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing response time to 120ms and operational expenses by 95%.",
+                "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product api response time to 120ms and operational expenses by 95%.",
                 "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with LangChain and OpenAI, automating 150+ human-hours weekly.",
                 "Deployed an event-driven data streaming platform with Go and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing operational efficiency and data availability.",
             ],
+            "link": "https://www.prove.com/",
         },
         {
             "company": "Meta (Facebook)",
@@ -34,6 +36,7 @@ resume_data = {
                 "Designed an automated framework to generate thousands of Spark data pipelines, improving compute efficiency by 66%.",
                 "Re-architected petabyte-scale data models, reducing storage costs by 25%.",
             ],
+            "link": "https://about.fb.com/",
         },
         {
             "company": "Deloitte",
@@ -45,25 +48,28 @@ resume_data = {
                 "Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.",
                 "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.",
             ],
+            "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
         },
         {
             "company": "Wide Open West",
-            "title": "Data Scientist",
+            "title": "Lead Data Scientist",
             "date": "11/2017 - 12/2018",
             "location": "Denver, CO",
             "highlights": [
                 "Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.",
                 "Led a team of 5 direct report data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
             ],
+            "link": "https://www.wowway.com/",
         },
         {
-            "company": "Catholic Health Initiatives",
+            "company": "Common Spirit Health (formerly Catholic Health Initiatives)",
             "title": "Data Engineer - Business Intelligence",
             "date": "09/2016 - 11/2017",
             "location": "Denver, CO",
             "highlights": [
                 "Redesigned rest APIs and data lakes, reducing data processing time for external partner data products from 7 days to 5 minutes."
             ],
+            "link": "https://www.commonspirit.org/",
         },
         {
             "company": "AcuStream (Acquired by R1 RCM)",
@@ -73,6 +79,7 @@ resume_data = {
             "highlights": [
                 "Built a custom invoicing system, driving $300M+ in annual recurring revenue using a combination of rule-based algorithms and machine learning."
             ],
+            "link": "https://www.r1rcm.com/",
         },
     ],
     "skills": {
@@ -162,7 +169,7 @@ resume_data = {
             "Retool",
         ],
     },
-    "achievements": [
+    "projects": [
         {
             "title": 'TechCrunch - "Join Group via QR"',
             "description": "Pitched, designed and implemented the functionality to enable Facebook group admins to invite users to their groups by generating a QR Code. Used by millions of users daily.",
