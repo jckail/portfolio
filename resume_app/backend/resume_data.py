@@ -9,19 +9,19 @@ resume_data = {
         "github": "https://github.com/jckail",
         "linkedin": "https://www.linkedin.com/in/jckail/",
     },
-    "About Me": """I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. When I'm not knee-deep in building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side.
+    "About Me": """I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. When I'm not building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side.
 
     I’ve always been passionate about computers and technology, from geeking out over the newest GPUs to tinkering with home labs and DIY tech experiments. This constant drive to learn, innovate, and problem-solve is what excites me about being a Data Engineer. Every day is a new puzzle, and I get to build and optimize systems that have real-world impact. Whether it’s cutting-edge AI projects or cloud infrastructure, I’m always eager to push boundaries and dive into new challenges.""",
     "experience": [
         {
             "company": "Prove Identity",
-            "title": "Staff Engineer - Data Platform",
-            "date": "06/2023 - Ongoing",
+            "title": "Staff Data Engineer",
+            "date": "06/2023 - Present",
             "location": "Denver, CO",
             "highlights": [
-                "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product api response time to 120ms and operational expenses by 95%.",
-                "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with LangChain and OpenAI, automating 150+ human-hours weekly.",
-                "Deployed an event-driven data streaming platform with Go and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing operational efficiency and data availability.",
+                "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product API response time to 120ms and operational expenses by 95%.",
+                "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
+                "Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes.",
             ],
             "link": "https://www.prove.com/",
         },
@@ -31,9 +31,9 @@ resume_data = {
             "date": "01/2021 - 09/2022",
             "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
             "highlights": [
-                "Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team of 10 engineers.",
-                "Developed 100+ ML pipelines using Airflow, Spark, and PyTorch for NLP, computer vision, and user segmentation, enhancing ad targeting and notifications for billions of users.",
-                "Designed an automated framework to generate thousands of Spark data pipelines, improving compute efficiency by 66%.",
+                "Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team of 10+ engineers.",
+                "Developed and deployed 100+ ML pipelines with Airflow, Spark, and PyTorch, leveraging NLP, computer vision, and user segmentation to optimize ad targeting and notifications for billions of users.",
+                "Designed an automated framework to dynamically generate thousands of async Spark data pipelines, increasing compute efficiency by 66%.",
                 "Re-architected petabyte-scale data models, reducing storage costs by 25%.",
             ],
             "link": "https://about.fb.com/",
@@ -57,7 +57,7 @@ resume_data = {
             "location": "Denver, CO",
             "highlights": [
                 "Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.",
-                "Led a team of 5 direct report data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
+                "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
             ],
             "link": "https://www.wowway.com/",
         },
@@ -67,7 +67,7 @@ resume_data = {
             "date": "09/2016 - 11/2017",
             "location": "Denver, CO",
             "highlights": [
-                "Redesigned rest APIs and data lakes, reducing data processing time for external partner data products from 7 days to 5 minutes."
+                "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes."
             ],
             "link": "https://www.commonspirit.org/",
         },
@@ -77,7 +77,7 @@ resume_data = {
             "date": "04/2013 - 09/2016",
             "location": "Boulder, CO",
             "highlights": [
-                "Built a custom invoicing system, driving $300M+ in annual recurring revenue using a combination of rule-based algorithms and machine learning."
+                "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue."
             ],
             "link": "https://www.r1rcm.com/",
         },
@@ -103,7 +103,7 @@ resume_data = {
             "Snowflake",
             "Databricks",
             "Iceberg",
-            "Delta Lake",
+            "NoSQL",
             "Neo4J",
             "Redis",
             "MongoDB",
@@ -172,16 +172,16 @@ resume_data = {
     "projects": [
         {
             "title": 'TechCrunch - "Join Group via QR"',
-            "description": "Pitched, designed and implemented the functionality to enable Facebook group admins to invite users to their groups by generating a QR Code. Used by millions of users daily.",
+            "description": "Created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
             "link": "https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/",
         },
         {
-            "title": "Jobbr - AI Agent Job Matching",
+            "title": "AI Agent Job Matching - Jobbr",
             "description": "Created a custom AI agent that matches a resume to available jobs at tech companies. Using Python, Langchain, FastAPI and OpenAI.",
             "link": "https://github.com/jckail/Jobbr",
         },
         {
-            "title": 'Developed "pointup.io"',
+            "title": 'Loyalty Management App - Pointup.io',
             "description": 'An AI web app for "All of your loyalty points in one place," powered by a Selenium-WebDriver agent in AWS via elastic beanstalk, lambda, and s3. ',
             "link": "https://github.com/jckail/point_bot",
             "link2": "https://www.pointup.io/"
@@ -192,9 +192,19 @@ resume_data = {
             "link": "https://github.com/jckail/crypto_trader",
         },
         {
-            "title": "goPilot",
+            "title": "AI Developer Assistant - goPilot",
             "description": "A custom AI CLI tool to help debug, develop, and compile apps written in GO. ",
             "link": "https://github.com/jckail/goPilot",
+        },
+        {
+            "title": "Data Playground - A Shop Like App",
+            "description": "A website designed to produce data to test data pipelines and ETL processes. Made with FastAPI, Streamlit, and Docker.",
+            "link": "https://github.com/jckail/shop_project",
+        },
+        {
+            "title": "Personal Portfolio Website",
+            "description": "A fully custom website using FastAPI and Streamlit. Why Streamlit? Simply because I wanted to learn a new technology. Hosted in GCP via CloudRun.",
+            "link": "https://github.com/jckail/portfolio",
         },
     ],
 }

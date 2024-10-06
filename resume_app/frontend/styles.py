@@ -10,6 +10,7 @@ def get_styles_css(selection, configs):
     body {{
         font-family: 'Roboto', sans-serif;
         font-size: 20px;
+        
     }}
 
     /* Global text color */
@@ -27,7 +28,7 @@ def get_styles_css(selection, configs):
     }}
     .stApp {{
         background-color: {background_color};
-        backdrop-filter: blur(1px);
+        backdrop-filter: blur(11px);
     }}
 
     /* Iframe styles */
@@ -37,7 +38,7 @@ def get_styles_css(selection, configs):
         left: 0;
         width: 100% !important;
         height: 100% !important;
-        z-index: -1;
+        z-index: 0;
     }}
 
     /* Content styles */
