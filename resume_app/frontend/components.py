@@ -10,7 +10,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     download_url = f"{BACKEND_URL}/download_resume"
     
     # Header with HTML formatting for name, contact details, and download button
-    download_button = f' 📄 <a href="{download_url}" target="_blank">Download Resume</a>'
+    download_button = f' 📄<a href="{download_url}" target="_blank">Download Resume</a>'
     
     # Create a container for the header
     header_container = st.container()
@@ -28,7 +28,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <!-- First column: Name -->
         <div class="column" style="flex: 1; text-align: left;">
-            <h3>    Data Engineer</h3>
+            <h4>    Data Engineer</h4>
         </div>
         <!-- Second column: Social Links -->
         <div class="column" style="flex: 1; text-align: center;">
@@ -51,64 +51,102 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
 
     st.markdown("""
 <style>
+/* Floating header styles */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: transparent;
+    backdrop-filter: blur(15px);
+    z-index: 98;
+    text-align: center;
+    border-radius: 100px;
+    max-width: 80%;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 2.5vw; /* Slightly smaller h3 for 'Jordan Kail' */
+    color: #ffffff !important;
+}
+
+.header h4 {
+    margin: 0;
+    font-size: 2vw; /* Slightly smaller h4 for 'Data Engineer' */
+    color: #ffffff !important;
+}
+
+.header p {
+    margin: 10px 0;
+    font-size: 1.2vw; /* Reduce the size of the text for the links */
+}
+
+.header a {
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 1.2vw; /* Match size for links to be smaller */
+    display: inline-block;
+    margin: 0 8px; /* Slightly reduce space between the links */
+    vertical-align: middle; /* Keep links in a horizontal line */
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
+
+/* Ensure the links remain in one horizontal line */
+.nav-menu {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+.nav-menu a {
+    margin: 0 10px;
+    font-size: 1.2vw; /* Smaller font size for consistency */
+    font-weight: bold;
+    color: #ffffff !important;
+    white-space: nowrap; /* Prevent breaking into multiple lines */
+}
+
+/* Mobile-specific adjustments for screens smaller than 768px */
+@media (max-width: 768px) {
     .header {
-        text-align: center;
-        margin-bottom: 10px;
-        max-width: 80%;
-        margin-left: auto;
-        margin-right: auto;
+        max-width: 100%;
+        padding: 10px 5px;
     }
 
-    .header h1 {
-        margin-bottom: 5px;
-        font-size: 4vw; /* Fluid font size that adjusts with screen width */
+    .header h3 {
+        font-size: 4.5vw; /* Larger header text for small screens */
     }
 
-    .header h2 {
-        margin-bottom: 5px;
-        font-size: 3vw; /* Fluid font size */
+    .header h4 {
+        font-size: 3.5vw; /* Larger text for 'Data Engineer' */
     }
 
     .header p {
-        margin-bottom: 10px;
-        font-size: 2vw; /* Fluid font size */
+        font-size: 2.5vw; /* Reduce link size on mobile for readability */
     }
 
-    .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .header a {
+        font-size: 2.5vw; /* Reduce link size on mobile */
     }
 
-    .column {
-        flex: 1;
-        text-align: center;
+    .nav-menu {
+        flex-wrap: wrap; /* Allow wrapping if needed on mobile */
     }
 
-    /* Media queries to ensure proper layout on smaller screens */
-    @media (max-width: 768px) {
-        .header h1 {
-            font-size: 6vw; /* Larger text for smaller screens */
-        }
-
-        .header h2 {
-            font-size: 4.5vw;
-        }
-
-        .header p {
-            font-size: 3.5vw;
-        }
-
-        .container {
-            flex-direction: column; /* Stacks the elements on top of each other */
-        }
-
-        .column {
-            text-align: center; /* Keep text centered when stacked */
-            margin-bottom: 10px; /* Add space between stacked columns */
-        }
+    .nav-menu a {
+        margin: 5px;
+        font-size: 2.5vw;
     }
+}
 </style>
+
     """, unsafe_allow_html=True)
 
 def create_navigation():
