@@ -24,10 +24,23 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
 
         with col2:
             st.markdown(f"""
-            <div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
-                <h1>{name} <h3> Data Engineer</h3> </h1>
-                <p>🤖 <a href="{contact['github']}"> GitHub</a> |  👔 <a href="{contact['linkedin']}"> LinkedIn</a> | {download_button}  </p>
-            </div>
+<div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- First column: Name -->
+        <div class="column" style="flex: 1; text-align: left;">
+            <h1>    Data Engineer</h1>
+        </div>
+        <!-- Second column: Social Links -->
+        <div class="column" style="flex: 1; text-align: center;">
+                        <h2>{name}</h2>
+            <p>🤖 <a href="{contact['github']}">GitHub</a> | 👔 <a href="{contact['linkedin']}">LinkedIn</a> |{download_button}</p>
+        </div>
+        <!-- Third column: Download Button -->
+        <div class="column" style="flex: 1; text-align: right;">
+            <p></p>
+        </div>
+    </div>
+</div>
             """, unsafe_allow_html=True)
 
         with col3:
