@@ -145,14 +145,13 @@ iframe {
 /* Dark mode toggle styles */
 .stCheckbox {
     position: fixed;
-    top: 5px;
-    right: 5px;
-    z-index: 1001;
+    top: 2px;
+    right: 15px;
     font-color: #00ff3c;
 }
+
 .stCheckbox > label {
     background-color: rgba(0, 0, 0, 0.7);
-    padding: 1px 1px;
     border-radius: 20px;
     border: 0px solid #000000;
     color: #000000 !important;
@@ -174,7 +173,16 @@ a:hover {
     color: #00ff3c !important; /* Change to white on hover for contrast */
     text-decoration: underline; /* Underline on hover */
 }
-</style>
+@media (max-width: 768px) {
+    .stCheckbox {
+        right: 10px; /* Slightly adjust for smaller screens */
+    }
+
+    .stCheckbox > label {
+        padding: 6px 10px; /* Adjust the padding for smaller screens */
+        font-size: 1.5vw; /* Reduce the font size for the label */
+    }
+}
 </style>
 """
 light_mode_css = """
@@ -314,8 +322,8 @@ iframe {
 }
 /* Expander styles */
 .streamlit-expanderHeader {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    color: #000000 !important;
+    background-color: rgba(255, 255, 255, 0) !important;
+    color: #00000000 !important;
 }
 .streamlit-expanderContent {
     background-color: transparent !important;

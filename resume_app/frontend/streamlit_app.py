@@ -11,7 +11,7 @@ from particles import dark_mode_particles_js, light_mode_particles_js
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Set the page configuration
-st.set_page_config(page_title="Jordan Kail's Resume", layout="wide")
+st.set_page_config(page_title="Jordan Kail's Portfolio", layout="wide",initial_sidebar_state="collapsed")
 
 # Initialize session state for theme
 if 'theme' not in st.session_state:
@@ -33,14 +33,14 @@ resume_data = fetch_resume_data()
 custom_css = """
 <style>
 .content {
-    margin-top: 10px;
+    margin-top: 5px;
 }
 .section-marker {
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 .header {
-    padding-top: 10px;
+    padding-top: 5px;
 }
 </style>
 """
@@ -74,3 +74,15 @@ create_section("Projects", create_projects_section(resume_data['projects']))
 
 # Close the content div
 st.markdown("</div>", unsafe_allow_html=True)
+
+# Create the sidebar with navigation, collapsed by default
+with st.sidebar.expander("📚 Navigation", expanded=True):  # Sidebar starts collapsed
+    st.markdown("""
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="#experience">⚡️ Experience</a></li>
+            <li><a href="#skills">🛠 Skills</a></li>
+            <li><a href="#projects">🏆 Projects</a></li>
+        </ul>
+    </nav>
+    """, unsafe_allow_html=True)

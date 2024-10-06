@@ -48,7 +48,7 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
             """, unsafe_allow_html=True)
 
         # Add theme toggle widget in a separate row
-        with st.columns([10, 2])[1]:
+        with st.columns([.9, .1])[1]:
             st.markdown('<div class = "st-bk" style="background-color: transparent; display: flex; justify-content: flex-end; align-items: right; padding-right: 10px;">', unsafe_allow_html=True)
             st.toggle(theme_icon, value=theme_value, key="theme_toggle", on_change=toggle_theme)
             st.markdown('</div>', unsafe_allow_html=True)
