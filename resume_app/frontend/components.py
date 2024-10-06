@@ -2,20 +2,15 @@ import streamlit as st
 import requests
 import base64
 
-def create_header(name, contact, theme_icon, theme_value, toggle_theme):
-    # Fetch the resume from your backend
-    resume_url = "http://127.0.0.1:8000/download_resume"
-    response = requests.get(resume_url)
+# Get the backend URL from Streamlit secrets
+BACKEND_URL = st.secrets.get("BACKEND_URL", "http://127.0.0.1:8000")
 
-    if response.status_code == 200:
-        # Encode the PDF content as base64
-        pdf_base64 = base64.b64encode(response.content).decode('utf-8')
-        download_link = f'data:application/pdf;base64,{pdf_base64}'
-    else:
-        download_link = None
+def create_header(name, contact, theme_icon, theme_value, toggle_theme):
+    # URL for downloading the resume
+    download_url = f"{BACKEND_URL}/download_resume"
     
     # Header with HTML formatting for name, contact details, and download button
-    download_button = ' 📄 <a href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > Download Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
+    download_button = f' 📄 <a href="{download_url}" target="_blank">Download Resume</a>'
     
     # Create a container for the header
     header_container = st.container()
@@ -30,13 +25,8 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         with col2:
             st.markdown(f"""
             <div class="header" style="background-color: transparent; padding: 10px; max-width: 80%; margin: 0 auto;">
-                <h1>{name}</h1>
-                <p>
-                    📞 {contact['phone']}</a> | 📧 <a href="mailto:{contact['email']}"> {contact['email']}</a> | 📍 {contact['location']} 
-                </p>
-                <p>
-                     🤖 <a href="{contact['github']}"> GitHub</a> |  👔 <a href="{contact['linkedin']}"> LinkedIn</a> | {download_button}    
-                </p>
+                <h1>{name} <h3> Data Engineer</h3> </h1>
+                <p>🤖 <a href="{contact['github']}"> GitHub</a> |  👔 <a href="{contact['linkedin']}"> LinkedIn</a> | {download_button}  </p>
             </div>
             """, unsafe_allow_html=True)
 

@@ -1,6 +1,7 @@
 # Ignore Python virtual environment
 .venv/
 venv/
+.streamlit/secrets.toml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
