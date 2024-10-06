@@ -62,7 +62,7 @@ resume_data = {
             "link": "https://www.wowway.com/",
         },
         {
-            "company": "Common Spirit Health (formerly Catholic Health Initiatives)",
+            "company": "Common Spirit Health (Formerly CHI)",
             "title": "Data Engineer - Business Intelligence",
             "date": "09/2016 - 11/2017",
             "location": "Denver, CO",
@@ -187,12 +187,12 @@ resume_data = {
         },
         {
             "title": "Algorithmic Crypto Trading Project",
-            "description": "Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. On AWS SageMaker with Flask, Boto3, pandas, Athena, and Beautiful Soup.",
+            "description": "Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS, and SageMaker.",
             "link": "https://github.com/jckail/crypto_trader",
         },
         {
             "title": "goPilot",
-            "description": "CLI tool to help build applications written in GO.",
+            "description": "A custom AI CLI tool to help debug, develop, and compile apps written in GO. ",
             "link": "https://github.com/jckail/goPilot",
         },
     ],

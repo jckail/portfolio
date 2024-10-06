@@ -112,13 +112,16 @@ iframe {
     font-size: 1.8em;
     font-weight: bold;
     margin: 40px 0 20px 0;
-    color: #00ff3c !important;
-    border-bottom: 2px solid #00ff3c;
+    color: #0403ff !important;
+    border-bottom: 2px solid #0403ff;
     padding-bottom: 10px;
 }
 /* Sidebar styles */
+.st-emotion-cache-rpj0dg {
+    background-color: transparent;
+}
 .css-1d391kg {
-    background-color: rgba(0, 0, 0, 0.1) !important;
+    background-color: rgb(4, 3, 255) !important;
 }
 .sidebar-nav {
     padding: 10px;
@@ -132,7 +135,7 @@ iframe {
     font-size: 0.9em;
 }
 .sidebar-nav a:hover {
-    color: #00ff3c;
+    color: #0403ff;
 }
 /* Expander styles */
 .streamlit-expanderHeader {
@@ -147,7 +150,7 @@ iframe {
     position: fixed;
     top: 2px;
     right: 15px;
-    font-color: #00ff3c;
+    font-color: #0403ff;
 }
 
 .stCheckbox > label {
@@ -155,14 +158,14 @@ iframe {
     border-radius: 20px;
     border: 0px solid #000000;
     color: #000000 !important;
-    font-color: #00ff3c;
+    font-color: #0403ff;
     font-weight: bold;
     box-shadow: 0 0 1px rgba(0, 255, 60, 0.5);
 }
 .stCheckbox > label:hover {
     background-color: rgba(0, 0, 0, 0.9);
     box-shadow: 0 0 15px rgba(13, 81, 29, 0.7);
-    font-color: #00ff3c;
+    font-color: #0403ff;
 }
 /* Styling hyperlinks in experience, skills, and project sections */
 a {
@@ -170,7 +173,7 @@ a {
     text-decoration: none; /* No underline by default */
 }
 a:hover {
-    color: #00ff3c !important; /* Change to white on hover for contrast */
+    color: #0403ff !important; /* Change to white on hover for contrast */
     text-decoration: underline; /* Underline on hover */
 }
 @media (max-width: 768px) {
@@ -303,22 +306,25 @@ iframe {
     padding-bottom: 10px;
 }
 /* Sidebar styles */
+.st-emotion-cache-rpj0dg {
+    background-color: transparent;
+}
 .css-1d391kg {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgb(3, 3, 255) !important;
 }
 .sidebar-nav {
     padding: 10px;
 }
 .sidebar-nav a {
     display: block;
-    color: #000000;
+    color: #0403ff;
     text-decoration: none;
     margin-bottom: 10px;
     font-weight: bold;
     font-size: 0.9em;
 }
 .sidebar-nav a:hover {
-    color: #ff0000;
+    color: #0403ff;
 }
 /* Expander styles */
 .streamlit-expanderHeader {
@@ -342,11 +348,11 @@ iframe {
     border: 2px solid #000000;
     color: #000000 !important;
     font-weight: bold;
-    box-shadow: 0 0 10px rgba(255, 0, 0, .5));
+    box-shadow: 0 0 10px rgba(4, 3, 255, .5));
 }
 .stCheckbox > label:hover {
     background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+    box-shadow: 0 0 15px rgba(4, 3, 255, 1);
 }
 /* Styling hyperlinks in experience, skills, and project sections */
 a {
@@ -354,7 +360,7 @@ a {
     text-decoration: none; /* No underline by default */
 }
 a:hover {
-    color: #ff0000 !important; /* Red on hover for visibility */
+    color: #0403ff !important; /* Red on hover for visibility */
     text-decoration: underline; /* Underline on hover */
 }
 </style>

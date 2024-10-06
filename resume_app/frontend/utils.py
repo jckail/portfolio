@@ -59,7 +59,7 @@ def add_script_for_download_and_navigation(api_url):
                 document.querySelectorAll('.sidebar-nav a').forEach(link => {{
                     link.style.color = '#ffffff';
                 }});
-                document.querySelector(`.sidebar-nav a[href="#${{section}}"]`).style.color = '#00ff3c';
+                document.querySelector(`.sidebar-nav a[href="#${{section}}"]`).style.color = '#0403ff';
             }}
         }});
         
