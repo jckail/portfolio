@@ -27,6 +27,7 @@ def get_styles_css(selection, configs):
     }}
     .stApp {{
         background-color: {background_color};
+        backdrop-filter: blur(1px);
     }}
 
     /* Iframe styles */
@@ -117,24 +118,24 @@ def get_styles_css(selection, configs):
 
 
     /* Experience item styles */
-    .experience-item {{
-        margin-bottom: 30px;
-    }}
-    .experience-item h3, .experience-item p, .experience-item ul {{
+
+    .experience-item h2, .experience-item p, .experience-item ul {{
         color: {text_color} !important;
-        backdrop-filter: blur(2px);
+        backdrop-filter: blur(1px);
         border-radius: 10px;
     }}
-    .experience-item h3 {{
+    .experience-item h2 {{
         font-size: 1.4em;
-        margin-bottom: 5px;
+        margin-bottom: 1px;
     }}
     .experience-item p {{
-        margin-bottom: 5px;
-        font-size: 1em;
+        margin-bottom: 1px;
+        font-size: .8em;
+        backdrop-filter: blur(1px);
     }}
     .experience-item ul {{
         margin-top: 0;
+        backdrop-filter: blur(1px);
     }}
 
     /* Override Streamlit's default styles */
@@ -339,13 +340,14 @@ def get_styles_css(selection, configs):
         padding-top: 200px;
         margin-top: -200px;
         
+        
     }}
         .stHorizontalBlock {{
     position: fixed;
     left: 0;
     right: 0;
-    background-color: #1a1a1a;
-    backdrop-filter: blur(5px);
+
+    backdrop-filter: blur(15px);
     z-index: 2;
     text-align: center;
     border-radius: 5px;

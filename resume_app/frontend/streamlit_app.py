@@ -47,7 +47,7 @@ st.markdown('<div class="content">', unsafe_allow_html=True)
 create_section("Experience", "".join(create_experience_item(job) for job in resume_data['experience']))
 
 # Skills Section
-create_section("Skills", create_skills_section(resume_data['skills']))
+create_section("Technical Skills", create_skills_section(resume_data['skills']))
 
 # Achievements Section
 create_section("Projects", create_projects_section(resume_data['projects']))

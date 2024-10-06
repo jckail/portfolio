@@ -5,7 +5,7 @@ resume_data = {
         "email": "jckail13@gmail.com",
         "phone": "571-218-5000",
         "website": "https://jordan-kail.com/",
-        "location": "Denver, CO - Open to relocation",
+        "location": "Denver, CO",
         "github": "https://github.com/jckail",
         "linkedin": "https://www.linkedin.com/in/jckail/",
     },
@@ -183,7 +183,8 @@ resume_data = {
         {
             "title": 'Developed "pointup.io"',
             "description": 'An AI web app for "All of your loyalty points in one place," powered by a Selenium-WebDriver agent in AWS via elastic beanstalk, lambda, and s3. ',
-            "link": "https://www.pointup.io/ https://github.com/jckail/point_bot",
+            "link": "https://github.com/jckail/point_bot",
+            "link2": "https://www.pointup.io/"
         },
         {
             "title": "Algorithmic Crypto Trading Project",
