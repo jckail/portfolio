@@ -138,6 +138,6 @@ def create_skills_section(skills):
 def create_achievements_section(achievements):
     content = ""
     for achievement in achievements:
-        content += f"<h3>{achievement['title']}</h3>"
+        content += f'<h3><a href="{achievement["link"]}">{achievement["title"]}</a></h3>'
         content += f"<p>{achievement['description']}</p>"
     return content
