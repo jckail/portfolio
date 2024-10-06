@@ -68,7 +68,7 @@ iframe {
 }
 /* Adjust content padding to account for floating header and navigation bar */
 .content {
-    padding-top: 10px; /* Reduced padding to decrease space */
+    padding-top: 40px; /* Reduced padding to decrease space */
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
@@ -140,21 +140,21 @@ iframe {
     color: #ffffff !important;
 }
 .streamlit-expanderContent {
-    background-color: rgba(0, 0, 0, 0.1) !important;
+    background-color: transparent !important;
 }
 /* Dark mode toggle styles */
 .stCheckbox {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 5px;
+    right: 5px;
     z-index: 1001;
     font-color: #00ff3c;
 }
 .stCheckbox > label {
     background-color: rgba(0, 0, 0, 0.7);
-    padding: 8px 15px;
+    padding: 1px 1px;
     border-radius: 20px;
-    border: 1px solid #000000;
+    border: 0px solid #000000;
     color: #000000 !important;
     font-color: #00ff3c;
     font-weight: bold;
@@ -162,7 +162,7 @@ iframe {
 }
 .stCheckbox > label:hover {
     background-color: rgba(0, 0, 0, 0.9);
-    box-shadow: 0 0 15px rgba(0, 255, 60, 0.7);
+    box-shadow: 0 0 15px rgba(13, 81, 29, 0.7);
     font-color: #00ff3c;
 }
 /* Styling hyperlinks in experience, skills, and project sections */
@@ -246,7 +246,7 @@ iframe {
 }
 /* Adjust content padding to account for floating header and navigation bar */
 .content {
-    padding-top: 10px; /* Reduced padding to decrease space */
+    padding-top: 40px; /* Reduced padding to decrease space */
     padding-left: 20px;
     padding-right: 20px;
     position: relative;
@@ -318,18 +318,18 @@ iframe {
     color: #000000 !important;
 }
 .streamlit-expanderContent {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: transparent !important;
 }
 /* Dark mode toggle styles */
 .stCheckbox {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 5px;
+    right: 5px;
     z-index: 1001;
 }
 .stCheckbox > label {
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 8px 15px;
+    padding: 1px 1px;
     border-radius: 20px;
     border: 2px solid #000000;
     color: #000000 !important;
