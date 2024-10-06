@@ -9,7 +9,7 @@ def get_styles_css(selection, configs):
     /* Base styles */
     body {{
         font-family: 'Roboto', sans-serif;
-        font-size: 18px;
+        font-size: 20px;
     }}
 
     /* Global text color */
@@ -52,30 +52,18 @@ def get_styles_css(selection, configs):
         /* Section marker styles */
     .section-marker {{
         text-align: center;
-        font-size: 1.8em;
+        font-size: 2em;
         font-weight: bold;
-        margin: 40px 0 50px 0;
+        margin: 0 0 50px 0;
         color: {link_color} !important;
         border-bottom: 2px solid {link_color};
-        padding-bottom: 10px;
+        padding-bottom: 5px;
         padding-top: 150px;
-        margin-top: -150px;
+        margin-top: -140px;
         
     }}
 
-    /* Section marker styles */
-    .section-marker {{
-        text-align: center;
-        font-size: 1.8em;
-        font-weight: bold;
-        margin: 40px 0 50px 0;
-        color: {link_color} !important;
-        border-bottom: 2px solid {link_color};
-        padding-bottom: 10px;
-        padding-top: 150px;
-        margin-top: -150px;
-        
-    }}
+
 
     /* Header styles */
 .stHorizontalBlock {{
@@ -97,11 +85,11 @@ def get_styles_css(selection, configs):
     background-color: transparent;
 }}
     .link-container {{
-        padding-top: 20px;
+        padding-top: 12px;
         display: flex;
         justify-content: center;
-        font-size: 4vw;
-        gap: 15px;
+        font-size: 1.3em !important;
+        gap: 35px;
         text-decoration: underline;
     }}
 
@@ -142,7 +130,8 @@ def get_styles_css(selection, configs):
         margin-bottom: 5px;
     }}
     .experience-item p {{
-        margin-bottom: 10px;
+        margin-bottom: 5px;
+        font-size: 1em;
     }}
     .experience-item ul {{
         margin-top: 0;
@@ -151,7 +140,7 @@ def get_styles_css(selection, configs):
     /* Override Streamlit's default styles */
     .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span {{
         opacity: 1 !important;
-        font-size: 25px !important;
+        font-size: 1em !important;
         color: {text_color} !important;
     }}
     .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
@@ -289,6 +278,8 @@ def get_styles_css(selection, configs):
         max-width: 250px;
     }}
     /* Responsive styles for smaller screens */
+
+
     @media (max-width: 900px) {{
         .stCheckbox {{
             right: 10px;
@@ -307,18 +298,48 @@ def get_styles_css(selection, configs):
             font-size: 3vw;
         }}
         .column.links {{
-            margin-top: 5px;
             text-align: center;
         }}
         .link-container {{
-                    padding-top: 20px;
+        
         display: flex;
         justify-content: center;
         font-size: 1vw;
         gap: 15px;
+            row-gap: 0.5rem;
+    column-gap: 0.5rem;
         text-decoration: underline;
             
         }}
+
+
+.stSidebar {{
+    position: relative;
+    top: 0px;
+    
+    z-index: 4;
+    
+    
+    transform: none;
+    
+    background-color: {button_background} !important;
+    border-radius: 5px;
+    border: 1px solid {button_boarder};
+    backdrop-filter: blur(15px);
+
+}}
+    /* Section marker styles */
+    .section-marker {{
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: {link_color} !important;
+        border-bottom: 2px solid {link_color};
+        padding-bottom: 10px;
+        padding-top: 200px;
+        margin-top: -200px;
+        
+    }}
         .stHorizontalBlock {{
     position: fixed;
     left: 0;
@@ -344,6 +365,7 @@ def get_styles_css(selection, configs):
         position: relative;
         z-index: 1;
     }}
+
     }}
     </style>
     """

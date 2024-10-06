@@ -32,7 +32,6 @@ def fetch_resume_data():
 resume_data = fetch_resume_data()
 
 
-
 # Inject CSS based on the theme
 st.markdown(get_styles_css(st.session_state['theme'],styles_config), unsafe_allow_html=True)
 components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
@@ -56,14 +55,3 @@ create_section("Projects", create_projects_section(resume_data['projects']))
 # Close the content div
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Create the sidebar with navigation, collapsed by default
-with st.sidebar.expander("📚 Navigation", expanded=True):  # Sidebar starts collapsed
-    st.markdown("""
-    <nav class="sidebar-nav">
-        <ul>
-            <li><a href="#experience">⚡️ Experience</a></li>
-            <li><a href="#skills">🛠 Skills</a></li>
-            <li><a href="#projects">🏆 Projects</a></li>
-        </ul>
-    </nav>
-    """, unsafe_allow_html=True)

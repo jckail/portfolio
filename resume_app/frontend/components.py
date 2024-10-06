@@ -21,19 +21,22 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         download_link = None
     
     # Header with HTML formatting for name, contact details, and download button
-    download_button = '<p href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > 📄 Resume</p>' if download_link else '<span class="error-message">Failed to load resume</span>'
+    download_button = '<a class="link-container" href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > 📄 Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'
 
     # Create a container for the header
 
     [col0, col1, col2,col3]= st.columns([.05, .30,.55,.1])
     with col0:
-        st.markdown("""
-        <nav class="sidebar-nav">
-            <a href="#experience"></a>
-            <a href="#skills"></a>
-            <a href="#achievements"></a>
-        </nav>
-        """, unsafe_allow_html=True)
+        with st.sidebar.expander("📚 Navigation", expanded=True):  # Sidebar starts collapsed
+            st.markdown("""
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#experience">⚡️ Experience</a></li>
+                    <li><a href="#skills">🛠 Skills</a></li>
+                    <li><a href="#projects">🏆 Projects</a></li>
+                </ul>
+            </nav>
+            """, unsafe_allow_html=True)
     with col1:
         st.markdown(f"""
     <div class="name-container">
@@ -45,8 +48,8 @@ def create_header(name, contact, theme_icon, theme_value, toggle_theme):
         st.markdown(f"""
             
             <div class="link-container">
-                <a href="{contact['github']}">🤖 GitHub</a>
-                <a href="{contact['linkedin']}">👔 LinkedIn</a>
+                <a class="link-container" href="{contact['github']}">🤖 GitHub</a>
+                <a class="link-container" href="{contact['linkedin']}">👔 LinkedIn</a>
                 {download_button}
             </div>
             """, unsafe_allow_html=True)
@@ -67,9 +70,9 @@ def create_experience_item(job):
     return f"""
     <div class="experience-item">
         <h2><a href="{job["link"]}">{job["company"]}</a></h2>
-        <h4>{job['title']} </h4>
-        <p>{job['location']}</p>
-        <p>{job['date']}</p>
+            <p>{job['title']} </p>
+            <p>{job['location']}</p>
+            <p>{job['date']}</p>
         <ul>
         {''.join(f"<li>{highlight}</li>" for highlight in job['highlights'])}
         </ul>
