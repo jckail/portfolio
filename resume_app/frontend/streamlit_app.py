@@ -20,7 +20,7 @@ st.set_page_config(
     menu_items={
         'Get Help': 'https://github.com/jckail/portfolio',
         'Report a bug': "https://github.com/jckail/portfolio/issues",
-        'About': "# Jordan Kail\n This is a Streamlit app showcasing Jordan Kail's professional experience and skills."
+        'About': "# Jordan Kail\n This Streamlit app showcases Jordan Kail's professional experience, skills, and projects."
     }
 )
 
@@ -57,7 +57,7 @@ create_section("Experience", "".join(create_experience_item(job) for job in resu
 # Skills Section
 create_section("Technical Skills", create_skills_section(resume_data['skills']))
 
-# Achievements Section
+# Projects Section
 create_section("Projects", create_projects_section(resume_data['projects']))
 
 # Close the content div
@@ -80,16 +80,19 @@ components.html(gtag_script, height=0)
 # Add metadata
 st.markdown('''
     <meta name="description" content="Jordan Kail's professional portfolio showcasing experience, skills, and projects.">
-    <meta name="keywords" content="Jordan Kail, Portfolio, Resume, Skills, Projects">
+    <meta name="keywords" content="Jordan Kail, Portfolio, Resume, Skills, Projects, Software Engineer, Data Engineer">
     <meta name="author" content="Jordan Kail">
     <link rel="canonical" href="https://jordankail.com">
 ''', unsafe_allow_html=True)
 
 # Add Open Graph and Twitter Card metadata
 st.markdown('''
-    <meta property="og:title" content="Jordan Kail">
+    <meta property="og:title" content="Jordan Kail | Portfolio">
     <meta property="og:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
     <meta property="og:image" content="https://jordankail.com/images/avatar.jpeg">
     <meta property="og:url" content="https://jordankail.com">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jordan Kail | Portfolio">
+    <meta name="twitter:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
+    <meta name="twitter:image" content="https://jordankail.com/images/avatar.jpeg">
 ''', unsafe_allow_html=True)
