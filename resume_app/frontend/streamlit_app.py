@@ -63,19 +63,20 @@ create_section("Projects", create_projects_section(resume_data['projects']))
 # Close the content div
 st.markdown("</div>", unsafe_allow_html=True)
 
+#TODO: tag manager is breaking interactivity i think it needs to be pushed back 
 # Google Tag Manager Script
-gtag_script = '''
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HDKC74P3BD"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+# gtag_script = '''
+# <!-- Google tag (gtag.js) -->
+# <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDKC74P3BD"></script>
+# <script>
+#   window.dataLayer = window.dataLayer || [];
+#   function gtag(){dataLayer.push(arguments);}
+#   gtag('js', new Date());
 
-  gtag('config', 'G-HDKC74P3BD');
-</script>
-'''
-components.html(gtag_script, height=0)
+#   gtag('config', 'G-HDKC74P3BD');
+# </script>
+# '''
+# components.html(gtag_script, height=0)
 
 # Add metadata
 st.markdown('''
@@ -87,7 +88,7 @@ st.markdown('''
 
 # Add Open Graph and Twitter Card metadata
 st.markdown('''
-    <meta property="og:title" content="Jordan Kail | Portfolio">
+    <meta property="og:title" content="Jordan Kail">
     <meta property="og:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
     <meta property="og:image" content="https://jordankail.com/images/avatar.jpeg">
     <meta property="og:url" content="https://jordankail.com">
