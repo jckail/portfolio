@@ -14,7 +14,7 @@ API_URL = os.environ.get("API_URL", "http://localhost:8000")
 # Set the page configuration
 st.set_page_config(
     page_title="Jordan Kail",
-    page_icon="images/favicon.ico",
+    page_icon=f"{API_URL}/images/favicon.ico",
     layout="wide",
     initial_sidebar_state="collapsed",
     menu_items={

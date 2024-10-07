@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY resume_app/ ./resume_app/
 COPY entrypoint.sh .
 
+# Copy the images directory
+COPY images/ ./images/
+
 # Make the entrypoint script executable
 RUN chmod +x entrypoint.sh
 

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from .resume_data import resume_data
+from fastapi.staticfiles import StaticFiles
 import os
 
 app = FastAPI()
@@ -29,3 +30,6 @@ async def download_resume():
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type='application/pdf', filename="JordanKailResume.pdf")
     return {"error": "Resume file not found"}
+
+
+app.mount("/images", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../../images")), name="images")
