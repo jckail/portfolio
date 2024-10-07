@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  resume-app:
+    build: .
+    ports:
+      - "8000:8000"  # Backend
+      - "8080:8080"  # Frontend
+    environment:
+      - API_URL=http://localhost:8000
+    volumes:
+      - ./resume_app:/app/resume_app
+    command: ./entrypoint.sh

@@ -60,8 +60,8 @@ def get_styles_css(selection, configs):
         color: {link_color} !important;
         border-bottom: 2px solid {link_color};
         padding-bottom: 5px;
-        padding-top: 150px;
-        margin-top: -140px;
+        padding-top: 250px;
+        margin-top: -180px;
         
     }}
 
@@ -280,6 +280,7 @@ def get_styles_css(selection, configs):
         max-width: 250px;
     }}
     /* Responsive styles for smaller screens */
+
 
     @media (max-width: 900px) {{
         .stCheckbox {{
