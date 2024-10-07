@@ -1,24 +1,39 @@
+from turtle import down
 import streamlit as st
 import requests
 import base64
 
-# Get the backend URL from Streamlit secrets
-BACKEND_URL = st.secrets.get("BACKEND_URL", "http://127.0.0.1:8000")
+def download_resume_pdf(url):
+    try:
+        url = f"{url}/download_resume"
+        # Send a GET request to the given URL
+        response = requests.get(url)
+        
+        # Raise an exception for bad status codes
+        response.raise_for_status()
+        
+        # Check if the content-type of the response is a PDF
+        if 'application/pdf' in response.headers.get('Content-Type', ''):
+            # Save the PDF content to a file
+            with open('Jordan_Kail_Resume.pdf', 'wb') as f:
+                f.write(response.content)
+            if response.status_code == 200:
+                # Encode the PDF content as base64
+                pdf_base64 = base64.b64encode(response.content).decode('utf-8')
+                download_link = f'data:application/pdf;base64,{pdf_base64}'
+                return download_link
+            else:
+                download_link = None
+            print("PDF downloaded successfully as 'Jordan_Kail_Resume.pdf'")
+        else:
+            print("The URL did not return a PDF file.")
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
 
-def create_header(name, contact, theme_icon, theme_value, toggle_theme):
-    # URL for downloading the resume
-    download_url = f"{BACKEND_URL}/download_resume"
+
+def create_header(name, contact, theme_icon, theme_value, toggle_theme,BACKEND_URL):
     
-    # Header with HTML formatting for name, contact details, and download button
-    #download_button = f'📄<a href="{download_url}" target="_blank">Download Resume</a>'
-    response = requests.get(download_url)
-
-    if response.status_code == 200:
-        # Encode the PDF content as base64
-        pdf_base64 = base64.b64encode(response.content).decode('utf-8')
-        download_link = f'data:application/pdf;base64,{pdf_base64}'
-    else:
-        download_link = None
+    download_link = download_resume_pdf(BACKEND_URL)
     
     # Header with HTML formatting for name, contact details, and download button
     download_button = '<a class="link-container" href="' + download_link + f'" download="{name.replace(" ", "_")}_Resume.pdf" > 📄 Resume</a>' if download_link else '<span class="error-message">Failed to load resume</span>'

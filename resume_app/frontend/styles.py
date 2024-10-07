@@ -281,7 +281,6 @@ def get_styles_css(selection, configs):
     }}
     /* Responsive styles for smaller screens */
 
-
     @media (max-width: 900px) {{
         .stCheckbox {{
             right: 10px;

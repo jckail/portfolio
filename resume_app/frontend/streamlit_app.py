@@ -28,6 +28,8 @@ def fetch_resume_data():
     response = requests.get(f"{API_URL}/resume")
     return response.json()
 
+
+
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
 
@@ -38,7 +40,7 @@ components.html(get_particle_js(st.session_state['theme'],particle_config), heig
 
 # Create header with theme toggle
 theme_icon = '🌙' if st.session_state['theme'] == 'dark' else '☀️'
-create_header(resume_data['name'], resume_data['contact'], theme_icon, st.session_state['theme'] == 'dark', toggle_theme)
+create_header(resume_data['name'], resume_data['contact'], theme_icon, st.session_state['theme'] == 'dark', toggle_theme, API_URL)
 
 # Display the resume content
 st.markdown('<div class="content">', unsafe_allow_html=True)
