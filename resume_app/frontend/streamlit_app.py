@@ -6,13 +6,23 @@ import os
 from styles import get_styles_css
 from custom_components import create_header, create_section, create_experience_item, create_skills_section, create_projects_section
 from particles import get_particle_js
-from configs import particle_config,styles_config
+from configs import particle_config, styles_config
 
 # API URL for fetching resume data
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Set the page configuration
-st.set_page_config(page_title="Jordan Kail's Portfolio", layout="wide",initial_sidebar_state="collapsed")
+st.set_page_config(
+    page_title="Jordan Kail",
+    page_icon="images/favicon.ico",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+    menu_items={
+        'Get Help': 'https://github.com/jckail/portfolio',
+        'Report a bug': "https://github.com/jckail/portfolio/issues",
+        'About': "# Jordan Kail\n This is a Streamlit app showcasing Jordan Kail's professional experience and skills."
+    }
+)
 
 # Initialize session state for theme
 if 'theme' not in st.session_state:
@@ -21,22 +31,18 @@ if 'theme' not in st.session_state:
 # Function to toggle theme
 def toggle_theme():
     st.session_state['theme'] = 'light' if st.session_state['theme'] == 'dark' else 'dark'
-    
 
 # Function to fetch resume data
 def fetch_resume_data():
     response = requests.get(f"{API_URL}/resume")
     return response.json()
 
-
-
 # Call the function to fetch resume data
 resume_data = fetch_resume_data()
 
-
 # Inject CSS based on the theme
-st.markdown(get_styles_css(st.session_state['theme'],styles_config), unsafe_allow_html=True)
-components.html(get_particle_js(st.session_state['theme'],particle_config), height=0)
+st.markdown(get_styles_css(st.session_state['theme'], styles_config), unsafe_allow_html=True)
+components.html(get_particle_js(st.session_state['theme'], particle_config), height=0)
 
 # Create header with theme toggle
 theme_icon = '🌙' if st.session_state['theme'] == 'dark' else '☀️'
@@ -59,50 +65,31 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 # Google Tag Manager Script
 gtag_script = '''
-<head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDKC74P3BD"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HDKC74P3BD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    gtag('config', 'G-HDKC74P3BD');
-  </script>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>{% block title %}{% endblock %}</title>
-  <meta name="author" content="Jordan Kail">
-  <link rel="canonical" href="{{request.path}}" />
-  <link rel="home" href="{% url 'main:home' %}" />
-  <meta name="description" content="{% block description %}{% endblock %}">
-  <meta name="keywords" content="{% block keywords %}{% endblock %}">
-
-  <!-- Start Social Media -->
-  <link rel="apple-touch-icon" type="image/x-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png'%}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png'%}">
-  <link rel="manifest" href="{% static 'images/site.webmanifest'%}">
-  <link rel="mask-icon" href="{% static 'images/safari-pinned-tab.svg'%}" color="#5bbad5">
-  <meta name="msapplication-TileColor" content="#da532c">
-  <meta name="theme-color" content="#ffffff">
-
-  <!-- Start CSS -->
-  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/swiper@7.0.5/swiper-bundle.min.css">
-  <link href="{% static 'css/style.css' %}" rel="stylesheet">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-  </style>
-  {% block extend_header %}{% endblock %}
-  <!-- End CSS -->
-
-  <!-- Add the particles.js library -->
-  <script src="{% static 'js/particles.min.js' %}"></script>
-</head>
+  gtag('config', 'G-HDKC74P3BD');
+</script>
 '''
 components.html(gtag_script, height=0)
 
+# Add metadata
+st.markdown('''
+    <meta name="description" content="Jordan Kail's professional portfolio showcasing experience, skills, and projects.">
+    <meta name="keywords" content="Jordan Kail, Portfolio, Resume, Skills, Projects">
+    <meta name="author" content="Jordan Kail">
+    <link rel="canonical" href="https://jordankail.com">
+''', unsafe_allow_html=True)
+
+# Add Open Graph and Twitter Card metadata
+st.markdown('''
+    <meta property="og:title" content="Jordan Kail">
+    <meta property="og:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
+    <meta property="og:image" content="https://jordankail.com/images/avatar.jpeg">
+    <meta property="og:url" content="https://jordankail.com">
+    <meta name="twitter:card" content="summary_large_image">
+''', unsafe_allow_html=True)
