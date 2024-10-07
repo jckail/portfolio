@@ -60,9 +60,9 @@ particlesJS('particles-js', {{
     }},
     "line_linked": {{
       "enable": true,
-      "distance": 150,
+      "distance": 200,
       "color": "{line_color}",
-      "opacity": 0.7,
+      "opacity": 1,
       "width": 1
     }},
     "move": {{
