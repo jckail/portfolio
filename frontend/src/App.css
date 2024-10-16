@@ -50,24 +50,17 @@ body, .App {
   background-color: transparent;
 }
 
-.floating-header .avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 15px;
-}
-
 .name-title {
   display: flex;
   flex-direction: column;
+  margin-left: 15px;
 }
 
 .floating-header h1 {
   font-size: 2em;
   margin: 0;
   color: var(--header-text-color);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .floating-header h2 {
@@ -77,43 +70,114 @@ body, .App {
   color: var(--header-text-color);
 }
 
-nav {
+.sandwich-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.sandwich-menu div {
+  width: 30px;
+  height: 3px;
+  background: var(--text-color);
+  border-radius: 10px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px;
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  transition: left 0.3s ease-in-out;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.side-panel.open {
+  left: 0;
+}
+
+.side-panel nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.side-panel nav a {
+  color: var(--sidebar-text-color);
+  text-decoration: none;
+  margin: 10px 0;
+  font-size: 1.2em;
+  transition: color 0.3s ease;
+}
+
+.side-panel nav a:hover {
+  color: var(--hover-color);
+}
+
+.close-btn {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.header-nav {
   display: flex;
   align-items: center;
   margin-right: 15px;
 }
 
-nav a {
+.header-nav a {
   color: var(--navbar-link-color);
   text-decoration: none;
   margin-left: 15px;
   transition: color 0.3s ease;
 }
 
-nav a:hover {
+.header-nav a:hover {
   color: var(--hover-color);
 }
 
-nav .icon {
+.header-nav .icon {
   width: 48px;
   height: 48px;
   object-fit: contain;
   border-radius: 50%;
   padding: 5px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
 }
 
-nav .icon:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.header-nav .icon:hover {
+  background-color: var(--resume-link-color);
 }
 
 .resume-link {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 12px 18px;
+  background-color: var(--resume-background-color);
+  padding: 8px 12px;
   border-radius: 24px;
-  font-size: 1.2em;
+  font-size: 1.4em;
   transition: background-color 0.3s ease;
+  color: var(--resume-link-color);
 }
 
 .resume-link:hover {
@@ -170,7 +234,7 @@ li {
 .project a {
   color: var(--link-color);
   text-decoration: none;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
 
 .project a:hover {
@@ -197,25 +261,46 @@ li {
 
 /* Increase contrast for better readability */
 body, .content, section, .job, .project {
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
   .floating-header {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 10px;
   }
 
-  .header-right {
-    margin-top: 10px;
+  .name-title h1 {
+    font-size: 1.5em;
   }
 
-  nav {
-    margin-right: 0;
-    margin-bottom: 10px;
+  .name-title h2 {
+    font-size: 1em;
+  }
+
+  .side-panel {
+    width: 100%;
+    left: -100%;
+  }
+
+  .content {
+    padding-top: 80px;
+  }
+
+  .header-nav {
+    margin-right: 10px;
+  }
+
+  .header-nav a {
+    margin-left: 10px;
+  }
+
+  .resume-link {
+    padding: 6px 10px;
+    font-size: 0.9em;
   }
 
   .theme-toggle {
-    margin-left: 15px;
+    padding: 6px;
+    font-size: 1.2em;
   }
 }

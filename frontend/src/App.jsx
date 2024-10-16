@@ -4,11 +4,61 @@ import './theme.css'
 import getParticlesConfig from './particlesConfig'
 import { particleConfig, stylesConfig } from './configs'
 
+function SandwichMenu({ onClick }) {
+  return (
+    <button className="sandwich-menu" onClick={onClick}>
+      <div></div>
+      <div></div>
+      <div></div>
+    </button>
+  )
+}
+
+function SidePanel({ isOpen, onClose }) {
+  return (
+    <div className={`side-panel ${isOpen ? 'open' : ''}`}>
+      <button className="close-btn" onClick={onClose}>&times;</button>
+      <nav>
+        <a href="#technical-skills">Technical Skills</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+      </nav>
+    </div>
+  )
+}
+
+function HeaderNav({ resumeData, theme }) {
+  return (
+    <nav className="header-nav">
+      {resumeData?.github && (
+        <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
+          <img 
+            src={theme === 'light' ? "/images/light_mode_github.png" : "/images/dark_mode_github.png"} 
+            alt="GitHub" 
+            className="icon" 
+          />
+        </a>
+      )}
+      {resumeData?.linkedin && (
+        <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer">
+          <img 
+            src={theme === 'light' ? "/images/light_mode_linkedin.png" : "/images/dark_mode_linkedin.png"} 
+            alt="LinkedIn" 
+            className="icon" 
+          />
+        </a>
+      )}
+      <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/download_resume`} target="_blank" rel="noopener noreferrer" className="resume-link">Download My Resume</a>
+    </nav>
+  )
+}
+
 function App() {
   const [resumeData, setResumeData] = useState(null)
   const [error, setError] = useState(null)
   const [particlesLoaded, setParticlesLoaded] = useState(false)
   const [theme, setTheme] = useState('dark')
+  const [isPanelOpen, setIsPanelOpen] = useState(false)
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -54,29 +104,30 @@ function App() {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
   }
 
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen)
+  }
+
   return (
     <div className="App">
       <div id="particles-js"></div>
       <div className="content">
         <header className="floating-header">
           <div className="header-left">
-            <img src="/images/home.jpg" alt="Jordan Kail" className="avatar" />
+            <SandwichMenu onClick={togglePanel} />
             <div className="name-title">
               <h1>{resumeData?.name || 'Jordan Kail'}</h1>
               <h2>{resumeData?.title || 'Software Engineer'}</h2>
             </div>
           </div>
           <div className="header-right">
-            <nav>
-              {resumeData?.github && <a href={resumeData.github} target="_blank" rel="noopener noreferrer"><img src="/images/github.jpg" alt="GitHub" className="icon" /></a>}
-              {resumeData?.linkedin && <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer"><img src="/images/linkedin.jpg" alt="LinkedIn" className="icon" /></a>}
-              <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/download_resume`} target="_blank" rel="noopener noreferrer" className="resume-link">Resume</a>
-            </nav>
+            <HeaderNav resumeData={resumeData} theme={theme} />
             <button onClick={toggleTheme} className="theme-toggle">
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
           </div>
         </header>
+        <SidePanel isOpen={isPanelOpen} onClose={togglePanel} />
         <main>
           {error && <div>Error: {error}</div>}
           {!resumeData && <div>Loading resume data...</div>}
