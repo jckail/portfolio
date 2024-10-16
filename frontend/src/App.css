@@ -163,7 +163,15 @@ Add back in to enable side bar to scoot things over
   background-color: transparent;
 }
 
-.side-panel nav a:hover,
+.side-panel nav a:hover
+{
+  color: var(--resume-link-color);
+  text-decoration: underline;
+  background-color: var(--resume-background-color);
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
+  border-radius: 12px;
+  padding: 4px 8px;
+}
 .side-panel nav a.active {
   color: var(--resume-link-color);
   text-decoration: underline;
