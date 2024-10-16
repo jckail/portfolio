@@ -20,9 +20,12 @@ body, .App {
 .content {
   position: relative;
   z-index: 2;
-  max-width: 800px;
-  margin: 0 auto;
   padding: 100px 20px 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.content.sidebar-open {
+  margin-left: 250px;
 }
 
 .floating-header {
@@ -36,7 +39,7 @@ body, .App {
   padding: 15px 20px;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
-  z-index: 1001; /* Increased to be above the sidebar */
+  z-index: 1001;
 }
 
 .header-left {
@@ -74,8 +77,8 @@ body, .App {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  width: 48px;
-  height: 48px;
+  width: 30px;
+  height: 25px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -96,14 +99,15 @@ body, .App {
 .side-panel {
   position: fixed;
   top: 0;
-  left: -300px;
-  width: 300px;
+  left: -250px;
+  width: 250px;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(5px);
   z-index: 1000;
-  transition: left 0.3s ease-in-out;
   box-sizing: border-box;
+  overflow-y: auto;
+  transition: left 0.3s ease-in-out;
 }
 
 .side-panel.open {
@@ -112,7 +116,6 @@ body, .App {
 
 .side-panel-content {
   padding: 20px;
-  padding-top: 0;
 }
 
 .side-panel h3 {
@@ -137,19 +140,9 @@ body, .App {
   background-color: transparent;
 }
 
-.side-panel nav a:hover {
+.side-panel nav a:hover,
+.side-panel nav a.active {
   color: var(--hover-color);
-}
-
-.close-btn {
-  position: absolute;
-  right: 20px;
-  top: 20px;
-  background: none;
-  border: none;
-  font-size: 1.5em;
-  color: var(--text-color);
-  cursor: pointer;
 }
 
 .header-nav {
@@ -278,6 +271,24 @@ body, .content, section, .job, .project {
 }
 
 @media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    padding-left: 20px;
+  }
+
+  .content.sidebar-open {
+    margin-left: 0;
+  }
+
+  .side-panel {
+    width: 100%;
+    left: -100%;
+  }
+
+  .side-panel.open {
+    left: 0;
+  }
+
   .floating-header {
     padding: 10px;
   }
@@ -288,15 +299,6 @@ body, .content, section, .job, .project {
 
   .name-title h2 {
     font-size: 1em;
-  }
-
-  .side-panel {
-    width: 100%;
-    left: -100%;
-  }
-
-  .content {
-    padding-top: 80px;
   }
 
   .header-nav {

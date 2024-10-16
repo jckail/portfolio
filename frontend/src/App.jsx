@@ -14,7 +14,7 @@ function SandwichMenu({ onClick }) {
   )
 }
 
-function SidePanel({ isOpen, onClose, headerHeight }) {
+function SidePanel({ isOpen, currentSection, headerHeight, onClose }) {
   const handleNavClick = (event, targetId) => {
     event.preventDefault();
     const targetElement = document.getElementById(targetId);
@@ -30,13 +30,30 @@ function SidePanel({ isOpen, onClose, headerHeight }) {
 
   return (
     <div className={`side-panel ${isOpen ? 'open' : ''}`} style={{ paddingTop: `${headerHeight}px` }}>
-      <button className="close-btn" onClick={onClose}>&times;</button>
       <div className="side-panel-content">
         <h3>Navigate to</h3>
         <nav>
-          <a href="#technical-skills" onClick={(e) => handleNavClick(e, 'technical-skills')}>Technical Skills</a>
-          <a href="#experience" onClick={(e) => handleNavClick(e, 'experience')}>Experience</a>
-          <a href="#projects" onClick={(e) => handleNavClick(e, 'projects')}>Projects</a>
+          <a 
+            href="#technical-skills" 
+            onClick={(e) => handleNavClick(e, 'technical-skills')}
+            className={currentSection === 'technical-skills' ? 'active' : ''}
+          >
+            Technical Skills
+          </a>
+          <a 
+            href="#experience" 
+            onClick={(e) => handleNavClick(e, 'experience')}
+            className={currentSection === 'experience' ? 'active' : ''}
+          >
+            Experience
+          </a>
+          <a 
+            href="#projects" 
+            onClick={(e) => handleNavClick(e, 'projects')}
+            className={currentSection === 'projects' ? 'active' : ''}
+          >
+            Projects
+          </a>
         </nav>
       </div>
     </div>
@@ -74,9 +91,11 @@ function App() {
   const [error, setError] = useState(null)
   const [particlesLoaded, setParticlesLoaded] = useState(false)
   const [theme, setTheme] = useState('dark')
-  const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [currentSection, setCurrentSection] = useState('technical-skills')
   const [headerHeight, setHeaderHeight] = useState(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const headerRef = useRef(null)
+  const sectionsRef = useRef({})
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -124,21 +143,39 @@ function App() {
     document.body.className = theme === 'dark' ? 'dark-theme' : ''
   }, [theme])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      let currentActiveSection = 'technical-skills';
+
+      Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
+        if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) { // Added a 10px buffer
+          currentActiveSection = sectionId;
+        }
+      });
+
+      setCurrentSection(currentActiveSection);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [headerHeight]);
+
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
   }
 
-  const togglePanel = () => {
-    setIsPanelOpen(!isPanelOpen)
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
   }
 
   return (
     <div className="App">
       <div id="particles-js"></div>
-      <div className="content">
+      <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <header className="floating-header" ref={headerRef}>
           <div className="header-left">
-            <SandwichMenu onClick={togglePanel} />
+            <SandwichMenu onClick={toggleSidebar} />
             <div className="name-title">
               <h1>{resumeData?.name || 'Jordan Kail'}</h1>
               <h2>{resumeData?.title || 'Software Engineer'}</h2>
@@ -151,14 +188,14 @@ function App() {
             </button>
           </div>
         </header>
-        <SidePanel isOpen={isPanelOpen} onClose={togglePanel} headerHeight={headerHeight} />
+        <SidePanel isOpen={isSidebarOpen} currentSection={currentSection} headerHeight={headerHeight} onClose={toggleSidebar} />
         <main>
           {error && <div>Error: {error}</div>}
           {!resumeData && <div>Loading resume data...</div>}
           {resumeData && (
             <>
               {resumeData.technicalSkills && (
-                <section id="technical-skills">
+                <section id="technical-skills" ref={el => sectionsRef.current['technical-skills'] = el}>
                   <h2>Technical Skills</h2>
                   <ul>
                     {resumeData.technicalSkills.map((skill, index) => (
@@ -171,7 +208,7 @@ function App() {
                 </section>
               )}
               {resumeData.experience && (
-                <section id="experience">
+                <section id="experience" ref={el => sectionsRef.current['experience'] = el}>
                   <h2>Experience</h2>
                   {resumeData.experience.map((job, index) => (
                     <div key={index} className="job">
@@ -190,7 +227,7 @@ function App() {
                 </section>
               )}
               {resumeData.projects && (
-                <section id="projects">
+                <section id="projects" ref={el => sectionsRef.current['projects'] = el}>
                   <h2>Projects</h2>
                   {resumeData.projects.map((project, index) => (
                     <div key={index} className="project">
