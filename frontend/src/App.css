@@ -21,12 +21,14 @@ body, .App {
   position: relative;
   z-index: 2;
   padding: 100px 20px 20px;
-  transition: margin-left 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition: margin-left 0.3s ease-in-out, opacity 0.1s ease-in-out;
 }
 
 .content.sidebar-open {
-  margin-left: 250px;
+  margin-left: 200px;
   opacity: 0.8;
+  
+  
 }
 
 .floating-header {
@@ -146,6 +148,7 @@ body, .App {
 .side-panel nav a:hover,
 .side-panel nav a.active {
   color: var(--hover-color);
+  text-decoration: underline;
 }
 
 .header-nav {
