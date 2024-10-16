@@ -69,3 +69,4 @@ coverage.xml
 
 # Linux/Unix files
 *~
+.notes.txt
