@@ -14,7 +14,7 @@ API_URL = os.environ.get("API_URL", "http://localhost:8000")
 # Set the page configuration
 st.set_page_config(
     page_title="Jordan Kail",
-    page_icon=f"{API_URL}/images/favicon.ico",
+    page_icon=f"{API_URL}/images/favicon.ico?v=1.0",
     layout="wide",
     initial_sidebar_state="collapsed",
     menu_items={
@@ -87,13 +87,48 @@ st.markdown('''
 ''', unsafe_allow_html=True)
 
 # Add Open Graph and Twitter Card metadata
-st.markdown('''
+st.markdown(f'''
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Jordan Kail's professional portfolio showcasing experience, skills, and projects.">
+    <meta name="keywords" content="Jordan Kail, Portfolio, Resume, Skills, Projects, Software Engineer, Data Engineer">
+    <meta name="author" content="Jordan Kail">
+    <link rel="canonical" href="https://jordankail.com">
+
+    <!-- Favicon Links -->
+    <link rel="icon" type="image/x-icon" href="{API_URL}/images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="{API_URL}/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{API_URL}/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{API_URL}/images/favicon-16x16.png">
+
+    <!-- Open Graph Meta Tags for Social Media Sharing -->
     <meta property="og:title" content="Jordan Kail">
     <meta property="og:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
     <meta property="og:image" content="https://jordankail.com/images/avatar.jpeg">
     <meta property="og:url" content="https://jordankail.com">
+    
+    <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Jordan Kail | Portfolio">
     <meta name="twitter:description" content="Professional portfolio showcasing Jordan Kail's experience, skills, and projects.">
     <meta name="twitter:image" content="https://jordankail.com/images/avatar.jpeg">
+    <link rel="icon" type="image/png" href="{API_URL}/images/favicon.png?v=1.0">
+    <!-- Metadata and Favicons -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Jordan Kail">
+    <link rel="canonical" href="https://jordankail.com">
+    <meta name="description" content="Jordan Kail's professional portfolio showcasing experience, skills, and projects.">
+    <meta name="keywords" content="Jordan Kail, Portfolio, Resume, Skills, Projects, Software Engineer, Data Engineer">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{API_URL}/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="{API_URL}/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{API_URL}/images/favicon-16x16.png">
+    <link rel="manifest" href="{API_URL}/images/site.webmanifest">
+    <link rel="mask-icon" href="{API_URL}/images/safari-pinned-tab.svg" color="#5bbad5">
+        <link rel="icon" type="image/x-icon" href="{API_URL}/images/favicon.ico?v=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="{API_URL}/images/apple-touch-icon.png?v=1.0">
+    <link rel="icon" type="image/png" href="{API_URL}/images/favicon.png?v=1.0">
 ''', unsafe_allow_html=True)

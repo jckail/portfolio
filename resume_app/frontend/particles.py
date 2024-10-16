@@ -22,7 +22,7 @@ body {{
 particlesJS('particles-js', {{
   "particles": {{
     "number": {{
-      "value": 30,
+      "value": 40,
       "density": {{
         "enable": false,
         "value_area": 800
@@ -60,7 +60,7 @@ particlesJS('particles-js', {{
     }},
     "line_linked": {{
       "enable": true,
-      "distance": 200,
+      "distance": 250,
       "color": "{line_color}",
       "opacity": 1,
       "width": 1
