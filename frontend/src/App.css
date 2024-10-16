@@ -36,7 +36,7 @@ body, .App {
   padding: 15px 20px;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
-  z-index: 3;
+  z-index: 1001; /* Increased to be above the sidebar */
 }
 
 .header-left {
@@ -100,10 +100,9 @@ body, .App {
   width: 300px;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
   z-index: 1000;
   transition: left 0.3s ease-in-out;
-  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -111,10 +110,22 @@ body, .App {
   left: 0;
 }
 
+.side-panel-content {
+  padding: 20px;
+  padding-top: 0;
+}
+
+.side-panel h3 {
+  color: var(--sidebar-text-color);
+  margin-bottom: 20px;
+  font-size: 1.4em;
+}
+
 .side-panel nav {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  background-color: transparent;
 }
 
 .side-panel nav a {
@@ -123,6 +134,7 @@ body, .App {
   margin: 10px 0;
   font-size: 1.2em;
   transition: color 0.3s ease;
+  background-color: transparent;
 }
 
 .side-panel nav a:hover {
@@ -151,6 +163,7 @@ body, .App {
   text-decoration: none;
   margin-left: 15px;
   transition: color 0.3s ease;
+  color: var(--resume-link-color);
 }
 
 .header-nav a:hover {
@@ -162,7 +175,7 @@ body, .App {
   height: 48px;
   object-fit: contain;
   border-radius: 50%;
-  padding: 5px;
+  padding: 3px;
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import './App.css'
 import './theme.css'
 import getParticlesConfig from './particlesConfig'
@@ -14,15 +14,31 @@ function SandwichMenu({ onClick }) {
   )
 }
 
-function SidePanel({ isOpen, onClose }) {
+function SidePanel({ isOpen, onClose, headerHeight }) {
+  const handleNavClick = (event, targetId) => {
+    event.preventDefault();
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: targetPosition - headerHeight,
+        behavior: 'smooth'
+      });
+    }
+    onClose();
+  };
+
   return (
-    <div className={`side-panel ${isOpen ? 'open' : ''}`}>
+    <div className={`side-panel ${isOpen ? 'open' : ''}`} style={{ paddingTop: `${headerHeight}px` }}>
       <button className="close-btn" onClick={onClose}>&times;</button>
-      <nav>
-        <a href="#technical-skills">Technical Skills</a>
-        <a href="#experience">Experience</a>
-        <a href="#projects">Projects</a>
-      </nav>
+      <div className="side-panel-content">
+        <h3>Navigate to</h3>
+        <nav>
+          <a href="#technical-skills" onClick={(e) => handleNavClick(e, 'technical-skills')}>Technical Skills</a>
+          <a href="#experience" onClick={(e) => handleNavClick(e, 'experience')}>Experience</a>
+          <a href="#projects" onClick={(e) => handleNavClick(e, 'projects')}>Projects</a>
+        </nav>
+      </div>
     </div>
   )
 }
@@ -59,6 +75,8 @@ function App() {
   const [particlesLoaded, setParticlesLoaded] = useState(false)
   const [theme, setTheme] = useState('dark')
   const [isPanelOpen, setIsPanelOpen] = useState(false)
+  const [headerHeight, setHeaderHeight] = useState(0)
+  const headerRef = useRef(null)
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -75,6 +93,12 @@ function App() {
         setError(error.message)
       })
   }, [])
+
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, []);
 
   const updateParticlesConfig = useCallback(() => {
     const config = particleConfig[theme]
@@ -112,7 +136,7 @@ function App() {
     <div className="App">
       <div id="particles-js"></div>
       <div className="content">
-        <header className="floating-header">
+        <header className="floating-header" ref={headerRef}>
           <div className="header-left">
             <SandwichMenu onClick={togglePanel} />
             <div className="name-title">
@@ -127,7 +151,7 @@ function App() {
             </button>
           </div>
         </header>
-        <SidePanel isOpen={isPanelOpen} onClose={togglePanel} />
+        <SidePanel isOpen={isPanelOpen} onClose={togglePanel} headerHeight={headerHeight} />
         <main>
           {error && <div>Error: {error}</div>}
           {!resumeData && <div>Loading resume data...</div>}

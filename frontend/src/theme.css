@@ -1,6 +1,6 @@
 :root {
   --primary: #0403ff;
-  --black: #000000;
+  --black: black;
   --white: white;
 
   /* Light theme default */
@@ -22,7 +22,8 @@
   --resume-background-color: black;
   --navbar-hover-background: #e0e0e0;
   --navbar-hover-color: var(--black);
-  --sidebar-text-color: var(--black);
+  --sidebar-text-color: var(--white);
+  
 }
 
 body.dark-theme {
@@ -44,7 +45,7 @@ body.dark-theme {
   --resume-background-color: var(--white);
   --navbar-hover-background: #575757;
   --navbar-hover-color: var(--white);
-  --sidebar-text-color: var(--white);
+  
 }
 
 body {
