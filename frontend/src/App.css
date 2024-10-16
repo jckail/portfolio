@@ -47,7 +47,7 @@ body, .App {
 .header-right {
   display: flex;
   align-items: center;
-  background-color: transparent; /* Ensure this is transparent */
+  background-color: transparent;
 }
 
 .floating-header .avatar {
@@ -95,8 +95,8 @@ nav a:hover {
 }
 
 nav .icon {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
   border-radius: 50%;
   padding: 5px;
@@ -110,9 +110,9 @@ nav .icon:hover {
 
 .resume-link {
   background-color: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-size: 0.9em;
+  padding: 12px 18px;
+  border-radius: 24px;
+  font-size: 1.2em;
   transition: background-color 0.3s ease;
 }
 
