@@ -1,13 +1,29 @@
-version: '3.8'
-
 services:
-  resume-app:
-    build: .
+  backend:
+    build:
+      context: .
+      target: backend
     ports:
-      - "8000:8000"  # Backend
-      - "8080:8080"  # Frontend
+      - "8000:8000"
     environment:
       - API_URL=http://localhost:8000
     volumes:
-      - ./resume_app:/app/resume_app
-    command: ./entrypoint.sh
+      - ./backend:/app/backend
+      - ./images:/app/images
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  node_modules:

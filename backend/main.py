@@ -32,4 +32,4 @@ async def download_resume():
     return {"error": "Resume file not found"}
 
 
-app.mount("/images", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../../images")), name="images")
+app.mount("/images", StaticFiles(directory="/app/images"), name="images")
