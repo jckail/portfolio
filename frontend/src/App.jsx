@@ -3,6 +3,7 @@ import './App.css'
 import './theme.css'
 import getParticlesConfig from './particlesConfig'
 import { particleConfig, stylesConfig } from './configs'
+import ResumePDF from './ResumePDF'
 
 function SandwichMenu({ onClick }) {
   return (
@@ -24,6 +25,8 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
         top: targetPosition - headerHeight,
         behavior: 'smooth'
       });
+      // Update URL hash
+      window.history.pushState(null, '', `#${targetId}`);
     }
     onClose();
   };
@@ -54,13 +57,20 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
           >
             Projects
           </a>
+          <a 
+            href="#my-resume" 
+            onClick={(e) => handleNavClick(e, 'my-resume')}
+            className={currentSection === 'my-resume' ? 'active' : ''}
+          >
+            My Resume
+          </a>
         </nav>
       </div>
     </div>
   )
 }
 
-function HeaderNav({ resumeData, theme }) {
+function HeaderNav({ resumeData, theme, onResumeClick }) {
   return (
     <nav className="header-nav">
       {resumeData?.github && (
@@ -81,7 +91,7 @@ function HeaderNav({ resumeData, theme }) {
           />
         </a>
       )}
-      <a href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/download_resume`} target="_blank" rel="noopener noreferrer" className="resume-link">Download My Resume</a>
+      <a href="#my-resume" onClick={onResumeClick} className="resume-link">See My Resume</a>
     </nav>
   )
 }
@@ -174,12 +184,52 @@ function App() {
     };
   }, [headerHeight, isSidebarOpen]);
 
+  // Handle initial navigation based on URL hash
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash && sectionsRef.current[hash]) {
+      const targetPosition = sectionsRef.current[hash].offsetTop;
+      window.scrollTo({
+        top: targetPosition - headerHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [headerHeight]);
+
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
   }
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  const handleResumeClick = (event) => {
+    event.preventDefault();
+    
+    // Scroll to the "My Resume" section
+    const resumeSection = document.getElementById('my-resume');
+    if (resumeSection) {
+      const targetPosition = resumeSection.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: targetPosition - headerHeight,
+        behavior: 'smooth'
+      });
+      // Update URL hash
+      window.history.pushState(null, '', '#my-resume');
+    }
+
+    // Initiate resume download
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const downloadUrl = `${apiUrl}/api/download_resume`;
+    
+    // Create a temporary anchor element to trigger the download
+    const downloadLink = document.createElement('a');
+    downloadLink.href = downloadUrl;
+    downloadLink.download = 'JordanKailResume.pdf'; // Set the desired filename
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
 
   return (
@@ -195,7 +245,7 @@ function App() {
             </div>
           </div>
           <div className="header-right">
-            <HeaderNav resumeData={resumeData} theme={theme} />
+            <HeaderNav resumeData={resumeData} theme={theme} onResumeClick={handleResumeClick} />
             <button onClick={toggleTheme} className="theme-toggle">
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
@@ -260,6 +310,10 @@ function App() {
                   ))}
                 </section>
               )}
+              <section id="my-resume" ref={el => sectionsRef.current['my-resume'] = el}>
+                <h2>My Resume</h2>
+                <ResumePDF />
+              </section>
             </>
           )}
         </main>
