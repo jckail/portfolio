@@ -24,12 +24,14 @@ body, .App {
   transition: margin-left 0.3s ease-in-out, opacity 0.1s ease-in-out;
 }
 
+/* 
+Add back in to enable side bar to scoot things over
 .content.sidebar-open {
-  margin-left: 200px;
+  margin-left: 150px;
   opacity: 0.8;
   
   
-}
+} */
 
 .floating-header {
   position: fixed;
@@ -40,8 +42,8 @@ body, .App {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background-color: var(--tbackground-color);
-  backdrop-filter: var(--tbackground-blur);
+  background-color: var(--top-tbackground-color);
+  backdrop-filter: var(--top-tbackground-blur);
   z-index: 1001;
 }
 
@@ -66,7 +68,7 @@ body, .App {
   font-size: 2em;
   margin: 0;
   color: var(--header-text-color);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 4px var(--text-shadow-color);
 }
 
 .floating-header h2 {
@@ -88,6 +90,22 @@ body, .App {
   padding: 0;
   z-index: 10;
 }
+.sandwich-menu:hover {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background:  var(--button-hover-background);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  box-shadow: 0 0 5px 1px var(--button-hover-background);
+  
+}
+
+
 
 .sandwich-menu div {
   width: 30px;
@@ -102,8 +120,8 @@ body, .App {
 .side-panel {
   position: fixed;
   top: 1110;
-  left: -200px;
-  width: 200px;
+  left: -150px;
+  width: 150px;
   height: 500px;
   color: var(--sidebar-text-color);
   background-color: var(--tbackground-color);
@@ -147,8 +165,11 @@ body, .App {
 
 .side-panel nav a:hover,
 .side-panel nav a.active {
-  color: var(--hover-color);
+  color: var(--resume-link-color);
   text-decoration: underline;
+  background-color: var(--resume-background-color);
+  border-radius: 12px;
+  padding: 4px 8px;
 }
 
 .header-nav {
@@ -161,12 +182,16 @@ body, .App {
   color: var(--navbar-link-color);
   text-decoration: none;
   margin-left: 15px;
+  padding: 8px 12px;
   transition: color 0.3s ease;
   color: var(--resume-link-color);
 }
 
 .header-nav a:hover {
-  color: var(--hover-color);
+  color: var(--text-color);
+  background-color: var(--background-color);
+  padding: 8px 12px;
+  
 }
 
 .header-nav .icon {
@@ -174,26 +199,32 @@ body, .App {
   height: 48px;
   object-fit: contain;
   border-radius: 50%;
-  padding: 3px;
+  padding: 8px 12px;
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
 }
 
 .header-nav .icon:hover {
-  background-color: var(--resume-link-color);
+  border-radius: 100%;
+  padding: 1px 2px;
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
 .resume-link {
   background-color: var(--resume-background-color);
   padding: 8px 12px;
   border-radius: 24px;
-  font-size: 1.4em;
+  font-size: 1.6em;
   transition: background-color 0.3s ease;
   color: var(--resume-link-color);
 }
 
+
+
 .resume-link:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--resume-background-color);
+  padding: 8px 12px;
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
 main {
@@ -207,6 +238,8 @@ section {
   backdrop-filter: var(--tbackground-blur);
   padding: 20px;
   border-radius: 8px;
+  padding-left: 150px;
+  width: 80%
 
 }
 
@@ -247,7 +280,7 @@ li {
 .project a {
   color: var(--link-color);
   text-decoration: none;
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
 .project a:hover {
@@ -260,21 +293,24 @@ li {
   border: none;
   color: var(--text-color);
   cursor: pointer;
-  font-size: 1.5em;
-  padding: 8px;
-  border-radius: 50%;
+  font-size: 1.8em;
+  padding: 1px 5px;
+  border-radius: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--resume-background-color);
 }
 
 .theme-toggle:hover {
-  color: var(--hover-color);
-  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 100%;
+  padding: 1px 5px;
+  background-color: var(--background-color);
+  color: var(--resume-background-color);
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
 /* Increase contrast for better readability */
 body, .content, section, .job, .project {
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
 @media (max-width: 768px) {
