@@ -14,7 +14,7 @@ function SandwichMenu({ onClick }) {
   )
 }
 
-function SidePanel({ isOpen, currentSection, headerHeight, onClose }) {
+function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporarilyVisible }) {
   const handleNavClick = (event, targetId) => {
     event.preventDefault();
     const targetElement = document.getElementById(targetId);
@@ -29,9 +29,9 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose }) {
   };
 
   return (
-    <div className={`side-panel ${isOpen ? 'open' : ''}`} style={{ paddingTop: `${headerHeight}px` }}>
+    <div className={`side-panel ${isOpen || isTemporarilyVisible ? 'open' : ''}`} style={{ paddingTop: `${headerHeight}px` }}>
       <div className="side-panel-content">
-        <h3>Navigate to</h3>
+        <h3>🔍</h3>
         <nav>
           <a 
             href="#technical-skills" 
@@ -94,8 +94,10 @@ function App() {
   const [currentSection, setCurrentSection] = useState('technical-skills')
   const [headerHeight, setHeaderHeight] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isTemporarilyVisible, setIsTemporarilyVisible] = useState(false)
   const headerRef = useRef(null)
   const sectionsRef = useRef({})
+  const timeoutRef = useRef(null)
 
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -149,17 +151,28 @@ function App() {
       let currentActiveSection = 'technical-skills';
 
       Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
-        if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) { // Added a 10px buffer
+        if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) {
           currentActiveSection = sectionId;
         }
       });
 
       setCurrentSection(currentActiveSection);
+
+      if (!isSidebarOpen) {
+        setIsTemporarilyVisible(true);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          setIsTemporarilyVisible(false);
+        }, 1000);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [headerHeight]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [headerHeight, isSidebarOpen]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
@@ -172,7 +185,7 @@ function App() {
   return (
     <div className="App">
       <div id="particles-js"></div>
-      <div className={`content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      <div className={`content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
         <header className="floating-header" ref={headerRef}>
           <div className="header-left">
             <SandwichMenu onClick={toggleSidebar} />
@@ -188,7 +201,13 @@ function App() {
             </button>
           </div>
         </header>
-        <SidePanel isOpen={isSidebarOpen} currentSection={currentSection} headerHeight={headerHeight} onClose={toggleSidebar} />
+        <SidePanel 
+          isOpen={isSidebarOpen} 
+          currentSection={currentSection} 
+          headerHeight={headerHeight} 
+          onClose={toggleSidebar}
+          isTemporarilyVisible={isTemporarilyVisible}
+        />
         <main>
           {error && <div>Error: {error}</div>}
           {!resumeData && <div>Loading resume data...</div>}
