@@ -1,35 +1,51 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from .resume_data import resume_data
 from fastapi.staticfiles import StaticFiles
 import os
 
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Allow the frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to Jordan Kail's Resume API"}
 
-
-##TODO: Add a route to get the resume data
-
-
-@app.get("/resume")
+@app.get("/api/resume_data")
 async def get_resume():
-    return resume_data
+    transformed_data = {
+        "name": resume_data["name"],
+        "title": resume_data["title"],
+        "github": resume_data["contact"]["github"],
+        "linkedin": resume_data["contact"]["linkedin"],
+        "technicalSkills": [f"{category}: {', '.join(skills)}" for category, skills in resume_data["skills"].items()],
+        "experience": [
+            {
+                "title": job["title"],
+                "company": job["company"],
+                "date": job["date"],
+                "responsibilities": job["highlights"]
+            }
+            for job in resume_data["experience"]
+        ],
+        "projects": resume_data["projects"]
+    }
+    return transformed_data
 
-@app.get("/resume/{section}")
-async def get_resume_section(section: str):
-    if section in resume_data:
-        return resume_data[section]
-    return {"error": "Section not found"}
-
-@app.get("/download_resume")
+@app.get("/api/download_resume")
 async def download_resume():
     file_path = os.path.join(os.path.dirname(__file__), "assets", "JordanKailResume.pdf")
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type='application/pdf', filename="JordanKailResume.pdf")
     return {"error": "Resume file not found"}
-
 
 app.mount("/images", StaticFiles(directory="/app/images"), name="images")

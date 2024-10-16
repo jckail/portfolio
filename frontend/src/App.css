@@ -1,50 +1,221 @@
-body {
+@import './theme.css';
+
+body, .App {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #000;
-  color: #fff;
+  color: var(--text-color);
+  background-color: transparent;
 }
 
-.App {
-  max-width: 1200px;
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 100px 20px 20px;
 }
 
-header {
+.floating-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  padding: 15px 20px;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 3;
 }
 
-h1 {
-  font-size: 2.5em;
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  background-color: transparent; /* Ensure this is transparent */
+}
+
+.floating-header .avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.name-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-header h1 {
+  font-size: 2em;
+  margin: 0;
+  color: var(--header-text-color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.floating-header h2 {
+  font-size: 1.2em;
+  margin: 0;
+  font-weight: normal;
+  color: var(--header-text-color);
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
 }
 
 nav a {
-  color: #fff;
+  color: var(--navbar-link-color);
   text-decoration: none;
-  margin-left: 20px;
+  margin-left: 15px;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: var(--hover-color);
+}
+
+nav .icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+nav .icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.resume-link {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+.resume-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 40px;
 }
 
 section {
-  background-color: #111;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border-radius: 8px;
+  backdrop-filter: blur(5px);
 }
 
 h2 {
-  color: #4a90e2;
-  border-bottom: 1px solid #4a90e2;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--text-color);
   padding-bottom: 10px;
 }
 
-/* Add more specific styles as needed */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.skill-icon, .job-icon, .project-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
+.job, .project {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.job > div, .project > div {
+  flex: 1;
+}
+
+.project a {
+  color: var(--link-color);
+  text-decoration: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.project a:hover {
+  color: var(--hover-color);
+  text-decoration: underline;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 1.5em;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle:hover {
+  color: var(--hover-color);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Increase contrast for better readability */
+body, .content, section, .job, .project {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+@media (max-width: 768px) {
+  .floating-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-right {
+    margin-top: 10px;
+  }
+
+  nav {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .theme-toggle {
+    margin-left: 15px;
+  }
+}
