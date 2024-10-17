@@ -14,13 +14,18 @@ export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
 
 export const getApiUrl = () => {
   const currentHost = window.location.hostname;
+  console.log('Current hostname:', currentHost);
 
-  if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
-    return `http://${currentHost}:8080`; // Use the current hostname for local development
+  let apiUrl;
+  if (currentHost === 'localhost' || currentHost === '0.0.0.0' ||currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
+    apiUrl = `http://${currentHost}:8080`; // Use the current hostname for local development
   } else {
     // For production, use the quickresume .env PRODUCTION_URL environment variable
-    return process.env.PRODUCTION_URL;
+    apiUrl = process.env.PRODUCTION_URL;
   }
+
+  console.log('API URL:', apiUrl);
+  return apiUrl;
 };
 
 export const downloadResume = () => {

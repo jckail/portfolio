@@ -26,9 +26,16 @@ function App() {
   const apiUrl = getApiUrl();
 
   useEffect(() => {
-    console.log('Fetching resume data from:', `${apiUrl}/api/resume_data`);
-    fetch(`${apiUrl}/api/resume_data`)
+    const fullApiUrl = `${apiUrl}/api/resume_data`;
+    console.log('Initiating API request to:', fullApiUrl);
+    console.log('API request headers:', {
+      'Content-Type': 'application/json',
+      // Add any other headers you're using
+    });
+
+    fetch(fullApiUrl)
       .then(response => {
+        console.log('API response received');
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         if (!response.ok) {
@@ -37,7 +44,7 @@ function App() {
         return response.json()
       })
       .then(data => {
-        console.log('Fetched resume data:', data);
+        console.log('API response data:', data);
         console.log('About Me data:', data.aboutMe);
         console.log('Technical Skills data:', data.technicalSkills);
         console.log('Experience data:', data.experience);
@@ -47,6 +54,7 @@ function App() {
       .catch(error => {
         console.error('Error fetching resume data:', error)
         console.error('Error details:', error.message)
+        console.error('Error stack:', error.stack)
         setError(error.message)
       })
   }, [apiUrl])
