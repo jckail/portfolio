@@ -17,11 +17,14 @@ export const getApiUrl = () => {
   console.log('Current hostname:', currentHost);
 
   let apiUrl;
-  if (currentHost === 'localhost' || currentHost === '0.0.0.0' ||currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
-    apiUrl = `http://${currentHost}:8080`; // Use the current hostname for local development
+  if (currentHost === 'localhost' || currentHost === '0.0.0.0' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
+    apiUrl = `http://${currentHost}:8080`; // Use HTTP and port 8080 for local development
+  } else if (currentHost.includes('run.app')) {
+    // For GCP Cloud Run, use HTTPS without a port number
+    apiUrl = `https://${currentHost}`;
   } else {
-    // For production, use the quickresume .env PRODUCTION_URL environment variable
-    apiUrl = process.env.PRODUCTION_URL;
+    // For other production environments, use HTTPS without a port number
+    apiUrl = `https://${currentHost}`;
   }
 
   console.log('API URL:', apiUrl);

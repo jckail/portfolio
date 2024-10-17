@@ -28,6 +28,7 @@ function App() {
   useEffect(() => {
     const fullApiUrl = `${apiUrl}/api/resume_data`;
     console.log('Initiating API request to:', fullApiUrl);
+    console.log('Current window.location:', window.location.toString());
     console.log('API request headers:', {
       'Content-Type': 'application/json',
       // Add any other headers you're using
@@ -37,25 +38,25 @@ function App() {
       .then(response => {
         console.log('API response received');
         console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
+        console.log('Response headers:', JSON.stringify(Array.from(response.headers.entries())));
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
         return response.json()
       })
       .then(data => {
-        console.log('API response data:', data);
-        console.log('About Me data:', data.aboutMe);
-        console.log('Technical Skills data:', data.technicalSkills);
-        console.log('Experience data:', data.experience);
-        console.log('Projects data:', data.projects);
+        console.log('API response data:', JSON.stringify(data, null, 2));
         setResumeData(data)
       })
       .catch(error => {
         console.error('Error fetching resume data:', error)
-        console.error('Error details:', error.message)
+        console.error('Error name:', error.name)
+        console.error('Error message:', error.message)
         console.error('Error stack:', error.stack)
-        setError(error.message)
+        if (error instanceof TypeError) {
+          console.error('This might be a CORS issue or a network error');
+        }
+        setError(`Failed to fetch resume data: ${error.message}`)
       })
   }, [apiUrl])
 
@@ -152,11 +153,9 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarOpen(prevState => !prevState)
     if (isSidebarOpen && !isSidebarOpenedByScroll) {
-      // If closing the sidebar and it wasn't opened by scroll, immediately set isTemporarilyVisible to false
       setIsTemporarilyVisible(false);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
-    // Reset the isSidebarOpenedByScroll state when manually toggling
     setIsSidebarOpenedByScroll(false);
   }
 
