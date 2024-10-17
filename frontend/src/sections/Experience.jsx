@@ -11,30 +11,34 @@ const Experience = forwardRef(({ experience }, ref) => {
 
   return (
     <section id="experience" ref={ref}>
-      <h2>Experience</h2>
-      {experience.map((job, index) => (
-        <div key={index} className="job">
-          <img src={`${apiUrl}/images/work-img.jpg`} alt="Work" className="job-icon" />
-          <div>
-            <h3>
-              <a 
-                href={job.link} 
-                onClick={(e) => handleLinkClick(e, job.link)}
-                rel="noopener noreferrer"
-              >
-                {job.company}
-              </a>
-            </h3>
-            <h4>{job.title}</h4>
-            <p>{job.date}</p>
-            <ul>
+      <div className="content-wrapper">
+        <h2>Experience</h2>
+        {experience.map((job, index) => (
+          <div key={index} className="job-item">
+            <div className="job-header">
+              <img src={`${apiUrl}/images/work-img.jpg`} alt="Work" className="job-icon" />
+              <div className="job-title">
+                <h3>
+                  <a 
+                    href={job.link} 
+                    onClick={(e) => handleLinkClick(e, job.link)}
+                    rel="noopener noreferrer"
+                  >
+                    {job.company}
+                  </a>
+                </h3>
+                <h4>{job.title}</h4>
+                <p className="job-date">{job.date}</p>
+              </div>
+            </div>
+            <ul className="job-responsibilities">
               {job.responsibilities.map((resp, i) => (
                 <li key={i}>{resp}</li>
               ))}
             </ul>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </section>
   )
 })

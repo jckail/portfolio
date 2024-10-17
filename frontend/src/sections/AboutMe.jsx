@@ -12,8 +12,10 @@ const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
   if (!aboutMeContent) {
     return (
       <section id="about-me" ref={ref}>
-        <h2>About Me</h2>
-        <p>Loading about me information...</p>
+        <div className="content-wrapper">
+          <h2>About Me</h2>
+          <p>Loading about me information...</p>
+        </div>
       </section>
     )
   }
@@ -22,10 +24,12 @@ const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
 
   return (
     <section id="about-me" ref={ref}>
-      <h2>About Me</h2>
-      {paragraphs.map((paragraph, index) => (
-        <p key={index}>{paragraph}</p>
-      ))}
+      <div className="content-wrapper">
+        <h2>About Me</h2>
+        {paragraphs.map((paragraph, index) => (
+          <p key={index}>{paragraph}</p>
+        ))}
+      </div>
     </section>
   )
 })

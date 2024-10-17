@@ -1,0 +1,66 @@
+:root {
+  --primary: #0403ff;
+  --black: black;
+  --white: white;
+
+  /* Light theme default */
+  --background-color: var(--white);
+  --text-color: var(--black);
+  --link-color: var(--black);
+  --hover-color: var(--primary);
+  --button-background: #57575700;
+  --button-text: var(--primary);
+  --button-hover-background: var(--primary);
+  --button-border: var(--black);
+  --header-background: #f1f1f1;
+  --header-text-color: var(--black);
+  --footer-background: #f1f1f1;
+  --footer-text-color: var(--black);
+  --navbar-background: transparent;
+  --navbar-link-color: var(--black);
+  --resume-link-color: var(--white);
+  --resume-background-color: black;
+  --navbar-hover-background: #e0e0e0;
+  --navbar-hover-color: var(--black);
+  --sidebar-text-color: var(--black);
+  --top-tbackground-color: rgba(255, 255, 255, 0.5);
+  --top-tbackground-blur: blur(5px); 
+  --tbackground-color: rgba(255, 255, 255, 0.1); 
+  --tbackground-blur: blur(3px); 
+  --text-shadow-color: rgba(0, 0, 0, 0.1);
+  
+  /* New variables for uniform styling */
+  --section-background: #f8f8f8;
+  --max-content-width: 1800px;
+  --side-panel-width: 150px;
+}
+
+body.dark-theme {
+  --background-color: var(--black);
+  --text-color: var(--white);
+  --link-color: var(--white);
+  --hover-color: var(--primary);
+  --button-background: transparent;
+  --button-text: var(--primary);
+  --button-hover-background: var(--primary);
+  --button-border: var(--black);
+  --header-background: #1a1a1a;
+  --header-text-color: var(--white);
+  --footer-background: #1a1a1a;
+  --footer-text-color: var(--white);
+  --navbar-background: transparent;
+  --navbar-link-color: transparent;
+  --resume-link-color: var(--black);
+  --resume-background-color: var(--white);
+  --navbar-hover-background: #575757;
+  --navbar-hover-color: var(--white);
+  --sidebar-text-color: var(--white);
+  --top-tbackground-color: rgba(0, 0, 0, .5);
+  --top-tbackground-blur: blur(5px); 
+  --tbackground-color: rgba(0, 0, 0, 0.1); 
+  --tbackground-blur: blur(3px); 
+  --text-shadow-color: rgba(255, 255, 255, 0.1);
+
+  /* Dark theme section background */
+  --section-background: #2a2a2a;
+}

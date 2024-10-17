@@ -1,0 +1,13 @@
+.content-wrapper {
+  max-width: calc(var(--max-content-width) - var(--side-panel-width));
+  margin: 0 auto;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+section {
+  background-color: var(--section-background);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+}

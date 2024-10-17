@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--hover-color);
+}
+
+button {
+  background-color: var(--button-background);
+  color: var(--button-text);
+  border: 1px solid var(--button-border);
+}
+
+button:hover {
+  background-color: var(--button-hover-background);
+  color: var(--button-text);
+}
+
+header {
+  background-color: var(--header-background);
+  color: var(--header-text-color);
+}
+
+footer {
+  background-color: var(--footer-background);
+  color: var(--footer-text-color);
+}
+
+nav {
+  background-color: var(--navbar-background);
+}
+
+nav a {
+  color: var(--navbar-link-color);
+}
+
+nav a:hover {
+  background-color: var(--navbar-hover-background);
+  color: var(--navbar-hover-color);
+}
