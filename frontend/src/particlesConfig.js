@@ -77,9 +77,9 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
       },
       modes: {
         grab: {
-          distance: 200,
+          distance: 400,
           line_linked: {
-            opacity: 1
+            opacity: 2
           }
         },
         bubble: {
