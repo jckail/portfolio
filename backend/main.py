@@ -48,4 +48,9 @@ async def download_resume():
         return FileResponse(file_path, media_type='application/pdf', filename="JordanKailResume.pdf")
     return {"error": "Resume file not found"}
 
-app.mount("/images", StaticFiles(directory="/app/images"), name="images")
+# Updated line to use the correct absolute path
+images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'images'))
+app.mount("/images", StaticFiles(directory=images_dir), name="images")
+
+# Print the path for debugging
+print(f"Images directory path: {images_dir}")
