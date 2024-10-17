@@ -16,15 +16,15 @@ export const getApiUrl = () => {
   const currentHost = window.location.hostname;
 
   if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
-    return `http://${currentHost}:8080/api`; // Use the current hostname for local development
+    return `http://${currentHost}:8080`; // Use the current hostname for local development
   } else {
     // For production, you might want to use an environment variable
-    return import.meta.env.VITE_API_URL || 'https://your-production-api-url.com/api';
+    return import.meta.env.VITE_API_URL || 'https://your-production-api-url.com';
   }
 };
 
-export const downloadResume = (apiUrl) => {
-  const downloadUrl = `${apiUrl}/download_resume`;
+export const downloadResume = () => {
+  const downloadUrl = '/JordanKailResume.pdf';
   const downloadLink = document.createElement('a');
   downloadLink.href = downloadUrl;
   downloadLink.download = 'JordanKailResume.pdf';

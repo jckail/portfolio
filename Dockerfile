@@ -1,46 +1,35 @@
-# Use an official Python runtime as the base image
-FROM python:3.11-slim
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the requirements file into the container
-COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y nodejs npm
-
-# Copy the backend code
-COPY backend/ ./backend/
-
-# Copy the frontend code
-COPY frontend/ ./frontend/
-
-# Install frontend dependencies and build
+# Stage 1: Build the React frontend
+FROM node:14 as frontend-build
 WORKDIR /app/frontend
+COPY frontend/package*.json ./
 RUN npm install
+COPY frontend/ ./
 RUN npm run build
 
-# Go back to the app root
+# Stage 2: Build the FastAPI backend
+FROM python:3.11-slim
 WORKDIR /app
 
-# Copy the images directory
-COPY images/ ./images/
+# Copy the frontend build
+COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
-# Copy entrypoint script
-COPY entrypoint.sh .
+# Copy favicon files (if they exist)
+COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/
+COPY --from=frontend-build /app/frontend/public/JordanKailResume.pdf /app/frontend/public/JordanKailResume.pdf
 
-# Make the entrypoint script executable
-RUN chmod +x entrypoint.sh
+# Install backend dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set default environment variable for API_URL
-ENV API_URL=http://localhost:8000
+# Copy the backend code and images
+COPY backend /app/backend
+COPY images /app/images
 
-# Expose the ports for both frontend and backend
-EXPOSE 8000 8080
+# Set environment variables
+ENV PYTHONPATH=/app
 
-# Set the command to run the application
-CMD ["./entrypoint.sh"]
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Command to run the application
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]

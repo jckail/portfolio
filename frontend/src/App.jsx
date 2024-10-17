@@ -155,7 +155,7 @@ function App() {
   const handleResumeClick = (event) => {
     event.preventDefault();
     scrollToSection('my-resume', headerHeight);
-    downloadResume(apiUrl);
+    downloadResume();
   }
 
   return (
