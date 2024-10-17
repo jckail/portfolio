@@ -71,12 +71,13 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
 }
 
 function HeaderNav({ resumeData, theme, onResumeClick }) {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   return (
     <nav className="header-nav">
       {resumeData?.github && (
         <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
           <img 
-            src={theme === 'light' ? "/images/light_mode_github.png" : "/images/dark_mode_github.png"} 
+            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_github.png" : "dark_mode_github.png"}`} 
             alt="GitHub" 
             className="icon" 
           />
@@ -85,7 +86,7 @@ function HeaderNav({ resumeData, theme, onResumeClick }) {
       {resumeData?.linkedin && (
         <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer">
           <img 
-            src={theme === 'light' ? "/images/light_mode_linkedin.png" : "/images/dark_mode_linkedin.png"} 
+            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_linkedin.png" : "dark_mode_linkedin.png"}`} 
             alt="LinkedIn" 
             className="icon" 
           />
@@ -108,9 +109,9 @@ function App() {
   const headerRef = useRef(null)
   const sectionsRef = useRef({})
   const timeoutRef = useRef(null)
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     fetch(`${apiUrl}/api/resume_data`)
       .then(response => {
         if (!response.ok) {
@@ -123,7 +124,7 @@ function App() {
         console.error('Error fetching resume data:', error)
         setError(error.message)
       })
-  }, [])
+  }, [apiUrl])
 
   useEffect(() => {
     if (headerRef.current) {
@@ -220,7 +221,6 @@ function App() {
     }
 
     // Initiate resume download
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     const downloadUrl = `${apiUrl}/api/download_resume`;
     
     // Create a temporary anchor element to trigger the download
@@ -269,7 +269,7 @@ function App() {
                   <ul>
                     {resumeData.technicalSkills.map((skill, index) => (
                       <li key={index}>
-                        <img src={`/images/key-skill-icon-${(index % 3) + 1}.svg`} alt="Skill Icon" className="skill-icon" />
+                        <img src={`${apiUrl}/images/key-skill-icon-${(index % 3) + 1}.svg`} alt="Skill Icon" className="skill-icon" />
                         {skill}
                       </li>
                     ))}
@@ -281,7 +281,7 @@ function App() {
                   <h2>Experience</h2>
                   {resumeData.experience.map((job, index) => (
                     <div key={index} className="job">
-                      <img src="/images/work-img.jpg" alt="Work" className="job-icon" />
+                      <img src={`${apiUrl}/images/work-img.jpg`} alt="Work" className="job-icon" />
                       <div>
                         <h3>{job.title} at {job.company}</h3>
                         <p>{job.date}</p>
@@ -300,7 +300,7 @@ function App() {
                   <h2>Projects</h2>
                   {resumeData.projects.map((project, index) => (
                     <div key={index} className="project">
-                      <img src="/images/project-img.jpg" alt="Project" className="project-icon" />
+                      <img src={`${apiUrl}/images/project-img.jpg`} alt="Project" className="project-icon" />
                       <div>
                         <h3>{project.title}</h3>
                         <p>{project.description}</p>
