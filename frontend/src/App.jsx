@@ -4,6 +4,7 @@ import './theme.css'
 import getParticlesConfig from './particlesConfig'
 import { particleConfig, stylesConfig } from './configs'
 import Layout from './components/Layout'
+import AboutMe from './sections/AboutMe'
 import TechnicalSkills from './sections/TechnicalSkills'
 import Experience from './sections/Experience'
 import Projects from './sections/Projects'
@@ -15,7 +16,7 @@ function App() {
   const [error, setError] = useState(null)
   const [particlesLoaded, setParticlesLoaded] = useState(false)
   const [theme, setTheme] = useState('dark')
-  const [currentSection, setCurrentSection] = useState('technical-skills')
+  const [currentSection, setCurrentSection] = useState('about-me')
   const [headerHeight, setHeaderHeight] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isTemporarilyVisible, setIsTemporarilyVisible] = useState(false)
@@ -31,7 +32,14 @@ function App() {
         }
         return response.json()
       })
-      .then(data => setResumeData(data))
+      .then(data => {
+        console.log('Fetched resume data:', data);
+        console.log('About Me data:', data.about_me);
+        console.log('Technical Skills data:', data.technicalSkills);
+        console.log('Technical Skills type:', typeof data.technicalSkills);
+        console.log('Is Technical Skills an array?', Array.isArray(data.technicalSkills));
+        setResumeData(data)
+      })
       .catch(error => {
         console.error('Error fetching resume data:', error)
         setError(error.message)
@@ -64,7 +72,7 @@ function App() {
 
   const handleScroll = useCallback(() => {
     const scrollPosition = window.scrollY;
-    let newCurrentSection = 'technical-skills';
+    let newCurrentSection = 'about-me';
 
     Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
       if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) {
@@ -154,6 +162,7 @@ function App() {
       {!resumeData && <div>Loading resume data...</div>}
       {resumeData && (
         <>
+          <AboutMe aboutMe={resumeData.aboutMe} ref={el => sectionsRef.current['about-me'] = el} />
           <TechnicalSkills skills={resumeData.technicalSkills} ref={el => sectionsRef.current['technical-skills'] = el} />
           <Experience experience={resumeData.experience} ref={el => sectionsRef.current['experience'] = el} />
           <Projects projects={resumeData.projects} ref={el => sectionsRef.current['projects'] = el} />

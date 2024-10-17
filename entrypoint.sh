@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Start the backend
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
+# Start the backend with hot reloading
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload &
 
 # Start the frontend
 cd frontend && npm run dev -- --host 0.0.0.0 &

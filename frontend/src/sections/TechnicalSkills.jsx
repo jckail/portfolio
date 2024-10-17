@@ -1,20 +1,24 @@
 import React, { forwardRef } from 'react'
-import { getApiUrl } from '../helpers/utils'
 
 const TechnicalSkills = forwardRef(({ skills }, ref) => {
-  const apiUrl = getApiUrl();
+  if (!skills || Object.keys(skills).length === 0) {
+    return (
+      <section id="technical-skills" ref={ref}>
+        <h2>Technical Skills</h2>
+        <p>No technical skills available.</p>
+      </section>
+    )
+  }
 
   return (
     <section id="technical-skills" ref={ref}>
       <h2>Technical Skills</h2>
-      <ul>
-        {skills.map((skill, index) => (
-          <li key={index}>
-            <img src={`${apiUrl}/images/key-skill-icon-${(index % 3) + 1}.svg`} alt="Skill Icon" className="skill-icon" />
-            {skill}
-          </li>
-        ))}
-      </ul>
+      {Object.entries(skills).map(([category, skillList]) => (
+        <div key={category} className="skill-category">
+          <h3>{category}</h3>
+          <p>{skillList.join(', ')}</p>
+        </div>
+      ))}
     </section>
   )
 })

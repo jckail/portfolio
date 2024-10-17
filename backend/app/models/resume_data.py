@@ -9,9 +9,7 @@ resume_data = {
         "github": "https://github.com/jckail",
         "linkedin": "https://www.linkedin.com/in/jckail/",
     },
-    "About Me": """I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. When I'm not building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side.
-
-    I’ve always been passionate about computers and technology, from geeking out over the newest GPUs to tinkering with home labs and DIY tech experiments. This constant drive to learn, innovate, and problem-solve is what excites me about being a Data Engineer. Every day is a new puzzle, and I get to build and optimize systems that have real-world impact. Whether it’s cutting-edge AI projects or cloud infrastructure, I’m always eager to push boundaries and dive into new challenges.""",
+    "about_me": str("""I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. \n\nWhen I'm not building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side. I’ve always been passionate about computers and technology, from geeking out over the newest GPUs to tinkering with home labs and DIY tech experiments. This constant drive to learn, innovate, and problem-solve is what excites me about being a Data Engineer. Every day is a new puzzle, and I get to build and optimize systems that have real-world impact. Whether it’s cutting-edge AI projects or cloud infrastructure, I’m always eager to push boundaries and dive into new challenges."""),
     "experience": [
         {
             "company": "Prove Identity",

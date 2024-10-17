@@ -12,7 +12,7 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
     // Add a small delay before closing the sidebar
     setTimeout(() => {
       onClose();
-    }, 500);
+    }, 50);
   };
 
   return (
@@ -20,6 +20,13 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
       <div className="side-panel-content">
         <h3>🔍</h3>
         <nav>
+          <a 
+            href="#about-me" 
+            onClick={(e) => handleNavClick(e, 'about-me')}
+            className={currentSection === 'about-me' ? 'active' : ''}
+          >
+            About Me
+          </a>
           <a 
             href="#technical-skills" 
             onClick={(e) => handleNavClick(e, 'technical-skills')}

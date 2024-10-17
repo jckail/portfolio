@@ -29,7 +29,7 @@
   --top-tbackground-blur: blur(5px); 
   --tbackground-color: rgba(255, 255, 255, 0.1); 
   --tbackground-blur: blur(3px); 
-  --text-shadow-color: rgba(0, 0, 0, 0.5);
+  --text-shadow-color: rgba(0, 0, 0, 0.1);
   
 }
 
@@ -57,7 +57,7 @@ body.dark-theme {
   --top-tbackground-blur: blur(5px); 
   --tbackground-color: rgba(0, 0, 0, 0.1); 
   --tbackground-blur: blur(3px); 
-  --text-shadow-color: rgba(255, 255, 255, 0.5);
+  --text-shadow-color: rgba(255, 255, 255, 0.1);
 }
 
 body {
