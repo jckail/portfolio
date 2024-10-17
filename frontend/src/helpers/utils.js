@@ -18,8 +18,8 @@ export const getApiUrl = () => {
   if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
     return `http://${currentHost}:8080`; // Use the current hostname for local development
   } else {
-    // For production, you might want to use an environment variable
-    return import.meta.env.VITE_API_URL || 'https://your-production-api-url.com';
+    // For production, use the quickresume .env PRODUCTION_URL environment variable
+    return process.env.PRODUCTION_URL;
   }
 };
 

@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get allowed origins from environment variable or use default
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.0.122:5173").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://0.0.0.0:8080,http://localhost:8080,http://localhost:5173,http://0.0.0.0:5173,http://192.168.0.122:5173").split(",")
 allowed_origins = [origin.strip() for origin in allowed_origins]
 logger.info(f"Allowed origins: {allowed_origins}")
 
