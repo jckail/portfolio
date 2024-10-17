@@ -1,7 +1,14 @@
+/* Center the main content area */
+body {
+  display: flex;
+  justify-content: center;
+}
+
 .content-wrapper {
-  max-width: calc(var(--max-content-width) - var(--side-panel-width));
+  max-width: var(--max-content-width);
+  width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
   box-sizing: border-box;
 }
 
@@ -10,4 +17,164 @@ section {
   padding: 2rem;
   margin-bottom: 2rem;
   border-radius: 8px;
+  text-align: center;
+  max-width: calc(100% - 1rem);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+section h2 {
+  margin-bottom: 1rem;
+}
+
+/* Center content for general sections */
+section > .content-wrapper > * {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Specific styling for job items in the Experience section */
+.job-item {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.job-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.job-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+}
+
+.job-title {
+  flex-grow: 1;
+}
+
+.job-responsibilities {
+  padding-left: 1.5rem;
+}
+
+/* Styling for Technical Skills section */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.skill-category {
+  text-align: center;
+}
+
+.skill-category h3 {
+  margin-bottom: 0.5rem;
+}
+
+.skill-list {
+  list-style-type: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.skill-list li {
+  margin: 0.25rem 0.5rem;
+}
+
+/* Styling for Projects section */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.project-item {
+  background-color: var(--project-item-background);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.project-item:hover {
+  transform: translateY(-5px);
+}
+
+.project-icon {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.project-content {
+  padding: 1rem;
+  text-align: center;
+}
+
+.project-content h3 {
+  margin-bottom: 0.5rem;
+}
+
+.project-content p {
+  margin-bottom: 1rem;
+}
+
+.project-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: var(--text-color-light);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.project-link:hover {
+  background-color: var(--primary-color-dark);
+}
+
+/* Styling for MyResume section */
+#my-resume .content-wrapper {
+  text-align: center;
+}
+
+#my-resume p {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.resume-pdf-container {
+  width: 100%;
+  height: 800px;
+  max-width: 1000px;
+  margin: 2rem auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Ensure other sections remain centered */
+#about-me .content-wrapper,
+#experience .content-wrapper {
+  text-align: center;
+}
+
+#about-me p,
+#experience p {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
