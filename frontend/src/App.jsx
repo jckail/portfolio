@@ -20,6 +20,7 @@ function App() {
   const [headerHeight, setHeaderHeight] = useState(0)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isTemporarilyVisible, setIsTemporarilyVisible] = useState(false)
+  const [isSidebarOpenedByScroll, setIsSidebarOpenedByScroll] = useState(false)
   const sectionsRef = useRef({})
   const timeoutRef = useRef(null)
   const apiUrl = getApiUrl();
@@ -87,9 +88,11 @@ function App() {
 
     if (!isSidebarOpen) {
       setIsTemporarilyVisible(true);
+      setIsSidebarOpenedByScroll(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         setIsTemporarilyVisible(false);
+        setIsSidebarOpenedByScroll(false);
       }, 1000);
     }
   }, [headerHeight, isSidebarOpen, currentSection]);
@@ -135,7 +138,14 @@ function App() {
   }
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
+    setIsSidebarOpen(prevState => !prevState)
+    if (isSidebarOpen && !isSidebarOpenedByScroll) {
+      // If closing the sidebar and it wasn't opened by scroll, immediately set isTemporarilyVisible to false
+      setIsTemporarilyVisible(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+    // Reset the isSidebarOpenedByScroll state when manually toggling
+    setIsSidebarOpenedByScroll(false);
   }
 
   const handleResumeClick = (event) => {
