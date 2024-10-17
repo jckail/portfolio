@@ -3,7 +3,7 @@ import './App.css'
 import './theme.css'
 import getParticlesConfig from './particlesConfig'
 import { particleConfig, stylesConfig } from './configs'
-import ResumePDF from './ResumePDF'
+import ResumePDF from './aResumePDF'
 
 function SandwichMenu({ onClick }) {
   return (
