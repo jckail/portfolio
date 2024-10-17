@@ -27,7 +27,7 @@ async def get_resume():
         "title": resume_data["title"],
         "github": resume_data["contact"]["github"],
         "linkedin": resume_data["contact"]["linkedin"],
-        "technicalSkills": [f"{category}: {', '.join(skills)}" for category, skills in resume_data["skills"].items()],
+        "technicalSkills": resume_data["skills"],  # Return the skills as a structured object
         "experience": [
             {
                 "title": job["title"],
@@ -46,6 +46,13 @@ async def download_resume():
     file_path = os.path.join(os.path.dirname(__file__), "assets", "JordanKailResume.pdf")
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type='application/pdf', filename="JordanKailResume.pdf")
+    return {"error": "Resume file not found"}
+
+@app.get("/api/resume")
+async def serve_resume():
+    file_path = os.path.join(os.path.dirname(__file__), "assets", "JordanKailResume.pdf")
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type='application/pdf')
     return {"error": "Resume file not found"}
 
 # Updated line to use the correct absolute path

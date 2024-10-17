@@ -4,7 +4,7 @@ function ResumePDF() {
   return (
     <div className="resume-pdf-container">
       <iframe
-        src="/JordanKailResume.pdf"
+        src="/resume.pdf"
         width="100%"
         height="100%"
         style={{border: 'none'}}
