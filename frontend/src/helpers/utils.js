@@ -13,11 +13,18 @@ export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
 };
 
 export const getApiUrl = () => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const currentHost = window.location.hostname;
+
+  if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
+    return `http://${currentHost}:8080/api`; // Use the current hostname for local development
+  } else {
+    // For production, you might want to use an environment variable
+    return import.meta.env.VITE_API_URL || 'https://your-production-api-url.com/api';
+  }
 };
 
 export const downloadResume = (apiUrl) => {
-  const downloadUrl = `${apiUrl}/api/download_resume`;
+  const downloadUrl = `${apiUrl}/download_resume`;
   const downloadLink = document.createElement('a');
   downloadLink.href = downloadUrl;
   downloadLink.download = 'JordanKailResume.pdf';

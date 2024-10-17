@@ -5,7 +5,7 @@ import os
 
 router = APIRouter()
 
-@router.get("/resume_data")
+@router.get("/api/resume_data")
 async def get_resume():
     transformed_data = {
         "name": resume_data["name"],
@@ -28,14 +28,14 @@ async def get_resume():
     }
     return transformed_data
 
-@router.get("/download_resume")
+@router.get("/api/download_resume")
 async def download_resume():
     file_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "JordanKailResume.pdf")
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type='application/pdf', filename="JordanKailResume.pdf")
     raise HTTPException(status_code=404, detail="Resume file not found")
 
-@router.get("/resume")
+@router.get("/api/resume")
 async def serve_resume():
     file_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "JordanKailResume.pdf")
     if os.path.exists(file_path):

@@ -1,5 +1,5 @@
-# Stage 1: Python backend
-FROM python:3.11-slim AS backend
+# Use an official Python runtime as the base image
+FROM python:3.11-slim
 
 # Set the working directory in the container
 WORKDIR /app
@@ -10,38 +10,22 @@ COPY requirements.txt .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend application code
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y nodejs npm
+
+# Copy the backend code
 COPY backend/ ./backend/
 
-# Stage 2: Node.js frontend
-FROM node:16 AS frontend
+# Copy the frontend code
+COPY frontend/ ./frontend/
 
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy package.json and package-lock.json (if available)
-COPY frontend/package*.json ./
-
-# Install frontend dependencies
+# Install frontend dependencies and build
+WORKDIR /app/frontend
 RUN npm install
-
-# Copy the frontend application code
-COPY frontend/ ./
-
-# Build the React app
 RUN npm run build
 
-# Stage 3: Final image
-FROM python:3.11-slim
-
-# Set the working directory in the container
+# Go back to the app root
 WORKDIR /app
-
-# Copy backend from the backend stage
-COPY --from=backend /app /app
-
-# Copy frontend build from the frontend stage
-COPY --from=frontend /app/dist /app/frontend/dist
 
 # Copy the images directory
 COPY images/ ./images/
@@ -56,7 +40,7 @@ RUN chmod +x entrypoint.sh
 ENV API_URL=http://localhost:8000
 
 # Expose the ports for both frontend and backend
-EXPOSE 8000 5173
+EXPOSE 8000 8080
 
 # Set the command to run the application
 CMD ["./entrypoint.sh"]

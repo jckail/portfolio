@@ -26,8 +26,11 @@ function App() {
   const apiUrl = getApiUrl();
 
   useEffect(() => {
+    console.log('Fetching resume data from:', `${apiUrl}/api/resume_data`);
     fetch(`${apiUrl}/api/resume_data`)
       .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -35,14 +38,15 @@ function App() {
       })
       .then(data => {
         console.log('Fetched resume data:', data);
-        console.log('About Me data:', data.about_me);
+        console.log('About Me data:', data.aboutMe);
         console.log('Technical Skills data:', data.technicalSkills);
-        console.log('Technical Skills type:', typeof data.technicalSkills);
-        console.log('Is Technical Skills an array?', Array.isArray(data.technicalSkills));
+        console.log('Experience data:', data.experience);
+        console.log('Projects data:', data.projects);
         setResumeData(data)
       })
       .catch(error => {
         console.error('Error fetching resume data:', error)
+        console.error('Error details:', error.message)
         setError(error.message)
       })
   }, [apiUrl])
