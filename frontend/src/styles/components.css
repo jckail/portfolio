@@ -48,9 +48,10 @@
 }
 
 .skill-category {
-  background-color: rgba(255, 255, 255, 0.05);
   padding: 1rem;
   border-radius: 8px;
+  background-color: var(--skill-category-background);
+  backdrop-filter: var(--skill-category-background-blur);
 }
 
 .skill-category h3 {
@@ -73,6 +74,8 @@
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   overflow: hidden;
+  background-color: var(--skill-category-background);
+  backdrop-filter: var(--skill-category-background-blur);
 }
 
 .project-icon {

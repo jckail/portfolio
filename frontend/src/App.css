@@ -108,10 +108,10 @@ body, .App {
 
 .side-panel {
   position: fixed;
-  top: 1110;
+  top: 1100;
   left: -150px;
   width: 150px;
-  height: 500px;
+  height: 400px;
   color: var(--sidebar-text-color);
   background-color: var(--tbackground-color);
   backdrop-filter: var(--tbackground-blur);
@@ -119,7 +119,7 @@ body, .App {
   box-sizing: border-box;
   overflow-y: auto;
   transition: left 0.1s ease-in-out;
-  border-radius: 10px;
+  border-radius: 25px;
 }
 
 .side-panel.open {

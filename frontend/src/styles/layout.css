@@ -14,9 +14,10 @@ body {
 
 section {
   background-color: var(--section-background);
+  backdrop-filter: var(--section-background-blur);
   padding: 2rem;
   margin-bottom: 2rem;
-  border-radius: 8px;
+  border-radius: 14px;
   text-align: center;
   max-width: calc(100% - 1rem);
   margin-left: auto;
@@ -68,14 +69,17 @@ section > .content-wrapper > * {
   justify-content: center;
   max-width: 1200px;
   margin: 0 auto;
+  
 }
 
 .skill-category {
   text-align: center;
+  
 }
 
 .skill-category h3 {
   margin-bottom: 0.5rem;
+  
 }
 
 .skill-list {

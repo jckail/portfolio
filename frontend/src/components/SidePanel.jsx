@@ -16,7 +16,7 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
   };
 
   return (
-    <div className={`side-panel ${isOpen || isTemporarilyVisible ? 'open' : ''}`} style={{ paddingTop: `${headerHeight}px` }}>
+    <div className={`side-panel ${isOpen || isTemporarilyVisible ? 'open' : ''}`} >
       <div className="side-panel-content">
         <h3>🔍</h3>
         <nav>
