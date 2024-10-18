@@ -29,8 +29,9 @@ kill_process_by_name() {
 # Kill process on port 5173 (frontend)
 kill_process_by_port 5173
 
-# Kill process on port 8000 (backend)
-kill_process_by_port 8000
+# Kill process on port 8080 (backend)
+kill_process_by_port 8080
+
 
 # Fallback: Kill Vite processes
 kill_process_by_name "vite"

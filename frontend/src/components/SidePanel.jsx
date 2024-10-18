@@ -12,7 +12,7 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
     // Add a small delay before closing the sidebar
     setTimeout(() => {
       onClose();
-    }, 50);
+    }, 10);
   };
 
   return (

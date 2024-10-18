@@ -3,7 +3,7 @@
     "dockerFile": "Dockerfile",
     "context": "..",
     "runArgs": ["--env-file", "../.env"],
-    "forwardPorts": [8000, 5173],
+    "forwardPorts": [8080, 5173],
     "postCreateCommand": "pip install --user -r requirements.txt && cd frontend && npm install",
     "customizations": {
         "vscode": {

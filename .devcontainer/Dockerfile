@@ -29,10 +29,10 @@ COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
 # Set default environment variable for API_URL
-ENV API_URL=http://localhost:8000
+ENV API_URL=http://localhost:8080
 
 # Expose the ports for both frontend and backend
-EXPOSE 8000 5173
+EXPOSE 8080 5173
 
 # Install frontend dependencies
 WORKDIR /app/frontend

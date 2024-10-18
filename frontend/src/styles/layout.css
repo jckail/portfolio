@@ -152,22 +152,31 @@ section > .content-wrapper > * {
 /* Styling for MyResume section */
 #my-resume .content-wrapper {
   text-align: center;
+  min-height: 1300px;
+  
 }
 
 #my-resume p {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  
 }
 
 .resume-pdf-container {
   width: 100%;
-  height: 800px;
+  min-height: 1200px;
   max-width: 1000px;
   margin: 2rem auto;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: none;
+  border-radius: 1px;
   overflow: hidden;
+  background: transparent;
+}
+
+.resume-pdf-container iframe {
+  background: transparent;
+  min-height: 1200px;
 }
 
 /* Ensure other sections remain centered */

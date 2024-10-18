@@ -62,7 +62,7 @@ quickResume/
 
 4. Create a `.env` file in the root directory and add the following:
    ```
-   VITE_API_URL=http://localhost:8000
+   VITE_API_URL=http://localhost:8080
    ```
 
 ## Running the Application

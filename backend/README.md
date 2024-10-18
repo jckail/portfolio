@@ -44,4 +44,4 @@ To run the backend:
 2. Navigate to the backend directory: `cd resume_app/backend`
 3. Run the FastAPI server: `uvicorn main:app --reload`
 
-The API will be available at `http://localhost:8000`, and you can access the interactive API documentation at `http://localhost:8000/docs`.
+The API will be available at `http://localhost:8080`, and you can access the interactive API documentation at `http://localhost:8080/docs`.
