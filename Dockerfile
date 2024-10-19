@@ -20,9 +20,11 @@ COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend code and images
+# Copy the backend code
 COPY backend /app/backend
-COPY images /app/images
+
+# Create a volume mount point for images
+VOLUME /app/images
 
 # Set environment variables
 ENV PYTHONPATH=/app

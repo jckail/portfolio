@@ -5,6 +5,10 @@ from fastapi.responses import FileResponse
 from backend.app.api.routes import router as api_router
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 
@@ -36,8 +40,6 @@ app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
 # Serve frontend static files
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
-
-
 
 # Serve index.html for all routes not matched by API or static files
 @app.get("/{full_path:path}")

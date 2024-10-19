@@ -3,3 +3,4 @@ uvicorn==0.31.0
 pydantic==2.9.2
 starlette==0.38.6
 typing_extensions==4.12.2
+python-dotenv==1.0.0

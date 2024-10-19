@@ -33,7 +33,7 @@ async def get_resume():
 
 @router.get("/resume")
 async def serve_resume():
-    file_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "JordanKailResume.pdf")
+    file_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", os.getenv("RESUME_FILE", "JordanKailResume.pdf"))
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type='application/pdf')
     raise HTTPException(status_code=404, detail="Resume file not found")
