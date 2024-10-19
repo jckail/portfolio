@@ -37,22 +37,7 @@ app.mount("/images", StaticFiles(directory=images_dir), name="images")
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
 app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
-# Serve PDF file
-@app.get("/JordanKailResume.pdf")
-async def serve_pdf():
-    try:
-        pdf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "assets", "JordanKailResume.pdf"))
-        logger.info(f"Attempting to serve PDF from path: {pdf_path}")
-        
-        if os.path.exists(pdf_path):
-            logger.info("PDF file found. Attempting to serve...")
-            return FileResponse(pdf_path, media_type='application/pdf', filename="JordanKailResume.pdf")
-        else:
-            logger.error(f"PDF file not found at path: {pdf_path}")
-            raise HTTPException(status_code=404, detail="PDF file not found")
-    except Exception as e:
-        logger.error(f"Error serving PDF: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 # Serve index.html for all routes not matched by API or static files
 @app.get("/{full_path:path}")

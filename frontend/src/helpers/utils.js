@@ -1,3 +1,5 @@
+import { resumeData } from '../configs';
+
 export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   const targetElement = document.getElementById(sectionId);
   if (targetElement) {
@@ -32,10 +34,10 @@ export const getApiUrl = () => {
 };
 
 export const downloadResume = () => {
-  const downloadUrl = '/JordanKailResume.pdf';
+  const downloadUrl = '/api/resume';
   const downloadLink = document.createElement('a');
   downloadLink.href = downloadUrl;
-  downloadLink.download = 'JordanKailResume.pdf';
+  downloadLink.download = `${resumeData.name}Resume.pdf`;
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);

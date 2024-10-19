@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../helpers/utils';
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
@@ -10,7 +11,8 @@ function ResumePDF() {
     const fetchPdf = async () => {
       try {
         console.log('Fetching PDF...');
-        const response = await fetch('http://localhost:8080/api/resume', {
+        const apiUrl = getApiUrl();
+        const response = await fetch(`${apiUrl}/api/resume`, {
           method: 'GET',
           mode: 'cors',
           credentials: 'include',
