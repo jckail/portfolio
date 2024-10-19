@@ -5,7 +5,6 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
-
 }
 
 .App {
@@ -17,14 +16,6 @@ html, body {
   min-height: 100vh;
   box-sizing: border-box;
 }
-
-/* body, .App {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  color: var(--text-color);
-  background-color: transparent;
-} */
 
 #particles-js {
   position: fixed;
@@ -126,10 +117,10 @@ html, body {
 
 .side-panel {
   position: fixed;
-  top: 1100;
+  top: 60px; /* Adjusted to add space below the header */
   left: -150px;
   width: 150px;
-  height: 400px;
+  height: calc(100vh - 60px); /* Adjusted to fill the remaining height */
   color: var(--sidebar-text-color);
   background-color: var(--tbackground-color);
   backdrop-filter: var(--tbackground-blur);
@@ -137,7 +128,8 @@ html, body {
   box-sizing: border-box;
   overflow-y: auto;
   transition: left 0.1s ease-in-out;
-  border-radius: 25px;
+  border-radius: 0 25px 25px 0; /* Adjusted to round only right corners */
+  padding-top: 30px; /* Added padding to the top */
 }
 
 .side-panel.open {
@@ -221,7 +213,6 @@ html, body {
 
 .resume-link {
   background-color: var(--resume-background-color);
-  
   height: 30px;
   padding: 1px 5px;
   border-radius: 24px;
@@ -325,9 +316,6 @@ body, .content, section, .job, .project {
   text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
- 
-
-
 @media (max-width: 768px) {
   /* Adjust margins and padding */
   .content {
@@ -346,7 +334,7 @@ body, .content, section, .job, .project {
     margin-top: 120px;
     left: -150px;
     width: 150px;
-    height: 400px;
+    height: calc(100vh - 120px); /* Adjusted to fill the remaining height */
     color: var(--sidebar-text-color);
     background-color: var(--tbackground-color);
     backdrop-filter: var(--tbackground-blur);
@@ -354,7 +342,8 @@ body, .content, section, .job, .project {
     box-sizing: border-box;
     overflow-y: auto;
     transition: left 0.1s ease-in-out;
-    border-radius: 25px;
+    border-radius: 0 25px 25px 0; /* Adjusted to round only right corners */
+    padding-top: 20px; /* Added padding to the top */
   }
   
   .side-panel.open {
@@ -506,8 +495,6 @@ section {
   box-sizing: border-box; /* Include padding in width calculation */
 }
 
-
-
   /* Hamburger menu adjustments */
   .sandwich-menu div {
     width: 25px;
@@ -517,7 +504,6 @@ section {
   }
 
 }
-
 
 @media (max-width: 400px) {
   /* Header adjustments for narrow screens */

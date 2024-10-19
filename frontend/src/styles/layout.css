@@ -15,13 +15,18 @@ body {
 section {
   background-color: var(--section-background);
   backdrop-filter: var(--section-background-blur);
-  padding: 2rem;
+  padding: 1rem;
   margin-bottom: 2rem;
-  border-radius: 25px;
+  border-radius: 20px;
   text-align: center;
-  max-width: calc(100% - 1rem);
+  max-width: calc(100% - .8rem);
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Add padding to the top of the first section */
+section:first-of-type {
+  padding-top: 4rem;
 }
 
 section h2 {
@@ -193,5 +198,3 @@ section > .content-wrapper > * {
   margin-left: auto;
   margin-right: auto;
 }
-
-
