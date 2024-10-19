@@ -56,6 +56,7 @@ html, body {
   display: flex;
   align-items: center;
   background-color: transparent;
+  gap: 10px; /* Add equal spacing between elements */
 }
 
 .name-title {
@@ -65,7 +66,7 @@ html, body {
 }
 
 .floating-header h1 {
-  font-size: 2em;
+  font-size: 1.5em; /* Reduced font size */
   margin: 0;
   color: var(--header-text-color);
   text-shadow: 2px 2px 4px var(--text-shadow-color);
@@ -175,17 +176,14 @@ html, body {
 .header-nav {
   display: flex;
   align-items: center;
-  margin-right: 15px;
 }
 
 .header-nav a {
   color: var(--navbar-link-color);
   text-decoration: none;
-  margin-left: 15px;
   padding: 8px 12px;
   transition: color 0.3s ease;
   color: var(--resume-link-color);
-  
 }
 
 .header-nav a:hover {
@@ -195,15 +193,13 @@ html, body {
 }
 
 .header-nav .icon {
-  width: 45px;
-  height: 45px;
+  width: 35px; /* Reduced size */
+  height: 35px;
   object-fit: contain;
   border-radius: 90%;
   font-size: 1.8em;
-  
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
-  margin-top: 10px
 }
 
 .header-nav .icon:hover {
@@ -228,7 +224,6 @@ html, body {
   background-color: var(--background-color);
   padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
-  
 }
 
 main {
@@ -302,9 +297,8 @@ li {
   border-radius: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-color: var(--resume-background-color);
-  width: 45px;
-  height: 45px;
-  margin-left: 10px;
+  width: 35px; /* Reduced size */
+  height: 35px;
 }
 
 .theme-toggle:hover {
@@ -412,7 +406,7 @@ body, .content, section, .job, .project {
   .header-right {
     display: flex;
     align-items: center;
-    gap: 3px; /* Reduced space between elements */
+    gap: 5px; /* Reduced space between elements */
     margin: 0;
     padding: 0;
   }
@@ -447,7 +441,6 @@ body, .content, section, .job, .project {
     margin: 1px; /* Reduced margin for tighter spacing */
     background-color: var(--resume-link-color);
     transition: background-color 0.3s ease;
-    margin-top: 10px
   }
 
   .header-nav .icon:hover {
@@ -463,7 +456,7 @@ body, .content, section, .job, .project {
     white-space: nowrap; /* Prevents text from wrapping */
     display: inline-block; /* Ensures it behaves like a button */
     text-align: center; /* Centers the text */
-}
+  }
 
   .resume-link:hover {
     box-shadow: 0 0 15px 5px var(--button-hover-background);
@@ -478,26 +471,26 @@ body, .content, section, .job, .project {
     font-size: 1.1em;
   }
 
-/* Center the main content */
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Horizontally center the content */
-  gap: 30px;
-  margin-top: 80px; /* Remove top margin to ensure full centering */
-  width: 100%; /* Ensure it spans the full width of the page */
-  max-width: 768px; /* Optional: Set a max-width for readability */
-  height: auto; /* Allow content to dictate height */
-  padding: 20px;
-}
+  /* Center the main content */
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Horizontally center the content */
+    gap: 30px;
+    margin-top: 80px; /* Remove top margin to ensure full centering */
+    width: 100%; /* Ensure it spans the full width of the page */
+    max-width: 768px; /* Optional: Set a max-width for readability */
+    height: auto; /* Allow content to dictate height */
+    padding: 20px;
+  }
 
-/* Center and control section width */
-section {
-  width: 100%; /* Maintain 95% width */
-  max-width: 768px; /* Optional: Set a max-width for better readability */
-  padding: 10px;
-  box-sizing: border-box; /* Include padding in width calculation */
-}
+  /* Center and control section width */
+  section {
+    width: 100%; /* Maintain 95% width */
+    max-width: 768px; /* Optional: Set a max-width for better readability */
+    padding: 10px;
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
 
   /* Hamburger menu adjustments */
   .sandwich-menu div {
@@ -506,7 +499,6 @@ section {
     background-color: var(--text-color);
     margin: 3px 0; /* Reduced spacing between lines */
   }
-
 }
 
 @media (max-width: 400px) {
