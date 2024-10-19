@@ -323,13 +323,59 @@ body, .content, section, .job, .project {
 
   /* Sidebar behavior for mobile */
   .side-panel {
-    width: 100%;
-    left: -100%;
-    transition: left 0.3s ease;
+    position: fixed;
+    top: 1100;
+    left: -150px;
+    width: 150px;
+    height: 400px;
+    color: var(--sidebar-text-color);
+    background-color: var(--tbackground-color);
+    backdrop-filter: var(--tbackground-blur);
+    z-index: 1000;
+    box-sizing: border-box;
+    overflow-y: auto;
+    transition: left 0.1s ease-in-out;
+    border-radius: 25px;
   }
-
+  
   .side-panel.open {
     left: 0;
+  }
+  
+  .side-panel-content {
+    padding: 20px;
+  }
+  
+  .side-panel h3 {
+    color: var(--sidebar-text-color);
+    margin-bottom: 20px;
+    font-size: 1.4em;
+  }
+  
+  .side-panel nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: transparent;
+  }
+  
+  .side-panel nav a {
+    color: var(--sidebar-text-color);
+    text-decoration: none;
+    margin: 10px 0;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+    background-color: transparent;
+  }
+  
+  .side-panel nav a:hover,
+  .side-panel nav a.active {
+    color: var(--resume-link-color);
+    text-decoration: underline;
+    background-color: var(--resume-background-color);
+    box-shadow: 0 0 20px 10px var(--button-hover-background);
+    border-radius: 12px;
+    padding: 4px 8px;
   }
 
   /* Header adjustments for mobile view */
