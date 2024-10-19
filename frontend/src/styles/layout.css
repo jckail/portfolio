@@ -17,7 +17,7 @@ section {
   backdrop-filter: var(--section-background-blur);
   padding: 2rem;
   margin-bottom: 2rem;
-  border-radius: 14px;
+  border-radius: 25px;
   text-align: center;
   max-width: calc(100% - 1rem);
   margin-left: auto;

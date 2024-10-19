@@ -31,11 +31,12 @@
   
   /* New variables for uniform styling */
   /* Dark theme section background */
-  --section-background: #0303ff0e;
-  --section-background-blur: blur(3px);
+  --section-background: #0303ff11;
+  --section-background-blur: blur(2px);
+  /* --skill-category-background-blur: blur(4px); */
   
   --skill-category-background: #0303ff00;
-  --skill-category-background-blur: blur(4px);
+   
 
   --max-content-width: 1800px;
   --side-panel-width: 150px;

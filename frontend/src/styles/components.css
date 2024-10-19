@@ -49,8 +49,8 @@
 
 .skill-category {
   padding: 1rem;
-  border-radius: 8px;
-  background-color: var(--skill-category-background);
+  border-radius: 25px;
+  border :1px solid var(--text-color);
   backdrop-filter: var(--skill-category-background-blur);
 }
 
@@ -71,8 +71,9 @@
 }
 
 .project-item {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  
+  border :1px solid var(--text-color);
+  border-radius: 25px;
   overflow: hidden;
   background-color: var(--skill-category-background);
   backdrop-filter: var(--skill-category-background-blur);
