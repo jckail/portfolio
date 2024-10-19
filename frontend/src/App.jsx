@@ -99,6 +99,8 @@ function App() {
       window.history.replaceState(null, '', `#${newCurrentSection}`);
     }
 
+    // Commented out sidebar visibility on scroll
+    /*
     if (!isSidebarOpen) {
       setIsTemporarilyVisible(true);
       setIsSidebarOpenedByScroll(true);
@@ -108,6 +110,7 @@ function App() {
         setIsSidebarOpenedByScroll(false);
       }, 1000);
     }
+    */
   }, [headerHeight, isSidebarOpen, currentSection]);
 
   useEffect(() => {
