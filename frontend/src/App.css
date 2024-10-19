@@ -199,9 +199,9 @@ html, body {
   width: 45px;
   height: 45px;
   object-fit: contain;
-  border-radius: 100%;
+  border-radius: 90%;
   font-size: 1.8em;
-  padding: 1px 5px;
+
   background-color: var(--resume-link-color);
   transition: red 0.3s ease;
   margin-top: 10px
@@ -211,6 +211,7 @@ html, body {
   border-radius: 100%;
   padding: 1px 2px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
+  background-color: var(--resume-link-color);
 }
 
 .resume-link {
@@ -225,8 +226,8 @@ html, body {
 }
 
 .resume-link:hover {
-  color: white;
-  background-color: black;
+  color: var(--text-color);
+  background-color: var(--background-color);
   padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
