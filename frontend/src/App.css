@@ -318,7 +318,7 @@ body, .content, section, .job, .project {
   /* Adjust margins and padding */
   .content {
     margin-left: 0;
-    padding: 10px 15px;
+    padding: 10px;
     width: 100%;
   }
 
@@ -355,7 +355,7 @@ body, .content, section, .job, .project {
   .side-panel h3 {
     color: var(--sidebar-text-color);
     margin-bottom: 20px;
-    font-size: 1.4em;
+    font-size: 1.3em;
   }
   
   .side-panel nav {
@@ -369,7 +369,7 @@ body, .content, section, .job, .project {
     color: var(--sidebar-text-color);
     text-decoration: none;
     margin: 10px 0;
-    font-size: 1.2em;
+    font-size: 1.1em;
     transition: color 0.3s ease;
     background-color: transparent;
   }
@@ -393,12 +393,12 @@ body, .content, section, .job, .project {
   }
 
   .name-title h1 {
-    font-size: 1.2em;
+    font-size: 1.1em;
     margin: 0;
   }
 
   .name-title h2 {
-    font-size: 1em;
+    font-size: 0.9em;
     margin: 0;
     opacity: 0.8;
   }
@@ -422,7 +422,7 @@ body, .content, section, .job, .project {
   .header-nav a {
     margin: 0;
     padding: 2px 3px;
-    font-size: 0.85em; /* Slightly smaller font for nav links */
+    font-size: 0.8em; /* Slightly smaller font for nav links */
     text-decoration: none;
     color: var(--resume-link-color);
     transition: color 0.3s ease, background-color 0.3s ease;
@@ -436,8 +436,8 @@ body, .content, section, .job, .project {
 
   /* Icons resized and spaced for mobile */
   .header-nav .icon {
-    width: 28px; /* Reduced size */
-    height: 28px;
+    width: 26px; /* Reduced size */
+    height: 26px;
     margin: 1px; /* Reduced margin for tighter spacing */
     background-color: var(--resume-link-color);
     transition: background-color 0.3s ease;
@@ -450,9 +450,9 @@ body, .content, section, .job, .project {
   /* Resume link adjustments */
   .resume-link {
     height: auto; /* Adjust height to content */
-    padding: 5px 15px; /* Add more horizontal padding */
-    border-radius: 20px;
-    font-size: 1em;
+    padding: 4px 12px; /* Add more horizontal padding */
+    border-radius: 18px;
+    font-size: 0.9em;
     white-space: nowrap; /* Prevents text from wrapping */
     display: inline-block; /* Ensures it behaves like a button */
     text-align: center; /* Centers the text */
@@ -466,9 +466,9 @@ body, .content, section, .job, .project {
   .theme-toggle {
     margin-left: 5px; /* Add slight space between nav and button */
     padding: 1px;
-    width: 28px;
-    height: 28px;
-    font-size: 1.1em;
+    width: 26px;
+    height: 26px;
+    font-size: 1em;
   }
 
   /* Center the main content */
@@ -476,20 +476,31 @@ body, .content, section, .job, .project {
     display: flex;
     flex-direction: column;
     align-items: center; /* Horizontally center the content */
-    gap: 30px;
-    margin-top: 80px; /* Remove top margin to ensure full centering */
+    gap: 25px;
+    margin-top: 70px; /* Reduced top margin */
     width: 100%; /* Ensure it spans the full width of the page */
     max-width: 768px; /* Optional: Set a max-width for readability */
     height: auto; /* Allow content to dictate height */
-    padding: 20px;
+    padding: 15px;
   }
 
   /* Center and control section width */
   section {
-    width: 100%; /* Maintain 95% width */
+    width: 95%; /* Increased width */
     max-width: 768px; /* Optional: Set a max-width for better readability */
-    padding: 10px;
+    padding: 15px;
     box-sizing: border-box; /* Include padding in width calculation */
+    margin-bottom: 20px; /* Add space between sections */
+    padding-left: 15px; /* Reduce left padding */
+  }
+
+  /* Adjust text size for better fit */
+  section h2 {
+    font-size: 1.4em;
+  }
+
+  section p, section li {
+    font-size: 0.95em;
   }
 
   /* Hamburger menu adjustments */
@@ -519,12 +530,27 @@ body, .content, section, .job, .project {
   }
 
   .header-nav a {
-    padding: 5px 0; /* Add spacing between nav links */
-    font-size: 0.9em; /* Slightly smaller font */
+    padding: 4px 0; /* Add spacing between nav links */
+    font-size: 0.85em; /* Slightly smaller font */
   }
 
   .resume-link {
-    margin-top: 10px; /* Add space below */
+    margin-top: 8px; /* Add space below */
     width: fit-content; /* Adjust to content size */
+  }
+
+  /* Further reduce text size for very small screens */
+  section h2 {
+    font-size: 1.3em;
+  }
+
+  section p, section li {
+    font-size: 0.9em;
+  }
+
+  /* Adjust section padding for very small screens */
+  section {
+    padding: 12px;
+    width: 98%; /* Increase width even more */
   }
 }
