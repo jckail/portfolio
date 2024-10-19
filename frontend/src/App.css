@@ -55,8 +55,10 @@ html, body {
 .header-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   background-color: transparent;
-  gap: 10px; /* Add equal spacing between elements */
+  gap: 15px; /* Increased spacing between elements */
+  height: 35px; /* Set a fixed height to ensure vertical alignment */
 }
 
 .name-title {
@@ -66,7 +68,7 @@ html, body {
 }
 
 .floating-header h1 {
-  font-size: 1.5em; /* Reduced font size */
+  font-size: 1.5em;
   margin: 0;
   color: var(--header-text-color);
   text-shadow: 2px 2px 4px var(--text-shadow-color);
@@ -118,10 +120,10 @@ html, body {
 
 .side-panel {
   position: fixed;
-  top: 60px; /* Adjusted to add space below the header */
+  top: 60px;
   left: -150px;
   width: 150px;
-  height: 500px; /* Adjusted to fill the remaining height */
+  height: 500px;
   color: var(--sidebar-text-color);
   background-color: var(--tbackground-color);
   backdrop-filter: var(--tbackground-blur);
@@ -129,8 +131,8 @@ html, body {
   box-sizing: border-box;
   overflow-y: auto;
   transition: left 0.1s ease-in-out;
-  border-radius: 0 25px 25px 0; /* Adjusted to round only right corners */
-  padding-top: 30px; /* Added padding to the top */
+  border-radius: 0 25px 25px 0;
+  padding-top: 30px;
 }
 
 .side-panel.open {
@@ -176,6 +178,7 @@ html, body {
 .header-nav {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .header-nav a {
@@ -184,6 +187,9 @@ html, body {
   padding: 8px 12px;
   transition: color 0.3s ease;
   color: var(--resume-link-color);
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .header-nav a:hover {
@@ -193,20 +199,23 @@ html, body {
 }
 
 .header-nav .icon {
-  width: 35px; /* Reduced size */
+  width: 35px;
   height: 35px;
   object-fit: contain;
   border-radius: 90%;
   font-size: 1.8em;
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-nav .icon:hover {
   border-radius: 100%;
   padding: 1px 2px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
-  background-color: var(--resume-link-color);
+  background-color: transparent;
 }
 
 .resume-link {
@@ -217,6 +226,9 @@ html, body {
   font-size: 1.3em;
   transition: background-color 0.3s ease;
   color: var(--resume-link-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .resume-link:hover {
@@ -297,8 +309,11 @@ li {
   border-radius: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-color: var(--resume-background-color);
-  width: 35px; /* Reduced size */
+  width: 35px;
   height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .theme-toggle:hover {
@@ -309,13 +324,11 @@ li {
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
-/* Increase contrast for better readability */
 body, .content, section, .job, .project {
   text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
 @media (max-width: 768px) {
-  /* Adjust margins and padding */
   .content {
     margin-left: 0;
     padding: 10px;
@@ -326,13 +339,12 @@ body, .content, section, .job, .project {
     margin-left: 0;
   }
 
-  /* Sidebar behavior for mobile */
   .side-panel {
     position: fixed;
     margin-top: 120px;
     left: -150px;
     width: 150px;
-    height: calc(100vh - 120px); /* Adjusted to fill the remaining height */
+    height: calc(100vh - 120px);
     color: var(--sidebar-text-color);
     background-color: var(--tbackground-color);
     backdrop-filter: var(--tbackground-blur);
@@ -340,8 +352,8 @@ body, .content, section, .job, .project {
     box-sizing: border-box;
     overflow-y: auto;
     transition: left 0.1s ease-in-out;
-    border-radius: 0 25px 25px 0; /* Adjusted to round only right corners */
-    padding-top: 20px; /* Added padding to the top */
+    border-radius: 0 25px 25px 0;
+    padding-top: 20px;
   }
   
   .side-panel.open {
@@ -384,7 +396,6 @@ body, .content, section, .job, .project {
     padding: 4px 8px;
   }
 
-  /* Header adjustments for mobile view */
   .floating-header {
     padding: 8px 10px;
     display: flex;
@@ -406,26 +417,30 @@ body, .content, section, .job, .project {
   .header-right {
     display: flex;
     align-items: center;
-    gap: 5px; /* Reduced space between elements */
+    gap: 5px;
     margin: 0;
     padding: 0;
+    height: 30px;
   }
 
-  /* Navigation styling for smaller screens */
   .header-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px; /* Reduced spacing between icons */
+    gap: 5px;
+    height: 100%;
   }
 
   .header-nav a {
     margin: 0;
     padding: 2px 3px;
-    font-size: 0.8em; /* Slightly smaller font for nav links */
+    font-size: 0.8em;
     text-decoration: none;
     color: var(--resume-link-color);
     transition: color 0.3s ease, background-color 0.3s ease;
+    height: 100%;
+    display: flex;
+    align-items: center;
   }
 
   .header-nav a:hover {
@@ -434,11 +449,10 @@ body, .content, section, .job, .project {
     border-radius: 8px;
   }
 
-  /* Icons resized and spaced for mobile */
   .header-nav .icon {
-    width: 26px; /* Reduced size */
+    width: 26px;
     height: 26px;
-    margin: 1px; /* Reduced margin for tighter spacing */
+    margin: 1px;
     background-color: var(--resume-link-color);
     transition: background-color 0.3s ease;
   }
@@ -447,54 +461,51 @@ body, .content, section, .job, .project {
     box-shadow: 0 0 8px 4px var(--button-hover-background);
   }
 
-  /* Resume link adjustments */
   .resume-link {
-    height: auto; /* Adjust height to content */
-    padding: 4px 12px; /* Add more horizontal padding */
+    height: 26px;
+    padding: 4px 12px;
     border-radius: 18px;
     font-size: 0.9em;
-    white-space: nowrap; /* Prevents text from wrapping */
-    display: inline-block; /* Ensures it behaves like a button */
-    text-align: center; /* Centers the text */
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   .resume-link:hover {
     box-shadow: 0 0 15px 5px var(--button-hover-background);
   }
 
-  /* Theme toggle button */
   .theme-toggle {
-    margin-left: 5px; /* Add slight space between nav and button */
+    margin-left: 5px;
     padding: 1px;
     width: 26px;
     height: 26px;
     font-size: 1em;
   }
 
-  /* Center the main content */
   main {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Horizontally center the content */
+    align-items: center;
     gap: 25px;
-    margin-top: 70px; /* Reduced top margin */
-    width: 100%; /* Ensure it spans the full width of the page */
-    max-width: 768px; /* Optional: Set a max-width for readability */
-    height: auto; /* Allow content to dictate height */
+    margin-top: 70px;
+    width: 100%;
+    max-width: 768px;
+    height: auto;
     padding: 15px;
   }
 
-  /* Center and control section width */
   section {
-    width: 95%; /* Increased width */
-    max-width: 768px; /* Optional: Set a max-width for better readability */
+    width: 95%;
+    max-width: 768px;
     padding: 15px;
-    box-sizing: border-box; /* Include padding in width calculation */
-    margin-bottom: 20px; /* Add space between sections */
-    padding-left: 15px; /* Reduce left padding */
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    padding-left: 15px;
   }
 
-  /* Adjust text size for better fit */
   section h2 {
     font-size: 1.4em;
   }
@@ -503,43 +514,40 @@ body, .content, section, .job, .project {
     font-size: 0.95em;
   }
 
-  /* Hamburger menu adjustments */
   .sandwich-menu div {
     width: 25px;
     height: 3px;
     background-color: var(--text-color);
-    margin: 3px 0; /* Reduced spacing between lines */
+    margin: 3px 0;
   }
 }
 
 @media (max-width: 400px) {
-  /* Header adjustments for narrow screens */
   .floating-header {
-    flex-direction: column; /* Stack the headers vertically */
-    align-items: flex-start; /* Align to the left */
-    gap: 5px; /* Add small spacing between elements */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
 
   .name-title {
-    width: 100%; /* Make the left header span full width */
+    width: 100%;
   }
 
   .header-nav {
-    width: 100%; /* Make the right header span full width */
-    justify-content: flex-start; /* Align it to the left */
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .header-nav a {
-    padding: 4px 0; /* Add spacing between nav links */
-    font-size: 0.85em; /* Slightly smaller font */
+    padding: 4px 0;
+    font-size: 0.85em;
   }
 
   .resume-link {
-    margin-top: 8px; /* Add space below */
-    width: fit-content; /* Adjust to content size */
+    margin-top: 8px;
+    width: fit-content;
   }
 
-  /* Further reduce text size for very small screens */
   section h2 {
     font-size: 1.3em;
   }
@@ -548,9 +556,8 @@ body, .content, section, .job, .project {
     font-size: 0.9em;
   }
 
-  /* Adjust section padding for very small screens */
   section {
     padding: 12px;
-    width: 98%; /* Increase width even more */
+    width: 98%;
   }
 }
