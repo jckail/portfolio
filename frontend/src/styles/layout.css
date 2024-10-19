@@ -26,7 +26,14 @@ section {
 
 /* Add padding to the top of the first section */
 section:first-of-type {
-  padding-top: 3rem;
+  padding-top: 4rem;
+}
+
+/* Add padding to the top of the first section for larger devices */
+@media (max-width: 768px) {
+  section:first-of-type {
+    padding-top: 2rem;
+  }
 }
 
 section h2 {
