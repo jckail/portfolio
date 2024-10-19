@@ -184,13 +184,15 @@ body, .App {
 }
 
 .header-nav .icon {
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   object-fit: contain;
-  border-radius: 50%;
-  padding: 8px 12px;
+  border-radius: 100%;
+  font-size: 1.8em;
+  padding: 1px 5px;
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
+  margin-top: 10px
 }
 
 .header-nav .icon:hover {
@@ -201,9 +203,11 @@ body, .App {
 
 .resume-link {
   background-color: var(--resume-background-color);
-  padding: 8px 12px;
+  
+  height: 30px;
+  padding: 1px 5px;
   border-radius: 24px;
-  font-size: 1.6em;
+  font-size: 1.3em;
   transition: background-color 0.3s ease;
   color: var(--resume-link-color);
 }
@@ -284,6 +288,9 @@ li {
   border-radius: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-color: var(--resume-background-color);
+  width: 45px;
+  height: 45px;
+  margin-left: 10px;
 }
 
 .theme-toggle:hover {
@@ -299,76 +306,129 @@ body, .content, section, .job, .project {
   text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
-/* New styles for the resume section */
-.resume-pdf-container {
-  width: 100%;
-  height: 800px;
-  overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+ 
 
-.resume-pdf-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
 
 @media (max-width: 768px) {
+  /* Adjust margins and padding */
   .content {
     margin-left: 0;
-    padding-left: 20px;
+    padding: 10px 15px;
+    width: 100%;
   }
 
   .content.sidebar-open {
     margin-left: 0;
   }
 
+  /* Sidebar behavior for mobile */
   .side-panel {
     width: 100%;
     left: -100%;
+    transition: left 0.3s ease;
   }
 
   .side-panel.open {
     left: 0;
   }
 
+  /* Header adjustments for mobile view */
   .floating-header {
-    padding: 10px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .name-title h1 {
-    font-size: 1.5em;
+    font-size: 1.2em;
+    margin: 0;
   }
 
   .name-title h2 {
     font-size: 1em;
+    margin: 0;
+    opacity: 0.8;
   }
 
+  /* Navigation styling for smaller screens */
   .header-nav {
-    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Reduced spacing between icons */
   }
 
   .header-nav a {
-    margin-left: 10px;
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 0.85em; /* Slightly smaller font for nav links */
+    text-decoration: none;
+    color: var(--resume-link-color);
+    transition: color 0.3s ease, background-color 0.3s ease;
   }
 
+  .header-nav a:hover {
+    color: var(--text-color);
+    background-color: var(--background-color);
+    border-radius: 8px;
+  }
+
+  /* Icons resized and spaced for mobile */
+  .header-nav .icon {
+    width: 30px; /* Reduced size */
+    height: 30px;
+    margin: 2px; /* Reduced margin for tighter spacing */
+    background-color: var(--resume-link-color);
+    transition: background-color 0.3s ease;
+    margin-top: 10px
+  }
+
+  .header-nav .icon:hover {
+    box-shadow: 0 0 8px 4px var(--button-hover-background);
+  }
+
+  /* Resume link adjustments */
   .resume-link {
-    padding: 6px 10px;
-    font-size: 0.9em;
+    height: 22px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 1em; /* Reduced font size */
   }
 
+  .resume-link:hover {
+    box-shadow: 0 0 15px 5px var(--button-hover-background);
+  }
+
+  /* Theme toggle button */
   .theme-toggle {
-    padding: 6px;
+    padding: 4px;
+    width: 30px; /* Reduced size */
+    height: 30px;
     font-size: 1.2em;
   }
 
-  section {
-    padding-left: 20px;
-    width: 90%;
+  main {
+    margin-top: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
   }
 
-  .resume-pdf-container {
-    height: 500px;
+  /* Section content width for better readability */
+  section {
+    padding: 10px;
+    width: 95%;
   }
+
+
+
+  /* Hamburger menu adjustments */
+  .sandwich-menu div {
+    width: 25px;
+    height: 3px;
+    background-color: var(--text-color);
+    margin: 3px 0; /* Reduced spacing between lines */
+  }
+
 }

@@ -172,6 +172,8 @@ section > .content-wrapper > * {
   border-radius: 1px;
   overflow: hidden;
   background: transparent;
+  margin-top: -20px;
+  margin-bottom: -60px;
 }
 
 .resume-pdf-container iframe {
@@ -191,3 +193,5 @@ section > .content-wrapper > * {
   margin-left: auto;
   margin-right: auto;
 }
+
+
