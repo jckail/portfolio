@@ -9,7 +9,14 @@ resume_data = {
         "github": "https://github.com/jckail",
         "linkedin": "https://www.linkedin.com/in/jckail/",
     },
-    "about_me": str("""I'm a self-proclaimed data geek with an insatiable curiosity for all things tech. \n\nWhen I'm not building data pipelines or experimenting with the latest machine learning models, you can find me outdoors—whether it's snowboarding down a mountain, hiking through the Rockies, camping under the stars, or exploring new craft breweries. I love traveling and discovering new places (and beers!) to fuel my adventurous side. I’ve always been passionate about computers and technology, from geeking out over the newest GPUs to tinkering with home labs and DIY tech experiments. This constant drive to learn, innovate, and problem-solve is what excites me about being a Data Engineer. Every day is a new puzzle, and I get to build and optimize systems that have real-world impact. Whether it’s cutting-edge AI projects or cloud infrastructure, I’m always eager to push boundaries and dive into new challenges."""),
+    "about_me": str("""
+I'm a data engineer with an insatiable curiosity for all things tech, always eager to push boundaries and explore the cutting edge of AI, machine learning, and big data. I’ve built scalable systems, crafted complex pipelines, and deployed transformer models, thriving at the intersection of innovation and impact.
+
+Whether developing AI-driven solutions or using QR codes to reconnect refugees with resources, I’m passionate about creating technology that makes a real difference. When I’m not neck-deep in data, you’ll find me building computers, hiking with my dog in the Rockies, or experimenting with new machine learning frameworks. 
+\nFor me, the goal is simple:                     
+\n''Make the world work better, one dataset—and adventure—at a time.''
+
+"""),
     "experience": [
         {
             "company": "Prove Identity",
