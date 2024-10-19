@@ -483,18 +483,18 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center; /* Horizontally center the content */
-  gap: 40px;
+  gap: 30px;
   margin-top: 80px; /* Remove top margin to ensure full centering */
   width: 100%; /* Ensure it spans the full width of the page */
-  max-width: 1200px; /* Optional: Set a max-width for readability */
+  max-width: 768px; /* Optional: Set a max-width for readability */
   height: auto; /* Allow content to dictate height */
   padding: 20px;
 }
 
 /* Center and control section width */
 section {
-  width: 80%; /* Maintain 95% width */
-  max-width: 800px; /* Optional: Set a max-width for better readability */
+  width: 100%; /* Maintain 95% width */
+  max-width: 768px; /* Optional: Set a max-width for better readability */
   padding: 10px;
   box-sizing: border-box; /* Include padding in width calculation */
 }
