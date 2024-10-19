@@ -120,6 +120,7 @@ html, body {
 .side-panel {
   position: fixed;
   top: 1100;
+  margin-top: 120px;
   left: -150px;
   width: 150px;
   height: 400px;
@@ -187,12 +188,12 @@ html, body {
   transition: color 0.3s ease;
   color: var(--resume-link-color);
 }
-
 .header-nav a:hover {
   color: var(--text-color);
-  background-color: var(--background-color);
+  background-color: transparent;
   padding: 8px 12px;
 }
+
 
 .header-nav .icon {
   width: 45px;
@@ -202,7 +203,7 @@ html, body {
   font-size: 1.8em;
   padding: 1px 5px;
   background-color: var(--resume-link-color);
-  transition: background-color 0.3s ease;
+  transition: red 0.3s ease;
   margin-top: 10px
 }
 
@@ -224,7 +225,8 @@ html, body {
 }
 
 .resume-link:hover {
-  background-color: var(--resume-background-color);
+  color: white;
+  background-color: black;
   padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }

@@ -31,8 +31,8 @@
   
   /* New variables for uniform styling */
   /* Dark theme section background */
-  --section-background: #0303ff11;
-  --section-background-blur: blur(2px);
+  --section-background: #0303ff15;
+  --section-background-blur: blur(3px);
   /* --skill-category-background-blur: blur(4px); */
   
   --skill-category-background: #0303ff00;
