@@ -50,7 +50,7 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  padding: 10px 15px;
   background-color: var(--top-tbackground-color);
   backdrop-filter: var(--top-tbackground-blur);
   z-index: 1001;
@@ -415,17 +415,25 @@ body, .content, section, .job, .project {
     opacity: 0.8;
   }
 
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 3px; /* Reduced space between elements */
+    margin: 0;
+    padding: 0;
+  }
+
   /* Navigation styling for smaller screens */
   .header-nav {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* Reduced spacing between icons */
+    gap: 5px; /* Reduced spacing between icons */
   }
 
   .header-nav a {
     margin: 0;
-    padding: 4px 8px;
+    padding: 2px 3px;
     font-size: 0.85em; /* Slightly smaller font for nav links */
     text-decoration: none;
     color: var(--resume-link-color);
@@ -440,9 +448,9 @@ body, .content, section, .job, .project {
 
   /* Icons resized and spaced for mobile */
   .header-nav .icon {
-    width: 30px; /* Reduced size */
-    height: 30px;
-    margin: 2px; /* Reduced margin for tighter spacing */
+    width: 28px; /* Reduced size */
+    height: 28px;
+    margin: 1px; /* Reduced margin for tighter spacing */
     background-color: var(--resume-link-color);
     transition: background-color 0.3s ease;
     margin-top: 10px
@@ -469,10 +477,11 @@ body, .content, section, .job, .project {
 
   /* Theme toggle button */
   .theme-toggle {
-    padding: 4px;
-    width: 30px; /* Reduced size */
-    height: 30px;
-    font-size: 1.2em;
+    margin-left: 5px; /* Add slight space between nav and button */
+    padding: 1px;
+    width: 28px;
+    height: 28px;
+    font-size: 1.1em;
   }
 
 /* Center the main content */
@@ -506,4 +515,33 @@ section {
     margin: 3px 0; /* Reduced spacing between lines */
   }
 
+}
+
+
+@media (max-width: 400px) {
+  /* Header adjustments for narrow screens */
+  .floating-header {
+    flex-direction: column; /* Stack the headers vertically */
+    align-items: flex-start; /* Align to the left */
+    gap: 5px; /* Add small spacing between elements */
+  }
+
+  .name-title {
+    width: 100%; /* Make the left header span full width */
+  }
+
+  .header-nav {
+    width: 100%; /* Make the right header span full width */
+    justify-content: flex-start; /* Align it to the left */
+  }
+
+  .header-nav a {
+    padding: 5px 0; /* Add spacing between nav links */
+    font-size: 0.9em; /* Slightly smaller font */
+  }
+
+  .resume-link {
+    margin-top: 10px; /* Add space below */
+    width: fit-content; /* Adjust to content size */
+  }
 }
