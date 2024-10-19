@@ -39,6 +39,7 @@ quickResume/
 ├── Dockerfile
 ├── entrypoint.sh
 ├── requirements.txt
+├── .env
 └── README.md
 ```
 
@@ -60,10 +61,24 @@ quickResume/
    npm install
    ```
 
-4. Create a `.env` file in the root directory and add the following:
+4. Create a `.env` file in the root directory with the following content:
    ```
-   VITE_API_URL=http://localhost:8080
+   # Backend
+   FLASK_APP=backend/main.py
+   ALLOWED_ORIGINS=http://localhost:5173,http://192.168.0.122:5173,http://localhost:8080,http://0.0.0.0:8080,http://localhost:5173,https://quickresume-292025398859.us-central1.run.app
+
+   # Frontend
+   VITE_API_URL=http://localhost:8080/api
+
+   # Shared
+   PRODUCTION_URL=https://quickresume-292025398859.us-central1.run.app
+
+   # Resume file name
+   RESUME_FILE=JordanKailResume.pdf
+   VITE_RESUME_FILE=JordanKailResume.pdf
    ```
+
+   Note: This single .env file is used for both frontend and backend configurations.
 
 ## Running the Application
 You can now run both the backend and frontend simultaneously using the entrypoint.sh script:
