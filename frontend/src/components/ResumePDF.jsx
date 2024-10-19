@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../helpers/utils';
+import { getApiUrl, downloadResume } from '../helpers/utils';
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
@@ -65,8 +65,9 @@ function ResumePDF() {
         width="100%"
         height="100%"
         style={{border: 'none'}}
-        title="Jordan Kail Resume"
+        title="Resume"
       />
+      <button onClick={downloadResume} className="download-button">Download Resume</button>
     </div>
   );
 }

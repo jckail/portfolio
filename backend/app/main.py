@@ -31,7 +31,7 @@ app.include_router(api_router, prefix="/api")
 
 # Serve static files (images)
 images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
-app.mount("/images", StaticFiles(directory=images_dir), name="images")
+app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
 
 # Serve frontend static files
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))

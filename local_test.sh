@@ -6,14 +6,17 @@ echo "Starting local test environment..."
 echo "Executing kill_hanging.sh to clean up any hanging processes..."
 bash ./kill_hanging.sh
 
+echo "Removing frontend/dist directory..."
+rm -rf frontend/dist
+
+echo "Building the frontend..."
+cd frontend && npm run build
+
 echo "Starting the backend..."
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8080 --reload --log-level debug &
+cd .. && uvicorn backend.app.main:app --host 0.0.0.0 --port 8080 --reload --log-level debug &
 
-echo "Starting the frontend..."
-cd frontend && npm run build && npm run dev -- --host 0.0.0.0 --port 5173 --debug &
-
-echo "Both backend and frontend services have been started."
-echo "Waiting for any process to exit..."
+echo "Starting the frontend dev server..."
+cd .. && cd frontend && npm run build && npm run dev -- --host 0.0.0.0 --port 5173 --debug &
 
 # Wait for any process to exit
 wait -n

@@ -15,7 +15,6 @@ COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
 # Copy favicon files (if they exist)
 COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/
-COPY --from=frontend-build /app/frontend/public/JordanKailResume.pdf /app/frontend/public/JordanKailResume.pdf
 
 # Install backend dependencies
 COPY requirements.txt .

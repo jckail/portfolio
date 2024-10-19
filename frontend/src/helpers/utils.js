@@ -1,4 +1,4 @@
-import { resumeData } from '../configs';
+import.meta.env.VITE_RESUME_FILE;
 
 export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   const targetElement = document.getElementById(sectionId);
@@ -37,7 +37,7 @@ export const downloadResume = () => {
   const downloadUrl = '/api/resume';
   const downloadLink = document.createElement('a');
   downloadLink.href = downloadUrl;
-  downloadLink.download = `${resumeData.name}Resume.pdf`;
+  downloadLink.download = import.meta.env.VITE_RESUME_FILE || 'resume.pdf';
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);

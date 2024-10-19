@@ -39,8 +39,8 @@ function Layout({
           <div className="header-left">
             <SandwichMenu onClick={toggleSidebar} />
             <div className="name-title">
-              <h1>{resumeData?.name || 'Jordan Kail'}</h1>
-              <h2>{resumeData?.title || 'Software Engineer'}</h2>
+              <h1>{resumeData?.name || 'Missing Name'}</h1>
+              <h2>{resumeData?.title || 'Missing Title'}</h2>
             </div>
           </div>
           <div className="header-right">
