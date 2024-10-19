@@ -325,7 +325,6 @@ body, .content, section, .job, .project {
   /* Adjust margins and padding */
   .content {
     margin-left: 0;
-    padding: 10px 15px;
     width: 100%;
   }
 
