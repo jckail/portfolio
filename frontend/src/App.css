@@ -1,12 +1,30 @@
 @import './theme.css';
 
-body, .App {
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* body, .App {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   color: var(--text-color);
   background-color: transparent;
-}
+} */
 
 #particles-js {
   position: fixed;
@@ -324,7 +342,7 @@ body, .content, section, .job, .project {
   /* Sidebar behavior for mobile */
   .side-panel {
     position: fixed;
-    top: 1100;
+    margin-top: 120px;
     left: -150px;
     width: 150px;
     height: 400px;
@@ -436,11 +454,14 @@ body, .content, section, .job, .project {
 
   /* Resume link adjustments */
   .resume-link {
-    height: 22px;
-    padding: 5px 10px;
+    height: auto; /* Adjust height to content */
+    padding: 5px 15px; /* Add more horizontal padding */
     border-radius: 20px;
-    font-size: 1em; /* Reduced font size */
-  }
+    font-size: 1em;
+    white-space: nowrap; /* Prevents text from wrapping */
+    display: inline-block; /* Ensures it behaves like a button */
+    text-align: center; /* Centers the text */
+}
 
   .resume-link:hover {
     box-shadow: 0 0 15px 5px var(--button-hover-background);
@@ -454,18 +475,26 @@ body, .content, section, .job, .project {
     font-size: 1.2em;
   }
 
-  main {
-    margin-top: 45px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
+/* Center the main content */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontally center the content */
+  gap: 40px;
+  margin-top: 80px; /* Remove top margin to ensure full centering */
+  width: 100%; /* Ensure it spans the full width of the page */
+  max-width: 1200px; /* Optional: Set a max-width for readability */
+  height: auto; /* Allow content to dictate height */
+  padding: 20px;
+}
 
-  /* Section content width for better readability */
-  section {
-    padding: 10px;
-    width: 95%;
-  }
+/* Center and control section width */
+section {
+  width: 80%; /* Maintain 95% width */
+  max-width: 800px; /* Optional: Set a max-width for better readability */
+  padding: 10px;
+  box-sizing: border-box; /* Include padding in width calculation */
+}
 
 
 
