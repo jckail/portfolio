@@ -16,7 +16,7 @@ function Layout({
   isTemporarilyVisible, 
   toggleSidebar, 
   handleResumeClick,
-  scrollToSection // Add this new prop
+  scrollToSection
 }) {
   const headerRef = useRef(null)
   const apiUrl = getApiUrl()
@@ -31,10 +31,24 @@ function Layout({
 
   console.log('Layout rendering, headerHeight:', headerHeight);
 
+  const wrapperStyle = {
+    overflowX: 'hidden',
+    position: 'relative',
+    width: '100%',
+    maxWidth: '100vw'
+  };
+
+  const contentStyle = {
+    width: '100%',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    padding: '0 15px'
+  };
+
   return (
-    <div className="App">
+    <div className="App" style={wrapperStyle}>
       <div id="particles-js"></div>
-      <div className={`content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
+      <div className={`content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`} style={contentStyle}>
         <header className="floating-header" ref={headerRef}>
           <div className="header-left">
             <SandwichMenu onClick={toggleSidebar} />
@@ -56,9 +70,9 @@ function Layout({
           headerHeight={headerHeight} 
           onClose={toggleSidebar}
           isTemporarilyVisible={isTemporarilyVisible}
-          scrollToSection={scrollToSection} // Pass the scrollToSection function
+          scrollToSection={scrollToSection}
         />
-        <main>
+        <main style={{ width: '100%', maxWidth: '100%' }}>
           {children}
         </main>
       </div>
