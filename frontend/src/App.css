@@ -75,7 +75,7 @@ html, body {
 }
 
 .floating-header h2 {
-  font-size: 1.0em;
+  font-size: 1em;
   margin: 0;
   font-weight: normal;
   color: var(--header-text-color);
@@ -404,7 +404,7 @@ body, .content, section, .job, .project {
   }
 
   .name-title h1 {
-    font-size: 2em;
+    font-size: 1.3em;
     margin: 0;
   }
 
@@ -489,7 +489,7 @@ body, .content, section, .job, .project {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 25px;
     margin-top: 70px;
     width: 100%;
     max-width: 768px;
@@ -532,7 +532,16 @@ body, .content, section, .job, .project {
   .name-title {
     width: 100%;
   }
+  .name-title h1 {
+    font-size: 1.2em;
+    margin: 0;
+  }
 
+  .name-title h2 {
+    font-size: 1em;
+    margin: 0;
+    opacity: 0.8;
+  }
   .header-nav {
     width: 100%;
     justify-content: flex-start;
