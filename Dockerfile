@@ -23,8 +23,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend code
 COPY backend /app/backend
 
-# Create a volume mount point for images
-VOLUME /app/images
+# Create the images directory and copy images
+COPY images /app/images
 
 # Set environment variables
 ENV PYTHONPATH=/app
@@ -33,4 +33,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8080
 
 # Command to run the application
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "echo 'Starting application...' && ls -R /app && uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"]

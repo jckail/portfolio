@@ -9,7 +9,7 @@ function HeaderNav({ resumeData, theme, onResumeClick }) {
       {resumeData?.github && (
         <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
           <img 
-            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_github.png" : "dark_mode_github.png"}`} 
+            src={`${apiUrl}/api/images/${theme === 'light' ? "light_mode_github.png" : "dark_mode_github.png"}`} 
             alt="GitHub" 
             className="icon" 
           />
@@ -18,7 +18,7 @@ function HeaderNav({ resumeData, theme, onResumeClick }) {
       {resumeData?.linkedin && (
         <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer">
           <img 
-            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_linkedin.png" : "dark_mode_linkedin.png"}`} 
+            src={`${apiUrl}/api/images/${theme === 'light' ? "light_mode_linkedin.png" : "dark_mode_linkedin.png"}`} 
             alt="LinkedIn" 
             className="icon" 
           />

@@ -109,6 +109,6 @@ Note: Hot reloading is enabled for both the backend and frontend. Any changes yo
 - GET `/api/resume_data`: Get formatted resume data
 - GET `/api/download_resume`: Download resume PDF
 - GET `/api/resume`: View resume PDF
-- GET `/images/*`: Serve static images
+- GET `/api/images/*`: Serve static images
 
 Feel free to customize this README to better fit your specific project needs and add any additional sections or information you find relevant.
