@@ -4,7 +4,7 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
   return {
     particles: {
       number: {
-        value: 30,
+        value: 25,
         density: {
           enable: false,
           value_area: 800
@@ -31,25 +31,25 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
         }
       },
       size: {
-        value: 5,
+        value: 4,
         random: false,
         anim: {
-          enable: true,
+          enable: false,
           speed: 0.1,
-          size_min: 0.1,
+          size_min: 2,
           sync: true
         }
       },
       line_linked: {
         enable: true,
-        distance: 250,
+        distance: 225,
         color: lineColor,
-        opacity: 2,
-        width: 1
+        opacity: 1,
+        width: 2
       },
       move: {
         enable: true,
-        speed: 0.4,
+        speed: 0.3,
         direction: "none",
         random: true,
         straight: false,
@@ -83,10 +83,10 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
           }
         },
         bubble: {
-          distance: 300,
-          size: 9,
-          duration: 1,
-          opacity: 8,
+          distance: 400,
+          size: 8,
+          duration: 2,
+          opacity: 4,
           speed: 5
         },
         repulse: {

@@ -93,12 +93,15 @@
   display: inline-block;
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  background-color: var(--primary);
-  color: var(--white);
-  border-radius: 4px;
+  background-color: var(--resume-background-color);
+  color: var(--background-color);
+  border-radius: 10px;
   text-decoration: none;
 }
 
 .project-link:hover {
-  background-color: var(--hover-color);
+  color: var(--resume-background-color);
+  background-color: var(--text);
+  padding: 8px 12px;
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
