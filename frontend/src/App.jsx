@@ -26,6 +26,16 @@ function App() {
   const apiUrl = getApiUrl();
 
   useEffect(() => {
+    console.log('Window dimensions on load:');
+    console.log('Window inner width:', window.innerWidth);
+    console.log('Window inner height:', window.innerHeight);
+    console.log('Document body clientWidth:', document.body.clientWidth);
+    console.log('Document body clientHeight:', document.body.clientHeight);
+    console.log('Document documentElement clientWidth:', document.documentElement.clientWidth);
+    console.log('Document documentElement clientHeight:', document.documentElement.clientHeight);
+  }, []);
+
+  useEffect(() => {
     const fullApiUrl = `${apiUrl}/api/resume_data`;
     console.log('Initiating API request to:', fullApiUrl);
     console.log('Current window.location:', window.location.toString());
