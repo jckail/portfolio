@@ -120,7 +120,7 @@ html, body {
   top: 60px; /* Adjusted to add space below the header */
   left: -150px;
   width: 150px;
-  height: calc(100vh - 60px); /* Adjusted to fill the remaining height */
+  height: 500px; /* Adjusted to fill the remaining height */
   color: var(--sidebar-text-color);
   background-color: var(--tbackground-color);
   backdrop-filter: var(--tbackground-blur);
