@@ -4,7 +4,7 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
   return {
     particles: {
       number: {
-        value: 50,
+        value: 30,
         density: {
           enable: false,
           value_area: 800
@@ -42,7 +42,7 @@ const getParticlesConfig = (backgroundColor, particleColor, lineColor) => {
       },
       line_linked: {
         enable: true,
-        distance: 400,
+        distance: 250,
         color: lineColor,
         opacity: 2,
         width: 1
