@@ -72,7 +72,7 @@ html, body {
 }
 
 .floating-header h2 {
-  font-size: 1.2em;
+  font-size: 1.0em;
   margin: 0;
   font-weight: normal;
   color: var(--header-text-color);
@@ -185,11 +185,12 @@ html, body {
   padding: 8px 12px;
   transition: color 0.3s ease;
   color: var(--resume-link-color);
+  
 }
 
 .header-nav a:hover {
   color: var(--text-color);
-  background-color: var(--background-color);
+  background-color: transparent;
   padding: 8px 12px;
 }
 
@@ -197,9 +198,9 @@ html, body {
   width: 45px;
   height: 45px;
   object-fit: contain;
-  border-radius: 100%;
+  border-radius: 90%;
   font-size: 1.8em;
-  padding: 1px 5px;
+  
   background-color: var(--resume-link-color);
   transition: background-color 0.3s ease;
   margin-top: 10px
@@ -209,6 +210,7 @@ html, body {
   border-radius: 100%;
   padding: 1px 2px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
+  background-color: var(--resume-link-color);
 }
 
 .resume-link {
@@ -222,9 +224,11 @@ html, body {
 }
 
 .resume-link:hover {
-  background-color: var(--resume-background-color);
+  color: var(--text-color);
+  background-color: var(--background-color);
   padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
+  
 }
 
 main {
