@@ -7,10 +7,20 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
 
   const handleNavClick = (event, targetId) => {
     event.preventDefault();
-    console.log('Jumping to section:', targetId, 'with headerHeight:', headerHeight);
-    scrollToSection(targetId, headerHeight);
+    console.log('handleNavClick called with targetId:', targetId);
+    console.log('Current headerHeight:', headerHeight);
+    console.log('scrollToSection function:', scrollToSection);
+    
+    if (typeof scrollToSection === 'function') {
+      console.log('Calling scrollToSection function');
+      scrollToSection(targetId);
+    } else {
+      console.error('scrollToSection is not a function');
+    }
+    
     // Add a small delay before closing the sidebar
     setTimeout(() => {
+      console.log('Closing sidebar');
       onClose();
     }, 10);
   };

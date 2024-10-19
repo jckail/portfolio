@@ -9,7 +9,7 @@ import TechnicalSkills from './sections/TechnicalSkills'
 import Experience from './sections/Experience'
 import Projects from './sections/Projects'
 import MyResume from './sections/MyResume'
-import { getApiUrl, downloadResume } from './helpers/utils'
+import { getApiUrl, downloadResume, scrollToSection as utilsScrollToSection } from './helpers/utils'
 
 function App() {
   const [resumeData, setResumeData] = useState(null)
@@ -23,49 +23,23 @@ function App() {
   const [isSidebarOpenedByScroll, setIsSidebarOpenedByScroll] = useState(false)
   const sectionsRef = useRef({})
   const timeoutRef = useRef(null)
+  const isScrolling = useRef(false)
   const apiUrl = getApiUrl();
 
   useEffect(() => {
-    console.log('Window dimensions on load:');
-    console.log('Window inner width:', window.innerWidth);
-    console.log('Window inner height:', window.innerHeight);
-    console.log('Document body clientWidth:', document.body.clientWidth);
-    console.log('Document body clientHeight:', document.body.clientHeight);
-    console.log('Document documentElement clientWidth:', document.documentElement.clientWidth);
-    console.log('Document documentElement clientHeight:', document.documentElement.clientHeight);
-  }, []);
-
-  useEffect(() => {
     const fullApiUrl = `${apiUrl}/api/resume_data`;
-    console.log('Initiating API request to:', fullApiUrl);
-    console.log('Current window.location:', window.location.toString());
-    console.log('API request headers:', {
-      'Content-Type': 'application/json',
-      // Add any other headers you're using
-    });
-
     fetch(fullApiUrl)
       .then(response => {
-        console.log('API response received');
-        console.log('Response status:', response.status);
-        console.log('Response headers:', JSON.stringify(Array.from(response.headers.entries())));
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
         return response.json()
       })
       .then(data => {
-        console.log('API response data:', JSON.stringify(data, null, 2));
         setResumeData(data)
       })
       .catch(error => {
         console.error('Error fetching resume data:', error)
-        console.error('Error name:', error.name)
-        console.error('Error message:', error.message)
-        console.error('Error stack:', error.stack)
-        if (error instanceof TypeError) {
-          console.error('This might be a CORS issue or a network error');
-        }
         setError(`Failed to fetch resume data: ${error.message}`)
       })
   }, [apiUrl])
@@ -94,19 +68,38 @@ function App() {
     document.body.className = theme === 'dark' ? 'dark-theme' : ''
   }, [theme])
 
-  const handleScroll = useCallback(() => {
-    const scrollPosition = window.scrollY;
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  const handleScroll = useCallback(debounce(() => {
+    if (isScrolling.current) return;
+
+    const scrollPosition = window.scrollY + headerHeight + 50; // Add some offset
     let newCurrentSection = 'about-me';
 
     Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
-      if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) {
+      if (sectionRef && scrollPosition >= sectionRef.offsetTop) {
         newCurrentSection = sectionId;
       }
     });
 
     if (newCurrentSection !== currentSection) {
+      console.log('Updating current section to:', newCurrentSection);
       setCurrentSection(newCurrentSection);
-      window.history.replaceState(null, '', `#${newCurrentSection}`);
+      const newUrl = `#${newCurrentSection}`;
+      if (window.location.hash !== newUrl) {
+        window.history.pushState(null, '', newUrl);
+        console.log('Updated URL:', window.location.href);
+      }
     }
 
     if (!isSidebarOpen) {
@@ -118,7 +111,7 @@ function App() {
         setIsSidebarOpenedByScroll(false);
       }, 1000);
     }
-  }, [headerHeight, isSidebarOpen, currentSection]);
+  }, 100), [headerHeight, isSidebarOpen, currentSection]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -128,33 +121,60 @@ function App() {
     };
   }, [handleScroll]);
 
-  const scrollToSection = useCallback((sectionId, headerHeight, updateUrl = true) => {
-    const targetElement = document.getElementById(sectionId);
-    if (targetElement) {
-      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({
-        top: targetPosition - headerHeight
-      });
-      if (updateUrl) {
-        window.history.pushState(null, '', `#${sectionId}`);
-      }
+  const scrollToSection = useCallback((sectionId) => {
+    console.log('scrollToSection called with sectionId:', sectionId);
+    if (sectionsRef.current[sectionId]) {
+      isScrolling.current = true;
+      const yOffset = -headerHeight;
+      const element = sectionsRef.current[sectionId];
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({top: y, behavior: 'smooth'});
       setCurrentSection(sectionId);
+      window.history.pushState(null, '', `#${sectionId}`);
+
+      // Reset isScrolling after animation completes
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 1000); // Adjust this value based on your scroll animation duration
+    } else {
+      console.error(`Section with id ${sectionId} not found`);
     }
-  }, []);
+  }, [headerHeight]);
 
   const handleInitialScroll = useCallback(() => {
     const hash = window.location.hash.slice(1);
+    console.log('handleInitialScroll called, hash:', hash);
     if (hash && sectionsRef.current[hash] && headerHeight > 0) {
-      scrollToSection(hash, headerHeight, false);
+      console.log('Scrolling to initial section:', hash);
+      setTimeout(() => {
+        scrollToSection(hash);
+      }, 100); // Small delay to ensure everything is rendered
+    } else {
+      console.log('No initial scroll needed or section not found');
     }
   }, [headerHeight, scrollToSection]);
 
   useEffect(() => {
     if (resumeData && headerHeight > 0) {
+      console.log('Resume data loaded and header height set, calling handleInitialScroll');
       handleInitialScroll();
-      handleScroll();
     }
-  }, [resumeData, headerHeight, handleInitialScroll, handleScroll]);
+  }, [resumeData, headerHeight, handleInitialScroll]);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const hash = window.location.hash.slice(1);
+      if (hash && sectionsRef.current[hash]) {
+        scrollToSection(hash);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [scrollToSection]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light')
@@ -171,7 +191,7 @@ function App() {
 
   const handleResumeClick = (event) => {
     event.preventDefault();
-    scrollToSection('my-resume', headerHeight);
+    scrollToSection('my-resume');
     downloadResume();
   }
 
