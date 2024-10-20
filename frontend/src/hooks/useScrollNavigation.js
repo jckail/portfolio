@@ -9,7 +9,7 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     let newCurrentSection = 'about-me';
 
     Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
-      if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 10) {
+      if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 100) {
         newCurrentSection = sectionId;
       }
     });
