@@ -1,4 +1,6 @@
-/* Styles for job items */
+/* Component Styles */
+
+/* 1. Job Items */
 .job-item {
   margin-bottom: 2rem;
   padding-bottom: 2rem;
@@ -22,12 +24,12 @@
   border-radius: 50%;
 }
 
-.job-title h3 {
+.job-title h3,
+.job-title h4 {
   margin-bottom: 0.25rem;
 }
 
 .job-title h4 {
-  margin-bottom: 0.25rem;
   font-weight: normal;
 }
 
@@ -40,7 +42,7 @@
   margin-top: 1rem;
 }
 
-/* Styles for technical skills */
+/* 2. Technical Skills */
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -50,7 +52,7 @@
 .skill-category {
   padding: 1rem;
   border-radius: 25px;
-  border :1px solid var(--text-color);
+  border: 1px solid var(--text-color);
   backdrop-filter: var(--skill-category-background-blur);
 }
 
@@ -63,7 +65,7 @@
   padding-left: 0;
 }
 
-/* Styles for projects */
+/* 3. Projects */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -71,8 +73,7 @@
 }
 
 .project-item {
-  
-  border :1px solid var(--text-color);
+  border: 1px solid var(--text-color);
   border-radius: 25px;
   overflow: hidden;
   background-color: var(--skill-category-background);
@@ -97,11 +98,12 @@
   color: var(--background-color);
   border-radius: 10px;
   text-decoration: none;
+  transition: all 0.3s ease;
 }
 
 .project-link:hover {
   color: var(--resume-background-color);
-  background-color: var(--text);
+  background-color: var(--text-color);
   padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }

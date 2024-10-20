@@ -1,5 +1,6 @@
 @import './theme.css';
 
+/* Global Styles */
 html, body {
   height: 100%;
   width: 100%;
@@ -33,6 +34,7 @@ html, body {
   transition: margin-left 0.1s ease-in-out, opacity 0.1s ease-in-out;
 }
 
+/* Header Styles */
 .floating-header {
   position: fixed;
   top: 0;
@@ -57,8 +59,8 @@ html, body {
   align-items: center;
   justify-content: flex-end;
   background-color: transparent;
-  gap: 15px; /* Increased spacing between elements */
-  height: 35px; /* Set a fixed height to ensure vertical alignment */
+  gap: 15px;
+  height: 35px;
 }
 
 .name-title {
@@ -81,6 +83,7 @@ html, body {
   color: var(--header-text-color);
 }
 
+/* Sandwich Menu Styles */
 .sandwich-menu {
   display: flex;
   flex-direction: column;
@@ -95,16 +98,7 @@ html, body {
 }
 
 .sandwich-menu:hover {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 25px;
-  background:  var(--button-hover-background);
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 10;
+  background: var(--button-hover-background);
   box-shadow: 0 0 5px 1px var(--button-hover-background);
 }
 
@@ -118,6 +112,7 @@ html, body {
   transform-origin: 1px;
 }
 
+/* Side Panel Styles */
 .side-panel {
   position: fixed;
   top: 60px;
@@ -175,6 +170,7 @@ html, body {
   padding: 4px 8px;
 }
 
+/* Header Navigation Styles */
 .header-nav {
   display: flex;
   align-items: center;
@@ -182,11 +178,10 @@ html, body {
 }
 
 .header-nav a {
-  color: var(--navbar-link-color);
+  color: var(--resume-link-color);
   text-decoration: none;
   padding: 8px 12px;
   transition: color 0.3s ease;
-  color: var(--resume-link-color);
   display: flex;
   align-items: center;
   height: 100%;
@@ -195,7 +190,6 @@ html, body {
 .header-nav a:hover {
   color: var(--text-color);
   background-color: transparent;
-  padding: 8px 12px;
 }
 
 .header-nav .icon {
@@ -218,6 +212,7 @@ html, body {
   background-color: transparent;
 }
 
+/* Resume Link Styles */
 .resume-link {
   background-color: var(--resume-background-color);
   height: 30px;
@@ -238,6 +233,7 @@ html, body {
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
+/* Main Content Styles */
 main {
   margin-top: 40px;
   display: flex;
@@ -299,6 +295,7 @@ li {
   text-decoration: underline;
 }
 
+/* Theme Toggle Styles */
 .theme-toggle {
   background: none;
   border: none;
@@ -324,10 +321,12 @@ li {
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
 
+/* Text Shadow */
 body, .content, section, .job, .project {
   text-shadow: 1px 1px 1px var(--text-shadow-color);
 }
 
+/* Media Queries */
 @media (max-width: 768px) {
   .content {
     margin-left: 0;
@@ -340,125 +339,42 @@ body, .content, section, .job, .project {
   }
 
   .side-panel {
-    position: fixed;
     margin-top: 120px;
-    left: -150px;
-    width: 150px;
     height: calc(100vh - 120px);
-    color: var(--sidebar-text-color);
-    background-color: var(--tbackground-color);
-    backdrop-filter: var(--tbackground-blur);
-    z-index: 1000;
-    box-sizing: border-box;
-    overflow-y: auto;
-    transition: left 0.1s ease-in-out;
-    border-radius: 0 25px 25px 0;
     padding-top: 20px;
-  }
-  
-  .side-panel.open {
-    left: 0;
-  }
-  
-  .side-panel-content {
-    padding: 20px;
-  }
-  
-  .side-panel h3 {
-    color: var(--sidebar-text-color);
-    margin-bottom: 20px;
-    font-size: 1.3em;
-  }
-  
-  .side-panel nav {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    background-color: transparent;
-  }
-  
-  .side-panel nav a {
-    color: var(--sidebar-text-color);
-    text-decoration: none;
-    margin: 10px 0;
-    font-size: 1.1em;
-    transition: color 0.3s ease;
-    background-color: transparent;
-  }
-  
-  .side-panel nav a:hover,
-  .side-panel nav a.active {
-    color: var(--resume-link-color);
-    text-decoration: underline;
-    background-color: var(--resume-background-color);
-    box-shadow: 0 0 20px 10px var(--button-hover-background);
-    border-radius: 12px;
-    padding: 4px 8px;
   }
 
   .floating-header {
     padding: 8px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 
   .name-title h1 {
     font-size: 1.3em;
-    margin: 0;
   }
 
   .name-title h2 {
     font-size: 1em;
-    margin: 0;
     opacity: 0.8;
   }
 
   .header-right {
-    display: flex;
-    align-items: center;
     gap: 5px;
-    margin: 0;
-    padding: 0;
     height: 30px;
   }
 
   .header-nav {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     gap: 5px;
-    height: 100%;
   }
 
   .header-nav a {
-    margin: 0;
     padding: 2px 3px;
     font-size: 0.8em;
-    text-decoration: none;
-    color: var(--resume-link-color);
-    transition: color 0.3s ease, background-color 0.3s ease;
-    height: 100%;
-    display: flex;
-    align-items: center;
-  }
-
-  .header-nav a:hover {
-    color: var(--text-color);
-    background-color: var(--background-color);
-    border-radius: 8px;
   }
 
   .header-nav .icon {
     width: 26px;
     height: 26px;
     margin: 1px;
-    background-color: var(--resume-link-color);
-    transition: background-color 0.3s ease;
-  }
-
-  .header-nav .icon:hover {
-    box-shadow: 0 0 8px 4px var(--button-hover-background);
   }
 
   .resume-link {
@@ -466,15 +382,6 @@ body, .content, section, .job, .project {
     padding: 4px 12px;
     border-radius: 18px;
     font-size: 0.9em;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .resume-link:hover {
-    box-shadow: 0 0 15px 5px var(--button-hover-background);
   }
 
   .theme-toggle {
@@ -486,14 +393,9 @@ body, .content, section, .job, .project {
   }
 
   main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 25px;
     margin-top: 70px;
     width: 100%;
     max-width: 768px;
-    height: auto;
     padding: 15px;
   }
 
@@ -501,9 +403,7 @@ body, .content, section, .job, .project {
     width: 95%;
     max-width: 768px;
     padding: 15px;
-    box-sizing: border-box;
     margin-bottom: 20px;
-    padding-left: 15px;
   }
 
   section h2 {
@@ -517,7 +417,6 @@ body, .content, section, .job, .project {
   .sandwich-menu div {
     width: 25px;
     height: 3px;
-    background-color: var(--text-color);
     margin: 3px 0;
   }
 }
@@ -532,16 +431,16 @@ body, .content, section, .job, .project {
   .name-title {
     width: 100%;
   }
+
   .name-title h1 {
     font-size: 1.2em;
-    margin: 0;
   }
 
   .name-title h2 {
     font-size: 1em;
-    margin: 0;
     opacity: 0.8;
   }
+
   .header-nav {
     width: 100%;
     justify-content: flex-start;

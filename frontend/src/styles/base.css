@@ -1,3 +1,6 @@
+/* Base styles for the entire document */
+
+/* Reset and base styles */
 body {
   margin: 0;
   padding: 0;
@@ -8,6 +11,88 @@ body {
   line-height: 1.6;
 }
 
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  line-height: 1.2;
+}
+
+/* Layout Components */
+
+/* Header */
+header {
+  background-color: var(--header-background);
+  color: var(--header-text-color);
+  padding: 1rem 0;
+}
+
+/* Footer */
+footer {
+  background-color: var(--footer-background);
+  color: var(--footer-text-color);
+  padding: 1rem 0;
+  text-align: center;
+}
+
+/* Navigation */
+nav {
+  background-color: var(--navbar-background);
+}
+
+nav a {
+  color: var(--navbar-link-color);
+  padding: 0.5rem 1rem;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+nav a:hover {
+  background-color: var(--navbar-hover-background);
+  color: var(--navbar-hover-color);
+}
+
+/* Common Elements */
+
+/* Links */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--hover-color);
+}
+
+/* Buttons */
+button {
+  background-color: var(--button-background);
+  color: var(--button-text);
+  border: 1px solid var(--button-border);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--button-hover-background);
+  color: var(--button-text);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 1.5rem;
+}
+
+/* Utility Classes */
+
+/* Particles.js container */
 #particles-js {
   position: fixed;
   top: 0;
@@ -17,45 +102,8 @@ body {
   z-index: -1;
 }
 
-a {
-  color: var(--link-color);
-  text-decoration: none;
-}
-
-a:hover {
-  color: var(--hover-color);
-}
-
-button {
-  background-color: var(--button-background);
-  color: var(--button-text);
-  border: 1px solid var(--button-border);
-}
-
-button:hover {
-  background-color: var(--button-hover-background);
-  color: var(--button-text);
-}
-
-header {
-  background-color: var(--header-background);
-  color: var(--header-text-color);
-}
-
-footer {
-  background-color: var(--footer-background);
-  color: var(--footer-text-color);
-}
-
-nav {
-  background-color: var(--navbar-background);
-}
-
-nav a {
-  color: var(--navbar-link-color);
-}
-
-nav a:hover {
-  background-color: var(--navbar-hover-background);
-  color: var(--navbar-hover-color);
+/* Accessibility */
+:focus {
+  outline: 2px solid var(--focus-color, #4d90fe);
+  outline-offset: 2px;
 }

@@ -1,4 +1,6 @@
-/* Center the main content area */
+/* Layout Styles */
+
+/* 1. Global Layout */
 body {
   display: flex;
   justify-content: center;
@@ -12,6 +14,7 @@ body {
   box-sizing: border-box;
 }
 
+/* 2. Section Styles */
 section {
   background-color: var(--section-background);
   backdrop-filter: var(--section-background-blur);
@@ -19,41 +22,26 @@ section {
   margin-bottom: 2rem;
   border-radius: 20px;
   text-align: center;
-  max-width: calc(100% - .8rem);
+  max-width: calc(100% - 0.8rem);
   margin-left: auto;
   margin-right: auto;
-}
-
-/* Add padding to the top of the first section */
-section:first-of-type {
-  padding-top: 4rem;
-}
-
-/* Add padding to the top of the first section for larger devices */
-@media (max-width: 768px) {
-  section:first-of-type {
-    padding-top: .3rem;
-  }
-}
-
-@media (max-width: 400px) {
-  section:first-of-type {
-    padding-top: 2.5rem;
-  }
 }
 
 section h2 {
   margin-bottom: 1rem;
 }
 
-/* Center content for general sections */
 section > .content-wrapper > * {
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* Specific styling for job items in the Experience section */
+section:first-of-type {
+  padding-top: 4rem;
+}
+
+/* 3. Experience Section */
 .job-item {
   text-align: left;
   margin-bottom: 2rem;
@@ -79,7 +67,7 @@ section > .content-wrapper > * {
   padding-left: 1.5rem;
 }
 
-/* Styling for Technical Skills section */
+/* 4. Technical Skills Section */
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -87,17 +75,14 @@ section > .content-wrapper > * {
   justify-content: center;
   max-width: 1200px;
   margin: 0 auto;
-  
 }
 
 .skill-category {
   text-align: center;
-  
 }
 
 .skill-category h3 {
   margin-bottom: 0.5rem;
-  
 }
 
 .skill-list {
@@ -112,7 +97,7 @@ section > .content-wrapper > * {
   margin: 0.25rem 0.5rem;
 }
 
-/* Styling for Projects section */
+/* 5. Projects Section */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -167,7 +152,7 @@ section > .content-wrapper > * {
   background-color: var(--primary-color-dark);
 }
 
-/* Styling for MyResume section */
+/* 6. MyResume Section */
 #my-resume .content-wrapper {
   text-align: center;
   min-height: 1500px;
@@ -183,13 +168,11 @@ section > .content-wrapper > * {
   width: 100%;
   min-height: 1400px;
   max-width: 1000px;
-  margin: 2rem auto;
+  margin: 2rem auto -60px;
   border: none;
   border-radius: 1px;
   overflow: hidden;
   background: transparent;
-  margin-top: -20px;
-  margin-bottom: -60px;
 }
 
 .resume-pdf-container iframe {
@@ -197,7 +180,7 @@ section > .content-wrapper > * {
   min-height: 1400px;
 }
 
-/* Ensure other sections remain centered */
+/* 7. About Me and Experience Section */
 #about-me .content-wrapper,
 #experience .content-wrapper {
   text-align: center;
@@ -208,4 +191,17 @@ section > .content-wrapper > * {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* 8. Media Queries */
+@media (max-width: 768px) {
+  section:first-of-type {
+    padding-top: 0.3rem;
+  }
+}
+
+@media (max-width: 400px) {
+  section:first-of-type {
+    padding-top: 2.5rem;
+  }
 }
