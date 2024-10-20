@@ -59,14 +59,13 @@ function ResumePDF() {
   }
 
   return (
-    <div className="resume-pdf-container">
-      <iframe
-        src={pdfUrl}
-        width="100%"
-        height="100%"
-        style={{border: 'none'}}
-        title="Resume"
-      />
+    <div className="resume-section">
+      <div className="resume-pdf-container">
+        <iframe
+          src={pdfUrl}
+          title="Resume"
+        />
+      </div>
       <button onClick={downloadResume} className="download-button">Download Resume</button>
     </div>
   );

@@ -1,0 +1,153 @@
+/* Media Queries */
+@media (min-width: 769px) {
+  .content {
+    padding-left: 170px; /* Adjust for side panel width */
+  }
+
+  section {
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    padding: 10px;
+    width: 100%;
+  }
+
+  .content.sidebar-open {
+    margin-left: 0;
+  }
+
+  .side-panel {
+    margin-top: 120px;
+    height: calc(100vh - 120px);
+    padding-top: 20px;
+  }
+
+  .floating-header {
+    padding: 8px 10px;
+  }
+
+  .name-title h1 {
+    font-size: 1.3em;
+  }
+
+  .name-title h2 {
+    font-size: 1em;
+    opacity: 0.8;
+  }
+
+  .header-right {
+    gap: 5px;
+    height: 30px;
+  }
+
+  .header-nav {
+    gap: 5px;
+  }
+
+  .header-nav a {
+    padding: 2px 3px;
+    font-size: 0.8em;
+  }
+
+  .header-nav .icon {
+    width: 26px;
+    height: 26px;
+    margin: 1px;
+  }
+
+  .resume-link {
+    height: 26px;
+    padding: 4px 12px;
+    border-radius: 18px;
+    font-size: 0.9em;
+  }
+
+  .theme-toggle {
+    margin-left: 5px;
+    padding: 1px;
+    width: 26px;
+    height: 26px;
+    font-size: 1em;
+  }
+
+  main {
+    margin-top: 70px;
+    width: 100%;
+    max-width: 768px;
+    padding: 15px;
+  }
+
+  section {
+    width: 100%;
+    max-width: 768px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  section h2 {
+    font-size: 1.4em;
+  }
+
+  section p, section li {
+    font-size: 0.95em;
+  }
+
+  .sandwich-menu div {
+    width: 25px;
+    height: 3px;
+    margin: 3px 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .floating-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .name-title {
+    width: 100%;
+  }
+
+  .name-title h1 {
+    font-size: 1.2em;
+  }
+
+  .name-title h2 {
+    font-size: 1em;
+    opacity: 0.8;
+  }
+
+  .header-nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .header-nav a {
+    padding: 4px 0;
+    font-size: 0.85em;
+  }
+
+  .resume-link {
+    margin-top: 8px;
+    width: fit-content;
+  }
+
+  section h2 {
+    font-size: 1.3em;
+  }
+
+  section p, section li {
+    font-size: 0.9em;
+  }
+
+  section {
+    padding: 12px;
+    width: 100%;
+  }
+}

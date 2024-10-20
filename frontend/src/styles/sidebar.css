@@ -1,0 +1,86 @@
+/* Sandwich Menu Styles */
+.sandwich-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.sandwich-menu:hover {
+  background: var(--button-hover-background);
+  box-shadow: 0 0 5px 1px var(--button-hover-background);
+}
+
+.sandwich-menu div {
+  width: 30px;
+  height: 3px;
+  background: var(--text-color);
+  border-radius: 10px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px;
+}
+
+/* Side Panel Styles */
+.side-panel {
+  position: fixed;
+  top: 60px;
+  left: -150px;
+  width: 150px;
+  height: 500px;
+  color: var(--sidebar-text-color);
+  background-color: var(--tbackground-color);
+  backdrop-filter: var(--tbackground-blur);
+  z-index: 1000;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: left 0.1s ease-in-out;
+  border-radius: 0 25px 25px 0;
+  padding-top: 30px;
+}
+
+.side-panel.open {
+  left: 0;
+}
+
+.side-panel-content {
+  padding: 20px;
+}
+
+.side-panel h3 {
+  color: var(--sidebar-text-color);
+  margin-bottom: 20px;
+  font-size: 1.4em;
+}
+
+.side-panel nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: transparent;
+}
+
+.side-panel nav a {
+  color: var(--sidebar-text-color);
+  text-decoration: none;
+  margin: 10px 0;
+  font-size: 1.2em;
+  transition: color 0.3s ease;
+  background-color: transparent;
+}
+
+.side-panel nav a:hover,
+.side-panel nav a.active {
+  color: var(--resume-link-color);
+  text-decoration: underline;
+  background-color: var(--resume-background-color);
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
+  border-radius: 12px;
+  padding: 4px 8px;
+}

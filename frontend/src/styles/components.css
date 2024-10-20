@@ -1,109 +1,27 @@
-/* Component Styles */
-
-/* 1. Job Items */
-.job-item {
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--text-color);
-}
-
-.job-item:last-child {
-  border-bottom: none;
-}
-
-.job-header {
+/* Theme Toggle Styles */
+.theme-toggle {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 1.8em;
+  padding: 1px 5px;
+  border-radius: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--resume-background-color);
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  justify-content: center;
 }
 
-.job-icon {
-  width: 50px;
-  height: 50px;
-  margin-right: 1rem;
-  border-radius: 50%;
-}
-
-.job-title h3,
-.job-title h4 {
-  margin-bottom: 0.25rem;
-}
-
-.job-title h4 {
-  font-weight: normal;
-}
-
-.job-date {
-  font-style: italic;
-  margin-bottom: 0.5rem;
-}
-
-.job-responsibilities {
-  margin-top: 1rem;
-}
-
-/* 2. Technical Skills */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.skill-category {
-  padding: 1rem;
-  border-radius: 25px;
-  border: 1px solid var(--text-color);
-  backdrop-filter: var(--skill-category-background-blur);
-}
-
-.skill-category h3 {
-  margin-bottom: 0.5rem;
-}
-
-.skill-list {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-/* 3. Projects */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.project-item {
-  border: 1px solid var(--text-color);
-  border-radius: 25px;
-  overflow: hidden;
-  background-color: var(--skill-category-background);
-  backdrop-filter: var(--skill-category-background-blur);
-}
-
-.project-icon {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.project-content {
-  padding: 1rem;
-}
-
-.project-link {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--resume-background-color);
-  color: var(--background-color);
-  border-radius: 10px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.project-link:hover {
+.theme-toggle:hover {
+  border-radius: 100%;
+  padding: 1px 5px;
+  background-color: var(--background-color);
   color: var(--resume-background-color);
-  background-color: var(--text-color);
-  padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
+
+/* You can add more component-specific styles here */
