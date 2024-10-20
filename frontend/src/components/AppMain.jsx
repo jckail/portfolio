@@ -8,8 +8,13 @@ import MyResume from '../sections/MyResume'
 const AppMain = ({ resumeData, error, sectionsRef }) => {
   return (
     <>
-      {error && <div>Error: {error}</div>}
-      {!resumeData && <div>Loading resume data...</div>}
+      {error && (
+        <div>
+          <p>Error: {error.message}</p>
+          <p>Failed to fetch data from: {error.url}</p>
+        </div>
+      )}
+      {!resumeData && !error && <div>Loading resume data...</div>}
       {resumeData && (
         <>
           <AboutMe aboutMe={resumeData.aboutMe} ref={el => sectionsRef.current['about-me'] = el} />

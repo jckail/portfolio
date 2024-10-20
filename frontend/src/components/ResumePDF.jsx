@@ -5,27 +5,23 @@ function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const fileName = process.env.RESUME_FILE || 'JordanKailResume.pdf';
 
   useEffect(() => {
-    console.log('ResumePDF component mounted');
     const fetchPdf = async () => {
       try {
-        console.log('Fetching PDF...');
         const apiUrl = getApiUrl();
-        const response = await fetch(`${apiUrl}/api/resume`, {
+        const fullUrl = `${apiUrl}/api/resume`;
+        const response = await fetch(fullUrl, {
           method: 'GET',
           mode: 'cors',
           credentials: 'include',
         });
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const blob = await response.blob();
-        console.log('Blob received:', blob);
         const url = URL.createObjectURL(blob);
-        console.log('Created URL:', url);
         setPdfUrl(url);
         setIsLoading(false);
       } catch (err) {
@@ -45,11 +41,6 @@ function ResumePDF() {
     };
   }, []);
 
-  console.log('Rendering ResumePDF component');
-  console.log('isLoading:', isLoading);
-  console.log('error:', error);
-  console.log('pdfUrl:', pdfUrl);
-
   if (isLoading) {
     return <div>Loading resume...</div>;
   }
@@ -63,7 +54,7 @@ function ResumePDF() {
       <div className="resume-pdf-container">
         <iframe
           src={pdfUrl}
-          title="Resume"
+          title={fileName}
         />
       </div>
       <button onClick={downloadResume} className="download-button">Download Resume</button>

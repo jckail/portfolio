@@ -17,14 +17,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get allowed origins from environment variable or use default
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://0.0.0.0:8080,http://localhost:8080,http://localhost:5173,http://0.0.0.0:5173,http://192.168.0.122:5173").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*,http://192.168.*.*:*").split(",")
 allowed_origins = [origin.strip() for origin in allowed_origins]
-logger.info(f"Allowed origins: {allowed_origins}")
+logger.info(f"Allowed origin patterns: {allowed_origins}")
+
+def is_origin_allowed(origin: str) -> bool:
+    from fnmatch import fnmatch
+    return any(fnmatch(origin, pattern) for pattern in allowed_origins)
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins,  # Use the allowed_origins list
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,6 +40,9 @@ app.include_router(api_router, prefix="/api")
 # Serve static files (images)
 images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
 app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
+
+# Define the path to the assets directory
+assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'assets'))
 
 # Serve frontend static files
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))

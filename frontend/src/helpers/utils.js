@@ -1,5 +1,3 @@
-import.meta.env.VITE_RESUME_FILE;
-
 export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   const targetElement = document.getElementById(sectionId);
   if (targetElement) {
@@ -18,27 +16,45 @@ export const getApiUrl = () => {
   const currentHost = window.location.hostname;
   console.log('Current hostname:', currentHost);
 
-  let apiUrl;
-  if (currentHost === 'localhost' || currentHost === '0.0.0.0' || currentHost === '127.0.0.1' || currentHost === '192.168.0.122') {
-    apiUrl = `http://${currentHost}:8080`; // Use HTTP and port 8080 for local development
-  } else if (currentHost.includes('run.app')) {
-    // For GCP Cloud Run, use HTTPS without a port number
-    apiUrl = `https://${currentHost}`;
-  } else {
-    // For other production environments, use HTTPS without a port number
-    apiUrl = `https://${currentHost}`;
-  }
+  const isLocal = ['localhost', '0.0.0.0', '127.0.0.1', '192.168.0.122'].includes(currentHost);
+  const protocol = isLocal ? 'http' : 'https';
+  const port = isLocal ? ':8080' : '';
+  const apiUrl = `${protocol}://${currentHost}${port}`;
 
   console.log('API URL:', apiUrl);
   return apiUrl;
 };
 
 export const downloadResume = () => {
-  const downloadUrl = '/api/resume';
-  const downloadLink = document.createElement('a');
-  downloadLink.href = downloadUrl;
-  downloadLink.download = import.meta.env.VITE_RESUME_FILE || 'resume.pdf';
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+  try {
+    console.info('Starting resume download...');
+
+    const apiUrl = getApiUrl();
+    const downloadUrl = '/api/resume';
+    const fullUrl = `${apiUrl}${downloadUrl}`;
+    console.debug(`Full download URL: ${fullUrl}`);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = fullUrl;
+
+    const fileName = process.env.RESUME_FILE || 'Resume.pdf';
+    downloadLink.download = fileName;
+    console.debug(`File name resolved to: ${fileName}`);
+
+    document.body.appendChild(downloadLink);
+    console.debug('Download link appended to the document body.');
+
+    downloadLink.click();
+    console.info('Download link clicked. Starting download process.');
+
+    document.body.removeChild(downloadLink);
+    console.debug('Download link removed from the document body.');
+
+    console.info('Resume download completed successfully.');
+  } catch (error) {
+    console.error('Error occurred while downloading the resume:', error);
+
+    // Optional: Provide user feedback if download fails.
+    alert('Failed to download the resume. Please try again later.');
+  }
 };

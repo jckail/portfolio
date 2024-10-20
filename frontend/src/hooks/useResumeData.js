@@ -36,7 +36,7 @@ export const useResumeData = () => {
         if (error instanceof TypeError) {
           console.error('This might be a CORS issue or a network error');
         }
-        setError(`Failed to fetch resume data: ${error.message}`);
+        setError({ message: error.message, url: fullApiUrl });
       });
   }, [apiUrl]);
 
