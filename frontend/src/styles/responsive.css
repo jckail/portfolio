@@ -7,6 +7,12 @@
   section {
     padding-left: 20px;
   }
+
+  .resume-link {
+    height: 24px;
+    padding: 0 6px;
+    font-size: 0.95em;
+  }
 }
 
 @media (max-width: 768px) {
@@ -60,10 +66,10 @@
   }
 
   .resume-link {
-    height: 26px;
-    padding: 4px 12px;
-    border-radius: 18px;
-    font-size: 0.9em;
+    height: 22px;
+    padding: 0 5px;
+    border-radius: 11px;
+    font-size: 0.85em;
   }
 
   .theme-toggle {
@@ -103,6 +109,14 @@
   }
 }
 
+@media (max-width: 480px) {
+  .resume-link {
+    height: 22px;
+    padding: 0 5px;
+    font-size: 0.85em;
+  }
+}
+
 @media (max-width: 374px) {
   .floating-header {
     flex-direction: column;
@@ -136,6 +150,9 @@
   .resume-link {
     margin-top: 8px;
     width: fit-content;
+    height: 22px;
+    padding: 0 5px;
+    font-size: 0.85em;
   }
 
   section h2 {

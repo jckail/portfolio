@@ -52,16 +52,18 @@
   display: flex;
   align-items: center;
   height: 100%;
+  
 }
 
 .header-nav a {
   color: var(--resume-link-color);
   text-decoration: none;
-  padding: 8px 12px;
+  padding: -5px 12px;
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
   height: 100%;
+  font-weight: bold;
 }
 
 .header-nav a:hover {
@@ -93,19 +95,33 @@
 .resume-link {
   background-color: var(--resume-background-color);
   height: 30px;
-  padding: 1px 5px;
-  border-radius: 24px;
-  font-size: 1.3em;
-  transition: background-color 0.3s ease;
+  padding: 1px 12px;
+  border-radius: 15px;
+  font-size: 1em;
+  transition: all 0.3s ease;
   color: var(--resume-link-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 100px;
+  max-width: 150px;
 }
 
 .resume-link:hover {
   color: var(--text-color);
   background-color: var(--background-color);
-  padding: 8px 12px;
   box-shadow: 0 0 20px 10px var(--button-hover-background);
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .resume-link {
+    font-size: 0.9em;
+    padding: 1px 8px;
+    min-width: 80px;
+    max-width: 120px;
+  }
 }

@@ -59,7 +59,8 @@ body.dark-theme {
   --navbar-background: transparent;
   --navbar-link-color: transparent;
   --resume-link-color: var(--black);
-  --resume-background-color: var(--white);
+  --resume-background-color: white;
+  --resume-boarder-color: white;
   --navbar-hover-background: #575757;
   --navbar-hover-color: var(--white);
   --sidebar-text-color: var(--white);

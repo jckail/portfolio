@@ -10,11 +10,12 @@ resume_data = {
         "linkedin": "https://www.linkedin.com/in/jckail/",
     },
     "about_me": str("""
-I'm a data engineer with an insatiable curiosity for all things tech, always eager to push boundaries and explore the cutting edge of AI, machine learning, and big data. I’ve built scalable systems, crafted complex pipelines, and deployed transformer models, thriving at the intersection of innovation and impact.
+I'm an engineer with a deep curiosity for technology, always excited to explore AI, machine learning, and data systems. I've helped build efficient, scalable systems, developed complex pipelines, and worked with transformer models.
 
-Whether developing AI-driven solutions or using QR codes to reconnect refugees with resources, I’m passionate about creating technology that makes a real difference. When I’m not neck-deep in data, you’ll find me building computers, hiking with my dog in the Rockies, or experimenting with new machine learning frameworks. 
-\nFor me, the goal is simple:                     
-\n''Make the world work better, one dataset—and adventure—at a time.''
+I love collaborating with others to create technology that makes a real impact. When I’m not working, you’ll likely find me building computers, hiking with my dog in the mountains, or tinkering with tech gadgets.
+
+For me, the goal is simple:
+"Make the world work better, one dataset—and adventure—at a time."
 
 """),
     "experience": [
