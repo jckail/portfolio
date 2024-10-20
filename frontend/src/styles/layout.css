@@ -37,9 +37,7 @@ section > .content-wrapper > * {
   margin-right: auto;
 }
 
-section:first-of-type {
-  padding-top: 4rem;
-}
+
 
 /* 3. Experience Section */
 .job-item {
@@ -192,6 +190,13 @@ section:first-of-type {
   margin-left: auto;
   margin-right: auto;
 }
+
+
+
+section:first-of-type {
+  padding-top: 4rem;
+}
+
 
 /* 8. Media Queries */
 @media (max-width: 768px) {
