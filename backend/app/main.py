@@ -45,7 +45,7 @@ app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
 assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
 
 # Serve resume PDF as a static file
-app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+app.mount("/api/assets", StaticFiles(directory=assets_dir), name="assets")
 
 # Serve frontend static files
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
