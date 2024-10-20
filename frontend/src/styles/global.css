@@ -4,6 +4,8 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .App {
