@@ -5,8 +5,10 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     ports:
-      - "8080:8080"
+      - "${PORT}:${PORT}"
     volumes:
       - ./backend:/app/backend
       - ./frontend:/app/frontend
@@ -14,3 +16,10 @@ services:
       - ./images:/app/images
     environment:
       - PYTHONPATH=/app
+      - FLASK_APP=${FLASK_APP}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - VITE_API_URL=${VITE_API_URL}
+      - PRODUCTION_URL=${PRODUCTION_URL}
+      - RESUME_FILE=${RESUME_FILE}
+      - VITE_RESUME_FILE=${VITE_RESUME_FILE}
+      - PORT=${PORT}

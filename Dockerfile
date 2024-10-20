@@ -26,11 +26,17 @@ COPY backend /app/backend
 # Create the images directory and copy images
 COPY images /app/images
 
+# Copy the .env file
+COPY .env /app/.env
+
 # Set environment variables
 ENV PYTHONPATH=/app
 
-# Expose the port the app runs on
-EXPOSE 8080
+# Expose the port the app runs on (default to 8080 if PORT is not set)
+EXPOSE ${PORT:-8080}
 
-# Command to run the application
-CMD ["sh", "-c", "echo 'Starting application...' && ls -R /app && uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"]
+# Install gettext-base for envsubst (needed for environment variable substitution)
+RUN apt-get update && apt-get install -y gettext-base && rm -rf /var/lib/apt/lists/*
+
+# Entry point to ensure .env is loaded and app is started properly
+CMD ["sh", "-c", "export $(grep -v '^#' /app/.env | xargs) && echo 'Environment Variables:' && printenv && echo 'Starting application...' && ls -R /app && uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
