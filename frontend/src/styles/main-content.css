@@ -3,7 +3,7 @@ main {
   margin-top: 40px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
   width: 100%;
 }
 

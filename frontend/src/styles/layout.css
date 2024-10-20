@@ -199,6 +199,9 @@ section > .content-wrapper > * {
 section:first-of-type {
   padding-top: 4rem;
 }
+main:first-of-type {
+  padding-top: 4rem;
+}
 
 /* 8. Media Queries */
 @media (max-width: 768px) {
