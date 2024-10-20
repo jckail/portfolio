@@ -25,36 +25,41 @@ export const getApiUrl = () => {
   return apiUrl;
 };
 
-export const downloadResume = () => {
+export const fetchResumeName = async () => {
   try {
-    console.info('Starting resume download...');
-
     const apiUrl = getApiUrl();
-    const downloadUrl = '/api/resume';
-    const fullUrl = `${apiUrl}${downloadUrl}`;
-    console.debug(`Full download URL: ${fullUrl}`);
+    const response = await fetch(`${apiUrl}/api/resume_file_name`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch resume name: ${response.statusText}`);
+    }
+
+    const { resumeFileName = 'default_resume.pdf' } = await response.json();
+    return resumeFileName;
+  } catch (error) {
+    console.error('Error fetching resume name:', error);
+    return 'default_resume.pdf';
+  }
+};
+
+export const downloadResume = async () => {
+  try {
+    console.info('Initiating resume download...');
+
+    const [apiUrl, fileName] = await Promise.all([getApiUrl(), fetchResumeName()]);
+    const downloadUrl = `${apiUrl}/api/resume`;
 
     const downloadLink = document.createElement('a');
-    downloadLink.href = fullUrl;
-
-    const fileName = process.env.RESUME_FILE || 'Resume.pdf';
+    downloadLink.href = downloadUrl;
     downloadLink.download = fileName;
-    console.debug(`File name resolved to: ${fileName}`);
 
     document.body.appendChild(downloadLink);
-    console.debug('Download link appended to the document body.');
-
     downloadLink.click();
-    console.info('Download link clicked. Starting download process.');
-
     document.body.removeChild(downloadLink);
-    console.debug('Download link removed from the document body.');
 
     console.info('Resume download completed successfully.');
   } catch (error) {
-    console.error('Error occurred while downloading the resume:', error);
-
-    // Optional: Provide user feedback if download fails.
+    console.error('Error during resume download:', error);
     alert('Failed to download the resume. Please try again later.');
   }
 };

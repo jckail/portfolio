@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl, downloadResume } from '../helpers/utils';
+import { getApiUrl, downloadResume, fetchResumeName } from '../helpers/utils';
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const fileName = process.env.RESUME_FILE || 'JordanKailResume.pdf';
+  const fileName = fetchResumeName();
 
   useEffect(() => {
     const fetchPdf = async () => {
