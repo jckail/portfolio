@@ -8,6 +8,7 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
   const timeoutRef = useRef(null);
+  const initialScrollDone = useRef(false); // Track if the initial scroll is completed
 
   const updateSection = (newSectionId) => {
     if (newSectionId !== currentSection) {
@@ -16,7 +17,9 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => {
-        window.history.replaceState(null, '', `#${newSectionId}`);
+        if (initialScrollDone.current) {
+          window.history.replaceState(null, '', `#${newSectionId}`);
+        }
       }, 1000);
     }
   };
@@ -45,7 +48,7 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
 
     const newSectionId = Object.entries(sectionsRef.current)
       .reverse()
-      .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0] 
+      .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0]
       || currentSection;
 
     updateSection(newSectionId);
@@ -86,15 +89,17 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
       const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
       window.scrollTo({
         top: targetPosition,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
       setCurrentSection(sectionId);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => {
-        window.history.pushState(null, '', `#${sectionId}`);
-      }, 1000);
+        if (initialScrollDone.current) {
+          window.history.pushState(null, '', `#${sectionId}`);
+        }
+      }, 10);
     }
   }, [headerHeight]);
 
@@ -103,11 +108,12 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     if (hash && sectionsRef.current[hash]) {
       scrollToSection(hash);
     }
+    initialScrollDone.current = true; // Mark initial scroll as done
   }, [scrollToSection]);
 
   useEffect(() => {
     if (resumeData && headerHeight > 0) {
-      setTimeout(handleInitialScroll, 100);
+      setTimeout(handleInitialScroll, 1);
     }
   }, [resumeData, headerHeight, handleInitialScroll]);
 
