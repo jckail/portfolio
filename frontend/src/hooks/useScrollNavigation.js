@@ -1,72 +1,97 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useScrollNavigation = (resumeData, headerHeight) => {
-  const [currentSection, setCurrentSection] = useState('about-me');
+  const [currentSection, setCurrentSection] = useState(
+    () => window.location.hash.slice(1) || 'about-me'
+  );
   const sectionsRef = useRef({});
+  const observerRef = useRef(null);
 
-  const handleScroll = useCallback(() => {
-    const scrollPosition = window.scrollY;
-    let newCurrentSection = 'about-me';
+  const updateSection = (newSectionId) => {
+    if (newSectionId !== currentSection) {
+      setCurrentSection(newSectionId);
+      window.history.replaceState(null, '', `#${newSectionId}`);
+    }
+  };
 
-    Object.entries(sectionsRef.current).forEach(([sectionId, sectionRef]) => {
-      if (sectionRef && scrollPosition >= sectionRef.offsetTop - headerHeight - 100) {
-        newCurrentSection = sectionId;
+  const handleIntersection = useCallback((entries) => {
+    let mostVisibleEntry = null;
+
+    // Find the entry with the highest intersection ratio.
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        if (
+          !mostVisibleEntry ||
+          entry.intersectionRatio > mostVisibleEntry.intersectionRatio
+        ) {
+          mostVisibleEntry = entry;
+        }
       }
     });
 
-    if (newCurrentSection !== currentSection) {
-      setCurrentSection(newCurrentSection);
-      window.history.replaceState(null, '', `#${newCurrentSection}`);
+    if (mostVisibleEntry) {
+      updateSection(mostVisibleEntry.target.id);
     }
-  }, [headerHeight, currentSection]);
+  }, [currentSection]);
+
+  const updateUrlOnScroll = useCallback(() => {
+    const scrollPosition = window.scrollY + headerHeight + 50;
+
+    const newSectionId = Object.entries(sectionsRef.current)
+      .reverse() // Reverse for the last visible section
+      .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0] 
+      || currentSection;
+
+    updateSection(newSectionId);
+  }, [currentSection, headerHeight]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [handleScroll]);
-
-  const scrollToSection = useCallback((sectionId, headerHeight, updateUrl = true) => {
-    console.log(`Attempting to scroll to section: ${sectionId}`);
-    const targetElement = document.getElementById(sectionId);
-    if (targetElement) {
-      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-      console.log(`Scrolling to position: ${targetPosition - headerHeight}`);
-      window.scrollTo({
-        top: targetPosition - headerHeight,
-        behavior: 'smooth'
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(handleIntersection, {
+        rootMargin: `-${headerHeight}px 0px -45% 0px`, // Adjusted for better visibility tracking
+        threshold: [0.1, 0.5, 1], // Adjusted to fire more consistently
       });
-      if (updateUrl) {
-        window.history.pushState(null, '', `#${sectionId}`);
-      }
-      setCurrentSection(sectionId);
-    } else {
-      console.error(`Target element not found for section: ${sectionId}`);
     }
-  }, []);
+
+    const observer = observerRef.current;
+    Object.values(sectionsRef.current).forEach((section) => {
+      if (section) observer.observe(section);
+    });
+
+    window.addEventListener('scroll', updateUrlOnScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', updateUrlOnScroll);
+    };
+  }, [headerHeight, handleIntersection, updateUrlOnScroll]);
+
+  const scrollToSection = useCallback(
+    (sectionId) => {
+      const targetElement = sectionsRef.current[sectionId];
+      if (targetElement) {
+        requestAnimationFrame(() => {
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        });
+        updateSection(sectionId);
+      }
+    },
+    [headerHeight]
+  );
 
   const handleInitialScroll = useCallback(() => {
     const hash = window.location.hash.slice(1);
-    console.log(`Initial hash: ${hash}`);
-    console.log(`Available sections:`, Object.keys(sectionsRef.current));
-    if (hash && sectionsRef.current[hash] && headerHeight > 0) {
-      console.log(`Scrolling to initial section: ${hash}`);
-      setTimeout(() => {
-        scrollToSection(hash, headerHeight, false);
-      }, 1000); // Increased delay to 1000ms (1 second)
-    } else {
-      console.log(`Not scrolling initially. Hash: ${hash}, Header height: ${headerHeight}`);
+    if (hash && sectionsRef.current[hash]) {
+      scrollToSection(hash);
     }
-  }, [headerHeight, scrollToSection]);
+  }, [scrollToSection]);
 
   useEffect(() => {
-    console.log(`useEffect triggered. resumeData: ${!!resumeData}, headerHeight: ${headerHeight}`);
     if (resumeData && headerHeight > 0) {
-      console.log(`Resume data loaded and header height set. Calling handleInitialScroll.`);
-      handleInitialScroll();
-    } else {
-      console.log(`Not calling handleInitialScroll. resumeData: ${!!resumeData}, headerHeight: ${headerHeight}`);
+      setTimeout(handleInitialScroll, 100);
     }
   }, [resumeData, headerHeight, handleInitialScroll]);
 

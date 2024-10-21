@@ -43,4 +43,6 @@ const Experience = forwardRef(({ experience }, ref) => {
   )
 })
 
+Experience.displayName = 'Experience';
+
 export default Experience

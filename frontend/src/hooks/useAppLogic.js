@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useResumeData } from './useResumeData';
 import { useTheme } from './useTheme';
 import { useParticles } from './useParticles';
@@ -8,6 +8,7 @@ import { downloadResume } from '../helpers/utils';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
+
   const { resumeData, error } = useResumeData();
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
   const { particlesLoaded } = useParticles(updateParticlesConfig);
@@ -18,11 +19,11 @@ export const useAppLogic = () => {
     toggleSidebar
   } = useSidebar();
 
-  const handleResumeClick = (event) => {
+  const handleResumeClick = useCallback((event) => {
     event.preventDefault();
     scrollToSection('my-resume', headerHeight);
     downloadResume();
-  };
+  }, [scrollToSection, headerHeight]);
 
   return {
     resumeData,

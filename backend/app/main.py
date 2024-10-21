@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Get allowed origins from environment variable or use default
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*,http://192.168.*.*:*").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*,http://192.168.*.*:*,http://*:*,https://*:*").split(",")
 allowed_origins = [origin.strip() for origin in allowed_origins]
 logger.info(f"Allowed origin patterns: {allowed_origins}")
 
@@ -28,7 +28,7 @@ def is_origin_allowed(origin: str) -> bool:
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # Use the allowed_origins list
+    allow_origin_regex=r"https?://.*",  # Allow all HTTP and HTTPS origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,4 +57,4 @@ async def serve_frontend(full_path: str):
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
