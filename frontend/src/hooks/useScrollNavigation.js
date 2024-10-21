@@ -35,7 +35,7 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
   }, [currentSection]);
 
   const updateUrlOnScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + headerHeight + 50;
+    const scrollPosition = window.scrollY + headerHeight + 150;
 
     const newSectionId = Object.entries(sectionsRef.current)
       .reverse() // Reverse for the last visible section
@@ -66,21 +66,18 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     };
   }, [headerHeight, handleIntersection, updateUrlOnScroll]);
 
-  const scrollToSection = useCallback(
-    (sectionId) => {
-      const targetElement = sectionsRef.current[sectionId];
-      if (targetElement) {
-        requestAnimationFrame(() => {
-          targetElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
-        });
-        updateSection(sectionId);
-      }
-    },
-    [headerHeight]
-  );
+  const scrollToSection = useCallback((sectionId) => {
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+      setCurrentSection(sectionId);
+      window.history.pushState(null, '', `#${sectionId}`);
+    }
+  }, [headerHeight]);
 
   const handleInitialScroll = useCallback(() => {
     const hash = window.location.hash.slice(1);
