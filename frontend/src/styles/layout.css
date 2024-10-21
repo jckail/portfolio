@@ -208,10 +208,19 @@ main:first-of-type {
   section:first-of-type {
     padding-top: 0.3rem;
   }
+
+
+  main:first-of-type {
+    padding-top: 1rem;
+  }
+
 }
 
 @media (max-width: 400px) {
   section:first-of-type {
-    padding-top: 2.5rem;
+    padding-top: 1.0rem;
+  }
+  main:first-of-type {
+    padding-top: 1rem;
   }
 }

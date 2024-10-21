@@ -1,12 +1,14 @@
 /* Media Queries */
 @media (min-width: 769px) {
-  .content {
-    padding-left: 170px; /* Adjust for side panel width */
+
+  /* .content {
+    padding-left: 170px; 
   }
 
   section {
     padding-left: 20px;
-  }
+  } */
+
 }
 
 @media (max-width: 768px) {
