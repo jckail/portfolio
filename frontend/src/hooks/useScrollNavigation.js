@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { debounce } from 'lodash';
 
 export const useScrollNavigation = (resumeData, headerHeight) => {
   const [currentSection, setCurrentSection] = useState(
@@ -6,18 +7,23 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
   );
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   const updateSection = (newSectionId) => {
     if (newSectionId !== currentSection) {
       setCurrentSection(newSectionId);
-      window.history.replaceState(null, '', `#${newSectionId}`);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        window.history.replaceState(null, '', `#${newSectionId}`);
+      }, 1000);
     }
   };
 
   const handleIntersection = useCallback((entries) => {
     let mostVisibleEntry = null;
 
-    // Find the entry with the highest intersection ratio.
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         if (
@@ -38,18 +44,23 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     const scrollPosition = window.scrollY + headerHeight + 150;
 
     const newSectionId = Object.entries(sectionsRef.current)
-      .reverse() // Reverse for the last visible section
+      .reverse()
       .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0] 
       || currentSection;
 
     updateSection(newSectionId);
   }, [currentSection, headerHeight]);
 
+  const debouncedUpdateUrlOnScroll = useCallback(
+    debounce(updateUrlOnScroll, 100),
+    [updateUrlOnScroll]
+  );
+
   useEffect(() => {
     if (!observerRef.current) {
       observerRef.current = new IntersectionObserver(handleIntersection, {
-        rootMargin: `-${headerHeight}px 0px -45% 0px`, // Adjusted for better visibility tracking
-        threshold: [0.1, 0.5, 1], // Adjusted to fire more consistently
+        rootMargin: `-${headerHeight}px 0px -45% 0px`,
+        threshold: [0.1, 0.5, 1],
       });
     }
 
@@ -58,13 +69,16 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
       if (section) observer.observe(section);
     });
 
-    window.addEventListener('scroll', updateUrlOnScroll, { passive: true });
+    window.addEventListener('scroll', debouncedUpdateUrlOnScroll, { passive: true });
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', updateUrlOnScroll);
+      window.removeEventListener('scroll', debouncedUpdateUrlOnScroll);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [headerHeight, handleIntersection, updateUrlOnScroll]);
+  }, [headerHeight, handleIntersection, debouncedUpdateUrlOnScroll]);
 
   const scrollToSection = useCallback((sectionId) => {
     const targetElement = document.getElementById(sectionId);
@@ -75,7 +89,12 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
         behavior: 'smooth'
       });
       setCurrentSection(sectionId);
-      window.history.pushState(null, '', `#${sectionId}`);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        window.history.pushState(null, '', `#${sectionId}`);
+      }, 1000);
     }
   }, [headerHeight]);
 
