@@ -9,6 +9,10 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
     event.preventDefault();
     console.log('Jumping to section:', targetId, 'with headerHeight:', headerHeight);
     scrollToSection(targetId, headerHeight);
+    
+    // Update URL immediately
+    window.history.pushState(null, '', `#${targetId}`);
+    
     // Add a small delay before closing the sidebar
     setTimeout(() => {
       onClose();
