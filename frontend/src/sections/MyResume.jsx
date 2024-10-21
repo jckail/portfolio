@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react'
-import ResumePDF from '../components/ResumePDF'
+import React, { forwardRef } from 'react';
+import ResumePDF from '../components/ResumePDF';
 
 const MyResume = forwardRef((props, ref) => {
   return (
@@ -10,7 +10,9 @@ const MyResume = forwardRef((props, ref) => {
         <ResumePDF />
       </div>
     </section>
-  )
-})
+  );
+});
 
-export default MyResume
+MyResume.displayName = 'MyResume';
+
+export default MyResume;

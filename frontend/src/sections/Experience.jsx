@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react'
-import { getApiUrl } from '../helpers/utils'
+import React, { forwardRef } from 'react';
+import { getApiUrl } from '../helpers/utils';
 
 const Experience = forwardRef(({ experience }, ref) => {
   const apiUrl = getApiUrl();
@@ -16,11 +16,15 @@ const Experience = forwardRef(({ experience }, ref) => {
         {experience.map((job, index) => (
           <div key={index} className="job-item">
             <div className="job-header">
-              <img src={`${apiUrl}/api/images/work-img.jpg`} alt="Work" className="job-icon" />
+              <img
+                src={`${apiUrl}/api/images/work-img.jpg`}
+                alt="Work"
+                className="job-icon"
+              />
               <div className="job-title">
                 <h3>
-                  <a 
-                    href={job.link} 
+                  <a
+                    href={job.link}
                     onClick={(e) => handleLinkClick(e, job.link)}
                     rel="noopener noreferrer"
                   >
@@ -40,9 +44,9 @@ const Experience = forwardRef(({ experience }, ref) => {
         ))}
       </div>
     </section>
-  )
-})
+  );
+});
 
 Experience.displayName = 'Experience';
 
-export default Experience
+export default Experience;

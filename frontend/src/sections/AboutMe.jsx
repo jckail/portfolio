@@ -1,13 +1,7 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef } from 'react';
 
 const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
   const aboutMeContent = aboutMe || about_me;
-
-  useEffect(() => {
-    console.log('AboutMe component received:', aboutMeContent);
-    console.log('AboutMe type:', typeof aboutMeContent);
-    console.log('AboutMe length:', aboutMeContent ? aboutMeContent.length : 'N/A');
-  }, [aboutMeContent]);
 
   if (!aboutMeContent) {
     return (
@@ -17,10 +11,10 @@ const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
           <p>Loading about me information...</p>
         </div>
       </section>
-    )
+    );
   }
 
-  const paragraphs = aboutMeContent.split('\n\n')
+  const paragraphs = aboutMeContent.split('\n\n');
 
   return (
     <section id="about-me" ref={ref}>
@@ -31,7 +25,9 @@ const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
         ))}
       </div>
     </section>
-  )
-})
+  );
+});
 
-export default AboutMe
+AboutMe.displayName = 'AboutMe';
+
+export default AboutMe;

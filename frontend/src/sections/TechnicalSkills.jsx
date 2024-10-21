@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef } from 'react';
 
 const TechnicalSkills = forwardRef(({ skills }, ref) => {
   if (!skills || Object.keys(skills).length === 0) {
@@ -9,7 +9,7 @@ const TechnicalSkills = forwardRef(({ skills }, ref) => {
           <p>No technical skills available.</p>
         </div>
       </section>
-    )
+    );
   }
 
   return (
@@ -30,7 +30,9 @@ const TechnicalSkills = forwardRef(({ skills }, ref) => {
         </div>
       </div>
     </section>
-  )
-})
+  );
+});
 
-export default TechnicalSkills
+TechnicalSkills.displayName = 'TechnicalSkills';
+
+export default TechnicalSkills;

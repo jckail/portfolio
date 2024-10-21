@@ -5,79 +5,107 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     () => window.location.hash.slice(1) || 'about-me'
   );
   const sectionsRef = useRef({});
+  const [sectionsReady, setSectionsReady] = useState(false);
   const observerRef = useRef(null);
+  const urlUpdateTimeoutRef = useRef(null);
 
-  const updateSection = (newSectionId) => {
-    if (newSectionId !== currentSection) {
-      setCurrentSection(newSectionId);
-      window.history.replaceState(null, '', `#${newSectionId}`);
-    }
-  };
+  const updateSection = useCallback(
+    (newSectionId) => {
+      if (newSectionId !== currentSection) {
+        setCurrentSection(newSectionId);
 
-  const handleIntersection = useCallback((entries) => {
-    let mostVisibleEntry = null;
-
-    // Find the entry with the highest intersection ratio.
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        if (
-          !mostVisibleEntry ||
-          entry.intersectionRatio > mostVisibleEntry.intersectionRatio
-        ) {
-          mostVisibleEntry = entry;
+        if (urlUpdateTimeoutRef.current) {
+          clearTimeout(urlUpdateTimeoutRef.current);
         }
+
+        urlUpdateTimeoutRef.current = setTimeout(() => {
+          window.history.replaceState(null, '', `#${newSectionId}`);
+          urlUpdateTimeoutRef.current = null;
+        }, 5);
       }
-    });
+    },
+    [currentSection]
+  );
 
-    if (mostVisibleEntry) {
-      updateSection(mostVisibleEntry.target.id);
+  const handleIntersection = useCallback(
+    (entries) => {
+      let mostVisibleEntry = null;
+
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (
+            !mostVisibleEntry ||
+            entry.intersectionRatio > mostVisibleEntry.intersectionRatio
+          ) {
+            mostVisibleEntry = entry;
+          }
+        }
+      });
+
+      if (mostVisibleEntry) {
+        updateSection(mostVisibleEntry.target.id);
+      }
+    },
+    [updateSection]
+  );
+
+  // Set sectionsReady when sectionsRef is populated
+  useEffect(() => {
+    if (Object.keys(sectionsRef.current).length > 0) {
+      setSectionsReady(true);
     }
-  }, [currentSection]);
-
-  const updateUrlOnScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + headerHeight + 150;
-
-    const newSectionId = Object.entries(sectionsRef.current)
-      .reverse() // Reverse for the last visible section
-      .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0] 
-      || currentSection;
-
-    updateSection(newSectionId);
-  }, [currentSection, headerHeight]);
+  }, [sectionsRef.current]);
 
   useEffect(() => {
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(handleIntersection, {
-        rootMargin: `-${headerHeight}px 0px -45% 0px`, // Adjusted for better visibility tracking
-        threshold: [0.1, 0.5, 1], // Adjusted to fire more consistently
+    if (!sectionsReady) return;
+
+    const initializeObserver = () => {
+      if (!observerRef.current) {
+        observerRef.current = new IntersectionObserver(handleIntersection, {
+          rootMargin: `-${headerHeight}px 0px -40% 0px`,
+          threshold: [0.1, 0.25, 0.5, 0.75],
+        });
+      }
+
+      const observer = observerRef.current;
+      Object.values(sectionsRef.current).forEach((section) => {
+        if (section) {
+          observer.observe(section);
+        }
       });
-    }
+    };
 
-    const observer = observerRef.current;
-    Object.values(sectionsRef.current).forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    window.addEventListener('scroll', updateUrlOnScroll, { passive: true });
+    initializeObserver();
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', updateUrlOnScroll);
-    };
-  }, [headerHeight, handleIntersection, updateUrlOnScroll]);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
 
-  const scrollToSection = useCallback((sectionId) => {
-    const targetElement = document.getElementById(sectionId);
-    if (targetElement) {
-      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
-      setCurrentSection(sectionId);
-      window.history.pushState(null, '', `#${sectionId}`);
-    }
-  }, [headerHeight]);
+      if (urlUpdateTimeoutRef.current) {
+        clearTimeout(urlUpdateTimeoutRef.current);
+      }
+    };
+  }, [headerHeight, handleIntersection, sectionsReady]);
+
+  const scrollToSection = useCallback(
+    (sectionId) => {
+      const targetElement = document.getElementById(sectionId);
+      if (targetElement) {
+        const targetPosition =
+          targetElement.getBoundingClientRect().top +
+          window.pageYOffset -
+          headerHeight;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth',
+        });
+        setCurrentSection(sectionId);
+        window.history.pushState(null, '', `#${sectionId}`);
+      }
+    },
+    [headerHeight]
+  );
 
   const handleInitialScroll = useCallback(() => {
     const hash = window.location.hash.slice(1);
@@ -87,10 +115,10 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
   }, [scrollToSection]);
 
   useEffect(() => {
-    if (resumeData && headerHeight > 0) {
+    if (resumeData && headerHeight > 0 && sectionsReady) {
       setTimeout(handleInitialScroll, 100);
     }
-  }, [resumeData, headerHeight, handleInitialScroll]);
+  }, [resumeData, headerHeight, handleInitialScroll, sectionsReady]);
 
   return { currentSection, sectionsRef, scrollToSection };
 };

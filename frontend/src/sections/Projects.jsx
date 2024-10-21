@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef } from 'react';
 
 const Projects = forwardRef(({ projects }, ref) => {
   return (
@@ -8,12 +8,21 @@ const Projects = forwardRef(({ projects }, ref) => {
         <div className="projects-grid">
           {projects.map((project, index) => (
             <div key={index} className="project-item">
-              <img src="/images/project-img.jpg" alt="Project" className="project-icon" />
+              <img
+                src="/images/project-img.jpg"
+                alt="Project"
+                className="project-icon"
+              />
               <div className="project-content">
                 <h3>{project.title}</h3>
                 <p>{project.description}</p>
                 {project.link && (
-                  <a href={project.link} target="_blank" rel="noopener noreferrer" className="project-link">
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-link"
+                  >
                     View Project
                   </a>
                 )}
@@ -23,7 +32,9 @@ const Projects = forwardRef(({ projects }, ref) => {
         </div>
       </div>
     </section>
-  )
-})
+  );
+});
 
-export default Projects
+Projects.displayName = 'Projects';
+
+export default Projects;

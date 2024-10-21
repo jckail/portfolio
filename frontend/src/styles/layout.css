@@ -196,11 +196,9 @@ section > .content-wrapper > * {
   margin-right: auto;
 }
 
-section:first-of-type {
-  padding-top: 4rem;
-}
+
 main:first-of-type {
-  padding-top: 4rem;
+  padding-top: 2rem;
 }
 
 /* 8. Media Queries */

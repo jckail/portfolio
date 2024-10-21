@@ -1,9 +1,9 @@
-import React from 'react'
-import './App.css'
-import './theme.css'
-import Layout from './components/Layout'
-import AppMain from './components/AppMain'
-import { useAppLogic } from './hooks/useAppLogic'
+import React from 'react';
+import './App.css';
+import './theme.css';
+import Layout from './components/Layout';
+import AppMain from './components/AppMain';
+import { useAppLogic } from './hooks/useAppLogic';
 
 function App() {
   const {
@@ -19,12 +19,13 @@ function App() {
     toggleTheme,
     toggleSidebar,
     handleResumeClick,
-    scrollToSection
-  } = useAppLogic()
+    scrollToSection,
+  } = useAppLogic();
 
   return (
     <Layout
       resumeData={resumeData}
+      error={error}
       theme={theme}
       toggleTheme={toggleTheme}
       currentSection={currentSection}
@@ -35,14 +36,9 @@ function App() {
       toggleSidebar={toggleSidebar}
       handleResumeClick={handleResumeClick}
       scrollToSection={scrollToSection}
-    >
-      <AppMain 
-        resumeData={resumeData}
-        error={error}
-        sectionsRef={sectionsRef}
-      />
-    </Layout>
-  )
+      sectionsRef={sectionsRef} // Pass sectionsRef to Layout
+    />
+  );
 }
 
-export default App
+export default App;
