@@ -16,7 +16,7 @@ const Experience = forwardRef(({ experience }, ref) => {
         {experience.map((job, index) => (
           <div key={index} className="job-item">
             <div className="job-header">
-              <img src={`${apiUrl}/api/images/work-img.jpg`} alt="Work" className="job-icon" />
+              <img src={`${apiUrl}/api/images/work-img.png`} alt="Work" className="job-icon" />
               <div className="job-title">
                 <h3>
                   <a 
