@@ -50,7 +50,9 @@
 
   .header-nav a {
     padding: 2px 3px;
-    font-size: 0.8em;
+    font-size: 0.5em;
+    text-align: center;  /* Aligns the text inside the element */
+    padding: 0px 5px;      /* Ensures it takes up the full width */
   }
 
   .header-nav .icon {
@@ -103,7 +105,7 @@
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 350px) {
   .floating-header {
     flex-direction: column;
     align-items: flex-start;
