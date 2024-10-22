@@ -1,9 +1,12 @@
 import React from 'react'
+import ReactGA from 'react-ga'
 import './App.css'
 import './theme.css'
 import Layout from './components/Layout'
 import AppMain from './components/AppMain'
 import { useAppLogic } from './hooks/useAppLogic'
+
+ReactGA.initialize('G-HDKC74P3BD')
 
 function App() {
   const {
@@ -21,6 +24,17 @@ function App() {
     handleResumeClick,
     scrollToSection
   } = useAppLogic()
+
+  const trackResumeButtonClick = () => {
+    ReactGA.event({
+      category: 'User',
+      action: 'Clicked See My Resume Button',
+    })
+  }
+
+  React.useEffect(() => {
+    ReactGA.pageview(window.location.pathname + window.location.search)
+  }, [])
 
   return (
     <Layout
@@ -40,6 +54,7 @@ function App() {
         resumeData={resumeData}
         error={error}
         sectionsRef={sectionsRef}
+        trackResumeButtonClick={trackResumeButtonClick}
       />
     </Layout>
   )
