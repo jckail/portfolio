@@ -1,118 +1,60 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { debounce } from 'lodash';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useIntersectionObserver } from './useIntersectionObserver';
+import { useUrlManagement } from './useUrlManagement';
+import { useSectionTracking } from './useSectionTracking';
+import { useScrollBehavior } from './useScrollBehavior';
 
 export const useScrollNavigation = (resumeData, headerHeight) => {
   const [currentSection, setCurrentSection] = useState(
     () => window.location.hash.slice(1) || 'about-me'
   );
   const sectionsRef = useRef({});
-  const observerRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const initialScrollDone = useRef(false); // Track if the initial scroll is completed
+  const initialScrollPerformed = useRef(false);
+  
+  const { updateUrl, initialScrollDone, cleanup: cleanupUrl } = useUrlManagement();
+  const { trackSection } = useSectionTracking();
 
-  const updateSection = (newSectionId) => {
+  const updateSection = useCallback((newSectionId, isPush = false) => {
     if (newSectionId !== currentSection) {
       setCurrentSection(newSectionId);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        if (initialScrollDone.current) {
-          window.history.replaceState(null, '', `#${newSectionId}`);
-        }
-      }, 1000);
+      trackSection(newSectionId);
+      updateUrl(newSectionId, isPush);
     }
-  };
+  }, [currentSection, trackSection, updateUrl]);
 
-  const handleIntersection = useCallback((entries) => {
-    let mostVisibleEntry = null;
-
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        if (
-          !mostVisibleEntry ||
-          entry.intersectionRatio > mostVisibleEntry.intersectionRatio
-        ) {
-          mostVisibleEntry = entry;
-        }
-      }
-    });
-
-    if (mostVisibleEntry) {
-      updateSection(mostVisibleEntry.target.id);
-    }
-  }, [currentSection]);
-
-  const updateUrlOnScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + headerHeight + 150;
-
-    const newSectionId = Object.entries(sectionsRef.current)
-      .reverse()
-      .find(([_, element]) => element?.offsetTop <= scrollPosition)?.[0]
-      || currentSection;
-
-    updateSection(newSectionId);
-  }, [currentSection, headerHeight]);
-
-  const debouncedUpdateUrlOnScroll = useCallback(
-    debounce(updateUrlOnScroll, 100),
-    [updateUrlOnScroll]
+  const { setupObserver } = useIntersectionObserver(headerHeight, updateSection);
+  const { debouncedUpdateSection, scrollToSection } = useScrollBehavior(
+    headerHeight,
+    currentSection,
+    updateSection,
+    sectionsRef
   );
 
-  useEffect(() => {
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(handleIntersection, {
-        rootMargin: `-${headerHeight}px 0px -45% 0px`,
-        threshold: [0.1, 0.5, 1],
-      });
-    }
-
-    const observer = observerRef.current;
-    Object.values(sectionsRef.current).forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    window.addEventListener('scroll', debouncedUpdateUrlOnScroll, { passive: true });
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', debouncedUpdateUrlOnScroll);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [headerHeight, handleIntersection, debouncedUpdateUrlOnScroll]);
-
-  const scrollToSection = useCallback((sectionId) => {
-    const targetElement = document.getElementById(sectionId);
-    if (targetElement) {
-      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth',
-      });
-      setCurrentSection(sectionId);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        if (initialScrollDone.current) {
-          window.history.pushState(null, '', `#${sectionId}`);
-        }
-      }, 10);
-    }
-  }, [headerHeight]);
-
   const handleInitialScroll = useCallback(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash && sectionsRef.current[hash]) {
-      scrollToSection(hash);
+    if (!initialScrollPerformed.current) {
+      const hash = window.location.hash.slice(1);
+      if (hash && sectionsRef.current[hash]) {
+        scrollToSection(hash);
+      }
+      initialScrollPerformed.current = true;
+      initialScrollDone.current = true;
     }
-    initialScrollDone.current = true; // Mark initial scroll as done
   }, [scrollToSection]);
 
   useEffect(() => {
-    if (resumeData && headerHeight > 0) {
+    const cleanupObserver = setupObserver(sectionsRef);
+    window.addEventListener('scroll', debouncedUpdateSection, { passive: true });
+
+    return () => {
+      cleanupObserver();
+      window.removeEventListener('scroll', debouncedUpdateSection);
+      cleanupUrl();
+    };
+  }, [headerHeight, debouncedUpdateSection, setupObserver, cleanupUrl]);
+
+  useEffect(() => {
+    if (resumeData && headerHeight > 0 && !initialScrollPerformed.current) {
+      // Small delay to ensure DOM is ready
       setTimeout(handleInitialScroll, 1);
     }
   }, [resumeData, headerHeight, handleInitialScroll]);

@@ -19,20 +19,6 @@ export const trackPageView = (page = window.location.pathname + window.location.
   console.info('Page view tracked:', page);
 };
 
-// Track section views
-export const trackSectionView = (sectionId) => {
-  const formattedSection = sectionId.split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-
-  ReactGA.event({
-    category: Events.Categories.NAVIGATION,
-    action: 'View Section',
-    label: formattedSection
-  });
-  console.info('Section view tracked:', formattedSection);
-};
-
 // Event tracking
 export const logEvent = (category, action, label) => {
   ReactGA.event({
@@ -49,7 +35,8 @@ export const Events = {
     NAVIGATION: 'Navigation',
     INTERACTION: 'Interaction',
     FORM: 'Form',
-    RESUME: 'Resume'
+    RESUME: 'Resume',
+    SECTION: 'Section'
   },
   Actions: {
     CLICK: 'Click',
@@ -69,17 +56,49 @@ export const trackResumeButtonClick = () => {
   console.info('Resume download event tracked:', { category, action, label });
 };
 
+// Track section views
+export const trackSectionView = (sectionId) => {
+  const formattedSection = sectionId.split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+  const category = Events.Categories.SECTION;
+  const action = Events.Actions.VIEW;
+  const label = `Viewed Section ${formattedSection}`;
+
+  logEvent(category, action, label);
+  console.info('Section view tracked:', { category, action, label });
+};
+
 // Custom hook for Google Analytics
 export const useGoogleAnalytics = () => {
   React.useEffect(() => {
     initGA();
     trackPageView();
+
+    // Track section views when URL hash changes
+    const handleHashChange = () => {
+      const sectionId = window.location.hash.slice(1); // Remove the # from the hash
+      if (sectionId) {
+        trackSectionView(sectionId);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Track initial section if present in URL
+    if (window.location.hash) {
+      handleHashChange();
+    }
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   return {
     trackPageView,
     trackResumeButtonClick,
-    trackSectionView,
     logEvent
   };
 };
