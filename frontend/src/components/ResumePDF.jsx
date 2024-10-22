@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl, downloadResume, fetchResumeName } from '../helpers/utils';
 
-function ResumePDF() {
+function ResumePDF({ trackResumeButtonClick }) {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,6 +41,11 @@ function ResumePDF() {
     };
   }, []);
 
+  const handleDownloadClick = async () => {
+    trackResumeButtonClick();
+    await downloadResume();
+  };
+
   if (isLoading) {
     return <div>Loading resume...</div>;
   }
@@ -57,7 +62,7 @@ function ResumePDF() {
           title={fileName}
         />
       </div>
-      <button onClick={downloadResume} className="download-button">Download Resume</button>
+      <button onClick={handleDownloadClick} className="download-button">Download Resume</button>
     </div>
   );
 }

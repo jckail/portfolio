@@ -5,7 +5,7 @@ import Experience from '../sections/Experience'
 import Projects from '../sections/Projects'
 import MyResume from '../sections/MyResume'
 
-const AppMain = ({ resumeData, error, sectionsRef }) => {
+const AppMain = ({ resumeData, error, sectionsRef, trackResumeButtonClick }) => {
   return (
     <>
       {error && (
@@ -21,7 +21,7 @@ const AppMain = ({ resumeData, error, sectionsRef }) => {
           <TechnicalSkills skills={resumeData.technicalSkills} ref={el => sectionsRef.current['technical-skills'] = el} />
           <Experience experience={resumeData.experience} ref={el => sectionsRef.current['experience'] = el} />
           <Projects projects={resumeData.projects} ref={el => sectionsRef.current['projects'] = el} />
-          <MyResume ref={el => sectionsRef.current['my-resume'] = el} />
+          <MyResume ref={el => sectionsRef.current['my-resume'] = el} trackResumeButtonClick={trackResumeButtonClick} />
         </>
       )}
     </>

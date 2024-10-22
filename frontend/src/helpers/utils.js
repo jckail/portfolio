@@ -1,3 +1,5 @@
+import { trackResumeButtonClick } from '../utils/google-analytics';
+
 export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   const targetElement = document.getElementById(sectionId);
   if (targetElement) {
@@ -47,6 +49,9 @@ export const fetchResumeName = async () => {
 export const downloadResume = async () => {
   try {
     console.info('Initiating resume download...');
+    
+    // Track resume download event
+    trackResumeButtonClick();
 
     const [apiUrl, fileName] = await Promise.all([getApiUrl(), fetchResumeName()]);
     const downloadUrl = `${apiUrl}/resume`;

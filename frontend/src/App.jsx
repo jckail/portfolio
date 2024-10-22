@@ -1,13 +1,11 @@
 import React from 'react'
-import ReactGA from 'react-ga4'
 import './App.css'
 import './theme.css'
 import Layout from './components/Layout'
 import AppMain from './components/AppMain'
+import CookieBanner from './components/CookieBanner'
 import { useAppLogic } from './hooks/useAppLogic'
-
-const TRACKING_ID = "G-HDKC74P3BD"
-ReactGA.initialize(TRACKING_ID)
+import { useGoogleAnalytics } from './utils/google-analytics'
 
 function App() {
   const {
@@ -26,38 +24,32 @@ function App() {
     scrollToSection
   } = useAppLogic()
 
-  const trackResumeButtonClick = () => {
-    ReactGA.event({
-      category: 'User',
-      action: 'Clicked See My Resume Button',
-    })
-  }
-
-  React.useEffect(() => {
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname + window.location.search, title: "Resume" });
-  }, [])
+  const { trackResumeButtonClick } = useGoogleAnalytics();
 
   return (
-    <Layout
-      resumeData={resumeData}
-      theme={theme}
-      toggleTheme={toggleTheme}
-      currentSection={currentSection}
-      headerHeight={headerHeight}
-      setHeaderHeight={setHeaderHeight}
-      isSidebarOpen={isSidebarOpen}
-      isTemporarilyVisible={isTemporarilyVisible}
-      toggleSidebar={toggleSidebar}
-      handleResumeClick={handleResumeClick}
-      scrollToSection={scrollToSection}
-    >
-      <AppMain 
+    <>
+      <Layout
         resumeData={resumeData}
-        error={error}
-        sectionsRef={sectionsRef}
-        trackResumeButtonClick={trackResumeButtonClick}
-      />
-    </Layout>
+        theme={theme}
+        toggleTheme={toggleTheme}
+        currentSection={currentSection}
+        headerHeight={headerHeight}
+        setHeaderHeight={setHeaderHeight}
+        isSidebarOpen={isSidebarOpen}
+        isTemporarilyVisible={isTemporarilyVisible}
+        toggleSidebar={toggleSidebar}
+        handleResumeClick={handleResumeClick}
+        scrollToSection={scrollToSection}
+      >
+        <AppMain 
+          resumeData={resumeData}
+          error={error}
+          sectionsRef={sectionsRef}
+          trackResumeButtonClick={trackResumeButtonClick}
+        />
+      </Layout>
+      <CookieBanner />
+    </>
   )
 }
 
