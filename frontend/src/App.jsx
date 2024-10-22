@@ -1,12 +1,13 @@
 import React from 'react'
-import ReactGA from 'react-ga'
+import ReactGA from 'react-ga4'
 import './App.css'
 import './theme.css'
 import Layout from './components/Layout'
 import AppMain from './components/AppMain'
 import { useAppLogic } from './hooks/useAppLogic'
 
-ReactGA.initialize('G-HDKC74P3BD')
+const TRACKING_ID = "G-HDKC74P3BD"
+ReactGA.initialize(TRACKING_ID)
 
 function App() {
   const {
@@ -33,7 +34,7 @@ function App() {
   }
 
   React.useEffect(() => {
-    ReactGA.pageview(window.location.pathname + window.location.search)
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname + window.location.search, title: "Resume" });
   }, [])
 
   return (

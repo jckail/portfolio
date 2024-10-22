@@ -5,6 +5,7 @@
     "preview": "cd frontend && npm run preview"
   },
   "dependencies": {
-    "idb": "^8.0.0"
+    "idb": "^8.0.0",
+    "react-ga4": "^2.1.0"
   }
 }
