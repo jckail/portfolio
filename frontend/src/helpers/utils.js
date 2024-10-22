@@ -12,16 +12,18 @@ export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   }
 };
 
+const isLocalHost = (hostname) => {
+  const localHostRegex = /^(localhost|0.0.0.0|127.0.0.1|192\.168\.0\.(122|128|134))$/;
+  return localHostRegex.test(hostname);
+};
+
 export const getApiUrl = () => {
   const currentHost = window.location.hostname;
-  console.log('Current hostname:', currentHost);
-
-  const isLocal = ['localhost', '0.0.0.0', '127.0.0.1', '192.168.0.122', '192.168.0.128'].includes(currentHost);
+  const isLocal = isLocalHost(currentHost);
   const protocol = isLocal ? 'http' : 'https';
   const port = isLocal ? ':8080' : '';
   const apiUrl = `${protocol}://${currentHost}${port}/api`;
 
-  console.log('API URL:', apiUrl);
   return apiUrl;
 };
 
@@ -62,4 +64,4 @@ export const downloadResume = async () => {
     console.error('Error during resume download:', error);
     alert('Failed to download the resume. Please try again later.');
   }
-};
+}
