@@ -11,7 +11,7 @@ function ResumePDF() {
     const fetchPdf = async () => {
       try {
         const apiUrl = getApiUrl();
-        const fullUrl = `${apiUrl}/api/resume`;
+        const fullUrl = `${apiUrl}/resume`;
         const response = await fetch(fullUrl, {
           method: 'GET',
           mode: 'cors',

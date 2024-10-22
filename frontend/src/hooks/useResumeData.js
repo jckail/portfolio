@@ -7,7 +7,7 @@ export const useResumeData = () => {
   const apiUrl = getApiUrl();
 
   useEffect(() => {
-    const fullApiUrl = `${apiUrl}/api/resume_data`;
+    const fullApiUrl = `${apiUrl}/resume_data`;
     console.log('Initiating API request to:', fullApiUrl);
     console.log('Current window.location:', window.location.toString());
     console.log('API request headers:', {

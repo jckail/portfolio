@@ -19,7 +19,7 @@ export const getApiUrl = () => {
   const isLocal = ['localhost', '0.0.0.0', '127.0.0.1', '192.168.0.122', '192.168.0.128'].includes(currentHost);
   const protocol = isLocal ? 'http' : 'https';
   const port = isLocal ? ':8080' : '';
-  const apiUrl = `${protocol}://${currentHost}${port}`;
+  const apiUrl = `${protocol}://${currentHost}${port}/api`;
 
   console.log('API URL:', apiUrl);
   return apiUrl;
@@ -28,7 +28,7 @@ export const getApiUrl = () => {
 export const fetchResumeName = async () => {
   try {
     const apiUrl = getApiUrl();
-    const response = await fetch(`${apiUrl}/api/resume_file_name`);
+    const response = await fetch(`${apiUrl}/resume_file_name`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch resume name: ${response.statusText}`);
@@ -47,7 +47,7 @@ export const downloadResume = async () => {
     console.info('Initiating resume download...');
 
     const [apiUrl, fileName] = await Promise.all([getApiUrl(), fetchResumeName()]);
-    const downloadUrl = `${apiUrl}/api/resume`;
+    const downloadUrl = `${apiUrl}/resume`;
 
     const downloadLink = document.createElement('a');
     downloadLink.href = downloadUrl;
