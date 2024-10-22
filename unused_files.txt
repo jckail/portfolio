@@ -1,0 +1,23 @@
+# Unused files based on search results:
+
+frontend/public/images/android-chrome-192x192.png
+frontend/public/images/android-chrome-512x512.png
+frontend/public/images/apple-touch-icon.png
+frontend/public/images/favicon-16x16.png
+frontend/public/images/favicon-32x32.png
+frontend/public/images/safari-pinned-tab.svg
+frontend/public/images/site.webmanifest
+images/android-chrome-192x192.png
+images/android-chrome-512x512.png
+images/apple-touch-icon.png
+images/browserconfig.xml
+images/discord.jpg
+images/favicon-16x16.png
+images/favicon-32x32.png
+images/mstile-150x150.png
+images/safari-pinned-tab.svg
+images/site.webmanifest
+
+# Unused assets based on manual inspection:
+frontend/public/images/project-img.jpg
+images/project-img.jpg
