@@ -3,7 +3,7 @@ import ResumePDF from '../components/ResumePDF'
 
 const MyResume = forwardRef((props, ref) => {
   return (
-    <section id="my-resume" ref={ref}>
+    <section className="section" id="my-resume" ref={ref}>
       <div className="content-wrapper">
         <h2>My Resume</h2>
         <p>Here's a downloadable version of my resume in PDF format:</p>

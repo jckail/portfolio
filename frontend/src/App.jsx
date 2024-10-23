@@ -14,24 +14,32 @@ import { getApiUrl } from './utils/apiUtils'
 import { useAppLogic } from './hooks/useAppLogic'
 import { useGoogleAnalytics } from './utils/google-analytics'
 
+const MainContent = React.memo(({ resumeData, sectionsRef }) => (
+  <>
+    <AboutMe aboutMe={resumeData.aboutMe} ref={el => sectionsRef.current['about-me'] = el} />
+    <TechnicalSkills skills={resumeData.technicalSkills} ref={el => sectionsRef.current['technical-skills'] = el} />
+    <Experience experience={resumeData.experience} ref={el => sectionsRef.current['experience'] = el} />
+    <Projects projects={resumeData.projects} ref={el => sectionsRef.current['projects'] = el} />
+    <MyResume ref={el => sectionsRef.current['my-resume'] = el} />
+  </>
+));
+
 function App() {
   const {
     resumeData,
     error,
     theme,
-    currentSection,
     headerHeight,
     isSidebarOpen,
     isTemporarilyVisible,
-    sectionsRef,
     setHeaderHeight,
     toggleTheme,
     toggleSidebar,
-    handleResumeClick,
-    handleSectionClick
+    handleResumeClick
   } = useAppLogic()
 
   const headerRef = useRef(null)
+  const sectionsRef = useRef({})
   const apiUrl = getApiUrl()
   const previousHeightRef = useRef(headerHeight)
 
@@ -55,9 +63,32 @@ function App() {
     isTemporarilyVisible
   ])
 
+  useEffect(() => {
+    if (!resumeData) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.id;
+            window.history.replaceState(null, '', `#${sectionId}`);
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      }
+    );
+
+    document.querySelectorAll('.section').forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [resumeData]);
+
   return (
     <div className="App app-wrapper">
-      <BrowserBanner />
       <div id="particles-js"></div>
       <div className={`app-content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
         <header className="floating-header" ref={headerRef}>
@@ -77,13 +108,11 @@ function App() {
         </header>
         <SidePanel 
           isOpen={isSidebarOpen} 
-          currentSection={currentSection} 
           headerHeight={headerHeight} 
           onClose={toggleSidebar}
           isTemporarilyVisible={isTemporarilyVisible}
-          handleSectionClick={handleSectionClick}
         />
-        <main >
+        <main>
           {error && (
             <div>
               <p>Error: {error.message}</p>
@@ -92,13 +121,7 @@ function App() {
           )}
           {!resumeData && !error && <div>Loading resume data...</div>}
           {resumeData && (
-            <>
-              <AboutMe aboutMe={resumeData.aboutMe} ref={el => sectionsRef.current['about-me'] = el} />
-              <TechnicalSkills skills={resumeData.technicalSkills} ref={el => sectionsRef.current['technical-skills'] = el} />
-              <Experience experience={resumeData.experience} ref={el => sectionsRef.current['experience'] = el} />
-              <Projects projects={resumeData.projects} ref={el => sectionsRef.current['projects'] = el} />
-              <MyResume ref={el => sectionsRef.current['my-resume'] = el} />
-            </>
+            <MainContent resumeData={resumeData} sectionsRef={sectionsRef} />
           )}
         </main>
       </div>

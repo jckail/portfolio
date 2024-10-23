@@ -2,6 +2,10 @@ import React, { forwardRef } from 'react'
 import { getApiUrl } from '../utils/apiUtils'
 
 const Experience = forwardRef(({ experience }, ref) => {
+  if (!experience || experience.length === 0) {
+    return null;
+  }
+
   const apiUrl = getApiUrl();
 
   const handleLinkClick = (e, url) => {
@@ -10,7 +14,7 @@ const Experience = forwardRef(({ experience }, ref) => {
   };
 
   return (
-    <section id="experience" ref={ref}>
+    <section className="section" id="experience" ref={ref}>
       <div className="content-wrapper">
         <h2>Experience</h2>
         {experience.map((job, index) => (

@@ -2,10 +2,14 @@ import React, { forwardRef } from 'react'
 import { getApiUrl } from '../utils/apiUtils'
 
 const Projects = forwardRef(({ projects }, ref) => {
+  if (!projects || projects.length === 0) {
+    return null;
+  }
+
   const apiUrl = getApiUrl();
   
   return (
-    <section id="projects" ref={ref}>
+    <section className="section" id="projects" ref={ref}>
       <div className="content-wrapper">
         <h2>Projects</h2>
         <div className="projects-grid">

@@ -2,18 +2,11 @@ import React, { forwardRef } from 'react'
 
 const TechnicalSkills = forwardRef(({ skills }, ref) => {
   if (!skills || Object.keys(skills).length === 0) {
-    return (
-      <section id="technical-skills" ref={ref}>
-        <div className="content-wrapper">
-          <h2>Technical Skills</h2>
-          <p>No technical skills available.</p>
-        </div>
-      </section>
-    )
+    return null;
   }
 
   return (
-    <section id="technical-skills" ref={ref}>
+    <section className="section" id="technical-skills" ref={ref}>
       <div className="content-wrapper">
         <h2>Technical Skills</h2>
         <div className="skills-grid">
