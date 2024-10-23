@@ -20,13 +20,24 @@ function Layout({
 }) {
   const headerRef = useRef(null)
   const apiUrl = getApiUrl()
+  const previousHeightRef = useRef(headerHeight)
 
   useEffect(() => {
     if (headerRef.current) {
-      const height = headerRef.current.offsetHeight;
-      setHeaderHeight(height);
+      const newHeight = headerRef.current.offsetHeight;
+      // Only update if the height has actually changed
+      if (newHeight !== previousHeightRef.current) {
+        previousHeightRef.current = newHeight;
+        setHeaderHeight(newHeight);
+      }
     }
-  }, [setHeaderHeight])
+  }, [
+    // Dependencies that could affect header height
+    resumeData?.name,
+    resumeData?.title,
+    isSidebarOpen,
+    isTemporarilyVisible
+  ])
 
   const wrapperStyle = {
     overflowX: 'hidden',

@@ -11,6 +11,13 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
   const sectionsRef = useRef({});
   const initialScrollPerformed = useRef(false);
   const observerPaused = useRef(false);
+  const observerInitialized = useRef(false);
+  // Log header height when it changes
+  useEffect(() => {
+    console.log('\n--- Section Selection Header Height ---');
+    console.log(`Current Header Height: ${headerHeight}px`);
+    console.log('------------------------\n');
+  }, [headerHeight]);
 
   // Central section update handler with logging
   const handleSectionUpdate = useCallback((newSectionId, source) => {
@@ -89,6 +96,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
       if (hash && sectionsRef.current[hash]) {
         console.log('\n--- Initial Section Load ---');
         console.log(`Loading section from URL hash: ${hash}`);
+        console.log(`Header Height: ${headerHeight}px`);
         console.log('------------------------\n');
         
         // Pause observer before any scroll action
@@ -98,31 +106,33 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
       }
       initialScrollPerformed.current = true;
     }
-  }, [scrollToSection, handleSectionUpdate]);
+  }, [scrollToSection, handleSectionUpdate, headerHeight]);
 
   // Navigation click handler
   const handleNavigationClick = useCallback((sectionId) => {
     console.log('\n--- Navigation Click ---');
     console.log(`Target Section: ${sectionId}`);
+    console.log(`Header Height: ${headerHeight}px`);
     console.log('------------------------\n');
     
     // Pause observer before any scroll action
     observerPaused.current = true;
     handleSectionUpdate(sectionId, 'navigation');
     scrollToSection(sectionId);
-  }, [scrollToSection, handleSectionUpdate]);
+  }, [scrollToSection, handleSectionUpdate, headerHeight]);
 
   // Button click handler (e.g., "See My Resume")
   const handleButtonClick = useCallback((sectionId) => {
     console.log('\n--- Button Click ---');
     console.log(`Target Section: ${sectionId}`);
+    console.log(`Header Height: ${headerHeight}px`);
     console.log('------------------------\n');
     
     // Pause observer before any scroll action
     observerPaused.current = true;
     handleSectionUpdate(sectionId, 'button');
     scrollToSection(sectionId);
-  }, [scrollToSection, handleSectionUpdate]);
+  }, [scrollToSection, handleSectionUpdate, headerHeight]);
 
   // Resume observer after animation ends
   useEffect(() => {
@@ -130,6 +140,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
       if (observerPaused.current) {
         console.log('\n--- Scroll Animation End ---');
         console.log('Resuming intersection observer');
+        console.log(`Header Height: ${headerHeight}px`);
         console.log('------------------------\n');
         observerPaused.current = false;
       }
@@ -148,37 +159,15 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
     };
-  }, []);
+  }, [headerHeight]);
 
-  // Setup event listeners
+  // Setup observer when header height changes
   useEffect(() => {
-    const cleanupObserver = setupObserver(sectionsRef);
-
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash && sectionsRef.current[hash]) {
-        console.log('\n--- URL Hash Change ---');
-        console.log(`New Hash: ${hash}`);
-        console.log('------------------------\n');
-        
-        // Pause observer before any scroll action
-        observerPaused.current = true;
-        initialScrollPerformed.current = false;
-        handleInitialSection();
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-
-    return () => {
-      cleanupObserver();
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [
-    headerHeight,
-    setupObserver,
-    handleInitialSection
-  ]);
+    if (headerHeight > 0) {
+      const cleanupObserver = setupObserver(sectionsRef);
+      return cleanupObserver;
+    }
+  }, [headerHeight, setupObserver]);
 
   // Handle initial section on mount
   useEffect(() => {

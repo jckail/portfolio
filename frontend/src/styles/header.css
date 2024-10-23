@@ -24,7 +24,6 @@
   justify-content: flex-end;
   background-color: transparent;
   gap: 15px;
-  height: 35px;
 }
 
 .name-title {
@@ -51,7 +50,6 @@
 .header-nav {
   display: flex;
   align-items: center;
-  height: 100%;
 }
 
 .header-nav a {
@@ -61,7 +59,6 @@
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
-  height: 100%;
   font-weight: bold;
 }
 
@@ -93,7 +90,6 @@
 /* Resume Link Styles */
 .resume-link {
   background-color: var(--resume-background-color);
-  height: 30px;
   padding: 1px 5px;
   border-radius: 24px;
   font-size: 1.3em;

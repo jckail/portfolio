@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useResumeData } from './useResumeData';
 import { useTheme } from './useTheme';
 import { useParticles } from './useParticles';
@@ -10,6 +10,13 @@ import { useSectionSelection } from './useSectionSelection';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
+
+  // Log header height changes
+  useEffect(() => {
+    console.log('\n--- Header Height Update ---');
+    console.log(`New Header Height: ${headerHeight}px`);
+    console.log('------------------------\n');
+  }, [headerHeight]);
 
   const { resumeData, error: resumeError } = useResumeData();
   const { resumeFileName, error: fileNameError } = useResumeFileName();
@@ -29,7 +36,7 @@ export const useAppLogic = () => {
     updateUrl(newSection, shouldPushState);
   }, [updateUrl]);
 
-  // Use the section selection hook with URL management
+  // Use the section selection hook with URL management and header height
   const {
     currentSection,
     sectionsRef,
@@ -49,6 +56,13 @@ export const useAppLogic = () => {
     downloadResume(resumeFileName);
   }, [handleButtonClick, resumeFileName]);
 
+  // Handle header height updates
+  const handleHeaderHeightChange = useCallback((height) => {
+    if (height !== headerHeight) {
+      setHeaderHeight(height);
+    }
+  }, [headerHeight]);
+
   return {
     resumeData,
     error: resumeError || fileNameError,
@@ -60,7 +74,7 @@ export const useAppLogic = () => {
     sectionsRef,
     particlesLoaded,
     resumeFileName,
-    setHeaderHeight,
+    setHeaderHeight: handleHeaderHeightChange,
     toggleTheme,
     toggleSidebar,
     handleResumeClick,
