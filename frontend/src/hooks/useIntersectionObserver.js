@@ -3,9 +3,7 @@ import { useCallback, useRef, useEffect } from 'react';
 export const useIntersectionObserver = (headerHeight, updateSection) => {
   const observerRef = useRef(null);
   const headerHeightRef = useRef(headerHeight);
-  const SCROLL_BUFFER = 20; // Buffer pixels below header
 
-  // Update the ref when headerHeight changes
   useEffect(() => {
     headerHeightRef.current = headerHeight;
   }, [headerHeight]);
@@ -14,6 +12,21 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
     const visibleEntries = entries.filter(entry => entry.isIntersecting);
     
     if (visibleEntries.length > 0) {
+      // First, find the topmost fully visible section
+      const fullyVisibleEntries = visibleEntries.filter(entry => {
+        const rect = entry.boundingClientRect;
+        return rect.top >= 0 && rect.bottom <= window.innerHeight;
+      });
+
+      if (fullyVisibleEntries.length > 0) {
+        const topSection = fullyVisibleEntries.reduce((prev, current) => {
+          return prev.boundingClientRect.top < current.boundingClientRect.top ? prev : current;
+        });
+        updateSection(topSection.target.id);
+        return;
+      }
+
+      // If no fully visible sections, use the original visibility scoring
       const mostVisible = visibleEntries.reduce((prev, current) => {
         const prevRect = prev.boundingClientRect;
         const currentRect = current.boundingClientRect;
@@ -26,14 +39,13 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
           return Math.max(0, bottom - top);
         };
 
-        // Calculate position scores (higher score for sections positioned right below header)
+        // Calculate position scores
         const getPositionScore = (rect) => {
-          const optimalPosition = headerHeightRef.current + SCROLL_BUFFER;
+          const optimalPosition = headerHeightRef.current;
           const distanceFromOptimal = Math.abs(rect.top - optimalPosition);
           return 1 / (1 + distanceFromOptimal / window.innerHeight);
         };
 
-        // Calculate visibility scores
         const prevHeight = getVisibleHeight(prevRect);
         const currentHeight = getVisibleHeight(currentRect);
         
@@ -54,11 +66,10 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
 
       updateSection(mostVisible.target.id);
     }
-  }, [updateSection]); // Removed headerHeight dependency
+  }, [updateSection]);
 
   const setupObserver = useCallback((sectionsRef) => {
     if (!observerRef.current) {
-      // Create thresholds for more precise detection
       const thresholds = Array.from({ length: 100 }, (_, i) => i / 100);
       
       observerRef.current = new IntersectionObserver(handleIntersection, {
@@ -66,7 +77,6 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
         threshold: thresholds,
       });
 
-      // Observe all sections
       Object.entries(sectionsRef.current).forEach(([_, section]) => {
         if (section) {
           observerRef.current.observe(section);
@@ -80,7 +90,7 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
         observerRef.current = null;
       }
     };
-  }, [handleIntersection]); // Removed headerHeight dependency
+  }, [handleIntersection]);
 
   return { setupObserver };
 };

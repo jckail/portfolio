@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useIntersectionObserver } from './useIntersectionObserver';
+import { debounce } from 'lodash';
 
 export const useSectionSelection = (headerHeight, onSectionChange) => {
   // State for tracking current section
@@ -12,6 +13,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
   const initialScrollPerformed = useRef(false);
   const observerPaused = useRef(false);
   const observerInitialized = useRef(false);
+
   // Log header height when it changes
   useEffect(() => {
     console.log('\n--- Section Selection Header Height ---');
@@ -69,10 +71,20 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     }
   }, [currentSection, headerHeight, onSectionChange]);
 
+  // Create debounced version for intersection updates
+  const debouncedHandleSectionUpdate = useCallback(
+    debounce((newSectionId, source) => handleSectionUpdate(newSectionId, source), 150),
+    [handleSectionUpdate]
+  );
+
   // Setup intersection observer for viewport detection
   const { setupObserver } = useIntersectionObserver(
     headerHeight,
-    (newSection) => handleSectionUpdate(newSection, 'intersection')
+    (newSection) => {
+      if (newSection) {
+        debouncedHandleSectionUpdate(newSection, 'intersection');
+      }
+    }
   );
 
   // Scroll to section function
@@ -158,8 +170,10 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(scrollTimeout);
+      // Cancel any pending debounced calls
+      debouncedHandleSectionUpdate.cancel();
     };
-  }, [headerHeight]);
+  }, [headerHeight, debouncedHandleSectionUpdate]);
 
   // Setup observer when header height changes
   useEffect(() => {

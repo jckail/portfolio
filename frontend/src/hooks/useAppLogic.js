@@ -7,6 +7,7 @@ import { downloadResume } from '../utils/resumeUtils';
 import { useResumeFileName } from './useResumeFileName';
 import { useUrlManagement } from './useUrlManagement';
 import { useSectionSelection } from './useSectionSelection';
+import { debounce } from 'lodash';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -24,6 +25,14 @@ export const useAppLogic = () => {
   const { particlesLoaded } = useParticles(updateParticlesConfig);
   const { updateUrl } = useUrlManagement();
 
+  // Debounced URL update for intersection changes
+  const debouncedUpdateUrl = useCallback(
+    debounce((newSection) => {
+      updateUrl(newSection, false);
+    }, 200),
+    [updateUrl]
+  );
+
   // Handle section changes and URL updates
   const handleSectionChange = useCallback((newSection, source) => {
     console.log('\n--- App Section State ---');
@@ -31,10 +40,14 @@ export const useAppLogic = () => {
     console.log(`Update Source: ${source}`);
     console.log('------------------------\n');
     
-    // Update URL - push state for user actions, replace for scroll/intersection
-    const shouldPushState = source === 'navigation' || source === 'button';
-    updateUrl(newSection, shouldPushState);
-  }, [updateUrl]);
+    // Update URL - push state for user actions, debounced replace for intersection
+    if (source === 'intersection') {
+      debouncedUpdateUrl(newSection);
+    } else {
+      const shouldPushState = source === 'navigation' || source === 'button';
+      updateUrl(newSection, shouldPushState);
+    }
+  }, [updateUrl, debouncedUpdateUrl]);
 
   // Use the section selection hook with URL management and header height
   const {
@@ -62,6 +75,13 @@ export const useAppLogic = () => {
       setHeaderHeight(height);
     }
   }, [headerHeight]);
+
+  // Cleanup debounced function
+  useEffect(() => {
+    return () => {
+      debouncedUpdateUrl.cancel();
+    };
+  }, [debouncedUpdateUrl]);
 
   return {
     resumeData,
