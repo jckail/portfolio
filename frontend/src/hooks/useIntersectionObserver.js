@@ -88,6 +88,7 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
         overlapsHeader: isOverlappingHeader,
         headerOverlap: Math.round(headerOverlapPenalty) + 'px'
       });
+      // Let useAppLogic handle URL updates
       updateSection(mostVisibleEntry.target.id);
     } else {
       console.log('\nNo section selected');

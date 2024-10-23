@@ -1,26 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useIntersectionObserver } from './useIntersectionObserver';
-import { useUrlManagement } from './useUrlManagement';
 import { useSectionTracking } from './useSectionTracking';
 import { useScrollBehavior } from './useScrollBehavior';
 
-export const useScrollNavigation = (resumeData, headerHeight) => {
+export const useScrollNavigation = (resumeData, headerHeight, onSectionChange) => {
   const [currentSection, setCurrentSection] = useState(
     () => window.location.hash.slice(1) || 'about-me'
   );
   const sectionsRef = useRef({});
   const initialScrollPerformed = useRef(false);
   
-  const { updateUrl, initialScrollDone, cleanup: cleanupUrl } = useUrlManagement();
   const { trackSection } = useSectionTracking();
 
-  const updateSection = useCallback((newSectionId, isPush = false) => {
+  const updateSection = useCallback((newSectionId) => {
     if (newSectionId !== currentSection) {
       setCurrentSection(newSectionId);
       trackSection(newSectionId);
-      updateUrl(newSectionId, isPush);
+      // Let useAppLogic handle URL updates
+      onSectionChange(newSectionId);
     }
-  }, [currentSection, trackSection, updateUrl]);
+  }, [currentSection, trackSection, onSectionChange]);
 
   const { setupObserver } = useIntersectionObserver(headerHeight, updateSection);
   const { debouncedUpdateSection, scrollToSection } = useScrollBehavior(
@@ -33,14 +32,13 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
   const performScroll = useCallback((hash) => {
     const targetElement = document.getElementById(hash);
     if (targetElement) {
-      // Wait for next frame to ensure all layout calculations are complete
       requestAnimationFrame(() => {
         const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
         window.scrollTo({
           top: targetPosition,
           behavior: 'smooth',
         });
-        updateSection(hash, true);
+        updateSection(hash);
       });
     }
   }, [headerHeight, updateSection]);
@@ -49,16 +47,13 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     if (!initialScrollPerformed.current) {
       const hash = window.location.hash.slice(1);
       if (hash && sectionsRef.current[hash]) {
-        // Ensure header height is available
         if (headerHeight > 0) {
           performScroll(hash);
         } else {
-          // If header height isn't ready, wait a bit and try again
           () => performScroll(hash);
         }
       }
       initialScrollPerformed.current = true;
-      initialScrollDone.current = true;
     }
   }, [headerHeight, performScroll]);
 
@@ -66,7 +61,6 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     const cleanupObserver = setupObserver(sectionsRef);
     window.addEventListener('scroll', debouncedUpdateSection, { passive: true });
 
-    // Handle direct URL navigation
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
       if (hash && sectionsRef.current[hash]) {
@@ -81,9 +75,8 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
       cleanupObserver();
       window.removeEventListener('scroll', debouncedUpdateSection);
       window.removeEventListener('hashchange', handleHashChange);
-      cleanupUrl();
     };
-  }, [headerHeight, debouncedUpdateSection, setupObserver, cleanupUrl, handleInitialScroll]);
+  }, [headerHeight, debouncedUpdateSection, setupObserver, handleInitialScroll]);
 
   useEffect(() => {
     if (resumeData && headerHeight > 0 && !initialScrollPerformed.current) {

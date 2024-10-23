@@ -16,7 +16,7 @@ function Layout({
   isTemporarilyVisible, 
   toggleSidebar, 
   handleResumeClick,
-  scrollToSection
+  handleSectionClick
 }) {
   const headerRef = useRef(null)
   const apiUrl = getApiUrl()
@@ -70,7 +70,7 @@ function Layout({
           headerHeight={headerHeight} 
           onClose={toggleSidebar}
           isTemporarilyVisible={isTemporarilyVisible}
-          scrollToSection={scrollToSection}
+          handleSectionClick={handleSectionClick}
         />
         <main style={{ width: '100%', maxWidth: '100%' }}>
           {children}

@@ -2,10 +2,10 @@ import { useState, useCallback } from 'react';
 import { useResumeData } from './useResumeData';
 import { useTheme } from './useTheme';
 import { useParticles } from './useParticles';
-import { useScrollNavigation } from './useScrollNavigation';
 import { useSidebar } from './useSidebar';
 import { downloadResume } from '../utils/resumeUtils';
 import { useResumeFileName } from './useResumeFileName';
+import { useSectionSelection } from './useSectionSelection';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -14,7 +14,15 @@ export const useAppLogic = () => {
   const { resumeFileName, error: fileNameError } = useResumeFileName();
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
   const { particlesLoaded } = useParticles(updateParticlesConfig);
-  const { currentSection, sectionsRef, scrollToSection } = useScrollNavigation(resumeData, headerHeight);
+
+  // Use the new section selection hook
+  const {
+    currentSection,
+    sectionsRef,
+    handleNavigationClick,
+    handleButtonClick
+  } = useSectionSelection(headerHeight);
+
   const {
     isSidebarOpen,
     isTemporarilyVisible,
@@ -23,9 +31,9 @@ export const useAppLogic = () => {
 
   const handleResumeClick = useCallback((event) => {
     event.preventDefault();
-    scrollToSection('my-resume', headerHeight);
+    handleButtonClick('my-resume');
     downloadResume(resumeFileName);
-  }, [scrollToSection, headerHeight, resumeFileName]);
+  }, [handleButtonClick, resumeFileName]);
 
   return {
     resumeData,
@@ -42,6 +50,7 @@ export const useAppLogic = () => {
     toggleTheme,
     toggleSidebar,
     handleResumeClick,
-    scrollToSection
+    // Export navigation handler for use in components
+    handleSectionClick: handleNavigationClick
   };
 };

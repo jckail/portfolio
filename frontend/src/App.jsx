@@ -3,7 +3,7 @@ import './App.css'
 import './theme.css'
 import Layout from './components/Layout'
 import AppMain from './components/AppMain'
-import CookieBanner from './components/CookieBanner'
+// import CookieBanner from './components/CookieBanner'
 import { useAppLogic } from './hooks/useAppLogic'
 import { useGoogleAnalytics } from './utils/google-analytics'
 
@@ -21,7 +21,7 @@ function App() {
     toggleTheme,
     toggleSidebar,
     handleResumeClick,
-    scrollToSection
+    handleSectionClick
   } = useAppLogic()
 
   // Initialize Google Analytics
@@ -40,7 +40,7 @@ function App() {
         isTemporarilyVisible={isTemporarilyVisible}
         toggleSidebar={toggleSidebar}
         handleResumeClick={handleResumeClick}
-        scrollToSection={scrollToSection}
+        handleSectionClick={handleSectionClick}
       >
         <AppMain 
           resumeData={resumeData}
@@ -48,7 +48,7 @@ function App() {
           sectionsRef={sectionsRef}
         />
       </Layout>
-      <CookieBanner />
+      {/* <CookieBanner /> */}
     </>
   )
 }

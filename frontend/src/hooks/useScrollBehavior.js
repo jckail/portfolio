@@ -75,7 +75,8 @@ export const useScrollBehavior = (headerHeight, currentSection, updateSection, s
           top: targetPosition,
           behavior: 'smooth',
         });
-        updateSection(sectionId, true);
+        // Let useAppLogic handle URL updates
+        updateSection(sectionId);
       });
     }
   }, [headerHeight, updateSection]);

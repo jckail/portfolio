@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporarilyVisible, scrollToSection }) {
+function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporarilyVisible, handleSectionClick }) {
   useEffect(() => {
     console.log('SidePanel received headerHeight:', headerHeight);
   }, [headerHeight]);
@@ -8,10 +8,7 @@ function SidePanel({ isOpen, currentSection, headerHeight, onClose, isTemporaril
   const handleNavClick = (event, targetId) => {
     event.preventDefault();
     console.log('Jumping to section:', targetId, 'with headerHeight:', headerHeight);
-    scrollToSection(targetId, headerHeight);
-    
-    // Update URL immediately
-    window.history.pushState(null, '', `#${targetId}`);
+    handleSectionClick(targetId);
     
     // Add a small delay before closing the sidebar
     setTimeout(() => {
