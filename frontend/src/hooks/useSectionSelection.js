@@ -90,22 +90,15 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     }
   );
 
-  // Scroll to section function with improved rendering handling
+  // Scroll to section function
   const scrollToSection = useCallback((sectionId) => {
     const targetElement = document.getElementById(sectionId);
     if (targetElement) {
-      // Force a layout calculation to ensure all elements are rendered
-      document.body.offsetHeight;
-      
-      // Use double requestAnimationFrame to ensure DOM is fully updated
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Get fresh measurements after layout is complete
-          const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'instant'
-          });
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth',
         });
       });
     }

@@ -1,38 +1,17 @@
-import { useEffect } from 'react';
-
-const Navigation = () => {
-  const sections = ['home', 'about', 'services', 'portfolio', 'team', 'contact'];
-
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    element?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    // Handle initial hash in URL
-    const hash = window.location.hash.slice(1);
-    if (hash) {
-      const element = document.getElementById(hash);
-      element?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, []);
-
+export default function Navigation() {
   return (
     <nav className="navigation">
-      {sections.map((section) => (
-        <a
-          key={section}
-          href={`#${section}`}
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToSection(section);
-          }}
-        >
-          {section.charAt(0).toUpperCase() + section.slice(1)}
-        </a>
-      ))}
+      <a href="#home">Home</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#education">Education</a>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#services">Services</a>
+      <a href="#awards">Awards</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#team">Team</a>
+      <a href="#contact">Contact</a>
     </nav>
   );
-};
-
-export default Navigation;
+}

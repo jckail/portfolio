@@ -32,21 +32,86 @@ main {
 }
 
 .section {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
   scroll-margin-top: 60px;
 }
 
-#home { background-color: #f0f0f0; }
-#about { background-color: #e0e0e0; }
-#services { background-color: #d0d0d0; }
-#portfolio { background-color: #c0c0c0; }
-#team { background-color: #b0b0b0; }
-#contact { background-color: #a0a0a0; }
+/* Extremely varied section sizes with unique layouts */
+#home { 
+  min-height: 100vh; 
+  background-color: #f0f0f0;
+  padding: 2rem;
+}
+
+#skills { 
+  min-height: 25vh; 
+  background-color: #e8e8e8;
+  padding: 4rem 2rem;
+  width: 80%;
+  margin: 0 auto;
+}
+
+#experience { 
+  min-height: 150vh; 
+  background-color: #e0e0e0;
+  padding: 6rem 2rem;
+  width: 100%;
+}
+
+#education { 
+  min-height: 40vh; 
+  background-color: #d8d8d8;
+  padding: 3rem;
+  width: 90%;
+  margin: 0 auto;
+}
+
+#about { 
+  min-height: 100vh; 
+  background-color: #d0d0d0;
+  padding: 2rem;
+}
+
+#projects { 
+  min-height: 180vh; 
+  background-color: #c8c8c8;
+  padding: 8rem 4rem;
+}
+
+#services { 
+  min-height: 100vh; 
+  background-color: #c0c0c0;
+  padding: 2rem;
+}
+
+#awards { 
+  min-height: 20vh; 
+  background-color: #b8b8b8;
+  padding: 2rem;
+  width: 70%;
+  margin: 0 auto;
+}
+
+#portfolio { 
+  min-height: 100vh; 
+  background-color: #b0b0b0;
+  padding: 2rem;
+}
+
+#team { 
+  min-height: 100vh; 
+  background-color: #a8a8a8;
+  padding: 2rem;
+}
+
+#contact { 
+  min-height: 100vh; 
+  background-color: #a0a0a0;
+  padding: 2rem;
+}
 
 h1, h2 {
   margin-bottom: 1rem;

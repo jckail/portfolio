@@ -6,6 +6,11 @@ import Services from './sections/Services';
 import Portfolio from './sections/Portfolio';
 import Team from './sections/Team';
 import Contact from './sections/Contact';
+import Skills from './sections/Skills';
+import Experience from './sections/Experience';
+import Education from './sections/Education';
+import Projects from './sections/Projects';
+import Awards from './sections/Awards';
 import './App.css';
 
 function App() {
@@ -36,8 +41,13 @@ function App() {
       <Navigation />
       <main>
         <Home />
+        <Skills />
+        <Experience />
+        <Education />
         <About />
+        <Projects />
         <Services />
+        <Awards />
         <Portfolio />
         <Team />
         <Contact />
