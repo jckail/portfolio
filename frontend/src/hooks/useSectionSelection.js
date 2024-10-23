@@ -15,17 +15,18 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
   // Central section update handler with logging
   const handleSectionUpdate = useCallback((newSectionId, source) => {
     if (newSectionId && newSectionId !== currentSection) {
-      console.log('\n--- Section Selection Update ---');
-      console.log(`Previous Section: ${currentSection}`);
-      console.log(`New Section: ${newSectionId}`);
-      console.log(`Update Source: ${source}`);
-      console.log(`Header Height: ${headerHeight}px`);
-      console.log(`Observer Paused: ${observerPaused.current}`);
+      // Log section updates except when source is intersection and observer is paused
+      if (!(source === 'intersection' && observerPaused.current)) {
+        console.log('\n--- Section Selection Update ---');
+        console.log(`Previous Section: ${currentSection}`);
+        console.log(`New Section: ${newSectionId}`);
+        console.log(`Update Source: ${source}`);
+        console.log(`Header Height: ${headerHeight}px`);
+        console.log(`Observer Paused: ${observerPaused.current}`);
+      }
       
       // Only allow intersection updates if observer is not paused
       if (source === 'intersection' && observerPaused.current) {
-        console.log('Intersection update ignored - observer paused');
-        console.log('------------------------\n');
         return;
       }
 
@@ -55,9 +56,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
           }
         });
       }
-      
       console.log('------------------------\n');
-      
       setCurrentSection(newSectionId);
       onSectionChange(newSectionId, source);
     }
@@ -79,10 +78,9 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
           top: targetPosition,
           behavior: 'smooth',
         });
-        handleSectionUpdate(sectionId, 'navigation');
       });
     }
-  }, [headerHeight, handleSectionUpdate]);
+  }, [headerHeight]);
 
   // Handle initial URL-based section
   const handleInitialSection = useCallback(() => {
@@ -93,9 +91,10 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log(`Loading section from URL hash: ${hash}`);
         console.log('------------------------\n');
         
+        // Pause observer before any scroll action
         observerPaused.current = true;
-        scrollToSection(hash);
         handleSectionUpdate(hash, 'url');
+        scrollToSection(hash);
       }
       initialScrollPerformed.current = true;
     }
@@ -107,9 +106,10 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log(`Target Section: ${sectionId}`);
     console.log('------------------------\n');
     
+    // Pause observer before any scroll action
     observerPaused.current = true;
-    scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'navigation');
+    scrollToSection(sectionId);
   }, [scrollToSection, handleSectionUpdate]);
 
   // Button click handler (e.g., "See My Resume")
@@ -118,10 +118,37 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log(`Target Section: ${sectionId}`);
     console.log('------------------------\n');
     
+    // Pause observer before any scroll action
     observerPaused.current = true;
-    scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'button');
+    scrollToSection(sectionId);
   }, [scrollToSection, handleSectionUpdate]);
+
+  // Resume observer after animation ends
+  useEffect(() => {
+    const handleScrollEnd = () => {
+      if (observerPaused.current) {
+        console.log('\n--- Scroll Animation End ---');
+        console.log('Resuming intersection observer');
+        console.log('------------------------\n');
+        observerPaused.current = false;
+      }
+    };
+
+    // Listen for the end of smooth scroll
+    let scrollTimeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(handleScrollEnd, 150); // Adjust timeout as needed
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   // Setup event listeners
   useEffect(() => {
@@ -134,6 +161,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log(`New Hash: ${hash}`);
         console.log('------------------------\n');
         
+        // Pause observer before any scroll action
         observerPaused.current = true;
         initialScrollPerformed.current = false;
         handleInitialSection();

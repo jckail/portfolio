@@ -1,23 +1,26 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 
 export const useUrlManagement = () => {
   const initialScrollDone = useRef(false);
 
   const updateUrl = useCallback((sectionId, isPush = false) => {
-    if (initialScrollDone.current) {
-      if (isPush) {
-        window.history.pushState(null, '', `#${sectionId}`);
-        console.log('URL pushed to:', `#${sectionId}`);
-      } else {
-        window.history.replaceState(null, '', `#${sectionId}`);
-        console.log('URL replaced with:', `#${sectionId}`);
-      }
+    // Always update URL regardless of initialScrollDone state
+    if (isPush) {
+      window.history.pushState(null, '', `#${sectionId}`);
+      console.log('URL pushed to:', `#${sectionId}`);
+    } else {
+      window.history.replaceState(null, '', `#${sectionId}`);
+      console.log('URL replaced with:', `#${sectionId}`);
     }
   }, []);
 
-  const cleanup = () => {
-    // No cleanup needed anymore since we removed the timeout
-  };
+  // Set initialScrollDone to true after component mounts
+  useEffect(() => {
+    initialScrollDone.current = true;
+    return () => {
+      initialScrollDone.current = false;
+    };
+  }, []);
 
-  return { updateUrl, initialScrollDone, cleanup };
+  return { updateUrl };
 };
