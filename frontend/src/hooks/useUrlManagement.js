@@ -1,26 +1,22 @@
-import { useRef, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 
 export const useUrlManagement = () => {
-  const initialScrollDone = useRef(false);
-
-  const updateUrl = useCallback((sectionId, isPush = false) => {
-    // Always update URL regardless of initialScrollDone state
-    if (isPush) {
-      window.history.pushState(null, '', `#${sectionId}`);
-      console.log('URL pushed to:', `#${sectionId}`);
-    } else {
-      window.history.replaceState(null, '', `#${sectionId}`);
-      console.log('URL replaced with:', `#${sectionId}`);
+  const updateUrl = useCallback((sectionId) => {
+    // Only update URL if a valid sectionId is provided
+    if (sectionId && sectionId.trim()) {
+      const newUrl = `${window.location.pathname}#${sectionId}`;
+      window.history.pushState({ path: newUrl }, '', newUrl);
     }
+    // If no sectionId is provided, do nothing and keep the current URL
   }, []);
 
-  // Set initialScrollDone to true after component mounts
-  useEffect(() => {
-    initialScrollDone.current = true;
-    return () => {
-      initialScrollDone.current = false;
-    };
+  const getCurrentSection = useCallback(() => {
+    const hash = window.location.hash;
+    return hash ? hash.replace('#', '') : '';
   }, []);
 
-  return { updateUrl };
+  return {
+    updateUrl,
+    getCurrentSection,
+  };
 };

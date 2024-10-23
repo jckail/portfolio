@@ -5,7 +5,7 @@ import { useScrollBehavior } from './useScrollBehavior';
 
 export const useScrollNavigation = (resumeData, headerHeight, onSectionChange) => {
   const [currentSection, setCurrentSection] = useState(
-    () => window.location.hash.slice(1) || 'about-me'
+    () => window.location.hash.slice(1) || ''
   );
   const sectionsRef = useRef({});
   const initialScrollPerformed = useRef(false);

@@ -19,7 +19,7 @@ export const useDirectPageLoad = (headerHeight, onSectionChange) => {
   // Get and validate section from URL hash
   const getValidSection = useCallback(() => {
     const hashSection = window.location.hash.slice(1);
-    return VALID_SECTIONS.includes(hashSection) ? hashSection : 'about-me';
+    return VALID_SECTIONS.includes(hashSection) ? hashSection : '';
   }, []);
 
   // Scroll to section function for initial load
@@ -50,8 +50,8 @@ export const useDirectPageLoad = (headerHeight, onSectionChange) => {
       console.log(`Section Exists: ${Boolean(sectionsRef.current[section])}`);
       console.log('------------------------\n');
 
-      // Only scroll if section exists
-      if (sectionsRef.current[section]) {
+      // Only scroll if section exists and is valid
+      if (section && sectionsRef.current[section]) {
         onSectionChange(section, 'direct-load');
         
         // For first visits, wait a bit to ensure content is loaded
@@ -64,13 +64,9 @@ export const useDirectPageLoad = (headerHeight, onSectionChange) => {
         } else {
           scrollToSection(section);
         }
-      } else {
+      } else if (section) {
         console.warn(`Invalid section "${section}" in URL hash`);
-        // If section doesn't exist, default to about-me
-        if (section !== 'about-me') {
-          onSectionChange('about-me', 'direct-load');
-          window.location.hash = 'about-me';
-        }
+        // If section is invalid, keep the current URL without changing it
       }
 
       initialLoadPerformed.current = true;
@@ -86,8 +82,10 @@ export const useDirectPageLoad = (headerHeight, onSectionChange) => {
         console.log(`Navigating to section: ${section}`);
         console.log('------------------------\n');
         
-        onSectionChange(section, 'browser-navigation');
-        scrollToSection(section);
+        if (section) {
+          onSectionChange(section, 'browser-navigation');
+          scrollToSection(section);
+        }
       }
     };
 
