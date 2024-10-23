@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import SandwichMenu from './SandwichMenu'
 import SidePanel from './SidePanel'
 import HeaderNav from './HeaderNav'
+import BrowserBanner from './BrowserBanner'
 import { getApiUrl } from '../utils/apiUtils'
 
 function Layout({ 
@@ -55,6 +56,7 @@ function Layout({
 
   return (
     <div className="App" style={wrapperStyle}>
+      <BrowserBanner />
       <div id="particles-js"></div>
       <div className={`content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`} style={contentStyle}>
         <header className="floating-header" ref={headerRef}>
