@@ -17,13 +17,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173, // This is the default port for Vite
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
+
   },
   define: {
     'process.env': envConfig
