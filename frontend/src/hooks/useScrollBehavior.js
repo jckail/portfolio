@@ -55,7 +55,7 @@ export const useScrollBehavior = (headerHeight, currentSection, updateSection, s
       if (newSection) {
         updateSection(newSection);
       }
-    }, 100),
+    }, 10),
     [updateSectionOnScroll, updateSection]
   );
 

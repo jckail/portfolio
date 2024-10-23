@@ -54,7 +54,7 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
           performScroll(hash);
         } else {
           // If header height isn't ready, wait a bit and try again
-          setTimeout(() => performScroll(hash), 100);
+          () => performScroll(hash);
         }
       }
       initialScrollPerformed.current = true;
