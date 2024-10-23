@@ -5,6 +5,7 @@ import { useParticles } from './useParticles';
 import { useSidebar } from './useSidebar';
 import { downloadResume } from '../utils/resumeUtils';
 import { useResumeFileName } from './useResumeFileName';
+import { useUrlManagement } from './useUrlManagement';
 import { useSectionSelection } from './useSectionSelection';
 
 export const useAppLogic = () => {
@@ -14,14 +15,22 @@ export const useAppLogic = () => {
   const { resumeFileName, error: fileNameError } = useResumeFileName();
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
   const { particlesLoaded } = useParticles(updateParticlesConfig);
+  const { updateUrl } = useUrlManagement();
 
-  // Use the new section selection hook
+  // Handle section changes and URL updates
+  const handleSectionChange = useCallback((newSection, source) => {
+    // Update URL - push state for user actions, replace for scroll/intersection
+    const shouldPushState = source === 'navigation' || source === 'button';
+    updateUrl(newSection, shouldPushState);
+  }, [updateUrl]);
+
+  // Use the section selection hook with URL management
   const {
     currentSection,
     sectionsRef,
     handleNavigationClick,
     handleButtonClick
-  } = useSectionSelection(headerHeight);
+  } = useSectionSelection(headerHeight, handleSectionChange);
 
   const {
     isSidebarOpen,
@@ -50,7 +59,6 @@ export const useAppLogic = () => {
     toggleTheme,
     toggleSidebar,
     handleResumeClick,
-    // Export navigation handler for use in components
     handleSectionClick: handleNavigationClick
   };
 };

@@ -22,7 +22,7 @@ export const useScrollNavigation = (resumeData, headerHeight, onSectionChange) =
   }, [currentSection, trackSection, onSectionChange]);
 
   const { setupObserver } = useIntersectionObserver(headerHeight, updateSection);
-  const { debouncedUpdateSection, scrollToSection } = useScrollBehavior(
+  const { updateSectionOnScroll, scrollToSection } = useScrollBehavior(
     headerHeight,
     currentSection,
     updateSection,
@@ -59,7 +59,7 @@ export const useScrollNavigation = (resumeData, headerHeight, onSectionChange) =
 
   useEffect(() => {
     const cleanupObserver = setupObserver(sectionsRef);
-    window.addEventListener('scroll', debouncedUpdateSection, { passive: true });
+    window.addEventListener('scroll', updateSectionOnScroll, { passive: true });
 
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -73,10 +73,10 @@ export const useScrollNavigation = (resumeData, headerHeight, onSectionChange) =
 
     return () => {
       cleanupObserver();
-      window.removeEventListener('scroll', debouncedUpdateSection);
+      window.removeEventListener('scroll', updateSectionOnScroll);
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [headerHeight, debouncedUpdateSection, setupObserver, handleInitialScroll]);
+  }, [headerHeight, updateSectionOnScroll, setupObserver, handleInitialScroll]);
 
   useEffect(() => {
     if (resumeData && headerHeight > 0 && !initialScrollPerformed.current) {
