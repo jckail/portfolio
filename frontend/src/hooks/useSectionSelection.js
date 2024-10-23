@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useIntersectionObserver } from './useIntersectionObserver';
-import { useScrollBehavior } from './useScrollBehavior';
 
 export const useSectionSelection = (headerHeight, onSectionChange) => {
   // State for tracking current section
@@ -12,7 +11,6 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
   const sectionsRef = useRef({});
   const initialScrollPerformed = useRef(false);
   const observerPaused = useRef(false);
-  const userScrolled = useRef(false);
 
   // Central section update handler with logging
   const handleSectionUpdate = useCallback((newSectionId, source) => {
@@ -31,7 +29,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         return;
       }
 
-      if (source === 'scroll' || source === 'intersection') {
+      if (source === 'intersection') {
         const viewportHeight = window.innerHeight;
         const viewportTop = window.scrollY;
         const viewportBottom = viewportTop + viewportHeight;
@@ -71,13 +69,20 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     (newSection) => handleSectionUpdate(newSection, 'intersection')
   );
 
-  // Setup scroll behavior
-  const { updateSectionOnScroll, scrollToSection } = useScrollBehavior(
-    headerHeight,
-    currentSection,
-    (newSection) => handleSectionUpdate(newSection, 'scroll'),
-    sectionsRef
-  );
+  // Scroll to section function
+  const scrollToSection = useCallback((sectionId) => {
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+      requestAnimationFrame(() => {
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth',
+        });
+        handleSectionUpdate(sectionId, 'navigation');
+      });
+    }
+  }, [headerHeight, handleSectionUpdate]);
 
   // Handle initial URL-based section
   const handleInitialSection = useCallback(() => {
@@ -103,7 +108,6 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log('------------------------\n');
     
     observerPaused.current = true;
-    userScrolled.current = false;
     scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'navigation');
   }, [scrollToSection, handleSectionUpdate]);
@@ -115,27 +119,13 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log('------------------------\n');
     
     observerPaused.current = true;
-    userScrolled.current = false;
     scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'button');
   }, [scrollToSection, handleSectionUpdate]);
 
-  // Handle manual scroll
-  const handleScroll = useCallback(() => {
-    if (!userScrolled.current) {
-      userScrolled.current = true;
-      observerPaused.current = false;
-      console.log('\n--- Manual Scroll Detected ---');
-      console.log('Intersection observer resumed');
-      console.log('------------------------\n');
-    }
-    updateSectionOnScroll();
-  }, [updateSectionOnScroll]);
-
   // Setup event listeners
   useEffect(() => {
     const cleanupObserver = setupObserver(sectionsRef);
-    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -145,7 +135,6 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log('------------------------\n');
         
         observerPaused.current = true;
-        userScrolled.current = false;
         initialScrollPerformed.current = false;
         handleInitialSection();
       }
@@ -155,12 +144,10 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
 
     return () => {
       cleanupObserver();
-      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [
     headerHeight,
-    handleScroll,
     setupObserver,
     handleInitialSection
   ]);
