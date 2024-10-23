@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getApiUrl } from '../utils/apiUtils';
-import { downloadResume, fetchResumeName } from '../utils/resumeUtils';
+import { downloadResume } from '../utils/resumeUtils';
+import { useAppLogic } from '../hooks/useAppLogic';
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const fileName = fetchResumeName();
+  const { resumeFileName } = useAppLogic();
 
   useEffect(() => {
     const fetchPdf = async () => {
@@ -43,7 +44,7 @@ function ResumePDF() {
   }, []);
 
   const handleDownloadClick = async () => {
-    await downloadResume();
+    await downloadResume(resumeFileName);
   };
 
   if (isLoading) {
@@ -59,7 +60,7 @@ function ResumePDF() {
       <div className="resume-pdf-container">
         <iframe
           src={pdfUrl}
-          title={fileName}
+          title={resumeFileName}
         />
       </div>
       <button onClick={handleDownloadClick} className="download-button">Download Resume</button>
