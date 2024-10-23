@@ -199,10 +199,10 @@ section > .content-wrapper > * {
 }
 
 section:first-of-type {
-  padding-top: 4rem;
+  padding-top: 3rem;
 }
 main:first-of-type {
-  padding-top: 4rem;
+  padding-top: 3rem;
 }
 
 /* 8. Media Queries */

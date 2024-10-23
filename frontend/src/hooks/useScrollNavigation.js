@@ -30,32 +30,64 @@ export const useScrollNavigation = (resumeData, headerHeight) => {
     sectionsRef
   );
 
+  const performScroll = useCallback((hash) => {
+    const targetElement = document.getElementById(hash);
+    if (targetElement) {
+      // Wait for next frame to ensure all layout calculations are complete
+      requestAnimationFrame(() => {
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth',
+        });
+        updateSection(hash, true);
+      });
+    }
+  }, [headerHeight, updateSection]);
+
   const handleInitialScroll = useCallback(() => {
     if (!initialScrollPerformed.current) {
       const hash = window.location.hash.slice(1);
       if (hash && sectionsRef.current[hash]) {
-        scrollToSection(hash);
+        // Ensure header height is available
+        if (headerHeight > 0) {
+          performScroll(hash);
+        } else {
+          // If header height isn't ready, wait a bit and try again
+          setTimeout(() => performScroll(hash), 100);
+        }
       }
       initialScrollPerformed.current = true;
       initialScrollDone.current = true;
     }
-  }, [scrollToSection]);
+  }, [headerHeight, performScroll]);
 
   useEffect(() => {
     const cleanupObserver = setupObserver(sectionsRef);
     window.addEventListener('scroll', debouncedUpdateSection, { passive: true });
 
+    // Handle direct URL navigation
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && sectionsRef.current[hash]) {
+        initialScrollPerformed.current = false;
+        handleInitialScroll();
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+
     return () => {
       cleanupObserver();
       window.removeEventListener('scroll', debouncedUpdateSection);
+      window.removeEventListener('hashchange', handleHashChange);
       cleanupUrl();
     };
-  }, [headerHeight, debouncedUpdateSection, setupObserver, cleanupUrl]);
+  }, [headerHeight, debouncedUpdateSection, setupObserver, cleanupUrl, handleInitialScroll]);
 
   useEffect(() => {
     if (resumeData && headerHeight > 0 && !initialScrollPerformed.current) {
-      // Small delay to ensure DOM is ready
-      setTimeout(handleInitialScroll, 1);
+      handleInitialScroll();
     }
   }, [resumeData, headerHeight, handleInitialScroll]);
 
