@@ -16,8 +16,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 5173, // This is the default port for Vite
-
+    port: 5173,
+    proxy: {
+      '/api': 'http://localhost:8080'
+    }
   },
   define: {
     'process.env': envConfig
