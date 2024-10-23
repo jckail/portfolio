@@ -17,15 +17,14 @@ export const useResumeData = () => {
     fetch(fullApiUrl)
       .then(response => {
         console.log('API response received');
-        console.log('Response status:', response.status);
-        console.log('Response headers:', JSON.stringify(Array.from(response.headers.entries())));
+        
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
       .then(data => {
-        console.log('API response data:', JSON.stringify(data, null, 2));
         setResumeData(data);
       })
       .catch(error => {

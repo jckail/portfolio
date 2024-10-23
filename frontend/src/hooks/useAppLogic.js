@@ -19,6 +19,11 @@ export const useAppLogic = () => {
 
   // Handle section changes and URL updates
   const handleSectionChange = useCallback((newSection, source) => {
+    console.log('\n--- App Section State ---');
+    console.log(`Current Section: ${newSection}`);
+    console.log(`Update Source: ${source}`);
+    console.log('------------------------\n');
+    
     // Update URL - push state for user actions, replace for scroll/intersection
     const shouldPushState = source === 'navigation' || source === 'button';
     updateUrl(newSection, shouldPushState);

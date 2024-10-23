@@ -11,6 +11,8 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
   // Refs for sections and initialization tracking
   const sectionsRef = useRef({});
   const initialScrollPerformed = useRef(false);
+  const observerPaused = useRef(false);
+  const userScrolled = useRef(false);
 
   // Central section update handler with logging
   const handleSectionUpdate = useCallback((newSectionId, source) => {
@@ -20,7 +22,15 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
       console.log(`New Section: ${newSectionId}`);
       console.log(`Update Source: ${source}`);
       console.log(`Header Height: ${headerHeight}px`);
+      console.log(`Observer Paused: ${observerPaused.current}`);
       
+      // Only allow intersection updates if observer is not paused
+      if (source === 'intersection' && observerPaused.current) {
+        console.log('Intersection update ignored - observer paused');
+        console.log('------------------------\n');
+        return;
+      }
+
       if (source === 'scroll' || source === 'intersection') {
         const viewportHeight = window.innerHeight;
         const viewportTop = window.scrollY;
@@ -78,6 +88,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log(`Loading section from URL hash: ${hash}`);
         console.log('------------------------\n');
         
+        observerPaused.current = true;
         scrollToSection(hash);
         handleSectionUpdate(hash, 'url');
       }
@@ -91,6 +102,8 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log(`Target Section: ${sectionId}`);
     console.log('------------------------\n');
     
+    observerPaused.current = true;
+    userScrolled.current = false;
     scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'navigation');
   }, [scrollToSection, handleSectionUpdate]);
@@ -101,14 +114,28 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     console.log(`Target Section: ${sectionId}`);
     console.log('------------------------\n');
     
+    observerPaused.current = true;
+    userScrolled.current = false;
     scrollToSection(sectionId);
     handleSectionUpdate(sectionId, 'button');
   }, [scrollToSection, handleSectionUpdate]);
 
+  // Handle manual scroll
+  const handleScroll = useCallback(() => {
+    if (!userScrolled.current) {
+      userScrolled.current = true;
+      observerPaused.current = false;
+      console.log('\n--- Manual Scroll Detected ---');
+      console.log('Intersection observer resumed');
+      console.log('------------------------\n');
+    }
+    updateSectionOnScroll();
+  }, [updateSectionOnScroll]);
+
   // Setup event listeners
   useEffect(() => {
     const cleanupObserver = setupObserver(sectionsRef);
-    window.addEventListener('scroll', updateSectionOnScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -117,6 +144,8 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log(`New Hash: ${hash}`);
         console.log('------------------------\n');
         
+        observerPaused.current = true;
+        userScrolled.current = false;
         initialScrollPerformed.current = false;
         handleInitialSection();
       }
@@ -126,12 +155,12 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
 
     return () => {
       cleanupObserver();
-      window.removeEventListener('scroll', updateSectionOnScroll);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [
     headerHeight,
-    updateSectionOnScroll,
+    handleScroll,
     setupObserver,
     handleInitialSection
   ]);

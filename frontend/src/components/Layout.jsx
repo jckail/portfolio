@@ -24,12 +24,9 @@ function Layout({
   useEffect(() => {
     if (headerRef.current) {
       const height = headerRef.current.offsetHeight;
-      console.log('Setting header height:', height);
       setHeaderHeight(height);
     }
   }, [setHeaderHeight])
-
-  console.log('Layout rendering, headerHeight:', headerHeight);
 
   const wrapperStyle = {
     overflowX: 'hidden',

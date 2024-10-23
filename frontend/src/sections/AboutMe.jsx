@@ -1,13 +1,7 @@
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef } from 'react'
 
 const AboutMe = forwardRef(({ aboutMe, about_me }, ref) => {
   const aboutMeContent = aboutMe || about_me;
-
-  useEffect(() => {
-    console.log('AboutMe component received:', aboutMeContent);
-    console.log('AboutMe type:', typeof aboutMeContent);
-    console.log('AboutMe length:', aboutMeContent ? aboutMeContent.length : 'N/A');
-  }, [aboutMeContent]);
 
   if (!aboutMeContent) {
     return (
