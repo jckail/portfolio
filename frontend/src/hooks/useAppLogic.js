@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useResumeData } from './useResumeData';
 import { useTheme } from './useTheme';
 import { useParticles } from './useParticles';
-import { useScrollNavigation } from './useScrollNavigation';
+import { useScrolling } from './useScrolling';
 import { useSidebar } from './useSidebar';
 import { downloadResume } from '../utils/resumeUtils';
 import { useResumeFileName } from './useResumeFileName';
@@ -14,7 +14,7 @@ export const useAppLogic = () => {
   const { resumeFileName, error: fileNameError } = useResumeFileName();
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
   const { particlesLoaded } = useParticles(updateParticlesConfig);
-  const { currentSection, sectionsRef, scrollToSection } = useScrollNavigation(resumeData, headerHeight);
+  const { currentSection, sectionsRef, scrollToSection } = useScrolling(headerHeight);
   const {
     isSidebarOpen,
     isTemporarilyVisible,
@@ -23,9 +23,9 @@ export const useAppLogic = () => {
 
   const handleResumeClick = useCallback((event) => {
     event.preventDefault();
-    scrollToSection('my-resume', headerHeight);
+    scrollToSection('my-resume');
     downloadResume(resumeFileName);
-  }, [scrollToSection, headerHeight, resumeFileName]);
+  }, [scrollToSection, resumeFileName]);
 
   return {
     resumeData,
