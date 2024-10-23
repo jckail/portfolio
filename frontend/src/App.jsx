@@ -24,7 +24,8 @@ function App() {
     scrollToSection
   } = useAppLogic()
 
-  const { trackResumeButtonClick } = useGoogleAnalytics();
+  // Initialize Google Analytics
+  useGoogleAnalytics();
 
   return (
     <>
@@ -45,7 +46,6 @@ function App() {
           resumeData={resumeData}
           error={error}
           sectionsRef={sectionsRef}
-          trackResumeButtonClick={trackResumeButtonClick}
         />
       </Layout>
       <CookieBanner />

@@ -25,7 +25,7 @@ export const useIntersectionObserver = (headerHeight, updateSection) => {
   const setupObserver = (sectionsRef) => {
     if (!observerRef.current) {
       observerRef.current = new IntersectionObserver(handleIntersection, {
-        rootMargin: `-${headerHeight}px 0px -45% 0px`,
+        rootMargin: `-${headerHeight}px 0px -50% 0px`,
         threshold: [0.1, 0.5, 1],
       });
     }

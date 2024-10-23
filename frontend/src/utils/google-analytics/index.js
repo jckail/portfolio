@@ -1,44 +1,20 @@
 import React from 'react';
 import ReactGA from 'react-ga4';
 
-const TRACKING_ID = "G-GDZX9ZYNHS";
-
-// Initialize GA4
-export const initGA = () => {
-  ReactGA.initialize(TRACKING_ID);
-  console.info('Google Analytics initialized with tracking ID:', TRACKING_ID);
-};
-
-// Track page views
-export const trackPageView = (page = window.location.pathname + window.location.search) => {
-  ReactGA.send({ 
-    hitType: "pageview", 
-    page,
-    title: "Resume"
-  });
-  console.info('Page view tracked:', page);
-};
-
-// Event tracking
-export const logEvent = (category, action, label) => {
-  ReactGA.event({
-    category,
-    action,
-    label,
-  });
-  console.info('GA Event tracked:', { category, action, label });
-};
-
-// Custom events structure
-export const Events = {
-  Categories: {
+const GA_CONFIG = {
+  TRACKING_ID: 'G-GDZX9ZYNHS',
+  EVENTS: {
+    PAGEVIEW: 'pageview',
+    CUSTOM: 'event'
+  },
+  CATEGORIES: {
     NAVIGATION: 'Navigation',
     INTERACTION: 'Interaction',
     FORM: 'Form',
     RESUME: 'Resume',
     SECTION: 'Section'
   },
-  Actions: {
+  ACTIONS: {
     CLICK: 'Click',
     SUBMIT: 'Submit',
     DOWNLOAD: 'Download',
@@ -46,59 +22,68 @@ export const Events = {
   }
 };
 
-// Track resume button clicks
-export const trackResumeButtonClick = () => {
-  const category = Events.Categories.RESUME;
-  const action = Events.Actions.DOWNLOAD;
-  const label = 'Resume Download';
-  
-  logEvent(category, action, label);
-  console.info('Resume download event tracked:', { category, action, label });
-};
+const logGAEvent = (type, data) => console.info('GA Event:', { type, ...data });
 
-// Track section views
-export const trackSectionView = (sectionId) => {
-  const formattedSection = sectionId.split('-')
+const formatSectionTitle = (sectionId) => 
+  sectionId.split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const category = Events.Categories.SECTION;
-  const action = Events.Actions.VIEW;
-  const label = `Viewed Section ${formattedSection}`;
+export const gaService = {
+  init: () => {
+    ReactGA.initialize(GA_CONFIG.TRACKING_ID);
+    console.info('Google Analytics initialized with tracking ID:', GA_CONFIG.TRACKING_ID);
+  },
 
-  logEvent(category, action, label);
-  console.info('Section view tracked:', { category, action, label });
+  trackPageView: (page = window.location.pathname + window.location.search, title = 'N/A') => {
+    const data = { hitType: GA_CONFIG.EVENTS.PAGEVIEW, page, title };
+    ReactGA.send(data);
+    logGAEvent(GA_CONFIG.EVENTS.PAGEVIEW, data);
+  },
+
+  trackEvent: (category, action, label) => {
+    const data = { category, action, label };
+    ReactGA.event(data);
+    logGAEvent(GA_CONFIG.EVENTS.CUSTOM, data);
+  },
+
+  trackResumeDownload: () => {
+    gaService.trackEvent(
+      GA_CONFIG.CATEGORIES.RESUME,
+      GA_CONFIG.ACTIONS.DOWNLOAD,
+      'Resume Download'
+    );
+  }
 };
 
-// Custom hook for Google Analytics
 export const useGoogleAnalytics = () => {
   React.useEffect(() => {
-    initGA();
-    trackPageView();
+    gaService.init();
+    gaService.trackPageView();
 
-    // Track section views when URL hash changes
     const handleHashChange = () => {
-      const sectionId = window.location.hash.slice(1); // Remove the # from the hash
+      const sectionId = window.location.hash.slice(1);
       if (sectionId) {
-        trackSectionView(sectionId);
+        gaService.trackPageView(
+          `/${sectionId}`,
+          formatSectionTitle(sectionId)
+        );
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
-    
-    // Track initial section if present in URL
-    if (window.location.hash) {
-      handleHashChange();
-    }
+    if (window.location.hash) handleHashChange();
 
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   return {
-    trackPageView,
-    trackResumeButtonClick,
-    logEvent
+    trackPageView: gaService.trackPageView,
+    trackResumeButtonClick: gaService.trackResumeDownload,
+    logEvent: gaService.trackEvent
   };
 };
+
+// Export aliases for backward compatibility
+export const GA = gaService;
+export const Events = GA_CONFIG;

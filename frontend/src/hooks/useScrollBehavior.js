@@ -3,7 +3,7 @@ import { debounce } from 'lodash';
 
 export const useScrollBehavior = (headerHeight, currentSection, updateSection, sectionsRef) => {
   const updateSectionOnScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + headerHeight + 150;
+    const scrollPosition = window.scrollY + headerHeight;
 
     return Object.entries(sectionsRef.current)
       .reverse()

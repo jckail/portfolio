@@ -162,15 +162,17 @@ section > .content-wrapper > * {
 
 .resume-pdf-container {
   width: 100%;
-  height: 1400px;
-  padding-bottom: 129.4%; /* Aspect ratio for A4 paper (1:1.414) */
+  height: 100vh;
   position: relative;
   max-width: 1000px;
-  margin: 2rem auto;
+  margin: 3rem auto;
+  padding: 1rem;
   border: none;
-  border-radius: 1px;
-  overflow: hidden;
+  border-radius: 8px;
+  overflow: auto;
   background: transparent;
+  box-sizing: border-box;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .resume-pdf-container iframe {
@@ -209,11 +211,15 @@ main:first-of-type {
     padding-top: 0.3rem;
   }
 
-
   main:first-of-type {
     padding-top: 1rem;
   }
 
+  .resume-pdf-container {
+    height: 85vh;
+    margin: 2rem auto;
+    padding: 0.5rem;
+  }
 }
 
 @media (max-width: 400px) {
@@ -222,5 +228,11 @@ main:first-of-type {
   }
   main:first-of-type {
     padding-top: 1rem;
+  }
+  
+  .resume-pdf-container {
+    height: 75vh;
+    margin: 1rem auto;
+    padding: 0.25rem;
   }
 }

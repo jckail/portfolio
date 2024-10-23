@@ -1,4 +1,4 @@
-import { trackResumeButtonClick } from '../utils/google-analytics';
+import { GA } from '../utils/google-analytics';
 
 export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
   const targetElement = document.getElementById(sectionId);
@@ -50,23 +50,29 @@ export const downloadResume = async () => {
   try {
     console.info('Initiating resume download...');
     
-    // Track resume download event
-    trackResumeButtonClick();
-
     const [apiUrl, fileName] = await Promise.all([getApiUrl(), fetchResumeName()]);
     const downloadUrl = `${apiUrl}/resume`;
 
+    const response = await fetch(downloadUrl);
+    if (!response.ok) {
+      throw new Error('Download failed');
+    }
+
+    const blob = await response.blob();
     const downloadLink = document.createElement('a');
-    downloadLink.href = downloadUrl;
+    downloadLink.href = URL.createObjectURL(blob);
     downloadLink.download = fileName;
 
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(downloadLink.href);
 
+    // Track successful resume download
+    GA.trackResumeDownload();
     console.info('Resume download completed successfully.');
   } catch (error) {
     console.error('Error during resume download:', error);
     alert('Failed to download the resume. Please try again later.');
   }
-}
+};
