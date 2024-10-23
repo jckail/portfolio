@@ -5,7 +5,7 @@ export const useUrlManagement = () => {
     // Only update URL if a valid sectionId is provided
     if (sectionId && sectionId.trim()) {
       const newUrl = `${window.location.pathname}#${sectionId}`;
-      window.history.pushState({ path: newUrl }, '', newUrl);
+      window.history.replaceState({ path: newUrl }, '', newUrl);
     }
     // If no sectionId is provided, do nothing and keep the current URL
   }, []);

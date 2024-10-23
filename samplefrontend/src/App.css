@@ -1,0 +1,53 @@
+.app {
+  min-height: 100vh;
+}
+
+.navigation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #333;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  z-index: 1000;
+}
+
+.navigation a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.navigation a:hover {
+  background-color: #555;
+}
+
+main {
+  padding-top: 60px;
+}
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  scroll-margin-top: 60px;
+}
+
+#home { background-color: #f0f0f0; }
+#about { background-color: #e0e0e0; }
+#services { background-color: #d0d0d0; }
+#portfolio { background-color: #c0c0c0; }
+#team { background-color: #b0b0b0; }
+#contact { background-color: #a0a0a0; }
+
+h1, h2 {
+  margin-bottom: 1rem;
+}
