@@ -1,33 +1,5 @@
-import { GA } from '../utils/google-analytics';
-
-export const scrollToSection = (sectionId, headerHeight, updateUrl = true) => {
-  const targetElement = document.getElementById(sectionId);
-  if (targetElement) {
-    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({
-      top: targetPosition - headerHeight,
-      behavior: 'smooth'
-    });
-    if (updateUrl) {
-      window.history.pushState(null, '', `#${sectionId}`);
-    }
-  }
-};
-
-const isLocalHost = (hostname) => {
-  const localHostRegex = /^(localhost|0.0.0.0|127.0.0.1|192\.168\.0\.(122|128|134))$/;
-  return localHostRegex.test(hostname);
-};
-
-export const getApiUrl = () => {
-  const currentHost = window.location.hostname;
-  const isLocal = isLocalHost(currentHost);
-  const protocol = isLocal ? 'http' : 'https';
-  const port = isLocal ? ':8080' : '';
-  const apiUrl = `${protocol}://${currentHost}${port}/api`;
-
-  return apiUrl;
-};
+import { GA } from './google-analytics';
+import { getApiUrl } from './apiUtils';
 
 export const fetchResumeName = async () => {
   try {

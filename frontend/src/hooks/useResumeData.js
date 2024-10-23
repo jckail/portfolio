@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../helpers/utils';
+import { getApiUrl } from '../utils/apiUtils';
 
 export const useResumeData = () => {
   const [resumeData, setResumeData] = useState(null);

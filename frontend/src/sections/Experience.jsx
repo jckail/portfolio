@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import { getApiUrl } from '../helpers/utils'
+import { getApiUrl } from '../utils/apiUtils'
 
 const Experience = forwardRef(({ experience }, ref) => {
   const apiUrl = getApiUrl();

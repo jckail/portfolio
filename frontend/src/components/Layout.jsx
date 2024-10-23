@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import SandwichMenu from './SandwichMenu'
 import SidePanel from './SidePanel'
 import HeaderNav from './HeaderNav'
-import { getApiUrl } from '../helpers/utils'
+import { getApiUrl } from '../utils/apiUtils'
 
 function Layout({ 
   children, 

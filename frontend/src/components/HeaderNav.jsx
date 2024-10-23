@@ -1,5 +1,5 @@
 import React from 'react'
-import { getApiUrl } from '../helpers/utils'
+import { getApiUrl } from '../utils/apiUtils'
 
 function HeaderNav({ resumeData, theme, onResumeClick }) {
   const apiUrl = getApiUrl();

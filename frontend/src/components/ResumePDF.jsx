@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl, downloadResume, fetchResumeName } from '../helpers/utils';
+import { getApiUrl } from '../utils/apiUtils';
+import { downloadResume, fetchResumeName } from '../utils/resumeUtils';
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');

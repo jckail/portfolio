@@ -4,7 +4,7 @@ import { useTheme } from './useTheme';
 import { useParticles } from './useParticles';
 import { useScrollNavigation } from './useScrollNavigation';
 import { useSidebar } from './useSidebar';
-import { downloadResume } from '../helpers/utils';
+import { downloadResume } from '../utils/resumeUtils';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
