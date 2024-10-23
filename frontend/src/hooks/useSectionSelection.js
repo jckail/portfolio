@@ -1,18 +1,19 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useIntersectionObserver } from './useIntersectionObserver';
+import { useDirectPageLoad } from './useDirectPageLoad';
 import { debounce } from 'lodash';
 
+// Use the same offset as defined in HeaderNav
+const SCROLL_OFFSET = 65;
+
 export const useSectionSelection = (headerHeight, onSectionChange) => {
-  // State for tracking current section
-  const [currentSection, setCurrentSection] = useState(
-    () => window.location.hash.slice(1) || 'about-me'
-  );
+  // Use direct page load hook
+  const { initialSection, handleDirectPageLoad, isFirstVisit } = useDirectPageLoad(headerHeight, onSectionChange);
+  const [currentSection, setCurrentSection] = useState(initialSection);
   
   // Refs for sections and initialization tracking
   const sectionsRef = useRef({});
-  const initialScrollPerformed = useRef(false);
   const observerPaused = useRef(false);
-  const observerInitialized = useRef(false);
 
   // Log header height when it changes
   useEffect(() => {
@@ -32,6 +33,7 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         console.log(`Update Source: ${source}`);
         console.log(`Header Height: ${headerHeight}px`);
         console.log(`Observer Paused: ${observerPaused.current}`);
+        console.log(`First Visit: ${isFirstVisit}`);
       }
       
       // Only allow intersection updates if observer is not paused
@@ -66,10 +68,11 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
         });
       }
       console.log('------------------------\n');
+
       setCurrentSection(newSectionId);
       onSectionChange(newSectionId, source);
     }
-  }, [currentSection, headerHeight, onSectionChange]);
+  }, [currentSection, headerHeight, onSectionChange, isFirstVisit]);
 
   // Create debounced version for intersection updates
   const debouncedHandleSectionUpdate = useCallback(
@@ -92,33 +95,14 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     const targetElement = document.getElementById(sectionId);
     if (targetElement) {
       requestAnimationFrame(() => {
-        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
         window.scrollTo({
           top: targetPosition,
           behavior: 'smooth',
         });
       });
     }
-  }, [headerHeight]);
-
-  // Handle initial URL-based section
-  const handleInitialSection = useCallback(() => {
-    if (!initialScrollPerformed.current) {
-      const hash = window.location.hash.slice(1);
-      if (hash && sectionsRef.current[hash]) {
-        console.log('\n--- Initial Section Load ---');
-        console.log(`Loading section from URL hash: ${hash}`);
-        console.log(`Header Height: ${headerHeight}px`);
-        console.log('------------------------\n');
-        
-        // Pause observer before any scroll action
-        observerPaused.current = true;
-        handleSectionUpdate(hash, 'url');
-        scrollToSection(hash);
-      }
-      initialScrollPerformed.current = true;
-    }
-  }, [scrollToSection, handleSectionUpdate, headerHeight]);
+  }, []);
 
   // Navigation click handler
   const handleNavigationClick = useCallback((sectionId) => {
@@ -183,12 +167,10 @@ export const useSectionSelection = (headerHeight, onSectionChange) => {
     }
   }, [headerHeight, setupObserver]);
 
-  // Handle initial section on mount
+  // Handle direct page load
   useEffect(() => {
-    if (headerHeight > 0 && !initialScrollPerformed.current) {
-      handleInitialSection();
-    }
-  }, [headerHeight, handleInitialSection]);
+    handleDirectPageLoad(sectionsRef);
+  }, [handleDirectPageLoad]);
 
   return {
     currentSection,

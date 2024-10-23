@@ -11,6 +11,7 @@ import { debounce } from 'lodash';
 
 export const useAppLogic = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
+  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
 
   // Log header height changes
   useEffect(() => {
@@ -28,9 +29,12 @@ export const useAppLogic = () => {
   // Debounced URL update for intersection changes
   const debouncedUpdateUrl = useCallback(
     debounce((newSection) => {
-      updateUrl(newSection, false);
+      // Only skip URL update on Firefox when source is intersection
+      if (!isFirefox) {
+        updateUrl(newSection, false);
+      }
     }, 200),
-    [updateUrl]
+    [updateUrl, isFirefox]
   );
 
   // Handle section changes and URL updates
@@ -40,14 +44,17 @@ export const useAppLogic = () => {
     console.log(`Update Source: ${source}`);
     console.log('------------------------\n');
     
-    // Update URL - push state for user actions, debounced replace for intersection
     if (source === 'intersection') {
-      debouncedUpdateUrl(newSection);
+      // For intersection updates, only update URL if not Firefox
+      if (!isFirefox) {
+        debouncedUpdateUrl(newSection);
+      }
     } else {
+      // For manual navigation (button/navigation), always update URL regardless of browser
       const shouldPushState = source === 'navigation' || source === 'button';
       updateUrl(newSection, shouldPushState);
     }
-  }, [updateUrl, debouncedUpdateUrl]);
+  }, [updateUrl, debouncedUpdateUrl, isFirefox]);
 
   // Use the section selection hook with URL management and header height
   const {
