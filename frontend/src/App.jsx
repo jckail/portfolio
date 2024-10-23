@@ -55,25 +55,11 @@ function App() {
     isTemporarilyVisible
   ])
 
-  const wrapperStyle = {
-    overflowX: 'hidden',
-    position: 'relative',
-    width: '100%',
-    maxWidth: '100vw'
-  };
-
-  const contentStyle = {
-    width: '100%',
-    maxWidth: '100%',
-    boxSizing: 'border-box',
-    padding: '0 15px'
-  };
-
   return (
-    <div className="App" style={wrapperStyle}>
+    <div className="App app-wrapper">
       <BrowserBanner />
       <div id="particles-js"></div>
-      <div className={`content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`} style={contentStyle}>
+      <div className={`app-content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
         <header className="floating-header" ref={headerRef}>
           <div className="header-left">
             <SandwichMenu onClick={toggleSidebar} />

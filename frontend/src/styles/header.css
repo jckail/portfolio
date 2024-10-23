@@ -50,6 +50,8 @@
 .header-nav {
   display: flex;
   align-items: center;
+  height: 65px;
+  min-height: 65px;
 }
 
 .header-nav a {

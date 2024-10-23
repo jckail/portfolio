@@ -24,16 +24,7 @@ function HeaderNav({ resumeData, theme, onResumeClick, onHeightChange }) {
   }, [onHeightChange]);
 
   return (
-    <nav 
-      ref={navRef}
-      className="header-nav"
-      style={{ 
-        height: HEADER_NAV_HEIGHT,
-        minHeight: HEADER_NAV_HEIGHT,
-        display: 'flex',
-        alignItems: 'center'
-      }}
-    >
+    <nav ref={navRef} className="header-nav">
       {resumeData?.github && (
         <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
           <img 
