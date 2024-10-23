@@ -1,4 +1,3 @@
-import { GA } from './google-analytics';
 import { getApiUrl } from './apiUtils';
 
 export const downloadResume = async (fileName = 'default_resume.pdf') => {
@@ -42,8 +41,6 @@ export const downloadResume = async (fileName = 'default_resume.pdf') => {
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(downloadLink.href);
 
-    // Track successful resume download
-    GA.trackResumeDownload();
     console.log('Resume download completed successfully.');
   } catch (error) {
     console.error('Detailed error during resume download:', {

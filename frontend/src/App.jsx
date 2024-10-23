@@ -12,7 +12,6 @@ import Projects from './sections/Projects'
 import MyResume from './sections/MyResume'
 import { getApiUrl } from './utils/apiUtils'
 import { useAppLogic } from './hooks/useAppLogic'
-import { useGoogleAnalytics } from './utils/google-analytics'
 
 const MainContent = React.memo(({ resumeData, sectionsRef }) => (
   <>
@@ -42,9 +41,6 @@ function App() {
   const sectionsRef = useRef({})
   const apiUrl = getApiUrl()
   const previousHeightRef = useRef(headerHeight)
-
-  // Initialize Google Analytics
-  useGoogleAnalytics();
 
   useEffect(() => {
     if (headerRef.current) {
