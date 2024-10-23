@@ -76,7 +76,8 @@ function App() {
         });
       },
       {
-        threshold: 0.5,
+        threshold: 0.1, // Changed from 0.5 to 0.1 to make it more sensitive
+        rootMargin: '0px 0px -10% 0px' // Added rootMargin to trigger slightly before the section is fully in view
       }
     );
 
