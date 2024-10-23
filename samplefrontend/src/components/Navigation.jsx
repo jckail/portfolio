@@ -1,17 +1,19 @@
+import { HashLink } from 'react-router-hash-link';
+
 export default function Navigation() {
   return (
     <nav className="navigation">
-      <a href="#home">Home</a>
-      <a href="#skills">Skills</a>
-      <a href="#experience">Experience</a>
-      <a href="#education">Education</a>
-      <a href="#about">About</a>
-      <a href="#projects">Projects</a>
-      <a href="#services">Services</a>
-      <a href="#awards">Awards</a>
-      <a href="#portfolio">Portfolio</a>
-      <a href="#team">Team</a>
-      <a href="#contact">Contact</a>
+      <HashLink smooth to="/#home">Home</HashLink>
+      <HashLink smooth to="/#skills">Skills</HashLink>
+      <HashLink smooth to="/#experience">Experience</HashLink>
+      <HashLink smooth to="/#education">Education</HashLink>
+      <HashLink smooth to="/#about">About</HashLink>
+      <HashLink smooth to="/#projects">Projects</HashLink>
+      <HashLink smooth to="/#services">Services</HashLink>
+      <HashLink smooth to="/#awards">Awards</HashLink>
+      <HashLink smooth to="/#portfolio">Portfolio</HashLink>
+      <HashLink smooth to="/#team">Team</HashLink>
+      <HashLink smooth to="/#contact">Contact</HashLink>
     </nav>
   );
 }

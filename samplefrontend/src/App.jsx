@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './sections/Home';
 import About from './sections/About';
@@ -14,13 +15,16 @@ import Awards from './sections/Awards';
 import './App.css';
 
 function App() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const sectionId = entry.target.id;
-            window.history.replaceState(null, '', `#${sectionId}`);
+            // Use navigate to update URL without page reload
+            navigate(`/#${sectionId}`, { replace: true });
           }
         });
       },
@@ -34,24 +38,28 @@ function App() {
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="app">
       <Navigation />
-      <main>
-        <Home />
-        <Skills />
-        <Experience />
-        <Education />
-        <About />
-        <Projects />
-        <Services />
-        <Awards />
-        <Portfolio />
-        <Team />
-        <Contact />
-      </main>
+      <Routes>
+        <Route path="/" element={
+          <main>
+            <section id="home" className="section"><Home /></section>
+            <section id="skills" className="section"><Skills /></section>
+            <section id="experience" className="section"><Experience /></section>
+            <section id="education" className="section"><Education /></section>
+            <section id="about" className="section"><About /></section>
+            <section id="projects" className="section"><Projects /></section>
+            <section id="services" className="section"><Services /></section>
+            <section id="awards" className="section"><Awards /></section>
+            <section id="portfolio" className="section"><Portfolio /></section>
+            <section id="team" className="section"><Team /></section>
+            <section id="contact" className="section"><Contact /></section>
+          </main>
+        } />
+      </Routes>
     </div>
   );
 }
