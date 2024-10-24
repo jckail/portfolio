@@ -46,11 +46,40 @@
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
+.collapse-button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-left: 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.collapse-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .banner-main {
     font-size: 1.1em;
     text-align: center;
     font-weight: bold;
     padding-left: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    max-height: 1000px;
+}
+
+.browser-banner.collapsed .collapsible-content {
+    max-height: 0;
 }
 
 .debug-info {

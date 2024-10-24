@@ -14,6 +14,7 @@ const BrowserBanner = () => {
         }
     });
     const [isVisible, setIsVisible] = useState(true);
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     // Check if we're running on Vite's development server (port 5173)
     const isViteDev = window.location.port === '5173' && 
@@ -152,9 +153,13 @@ const BrowserBanner = () => {
         setIsVisible(false);
     };
 
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+    };
+
     if (!isVisible) return null;
 
-    const bannerClass = `browser-banner ${browserInfo.browser}`;
+    const bannerClass = `browser-banner ${browserInfo.browser} ${isCollapsed ? 'collapsed' : ''}`;
     
     const getBrowserInfo = () => {
         const deviceInfo = browserInfo.device ? ` on ${browserInfo.device}` : '';
@@ -166,25 +171,36 @@ const BrowserBanner = () => {
             <button className="close-button" onClick={handleClose} aria-label="Close banner">
                 ×
             </button>
-            <div className="banner-main">Welcome to Quick Resume! You're using {getBrowserInfo()}</div>
-            <div className="debug-info">
-                <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
-                <div className="debug-details">
-                    <div>Connection Info:</div>
-                    <div>- Host: {browserInfo.debugInfo?.host}</div>
-                    <div>- Port: {browserInfo.debugInfo?.port}</div>
-                    <div>Device Info:</div>
-                    <div>- Platform: {browserInfo.debugInfo?.uaComponents?.platform}</div>
-                    <div>- Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
-                    <div>- WebKit: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
-                    <div>- Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
-                    <div>- OS Version: {browserInfo.debugInfo?.uaComponents?.osVersion}</div>
-                    <div>Features:</div>
-                    <div>- Firefox APIs: {browserInfo.debugInfo?.features?.mozGetUserMedia ? 'Yes' : 'No'}</div>
-                    <div>- Safari APIs: {browserInfo.debugInfo?.features?.webkitGetUserMedia ? 'Yes' : 'No'}</div>
-                    <div>- Service Worker: {browserInfo.debugInfo?.features?.serviceWorker ? 'Yes' : 'No'}</div>
-                    <div>- Push Manager: {browserInfo.debugInfo?.features?.pushManager ? 'Yes' : 'No'}</div>
-                    <div>- Touch Points: {browserInfo.debugInfo?.features?.maxTouchPoints}</div>
+            <div className="banner-main">
+                Welcome to Quick Resume! You're using {getBrowserInfo()}
+                <button 
+                    className="collapse-button" 
+                    onClick={toggleCollapse} 
+                    aria-label={isCollapsed ? "Expand banner" : "Collapse banner"}
+                >
+                    {isCollapsed ? '▼' : '▲'}
+                </button>
+            </div>
+            <div className="collapsible-content">
+                <div className="debug-info">
+                    <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
+                    <div className="debug-details">
+                        <div>Connection Info:</div>
+                        <div>- Host: {browserInfo.debugInfo?.host}</div>
+                        <div>- Port: {browserInfo.debugInfo?.port}</div>
+                        <div>Device Info:</div>
+                        <div>- Platform: {browserInfo.debugInfo?.uaComponents?.platform}</div>
+                        <div>- Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
+                        <div>- WebKit: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
+                        <div>- Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
+                        <div>- OS Version: {browserInfo.debugInfo?.uaComponents?.osVersion}</div>
+                        <div>Features:</div>
+                        <div>- Firefox APIs: {browserInfo.debugInfo?.features?.mozGetUserMedia ? 'Yes' : 'No'}</div>
+                        <div>- Safari APIs: {browserInfo.debugInfo?.features?.webkitGetUserMedia ? 'Yes' : 'No'}</div>
+                        <div>- Service Worker: {browserInfo.debugInfo?.features?.serviceWorker ? 'Yes' : 'No'}</div>
+                        <div>- Push Manager: {browserInfo.debugInfo?.features?.pushManager ? 'Yes' : 'No'}</div>
+                        <div>- Touch Points: {browserInfo.debugInfo?.features?.maxTouchPoints}</div>
+                    </div>
                 </div>
             </div>
         </div>
