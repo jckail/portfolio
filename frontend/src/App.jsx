@@ -14,7 +14,7 @@ import { ResumeProvider, useResume } from './components/ResumeProvider';
 import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider';
 import { ParticlesProvider } from './components/ParticlesProvider';
 import { SidebarProvider, useSidebar } from './components/SidebarProvider';
-import { UrlProvider } from './components/UrlProvider';
+
 
 function AppContent() {
   const {
@@ -101,7 +101,7 @@ function AppContent() {
 
 function App() {
   return (
-    <UrlProvider>
+    
       <AppLogicProvider>
         <SidebarProvider>
           <ResumeProvider>
@@ -109,7 +109,7 @@ function App() {
           </ResumeProvider>
         </SidebarProvider>
       </AppLogicProvider>
-    </UrlProvider>
+    
   );
 }
 
