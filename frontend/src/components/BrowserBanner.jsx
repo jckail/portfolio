@@ -194,6 +194,17 @@ const BrowserBanner = () => {
         setIsCollapsed(!isCollapsed);
     };
 
+    const handleTabClick = (tabName) => {
+        if (isCollapsed) {
+            setIsCollapsed(false);
+            setActiveTab(tabName);
+        } else if (activeTab === tabName) {
+            setIsCollapsed(true);
+        } else {
+            setActiveTab(tabName);
+        }
+    };
+
     if (!isVisible) return null;
 
     const bannerClass = `browser-banner ${browserInfo.browser.split(' ')[0]} ${isCollapsed ? 'collapsed' : ''}`;
@@ -284,31 +295,31 @@ const BrowserBanner = () => {
                 <div className="tabs">
                     <button 
                         className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('basic')}
+                        onClick={() => handleTabClick('basic')}
                     >
                         Basic Info
                     </button>
                     <button 
                         className={`tab-button ${activeTab === 'connection' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('connection')}
+                        onClick={() => handleTabClick('connection')}
                     >
                         Connection
                     </button>
                     <button 
                         className={`tab-button ${activeTab === 'device' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('device')}
+                        onClick={() => handleTabClick('device')}
                     >
                         Device Details
                     </button>
                     <button 
                         className={`tab-button ${activeTab === 'features' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('features')}
+                        onClick={() => handleTabClick('features')}
                     >
                         Features
                     </button>
                     <button 
                         className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('logs')}
+                        onClick={() => handleTabClick('logs')}
                     >
                         Logs
                     </button>
