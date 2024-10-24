@@ -13,15 +13,13 @@
     gap: 8px;
     max-height: 80vh;
     overflow-y: auto;
-    direction: rtl; /* This moves the scrollbar to the left */
+    direction: rtl;
 }
 
-/* Reset direction for content */
 .browser-banner > * {
     direction: ltr;
 }
 
-/* Webkit scrollbar styles */
 .browser-banner::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -78,10 +76,10 @@
     color: inherit;
     cursor: pointer;
     padding: 2px 8px;
-    margin-left: 20px;
     border-radius: 4px;
     transition: background-color 0.2s ease;
     font-size: 0.9em;
+    margin-left: auto;
 }
 
 .collapse-button:hover {
@@ -90,15 +88,37 @@
 
 .banner-main {
     font-size: 0.9em;
-    text-align: center;
-    font-weight: bold;
-    padding: 0 35px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 15px;
     height: 30px;
     min-height: 30px;
+    padding: 0 40px;
+}
+
+.browser-info {
+    font-weight: bold;
+    margin-left: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 200px;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .browser-banner.collapsed {
@@ -129,15 +149,8 @@
     gap: 8px;
 }
 
-.tabs {
-    display: flex;
-    gap: 4px;
-    padding: 0 4px;
-    flex-wrap: wrap;
-}
-
 .tab-button {
-    padding: 6px 12px;
+    padding: 4px 12px;
     background: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 4px;
@@ -146,6 +159,7 @@
     transition: all 0.2s ease;
     font-weight: 500;
     font-size: 0.9em;
+    white-space: nowrap;
 }
 
 .tab-button:hover {
@@ -192,15 +206,13 @@
     overflow-y: auto;
     font-family: monospace;
     font-size: 0.9em;
-    direction: rtl; /* Move scrollbar to left */
+    direction: rtl;
 }
 
-/* Reset direction for log entries */
 .logs-section > * {
     direction: ltr;
 }
 
-/* Webkit scrollbar styles for logs section */
 .logs-section::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -276,12 +288,18 @@
         font-size: 20px;
     }
 
+    .browser-info {
+        margin-left: 25px;
+        min-width: 150px;
+        font-size: 0.85em;
+    }
+
     .tabs {
-        justify-content: center;
+        padding: 0 5px;
     }
 
     .tab-button {
-        padding: 4px 10px;
+        padding: 3px 8px;
         font-size: 0.85em;
     }
 

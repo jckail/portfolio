@@ -39,7 +39,6 @@ const BrowserBanner = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setLogs(data.logs);
-                    // If logs tab is active, scroll to bottom when new logs arrive
                     if (activeTab === 'logs') {
                         scrollToBottom();
                     }
@@ -49,16 +48,11 @@ const BrowserBanner = () => {
             }
         };
 
-        // Initial fetch
         fetchLogs();
-
-        // Set up polling every 2 seconds
-        const interval = setInterval(fetchLogs, 2000);
-
+        const interval = setInterval(fetchLogs, 1000);
         return () => clearInterval(interval);
-    }, [activeTab]); // Added activeTab to dependencies to handle scroll on tab change
+    }, [activeTab]);
 
-    // Scroll to bottom when switching to logs tab
     useEffect(() => {
         if (activeTab === 'logs') {
             scrollToBottom();
@@ -286,7 +280,39 @@ const BrowserBanner = () => {
                 ×
             </button>
             <div className="banner-main">
-                {getBrowserInfo()}
+                <div className="browser-info">{getBrowserInfo()}</div>
+                <div className="tabs">
+                    <button 
+                        className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('basic')}
+                    >
+                        Basic Info
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'connection' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('connection')}
+                    >
+                        Connection
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'device' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('device')}
+                    >
+                        Device Details
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'features' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('features')}
+                    >
+                        Features
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('logs')}
+                    >
+                        Logs
+                    </button>
+                </div>
                 <button 
                     className="collapse-button" 
                     onClick={toggleCollapse} 
@@ -297,38 +323,6 @@ const BrowserBanner = () => {
             </div>
             <div className="collapsible-content">
                 <div className="debug-info">
-                    <div className="tabs">
-                        <button 
-                            className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('basic')}
-                        >
-                            Basic Info
-                        </button>
-                        <button 
-                            className={`tab-button ${activeTab === 'connection' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('connection')}
-                        >
-                            Connection
-                        </button>
-                        <button 
-                            className={`tab-button ${activeTab === 'device' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('device')}
-                        >
-                            Device Details
-                        </button>
-                        <button 
-                            className={`tab-button ${activeTab === 'features' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('features')}
-                        >
-                            Features
-                        </button>
-                        <button 
-                            className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('logs')}
-                        >
-                            Logs
-                        </button>
-                    </div>
                     {renderTabContent()}
                 </div>
             </div>
