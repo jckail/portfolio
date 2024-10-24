@@ -106,7 +106,12 @@ const BrowserBanner = () => {
             };
 
             const isChrome = () => {
-                return (ua.includes('Chrome/') || ua.includes('CriOS')) && 
+                // Check for Chrome on iOS specifically
+                if (ua.includes('CriOS')) {
+                    return true;
+                }
+                // Regular Chrome detection for other platforms
+                return ua.includes('Chrome/') && 
                        vendor.includes('Google Inc.') &&
                        !ua.includes('Edg/') && 
                        !ua.includes('OPR/');
