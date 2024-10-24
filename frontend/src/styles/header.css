@@ -10,7 +10,7 @@
   padding: 10px 15px;
   background-color: var(--top-tbackground-color);
   backdrop-filter: var(--top-tbackground-blur);
-  z-index: 1001;
+  z-index: var(--z-header);
 }
 
 .header-left {

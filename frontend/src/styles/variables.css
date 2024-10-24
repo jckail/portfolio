@@ -40,6 +40,16 @@
   /* 3. Layout Variables */
   --max-content-width: 1800px;
   --side-panel-width: 150px;
+
+  /* 4. Z-Index Variables */
+  --z-background: -1;
+  --z-base: 0;
+  --z-content: 2;
+  --z-sidebar: 10;
+  --z-overlay: 1000;
+  --z-header: 1001;
+  --z-banner: 9999;
+  --z-modal: 10000;
 }
 
 /* 4. Dark Theme Variables */
