@@ -1,49 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiUtils';
-import { downloadResume } from '../utils/resumeUtils';
-import { useAppLogic } from '../hooks/useAppLogic';
+import React from 'react';
+import { useResume } from './ResumeProvider';
 
 function ResumePDF() {
-  const [pdfUrl, setPdfUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { resumeFileName } = useAppLogic();
-
-  useEffect(() => {
-    const fetchPdf = async () => {
-      try {
-        const apiUrl = getApiUrl();
-        const fullUrl = `${apiUrl}/resume`;
-        const response = await fetch(fullUrl);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching PDF:', err.message);
-        setError(err.message);
-        setIsLoading(false);
-      }
-    };
-
-    fetchPdf();
-
-    // Cleanup function to revoke the object URL
-    return () => {
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-      }
-    };
-  }, []);
-
-  const handleDownloadClick = async () => {
-    await downloadResume(resumeFileName);
-  };
+  const { pdfUrl, isLoading, error, resumeFileName, handleDownload } = useResume();
 
   if (isLoading) {
     return <div>Loading resume...</div>;
@@ -61,7 +20,7 @@ function ResumePDF() {
           title={resumeFileName || 'ResumePDF'}
         />
       </div>
-      <button onClick={handleDownloadClick} className="download-button">Download Resume</button>
+      <button onClick={handleDownload} className="download-button">Download Resume</button>
     </div>
   );
 }

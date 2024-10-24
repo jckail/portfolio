@@ -1,35 +1,36 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useResumeData } from './useResumeData';
-import { useTheme } from './useTheme';
-import { useParticles } from './useParticles';
-import { useSidebar } from './useSidebar';
-import { downloadResume } from '../utils/resumeUtils';
-import { useResumeFileName } from './useResumeFileName';
-import { useUrlManagement } from './useUrlManagement';
-import { useSectionSelection } from './useSectionSelection';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useTheme } from '../hooks/useTheme';
+import { useSidebar } from '../hooks/useSidebar';
+import { useUrlManagement } from '../hooks/useUrlManagement';
+import { useSectionSelection } from '../hooks/useSectionSelection';
 import { debounce } from 'lodash';
 
+const AppLogicContext = createContext();
+
 export const useAppLogic = () => {
+  const context = useContext(AppLogicContext);
+  if (!context) {
+    throw new Error('useAppLogic must be used within an AppLogicProvider');
+  }
+  return context;
+};
+
+export function AppLogicProvider({ children }) {
   const [headerHeight, setHeaderHeight] = useState(0);
   const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
 
-  // Log header height changes
   useEffect(() => {
     console.log('\n--- Header Height Update ---');
     console.log(`New Header Height: ${headerHeight}px`);
     console.log('------------------------\n');
   }, [headerHeight]);
 
-  const { resumeData, error: resumeError } = useResumeData();
-  const { resumeFileName, error: fileNameError } = useResumeFileName();
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
-  const { particlesLoaded } = useParticles(updateParticlesConfig);
+
   const { updateUrl } = useUrlManagement();
 
-  // Debounced URL update for intersection changes
   const debouncedUpdateUrl = useCallback(
     debounce((newSection) => {
-      // Only skip URL update on Firefox when source is intersection
       if (!isFirefox) {
         updateUrl(newSection, false);
       }
@@ -37,7 +38,6 @@ export const useAppLogic = () => {
     [updateUrl, isFirefox]
   );
 
-  // Handle section changes and URL updates
   const handleSectionChange = useCallback((newSection, source) => {
     console.log('\n--- App Section State ---');
     console.log(`Current Section: ${newSection}`);
@@ -45,18 +45,15 @@ export const useAppLogic = () => {
     console.log('------------------------\n');
     
     if (source === 'intersection') {
-      // For intersection updates, only update URL if not Firefox
       if (!isFirefox) {
         debouncedUpdateUrl(newSection);
       }
     } else {
-      // For manual navigation (button/navigation), always update URL regardless of browser
       const shouldPushState = source === 'navigation' || source === 'button';
       updateUrl(newSection, shouldPushState);
     }
   }, [updateUrl, debouncedUpdateUrl, isFirefox]);
 
-  // Use the section selection hook with URL management and header height
   const {
     currentSection,
     sectionsRef,
@@ -70,41 +67,36 @@ export const useAppLogic = () => {
     toggleSidebar
   } = useSidebar();
 
-  const handleResumeClick = useCallback((event) => {
-    event.preventDefault();
-    handleButtonClick('my-resume');
-    downloadResume(resumeFileName);
-  }, [handleButtonClick, resumeFileName]);
-
-  // Handle header height updates
   const handleHeaderHeightChange = useCallback((height) => {
     if (height !== headerHeight) {
       setHeaderHeight(height);
     }
   }, [headerHeight]);
 
-  // Cleanup debounced function
   useEffect(() => {
     return () => {
       debouncedUpdateUrl.cancel();
     };
   }, [debouncedUpdateUrl]);
 
-  return {
-    resumeData,
-    error: resumeError || fileNameError,
+  const value = {
     theme,
     currentSection,
     headerHeight,
     isSidebarOpen,
     isTemporarilyVisible,
     sectionsRef,
-    particlesLoaded,
-    resumeFileName,
     setHeaderHeight: handleHeaderHeightChange,
     toggleTheme,
     toggleSidebar,
-    handleResumeClick,
-    handleSectionClick: handleNavigationClick
+    handleSectionClick: handleNavigationClick,
+    handleButtonClick,
+    updateParticlesConfig
   };
-};
+
+  return (
+    <AppLogicContext.Provider value={value}>
+      {children}
+    </AppLogicContext.Provider>
+  );
+}

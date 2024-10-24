@@ -1,12 +1,14 @@
 import React, { useRef, useEffect } from 'react'
 import { getApiUrl } from '../utils/apiUtils'
+import { useResume } from './ResumeProvider'
 
 // Define header nav height constant
 const HEADER_NAV_HEIGHT = 65; // Base height in pixels
 
-function HeaderNav({ resumeData, theme, onResumeClick, onHeightChange }) {
+function HeaderNav({ theme, onResumeClick, onHeightChange }) {
   const apiUrl = getApiUrl();
   const navRef = useRef(null);
+  const { resumeData } = useResume();
 
   useEffect(() => {
     if (navRef.current && onHeightChange) {

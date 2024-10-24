@@ -1,0 +1,107 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getApiUrl } from '../utils/apiUtils';
+import { downloadResume } from '../utils/resumeUtils';
+
+const ResumeContext = createContext();
+
+export const useResume = () => {
+  const context = useContext(ResumeContext);
+  if (!context) {
+    throw new Error('useResume must be used within a ResumeProvider');
+  }
+  return context;
+};
+
+export function ResumeProvider({ children }) {
+  const [resumeData, setResumeData] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState('default_resume.pdf');
+  const [pdfUrl, setPdfUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const apiUrl = getApiUrl();
+
+  // Fetch resume data
+  useEffect(() => {
+    const fetchResumeData = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/resume_data`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setResumeData(data);
+      } catch (error) {
+        console.error('Error fetching resume data:', error);
+        setError(error.message);
+      }
+    };
+
+    fetchResumeData();
+  }, [apiUrl]);
+
+  // Fetch resume filename
+  useEffect(() => {
+    const fetchResumeFileName = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/resume_file_name`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setResumeFileName(data.resumeFileName);
+      } catch (error) {
+        console.error('Error fetching resume file name:', error);
+        setError(error.message);
+      }
+    };
+
+    fetchResumeFileName();
+  }, [apiUrl]);
+
+  // Fetch PDF
+  useEffect(() => {
+    const fetchPdf = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/resume`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching PDF:', error);
+        setError(error.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchPdf();
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [apiUrl]);
+
+  const handleDownload = async () => {
+    await downloadResume(resumeFileName);
+  };
+
+  const value = {
+    resumeData,
+    resumeFileName,
+    pdfUrl,
+    isLoading,
+    error,
+    handleDownload
+  };
+
+  return (
+    <ResumeContext.Provider value={value}>
+      {children}
+    </ResumeContext.Provider>
+  );
+}
