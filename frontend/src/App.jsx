@@ -14,6 +14,7 @@ import { ResumeProvider, useResume } from './components/ResumeProvider'
 import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider'
 import { ParticlesProvider } from './components/ParticlesProvider'
 import { SidebarProvider, useSidebar } from './components/SidebarProvider'
+import { UrlProvider } from './components/UrlProvider'
 import { useGoogleAnalytics } from './utils/google-analytics'
 
 function AppContent() {
@@ -128,13 +129,15 @@ function AppContent() {
 
 function App() {
   return (
-    <AppLogicProvider>
-      <SidebarProvider>
-        <ResumeProvider>
-          <AppContent />
-        </ResumeProvider>
-      </SidebarProvider>
-    </AppLogicProvider>
+    <UrlProvider>
+      <AppLogicProvider>
+        <SidebarProvider>
+          <ResumeProvider>
+            <AppContent />
+          </ResumeProvider>
+        </SidebarProvider>
+      </AppLogicProvider>
+    </UrlProvider>
   );
 }
 

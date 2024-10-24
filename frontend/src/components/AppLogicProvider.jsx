@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
-import { useUrlManagement } from '../hooks/useUrlManagement';
 import { useSectionSelection } from '../hooks/useSectionSelection';
+import { useUrl } from './UrlProvider';
 import { debounce } from 'lodash';
 
 const AppLogicContext = createContext();
@@ -25,8 +25,7 @@ export function AppLogicProvider({ children }) {
   }, [headerHeight]);
 
   const { theme, toggleTheme, updateParticlesConfig } = useTheme();
-
-  const { updateUrl } = useUrlManagement();
+  const { updateUrl } = useUrl();
 
   const debouncedUpdateUrl = useCallback(
     debounce((newSection) => {
