@@ -1,8 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useTheme } from '../hooks/useTheme';
-import { useSectionSelection } from '../hooks/useSectionSelection';
-import { useUrl } from './UrlProvider';
-import { debounce } from 'lodash';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { particleConfig } from '../configs';
+import getParticlesConfig from '../particlesConfig';
 
 const AppLogicContext = createContext();
 
@@ -15,72 +13,60 @@ export const useAppLogic = () => {
 };
 
 export function AppLogicProvider({ children }) {
-  const [headerHeight, setHeaderHeight] = useState(0);
-  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+  const [theme, setTheme] = useState('dark');
+  const [currentSection, setCurrentSection] = useState('about-me');
+  const sectionsRef = useRef({});
 
+  // Apply theme to the document body
   useEffect(() => {
-    console.log('\n--- Header Height Update ---');
-    console.log(`New Header Height: ${headerHeight}px`);
-    console.log('------------------------\n');
-  }, [headerHeight]);
+    document.body.className = theme === 'dark' ? 'dark-theme' : '';
+  }, [theme]);
 
-  const { theme, toggleTheme, updateParticlesConfig } = useTheme();
-  const { updateUrl } = useUrl();
+  // Toggle between light and dark themes
+  const toggleTheme = useCallback(() => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  }, []);
 
-  const debouncedUpdateUrl = useCallback(
-    debounce((newSection) => {
-      if (!isFirefox) {
-        updateUrl(newSection, false);
-      }
-    }, 200),
-    [updateUrl, isFirefox]
-  );
+  // Generate particle configuration based on the current theme
+  const updateParticlesConfig = useCallback(() => {
+    const config = particleConfig[theme];
+    return getParticlesConfig(
+      config.background_color,
+      config.particle_color,
+      config.line_color
+    );
+  }, [theme]);
 
-  const handleSectionChange = useCallback((newSection, source) => {
-    console.log('\n--- App Section State ---');
-    console.log(`Current Section: ${newSection}`);
-    console.log(`Update Source: ${source}`);
-    console.log('------------------------\n');
-    
-    if (source === 'intersection') {
-      if (!isFirefox) {
-        debouncedUpdateUrl(newSection);
-      }
-    } else {
-      const shouldPushState = source === 'navigation' || source === 'button';
-      updateUrl(newSection, shouldPushState);
+  // Helper function to safely set section refs
+  const setSectionRef = useCallback((sectionId, element) => {
+    if (element) {
+      sectionsRef.current[sectionId] = element;
     }
-  }, [updateUrl, debouncedUpdateUrl, isFirefox]);
+  }, []);
 
-  const {
-    currentSection,
-    sectionsRef,
-    handleNavigationClick,
-    handleButtonClick
-  } = useSectionSelection(headerHeight, handleSectionChange);
-
-  const handleHeaderHeightChange = useCallback((height) => {
-    if (height !== headerHeight) {
-      setHeaderHeight(height);
+  // Handle section click for navigation
+  const handleSectionClick = useCallback((sectionId) => {
+    setCurrentSection(sectionId);
+    const element = sectionsRef.current[sectionId];
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [headerHeight]);
+  }, []);
 
-  useEffect(() => {
-    return () => {
-      debouncedUpdateUrl.cancel();
-    };
-  }, [debouncedUpdateUrl]);
+  // Handle button click (used for resume download)
+  const handleButtonClick = useCallback((sectionId) => {
+    setCurrentSection(sectionId);
+  }, []);
 
   const value = {
     theme,
     currentSection,
-    headerHeight,
     sectionsRef,
-    setHeaderHeight: handleHeaderHeightChange,
+    setSectionRef,
     toggleTheme,
-    handleSectionClick: handleNavigationClick,
+    handleSectionClick,
     handleButtonClick,
-    updateParticlesConfig
+    updateParticlesConfig,
   };
 
   return (
