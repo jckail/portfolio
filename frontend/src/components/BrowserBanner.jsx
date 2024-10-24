@@ -57,6 +57,8 @@ const BrowserBanner = () => {
             const uaParts = {
                 webkitVersion: ua.match(/AppleWebKit\/(\d+\.\d+)/)?.[1],
                 safariVersion: ua.match(/Version\/(\d+\.\d+)/)?.[1],
+                chromeVersion: ua.match(/(?:Chrome|CriOS)\/(\d+\.\d+)/)?.[1],
+                firefoxVersion: ua.match(/(?:Firefox|FxiOS)\/(\d+\.\d+)/)?.[1],
                 osVersion: getOSVersion(),
                 isIpad: /iPad/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1),
                 isIphone: /iPhone/.test(ua),
@@ -97,13 +99,17 @@ const BrowserBanner = () => {
 
             // Enhanced browser detection logic
             const isFirefox = () => {
-                if (features.mozGetUserMedia || features.mozRTCPeerConnection) {
-                    return true;
-                }
-                if (ua.includes('FxiOS')) {
-                    return true;
-                }
-                return false;
+                return ua.includes('Firefox/') || 
+                       ua.includes('FxiOS') || 
+                       features.mozGetUserMedia || 
+                       features.mozRTCPeerConnection;
+            };
+
+            const isChrome = () => {
+                return (ua.includes('Chrome/') || ua.includes('CriOS')) && 
+                       vendor.includes('Google Inc.') &&
+                       !ua.includes('Edg/') && 
+                       !ua.includes('OPR/');
             };
 
             // Device detection
@@ -117,15 +123,15 @@ const BrowserBanner = () => {
                 device = 'Desktop';
             }
 
-            // Browser detection
+            // Browser detection with version information
             if (isFirefox()) {
-                browser = 'firefox';
-            } else if (ua.includes('CriOS')) {
-                browser = 'chrome';
-            } else if (ua.includes('EdgiOS')) {
+                browser = `firefox ${uaParts.firefoxVersion || ''}`;
+            } else if (isChrome()) {
+                browser = `chrome ${uaParts.chromeVersion || ''}`;
+            } else if (ua.includes('EdgiOS') || ua.includes('Edg/')) {
                 browser = 'edge';
-            } else if (vendor.includes('Apple')) {
-                browser = 'safari';
+            } else if (vendor.includes('Apple') && !isChrome()) {
+                browser = `safari ${uaParts.safariVersion || ''}`;
             }
 
             return {
@@ -159,11 +165,14 @@ const BrowserBanner = () => {
 
     if (!isVisible) return null;
 
-    const bannerClass = `browser-banner ${browserInfo.browser} ${isCollapsed ? 'collapsed' : ''}`;
+    const bannerClass = `browser-banner ${browserInfo.browser.split(' ')[0]} ${isCollapsed ? 'collapsed' : ''}`;
     
     const getBrowserInfo = () => {
+        const browserName = browserInfo.browser.split(' ')[0];
+        const browserVersion = browserInfo.browser.split(' ')[1] || '';
+        const formattedBrowser = browserName.charAt(0).toUpperCase() + browserName.slice(1);
         const deviceInfo = browserInfo.device ? ` on ${browserInfo.device}` : '';
-        return `${browserInfo.browser.charAt(0).toUpperCase() + browserInfo.browser.slice(1)}${deviceInfo}`;
+        return `${formattedBrowser} ${browserVersion}${deviceInfo}`;
     };
 
     return (
@@ -193,6 +202,8 @@ const BrowserBanner = () => {
                         <div>- Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
                         <div>- WebKit: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
                         <div>- Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
+                        <div>- Chrome Version: {browserInfo.debugInfo?.uaComponents?.chromeVersion}</div>
+                        <div>- Firefox Version: {browserInfo.debugInfo?.uaComponents?.firefoxVersion}</div>
                         <div>- OS Version: {browserInfo.debugInfo?.uaComponents?.osVersion}</div>
                         <div>Features:</div>
                         <div>- Firefox APIs: {browserInfo.debugInfo?.features?.mozGetUserMedia ? 'Yes' : 'No'}</div>
