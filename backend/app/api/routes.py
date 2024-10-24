@@ -3,6 +3,9 @@ from fastapi.responses import FileResponse
 from backend.app.models.resume_data import resume_data
 import os
 from dotenv import load_dotenv
+from fastapi import Request
+import json
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -15,7 +18,7 @@ async def get_resume():
         "title": resume_data["title"],
         "github": resume_data["contact"]["github"],
         "linkedin": resume_data["contact"]["linkedin"],
-        "aboutMe": resume_data["about_me"],  # Use the correct key with space
+        "aboutMe": resume_data["about_me"],
         "technicalSkills": resume_data["skills"],
         "experience": [
             {
@@ -31,8 +34,40 @@ async def get_resume():
     }
     return transformed_data
 
-
-
+@router.post("/log")
+async def log_message(request: Request):
+    """Log messages from the frontend to frontend.log"""
+    try:
+        body = await request.json()
+        message = body.get("message", "")
+        log_file_path = os.path.join(os.path.dirname(__file__), "../../../frontend/frontend.log")
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+        
+        # Add timestamp if not present
+        if not message.startswith('[20'):  # Check if timestamp is already present
+            timestamp = datetime.utcnow().isoformat() + 'Z'
+            message = f'[{timestamp}] {message}'
+        
+        # Ensure message ends with newline
+        if not message.endswith('\n'):
+            message += '\n'
+            
+        # Append message to log file
+        with open(log_file_path, "a", encoding='utf-8') as f:
+            f.write(message)
+        
+        return {"status": "success", "message": "Log written successfully"}
+    except Exception as e:
+        # Log the error but don't fail the request
+        error_message = f"[{datetime.utcnow().isoformat()}Z] [ERROR] Logging failed: {str(e)}\n"
+        try:
+            with open(log_file_path, "a", encoding='utf-8') as f:
+                f.write(error_message)
+        except:
+            pass
+        return {"status": "error", "message": str(e)}
 
 def get_resume_file_path():
     """Fetch the resume file path, ensuring the environment variable is set and the file exists."""
