@@ -79,7 +79,7 @@
 }
 
 .browser-banner.collapsed .banner-main {
-    height: 30px;
+    height: 20px;
     font-size: 0.9em;
 }
 
@@ -210,15 +210,15 @@
     }
     
     .browser-banner {
-        padding: 10px;
+        padding: 8px;
     }
     
     .close-button {
-        top: 5px;
-        left: 5px;
-        width: 35px;
-        height: 35px;
-        font-size: 28px;
+        top: 4px;
+        left: 4px;
+        width: 25px;
+        height: 25px;
+        font-size: 20px;
     }
 
     .tabs {
@@ -226,17 +226,18 @@
     }
 
     .tab-button {
-        padding: 6px 12px;
-        font-size: 0.9em;
+        padding: 4px 10px;
+        font-size: 0.85em;
     }
 
     .browser-banner.collapsed {
-        padding: 2px 10px;
+        padding: 2px 8px;
     }
 
     .browser-banner.collapsed .banner-main {
-        height: 25px;
-        font-size: 0.85em;
+        height: 30px;
+        min-height: 22px;
+        font-size: 0.8em;
     }
 
     .logs-section {

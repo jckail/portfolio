@@ -286,7 +286,7 @@ const BrowserBanner = () => {
                 ×
             </button>
             <div className="banner-main">
-                Welcome to Quick Resume! You're using {getBrowserInfo()}
+                {getBrowserInfo()}
                 <button 
                     className="collapse-button" 
                     onClick={toggleCollapse} 
