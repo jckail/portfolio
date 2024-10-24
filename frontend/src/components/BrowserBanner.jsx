@@ -52,6 +52,22 @@ const BrowserBanner = () => {
 
                 return 'unknown';
             };
+
+            // Enhanced iPad detection
+            const isIPad = () => {
+                // Direct iPad detection
+                if (/iPad/.test(ua)) return true;
+                
+                // Modern iPads on iPadOS 13+ show as MacIntel
+                if (platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+                    // Additional check for iPad-specific features
+                    const isStandalone = window.navigator.standalone !== undefined;
+                    const hasTouchScreen = navigator.maxTouchPoints > 1;
+                    return isStandalone && hasTouchScreen;
+                }
+                
+                return false;
+            };
             
             // Detailed parsing of user agent components
             const uaParts = {
@@ -60,9 +76,9 @@ const BrowserBanner = () => {
                 chromeVersion: ua.match(/(?:Chrome|CriOS)\/(\d+\.\d+)/)?.[1],
                 firefoxVersion: ua.match(/(?:Firefox|FxiOS)\/(\d+\.\d+)/)?.[1],
                 osVersion: getOSVersion(),
-                isIpad: /iPad/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1),
+                isIpad: isIPad(),
                 isIphone: /iPhone/.test(ua),
-                isMac: /Macintosh|MacIntel/.test(platform),
+                isMac: /Macintosh|MacIntel/.test(platform) && !isIPad(),
                 originalUa: ua
             };
 
@@ -117,7 +133,7 @@ const BrowserBanner = () => {
                        !ua.includes('OPR/');
             };
 
-            // Device detection
+            // Device detection with enhanced iPad support
             if (uaParts.isIpad) {
                 device = `iPad (iPadOS ${uaParts.osVersion})`;
             } else if (uaParts.isIphone) {
