@@ -1,47 +1,130 @@
-# Backend for QuickResume
+# QuickResume Backend
 
-This backend is built using FastAPI, a modern, fast (high-performance) web framework for building APIs with Python 3.6+ based on standard Python type hints.
+## Overview
+The backend of QuickResume is built with FastAPI, providing a high-performance API layer for serving resume data and handling file operations. It features automatic API documentation, type checking, and efficient request handling.
 
-## Why FastAPI?
+## Features
+- Fast and efficient API endpoints
+- Automatic OpenAPI documentation
+- Type validation with Pydantic
+- Asynchronous request handling
+- Comprehensive logging system
+- PDF file serving capabilities
 
-FastAPI was chosen for this project for several reasons:
+## API Documentation
 
-1. **Performance**: FastAPI is one of the fastest Python frameworks available, which makes it ideal for handling multiple requests efficiently.
+### Endpoints
 
-2. **Easy integration**: It allows easy integration with other projects and services, which is crucial for linking various components to my personal website.
+#### 1. Get Resume Data
+```http
+GET /api/resume_data
+```
+Returns formatted resume data including personal information, skills, experience, and projects.
 
-3. **Interactive API documentation**: FastAPI automatically generates interactive API documentation (with Swagger UI), making it easier to test and understand the API endpoints.
+Example Response:
+```json
+{
+    "name": "John Doe",
+    "title": "Software Engineer",
+    "github": "https://github.com/johndoe",
+    "linkedin": "https://linkedin.com/in/johndoe",
+    "aboutMe": "Professional software engineer...",
+    "technicalSkills": ["Python", "JavaScript", "React"],
+    "experience": [
+        {
+            "title": "Senior Developer",
+            "company": "Tech Corp",
+            "date": "2020-Present",
+            "responsibilities": ["Led team...", "Developed..."],
+            "link": "https://techcorp.com"
+        }
+    ],
+    "projects": [
+        {
+            "name": "Project Name",
+            "description": "Project description...",
+            "technologies": ["React", "Node.js"],
+            "link": "https://project.com"
+        }
+    ]
+}
+```
 
-4. **Type checking**: With its use of Python type hints, it provides better code quality and reduces the chances of runtime errors.
+#### 2. Serve Resume PDF
+```http
+GET /api/resume
+```
+Serves the resume PDF file.
 
-5. **Asynchronous support**: FastAPI fully supports asynchronous programming, allowing for efficient handling of concurrent requests.
+Response: PDF file (application/pdf)
 
-## Features and Demonstrations
+#### 3. Get Resume Filename
+```http
+GET /api/resume_file_name
+```
+Returns the current resume file name.
 
-This backend includes several features that showcase the capabilities of FastAPI and demonstrate my skills:
+Example Response:
+```json
+{
+    "resumeFileName": "JohnDoe_Resume.pdf"
+}
+```
 
-1. **Resume Data API**: Endpoints for retrieving various sections of my resume dynamically.
+#### 4. Log Frontend Messages
+```http
+POST /api/log
+```
+Logs messages from the frontend for debugging and monitoring.
 
-2. **FastAPI Stress Test**: An interactive endpoint that demonstrates FastAPI's performance under load.
+Request Body:
+```json
+{
+    "message": "Log message content"
+}
+```
 
-3. **Asynchronous Operations**: Examples of how to efficiently handle time-consuming operations without blocking the server.
+Example Response:
+```json
+{
+    "status": "success",
+    "message": "Log written successfully"
+}
+```
 
-4. **WebSocket Integration**: Real-time communication capabilities for interactive features.
+## Development Setup
 
-5. **Custom Middleware**: Demonstration of how to extend FastAPI's functionality with custom middleware.
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-6. **Data Validation**: Utilizing Pydantic models for robust data validation and serialization.
+2. Set up environment variables:
+```env
+FLASK_APP=backend/main.py
+ALLOWED_ORIGINS=http://localhost:5173
+RESUME_FILE=YourResume.pdf
+```
 
-7. **Authentication**: Implementation of secure authentication mechanisms.
+3. Run the development server:
+```bash
+uvicorn backend.app.main:app --reload --port 8080
+```
 
-These features not only serve the purpose of the resume application but also act as a portfolio of FastAPI capabilities and my understanding of backend development principles.
+## Logging System
+- Logs are stored in `backend/app/logs/`
+- Filename format: `frontend_YYYY_MM_DD_HH.logs`
+- Includes timestamps and error tracking
+- Automatic log rotation by hour
 
-## Getting Started
+## Error Handling
+- Comprehensive error messages
+- HTTP status codes for different scenarios
+- Error logging for debugging
+- Graceful fallbacks for missing files
 
-To run the backend:
-
-1. Install dependencies: `pip install -r requirements.txt`
-2. Navigate to the backend directory: `cd resume_app/backend`
-3. Run the FastAPI server: `uvicorn main:app --reload`
-
-The API will be available at `http://localhost:8080`, and you can access the interactive API documentation at `http://localhost:8080/docs`.
+## Best Practices
+- Use type hints for better code quality
+- Implement proper error handling
+- Follow REST API conventions
+- Maintain clear documentation

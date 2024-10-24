@@ -1,114 +1,81 @@
-# Quick Resume
+# QuickResume
 
-## Project Overview
-Quick Resume is a dynamic, interactive resume application that showcases professional experience, skills, and projects in a visually appealing manner. It features a responsive design with a dark/light theme toggle and smooth scrolling navigation.
+## Overview
+QuickResume is a modern, interactive resume application that transforms the traditional resume into a dynamic web experience. Built with React and FastAPI, it offers a unique way to showcase professional experience through an interactive interface with real-time data updates, smooth animations, and a responsive design that adapts to any device.
+
+### Key Features
+- Interactive UI with dark/light theme support
+- Real-time data updates through FastAPI backend
+- Responsive design for all devices
+- PDF resume download capability
+- Particle.js background animations
+- Comprehensive logging system
+- Professional section organization (Experience, Projects, Skills)
 
 ## Project Structure
-The project is organized into frontend and backend directories:
-
 ```
 quickResume/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── helpers/
-│   │   ├── sections/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── configs.js
-│   │   ├── main.jsx
-│   │   ├── particlesConfig.js
-│   │   └── theme.css
-│   ├── public/
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── routes.py
-│   │   ├── core/
-│   │   │   └── __init__.py
-│   │   ├── models/
-│   │   │   └── resume_data.py
-│   │   └── main.py
-│   └── assets/
-├── images/
-├── .gitignore
-├── docker-compose.yml
-├── Dockerfile
-├── entrypoint.sh
-├── requirements.txt
-├── .env
-└── README.md
+├── frontend/    # React/Vite application
+├── backend/     # FastAPI server
+├── images/      # Static assets
+└── scripts/     # Utility scripts
 ```
 
-## Setup Instructions
+## Quick Start
+
+### Prerequisites
+- Python 3.6+
+- Node.js 14+
+- npm or yarn
+
+### Running Locally
 1. Clone the repository:
-   ```
-   git clone https://github.com/your-username/quickResume.git
-   cd quickResume
-   ```
+```bash
+git clone [repository-url]
+cd quickResume
+```
 
-2. Set up the backend:
-   ```
-   pip install -r requirements.txt
-   ```
+2. Start both frontend and backend:
+```bash
+./local_test.sh
+```
 
-3. Set up the frontend:
-   ```
-   cd frontend
-   npm install
-   ```
+This script will:
+- Install all necessary dependencies
+- Start the FastAPI backend server
+- Launch the Vite development server
+- Open the application in your default browser
 
-4. Create a `.env` file in the root directory with the following content:
-   ```
-   # Backend
-   FLASK_APP=backend/main.py
-   ALLOWED_ORIGINS=http://localhost:5173,http://192.168.0.122:5173,http://localhost:8080,http://0.0.0.0:8080,http://localhost:5173,https://quickresume-292025398859.us-central1.run.app
+### Access the Application
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080
+- API Documentation: http://localhost:8080/docs
 
-   # Frontend
-   VITE_API_URL=http://localhost:8080/api
+## Development
 
-   # Shared
-   PRODUCTION_URL=https://quickresume-292025398859.us-central1.run.app
+### Frontend Development
+The frontend is built with React and Vite, offering:
+- Hot module replacement
+- Fast refresh
+- Component-based architecture
+- Modern JavaScript features
 
-   # Resume file name
-   RESUME_FILE=JordanKailResume.pdf
-   VITE_RESUME_FILE=JordanKailResume.pdf
-   ```
+### Backend Development
+The backend uses FastAPI, providing:
+- Fast API endpoints
+- Automatic API documentation
+- Type checking
+- Asynchronous request handling
 
-   Note: This single .env file is used for both frontend and backend configurations.
+## Environment Configuration
+Create a `.env` file in the root directory:
+```env
+FLASK_APP=backend/main.py
+ALLOWED_ORIGINS=http://localhost:5173
+VITE_API_URL=http://localhost:8080/api
+RESUME_FILE=YourResume.pdf
+```
 
-## Running the Application
-You can now run both the backend and frontend simultaneously using the entrypoint.sh script:
-
-1. Make sure the script is executable:
-   ```
-   chmod +x entrypoint.sh
-   ```
-
-2. Run the application:
-   ```
-   ./entrypoint.sh
-   ```
-
-This script starts both the backend (with hot reloading enabled) and the frontend development server.
-
-3. Open your browser and navigate to `http://localhost:5173` (or the port specified by Vite).
-
-Note: Hot reloading is enabled for both the backend and frontend. Any changes you make to the code will automatically trigger a reload of the affected parts of the application.
-
-## Technologies Used
-- Frontend: React, Vite, CSS
-- Backend: FastAPI
-- Other: Particles.js for background animation
-
-## API Endpoints
-- GET `/`: Welcome message
-- GET `/api/resume_data`: Get formatted resume data
-- GET `/api/download_resume`: Download resume PDF
-- GET `/api/resume`: View resume PDF
-- GET `/api/images/*`: Serve static images
-
-Feel free to customize this README to better fit your specific project needs and add any additional sections or information you find relevant.
+## Additional Documentation
+- [Frontend Documentation](./frontend/README.md)
+- [Backend Documentation](./backend/README.md)

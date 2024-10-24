@@ -69,7 +69,14 @@ coverage.xml
 
 # Linux/Unix files
 *~
-.notes.txtfrontend/node_modules/
+.notes.txt
+
+# Node modules
+frontend/node_modules/
 samplefrontend/node_modules/*
 frontend/node_modules/*
+
+# Log files
+backend/app/logs/
+frontend/frontend.log
 .notes.txt

@@ -11,6 +11,18 @@ from datetime import datetime
 load_dotenv()
 router = APIRouter()
 
+def get_log_file_path():
+    """Get the current log file path based on timestamp"""
+    now = datetime.utcnow()
+    log_dir = os.path.join(os.path.dirname(__file__), "../logs")
+    
+    # Ensure logs directory exists
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # Create filename with timestamp
+    filename = f"frontend_{now.strftime('%Y_%m_%d_%H')}.logs"
+    return os.path.join(log_dir, filename)
+
 @router.get("/resume_data")
 async def get_resume():
     transformed_data = {
@@ -36,14 +48,11 @@ async def get_resume():
 
 @router.post("/log")
 async def log_message(request: Request):
-    """Log messages from the frontend to frontend.log"""
+    """Log messages from the frontend to timestamped log files"""
     try:
         body = await request.json()
         message = body.get("message", "")
-        log_file_path = os.path.join(os.path.dirname(__file__), "../../../frontend/frontend.log")
-        
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+        log_file_path = get_log_file_path()
         
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
@@ -63,7 +72,7 @@ async def log_message(request: Request):
         # Log the error but don't fail the request
         error_message = f"[{datetime.utcnow().isoformat()}Z] [ERROR] Logging failed: {str(e)}\n"
         try:
-            with open(log_file_path, "a", encoding='utf-8') as f:
+            with open(get_log_file_path(), "a", encoding='utf-8') as f:
                 f.write(error_message)
         except:
             pass

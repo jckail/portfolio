@@ -1,32 +1,31 @@
 .browser-banner {
-    width: 100%;
+    width: 100% !important;
     padding: 15px;
     text-align: left;
     font-weight: 500;
-    position: fixed;
-    top: 0;
+    position: fixed !important;
+    bottom: 0 !important;
     left: 0;
-    z-index: 1000;
+    z-index: 9999 !important;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     gap: 10px;
     max-height: 80vh;
     overflow-y: auto;
-    position: relative;
 }
 
 .close-button {
     position: absolute;
     top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: #ff0000;
     border: none;
     color: white;
-    font-size: 24px;
+    font-size: 32px;
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -34,10 +33,12 @@
     justify-content: center;
     padding: 0;
     transition: background-color 0.2s ease;
+    font-weight: bold;
+    z-index: 10000 !important;
 }
 
 .close-button:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #ff3333;
 }
 
 .close-button:focus {
@@ -49,7 +50,7 @@
     font-size: 1.1em;
     text-align: center;
     font-weight: bold;
-    padding-right: 40px;
+    padding-left: 40px;
 }
 
 .debug-info {
@@ -114,6 +115,9 @@
     
     .close-button {
         top: 5px;
-        right: 5px;
+        left: 5px;
+        width: 35px;
+        height: 35px;
+        font-size: 28px;
     }
 }
