@@ -17,7 +17,10 @@ const BrowserBanner = () => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [activeTab, setActiveTab] = useState('basic');
     const [logs, setLogs] = useState([]);
+    const [showNoteInput, setShowNoteInput] = useState(false);
+    const [noteText, setNoteText] = useState('');
     const logsRef = useRef(null);
+    const noteInputRef = useRef(null);
 
     // Check if we're running on Vite's development server (port 5173)
     const isViteDev = window.location.port === '5173';
@@ -58,6 +61,43 @@ const BrowserBanner = () => {
             scrollToBottom();
         }
     }, [activeTab]);
+
+    // Focus note input when shown
+    useEffect(() => {
+        if (showNoteInput && noteInputRef.current) {
+            noteInputRef.current.focus();
+        }
+    }, [showNoteInput]);
+
+    const handleAddNote = async () => {
+        if (!noteText.trim()) return;
+
+        try {
+            const response = await fetch(`http://${window.location.hostname}:8080/api/log`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: `[NOTE] ${noteText}`,
+                }),
+            });
+
+            if (response.ok) {
+                setNoteText('');
+                setShowNoteInput(false);
+            }
+        } catch (error) {
+            console.error('Failed to add note:', error);
+        }
+    };
+
+    const handleNoteKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleAddNote();
+        }
+    };
 
     useEffect(() => {
         const detectBrowser = () => {
@@ -270,6 +310,33 @@ const BrowserBanner = () => {
             case 'logs':
                 return (
                     <div className="tab-content">
+                        <div className="logs-header">
+                            <button 
+                                className="add-note-button"
+                                onClick={() => setShowNoteInput(!showNoteInput)}
+                            >
+                                {showNoteInput ? 'Cancel Note' : 'Add Note'}
+                            </button>
+                        </div>
+                        {showNoteInput && (
+                            <div className="note-input-container">
+                                <textarea
+                                    ref={noteInputRef}
+                                    className="note-input"
+                                    value={noteText}
+                                    onChange={(e) => setNoteText(e.target.value)}
+                                    onKeyPress={handleNoteKeyPress}
+                                    placeholder="Type your note here... (Press Enter to save)"
+                                    rows={3}
+                                />
+                                <button 
+                                    className="save-note-button"
+                                    onClick={handleAddNote}
+                                >
+                                    Save Note
+                                </button>
+                            </div>
+                        )}
                         <div className="logs-section" ref={logsRef}>
                             {logs.map((log, index) => (
                                 <div key={index} className="log-entry">
