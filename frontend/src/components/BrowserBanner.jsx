@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import '../styles/browser-banner.css';
 
 const BrowserBanner = () => {
@@ -15,14 +15,55 @@ const BrowserBanner = () => {
     });
     const [isVisible, setIsVisible] = useState(true);
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const [activeTab, setActiveTab] = useState('basic');
+    const [logs, setLogs] = useState([]);
+    const logsRef = useRef(null);
 
     // Check if we're running on Vite's development server (port 5173)
-    const isViteDev = window.location.port === '5173' && 
-                     (window.location.hostname === 'localhost' || 
-                      window.location.hostname.match(/^(?:192\.168\.|172\.(?:1[6-9]|2[0-9]|3[0-1])\.|10\.)/));
+    const isViteDev = window.location.port === '5173';
 
     // If not running on Vite dev server, don't render anything
     if (!isViteDev) return null;
+
+    // Scroll logs to bottom
+    const scrollToBottom = () => {
+        if (logsRef.current) {
+            logsRef.current.scrollTop = logsRef.current.scrollHeight;
+        }
+    };
+
+    useEffect(() => {
+        const fetchLogs = async () => {
+            try {
+                const response = await fetch(`http://${window.location.hostname}:8080/api/logs`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setLogs(data.logs);
+                    // If logs tab is active, scroll to bottom when new logs arrive
+                    if (activeTab === 'logs') {
+                        scrollToBottom();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch logs:', error);
+            }
+        };
+
+        // Initial fetch
+        fetchLogs();
+
+        // Set up polling every 2 seconds
+        const interval = setInterval(fetchLogs, 2000);
+
+        return () => clearInterval(interval);
+    }, [activeTab]); // Added activeTab to dependencies to handle scroll on tab change
+
+    // Scroll to bottom when switching to logs tab
+    useEffect(() => {
+        if (activeTab === 'logs') {
+            scrollToBottom();
+        }
+    }, [activeTab]);
 
     useEffect(() => {
         const detectBrowser = () => {
@@ -30,46 +71,29 @@ const BrowserBanner = () => {
             const vendor = navigator.vendor;
             const platform = navigator.platform;
             
-            // Helper function to extract OS version
             const getOSVersion = () => {
-                // Try to match iPadOS/iOS version
                 const iosMatch = ua.match(/(?:iPhone|iPad|iPod).*? OS (\d+_\d+)/);
-                if (iosMatch) {
-                    return iosMatch[1].replace('_', '.');
-                }
+                if (iosMatch) return iosMatch[1].replace('_', '.');
 
-                // Try to match macOS version
                 const macMatch = ua.match(/Mac OS X (\d+[._]\d+)/);
-                if (macMatch) {
-                    return macMatch[1].replace('_', '.');
-                }
+                if (macMatch) return macMatch[1].replace('_', '.');
 
-                // Try to match Windows version
                 const windowsMatch = ua.match(/Windows NT (\d+\.\d+)/);
-                if (windowsMatch) {
-                    return windowsMatch[1];
-                }
+                if (windowsMatch) return windowsMatch[1];
 
                 return 'unknown';
             };
 
-            // Enhanced iPad detection
             const isIPad = () => {
-                // Direct iPad detection
                 if (/iPad/.test(ua)) return true;
-                
-                // Modern iPads on iPadOS 13+ show as MacIntel
                 if (platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
-                    // Additional check for iPad-specific features
                     const isStandalone = window.navigator.standalone !== undefined;
                     const hasTouchScreen = navigator.maxTouchPoints > 1;
                     return isStandalone && hasTouchScreen;
                 }
-                
                 return false;
             };
             
-            // Detailed parsing of user agent components
             const uaParts = {
                 webkitVersion: ua.match(/AppleWebKit\/(\d+\.\d+)/)?.[1],
                 safariVersion: ua.match(/Version\/(\d+\.\d+)/)?.[1],
@@ -82,7 +106,6 @@ const BrowserBanner = () => {
                 originalUa: ua
             };
 
-            // Feature detection
             const features = {
                 mozGetUserMedia: 'mozGetUserMedia' in navigator,
                 mozRTCPeerConnection: 'mozRTCPeerConnection' in window,
@@ -113,7 +136,6 @@ const BrowserBanner = () => {
             let browser = 'other';
             let device = 'unknown';
 
-            // Enhanced browser detection logic
             const isFirefox = () => {
                 return ua.includes('Firefox/') || 
                        ua.includes('FxiOS') || 
@@ -122,18 +144,13 @@ const BrowserBanner = () => {
             };
 
             const isChrome = () => {
-                // Check for Chrome on iOS specifically
-                if (ua.includes('CriOS')) {
-                    return true;
-                }
-                // Regular Chrome detection for other platforms
+                if (ua.includes('CriOS')) return true;
                 return ua.includes('Chrome/') && 
                        vendor.includes('Google Inc.') &&
                        !ua.includes('Edg/') && 
                        !ua.includes('OPR/');
             };
 
-            // Device detection with enhanced iPad support
             if (uaParts.isIpad) {
                 device = `iPad (iPadOS ${uaParts.osVersion})`;
             } else if (uaParts.isIphone) {
@@ -144,7 +161,6 @@ const BrowserBanner = () => {
                 device = 'Desktop';
             }
 
-            // Browser detection with version information
             if (isFirefox()) {
                 browser = `firefox ${uaParts.firefoxVersion || ''}`;
             } else if (isChrome()) {
@@ -196,6 +212,74 @@ const BrowserBanner = () => {
         return `${formattedBrowser} ${browserVersion}${deviceInfo}`;
     };
 
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'basic':
+                return (
+                    <div className="tab-content">
+                        <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
+                        <div className="debug-section">
+                            <div>Browser: {getBrowserInfo()}</div>
+                            <div>Mobile Device: {browserInfo.isMobile ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+                );
+            case 'connection':
+                return (
+                    <div className="tab-content">
+                        <div className="debug-section">
+                            <div>Host: {browserInfo.debugInfo?.host}</div>
+                            <div>Port: {browserInfo.debugInfo?.port}</div>
+                        </div>
+                    </div>
+                );
+            case 'device':
+                return (
+                    <div className="tab-content">
+                        <div className="debug-section">
+                            <div>Platform: {browserInfo.debugInfo?.uaComponents?.platform}</div>
+                            <div>Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
+                            <div>WebKit Version: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
+                            <div>Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
+                            <div>Chrome Version: {browserInfo.debugInfo?.uaComponents?.chromeVersion}</div>
+                            <div>Firefox Version: {browserInfo.debugInfo?.uaComponents?.firefoxVersion}</div>
+                            <div>OS Version: {browserInfo.debugInfo?.uaComponents?.osVersion}</div>
+                        </div>
+                    </div>
+                );
+            case 'features':
+                return (
+                    <div className="tab-content">
+                        <div className="debug-section">
+                            <div>Firefox APIs: {browserInfo.debugInfo?.features?.mozGetUserMedia ? 'Yes' : 'No'}</div>
+                            <div>Safari APIs: {browserInfo.debugInfo?.features?.webkitGetUserMedia ? 'Yes' : 'No'}</div>
+                            <div>Service Worker: {browserInfo.debugInfo?.features?.serviceWorker ? 'Yes' : 'No'}</div>
+                            <div>Push Manager: {browserInfo.debugInfo?.features?.pushManager ? 'Yes' : 'No'}</div>
+                            <div>Touch Points: {browserInfo.debugInfo?.features?.maxTouchPoints}</div>
+                            <div>Local Storage: {browserInfo.debugInfo?.features?.localStorage ? 'Yes' : 'No'}</div>
+                            <div>Performance API: {browserInfo.debugInfo?.features?.performance ? 'Yes' : 'No'}</div>
+                            <div>WebGL: {browserInfo.debugInfo?.features?.webgl ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+                );
+            case 'logs':
+                return (
+                    <div className="tab-content">
+                        <div className="logs-section" ref={logsRef}>
+                            {logs.map((log, index) => (
+                                <div key={index} className="log-entry">
+                                    <span className="log-timestamp">{log.timestamp}</span>
+                                    <span className="log-message">{log.message}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className={bannerClass}>
             <button className="close-button" onClick={handleClose} aria-label="Close banner">
@@ -213,26 +297,39 @@ const BrowserBanner = () => {
             </div>
             <div className="collapsible-content">
                 <div className="debug-info">
-                    <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
-                    <div className="debug-details">
-                        <div>Connection Info:</div>
-                        <div>- Host: {browserInfo.debugInfo?.host}</div>
-                        <div>- Port: {browserInfo.debugInfo?.port}</div>
-                        <div>Device Info:</div>
-                        <div>- Platform: {browserInfo.debugInfo?.uaComponents?.platform}</div>
-                        <div>- Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
-                        <div>- WebKit: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
-                        <div>- Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
-                        <div>- Chrome Version: {browserInfo.debugInfo?.uaComponents?.chromeVersion}</div>
-                        <div>- Firefox Version: {browserInfo.debugInfo?.uaComponents?.firefoxVersion}</div>
-                        <div>- OS Version: {browserInfo.debugInfo?.uaComponents?.osVersion}</div>
-                        <div>Features:</div>
-                        <div>- Firefox APIs: {browserInfo.debugInfo?.features?.mozGetUserMedia ? 'Yes' : 'No'}</div>
-                        <div>- Safari APIs: {browserInfo.debugInfo?.features?.webkitGetUserMedia ? 'Yes' : 'No'}</div>
-                        <div>- Service Worker: {browserInfo.debugInfo?.features?.serviceWorker ? 'Yes' : 'No'}</div>
-                        <div>- Push Manager: {browserInfo.debugInfo?.features?.pushManager ? 'Yes' : 'No'}</div>
-                        <div>- Touch Points: {browserInfo.debugInfo?.features?.maxTouchPoints}</div>
+                    <div className="tabs">
+                        <button 
+                            className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('basic')}
+                        >
+                            Basic Info
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'connection' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('connection')}
+                        >
+                            Connection
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'device' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('device')}
+                        >
+                            Device Details
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'features' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('features')}
+                        >
+                            Features
+                        </button>
+                        <button 
+                            className={`tab-button ${activeTab === 'logs' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('logs')}
+                        >
+                            Logs
+                        </button>
                     </div>
+                    {renderTabContent()}
                 </div>
             </div>
         </div>

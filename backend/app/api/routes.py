@@ -1,15 +1,30 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from backend.app.models.resume_data import resume_data
 import os
 from dotenv import load_dotenv
 from fastapi import Request
 import json
 from datetime import datetime
+import ipaddress
 
 # Load environment variables
 load_dotenv()
 router = APIRouter()
+
+def is_development_environment(request: Request) -> bool:
+    """Check if the request is coming from a development environment"""
+    client_host = request.client.host
+    try:
+        ip = ipaddress.ip_address(client_host)
+        return (
+            ip.is_loopback or  # localhost
+            ip.is_private or   # local network
+            str(ip) == '::1'   # IPv6 localhost
+        )
+    except ValueError:
+        return False
 
 def get_log_file_path():
     """Get the current log file path based on timestamp"""
@@ -22,6 +37,50 @@ def get_log_file_path():
     # Create filename with timestamp
     filename = f"frontend_{now.strftime('%Y_%m_%d_%H')}.logs"
     return os.path.join(log_dir, filename)
+
+@router.get("/logs")
+async def get_logs(request: Request):
+    """Fetch logs from the current log file"""
+    # Add CORS headers
+    headers = {
+        "Access-Control-Allow-Origin": "http://localhost:5173",
+        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Headers": "Content-Type",
+    }
+    
+    if not is_development_environment(request):
+        raise HTTPException(status_code=403, detail="Access denied: Development environment only")
+    
+    try:
+        log_file_path = get_log_file_path()
+        if not os.path.exists(log_file_path):
+            return {"logs": []}
+        
+        with open(log_file_path, "r", encoding='utf-8') as f:
+            logs = f.readlines()
+        
+        # Parse and format logs
+        formatted_logs = []
+        for log in logs:
+            log = log.strip()
+            if log:
+                # Try to extract timestamp and message
+                try:
+                    timestamp = log[1:log.index(']')]
+                    message = log[log.index(']')+1:].strip()
+                    formatted_logs.append({
+                        "timestamp": timestamp,
+                        "message": message
+                    })
+                except:
+                    formatted_logs.append({
+                        "timestamp": "",
+                        "message": log
+                    })
+        
+        return {"logs": formatted_logs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/resume_data")
 async def get_resume():
