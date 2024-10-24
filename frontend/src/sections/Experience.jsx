@@ -1,48 +1,39 @@
-import React, { forwardRef } from 'react'
-import { getApiUrl } from '../utils/apiUtils'
+import React, { forwardRef } from 'react';
 
 const Experience = forwardRef(({ experience }, ref) => {
-  const apiUrl = getApiUrl();
-
-  const handleLinkClick = (e, url) => {
-    e.preventDefault();
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
   return (
-    <section id="experience" ref={ref}>
-      <div className="content-wrapper">
-        <h2>Experience</h2>
-        {experience.map((job, index) => (
+    <section ref={ref} id="experience" className="section experience-section">
+      <h2>Experience</h2>
+      <div className="experience-container">
+        {experience?.map((job, index) => (
           <div key={index} className="job-item">
             <div className="job-header">
-              <img src={`${apiUrl}/images/work-img.png`} alt="Work" className="job-icon" />
+              <img src={`/api/images/work-img.png`} alt="Work" className="job-icon" />
               <div className="job-title">
-                <h3>
-                  <a 
-                    href={job.link} 
-                    onClick={(e) => handleLinkClick(e, job.link)}
-                    rel="noopener noreferrer"
-                  >
-                    {job.company}
-                  </a>
-                </h3>
-                <h4>{job.title}</h4>
-                <p className="job-date">{job.date}</p>
+                <h3>{job.title}</h3>
+                <h4>{job.company}</h4>
+                <p className="job-duration">{job.duration}</p>
               </div>
             </div>
             <ul className="job-responsibilities">
-              {job.responsibilities.map((resp, i) => (
-                <li key={i}>{resp}</li>
+              {job.responsibilities?.map((responsibility, respIndex) => (
+                <li key={respIndex}>{responsibility}</li>
               ))}
             </ul>
+            {job.technologies && (
+              <div className="technologies">
+                {job.technologies.map((tech, techIndex) => (
+                  <span key={techIndex} className="technology-tag">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
     </section>
-  )
-})
+  );
+});
 
-Experience.displayName = 'Experience';
-
-export default Experience
+export default Experience;

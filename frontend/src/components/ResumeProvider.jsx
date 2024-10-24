@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiUtils';
 
 const ResumeContext = createContext();
 
@@ -17,13 +16,12 @@ export function ResumeProvider({ children }) {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiUrl = getApiUrl();
 
   // Fetch resume data
   useEffect(() => {
     const fetchResumeData = async () => {
       try {
-        const response = await fetch(`${apiUrl}/resume_data`);
+        const response = await fetch('/api/resume_data');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -36,13 +34,13 @@ export function ResumeProvider({ children }) {
     };
 
     fetchResumeData();
-  }, [apiUrl]);
+  }, []);
 
   // Fetch resume filename
   useEffect(() => {
     const fetchResumeFileName = async () => {
       try {
-        const response = await fetch(`${apiUrl}/resume_file_name`);
+        const response = await fetch('/api/resume_file_name');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -55,13 +53,13 @@ export function ResumeProvider({ children }) {
     };
 
     fetchResumeFileName();
-  }, [apiUrl]);
+  }, []);
 
   // Fetch PDF
   useEffect(() => {
     const fetchPdf = async () => {
       try {
-        const response = await fetch(`${apiUrl}/resume`);
+        const response = await fetch('/api/resume');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -83,16 +81,15 @@ export function ResumeProvider({ children }) {
         URL.revokeObjectURL(pdfUrl);
       }
     };
-  }, [apiUrl]);
+  }, []);
 
   const downloadResume = async (fileName = 'default_resume.pdf') => {
     try {
       console.log('Initiating resume download...', {
-        fileName,
-        apiUrl
+        fileName
       });
       
-      const downloadUrl = `${apiUrl}/resume`;
+      const downloadUrl = '/api/resume';
       console.log('Download URL:', downloadUrl);
 
       console.log('Making fetch request...');

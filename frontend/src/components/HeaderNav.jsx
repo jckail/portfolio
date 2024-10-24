@@ -1,13 +1,32 @@
-import React from 'react'
-import { getApiUrl } from '../utils/apiUtils'
+import React, { useRef, useEffect } from 'react'
+
 import { useResume } from './ResumeProvider'
 
-function HeaderNav({ theme, onResumeClick }) {
-  const apiUrl = getApiUrl();
+// Define header nav height constant
+const HEADER_NAV_HEIGHT = 65; // Base height in pixels
+
+function HeaderNav({ theme, onResumeClick, onHeightChange }) {
+  const apiUrl = "/api";
+  const navRef = useRef(null);
   const { resumeData } = useResume();
 
+  useEffect(() => {
+    if (navRef.current && onHeightChange) {
+      const updateHeight = () => {
+        const height = Math.max(navRef.current.offsetHeight, HEADER_NAV_HEIGHT);
+        onHeightChange(height);
+      };
+
+      // Update height initially and on resize
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+
+      return () => window.removeEventListener('resize', updateHeight);
+    }
+  }, [onHeightChange]);
+
   return (
-    <nav className="header-nav">
+    <nav ref={navRef} className="header-nav">
       {resumeData?.github && (
         <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
           <img 
