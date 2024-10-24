@@ -29,11 +29,34 @@ const BrowserBanner = () => {
             const vendor = navigator.vendor;
             const platform = navigator.platform;
             
+            // Helper function to extract OS version
+            const getOSVersion = () => {
+                // Try to match iPadOS/iOS version
+                const iosMatch = ua.match(/(?:iPhone|iPad|iPod).*? OS (\d+_\d+)/);
+                if (iosMatch) {
+                    return iosMatch[1].replace('_', '.');
+                }
+
+                // Try to match macOS version
+                const macMatch = ua.match(/Mac OS X (\d+[._]\d+)/);
+                if (macMatch) {
+                    return macMatch[1].replace('_', '.');
+                }
+
+                // Try to match Windows version
+                const windowsMatch = ua.match(/Windows NT (\d+\.\d+)/);
+                if (windowsMatch) {
+                    return windowsMatch[1];
+                }
+
+                return 'unknown';
+            };
+            
             // Detailed parsing of user agent components
             const uaParts = {
                 webkitVersion: ua.match(/AppleWebKit\/(\d+\.\d+)/)?.[1],
                 safariVersion: ua.match(/Version\/(\d+\.\d+)/)?.[1],
-                osVersion: ua.match(/(?:iPhone|iPad|Mac|Windows).+?(?:OS|Mac OS|Windows NT) +(\d+[._]\d+)/)?.[1]?.replace('_', '.'),
+                osVersion: getOSVersion(),
                 isIpad: /iPad/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1),
                 isIphone: /iPhone/.test(ua),
                 isMac: /Macintosh|MacIntel/.test(platform),
@@ -78,14 +101,6 @@ const BrowserBanner = () => {
                 }
                 if (ua.includes('FxiOS')) {
                     return true;
-                }
-                if (uaParts.isIpad) {
-                    return !ua.includes('CriOS') && 
-                           !ua.includes('EdgiOS') && 
-                           ua.includes('Safari') &&
-                           features.serviceWorker &&
-                           features.pushManager &&
-                           !features.webkitGetUserMedia;
                 }
                 return false;
             };
