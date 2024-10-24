@@ -13,6 +13,7 @@ import MyResume from './sections/MyResume'
 import { ResumeProvider, useResume } from './components/ResumeProvider'
 import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider'
 import { ParticlesProvider } from './components/ParticlesProvider'
+import { SidebarProvider, useSidebar } from './components/SidebarProvider'
 import { useGoogleAnalytics } from './utils/google-analytics'
 
 function AppContent() {
@@ -20,16 +21,19 @@ function AppContent() {
     theme,
     currentSection,
     headerHeight,
-    isSidebarOpen,
-    isTemporarilyVisible,
     sectionsRef,
     setHeaderHeight,
     toggleTheme,
-    toggleSidebar,
     handleSectionClick,
     handleButtonClick,
     updateParticlesConfig
   } = useAppLogic();
+
+  const {
+    isSidebarOpen,
+    isTemporarilyVisible,
+    toggleSidebar
+  } = useSidebar();
 
   const {
     resumeData,
@@ -125,9 +129,11 @@ function AppContent() {
 function App() {
   return (
     <AppLogicProvider>
-      <ResumeProvider>
-        <AppContent />
-      </ResumeProvider>
+      <SidebarProvider>
+        <ResumeProvider>
+          <AppContent />
+        </ResumeProvider>
+      </SidebarProvider>
     </AppLogicProvider>
   );
 }

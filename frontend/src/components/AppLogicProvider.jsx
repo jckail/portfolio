@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
-import { useSidebar } from '../hooks/useSidebar';
 import { useUrlManagement } from '../hooks/useUrlManagement';
 import { useSectionSelection } from '../hooks/useSectionSelection';
 import { debounce } from 'lodash';
@@ -61,12 +60,6 @@ export function AppLogicProvider({ children }) {
     handleButtonClick
   } = useSectionSelection(headerHeight, handleSectionChange);
 
-  const {
-    isSidebarOpen,
-    isTemporarilyVisible,
-    toggleSidebar
-  } = useSidebar();
-
   const handleHeaderHeightChange = useCallback((height) => {
     if (height !== headerHeight) {
       setHeaderHeight(height);
@@ -83,12 +76,9 @@ export function AppLogicProvider({ children }) {
     theme,
     currentSection,
     headerHeight,
-    isSidebarOpen,
-    isTemporarilyVisible,
     sectionsRef,
     setHeaderHeight: handleHeaderHeightChange,
     toggleTheme,
-    toggleSidebar,
     handleSectionClick: handleNavigationClick,
     handleButtonClick,
     updateParticlesConfig
