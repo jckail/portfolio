@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import './theme.css';
 import SandwichMenu from './components/SandwichMenu';
@@ -44,6 +44,42 @@ function AppContent() {
     handleButtonClick('my-resume');
     handleDownload();
   };
+
+  useEffect(() => {
+    if (!resumeData) return; // Only setup observer after content is loaded
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.id;
+            if (sectionId) {
+              window.history.replaceState(null, '', `#${sectionId}`);
+              console.log('Updated URL for section:', sectionId);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: '-50px 0px -50px 0px'
+      }
+    );
+
+    // Find all sections with IDs
+    const sections = document.querySelectorAll('section[id]');
+    console.log('Found sections:', sections.length);
+    
+    sections.forEach((section) => {
+      observer.observe(section);
+      console.log('Observing section:', section.id);
+    });
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+      observer.disconnect();
+    };
+  }, [resumeData]); // Re-run when resumeData changes
 
   return (
     <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
@@ -101,16 +137,15 @@ function AppContent() {
 
 function App() {
   return (
-    
-      <AppLogicProvider>
-        <SidebarProvider>
-          <ResumeProvider>
-            <AppContent />
-          </ResumeProvider>
-        </SidebarProvider>
-      </AppLogicProvider>
-    
+    <AppLogicProvider>
+      <SidebarProvider>
+        <ResumeProvider>
+          <AppContent />
+        </ResumeProvider>
+      </SidebarProvider>
+    </AppLogicProvider>
   );
 }
 
 export default App;
+
