@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiUtils';
+
+
+const apiUrl = '/api'
+
+
 
 export const useResumeData = () => {
   const [resumeData, setResumeData] = useState(null);
   const [error, setError] = useState(null);
-  const apiUrl = getApiUrl();
+  
 
   useEffect(() => {
     const fullApiUrl = `${apiUrl}/resume_data`;

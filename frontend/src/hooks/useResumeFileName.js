@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiUtils';
+const apiUrl = '/api'
 
 export const useResumeFileName = () => {
   const [resumeFileName, setResumeFileName] = useState('default_resume.pdf');
   const [error, setError] = useState(null);
-  const apiUrl = getApiUrl();
+  
 
   useEffect(() => {
     const fullApiUrl = `${apiUrl}/resume_file_name`;

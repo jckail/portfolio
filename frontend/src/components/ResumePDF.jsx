@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../utils/apiUtils';
 import { downloadResume } from '../utils/resumeUtils';
 import { useAppLogic } from '../hooks/useAppLogic';
+
+
+const apiUrl = '/api'
 
 function ResumePDF() {
   const [pdfUrl, setPdfUrl] = useState('');
@@ -12,7 +14,7 @@ function ResumePDF() {
   useEffect(() => {
     const fetchPdf = async () => {
       try {
-        const apiUrl = getApiUrl();
+        
         const fullUrl = `${apiUrl}/resume`;
         const response = await fetch(fullUrl);
 

@@ -1,12 +1,12 @@
 import React, { forwardRef } from 'react'
-import { getApiUrl } from '../utils/apiUtils'
+const apiUrl = '/api'
 
 const Experience = forwardRef(({ experience }, ref) => {
   if (!experience || experience.length === 0) {
     return null;
   }
 
-  const apiUrl = getApiUrl();
+  
 
   const handleLinkClick = (e, url) => {
     e.preventDefault();

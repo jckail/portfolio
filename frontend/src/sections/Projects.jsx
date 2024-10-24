@@ -1,12 +1,12 @@
 import React, { forwardRef } from 'react'
-import { getApiUrl } from '../utils/apiUtils'
+const apiUrl = '/api'
 
 const Projects = forwardRef(({ projects }, ref) => {
   if (!projects || projects.length === 0) {
     return null;
   }
 
-  const apiUrl = getApiUrl();
+  
   
   return (
     <section className="section" id="projects" ref={ref}>

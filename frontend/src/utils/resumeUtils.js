@@ -1,13 +1,13 @@
-import { getApiUrl } from './apiUtils';
+const apiUrl = '/api'
 
 export const downloadResume = async (fileName = 'default_resume.pdf') => {
   try {
     console.log('Initiating resume download...', {
       fileName,
-      apiUrl: getApiUrl()
+      apiUrl: apiUrl
     });
     
-    const apiUrl = getApiUrl();
+    
     const downloadUrl = `${apiUrl}/resume`;
     console.log('Download URL:', downloadUrl);
 

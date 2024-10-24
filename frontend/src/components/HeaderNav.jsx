@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from 'react'
-import { getApiUrl } from '../utils/apiUtils'
+const apiUrl = '/api'
 
 const HEADER_NAV_HEIGHT = 65;
 
 function HeaderNav({ resumeData, theme, onResumeClick, onHeightChange }) {
-  const apiUrl = getApiUrl();
+  
   const navRef = useRef(null);
 
   useEffect(() => {

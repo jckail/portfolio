@@ -10,7 +10,6 @@ import TechnicalSkills from './sections/TechnicalSkills'
 import Experience from './sections/Experience'
 import Projects from './sections/Projects'
 import MyResume from './sections/MyResume'
-import { getApiUrl } from './utils/apiUtils'
 import { useAppLogic } from './hooks/useAppLogic'
 
 const MainContent = React.memo(({ resumeData, sectionsRef }) => (
@@ -39,7 +38,10 @@ function App() {
 
   const headerRef = useRef(null)
   const sectionsRef = useRef({})
-  const apiUrl = getApiUrl()
+  
+
+  
+
   const previousHeightRef = useRef(headerHeight)
 
   useEffect(() => {
