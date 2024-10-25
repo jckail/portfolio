@@ -1,3 +1,5 @@
+import { getSessionUUID } from './sessionManager';
+
 // Queue to store logs while backend is not available
 let logQueue = [];
 let isProcessingQueue = false;
@@ -8,15 +10,15 @@ const processLogQueue = async () => {
     
     isProcessingQueue = true;
     while (logQueue.length > 0) {
-        const { level, args } = logQueue[0];
+        const { level, args, sessionUUID } = logQueue[0];
         try {
-            const message = `[${level}] ${args.join(' ')}`;
+            const message = `[${level}] [${sessionUUID}] ${args.join(' ')}`;
             const response = await fetch('/api/log', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message }),
+                body: JSON.stringify({ message, sessionUUID }),
             });
             
             if (response.ok) {
@@ -33,8 +35,9 @@ const processLogQueue = async () => {
 
 // Custom logging function that sends logs to backend
 const logToFile = async (level, args) => {
+    const sessionUUID = getSessionUUID();
     // Add to queue
-    logQueue.push({ level, args });
+    logQueue.push({ level, args, sessionUUID });
     
     // Try to process queue
     processLogQueue();
@@ -155,6 +158,8 @@ const detectBrowserInfo = () => {
 
 // Initialize logging system
 export const initializeLogging = () => {
+    const sessionUUID = getSessionUUID();
+    
     // Override console methods
     ['log', 'warn', 'error', 'info', 'debug'].forEach(level => {
         const original = console[level];
@@ -170,6 +175,7 @@ export const initializeLogging = () => {
     // Log browser information at startup
     const browserInfo = detectBrowserInfo();
     console.log('=== Quick Resume Session Start ===');
+    console.log('Session UUID:', sessionUUID);
     console.log('Browser:', browserInfo.browser);
     console.log('Device:', browserInfo.device);
     console.log('User Agent:', browserInfo.userAgent);

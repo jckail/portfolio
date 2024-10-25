@@ -26,21 +26,26 @@ def is_development_environment(request: Request) -> bool:
     except ValueError:
         return False
 
-def get_log_file_path():
-    """Get the current log file path based on timestamp"""
+def get_log_file_path(session_uuid=None):
+    """Get the current log file path based on timestamp and session UUID"""
     now = datetime.utcnow()
-    log_dir = os.path.join(os.path.dirname(__file__), "../logs")
+    base_log_dir = os.path.join(os.path.dirname(__file__), "../logs")
+    frontend_log_dir = os.path.join(base_log_dir, "frontend", now.strftime('%Y_%m_%d'))
     
-    # Ensure logs directory exists
-    os.makedirs(log_dir, exist_ok=True)
+    # Ensure frontend logs directory exists
+    os.makedirs(frontend_log_dir, exist_ok=True)
     
-    # Create filename with timestamp
-    filename = f"frontend_{now.strftime('%Y_%m_%d_%H')}.logs"
-    return os.path.join(log_dir, filename)
+    # Create filename with session UUID
+    if session_uuid:
+        filename = f"{session_uuid}.log"
+    else:
+        filename = "unknown_session.log"
+    
+    return os.path.join(frontend_log_dir, filename)
 
 @router.get("/logs")
-async def get_logs(request: Request):
-    """Fetch logs from the current log file"""
+async def get_logs(request: Request, session_uuid: str = None):
+    """Fetch logs from the current log file, optionally filtered by session UUID"""
     # Add CORS headers
     headers = {
         "Access-Control-Allow-Origin": "http://localhost:5173",
@@ -52,7 +57,7 @@ async def get_logs(request: Request):
         raise HTTPException(status_code=403, detail="Access denied: Development environment only")
     
     try:
-        log_file_path = get_log_file_path()
+        log_file_path = get_log_file_path(session_uuid)
         if not os.path.exists(log_file_path):
             return {"logs": []}
         
@@ -111,7 +116,12 @@ async def log_message(request: Request):
     try:
         body = await request.json()
         message = body.get("message", "")
-        log_file_path = get_log_file_path()
+        session_uuid = body.get("sessionUUID")
+        
+        if not session_uuid:
+            return {"status": "error", "message": "Session UUID is required"}
+        
+        log_file_path = get_log_file_path(session_uuid)
         
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
