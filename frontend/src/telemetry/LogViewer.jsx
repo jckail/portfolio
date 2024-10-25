@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getSessionUUID } from '../utils/sessionManager';
 import { API_CONFIG } from '../configs';
 
-const LogViewer = ({ isAdminLoggedIn, defaultSessionUUID }) => {
+const LogViewer = ({ isAdminLoggedIn }) => {
+    const currentSessionUUID = getSessionUUID();
     const [logs, setLogs] = useState([]);
     const [showNoteInput, setShowNoteInput] = useState(false);
     const [noteText, setNoteText] = useState('');
-    const [sessionUUIDInput, setSessionUUIDInput] = useState(defaultSessionUUID || '');
+    const [sessionUUIDInput, setSessionUUIDInput] = useState(currentSessionUUID);
     const logsRef = useRef(null);
     const noteInputRef = useRef(null);
-    const currentSessionUUID = getSessionUUID();
 
     const getAuthHeader = () => {
         const token = localStorage.getItem('adminToken');
@@ -24,7 +24,13 @@ const LogViewer = ({ isAdminLoggedIn, defaultSessionUUID }) => {
 
     const fetchLogs = async (isManualRefresh = false) => {
         try {
-            const response = await fetch(`${API_CONFIG.baseUrl}/api/logs?session_uuid=${sessionUUIDInput}`, {
+            // Trim whitespace from each UUID
+            const cleanedUUIDs = sessionUUIDInput.split(',')
+                .map(uuid => uuid.trim())
+                .filter(uuid => uuid) // Remove empty strings
+                .join(',');
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/logs?session_uuid=${cleanedUUIDs}`, {
                 headers: getAuthHeader()
             });
             if (response.ok) {
@@ -89,7 +95,6 @@ const LogViewer = ({ isAdminLoggedIn, defaultSessionUUID }) => {
     };
 
     const handleSessionUUIDChange = (e) => {
-        // Allow comma-separated UUIDs
         setSessionUUIDInput(e.target.value);
     };
 
@@ -108,8 +113,8 @@ const LogViewer = ({ isAdminLoggedIn, defaultSessionUUID }) => {
                     value={sessionUUIDInput}
                     onChange={handleSessionUUIDChange}
                     onKeyPress={handleSessionUUIDKeyPress}
-                    placeholder="Enter Session UUID(s)"
-                    title="Enter single UUID or comma-separated UUIDs"
+                    placeholder={sessionUUIDInput}
+                    title="Session UUIDs"
                 />
                 <button 
                     className="add-note-button"

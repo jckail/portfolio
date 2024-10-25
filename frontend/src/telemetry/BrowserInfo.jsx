@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getSessionUUID } from '../utils/sessionManager';
 
 const BrowserInfo = ({ onBrowserDetect }) => {
     const [browserInfo, setBrowserInfo] = useState({
@@ -14,6 +15,7 @@ const BrowserInfo = ({ onBrowserDetect }) => {
             cookiesEnabled: false
         }
     });
+    const sessionUUID = getSessionUUID();
 
     useEffect(() => {
         const detectBrowser = () => {
@@ -133,6 +135,7 @@ const BrowserInfo = ({ onBrowserDetect }) => {
             <div className="browser-info-display">{browserInfoString}</div>
             <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
             <div className="debug-section">
+                <div>Session UUID: {sessionUUID}</div>
                 <div>Browser: {browserInfoString}</div>
                 <div>Mobile Device: {browserInfo.isMobile ? 'Yes' : 'No'}</div>
                 <div>Browser Language: {browserInfo.preferences.language}</div>
