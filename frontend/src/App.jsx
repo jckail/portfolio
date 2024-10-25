@@ -4,7 +4,7 @@ import './theme.css';
 import SandwichMenu from './components/SandwichMenu';
 import SidePanel from './components/SidePanel';
 import HeaderNav from './components/HeaderNav';
-import BrowserBanner from './components/BrowserBanner';
+import TelemetryBanner from './telemetry/TelemetryBanner';
 import AboutMe from './sections/AboutMe';
 import TechnicalSkills from './sections/TechnicalSkills';
 import Experience from './sections/Experience';
@@ -145,7 +145,7 @@ function AppContent() {
   return (
     <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
       <div className="App app-wrapper">
-        <BrowserBanner />
+        <TelemetryBanner isAdminLoggedIn={isAdminLoggedIn} />
         <div id="particles-js"></div>
         <div className={`app-content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
           <header className="floating-header">

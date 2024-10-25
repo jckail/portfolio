@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Header
+from fastapi import APIRouter, HTTPException, Request, Header, Depends
 from typing import Optional
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
@@ -32,10 +32,16 @@ def is_local_dev_environment(request: Request) -> bool:
     except ValueError:
         return False
 
-async def verify_access(request: Request, authorization: Optional[str] = None):
+async def verify_access(request: Request):
     """Verify access based on local dev environment or admin authentication"""
     if not is_local_dev_environment(request):
-        await verify_admin_token(authorization)
+        # Get the token from the Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            raise HTTPException(status_code=401, detail="No authorization token provided")
+        
+        # Verify the admin token
+        await verify_admin_token(auth_header)
 
 def get_log_file_path(session_uuid=None):
     """Get the current log file path based on timestamp and session UUID"""
@@ -55,10 +61,10 @@ def get_log_file_path(session_uuid=None):
     return os.path.join(frontend_log_dir, filename)
 
 @router.get("/logs")
-async def get_logs(request: Request, session_uuid: str = None, authorization: Optional[str] = Header(None)):
+async def get_logs(request: Request, session_uuid: str = None):
     """Fetch logs from Supabase, falling back to file system if needed"""
     # Verify access (local dev environment or admin auth)
-    await verify_access(request, authorization)
+    await verify_access(request)
     
     try:
         # Get Supabase client only when needed

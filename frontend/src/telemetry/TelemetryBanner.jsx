@@ -4,20 +4,25 @@ import ConnectionInfo from './ConnectionInfo';
 import DeviceDetails from './DeviceDetails';
 import FeatureSupport from './FeatureSupport';
 import LogViewer from './LogViewer';
+import { getSessionUUID } from '../utils/sessionManager';
 import './telemetry-banner.css';
 
-const TelemetryBanner = () => {
+const TelemetryBanner = ({ isAdminLoggedIn }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [activeTab, setActiveTab] = useState('basic');
     const [browserType, setBrowserType] = useState('other');
     const performanceInterval = useRef(null);
+    const currentSessionUUID = getSessionUUID();
 
-    // Check if we're running on Vite's development server (port 5173)
-    const isViteDev = window.location.port === '5173';
+    // Check if we're running on localhost:5173
+    const isLocalDev = window.location.hostname === 'localhost' && window.location.port === '5173';
 
-    // If not running on Vite dev server, don't render anything
-    if (!isViteDev) return null;
+    // Only show if we're in local dev mode or admin is logged in
+    const shouldShow = isLocalDev || isAdminLoggedIn;
+
+    // If not allowed to show, don't render anything
+    if (!shouldShow) return null;
 
     const handleClose = () => {
         setIsVisible(false);
@@ -57,7 +62,10 @@ const TelemetryBanner = () => {
             case 'features':
                 return <FeatureSupport />;
             case 'logs':
-                return <LogViewer />;
+                return <LogViewer 
+                    isAdminLoggedIn={isAdminLoggedIn} 
+                    defaultSessionUUID={currentSessionUUID}
+                />;
             default:
                 return null;
         }

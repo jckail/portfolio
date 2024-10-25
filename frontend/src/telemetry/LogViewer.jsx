@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getSessionUUID } from '../utils/sessionManager';
+import { API_CONFIG } from '../configs';
 
-const LogViewer = () => {
+const LogViewer = ({ isAdminLoggedIn, defaultSessionUUID }) => {
     const [logs, setLogs] = useState([]);
     const [showNoteInput, setShowNoteInput] = useState(false);
     const [noteText, setNoteText] = useState('');
+    const [sessionUUIDInput, setSessionUUIDInput] = useState(defaultSessionUUID || '');
     const logsRef = useRef(null);
     const noteInputRef = useRef(null);
+    const currentSessionUUID = getSessionUUID();
+
+    const getAuthHeader = () => {
+        const token = localStorage.getItem('adminToken');
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
 
     const scrollToBottom = () => {
         if (logsRef.current) {
@@ -15,7 +24,9 @@ const LogViewer = () => {
 
     const fetchLogs = async (isManualRefresh = false) => {
         try {
-            const response = await fetch(`http://${window.location.hostname}:8080/api/logs`);
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/logs?session_uuid=${sessionUUIDInput}`, {
+                headers: getAuthHeader()
+            });
             if (response.ok) {
                 const data = await response.json();
                 setLogs(data.logs);
@@ -32,7 +43,7 @@ const LogViewer = () => {
         fetchLogs();
         const interval = setInterval(() => fetchLogs(), 20000);
         return () => clearInterval(interval);
-    }, []);
+    }, [sessionUUIDInput]);
 
     useEffect(() => {
         scrollToBottom();
@@ -48,13 +59,15 @@ const LogViewer = () => {
         if (!noteText.trim()) return;
 
         try {
-            const response = await fetch(`http://${window.location.hostname}:8080/api/log`, {
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/log`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...getAuthHeader()
                 },
                 body: JSON.stringify({
                     message: `[NOTE] ${noteText}`,
+                    sessionUUID: currentSessionUUID
                 }),
             });
 
@@ -75,9 +88,29 @@ const LogViewer = () => {
         }
     };
 
+    const handleSessionUUIDChange = (e) => {
+        // Allow comma-separated UUIDs
+        setSessionUUIDInput(e.target.value);
+    };
+
+    const handleSessionUUIDKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            fetchLogs(true);
+        }
+    };
+
     return (
         <div className="tab-content">
             <div className="logs-header">
+                <input
+                    type="text"
+                    className="session-uuid-input"
+                    value={sessionUUIDInput}
+                    onChange={handleSessionUUIDChange}
+                    onKeyPress={handleSessionUUIDKeyPress}
+                    placeholder="Enter Session UUID(s)"
+                    title="Enter single UUID or comma-separated UUIDs"
+                />
                 <button 
                     className="add-note-button"
                     onClick={() => setShowNoteInput(!showNoteInput)}
