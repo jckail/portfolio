@@ -79,7 +79,7 @@ async def get_logs(request: Request, session_uuid: str = None):
             if len(session_uuids) > 0:
                 query = query.in_('session_uuid', session_uuids)
         
-        query = query.order('timestamp', desc=True)
+        query = query.order('timestamp', desc=False)
         
         result = query.execute()
         if result.data:
