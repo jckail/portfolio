@@ -3,9 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from .api.routes import router as api_router
+from .api.health_routes import router as health_router
 from .utils.logger import setup_logging
 import os
 from dotenv import load_dotenv
+import sys
+
+# Configure logging first
+logger = setup_logging()
 
 # Load environment variables
 load_dotenv()
@@ -14,17 +19,24 @@ load_dotenv()
 required_env_vars = [
     "SUPABASE_URL",
     "SUPABASE_ANON_KEY",
-    "ADMIN_EMAIL",
+    "SUPABASE_SERVICE_ROLE",  # Added this as required
 ]
+
+# Log all environment variables (excluding sensitive ones)
+logger.info("Checking environment variables...")
+for key in os.environ:
+    if not any(sensitive in key.lower() for sensitive in ['key', 'password', 'secret', 'token']):
+        logger.info(f"ENV: {key}={os.environ[key]}")
 
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
-    raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+    error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
+    logger.error(error_msg)
+    sys.exit(1)
+
+logger.info("All required environment variables are present")
 
 app = FastAPI()
-
-# Configure logging
-logger = setup_logging()
 
 # Get allowed origins from environment variable or use default
 allowed_origins = os.getenv(
@@ -44,32 +56,60 @@ app.add_middleware(
     expose_headers=["*"]  # Expose all headers
 )
 
+# Mount health routes at root level
+app.include_router(health_router)
+
 # Mount the API routes
 app.include_router(api_router, prefix="/api")
 
-# Serve static files (images)
-images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
-app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
+try:
+    # Serve static files (images)
+    images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
+    logger.info(f"Images directory path: {images_dir}")
+    if not os.path.exists(images_dir):
+        logger.warning(f"Images directory does not exist: {images_dir}")
+    app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
 
-# Define the path to the assets directory
-assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
-app.mount("/api/assets", StaticFiles(directory=assets_dir), name="assets")
+    # Define the path to the assets directory
+    assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
+    logger.info(f"Assets directory path: {assets_dir}")
+    if not os.path.exists(assets_dir):
+        logger.warning(f"Assets directory does not exist: {assets_dir}")
+    app.mount("/api/assets", StaticFiles(directory=assets_dir), name="assets")
 
-# Serve frontend static files
-frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
-app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+    # Serve frontend static files
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
+    logger.info(f"Frontend directory path: {frontend_dir}")
+    if not os.path.exists(frontend_dir):
+        logger.warning(f"Frontend directory does not exist: {frontend_dir}")
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+except Exception as e:
+    logger.error(f"Error mounting static files: {str(e)}")
+    raise
 
 # Serve index.html for all routes not matched by API or static files
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
+    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
     return FileResponse(os.path.join(frontend_dir, "index.html"))
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize any necessary services on startup"""
     logger.info("Starting up the application...")
-    # Ensure logs directory exists
-    os.makedirs(os.path.join(os.path.dirname(__file__), 'logs'), exist_ok=True)
+    try:
+        # Ensure logs directory exists
+        logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+        os.makedirs(logs_dir, exist_ok=True)
+        logger.info(f"Logs directory ensured at: {logs_dir}")
+        
+        # Log the port we're trying to use
+        port = os.getenv('PORT', '8080')
+        logger.info(f"Configured to run on port: {port}")
+        
+    except Exception as e:
+        logger.error(f"Startup error: {str(e)}")
+        raise
 
 @app.on_event("shutdown")
 async def shutdown_event():
