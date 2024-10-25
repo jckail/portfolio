@@ -15,14 +15,19 @@ const TelemetryBanner = ({ isAdminLoggedIn }) => {
     const performanceInterval = useRef(null);
     const currentSessionUUID = getSessionUUID();
 
-    // Check if we're running on localhost:5173
-    const isLocalDev = window.location.hostname === 'localhost' && window.location.port === '5173';
-
-    // Only show if we're in local dev mode or admin is logged in
-    const shouldShow = isLocalDev || isAdminLoggedIn;
+    // Check if we're on port 5173 (development environment)
+    const isDevelopment = window.location.port === '5173';
+    
+    // Show if either:
+    // 1. We're on port 5173 (localhost/local network development) OR
+    // 2. Admin is authenticated (regardless of port)
+    const shouldShow = isDevelopment || isAdminLoggedIn;
 
     // If not allowed to show, don't render anything
     if (!shouldShow) return null;
+
+    // If manually closed, don't render
+    if (!isVisible) return null;
 
     const handleClose = () => {
         setIsVisible(false);
@@ -47,8 +52,6 @@ const TelemetryBanner = ({ isAdminLoggedIn }) => {
         setBrowserType(browser);
     };
 
-    if (!isVisible) return null;
-
     const bannerClass = `browser-banner ${browserType} ${isCollapsed ? 'collapsed' : ''}`;
 
     const renderTabContent = () => {
@@ -72,7 +75,7 @@ const TelemetryBanner = ({ isAdminLoggedIn }) => {
     };
 
     return (
-        <div className={bannerClass}>
+        <div className={bannerClass} style={{ direction: 'ltr' }}>
             <button className="close-button" onClick={handleClose} aria-label="Close banner">
                 ×
             </button>
