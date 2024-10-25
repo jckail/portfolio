@@ -44,7 +44,7 @@ check_health() {
     echo "Backend not healthy yet. Attempt $attempt/$max_attempts. Retrying in $delay seconds..."
     sleep $delay
     attempt=$((attempt + 1))
-    delay=$((delay * 2))  # Exponential backoff
+    delay=$((delay ))  # Exponential backoff
   done
 
   echo "Backend health check failed after $max_attempts attempts."
