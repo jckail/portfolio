@@ -96,13 +96,13 @@
     padding: 0 40px;
 }
 
-.browser-info {
+.browser-info-display {
     font-weight: bold;
-    margin-left: 30px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 200px;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
 
 .tabs {
@@ -219,7 +219,7 @@
 }
 
 .refresh-logs-button {
-    margin-right : 10px;
+    margin-right: 10px;
 }
 
 .add-note-button:hover, .refresh-logs-button:hover {
@@ -361,12 +361,6 @@
         font-size: 20px;
     }
 
-    .browser-info {
-        margin-left: 25px;
-        min-width: 150px;
-        font-size: 0.85em;
-    }
-
     .tabs {
         padding: 0 5px;
     }
@@ -392,5 +386,10 @@
 
     .note-input {
         font-size: 0.85em;
+    }
+
+    .browser-info-display {
+        font-size: 1em;
+        padding: 6px;
     }
 }

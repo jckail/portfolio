@@ -318,23 +318,22 @@ const BrowserBanner = () => {
     if (!isVisible) return null;
 
     const bannerClass = `browser-banner ${browserInfo.browser.split(' ')[0]} ${isCollapsed ? 'collapsed' : ''}`;
-    
-    const getBrowserInfo = () => {
-        const browserName = browserInfo.browser.split(' ')[0];
-        const browserVersion = browserInfo.browser.split(' ')[1] || '';
-        const formattedBrowser = browserName.charAt(0).toUpperCase() + browserName.slice(1);
-        const deviceInfo = browserInfo.device ? ` on ${browserInfo.device}` : '';
-        return `${formattedBrowser} ${browserVersion}${deviceInfo}`;
-    };
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'basic':
+                const browserName = browserInfo.browser.split(' ')[0];
+                const browserVersion = browserInfo.browser.split(' ')[1] || '';
+                const formattedBrowser = browserName.charAt(0).toUpperCase() + browserName.slice(1);
+                const deviceInfo = browserInfo.device ? ` on ${browserInfo.device}` : '';
+                const browserInfoString = `${formattedBrowser} ${browserVersion}${deviceInfo}`;
+
                 return (
                     <div className="tab-content">
+                        <div className="browser-info-display">{browserInfoString}</div>
                         <div className="user-agent">User Agent: {browserInfo.userAgent}</div>
                         <div className="debug-section">
-                            <div>Browser: {getBrowserInfo()}</div>
+                            <div>Browser: {browserInfoString}</div>
                             <div>Mobile Device: {browserInfo.isMobile ? 'Yes' : 'No'}</div>
                             <div>Browser Language: {browserInfo.preferences.language}</div>
                             <div>Preferred Languages: {browserInfo.preferences.languages.join(', ')}</div>
@@ -448,7 +447,6 @@ const BrowserBanner = () => {
                 ×
             </button>
             <div className="banner-main">
-                <div className="browser-info">{getBrowserInfo()}</div>
                 <div className="tabs">
                     <button 
                         className={`tab-button ${activeTab === 'basic' ? 'active' : ''}`}
