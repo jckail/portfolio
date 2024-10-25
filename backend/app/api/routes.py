@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.models.resume_data import resume_data
+from backend.app.utils.supabase_client import supabase
 import os
 from dotenv import load_dotenv
 from fastapi import Request
@@ -45,7 +46,7 @@ def get_log_file_path(session_uuid=None):
 
 @router.get("/logs")
 async def get_logs(request: Request, session_uuid: str = None):
-    """Fetch logs from the current log file, optionally filtered by session UUID"""
+    """Fetch logs from Supabase, falling back to file system if needed"""
     # Add CORS headers
     headers = {
         "Access-Control-Allow-Origin": "http://localhost:5173",
@@ -57,6 +58,17 @@ async def get_logs(request: Request, session_uuid: str = None):
         raise HTTPException(status_code=403, detail="Access denied: Development environment only")
     
     try:
+        # Try to fetch logs from Supabase first
+        query = supabase.admin_client.table('logs').select('*')
+        if session_uuid:
+            query = query.eq('session_uuid', session_uuid)
+        query = query.order('timestamp', desc=True)
+        
+        result = query.execute()
+        if result.data:
+            return {"logs": result.data}
+            
+        # Fall back to file system if no logs in Supabase
         log_file_path = get_log_file_path(session_uuid)
         if not os.path.exists(log_file_path):
             return {"logs": []}
@@ -69,7 +81,6 @@ async def get_logs(request: Request, session_uuid: str = None):
         for log in logs:
             log = log.strip()
             if log:
-                # Try to extract timestamp and message
                 try:
                     timestamp = log[1:log.index(']')]
                     message = log[log.index(']')+1:].strip()
@@ -112,7 +123,7 @@ async def get_resume():
 
 @router.post("/log")
 async def log_message(request: Request):
-    """Log messages from the frontend to timestamped log files"""
+    """Log messages to Supabase with file system fallback"""
     try:
         body = await request.json()
         message = body.get("message", "")
@@ -121,30 +132,49 @@ async def log_message(request: Request):
         if not session_uuid:
             return {"status": "error", "message": "Session UUID is required"}
         
-        log_file_path = get_log_file_path(session_uuid)
-        
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
             timestamp = datetime.utcnow().isoformat() + 'Z'
             message = f'[{timestamp}] {message}'
         
-        # Ensure message ends with newline
-        if not message.endswith('\n'):
-            message += '\n'
+        # Try to store in Supabase first
+        try:
+            await supabase.store_log(
+                level="INFO",
+                message=message,
+                session_uuid=session_uuid,
+                metadata={"raw_message": message}
+            )
+        except Exception as e:
+            # If Supabase fails, fall back to file logging
+            log_file_path = get_log_file_path(session_uuid)
             
-        # Append message to log file
-        with open(log_file_path, "a", encoding='utf-8') as f:
-            f.write(message)
+            # Ensure message ends with newline
+            if not message.endswith('\n'):
+                message += '\n'
+                
+            # Append message to log file
+            with open(log_file_path, "a", encoding='utf-8') as f:
+                f.write(message)
         
         return {"status": "success", "message": "Log written successfully"}
     except Exception as e:
         # Log the error but don't fail the request
         error_message = f"[{datetime.utcnow().isoformat()}Z] [ERROR] Logging failed: {str(e)}\n"
         try:
-            with open(get_log_file_path(), "a", encoding='utf-8') as f:
-                f.write(error_message)
+            # Try Supabase first
+            await supabase.store_log(
+                level="ERROR",
+                message=error_message,
+                metadata={"error": str(e)}
+            )
         except:
-            pass
+            # Fall back to file
+            try:
+                with open(get_log_file_path(), "a", encoding='utf-8') as f:
+                    f.write(error_message)
+            except:
+                pass
         return {"status": "error", "message": str(e)}
 
 def get_resume_file_path():

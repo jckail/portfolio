@@ -1,7 +1,9 @@
 from supabase import create_client, Client
 import os
+import sys
 from dotenv import load_dotenv
 from typing import Optional, Dict, Any
+from datetime import datetime
 
 load_dotenv()
 
@@ -87,6 +89,31 @@ class SupabaseClient:
                 self.client.auth.sign_out()
         except Exception as e:
             raise Exception(f"Sign out failed: {str(e)}")
+
+    async def store_log(self, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None):
+        """Store a log entry in Supabase.
+        
+        Args:
+            level: The log level (e.g., 'INFO', 'ERROR', 'WARNING')
+            message: The log message
+            session_uuid: Optional session identifier
+            metadata: Optional dictionary containing additional log data
+        """
+        try:
+            log_entry = {
+                'timestamp': datetime.utcnow().isoformat(),
+                'level': level.upper(),
+                'message': message,
+                'session_uuid': session_uuid,
+                'metadata': metadata or {}
+            }
+            
+            result = self.admin_client.table('logs').insert(log_entry).execute()
+            return result
+        except Exception as e:
+            # If we fail to store the log, we'll print it to stderr as a fallback
+            print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
+            return None
 
 # Create a singleton instance
 supabase = SupabaseClient()
