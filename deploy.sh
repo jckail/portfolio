@@ -30,7 +30,15 @@ gcloud run deploy quickresume \
   --image ${IMAGE_NAME} \
   --platform managed \
   --region us-central1 \
-  --set-env-vars "SUPABASE_URL=${SUPABASE_URL},SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY},SUPABASE_SERVICE_ROLE=${SUPABASE_SERVICE_ROLE}" \
+  --set-env-vars "SUPABASE_URL=${SUPABASE_URL}" \
+  --set-env-vars "SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
+  --set-env-vars "SUPABASE_SERVICE_ROLE=${SUPABASE_SERVICE_ROLE}" \
+  --set-env-vars "ALLOWED_ORIGINS=https://portfolio-292025398859.us-central1.run.app" \
+  --set-env-vars "PRODUCTION_URL=https://portfolio-292025398859.us-central1.run.app" \
+  --set-env-vars "ADMIN_EMAIL=${ADMIN_EMAIL}" \
+  --set-env-vars "RESUME_FILE=${RESUME_FILE}" \
+  --set-env-vars "SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}" \
+  --set-env-vars "SUPABASE_PW=${SUPABASE_PW}" \
   --allow-unauthenticated
 
 echo "Deployment complete! Checking service health..."

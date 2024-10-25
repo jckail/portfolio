@@ -19,6 +19,13 @@ required_env_vars = [
     "SUPABASE_URL",
     "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE",
+    "ALLOWED_ORIGINS",
+    "PRODUCTION_URL",
+    "PORT",
+    "ADMIN_EMAIL",
+    "RESUME_FILE",
+    "SUPABASE_JWT_SECRET",
+    "SUPABASE_PW"
 ]
 
 # Log all environment variables (excluding sensitive ones)
@@ -52,7 +59,7 @@ logger.info(f"Allowed origin patterns: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,  # Use the configured allowed origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

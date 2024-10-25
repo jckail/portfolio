@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Header
+from typing import Optional
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
+from ..middleware.auth_middleware import verify_admin_token
 import os
 from datetime import datetime
 import ipaddress
@@ -9,18 +11,31 @@ import json
 router = APIRouter()
 logger = setup_logging()
 
-def is_development_environment(request: Request) -> bool:
-    """Check if the request is coming from a development environment"""
+def is_local_dev_environment(request: Request) -> bool:
+    """Check if the request is coming from localhost/local network AND port 5173"""
     client_host = request.client.host
+    origin = request.headers.get('origin', '')
+    
     try:
+        # Check if it's a local IP
         ip = ipaddress.ip_address(client_host)
-        return (
+        is_local = (
             ip.is_loopback or  # localhost
             ip.is_private or   # local network
             str(ip) == '::1'   # IPv6 localhost
         )
+        
+        # Check if it's coming from port 5173
+        is_dev_port = ':5173' in origin
+        
+        return is_local and is_dev_port
     except ValueError:
         return False
+
+async def verify_access(request: Request, authorization: Optional[str] = None):
+    """Verify access based on local dev environment or admin authentication"""
+    if not is_local_dev_environment(request):
+        await verify_admin_token(authorization)
 
 def get_log_file_path(session_uuid=None):
     """Get the current log file path based on timestamp and session UUID"""
@@ -40,10 +55,10 @@ def get_log_file_path(session_uuid=None):
     return os.path.join(frontend_log_dir, filename)
 
 @router.get("/logs")
-async def get_logs(request: Request, session_uuid: str = None):
+async def get_logs(request: Request, session_uuid: str = None, authorization: Optional[str] = Header(None)):
     """Fetch logs from Supabase, falling back to file system if needed"""
-    if not is_development_environment(request):
-        raise HTTPException(status_code=403, detail="Access denied: Development environment only")
+    # Verify access (local dev environment or admin auth)
+    await verify_access(request, authorization)
     
     try:
         # Get Supabase client only when needed
@@ -51,8 +66,13 @@ async def get_logs(request: Request, session_uuid: str = None):
         
         # Try to fetch logs from Supabase first
         query = supabase.get_admin_client().table('logs').select('*')
+        
+        # Handle multiple session UUIDs
         if session_uuid:
-            query = query.eq('session_uuid', session_uuid)
+            session_uuids = [uuid.strip() for uuid in session_uuid.split(',')]
+            if len(session_uuids) > 0:
+                query = query.in_('session_uuid', session_uuids)
+        
         query = query.order('timestamp', desc=True)
         
         result = query.execute()
@@ -60,32 +80,31 @@ async def get_logs(request: Request, session_uuid: str = None):
             return {"logs": result.data}
             
         # Fall back to file system if no logs in Supabase
-        log_file_path = get_log_file_path(session_uuid)
-        if not os.path.exists(log_file_path):
-            return {"logs": []}
+        logs = []
+        if session_uuid:
+            session_uuids = [uuid.strip() for uuid in session_uuid.split(',')]
+            for uuid in session_uuids:
+                log_file_path = get_log_file_path(uuid)
+                if os.path.exists(log_file_path):
+                    with open(log_file_path, "r", encoding='utf-8') as f:
+                        file_logs = f.readlines()
+                        for log in file_logs:
+                            log = log.strip()
+                            if log:
+                                try:
+                                    timestamp = log[1:log.index(']')]
+                                    message = log[log.index(']')+1:].strip()
+                                    logs.append({
+                                        "timestamp": timestamp,
+                                        "message": message
+                                    })
+                                except:
+                                    logs.append({
+                                        "timestamp": "",
+                                        "message": log
+                                    })
         
-        with open(log_file_path, "r", encoding='utf-8') as f:
-            logs = f.readlines()
-        
-        # Parse and format logs
-        formatted_logs = []
-        for log in logs:
-            log = log.strip()
-            if log:
-                try:
-                    timestamp = log[1:log.index(']')]
-                    message = log[log.index(']')+1:].strip()
-                    formatted_logs.append({
-                        "timestamp": timestamp,
-                        "message": message
-                    })
-                except:
-                    formatted_logs.append({
-                        "timestamp": "",
-                        "message": log
-                    })
-        
-        return {"logs": formatted_logs}
+        return {"logs": logs}
     except Exception as e:
         logger.error(f"Error fetching logs: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

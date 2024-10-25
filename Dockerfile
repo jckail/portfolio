@@ -29,24 +29,25 @@ COPY images /app/images
 # Set environment variables
 ENV PYTHONPATH=/app
 
-# Expose the port the app runs on (default to 8080 if PORT is not set)
-EXPOSE ${PORT:-8080}
-
-# Add a healthcheck
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
-
 # Entry point script
 COPY <<'EOF' /app/start.sh
 #!/bin/sh
 echo "Starting application..."
 echo "Checking environment variables..."
-if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ] || [ -z "$SUPABASE_SERVICE_ROLE" ]; then
-    echo "Error: Required environment variables are not set"
-    echo "Please ensure SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE are set"
-    exit 1
-fi
+
+# List of required environment variables
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW"
+
+# Check each required variable
+for var in $required_vars; do
+    if [ -z "$(eval echo \$$var)" ]; then
+        echo "Error: Required environment variable $var is not set"
+        exit 1
+    fi
+done
+
 echo "Environment check passed"
+# Use PORT environment variable provided by Cloud Run, defaulting to 8080 if not set
 exec uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 EOF
 
