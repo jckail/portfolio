@@ -80,3 +80,4 @@ frontend/node_modules/*
 backend/app/logs/
 frontend/frontend.log
 .notes.txt
+.ignorefolder/
