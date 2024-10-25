@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Header
 from typing import Optional
-from backend.app.utils.supabase_client import supabase
+from backend.app.utils.supabase_client import SupabaseClient
 import os
 from functools import wraps
 
@@ -16,8 +16,11 @@ async def verify_auth_token(authorization: Optional[str] = Header(None)):
         # Remove 'Bearer ' prefix if present
         token = authorization.replace('Bearer ', '')
         
+        # Get Supabase client only when needed
+        supabase = SupabaseClient()
+        
         # Verify token with Supabase
-        user_response = supabase.client.auth.get_user(token)
+        user_response = supabase.get_client().auth.get_user(token)
         if not user_response or not user_response.user:
             raise HTTPException(status_code=401, detail="Invalid token")
         

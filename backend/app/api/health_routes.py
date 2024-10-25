@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from ..utils.logger import setup_logging
-from ..utils.supabase_client import supabase
+from ..utils.supabase_client import SupabaseClient
 
 router = APIRouter()
 logger = setup_logging()
@@ -9,8 +9,10 @@ logger = setup_logging()
 async def health_check():
     """Check if the service is healthy and verify Supabase connectivity"""
     try:
-        # Test Supabase connectivity by attempting a simple query
+        # Initialize Supabase client only when the route is called
+        supabase = SupabaseClient()
         client = supabase.get_client()
+        
         # Try to fetch a single row from logs table with a limit
         result = client.table('logs').select("*").limit(1).execute()
         

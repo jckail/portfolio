@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Optional
-from backend.app.utils.supabase_client import supabase
+from backend.app.utils.supabase_client import SupabaseClient
 from backend.app.models.resume_data import resume_data
 from backend.app.middleware.auth_middleware import verify_admin_token
 import os
@@ -34,6 +34,9 @@ async def admin_login(credentials: LoginCredentials):
         if email != admin_email:
             raise HTTPException(status_code=401, detail="Invalid credentials")
             
+        # Get Supabase client only when needed
+        supabase = SupabaseClient()
+        
         # Attempt login with Supabase
         response = await supabase.sign_in_with_password(email, password)
         
@@ -54,6 +57,7 @@ async def admin_logout(user = Depends(verify_admin_token)):
     Logout admin user
     """
     try:
+        supabase = SupabaseClient()
         await supabase.sign_out()
         return {"message": "Successfully logged out"}
     except Exception as e:

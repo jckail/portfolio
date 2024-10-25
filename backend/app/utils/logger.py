@@ -7,12 +7,26 @@ import os
 class SupabaseHandler(logging.Handler):
     def __init__(self):
         super().__init__()
-        try:
-            self.hostname = socket.gethostname()
-            self.ip_address = socket.gethostbyname(self.hostname)
-        except:
-            self.hostname = 'unknown'
-            self.ip_address = '127.0.0.1'
+        self._hostname = None
+        self._ip_address = None
+
+    @property
+    def hostname(self):
+        if self._hostname is None:
+            try:
+                self._hostname = socket.gethostname()
+            except:
+                self._hostname = 'unknown'
+        return self._hostname
+
+    @property
+    def ip_address(self):
+        if self._ip_address is None:
+            try:
+                self._ip_address = socket.gethostbyname(self.hostname)
+            except:
+                self._ip_address = '127.0.0.1'
+        return self._ip_address
 
     def emit(self, record):
         try:

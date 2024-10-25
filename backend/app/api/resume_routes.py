@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from ..utils.logger import setup_logging
+from ..models.resume_data import resume_data
 import os
 from dotenv import load_dotenv
 
@@ -10,7 +11,6 @@ logger = setup_logging()
 @router.get("/resume_data")
 async def get_resume():
     try:
-        from ..models.resume_data import resume_data
         transformed_data = {
             "name": resume_data["name"],
             "title": resume_data["title"],

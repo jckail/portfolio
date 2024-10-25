@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from ..utils.logger import setup_logging
-from ..utils.supabase_client import supabase
+from ..utils.supabase_client import SupabaseClient
 import os
 from datetime import datetime
 import ipaddress
@@ -46,8 +46,11 @@ async def get_logs(request: Request, session_uuid: str = None):
         raise HTTPException(status_code=403, detail="Access denied: Development environment only")
     
     try:
+        # Get Supabase client only when needed
+        supabase = SupabaseClient()
+        
         # Try to fetch logs from Supabase first
-        query = supabase.admin_client.table('logs').select('*')
+        query = supabase.get_admin_client().table('logs').select('*')
         if session_uuid:
             query = query.eq('session_uuid', session_uuid)
         query = query.order('timestamp', desc=True)
@@ -106,6 +109,9 @@ async def log_message(request: Request):
         
         # Get client IP address
         client_ip = request.client.host
+        
+        # Get Supabase client only when needed
+        supabase = SupabaseClient()
         
         # Try to store in Supabase first
         try:

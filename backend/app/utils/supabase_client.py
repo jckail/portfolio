@@ -7,49 +7,59 @@ from datetime import datetime
 
 load_dotenv()
 
+def get_supabase_config():
+    """Get Supabase configuration from environment variables."""
+    url = os.getenv("SUPABASE_URL")
+    anon_key = os.getenv("SUPABASE_ANON_KEY")
+    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE")
+    
+    if not url or not anon_key or not service_role_key:
+        raise ValueError("Supabase URL, anon key, and service role key must be set in environment variables")
+    
+    return url, anon_key, service_role_key
+
 class SupabaseClient:
-    _instance = None
+    _regular_client = None
+    _admin_client = None
+    _url = None
+    _anon_key = None
+    _service_role_key = None
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(SupabaseClient, cls).__new__(cls)
-            cls._instance._initialize()
-        return cls._instance
+    @classmethod
+    def initialize_config(cls):
+        """Initialize configuration if not already done."""
+        if cls._url is None:
+            cls._url, cls._anon_key, cls._service_role_key = get_supabase_config()
 
-    def _initialize(self):
-        """Initialize the Supabase client with environment variables."""
-        url = os.getenv("SUPABASE_URL")
-        anon_key = os.getenv("SUPABASE_ANON_KEY")
-        service_role_key = os.getenv("SUPABASE_SERVICE_ROLE")
-        
-        if not url or not anon_key or not service_role_key:
-            raise ValueError("Supabase URL, anon key, and service role key must be set in environment variables")
-        
-        # Create two clients - one with anon key and one with service role
-        self.client: Client = create_client(url, anon_key)
-        self.admin_client: Client = create_client(url, service_role_key)
+    @classmethod
+    def get_client(cls) -> Client:
+        """Get the regular Supabase client instance (lazy loaded)."""
+        if cls._regular_client is None:
+            cls.initialize_config()
+            cls._regular_client = create_client(cls._url, cls._anon_key)
+        return cls._regular_client
 
-    def get_client(self) -> Client:
-        """Get the regular Supabase client instance."""
-        return self.client
+    @classmethod
+    def get_admin_client(cls) -> Client:
+        """Get the admin Supabase client instance (lazy loaded)."""
+        if cls._admin_client is None:
+            cls.initialize_config()
+            cls._admin_client = create_client(cls._url, cls._service_role_key)
+        return cls._admin_client
 
-    def get_admin_client(self) -> Client:
-        """Get the admin Supabase client instance."""
-        return self.admin_client
-
-    async def create_admin_user(self, email: str, password: str):
+    @classmethod
+    async def create_admin_user(cls, email: str, password: str):
         """Create a new admin user using the service role client."""
         try:
-            # Create user with service role client
-            response = self.admin_client.auth.admin.create_user({
+            admin_client = cls.get_admin_client()
+            response = admin_client.auth.admin.create_user({
                 "email": email,
                 "password": password,
-                "email_confirm": True  # Auto-confirm email
+                "email_confirm": True
             })
             
             if response.user:
-                # Set custom claims or role for admin
-                await self.admin_client.rpc(
+                await admin_client.rpc(
                     'set_claim',
                     {
                         'uid': response.user.id,
@@ -61,18 +71,22 @@ class SupabaseClient:
         except Exception as e:
             raise Exception(f"Failed to create admin user: {str(e)}")
 
-    async def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
+    @classmethod
+    async def verify_token(cls, token: str) -> Optional[Dict[str, Any]]:
         """Verify a JWT token and return user data if valid."""
         try:
-            user = self.admin_client.auth.get_user(token)
+            admin_client = cls.get_admin_client()
+            user = admin_client.auth.get_user(token)
             return user.user if user else None
         except Exception:
             return None
 
-    async def sign_in_with_password(self, email: str, password: str):
+    @classmethod
+    async def sign_in_with_password(cls, email: str, password: str):
         """Sign in a user with email and password."""
         try:
-            auth_response = self.client.auth.sign_in_with_password({
+            client = cls.get_client()
+            auth_response = client.auth.sign_in_with_password({
                 "email": email,
                 "password": password
             })
@@ -80,28 +94,24 @@ class SupabaseClient:
         except Exception as e:
             raise Exception(f"Authentication failed: {str(e)}")
 
-    async def sign_out(self, token: str = None):
+    @classmethod
+    async def sign_out(cls, token: str = None):
         """Sign out the current user or a specific session."""
         try:
             if token:
-                self.admin_client.auth.admin.sign_out(token)
+                admin_client = cls.get_admin_client()
+                admin_client.auth.admin.sign_out(token)
             else:
-                self.client.auth.sign_out()
+                client = cls.get_client()
+                client.auth.sign_out()
         except Exception as e:
             raise Exception(f"Sign out failed: {str(e)}")
 
-    async def store_log(self, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None, source: str = "backend", ip_address: str = None):
-        """Store a log entry in Supabase.
-        
-        Args:
-            level: The log level (e.g., 'INFO', 'ERROR', 'WARNING')
-            message: The log message
-            session_uuid: Optional session identifier
-            metadata: Optional dictionary containing additional log data
-            source: The source of the log ('frontend' or 'backend')
-            ip_address: The IP address of the client
-        """
+    @classmethod
+    async def store_log(cls, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None, source: str = "backend", ip_address: str = None):
+        """Store a log entry in Supabase."""
         try:
+            admin_client = cls.get_admin_client()
             log_entry = {
                 'timestamp': datetime.utcnow().isoformat(),
                 'level': level.upper(),
@@ -112,12 +122,11 @@ class SupabaseClient:
                 'ip_address': ip_address
             }
             
-            result = self.admin_client.table('logs').insert(log_entry).execute()
+            result = admin_client.table('logs').insert(log_entry).execute()
             return result
         except Exception as e:
-            # If we fail to store the log, we'll print it to stderr as a fallback
             print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
             return None
 
-# Create a singleton instance
+# Create a module-level interface
 supabase = SupabaseClient()

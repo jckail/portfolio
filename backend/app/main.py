@@ -3,13 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from .api.routes import router as api_router
-from .api.health_routes import router as health_router
 from .utils.logger import setup_logging
 import os
 from dotenv import load_dotenv
 import sys
 
-# Configure logging first
+# Configure logging
 logger = setup_logging()
 
 # Load environment variables
@@ -19,7 +18,7 @@ load_dotenv()
 required_env_vars = [
     "SUPABASE_URL",
     "SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE",  # Added this as required
+    "SUPABASE_SERVICE_ROLE",
 ]
 
 # Log all environment variables (excluding sensitive ones)
@@ -36,9 +35,14 @@ if missing_vars:
 
 logger.info("All required environment variables are present")
 
-app = FastAPI()
+# Initialize FastAPI
+app = FastAPI(
+    title="QuickResume API",
+    description="API for the QuickResume application",
+    version="1.0.0"
+)
 
-# Get allowed origins from environment variable or use default
+# Configure CORS
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS", 
     "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*"
@@ -46,22 +50,19 @@ allowed_origins = os.getenv(
 allowed_origins = [origin.strip() for origin in allowed_origins]
 logger.info(f"Allowed origin patterns: {allowed_origins}")
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-    expose_headers=["*"]  # Expose all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
 )
 
-# Mount health routes at root level
-app.include_router(health_router)
-
-# Mount the API routes
+# Mount API routes
 app.include_router(api_router, prefix="/api")
 
+# Mount static files
 try:
     # Serve static files (images)
     images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
