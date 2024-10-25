@@ -54,24 +54,25 @@ const BrowserBanner = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchLogs = async () => {
-            try {
-                const response = await fetch(`http://${window.location.hostname}:8080/api/logs`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setLogs(data.logs);
-                    if (activeTab === 'logs') {
-                        scrollToBottom();
-                    }
+    const fetchLogs = async (isManualRefresh = false) => {
+        try {
+            const response = await fetch(`http://${window.location.hostname}:8080/api/logs`);
+            if (response.ok) {
+                const data = await response.json();
+                setLogs(data.logs);
+                // Scroll to bottom for manual refreshes or when logs tab is active
+                if (isManualRefresh || activeTab === 'logs') {
+                    setTimeout(scrollToBottom, 0);
                 }
-            } catch (error) {
-                console.error('Failed to fetch logs:', error);
             }
-        };
+        } catch (error) {
+            console.error('Failed to fetch logs:', error);
+        }
+    };
 
+    useEffect(() => {
         fetchLogs();
-        const interval = setInterval(fetchLogs, 1000);
+        const interval = setInterval(() => fetchLogs(), 20000);
         return () => clearInterval(interval);
     }, [activeTab]);
 
@@ -105,6 +106,8 @@ const BrowserBanner = () => {
             if (response.ok) {
                 setNoteText('');
                 setShowNoteInput(false);
+                // Refresh logs immediately after adding a note with manual refresh flag
+                await fetchLogs(true);
             }
         } catch (error) {
             console.error('Failed to add note:', error);
@@ -397,6 +400,12 @@ const BrowserBanner = () => {
                                 onClick={() => setShowNoteInput(!showNoteInput)}
                             >
                                 {showNoteInput ? 'Cancel Note' : 'Add Note'}
+                            </button>
+                            <button 
+                                className="refresh-logs-button"
+                                onClick={() => fetchLogs(true)}
+                            >
+                                Refresh Logs
                             </button>
                         </div>
                         {showNoteInput && (
