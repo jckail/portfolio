@@ -1,5 +1,17 @@
 // configs.js
 
+// API Configuration
+export const API_CONFIG = {
+    baseUrl: window.location.origin,
+    endpoints: {
+        admin: {
+            login: '/api/admin/login',
+            verify: '/api/admin/verify',
+            logout: '/api/admin/logout'
+        }
+    }
+};
+
 // Define primary colors
 export const PRIMARY = "#0403ff";
 export const BLACK = "#000000";

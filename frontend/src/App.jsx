@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import './theme.css';
 import SandwichMenu from './components/SandwichMenu';
@@ -10,11 +10,12 @@ import TechnicalSkills from './sections/TechnicalSkills';
 import Experience from './sections/Experience';
 import Projects from './sections/Projects';
 import MyResume from './sections/MyResume';
+import AdminLogin from './components/AdminLogin';
 import { ResumeProvider, useResume } from './components/ResumeProvider';
 import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider';
 import { ParticlesProvider } from './components/ParticlesProvider';
 import { SidebarProvider, useSidebar } from './components/SidebarProvider';
-
+import { API_CONFIG } from './configs';
 
 function AppContent() {
   const {
@@ -39,6 +40,42 @@ function AppContent() {
     handleDownload
   } = useResume();
 
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  const verifyToken = async (token) => {
+    try {
+      const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.admin.verify}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Token verification failed');
+      }
+
+      const data = await response.json();
+      return true;
+    } catch (err) {
+      console.error('Token verification failed:', err);
+      localStorage.removeItem('adminToken');
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    const checkExistingToken = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        const isValid = await verifyToken(token);
+        setIsAdminLoggedIn(isValid);
+      }
+    };
+    checkExistingToken();
+  }, []);
+
   const handleResumeClick = (event) => {
     event.preventDefault();
     handleButtonClick('my-resume');
@@ -46,7 +83,7 @@ function AppContent() {
   };
 
   useEffect(() => {
-    if (!resumeData) return; // Only setup observer after content is loaded
+    if (!resumeData) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -66,7 +103,6 @@ function AppContent() {
       }
     );
 
-    // Find all sections with IDs
     const sections = document.querySelectorAll('section[id]');
     console.log('Found sections:', sections.length);
     
@@ -79,7 +115,32 @@ function AppContent() {
       sections.forEach(section => observer.unobserve(section));
       observer.disconnect();
     };
-  }, [resumeData]); // Re-run when resumeData changes
+  }, [resumeData]);
+
+  const handleAdminClick = async () => {
+    if (isAdminLoggedIn) {
+      try {
+        const token = localStorage.getItem('adminToken');
+        await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.admin.logout}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
+      localStorage.removeItem('adminToken');
+      setIsAdminLoggedIn(false);
+    } else {
+      setIsAdminLoginOpen(true);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setIsAdminLoggedIn(true);
+    setIsAdminLoginOpen(false);
+  };
 
   return (
     <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
@@ -98,7 +159,9 @@ function AppContent() {
             <div className="header-right">
               <HeaderNav 
                 theme={theme} 
-                onResumeClick={handleResumeClick} 
+                onResumeClick={handleResumeClick}
+                onAdminClick={handleAdminClick}
+                isAdminLoggedIn={isAdminLoggedIn}
               />
               <button onClick={toggleTheme} className="theme-toggle">
                 {theme === 'light' ? '🌙' : '☀️'}
@@ -129,6 +192,11 @@ function AppContent() {
               </>
             )}
           </main>
+          <AdminLogin 
+            isOpen={isAdminLoginOpen} 
+            onClose={() => setIsAdminLoginOpen(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
         </div>
       </div>
     </ParticlesProvider>
@@ -148,4 +216,3 @@ function App() {
 }
 
 export default App;
-

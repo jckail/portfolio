@@ -1,110 +1,118 @@
-/* Header Styles */
 .floating-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  z-index: 100;
+  background-color: var(--background-color);
+  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background-color: var(--top-tbackground-color);
-  backdrop-filter: var(--top-tbackground-blur);
-  z-index: var(--z-header);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  background-color: transparent;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .name-title {
   display: flex;
   flex-direction: column;
-  margin-left: 15px;
 }
 
-.floating-header h1 {
-  font-size: 2em;
+.name-title h1 {
   margin: 0;
-  color: var(--header-text-color);
-  text-shadow: 2px 2px 4px var(--text-shadow-color);
+  font-size: 1.5rem;
+  color: var(--text-color);
 }
 
-.floating-header h2 {
-  font-size: 1em;
+.name-title h2 {
   margin: 0;
-  font-weight: normal;
-  color: var(--header-text-color);
+  font-size: 1rem;
+  color: var(--secondary-text-color);
 }
 
-/* Header Navigation Styles */
 .header-nav {
   display: flex;
   align-items: center;
-  height: 65px;
-  min-height: 65px;
-}
-
-.header-nav a {
-  color:var(--resume-link-color);
-  text-decoration: none;
-  padding: 0px 12px;
-  transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-}
-
-.header-nav a:hover {
-  color: var(--text-color);
-  background-color: transparent;
+  gap: 1rem;
 }
 
 .header-nav .icon {
-  width: 35px;
-  height: 35px;
-  object-fit: contain;
-  border-radius: 90%;
-  font-size: 1.8em;
-  background-color: var(--resume-link-color);
-  transition: background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: opacity 0.2s;
 }
 
 .header-nav .icon:hover {
-  border-radius: 100%;
-  padding: 1px 2px;
-  box-shadow: 0 0 20px 10px var(--button-hover-background);
-  background-color: transparent;
+  opacity: 0.8;
 }
 
-/* Resume Link Styles */
 .resume-link {
-  background-color: var(--resume-background-color);
-  padding: 1px 5px;
-  border-radius: 24px;
-  font-size: 1.3em;
-  transition: background-color 0.3s ease;
-  color: var(--resume-link-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--text-color);
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .resume-link:hover {
+  background-color: var(--text-color);
+  color: var(--background-color);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-color);
-  background-color: var(--background-color);
-  padding: 8px 12px;
-  box-shadow: 0 0 20px 10px var(--button-hover-background);
+}
+
+.admin-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.admin-button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .name-title h1 {
+    font-size: 1.2rem;
+  }
+
+  .name-title h2 {
+    font-size: 0.9rem;
+  }
+
+  .header-nav {
+    gap: 0.5rem;
+  }
+
+  .resume-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
 }

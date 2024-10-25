@@ -6,50 +6,23 @@ from backend.app.middleware.auth_middleware import verify_admin_token
 import os
 import json
 from datetime import datetime
+from pydantic import BaseModel
 
 router = APIRouter()
 
-# @router.post("/setup")
-# async def setup_admin():
-#     """
-#     Initial setup endpoint to create admin user.
-#     This should only be called once to set up the initial admin account.
-#     """
-#     try:
-#         admin_email = os.getenv("ADMIN_EMAIL")
-#         admin_password = os.getenv("SUPABASE_PW")
-        
-#         if not admin_email or not admin_password:
-#             raise HTTPException(
-#                 status_code=500,
-#                 detail="Admin credentials not configured in environment"
-#             )
-            
-#         # Create admin user with service role
-#         response = await supabase.create_admin_user(admin_email, admin_password)
-        
-#         if response.user:
-#             return {"message": "Admin user created successfully"}
-#         else:
-#             raise HTTPException(status_code=500, detail="Failed to create admin user")
-            
-#     except Exception as e:
-#         if "User already registered" in str(e):
-#             raise HTTPException(status_code=400, detail="Admin user already exists")
-#         raise HTTPException(status_code=500, detail=str(e))
+class LoginCredentials(BaseModel):
+    email: str
+    password: str
 
 @router.post("/login")
-async def admin_login(credentials: dict):
+async def admin_login(credentials: LoginCredentials):
     """
     Authenticate admin user
     """
     try:
-        email = credentials.get("email")
-        password = credentials.get("password")
+        email = credentials.email
+        password = credentials.password
         
-        if not email or not password:
-            raise HTTPException(status_code=400, detail="Email and password required")
-            
         # Verify against admin email
         admin_email = os.getenv("ADMIN_EMAIL")
         if not admin_email:
@@ -97,8 +70,6 @@ async def verify_admin(user = Depends(verify_admin_token)):
 async def get_analytics(user = Depends(verify_admin_token)):
     """Get analytics data"""
     try:
-        # Get analytics data from Supabase
-        # This is a placeholder - implement actual analytics gathering
         analytics = {
             "pageViews": 0,
             "uniqueVisitors": 0,
@@ -117,7 +88,6 @@ async def get_admin_logs(user = Depends(verify_admin_token)):
         log_dir = os.path.join(os.path.dirname(__file__), "../logs")
         logs = []
         
-        # Recursively get all log files
         for root, _, files in os.walk(log_dir):
             for file in files:
                 if file.endswith('.log'):
@@ -132,12 +102,8 @@ async def get_admin_logs(user = Depends(verify_admin_token)):
 async def update_resume_data(updated_data: dict, user = Depends(verify_admin_token)):
     """Update resume data"""
     try:
-        # Update resume data
-        # In a production environment, this should update the database
-        # For now, we'll update the in-memory data
         resume_data.update(updated_data)
         
-        # Save to a backup file
         backup_path = os.path.join(os.path.dirname(__file__), "../data/resume_backup.json")
         os.makedirs(os.path.dirname(backup_path), exist_ok=True)
         
@@ -152,13 +118,12 @@ async def update_resume_data(updated_data: dict, user = Depends(verify_admin_tok
 async def get_admin_health(user = Depends(verify_admin_token)):
     """Get system health information"""
     try:
-        # Get basic system health information
         health_info = {
             "status": "healthy",
             "lastChecked": datetime.utcnow().isoformat(),
-            "diskSpace": "N/A",  # Implement actual disk space check
-            "memoryUsage": "N/A",  # Implement actual memory usage check
-            "activeUsers": 0  # Implement actual active users count
+            "diskSpace": "N/A",
+            "memoryUsage": "N/A",
+            "activeUsers": 0
         }
         return health_info
     except Exception as e:

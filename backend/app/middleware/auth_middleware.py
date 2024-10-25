@@ -17,11 +17,11 @@ async def verify_auth_token(authorization: Optional[str] = Header(None)):
         token = authorization.replace('Bearer ', '')
         
         # Verify token with Supabase
-        user = supabase.client.auth.get_user(token)
-        if not user:
+        user_response = supabase.client.auth.get_user(token)
+        if not user_response or not user_response.user:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        return user
+        return user_response
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
 
@@ -30,7 +30,7 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
     Verify that the token belongs to an admin user.
     This function is used as a dependency in admin-protected routes.
     """
-    user = await verify_auth_token(authorization)
+    user_response = await verify_auth_token(authorization)
     
     # Get admin email from environment variable
     admin_email = os.getenv("ADMIN_EMAIL")
@@ -41,13 +41,14 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
         )
     
     # Check if user is admin
-    if user.email != admin_email:
+    user_email = user_response.user.email
+    if not user_email or user_email != admin_email:
         raise HTTPException(
             status_code=403, 
             detail="User is not authorized for admin access"
         )
     
-    return user
+    return user_response.user
 
 def require_admin(func):
     """

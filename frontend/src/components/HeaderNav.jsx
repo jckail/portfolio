@@ -1,14 +1,13 @@
-import React, { useRef, useEffect } from 'react'
-
+import React, { useRef, useEffect, useState } from 'react'
 import { useResume } from './ResumeProvider'
 
-// Define header nav height constant
-const HEADER_NAV_HEIGHT = 65; // Base height in pixels
+const HEADER_NAV_HEIGHT = 65;
 
-function HeaderNav({ theme, onResumeClick, onHeightChange }) {
+function HeaderNav({ theme, onResumeClick, onHeightChange, onAdminClick, isAdminLoggedIn }) {
   const apiUrl = "/api";
   const navRef = useRef(null);
   const { resumeData } = useResume();
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     if (navRef.current && onHeightChange) {
@@ -17,13 +16,22 @@ function HeaderNav({ theme, onResumeClick, onHeightChange }) {
         onHeightChange(height);
       };
 
-      // Update height initially and on resize
       updateHeight();
       window.addEventListener('resize', updateHeight);
 
       return () => window.removeEventListener('resize', updateHeight);
     }
   }, [onHeightChange]);
+
+  useEffect(() => {
+    const checkHash = () => {
+      setShowAdmin(window.location.hash === '#admin');
+    };
+
+    checkHash();
+    window.addEventListener('hashchange', checkHash);
+    return () => window.removeEventListener('hashchange', checkHash);
+  }, []);
 
   return (
     <nav ref={navRef} className="header-nav">
@@ -46,6 +54,11 @@ function HeaderNav({ theme, onResumeClick, onHeightChange }) {
         </a>
       )}
       <a href="#my-resume" onClick={onResumeClick} className="resume-link">See My Resume</a>
+      {showAdmin && (
+        <button onClick={onAdminClick} className="admin-button">
+          {isAdminLoggedIn ? 'Logout' : 'Admin'}
+        </button>
+      )}
     </nav>
   )
 }
