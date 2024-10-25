@@ -7,10 +7,28 @@ const BrowserBanner = () => {
         userAgent: '',
         isMobile: false,
         device: '',
+        preferences: {
+            language: '',
+            languages: [],
+            theme: '',
+            doNotTrack: '',
+            cookiesEnabled: false
+        },
         debugInfo: {
             uaComponents: {
                 rawTokens: []
             }
+        },
+        networkInfo: {
+            type: 'unknown',
+            downlink: 0,
+            rtt: 0
+        },
+        performanceMetrics: {
+            timeFromLoad: 0,
+            pageLoadTime: 0,
+            firstPaint: 0,
+            lcp: 0
         }
     });
     const [isVisible, setIsVisible] = useState(true);
@@ -21,6 +39,7 @@ const BrowserBanner = () => {
     const [noteText, setNoteText] = useState('');
     const logsRef = useRef(null);
     const noteInputRef = useRef(null);
+    const performanceInterval = useRef(null);
 
     // Check if we're running on Vite's development server (port 5173)
     const isViteDev = window.location.port === '5173';
@@ -137,7 +156,10 @@ const BrowserBanner = () => {
                 isIpad: isIPad(),
                 isIphone: /iPhone/.test(ua),
                 isMac: /Macintosh|MacIntel/.test(platform) && !isIPad(),
-                originalUa: ua
+                originalUa: ua,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                orientation: window.screen.orientation?.type || 'unknown'
             };
 
             const features = {
@@ -205,11 +227,37 @@ const BrowserBanner = () => {
                 browser = `safari ${uaParts.safariVersion || ''}`;
             }
 
+            // Get browser preferences
+            const preferences = {
+                language: navigator.language || 'unknown',
+                languages: navigator.languages || [navigator.language || 'unknown'],
+                theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light',
+                doNotTrack: navigator.doNotTrack || 'unspecified',
+                cookiesEnabled: navigator.cookieEnabled
+            };
+
+            // Get network information
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const networkInfo = {
+                type: connection?.effectiveType || 'unknown',
+                downlink: connection?.downlink || 0,
+                rtt: connection?.rtt || 0
+            };
+
+            // Get performance metrics
+            const performanceMetrics = {
+                timeFromLoad: performance.now(),
+                pageLoadTime: (performance.timing?.domContentLoadedEventEnd - performance.timing?.navigationStart) / 1000 || 0,
+                firstPaint: performance.getEntriesByType('paint').find(entry => entry.name === 'first-paint')?.startTime || 0,
+                lcp: performance.getEntriesByType('largest-contentful-paint')[0]?.startTime || 0
+            };
+
             return {
                 browser,
                 device,
                 userAgent: ua,
                 isMobile: features.maxTouchPoints > 0,
+                preferences,
                 debugInfo: {
                     uaComponents: {
                         ...uaParts,
@@ -219,11 +267,30 @@ const BrowserBanner = () => {
                     features,
                     host: window.location.hostname,
                     port: window.location.port
-                }
+                },
+                networkInfo,
+                performanceMetrics
             };
         };
 
         setBrowserInfo(detectBrowser());
+
+        // Update performance metrics periodically
+        performanceInterval.current = setInterval(() => {
+            setBrowserInfo(prev => ({
+                ...prev,
+                performanceMetrics: {
+                    ...prev.performanceMetrics,
+                    timeFromLoad: performance.now()
+                }
+            }));
+        }, 1000);
+
+        return () => {
+            if (performanceInterval.current) {
+                clearInterval(performanceInterval.current);
+            }
+        };
     }, []);
 
     const handleClose = () => {
@@ -266,6 +333,11 @@ const BrowserBanner = () => {
                         <div className="debug-section">
                             <div>Browser: {getBrowserInfo()}</div>
                             <div>Mobile Device: {browserInfo.isMobile ? 'Yes' : 'No'}</div>
+                            <div>Browser Language: {browserInfo.preferences.language}</div>
+                            <div>Preferred Languages: {browserInfo.preferences.languages.join(', ')}</div>
+                            <div>Browser Theme: {browserInfo.preferences.theme} Mode</div>
+                            <div>Do Not Track: {browserInfo.preferences.doNotTrack}</div>
+                            <div>Cookies Enabled: {browserInfo.preferences.cookiesEnabled ? 'Yes' : 'No'}</div>
                         </div>
                     </div>
                 );
@@ -275,6 +347,13 @@ const BrowserBanner = () => {
                         <div className="debug-section">
                             <div>Host: {browserInfo.debugInfo?.host}</div>
                             <div>Port: {browserInfo.debugInfo?.port}</div>
+                            <div>Network Type: {browserInfo.networkInfo.type}</div>
+                            <div>Downlink Speed: {browserInfo.networkInfo.downlink} Mbps</div>
+                            <div>Latency (RTT): {browserInfo.networkInfo.rtt} ms</div>
+                            <div>Time Since Load: {(browserInfo.performanceMetrics.timeFromLoad / 1000).toFixed(2)}s</div>
+                            <div>Page Load Time: {browserInfo.performanceMetrics.pageLoadTime.toFixed(2)}s</div>
+                            <div>First Paint: {(browserInfo.performanceMetrics.firstPaint / 1000).toFixed(2)}s</div>
+                            <div>Largest Contentful Paint: {(browserInfo.performanceMetrics.lcp / 1000).toFixed(2)}s</div>
                         </div>
                     </div>
                 );
@@ -284,6 +363,8 @@ const BrowserBanner = () => {
                         <div className="debug-section">
                             <div>Platform: {browserInfo.debugInfo?.uaComponents?.platform}</div>
                             <div>Vendor: {browserInfo.debugInfo?.uaComponents?.vendor}</div>
+                            <div>Screen Resolution: {browserInfo.debugInfo?.uaComponents?.screenWidth}x{browserInfo.debugInfo?.uaComponents?.screenHeight}</div>
+                            <div>Orientation: {browserInfo.debugInfo?.uaComponents?.orientation}</div>
                             <div>WebKit Version: {browserInfo.debugInfo?.uaComponents?.webkitVersion}</div>
                             <div>Safari Version: {browserInfo.debugInfo?.uaComponents?.safariVersion}</div>
                             <div>Chrome Version: {browserInfo.debugInfo?.uaComponents?.chromeVersion}</div>
