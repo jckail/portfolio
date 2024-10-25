@@ -1,11 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from backend.app.api.routes import router as api_router
-from backend.app.api.admin_routes import router as admin_router
+from .api.routes import router as api_router
+from .utils.logger import setup_logging
 import os
-import logging
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -25,15 +24,7 @@ if missing_vars:
 app = FastAPI()
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.join(os.path.dirname(__file__), 'logs', 'app.log')),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 # Get allowed origins from environment variable or use default
 allowed_origins = os.getenv(
@@ -42,10 +33,6 @@ allowed_origins = os.getenv(
 ).split(",")
 allowed_origins = [origin.strip() for origin in allowed_origins]
 logger.info(f"Allowed origin patterns: {allowed_origins}")
-
-def is_origin_allowed(origin: str) -> bool:
-    from fnmatch import fnmatch
-    return any(fnmatch(origin, pattern) for pattern in allowed_origins)
 
 # Add CORS middleware
 app.add_middleware(
@@ -59,7 +46,6 @@ app.add_middleware(
 
 # Mount the API routes
 app.include_router(api_router, prefix="/api")
-app.include_router(admin_router, prefix="/api/admin", tags=["admin"])
 
 # Serve static files (images)
 images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
@@ -80,27 +66,12 @@ async def serve_frontend(full_path: str):
 
 @app.on_event("startup")
 async def startup_event():
-    """
-    Initialize any necessary services on startup
-    """
+    """Initialize any necessary services on startup"""
     logger.info("Starting up the application...")
     # Ensure logs directory exists
     os.makedirs(os.path.join(os.path.dirname(__file__), 'logs'), exist_ok=True)
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """
-    Clean up any resources on shutdown
-    """
+    """Clean up any resources on shutdown"""
     logger.info("Shutting down the application...")
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8080))
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=True,
-        log_level="info"
-    )

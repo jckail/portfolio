@@ -1,7 +1,7 @@
-# QuickResume
+# Portfolio
 
 ## Overview
-QuickResume is a modern, interactive resume application that transforms the traditional resume into a dynamic web experience. Built with React and FastAPI, it offers a unique way to showcase professional experience through an interactive interface with real-time data updates, smooth animations, and a responsive design that adapts to any device.
+Portfolio is a modern, interactive resume application that transforms the traditional resume into a dynamic web experience. Built with React and FastAPI, it offers a unique way to showcase professional experience through an interactive interface with real-time data updates, smooth animations, and a responsive design that adapts to any device.
 
 ### Key Features
 - Interactive UI with dark/light theme support
@@ -14,7 +14,7 @@ QuickResume is a modern, interactive resume application that transforms the trad
 
 ## Project Structure
 ```
-quickResume/
+portfolio/
 ├── frontend/    # React/Vite application
 ├── backend/     # FastAPI server
 ├── images/      # Static assets
@@ -32,7 +32,7 @@ quickResume/
 1. Clone the repository:
 ```bash
 git clone [repository-url]
-cd quickResume
+cd portfolio
 ```
 
 2. Start both frontend and backend:

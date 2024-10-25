@@ -90,7 +90,7 @@ class SupabaseClient:
         except Exception as e:
             raise Exception(f"Sign out failed: {str(e)}")
 
-    async def store_log(self, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None):
+    async def store_log(self, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None, source: str = "backend", ip_address: str = None):
         """Store a log entry in Supabase.
         
         Args:
@@ -98,6 +98,8 @@ class SupabaseClient:
             message: The log message
             session_uuid: Optional session identifier
             metadata: Optional dictionary containing additional log data
+            source: The source of the log ('frontend' or 'backend')
+            ip_address: The IP address of the client
         """
         try:
             log_entry = {
@@ -105,7 +107,9 @@ class SupabaseClient:
                 'level': level.upper(),
                 'message': message,
                 'session_uuid': session_uuid,
-                'metadata': metadata or {}
+                'metadata': metadata or {},
+                'source': source,
+                'ip_address': ip_address
             }
             
             result = self.admin_client.table('logs').insert(log_entry).execute()
