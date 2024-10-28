@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, Header, Depends
-from typing import Optional
+from typing import Optional, List
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 from ..middleware.auth_middleware import verify_admin_token
@@ -117,7 +117,7 @@ async def get_logs(request: Request, session_uuid: str = None):
 
 @router.post("/log")
 async def log_message(request: Request):
-    """Log messages to Supabase with file system fallback"""
+    """Log a single message"""
     try:
         body = await request.json()
         message = body.get("message", "")
@@ -127,13 +127,53 @@ async def log_message(request: Request):
             logger.error("Session UUID is required")
             return {"status": "error", "message": "Session UUID is required"}
         
+        return await store_log_message(message, session_uuid, request.client.host)
+    except Exception as e:
+        logger.error(f"Error in log_message endpoint: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+@router.post("/log/batch")
+async def log_messages_batch(request: Request):
+    """Log multiple messages in a single request"""
+    try:
+        body = await request.json()
+        logs = body.get("logs", [])
+        
+        if not logs:
+            return {"status": "error", "message": "No logs provided"}
+        
+        client_ip = request.client.host
+        
+        # Process all logs in the batch
+        results = []
+        for log_entry in logs:
+            message = log_entry.get("message", "")
+            session_uuid = log_entry.get("sessionUUID")
+            
+            if not session_uuid:
+                logger.error("Session UUID is required for all logs")
+                continue
+                
+            result = await store_log_message(message, session_uuid, client_ip)
+            results.append(result)
+        
+        # Check if any logs were processed successfully
+        if any(result.get("status") == "success" for result in results):
+            return {"status": "success", "message": "Batch processed successfully"}
+        else:
+            return {"status": "error", "message": "Failed to process any logs in batch"}
+            
+    except Exception as e:
+        logger.error(f"Error in log_messages_batch endpoint: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+async def store_log_message(message: str, session_uuid: str, client_ip: str):
+    """Store a single log message"""
+    try:
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
             timestamp = datetime.utcnow().isoformat() + 'Z'
             message = f'[{timestamp}] {message}'
-        
-        # Get client IP address
-        client_ip = request.client.host
         
         # Get Supabase client only when needed
         supabase = SupabaseClient()
@@ -163,5 +203,5 @@ async def log_message(request: Request):
         
         return {"status": "success", "message": "Log written successfully"}
     except Exception as e:
-        logger.error(f"Error in log_message endpoint: {str(e)}")
+        logger.error(f"Error storing log message: {str(e)}")
         return {"status": "error", "message": str(e)}
