@@ -5,7 +5,6 @@ import SidePanel from './components/SidePanel';
 import TelemetryBanner from './telemetry/TelemetryBanner';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
-import SectionObserver from './components/SectionObserver';
 import AdminHandler from './components/AdminHandler';
 import { ResumeProvider, useResume } from './components/ResumeProvider';
 import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider';
@@ -21,7 +20,8 @@ function AppContent() {
     toggleTheme,
     handleSectionClick,
     handleButtonClick,
-    updateParticlesConfig
+    updateParticlesConfig, 
+    SectionObserver
   } = useAppLogic();
 
   const {
