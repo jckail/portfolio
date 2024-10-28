@@ -16,6 +16,7 @@ import { AppLogicProvider, useAppLogic } from './components/AppLogicProvider';
 import { ParticlesProvider } from './components/ParticlesProvider';
 import { SidebarProvider, useSidebar } from './components/SidebarProvider';
 import { API_CONFIG } from './configs';
+import TelemetryCollector from './utils/TelemetryCollector';
 
 function AppContent() {
   const {
@@ -42,6 +43,14 @@ function AppContent() {
 
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  // Initialize telemetry collection
+  useEffect(() => {
+    TelemetryCollector.initialize();
+    return () => {
+      TelemetryCollector.cleanup();
+    };
+  }, []);
 
   const verifyToken = async (token) => {
     try {

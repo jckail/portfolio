@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request, Header, Depends
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 from ..middleware.auth_middleware import verify_admin_token
@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 import ipaddress
 import json
+import uuid
 
 router = APIRouter()
 logger = setup_logging()
@@ -59,6 +60,63 @@ def get_log_file_path(session_uuid=None):
         filename = "unknown_session.log"
     
     return os.path.join(frontend_log_dir, filename)
+
+@router.post("/telemetry")
+async def store_telemetry(request: Request):
+    """Store telemetry data from the frontend"""
+    try:
+        telemetry_data: Dict[str, Any] = await request.json()
+        
+        # Validate required fields
+        if 'sessionUUID' not in telemetry_data:
+            raise HTTPException(status_code=400, detail="Missing sessionUUID")
+        if 'timestamp' not in telemetry_data:
+            raise HTTPException(status_code=400, detail="Missing timestamp")
+            
+        # Validate UUID format
+        try:
+            uuid_obj = uuid.UUID(telemetry_data['sessionUUID'])
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid sessionUUID format")
+            
+        # Ensure timestamp is in ISO format
+        try:
+            timestamp = datetime.fromisoformat(telemetry_data['timestamp'].replace('Z', '+00:00'))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid timestamp format")
+        
+        # Get Supabase client
+        supabase = SupabaseClient()
+        
+        # Store telemetry data in Supabase
+        try:
+            result = supabase.get_admin_client().table('telemetry').insert({
+                'timestamp': timestamp.isoformat(),
+                'session_uuid': str(uuid_obj),
+                'browser_info': telemetry_data.get('browserInfo', {}),
+                'connection_info': telemetry_data.get('connectionInfo', {}),
+                'device_info': telemetry_data.get('deviceInfo', {}),
+                'feature_support': telemetry_data.get('featureSupport', {}),
+                'ip_address': request.client.host
+            }).execute()
+            
+            return {"status": "success", "message": "Telemetry data stored successfully"}
+            
+        except Exception as e:
+            logger.error(f"Failed to store telemetry data in Supabase: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to store telemetry data"
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing telemetry data: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 @router.get("/logs")
 async def get_logs(request: Request, session_uuid: str = None):
