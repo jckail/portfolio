@@ -1,4 +1,5 @@
 import { API_CONFIG } from '../configs';
+import TelemetryCollector from './TelemetryCollector';
 
 // Queue to store logs while backend is not available
 let logQueue = [];
@@ -51,6 +52,9 @@ const processLogQueue = async () => {
                 if (result.status === 'success') {
                     // Remove processed logs from queue
                     logQueue = logQueue.slice(batch.length);
+                    
+                    // Trigger telemetry collection after successful log batch
+                    await TelemetryCollector.collectAndSubmit();
                 } else {
                     console.error('Failed to process log batch:', result.message);
                     break;

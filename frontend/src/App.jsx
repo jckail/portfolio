@@ -101,7 +101,7 @@ function AppContent() {
             const sectionId = entry.target.id;
             if (sectionId) {
               window.history.replaceState(null, '', `#${sectionId}`);
-              console.log('Updated URL for section:', sectionId);
+              //console.log('Updated URL for section:', sectionId);
             }
           }
         });

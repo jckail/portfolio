@@ -3,8 +3,7 @@ import { API_CONFIG } from '../configs';
 
 class TelemetryCollector {
     static instance = null;
-    static updateInterval = 60000; // Update every minute
-    static intervalId = null;
+    static eventListeners = [];
 
     constructor() {
         if (TelemetryCollector.instance) {
@@ -12,57 +11,64 @@ class TelemetryCollector {
         }
         TelemetryCollector.instance = this;
         this.setupEventListeners();
-        this.startPeriodicUpdates();
     }
 
     setupEventListeners() {
         // Network changes
         if ('connection' in navigator) {
-            navigator.connection.addEventListener('change', () => {
-                TelemetryCollector.collectAndSubmit();
+            const handler = () => TelemetryCollector.collectAndSubmit();
+            navigator.connection.addEventListener('change', handler);
+            TelemetryCollector.eventListeners.push({
+                target: navigator.connection,
+                type: 'change',
+                handler
             });
         }
 
         // Screen orientation changes
         if ('screen' in window && 'orientation' in window.screen) {
-            window.screen.orientation.addEventListener('change', () => {
-                TelemetryCollector.collectAndSubmit();
+            const handler = () => TelemetryCollector.collectAndSubmit();
+            window.screen.orientation.addEventListener('change', handler);
+            TelemetryCollector.eventListeners.push({
+                target: window.screen.orientation,
+                type: 'change',
+                handler
             });
         }
 
         // Theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            TelemetryCollector.collectAndSubmit();
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handler = () => TelemetryCollector.collectAndSubmit();
+        mediaQuery.addEventListener('change', handler);
+        TelemetryCollector.eventListeners.push({
+            target: mediaQuery,
+            type: 'change',
+            handler
         });
 
         // Visibility changes (tab active/inactive)
-        document.addEventListener('visibilitychange', () => {
-            TelemetryCollector.collectAndSubmit();
+        const visibilityHandler = () => TelemetryCollector.collectAndSubmit();
+        document.addEventListener('visibilitychange', visibilityHandler);
+        TelemetryCollector.eventListeners.push({
+            target: document,
+            type: 'visibilitychange',
+            handler: visibilityHandler
         });
 
         // Window resize
         let resizeTimeout;
-        window.addEventListener('resize', () => {
+        const resizeHandler = () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 TelemetryCollector.collectAndSubmit();
             }, 1000);
+        };
+        window.addEventListener('resize', resizeHandler);
+        TelemetryCollector.eventListeners.push({
+            target: window,
+            type: 'resize',
+            handler: resizeHandler
         });
-    }
-
-    startPeriodicUpdates() {
-        // Clear any existing interval
-        if (TelemetryCollector.intervalId) {
-            clearInterval(TelemetryCollector.intervalId);
-        }
-
-        // Set up new interval
-        TelemetryCollector.intervalId = setInterval(() => {
-            TelemetryCollector.collectAndSubmit();
-        }, TelemetryCollector.updateInterval);
-
-        // Initial collection
-        TelemetryCollector.collectAndSubmit();
     }
 
     static async collectAndSubmit() {
@@ -198,9 +204,12 @@ class TelemetryCollector {
     }
 
     static cleanup() {
-        if (TelemetryCollector.intervalId) {
-            clearInterval(TelemetryCollector.intervalId);
-        }
+        // Remove all event listeners
+        TelemetryCollector.eventListeners.forEach(({ target, type, handler }) => {
+            target.removeEventListener(type, handler);
+        });
+        TelemetryCollector.eventListeners = [];
+        TelemetryCollector.instance = null;
     }
 }
 
