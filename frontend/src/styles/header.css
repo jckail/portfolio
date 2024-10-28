@@ -45,17 +45,9 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  background-color: transparent;
 }
 
-.header-nav .icon {
-  width: 24px;
-  height: 24px;
-  transition: opacity 0.2s;
-}
-
-.header-nav .icon:hover {
-  opacity: 0.8;
-}
 
 .resume-link {
   color: var(--text-color);
@@ -66,7 +58,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 24px;
+  height: 30px;
   padding: 0 1rem;
   line-height: 1;
 }
@@ -74,7 +66,35 @@
 .resume-link:hover {
   background-color: var(--text-color);
   color: var(--background-color);
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
 }
+
+
+.header-nav a:hover:not(.resume-link) {
+  background-color: transparent;
+
+}
+
+
+.header-nav .icon {
+  width: 30px;
+  height: 30px;
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 100%;
+  background-color: transparent;
+}
+
+
+
+.header-nav .icon:hover {
+  background-color: var(--background-color);
+  box-shadow: 0 0 20px 10px var(--button-hover-background);
+  
+  
+}
+
+
 
 .theme-toggle {
   background: none;

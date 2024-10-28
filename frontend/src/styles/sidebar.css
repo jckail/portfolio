@@ -24,13 +24,12 @@
   border-radius: 10px;
   transition: all 0.3s linear;
   position: relative;
-  transform-origin: 1px;
 }
 
 /* Side Panel Styles */
 .side-panel {
   position: fixed;
-  top: 60px;
+  top: 90px;
   left: -150px;
   width: 150px;
   height: 500px;
