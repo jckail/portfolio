@@ -51,16 +51,49 @@ const SectionBanner = ({ currentSection, sectionHistory }) => {
 };
 
 export function AppLogicProvider({ children }) {
+  // Determine the initial source based on navigation type
+  const getInitialSource = () => {
+    const isRefresh = window.performance.navigation.type === 1;
+    const hasReferrer = document.referrer !== '';
+    const hasHash = window.location.hash !== '';
+    
+    if (isRefresh) return 'refresh';
+    if (!hasReferrer && hasHash) return 'url_entry';
+    return 'initial';
+  };
+
   // Get initial section from URL hash or default to 'about-me'
   const initialSection = window.location.hash.slice(1) || 'about-me';
+  const initialSource = getInitialSource();
   
   const [theme, setTheme] = useState('dark');
-  const [currentSection, setCurrentSection] = useState({ id: initialSection, source: 'initial' });
+  const [currentSection, setCurrentSection] = useState({ id: initialSection, source: initialSource });
   const [sectionHistory, setSectionHistory] = useState([]);
   const sectionsRef = useRef({});
   const isManualNavigationRef = useRef(false);
   const lastClickSourceRef = useRef(null);
   const isInitialLoadRef = useRef(true);
+
+  // Effect to handle initial scroll
+  useEffect(() => {
+    if (isInitialLoadRef.current && initialSection) {
+      isManualNavigationRef.current = true;
+      
+      // Wait for refs to be set up
+      requestAnimationFrame(() => {
+        const element = sectionsRef.current[initialSection];
+        if (element) {
+          element.scrollIntoView({ behavior: 'instant' });
+          
+          // Reset the manual navigation flag after initial scroll
+          setTimeout(() => {
+            isManualNavigationRef.current = false;
+            console.log('Initial navigation complete, enabling observer');
+          }, 100);
+        }
+      });
+    }
+  }, [initialSection]);
 
   // Wrapper for setCurrentSection that includes source information
   const updateCurrentSection = useCallback((sectionId, source) => {
@@ -144,6 +177,7 @@ export function AppLogicProvider({ children }) {
       setTimeout(() => {
         isManualNavigationRef.current = false;
         lastClickSourceRef.current = null;
+        console.log('Manual navigation complete, re-enabling observer');
       }, 1000);
     });
   }, [updateCurrentSection]);
@@ -155,23 +189,15 @@ export function AppLogicProvider({ children }) {
 
   const SectionObserver = () => {
     useEffect(() => {
-      let scrollTimeout;
-      let isScrolling = false;
+      console.log('Setting up intersection observer');
       
-      // Debounce scroll events
-      const handleScroll = () => {
-        isScrolling = true;
-        clearTimeout(scrollTimeout);
-        
-        scrollTimeout = setTimeout(() => {
-          isScrolling = false;
-        }, 150);
-      };
-  
       const observer = new IntersectionObserver(
         (entries) => {
-          // Don't process entries during manual navigation or active scrolling
-          if (isManualNavigationRef.current || isScrolling) return;
+          // Don't process entries during manual navigation
+          if (isManualNavigationRef.current) {
+            console.log('Skipping intersection due to manual navigation');
+            return;
+          }
           
           // Sort entries by their intersection ratio to find the most visible section
           const visibleEntries = entries
@@ -182,33 +208,40 @@ export function AppLogicProvider({ children }) {
             const mostVisibleEntry = visibleEntries[0];
             const sectionId = mostVisibleEntry.target.id;
             
+            console.log('Intersection detected', {
+              sectionId,
+              ratio: mostVisibleEntry.intersectionRatio,
+              isManualNavigation: isManualNavigationRef.current,
+              currentSection: currentSection.id
+            });
+            
             // Only update if the section has actually changed
             if (sectionId && currentSection.id !== sectionId) {
-              // Use the last click source if available, otherwise use scroll
-              const source = lastClickSourceRef.current || 'scroll';
-              updateCurrentSection(sectionId, source);
+              console.log('Updating section from observer');
+              updateCurrentSection(sectionId, 'observer');
             }
           }
         },
         {
-          threshold: [0.2]
+          threshold: [0.1, 0.2, 0.3], // More granular thresholds
+          rootMargin: '-10% 0px -10% 0px' // Adjust intersection box
         }
       );
   
-      window.addEventListener('scroll', handleScroll, { passive: true });
       const sections = document.querySelectorAll('section[id]');
-      sections.forEach((section) => observer.observe(section));
+      sections.forEach((section) => {
+        observer.observe(section);
+        console.log(`Observing section: ${section.id}`);
+      });
   
       // After initial mount, mark as no longer initial load
       isInitialLoadRef.current = false;
   
       return () => {
-        window.removeEventListener('scroll', handleScroll);
         sections.forEach(section => observer.unobserve(section));
         observer.disconnect();
-        clearTimeout(scrollTimeout);
       };
-    }, [currentSection.id, updateCurrentSection]); // Updated dependency array
+    }, [currentSection.id, updateCurrentSection]);
   
     return (
       <SectionBanner 
