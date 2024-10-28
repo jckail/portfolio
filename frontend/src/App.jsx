@@ -117,7 +117,7 @@ function AppContent() {
     
     sections.forEach((section) => {
       observer.observe(section);
-      console.log('Observing section:', section.id);
+      // console.log('Observing section:', section.id);
     });
 
     return () => {

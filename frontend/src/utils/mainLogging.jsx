@@ -15,14 +15,14 @@ export const initializeLogging = () => {
 
     // Log browser information at startup
     const browserInfo = detectBrowserInfo();
-    console.log('=== Quick Resume Session Start ===');
-    console.log('Session UUID:', sessionUUID);
-    console.log('Browser:', browserInfo.browser);
-    console.log('Device:', browserInfo.device);
-    console.log('User Agent:', browserInfo.userAgent);
-    console.log('Host:', browserInfo.debugInfo.host);
-    console.log('Port:', browserInfo.debugInfo.port);
-    console.log('Platform:', browserInfo.debugInfo.uaComponents.platform);
-    console.log('Features:', browserInfo.debugInfo.features);
-    console.log('================================');
+    // console.log('=== Quick Resume Session Start ===');
+    // console.log('Session UUID:', sessionUUID);
+    // console.log('Browser:', browserInfo.browser);
+    // console.log('Device:', browserInfo.device);
+    // console.log('User Agent:', browserInfo.userAgent);
+    // console.log('Host:', browserInfo.debugInfo.host);
+    // console.log('Port:', browserInfo.debugInfo.port);
+    // console.log('Platform:', browserInfo.debugInfo.uaComponents.platform);
+    // console.log('Features:', browserInfo.debugInfo.features);
+    // console.log('================================');
 };
