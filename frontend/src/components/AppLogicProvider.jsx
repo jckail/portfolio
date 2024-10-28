@@ -73,6 +73,7 @@ export function AppLogicProvider({ children }) {
   const isManualNavigationRef = useRef(false);
   const lastClickSourceRef = useRef(null);
   const isInitialLoadRef = useRef(true);
+  const observerRef = useRef(null);
 
   // Effect to handle initial scroll
   useEffect(() => {
@@ -84,12 +85,7 @@ export function AppLogicProvider({ children }) {
         const element = sectionsRef.current[initialSection];
         if (element) {
           element.scrollIntoView({ behavior: 'instant' });
-          
-          // Reset the manual navigation flag after initial scroll
-          setTimeout(() => {
-            isManualNavigationRef.current = false;
-            console.log('Initial navigation complete, enabling observer');
-          }, 100);
+          isManualNavigationRef.current = false;
         }
       });
     }
@@ -177,7 +173,6 @@ export function AppLogicProvider({ children }) {
       setTimeout(() => {
         isManualNavigationRef.current = false;
         lastClickSourceRef.current = null;
-        console.log('Manual navigation complete, re-enabling observer');
       }, 1000);
     });
   }, [updateCurrentSection]);
@@ -190,8 +185,9 @@ export function AppLogicProvider({ children }) {
   const SectionObserver = () => {
     useEffect(() => {
       console.log('Setting up intersection observer');
-      
-      const observer = new IntersectionObserver(
+
+      // Create the observer
+      observerRef.current = new IntersectionObserver(
         (entries) => {
           // Don't process entries during manual navigation
           if (isManualNavigationRef.current) {
@@ -211,7 +207,6 @@ export function AppLogicProvider({ children }) {
             console.log('Intersection detected', {
               sectionId,
               ratio: mostVisibleEntry.intersectionRatio,
-              isManualNavigation: isManualNavigationRef.current,
               currentSection: currentSection.id
             });
             
@@ -223,23 +218,40 @@ export function AppLogicProvider({ children }) {
           }
         },
         {
-          threshold: [0.1, 0.2, 0.3], // More granular thresholds
-          rootMargin: '-10% 0px -10% 0px' // Adjust intersection box
+          threshold: [0.1, 0.2, 0.3],
+          rootMargin: '-10% 0px -10% 0px'
         }
       );
-  
-      const sections = document.querySelectorAll('section[id]');
-      sections.forEach((section) => {
-        observer.observe(section);
-        console.log(`Observing section: ${section.id}`);
-      });
+
+      // Start observing sections when scroll starts
+      const handleScroll = () => {
+        if (!observerRef.current) return;
+
+        console.log('Scroll detected, ensuring sections are observed');
+        const sections = document.querySelectorAll('section[id]');
+        sections.forEach(section => {
+          observerRef.current.observe(section);
+          console.log(`Observing section: ${section.id}`);
+        });
+
+        // Remove scroll listener after first scroll
+        window.removeEventListener('scroll', handleScroll);
+      };
+
+      // Add scroll listener
+      window.addEventListener('scroll', handleScroll, { passive: true });
   
       // After initial mount, mark as no longer initial load
       isInitialLoadRef.current = false;
   
       return () => {
-        sections.forEach(section => observer.unobserve(section));
-        observer.disconnect();
+        if (observerRef.current) {
+          const sections = document.querySelectorAll('section[id]');
+          sections.forEach(section => observerRef.current.unobserve(section));
+          observerRef.current.disconnect();
+          observerRef.current = null;
+        }
+        window.removeEventListener('scroll', handleScroll);
       };
     }, [currentSection.id, updateCurrentSection]);
   
