@@ -51,8 +51,11 @@ const SectionBanner = ({ currentSection, sectionHistory }) => {
 };
 
 export function AppLogicProvider({ children }) {
+  // Get initial section from URL hash or default to 'about-me'
+  const initialSection = window.location.hash.slice(1) || 'about-me';
+  
   const [theme, setTheme] = useState('dark');
-  const [currentSection, setCurrentSection] = useState({ id: 'about-me', source: 'initial' });
+  const [currentSection, setCurrentSection] = useState({ id: initialSection, source: 'initial' });
   const [sectionHistory, setSectionHistory] = useState([]);
   const sectionsRef = useRef({});
   const isManualNavigationRef = useRef(false);
@@ -196,12 +199,6 @@ export function AppLogicProvider({ children }) {
       const sections = document.querySelectorAll('section[id]');
       sections.forEach((section) => observer.observe(section));
   
-      // Check initial section on mount or page refresh
-      const hash = window.location.hash.slice(1);
-      if (isInitialLoadRef.current && hash && hash !== currentSection.id) {
-        updateCurrentSection(hash, 'url');
-      }
-      
       // After initial mount, mark as no longer initial load
       isInitialLoadRef.current = false;
   
