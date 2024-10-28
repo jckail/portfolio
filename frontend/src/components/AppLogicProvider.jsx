@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { debounce } from 'lodash';
 import { particleConfig } from '../configs';
 import getParticlesConfig from '../particlesConfig';
 
@@ -13,6 +14,12 @@ export const useAppLogic = () => {
 };
 
 const SectionBanner = ({ currentSection, sectionHistory }) => {
+  console.log('Rendering SectionBanner', {
+    timestamp: new Date().toISOString(),
+    currentSection,
+    historyLength: sectionHistory.length
+  });
+
   return (
     <div style={{
       position: 'fixed',
@@ -51,6 +58,11 @@ const SectionBanner = ({ currentSection, sectionHistory }) => {
 };
 
 export function AppLogicProvider({ children }) {
+  console.log('Rendering AppLogicProvider', {
+    timestamp: new Date().toISOString(),
+    performance: window.performance.now()
+  });
+
   // Determine the initial source based on navigation type
   const getInitialSource = () => {
     const isRefresh = window.performance.navigation.type === 1;
@@ -74,6 +86,36 @@ export function AppLogicProvider({ children }) {
   const lastClickSourceRef = useRef(null);
   const isInitialLoadRef = useRef(true);
   const observerRef = useRef(null);
+  const renderCountRef = useRef(0);
+
+  // Create debounced URL update function
+  const debouncedUpdateUrl = useRef(
+    debounce((sectionId) => {
+      console.log('Updating URL (debounced)', {
+        timestamp: new Date().toISOString(),
+        sectionId
+      });
+      window.history.replaceState(null, '', `#${sectionId}`);
+    }, 1000)
+  ).current;
+
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedUpdateUrl.cancel();
+    };
+  }, [debouncedUpdateUrl]);
+
+  // Log render count
+  useEffect(() => {
+    renderCountRef.current += 1;
+    console.log('AppLogicProvider rendered', {
+      timestamp: new Date().toISOString(),
+      renderCount: renderCountRef.current,
+      currentSection: currentSection.id,
+      source: currentSection.source
+    });
+  });
 
   // Effect to handle initial scroll
   useEffect(() => {
@@ -119,12 +161,12 @@ export function AppLogicProvider({ children }) {
     });
   }, [currentSection]);
 
-  // Update URL when currentSection changes
+  // Update URL when currentSection changes (debounced)
   useEffect(() => {
     if (currentSection.id) {
-      window.history.replaceState(null, '', `#${currentSection.id}`);
+      debouncedUpdateUrl(currentSection.id);
     }
-  }, [currentSection]);
+  }, [currentSection.id, debouncedUpdateUrl]);
 
   // Apply theme to the document body
   useEffect(() => {
@@ -183,6 +225,12 @@ export function AppLogicProvider({ children }) {
   }, [updateCurrentSection]);
 
   const SectionObserver = () => {
+    console.log('Rendering SectionObserver', {
+      timestamp: new Date().toISOString(),
+      currentSection: currentSection.id,
+      isManualNavigation: isManualNavigationRef.current
+    });
+
     useEffect(() => {
       console.log('Setting up intersection observer');
 
