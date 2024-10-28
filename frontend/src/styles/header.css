@@ -4,7 +4,8 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background-color: var(--background-color);
+  background-color: var(--header-background);
+  backdrop-filter: var(--header-background-blur);
   padding: 1rem;
   display: flex;
   justify-content: space-between;

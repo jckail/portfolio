@@ -5,6 +5,11 @@
   --primary: #0403ff;
   --black: black;
   --white: white;
+  --transparent-white: #f1f1f1;
+  --transparent-black: #1a1a1a00;
+  --transparent-blue: #0303ff13;
+  --more-transparent-blue: #0303ff00;
+
 
   /* 2. Light Theme Variables */
   --background-color: var(--white);
@@ -15,7 +20,8 @@
   --button-text: var(--primary);
   --button-hover-background: var(--primary);
   --button-border: var(--black);
-  --header-background: #f1f1f1;
+  --header-background: #ffffff00;
+  --header-background-blur: blur(5px);
   --header-text-color: var(--black);
   --footer-background: #f1f1f1;
   --footer-text-color: var(--black);
@@ -33,9 +39,9 @@
   --text-shadow-color: rgba(0, 0, 0, 0.1);
   
   /* Section and skill category backgrounds */
-  --section-background: #0303ff13;
+  --section-background: var(--transparent-blue);
   --section-background-blur: blur(3px);
-  --skill-category-background: #0303ff00;
+  --skill-category-background: var(--more-transparent-blue);
 
   /* 3. Layout Variables */
   --max-content-width: 1800px;
@@ -62,9 +68,10 @@ body.dark-theme {
   --button-text: var(--primary);
   --button-hover-background: var(--primary);
   --button-border: var(--black);
-  --header-background: #1a1a1a;
+  --header-background: var(--transparent-black);
+  --header-background-blur: blur(5px);
   --header-text-color: var(--white);
-  --footer-background: #1a1a1a;
+  --footer-background: var(--transparent-black);
   --footer-text-color: var(--white);
   --navbar-background: transparent;
   --navbar-link-color: transparent;
