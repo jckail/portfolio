@@ -19,6 +19,7 @@
 body {
   display: flex;
   justify-content: center;
+  scroll-behavior: smooth; /* Add smooth scrolling behavior */
 }
 
 .content-wrapper {
@@ -40,6 +41,7 @@ section {
   max-width: calc(100% - 0.8rem);
   margin-left: auto;
   margin-right: auto;
+  scroll-margin-top: 80px; /* Add offset for anchor navigation */
 }
 
 section h2 {
@@ -235,6 +237,10 @@ main:first-of-type {
     margin: 2rem auto;
     padding: 0.5rem;
   }
+
+  section {
+    scroll-margin-top: 60px; /* Slightly smaller offset for mobile */
+  }
 }
 
 @media (max-width: 400px) {
@@ -249,5 +255,9 @@ main:first-of-type {
     height: 75vh;
     margin: 1rem auto;
     padding: 0.25rem;
+  }
+
+  section {
+    scroll-margin-top: 50px; /* Even smaller offset for very small screens */
   }
 }
