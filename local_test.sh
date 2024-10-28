@@ -56,6 +56,22 @@ if check_health; then
   echo "Starting the frontend dev server..."
   cd "$SCRIPT_DIR/frontend" || { echo "Failed to navigate to 'frontend' directory"; exit 1; }
   npm run dev -- --host 0.0.0.0 --port 5173 --debug &
+
+  # Wait for frontend server to start
+  sleep 5
+
+  # Check if width and height arguments are provided
+  if [ $# -eq 2 ]; then
+    width=$1
+    height=$2
+    echo "Opening browser with resolution ${width}x${height}..."
+    /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+      --window-size=$width,$height \
+      --app="http://localhost:8080/api/custom_resolution?width=$width&height=$height"
+  else
+    echo "Opening browser in default resolution..."
+    open http://localhost:5173
+  fi
 else
   echo "Skipping frontend dev server startup due to backend health check failure."
   exit 1  # Exit with failure status if the backend isn't healthy
