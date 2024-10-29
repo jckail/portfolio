@@ -1,9 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useResume } from './ResumeProvider'
+import SidePanel from './SidePanel'
+import { useAppLogic } from './AppLogicProvider'
 
 const HEADER_NAV_HEIGHT = 65;
 
-function HeaderNav({ theme, onResumeClick, onHeightChange, onAdminClick, isAdminLoggedIn }) {
+function HeaderNav({ 
+  theme, 
+  onResumeClick, 
+  onHeightChange, 
+  onAdminClick, 
+  isAdminLoggedIn,
+  currentSection,
+  handleSectionClick
+}) {
   const apiUrl = "/api";
   const navRef = useRef(null);
   const { resumeData } = useResume();
@@ -34,32 +44,38 @@ function HeaderNav({ theme, onResumeClick, onHeightChange, onAdminClick, isAdmin
   }, []);
 
   return (
-    <nav ref={navRef} className="header-nav">
-      {resumeData?.github && (
-        <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
-          <img 
-            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_github.png" : "dark_mode_github.png"}`} 
-            alt="GitHub" 
-            className="icon" 
-          />
-        </a>
-      )}
-      {resumeData?.linkedin && (
-        <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer">
-          <img 
-            src={`${apiUrl}/images/${theme === 'light' ? "light_mode_linkedin.png" : "dark_mode_linkedin.png"}`} 
-            alt="LinkedIn" 
-            className="icon" 
-          />
-        </a>
-      )}
-      <a href="#my-resume" onClick={onResumeClick} className="resume-link">See My Resume</a>
-      {showAdmin && (
-        <button onClick={onAdminClick} className="admin-button">
-          {isAdminLoggedIn ? 'Logout' : 'Admin'}
-        </button>
-      )}
-    </nav>
+    <>
+      <nav ref={navRef} className="header-nav">
+        {resumeData?.github && (
+          <a href={resumeData.github} target="_blank" rel="noopener noreferrer">
+            <img 
+              src={`${apiUrl}/images/${theme === 'light' ? "light_mode_github.png" : "dark_mode_github.png"}`} 
+              alt="GitHub" 
+              className="icon" 
+            />
+          </a>
+        )}
+        {resumeData?.linkedin && (
+          <a href={resumeData.linkedin} target="_blank" rel="noopener noreferrer">
+            <img 
+              src={`${apiUrl}/images/${theme === 'light' ? "light_mode_linkedin.png" : "dark_mode_linkedin.png"}`} 
+              alt="LinkedIn" 
+              className="icon" 
+            />
+          </a>
+        )}
+        <a href="#my-resume" onClick={onResumeClick} className="resume-link">See My Resume</a>
+        {showAdmin && (
+          <button onClick={onAdminClick} className="admin-button">
+            {isAdminLoggedIn ? 'Logout' : 'Admin'}
+          </button>
+        )}
+      </nav>
+      <SidePanel 
+        currentSection={currentSection}
+        handleSectionClick={handleSectionClick}
+      />
+    </>
   )
 }
 

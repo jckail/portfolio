@@ -72,6 +72,9 @@
   font-size: 1.2em;
   transition: color 0.3s ease;
   background-color: transparent;
+  padding: 4px 8px;
+  border-radius: 12px;
+  width: calc(100% - 16px);
 }
 
 .side-panel nav a:hover,

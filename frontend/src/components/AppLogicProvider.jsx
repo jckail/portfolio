@@ -2,13 +2,11 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { debounce } from 'lodash';
 import { particleConfig } from '../configs';
 import getParticlesConfig from '../particlesConfig';
-import SidePanel from './SidePanel';
 import TelemetryBanner from '../telemetry/TelemetryBanner';
 import Header from './Header';
 import MainContent from './MainContent';
 import AdminHandler from './AdminHandler';
 import { useResume } from './ResumeProvider';
-import { useSidebar } from './SidebarProvider';
 import { ParticlesProvider } from './ParticlesProvider';
 import TelemetryCollector from '../utils/TelemetryCollector';
 
@@ -30,14 +28,11 @@ export function AppContent() {
     toggleTheme,
     handleSectionClick,
     handleButtonClick,
-    updateParticlesConfig
-  } = useAppLogic();
-
-  const {
+    updateParticlesConfig,
     isSidebarOpen,
     isTemporarilyVisible,
     toggleSidebar
-  } = useSidebar();
+  } = useAppLogic();
 
   const {
     resumeData,
@@ -70,7 +65,7 @@ export function AppContent() {
       <div className="App app-wrapper">
         <TelemetryBanner isAdminLoggedIn={isAdminLoggedIn} />
         <div id="particles-js"></div>
-        <div className={`app-content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
+        <div className="app-content">
           <Header 
             resumeData={resumeData}
             theme={theme}
@@ -78,14 +73,11 @@ export function AppContent() {
             handleResumeClick={handleResumeClick}
             handleAdminClick={handleAdminClick}
             isAdminLoggedIn={isAdminLoggedIn}
-            toggleSidebar={toggleSidebar}
-          />
-          <SidePanel 
-            isOpen={isSidebarOpen} 
-            currentSection={currentSection} 
-            onClose={toggleSidebar}
-            isTemporarilyVisible={isTemporarilyVisible}
+            currentSection={currentSection}
             handleSectionClick={handleSectionClick}
+            isSidebarOpen={isSidebarOpen}
+            isTemporarilyVisible={isTemporarilyVisible}
+            toggleSidebar={toggleSidebar}
           />
           <MainContent 
             resumeData={resumeData}
@@ -119,6 +111,30 @@ export function AppLogicProvider({ children }) {
   const sectionsRef = useRef({});
   const isManualNavigationRef = useRef(false);
   const isInitialLoadRef = useRef(true);
+
+  // Sidebar state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isTemporarilyVisible, setIsTemporarilyVisible] = useState(false);
+  const [isSidebarOpenedByScroll, setIsSidebarOpenedByScroll] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen(prevState => !prevState);
+    if (isSidebarOpen && !isSidebarOpenedByScroll) {
+      setIsTemporarilyVisible(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
+    setIsSidebarOpenedByScroll(false);
+  }, [isSidebarOpen, isSidebarOpenedByScroll]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Create debounced URL update function
   const debouncedUpdateUrl = useRef(
@@ -232,7 +248,15 @@ export function AppLogicProvider({ children }) {
     toggleTheme,
     handleSectionClick,
     handleButtonClick,
-    updateParticlesConfig
+    updateParticlesConfig,
+    isSidebarOpen,
+    isTemporarilyVisible,
+    isSidebarOpenedByScroll,
+    setIsSidebarOpen,
+    setIsTemporarilyVisible,
+    setIsSidebarOpenedByScroll,
+    toggleSidebar,
+    timeoutRef
   }), [
     theme,
     currentSection,
@@ -241,7 +265,11 @@ export function AppLogicProvider({ children }) {
     toggleTheme,
     handleSectionClick,
     handleButtonClick,
-    updateParticlesConfig
+    updateParticlesConfig,
+    isSidebarOpen,
+    isTemporarilyVisible,
+    isSidebarOpenedByScroll,
+    toggleSidebar
   ]);
 
   return (

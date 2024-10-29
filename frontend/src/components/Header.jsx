@@ -1,6 +1,7 @@
 import React from 'react';
 import SandwichMenu from './SandwichMenu';
 import HeaderNav from './HeaderNav';
+import { useAppLogic } from './AppLogicProvider';
 
 const Header = ({ 
   resumeData, 
@@ -9,8 +10,11 @@ const Header = ({
   handleResumeClick, 
   handleAdminClick, 
   isAdminLoggedIn,
-  toggleSidebar 
+  currentSection,
+  handleSectionClick
 }) => {
+  const { toggleSidebar } = useAppLogic();
+
   return (
     <header className="floating-header">
       <div className="header-left">
@@ -26,6 +30,8 @@ const Header = ({
           onResumeClick={handleResumeClick}
           onAdminClick={handleAdminClick}
           isAdminLoggedIn={isAdminLoggedIn}
+          currentSection={currentSection}
+          handleSectionClick={handleSectionClick}
         />
         <button onClick={toggleTheme} className="theme-toggle">
           {theme === 'light' ? '🌙' : '☀️'}
