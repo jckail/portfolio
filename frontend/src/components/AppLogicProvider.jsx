@@ -254,6 +254,13 @@ export function AppLogicProvider({ children }) {
 const SectionObserver = () => {
   const { currentSection, updateCurrentSection, isManualNavigationRef, isInitialLoadRef } = useAppLogic();
 
+  // Create debounced update function
+  const debouncedSectionUpdate = useRef(
+    debounce((sectionId) => {
+      updateCurrentSection(sectionId, 'observer');
+    }, 2000)
+  ).current;
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -270,7 +277,7 @@ const SectionObserver = () => {
           const sectionId = mostVisibleEntry.target.id;
           
           if (sectionId && currentSection.id !== sectionId) {
-            updateCurrentSection(sectionId, 'observer');
+            debouncedSectionUpdate(sectionId);
           }
         }
       },
@@ -298,8 +305,9 @@ const SectionObserver = () => {
       sections.forEach(section => observer.unobserve(section));
       observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
+      debouncedSectionUpdate.cancel(); // Cleanup debounced function
     };
-  }, [currentSection.id, updateCurrentSection, isManualNavigationRef, isInitialLoadRef]);
+  }, [currentSection.id, updateCurrentSection, isManualNavigationRef, isInitialLoadRef, debouncedSectionUpdate]);
 
   return null;
 };
