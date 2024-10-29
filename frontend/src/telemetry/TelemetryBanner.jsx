@@ -4,6 +4,7 @@ import ConnectionInfo from './ConnectionInfo';
 import DeviceDetails from './DeviceDetails';
 import FeatureSupport from './FeatureSupport';
 import LogViewer from './LogViewer';
+import SectionHistory from './SectionHistory';
 import { getSessionUUID } from '../utils/sessionManager';
 import './telemetry-banner.css';
 
@@ -69,6 +70,8 @@ const TelemetryBanner = ({ isAdminLoggedIn }) => {
                     isAdminLoggedIn={isAdminLoggedIn} 
                     defaultSessionUUID={currentSessionUUID}
                 />;
+            case 'sections':
+                return <SectionHistory />;
             default:
                 return null;
         }
@@ -110,6 +113,12 @@ const TelemetryBanner = ({ isAdminLoggedIn }) => {
                         onClick={() => handleTabClick('logs')}
                     >
                         Logs
+                    </button>
+                    <button 
+                        className={`tab-button ${activeTab === 'sections' ? 'active' : ''}`}
+                        onClick={() => handleTabClick('sections')}
+                    >
+                        Sections
                     </button>
                 </div>
                 <button 

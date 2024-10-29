@@ -13,50 +13,6 @@ export const useAppLogic = () => {
   return context;
 };
 
-const SectionBanner = ({ currentSection, sectionHistory }) => {
-  console.log('Rendering SectionBanner', {
-    timestamp: new Date().toISOString(),
-    currentSection,
-    historyLength: sectionHistory.length
-  });
-
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: 'red',
-      color: 'white',
-      padding: '10px',
-      zIndex: 1000,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: '20px',
-      fontSize: '14px'
-    }}>
-      <span>
-        <strong>Current:</strong> {currentSection.id} 
-        <em style={{ marginLeft: '5px', fontSize: '12px' }}>
-          (set by {currentSection.source})
-        </em>
-      </span>
-      <span>
-        <strong>History:</strong> {sectionHistory.map((item, index) => (
-          <span key={index}>
-            {index > 0 ? ' → ' : ''}
-            {item.id}
-            <em style={{ marginLeft: '5px', fontSize: '12px' }}>
-              ({item.source})
-            </em>
-          </span>
-        ))}
-      </span>
-    </div>
-  );
-};
-
 export function AppLogicProvider({ children }) {
   console.log('Rendering AppLogicProvider', {
     timestamp: new Date().toISOString(),
@@ -117,6 +73,22 @@ export function AppLogicProvider({ children }) {
     });
   });
 
+  // Effect to handle initial scroll
+  useEffect(() => {
+    if (isInitialLoadRef.current && initialSection) {
+      isManualNavigationRef.current = true;
+      
+      // Wait for refs to be set up
+      requestAnimationFrame(() => {
+        const element = sectionsRef.current[initialSection];
+        if (element) {
+          element.scrollIntoView({ behavior: 'instant' });
+          isManualNavigationRef.current = false;
+        }
+      });
+    }
+  }, [initialSection]);
+
   // Wrapper for setCurrentSection that includes source information
   const updateCurrentSection = useCallback((sectionId, source) => {
     console.log(`Section Update - ID: ${sectionId}, Source: ${source}`, {
@@ -128,60 +100,6 @@ export function AppLogicProvider({ children }) {
 
     setCurrentSection({ id: sectionId, source });
   }, [currentSection]);
-
-  // Create debounced version of updateCurrentSection specifically for the observer
-  const debouncedObserverUpdate = useRef(
-    debounce((sectionId) => {
-      if (!isManualNavigationRef.current) {
-        updateCurrentSection(sectionId, 'observer');
-      }
-    }, 2000)
-  ).current;
-
-  // Consolidated scroll to section function
-  const scrollToSection = useCallback((sectionId, options = {}) => {
-    const {
-      behavior = 'instant',
-      isInitialScroll = false,
-      source = null
-    } = options;
-
-    console.log('Scrolling to section', {
-      sectionId,
-      behavior,
-      isInitialScroll,
-      source
-    });
-
-    const element = sectionsRef.current[sectionId];
-    if (!element) return;
-
-    // Set manual navigation flag
-    isManualNavigationRef.current = true;
-    if (source) lastClickSourceRef.current = source;
-
-    // Perform scroll
-    element.scrollIntoView({ behavior });
-
-    // Reset manual navigation flag with appropriate timing
-    const resetTimeout = isInitialScroll ? 0 : 100;
-    setTimeout(() => {
-      isManualNavigationRef.current = false;
-      if (source) lastClickSourceRef.current = null;
-    }, resetTimeout);
-  }, []);
-
-  // Effect to handle initial scroll
-  useEffect(() => {
-    if (isInitialLoadRef.current && initialSection) {
-      requestAnimationFrame(() => {
-        scrollToSection(initialSection, {
-          behavior: 'instant',
-          isInitialScroll: true
-        });
-      });
-    }
-  }, [initialSection, scrollToSection]);
 
   // Update section history when currentSection changes
   useEffect(() => {
@@ -235,11 +153,27 @@ export function AppLogicProvider({ children }) {
 
   // Handle section click for navigation
   const handleSectionClick = useCallback((sectionId, source = 'sidebar') => {
-    console.log('Section click handler triggered', { sectionId, source });
+    // Set manual navigation flag before any updates
+    isManualNavigationRef.current = true;
+    lastClickSourceRef.current = source;
     
+    // First update the current section
     updateCurrentSection(sectionId, source);
-    scrollToSection(sectionId, { source });
-  }, [updateCurrentSection, scrollToSection]);
+    
+    // Then scroll to the section after a brief delay to ensure state is updated
+    requestAnimationFrame(() => {
+      const element = sectionsRef.current[sectionId];
+      if (element) {
+        element.scrollIntoView({ behavior: 'instant' });
+      }
+      
+      // Reset the manual navigation flag after animation completes
+      setTimeout(() => {
+        isManualNavigationRef.current = false;
+        lastClickSourceRef.current = null;
+      }, 1000);
+    });
+  }, [updateCurrentSection]);
 
   // Handle button click (used for resume download)
   const handleButtonClick = useCallback((sectionId) => {
@@ -283,7 +217,7 @@ export function AppLogicProvider({ children }) {
             // Only update if the section has actually changed
             if (sectionId && currentSection.id !== sectionId) {
               console.log('Updating section from observer');
-              debouncedObserverUpdate(sectionId);
+              updateCurrentSection(sectionId, 'observer');
             }
           }
         },
@@ -322,22 +256,16 @@ export function AppLogicProvider({ children }) {
           observerRef.current = null;
         }
         window.removeEventListener('scroll', handleScroll);
-        // Clean up debounced function
-        debouncedObserverUpdate.cancel();
       };
-    }, [currentSection.id]);
+    }, [currentSection.id, updateCurrentSection]);
   
-    return (
-      <SectionBanner 
-        currentSection={currentSection}
-        sectionHistory={sectionHistory}
-      />
-    );
+    return null;
   };
 
   const value = {
     theme,
-    currentSection: currentSection.id, // Keep the external API unchanged
+    currentSection,  // Now expose the full section object
+    sectionHistory, // Expose section history
     sectionsRef,
     setSectionRef,
     toggleTheme,
