@@ -3,16 +3,32 @@
 # Exit on any error
 set -e
 
-# Default to prod if no environment is specified
-ENVIRONMENT=${1:-prod}
+# Default to prod if no argument is specified
+ENVIRONMENT="prod"
 
-# Validate environment argument
-if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
-    echo "Usage: $0 [prod|dev]"
-    echo "  prod: Deploy production environment (default)"
-    echo "  dev:  Deploy development environment"
-    exit 1
-fi
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --dev)
+            ENVIRONMENT="dev"
+            shift
+            ;;
+        --prod)
+            ENVIRONMENT="prod"
+            shift
+            ;;
+        *)
+            echo "Invalid argument: $1"
+            echo "Usage: $0 [--prod|--dev]"
+            echo "  --prod: Deploy production environment (default)"
+            echo "  --dev:  Deploy development environment"
+            exit 1
+            ;;
+    esac
+done
+
+# Get current git commit hash
+GIT_COMMIT=$(git rev-parse HEAD)
 
 # Load environment variables from .env file
 if [ -f .env ]; then
@@ -33,28 +49,27 @@ done
 
 # Set environment-specific variables
 if [ "$ENVIRONMENT" = "prod" ]; then
-    IMAGE_NAME="quickresume:prod"
     DOCKERFILE="Dockerfile.prod"
     ALLOWED_ORIGINS="https://portfolio-292025398859.us-central1.run.app"
     PRODUCTION_URL="https://portfolio-292025398859.us-central1.run.app"
 else
-    IMAGE_NAME="quickresume:dev"
     DOCKERFILE="Dockerfile.dev"
     ALLOWED_ORIGINS="http://localhost:5173"
     PRODUCTION_URL="http://localhost:8080"
 fi
 
+IMAGE_NAME="${ENVIRONMENT}/quickresume:${GIT_COMMIT}"
 echo "Building Docker image for $ENVIRONMENT environment..."
 docker build -t ${IMAGE_NAME} --platform linux/amd64 -f ${DOCKERFILE} .
 
 if [ "$ENVIRONMENT" = "prod" ]; then
-    # Tag for Google Container Registry
-    docker tag ${IMAGE_NAME} gcr.io/portfolio-383615/${IMAGE_NAME}
-    docker push gcr.io/portfolio-383615/${IMAGE_NAME}
+    # Tag with git commit hash and push to GCR
+    docker tag ${IMAGE_NAME} gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
+    docker push gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
 
     echo "Deploying to Cloud Run..."
     gcloud run deploy quickresume \
-        --image gcr.io/portfolio-383615/${IMAGE_NAME} \
+        --image gcr.io/portfolio-383615/quickresume:${GIT_COMMIT} \
         --platform managed \
         --region us-central1 \
         --set-env-vars "SUPABASE_URL=${SUPABASE_URL}" \
@@ -66,6 +81,7 @@ if [ "$ENVIRONMENT" = "prod" ]; then
         --set-env-vars "RESUME_FILE=${RESUME_FILE}" \
         --set-env-vars "SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}" \
         --set-env-vars "SUPABASE_PW=${SUPABASE_PW}" \
+        --set-env-vars "GIT_COMMIT=${GIT_COMMIT}" \
         --allow-unauthenticated
 
     echo "Deployment complete! Checking service health..."

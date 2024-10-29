@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
+import os
+import subprocess
 
 router = APIRouter()
 logger = setup_logging()
@@ -16,11 +18,25 @@ async def health_check():
         # Try to fetch a single row from logs table with a limit
         result = client.table('logs').select("*").limit(1).execute()
         
+        # Get git commit from environment or git command
+        try:
+            git_commit = os.getenv('GIT_COMMIT')
+            if not git_commit:
+                try:
+                    git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                                      stderr=subprocess.STDOUT).decode('utf-8').strip()
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    git_commit = "unknown"
+        except Exception as e:
+            logger.error(f"Failed to get git commit: {str(e)}")
+            git_commit = "unknown"
+        
         return {
             "status": "healthy",
             "message": "Service is running",
             "supabase_connection": "connected",
-            "database_status": "operational"
+            "database_status": "operational",
+            "version": git_commit
         }
     except Exception as e:
         logger.error(f"Health check failed: {str(e)}")
