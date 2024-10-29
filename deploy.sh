@@ -92,9 +92,12 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     # Wait for the service to be ready (up to 60 seconds)
     echo "Waiting for service to be ready..."
     for i in {1..12}; do
-        if curl -s -f "${SERVICE_URL}/api/health" > /dev/null 2>&1; then
+        response=$(curl -s "${SERVICE_URL}/api/health")
+        if [[ "$response" == *'"status":"healthy"'* ]] && [[ "$response" == *'"checks":{"database":{"status":"operational"'* ]]; then
             echo "Service is healthy!"
-            curl -s "${SERVICE_URL}/api/health" | jq .
+            echo "Health check response:"
+            echo "$response" | jq .
+            echo "Deployed version: $(echo "$response" | jq -r '.checks.version.hash')"
             exit 0
         fi
         echo "Waiting for service to be ready... (attempt $i/12)"
@@ -102,6 +105,8 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     done
 
     echo "Error: Service health check failed after 60 seconds"
+    echo "Last response:"
+    echo "$response" | jq .
     exit 1
 else
     echo "Development environment setup complete"

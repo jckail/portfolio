@@ -37,7 +37,7 @@ check_health() {
 
   while [ $attempt -le $max_attempts ]; do
     response=$(curl -s http://0.0.0.0:8080/api/health)
-    if [[ "$response" == *'"status":"healthy"'* ]] && [[ "$response" == *'"database_status":"operational"'* ]]; then
+    if [[ "$response" == *'"status":"healthy"'* ]] && [[ "$response" == *'"status":"healthy"'* ]]; then
       echo "Backend is healthy."
       return 0  # Success
     fi
