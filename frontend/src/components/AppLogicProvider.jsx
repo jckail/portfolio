@@ -2,6 +2,15 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { debounce } from 'lodash';
 import { particleConfig } from '../configs';
 import getParticlesConfig from '../particlesConfig';
+import SidePanel from './SidePanel';
+import TelemetryBanner from '../telemetry/TelemetryBanner';
+import Header from './Header';
+import MainContent from './MainContent';
+import AdminHandler from './AdminHandler';
+import { useResume } from './ResumeProvider';
+import { useSidebar } from './SidebarProvider';
+import { ParticlesProvider } from './ParticlesProvider';
+import TelemetryCollector from '../utils/TelemetryCollector';
 
 const AppLogicContext = createContext();
 
@@ -12,6 +21,85 @@ export const useAppLogic = () => {
   }
   return context;
 };
+
+export function AppContent() {
+  const {
+    theme,
+    currentSection,
+    setSectionRef,
+    toggleTheme,
+    handleSectionClick,
+    handleButtonClick,
+    updateParticlesConfig, 
+    SectionObserver
+  } = useAppLogic();
+
+  const {
+    isSidebarOpen,
+    isTemporarilyVisible,
+    toggleSidebar
+  } = useSidebar();
+
+  const {
+    resumeData,
+    error,
+    handleDownload
+  } = useResume();
+
+  const {
+    isAdminLoggedIn,
+    handleAdminClick,
+    AdminLoginComponent
+  } = AdminHandler();
+
+  // Initialize telemetry collection
+  useEffect(() => {
+    TelemetryCollector.initialize();
+    return () => {
+      TelemetryCollector.cleanup();
+    };
+  }, []);
+
+  const handleResumeClick = (event) => {
+    event.preventDefault();
+    handleButtonClick('my-resume');
+    handleDownload();
+  };
+
+  return (
+    <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
+      <div className="App app-wrapper">
+        <TelemetryBanner isAdminLoggedIn={isAdminLoggedIn} />
+        <div id="particles-js"></div>
+        <div className={`app-content ${isSidebarOpen || isTemporarilyVisible ? 'sidebar-open' : ''}`}>
+          <Header 
+            resumeData={resumeData}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            handleResumeClick={handleResumeClick}
+            handleAdminClick={handleAdminClick}
+            isAdminLoggedIn={isAdminLoggedIn}
+            toggleSidebar={toggleSidebar}
+          />
+          <SidePanel 
+            isOpen={isSidebarOpen} 
+            currentSection={currentSection} 
+            onClose={toggleSidebar}
+            isTemporarilyVisible={isTemporarilyVisible}
+            handleSectionClick={handleSectionClick}
+          />
+          <MainContent 
+            resumeData={resumeData}
+            error={error}
+            setSectionRef={setSectionRef}
+          />
+          {AdminLoginComponent}
+        </div>
+      </div>
+      <SectionObserver resumeData={resumeData} />
+    </ParticlesProvider>
+  );
+}
 
 export function AppLogicProvider({ children }) {
   console.log('Rendering AppLogicProvider', {
