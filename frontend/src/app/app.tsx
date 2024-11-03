@@ -1,28 +1,17 @@
 import React from 'react';
-import { MainLayout } from '../components/layouts/main-layout';
-import { ResumeProvider, useResume } from '../components/ResumeProvider';
-import Resume from '../features/resume/components/resume';
-import { AppLogicProvider } from '../components/AppLogicProvider';
-
-const AppContent: React.FC = () => {
-  const { resumeData } = useResume();
-
-  if (!resumeData) {
-    return null;
-  }
-
-  return (
-    <MainLayout>
-      <Resume resumeData={resumeData} />
-    </MainLayout>
-  );
-};
+import { AppLogicProvider } from '@/app/providers/app-logic-provider';
+import { ResumeProvider } from '@/features/resume/components/resume-provider';
+import { MainLayout } from '@/features/layouts';
+import MainContent from '@/features/resume/components/main-content/main-content';
+import './styles/app.css';
 
 const App: React.FC = () => {
   return (
     <AppLogicProvider>
       <ResumeProvider>
-        <AppContent />
+        <MainLayout>
+          <MainContent />
+        </MainLayout>
       </ResumeProvider>
     </AppLogicProvider>
   );

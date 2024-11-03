@@ -1,32 +1,22 @@
-export interface AdminState {
-  isLoggedIn: boolean;
-  token?: string;
-}
-
-export interface AdminLoginRequest {
+export interface AdminCredentials {
+  email: string;
   password: string;
 }
 
 export interface AdminLoginResponse {
-  success: boolean;
-  token?: string;
-  error?: string;
+  access_token: string;
+  token_type: string;
 }
 
-export interface AdminSession {
-  token: string;
-  expiresAt: number;
+export interface AdminState {
+  isLoggedIn: boolean;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
-export interface AdminPermissions {
-  canEdit: boolean;
-  canDelete: boolean;
-  canManageUsers: boolean;
-}
-
-export interface AdminUser {
-  id: string;
-  username: string;
-  permissions: AdminPermissions;
-  lastLogin?: string;
+export interface AdminLoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLoginSuccess: () => void;
 }

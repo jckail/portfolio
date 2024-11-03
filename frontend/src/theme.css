@@ -1,8 +1,0 @@
-/* Import all CSS files */
-@import url('./styles/variables.css');
-@import url('./styles/base.css');
-@import url('./styles/layout.css');
-@import url('./styles/typography.css');
-@import url('./styles/components.css');
-
-/* Any additional styles or overrides can be added here if needed */

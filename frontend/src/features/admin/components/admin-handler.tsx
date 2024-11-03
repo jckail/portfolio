@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import { useAdminStore } from '../stores/admin-store';
-import { AdminLogin } from './admin-login';
+import AdminLogin from './admin-login';
 
-export function useAdminHandler() {
-  const [showLogin, setShowLogin] = useState(false);
+export const AdminHandler = () => {
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const { isLoggedIn, logout } = useAdminStore();
 
-  const handleAdminClick = () => {
+  const handleAdminClick = async () => {
     if (isLoggedIn) {
-      logout();
+      await logout();
     } else {
-      setShowLogin(true);
+      setIsAdminLoginOpen(true);
     }
   };
 
-  const handleCloseLogin = () => {
-    setShowLogin(false);
+  const handleLoginSuccess = () => {
+    setIsAdminLoginOpen(false);
   };
-
-  const AdminLoginComponent = showLogin ? (
-    <AdminLogin onClose={handleCloseLogin} />
-  ) : null;
 
   return {
-    isAdminLoggedIn: isLoggedIn,
+    isAdminLoginOpen,
+    isLoggedIn,
     handleAdminClick,
-    AdminLoginComponent,
+    AdminLoginComponent: (
+      <AdminLogin 
+        isOpen={isAdminLoginOpen} 
+        onClose={() => setIsAdminLoginOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    )
   };
-}
+};
+
+export default AdminHandler;

@@ -1,70 +1,55 @@
 import React from 'react';
-
-interface Project {
-  name: string;
-  description: string;
-  technologies?: string[];
-  link?: string;
-  github?: string;
-  image?: string;
-}
+import { ResumeData } from '@/features/resume/types';
+import '@/features/resume/styles/projects.css';
 
 interface ProjectsProps {
-  projects?: Project[];
+  projects: ResumeData['projects'];
 }
 
-export function Projects({ projects }: ProjectsProps) {
-  if (!projects?.length) return null;
-
+const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
   return (
     <section id="projects" className="section">
-      <div className="container">
-        <h2>Projects</h2>
-        <div className="projects-grid">
-          {projects.map((project, index) => (
-            <div key={index} className="project-card">
-              {project.image && (
-                <div className="project-image">
-                  <img src={project.image} alt={project.name} />
-                </div>
-              )}
-              <div className="project-content">
-                <h3>{project.name}</h3>
-                <p>{project.description}</p>
-                {project.technologies && project.technologies.length > 0 && (
-                  <div className="project-technologies">
-                    {project.technologies.map((tech, i) => (
-                      <span key={i} className="tech-tag">{tech}</span>
-                    ))}
-                  </div>
+      <h2>Projects</h2>
+      <div className="projects-grid">
+        {projects.map((project, index) => (
+          <div 
+            key={index} 
+            className="project-card"
+            style={{ '--item-index': index } as React.CSSProperties}
+          >
+            <div className="project-content">
+              <h3>
+                <a href={project.link} target="_blank" rel="noopener noreferrer">
+                  {project.title}
+                </a>
+              </h3>
+              <p>{project.description}</p>
+              <div className="project-links">
+                <a 
+                  href={project.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="project-link primary"
+                >
+                  View Project
+                </a>
+                {project.link2 && (
+                  <a 
+                    href={project.link2} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="project-link secondary"
+                  >
+                    Live Demo
+                  </a>
                 )}
-                <div className="project-links">
-                  {project.link && (
-                    <a 
-                      href={project.link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="project-link"
-                    >
-                      View Project
-                    </a>
-                  )}
-                  {project.github && (
-                    <a 
-                      href={project.github} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="project-github"
-                    >
-                      GitHub
-                    </a>
-                  )}
-                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </section>
   );
-}
+};
+
+export default Projects;

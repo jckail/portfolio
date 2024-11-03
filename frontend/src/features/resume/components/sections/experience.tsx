@@ -1,60 +1,49 @@
 import React from 'react';
-
-interface ExperienceItem {
-  company: string;
-  position: string;
-  period: string;
-  description: string;
-  achievements?: string[];
-  technologies?: string[];
-}
+import { ResumeData } from '@/features/resume/types';
+import '@/features/resume/styles/experience.css';
 
 interface ExperienceProps {
-  experience?: ExperienceItem[];
+  experience?: ResumeData['experience'];
 }
 
-export function Experience({ experience }: ExperienceProps) {
-  if (!experience?.length) return null;
-
+const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
   return (
     <section id="experience" className="section">
-      <div className="container">
-        <h2>Experience</h2>
-        <div className="experience-timeline">
-          {experience.map((item, index) => (
-            <div key={index} className="experience-item">
-              <div className="experience-header">
-                <h3>{item.position}</h3>
-                <div className="experience-subheader">
-                  <span className="company">{item.company}</span>
-                  <span className="period">{item.period}</span>
+      <h2>Experience</h2>
+      <div className="timeline">
+        {experience.map((item, index) => (
+          <div key={index} className="timeline-item">
+            <div className="timeline-content">
+              <div className="timeline-header">
+                <h3>{item.title}</h3>
+                <h4>{item.company}</h4>
+                <div className="timeline-meta">
+                  <span className="date">{item.date}</span>
                 </div>
               </div>
-              <p className="description">{item.description}</p>
-              {item.achievements && item.achievements.length > 0 && (
-                <div className="achievements">
-                  <h4>Key Achievements:</h4>
-                  <ul>
-                    {item.achievements.map((achievement, i) => (
-                      <li key={i}>{achievement}</li>
-                    ))}
-                  </ul>
-                </div>
+              {item.responsibilities && (
+                <ul className="responsibilities">
+                  {item.responsibilities.map((responsibility, idx) => (
+                    <li key={idx}>{responsibility}</li>
+                  ))}
+                </ul>
               )}
-              {item.technologies && item.technologies.length > 0 && (
-                <div className="technologies">
-                  <h4>Technologies Used:</h4>
-                  <div className="tech-tags">
-                    {item.technologies.map((tech, i) => (
-                      <span key={i} className="tech-tag">{tech}</span>
-                    ))}
-                  </div>
-                </div>
+              {item.link && (
+                <a 
+                  href={item.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="company-link"
+                >
+                  Company Website
+                </a>
               )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </section>
   );
-}
+};
+
+export default Experience;

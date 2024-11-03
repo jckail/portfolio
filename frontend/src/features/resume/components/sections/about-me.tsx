@@ -1,20 +1,26 @@
 import React from 'react';
 
 interface AboutMeProps {
-  aboutMe?: string;
+  aboutMe: string;
 }
 
-export function AboutMe({ aboutMe }: AboutMeProps) {
-  if (!aboutMe) return null;
+const AboutMe: React.FC<AboutMeProps> = ({ aboutMe }) => {
+  if (!aboutMe) {
+    return null;
+  }
 
   return (
     <section id="about-me" className="section">
-      <div className="container">
-        <h2>About Me</h2>
-        <div className="content">
-          <p>{aboutMe}</p>
-        </div>
+      <h2>About Me</h2>
+      <div className="about-me-content">
+        {aboutMe.split('\n\n').map((paragraph, index) => (
+          paragraph.trim() && (
+            <p key={index}>{paragraph.trim()}</p>
+          )
+        ))}
       </div>
     </section>
   );
-}
+};
+
+export default AboutMe;

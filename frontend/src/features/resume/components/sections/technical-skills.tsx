@@ -1,48 +1,39 @@
 import React from 'react';
-
-interface Skill {
-  name: string;
-  level?: string;
-  category?: string;
-}
+import { ResumeData } from '@/features/resume/types';
+import '@/features/resume/styles/technical-skills.css';
 
 interface TechnicalSkillsProps {
-  skills?: Skill[];
+  skills: ResumeData['technicalSkills'];
 }
 
-export function TechnicalSkills({ skills }: TechnicalSkillsProps) {
-  if (!skills?.length) return null;
-
-  // Group skills by category
-  const groupedSkills = skills.reduce((acc, skill) => {
-    const category = skill.category || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
+const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({ skills }) => {
+  if (!skills) {
+    return null;
+  }
 
   return (
     <section id="technical-skills" className="section">
-      <div className="container">
-        <h2>Technical Skills</h2>
-        <div className="skills-grid">
-          {Object.entries(groupedSkills).map(([category, categorySkills]) => (
-            <div key={category} className="skill-category">
-              <h3>{category}</h3>
-              <ul>
-                {categorySkills.map((skill, index) => (
-                  <li key={index}>
-                    <span className="skill-name">{skill.name}</span>
-                    {skill.level && <span className="skill-level">{skill.level}</span>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <h2>Technical Skills</h2>
+      <div className="skills-grid">
+        {Object.entries(skills).map(([category, skillList]) => (
+          <div key={category} className="skill-category">
+            <h3>{category}</h3>
+            <ul className="skill-list">
+              {skillList.map((skill: string, index: number) => (
+                <li 
+                  key={`${category}-${index}`} 
+                  className="skill-item"
+                  style={{ '--item-index': index } as React.CSSProperties}
+                >
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </section>
   );
-}
+};
+
+export default TechnicalSkills;
