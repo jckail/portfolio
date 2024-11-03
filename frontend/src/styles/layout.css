@@ -1,263 +1,75 @@
-/* Layout Styles */
-
-/* 1. Root Layout */
-.app-wrapper {
-  overflow-x: hidden;
-  position: relative;
+/* Layout containers */
+.container {
   width: 100%;
-  max-width: 100vw;
-}
-
-.app-content {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  padding: 0 15px;
-}
-
-/* 1. Global Layout */
-body {
-  display: flex;
-  justify-content: center;
-  scroll-behavior: smooth; /* Add smooth scrolling behavior */
-}
-
-.content-wrapper {
-  max-width: var(--max-content-width);
-  width: 100%;
+  max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 1rem;
-  box-sizing: border-box;
+  padding: 0 var(--spacing-medium);
 }
 
-/* 2. Section Styles */
-section {
-  background-color: var(--section-background);
-  backdrop-filter: var(--section-background-blur);
-  padding: 1rem;
-  margin-bottom: 2rem;
-  border-radius: 20px;
-  text-align: center;
-  max-width: calc(100% - 0.8rem);
-  margin-left: auto;
-  margin-right: auto;
-  scroll-margin-top: 80px; /* Add offset for anchor navigation */
-}
-
-section h2 {
-  margin-bottom: 1rem;
-}
-
-section > .content-wrapper > * {
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 3. Experience Section */
-.job-item {
-  text-align: left;
-  margin-bottom: 2rem;
-}
-
-.job-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.job-icon {
-  width: 50px;
-  height: 50px;
-  margin-right: 1rem;
-}
-
-.job-title {
-  flex-grow: 1;
-}
-
-.job-responsibilities {
-  padding-left: 1.5rem;
-}
-
-/* 4. Technical Skills Section */
-.skills-grid {
+/* Grid system */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: var(--spacing-medium);
 }
 
-.skill-category {
-  text-align: center;
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
 }
 
-.skill-category h3 {
-  margin-bottom: 0.5rem;
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
-.skill-list {
-  list-style-type: none;
-  padding-left: 0;
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Flexbox utilities */
+.flex {
   display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-wrap {
   flex-wrap: wrap;
+}
+
+.justify-center {
   justify-content: center;
 }
 
-.skill-list li {
-  margin: 0.25rem 0.5rem;
+.justify-between {
+  justify-content: space-between;
 }
 
-/* 5. Projects Section */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
+.align-center {
+  align-items: center;
 }
 
-.project-item {
-  background-color: var(--project-item-background);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+/* Spacing utilities */
+.m-auto {
+  margin: auto;
 }
 
-.project-item:hover {
-  transform: translateY(-5px);
-}
-
-.project-icon {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-}
-
-.project-content {
-  padding: 1rem;
-  text-align: center;
-}
-
-.project-content h3 {
-  margin-bottom: 0.5rem;
-}
-
-.project-content p {
-  margin-bottom: 1rem;
-}
-
-.project-link {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  color: var(--resume-link-color);
-  background-color: var(--text-color);
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.project-link:hover {
-  background-color: var(--primary-color-dark);
-}
-
-/* 6. MyResume Section */
-#my-resume .content-wrapper {
-  text-align: center;
-  min-height: 1500px;
-}
-
-#my-resume p {
-  max-width: 800px;
+.mx-auto {
   margin-left: auto;
   margin-right: auto;
 }
 
-.resume-pdf-container {
-  width: 100%;
-  height: 100vh;
-  position: relative;
-  max-width: 1000px;
-  margin: 3rem auto;
-  padding: 1rem;
-  border: none;
-  border-radius: 8px;
-  overflow: auto;
-  background: transparent;
-  box-sizing: border-box;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.resume-pdf-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  background: transparent;
-}
-
-/* 7. About Me and Experience Section */
-#about-me .content-wrapper,
-#experience .content-wrapper {
-  text-align: center;
-}
-
-#about-me p,
-#experience p {
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-section:first-of-type {
-  padding-top: 2rem;
-}
-main:first-of-type {
-  padding-top: 5rem;
-}
-
-/* 8. Media Queries */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  section:first-of-type {
-    padding-top: 0.3rem;
-  }
-
-  main:first-of-type {
-    padding-top: 1rem;
-  }
-
-  .resume-pdf-container {
-    height: 85vh;
-    margin: 2rem auto;
-    padding: 0.5rem;
-  }
-
-  section {
-    scroll-margin-top: 60px; /* Slightly smaller offset for mobile */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 400px) {
-  section:first-of-type {
-    padding-top: 1.0rem;
-  }
-  main:first-of-type {
-    padding-top: 1rem;
-  }
-  
-  .resume-pdf-container {
-    height: 75vh;
-    margin: 1rem auto;
-    padding: 0.25rem;
-  }
-
-  section {
-    scroll-margin-top: 50px; /* Even smaller offset for very small screens */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-small);
   }
 }

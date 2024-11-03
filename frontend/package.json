@@ -1,24 +1,36 @@
 {
-  "name": "portfolio-frontend",
+  "name": "quick-resume",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5173 --host",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite --host 0.0.0.0 --port 5173 --debug",
+    "build": "tsc && vite build",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "lodash": "^4.17.21",
+    "@tsparticles/engine": "^3.2.1",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-ga4": "^2.1.0"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "@vitejs/plugin-react": "^4.3.3",
-    "vite": "^5.4.10"
+    "@types/node": "^20.11.17",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "husky": "^9.0.10",
+    "typescript": "5.3.3",
+    "vite": "^5.1.0"
   }
 }
