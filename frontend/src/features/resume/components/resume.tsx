@@ -16,8 +16,8 @@ const Resume: React.FC<ResumeProps> = ({ resumeData }) => {
 
   return (
     <div className="resume-content">
-      <AboutMe aboutMe={resumeData.about_me} />
-      <TechnicalSkills skills={resumeData.skills} />
+      <AboutMe aboutMe={resumeData.aboutMe} />
+      <TechnicalSkills skills={resumeData.technicalSkills} />
       <Experience experience={resumeData.experience} />
       <Projects projects={resumeData.projects} />
     </div>

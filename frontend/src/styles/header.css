@@ -57,17 +57,19 @@
   background: var(--primary-light);
   transition: all var(--transition-fast);
   padding: var(--spacing-xs);
+  color: var(--text);
 }
 
 .icon-link:hover {
   background: var(--primary-light-hover);
   transform: translateY(-2px);
+  color: var(--primary);
 }
 
-.icon-link img {
+.icon-link svg {
   width: 20px;
   height: 20px;
-  filter: brightness(var(--icon-brightness));
+  transition: transform var(--transition-fast);
 }
 
 .resume-button {

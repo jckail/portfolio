@@ -14,7 +14,9 @@ const AboutMe: React.FC<AboutMeProps> = ({ aboutMe }) => {
       <h2>About Me</h2>
       <div className="about-me-content">
         {aboutMe.split('\n\n').map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
+          paragraph.trim() && (
+            <p key={index}>{paragraph.trim()}</p>
+          )
         ))}
       </div>
     </section>
