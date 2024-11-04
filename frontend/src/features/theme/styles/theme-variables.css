@@ -1,10 +1,10 @@
 /* Light theme */
 :root[data-theme='light'] {
   --background-color: #ffffff;
-  --surface: rgba(255, 255, 255, 0.9);
+  --surface-color: rgba(255, 255, 255, 0.9);
   --text-color: #000000;
   --text-secondary: #666666;
-  --border-color: #e0e0e0;
+  --border-color: rgba(0, 0, 0, 0.1);
   
   --primary: #0403ff;
   --primary-hover: #0302cc;
@@ -16,10 +16,10 @@
 /* Dark theme */
 :root[data-theme='dark'] {
   --background-color: #000000;
-  --surface: rgba(0, 0, 0, 0.9);
+  --surface-color: rgba(20, 20, 20, 0.9);
   --text-color: #ffffff;
   --text-secondary: #999999;
-  --border-color: #333333;
+  --border-color: rgba(255, 255, 255, 0.1);
   
   --primary: #0403ff;
   --primary-hover: #3332ff;
