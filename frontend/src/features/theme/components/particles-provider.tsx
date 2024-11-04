@@ -64,13 +64,17 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
     if (!particlesContainer) {
       particlesContainer = document.createElement('div');
       particlesContainer.id = 'particles-js';
-      particlesContainer.style.position = 'fixed';
-      particlesContainer.style.top = '0';
-      particlesContainer.style.left = '0';
-      particlesContainer.style.width = '100%';
-      particlesContainer.style.height = '100%';
-      particlesContainer.style.zIndex = '-1';
-      document.body.appendChild(particlesContainer);
+      particlesContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        background-color: transparent;
+      `;
+      document.body.insertBefore(particlesContainer, document.body.firstChild);
     }
 
     const checkAndInit = () => {

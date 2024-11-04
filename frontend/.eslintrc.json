@@ -1,36 +1,82 @@
 {
-  "root": true,
   "env": {
     "browser": true,
-    "es2020": true
+    "es2021": true
   },
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended",
     "plugin:react/recommended",
-    "plugin:react/jsx-runtime"
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "prettier"
   ],
-  "ignorePatterns": ["dist", ".eslintrc.json"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": ["./tsconfig.json"],
-    "tsconfigRootDir": "./frontend"
+    "project": "./tsconfig.json"
   },
-  "plugins": ["react-refresh", "@typescript-eslint", "react"],
+  "plugins": [
+    "react",
+    "react-hooks",
+    "@typescript-eslint",
+    "jsx-a11y",
+    "import"
+  ],
   "rules": {
-    "react-refresh/only-export-components": [
-      "warn",
-      { "allowConstantExport": true }
-    ],
     "react/react-in-jsx-scope": "off",
-    "@typescript-eslint/no-unused-vars": "warn"
+    "react/prop-types": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["parent", "sibling"],
+          "index",
+          "object",
+          "type"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal",
+            "position": "after"
+          }
+        ],
+        "newlines-between": "always"
+      }
+    ],
+    "import/no-restricted-paths": [
+      "error",
+      {
+        "zones": [
+          {
+            "target": "./src/features",
+            "from": "./src/features",
+            "except": ["./current-feature-directory"]
+          },
+          {
+            "target": "./src/shared",
+            "from": "./src/features"
+          }
+        ]
+      }
+    ]
   },
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": {}
     }
   }
 }
