@@ -20,7 +20,7 @@
 .side-panel {
   position: fixed;
   top: var(--header-height);
-  left: -200px; /* Start completely off-screen */
+  left: -200px;
   height: auto;
   width: 10vw;
   max-width: 200px;
@@ -61,6 +61,17 @@
 .nav-item:hover {
   background: var(--primary-light);
   color: var(--primary);
+}
+
+.nav-item.active {
+  background: var(--primary);
+  color: var(--surface);
+}
+
+.nav-item.active:hover {
+  background: var(--primary);
+  color: var(--surface);
+  opacity: 0.9;
 }
 
 @media (max-width: 768px) {
