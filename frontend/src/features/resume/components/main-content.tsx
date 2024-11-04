@@ -53,7 +53,7 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
   }
 
   return (
-    <main className="main-content">
+    <div className="main-content">
       <div className="main-content-inner">
         <section id="about" className="section">
           <AboutMe aboutMe={resumeData.aboutMe} />
@@ -71,7 +71,7 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
           <MyResume />
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -2,10 +2,10 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  width: 200px;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: var(--surface);
+  backdrop-filter: blur(10px);
   z-index: 999;
   opacity: 0;
   visibility: hidden;
@@ -20,22 +20,22 @@
 .side-panel {
   position: fixed;
   top: var(--header-height);
-  left: 0;
-  bottom: 0;
+  left: -200px; /* Start completely off-screen */
+  height: auto;
   width: 10vw;
-  max-width: 10%;
+  max-width: 200px;
   min-width: 100px;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-bottom-right-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  transform: translateX(-100%);
-  transition: transform var(--transition-fast);
+  transition: left var(--transition-fast);
   z-index: 1000;
-  overflow-y: auto;
 }
 
 .side-panel.open {
-  transform: translateX(0);
+  left: 0;
 }
 
 .side-panel-content {
@@ -67,6 +67,7 @@
   .side-panel {
     width: 10vw;
     min-width: 80px;
+    max-width: 200px;
   }
   
   .nav-item {
