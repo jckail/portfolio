@@ -1,33 +1,28 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React from 'react';
 
-import { ThemeProvider } from '@/features/theme/components/theme-provider';
-import { ResumeProvider } from '@/features/resume/components/resume-provider';
-import { TelemetryProvider } from '@/features/telemetry/components/telemetry-provider';
+import { BrowserRouter } from 'react-router-dom';
+
+import { AppLogicProvider } from './providers/app-logic-provider';
+import { ResumeProvider } from '../features/resume/components/resume-provider';
+import { TelemetryProvider } from '../features/telemetry/components/telemetry-provider';
+import { ThemeProvider } from '../features/theme/components/theme-provider';
 
 interface AppProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-const AppContext = createContext<null>(null);
-
-export function AppProvider({ children }: AppProviderProps) {
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   return (
-    <AppContext.Provider value={null}>
+    <AppLogicProvider>
       <ThemeProvider>
         <ResumeProvider>
           <TelemetryProvider>
-            {children}
+            <BrowserRouter>
+              {children}
+            </BrowserRouter>
           </TelemetryProvider>
         </ResumeProvider>
       </ThemeProvider>
-    </AppContext.Provider>
+    </AppLogicProvider>
   );
-}
-
-export function useApp() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useApp must be used within an AppProvider');
-  }
-  return context;
-}
+};

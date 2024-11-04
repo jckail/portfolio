@@ -1,17 +1,96 @@
 import React from 'react';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Box,
+  useTheme,
+  styled,
+  alpha,
+  Typography,
+  Divider
+} from '@mui/material';
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
-import '../styles/side-panel.css';
 
 interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Custom hook to get current section from URL and scroll position
+const HEADER_HEIGHT = 64;
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  '& .MuiDrawer-paper': {
+    width: 280,
+    backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    borderRight: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+    transition: theme.transitions.create(['box-shadow', 'background-color'], {
+      duration: theme.transitions.duration.standard,
+    }),
+    '&:hover': {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `4px 0 8px ${alpha(theme.palette.common.black, 0.1)}`,
+    },
+  },
+  '& .MuiBackdrop-root': {
+    backgroundColor: alpha(theme.palette.background.paper, 0.2),
+    backdropFilter: 'blur(4px)',
+    WebkitBackdropFilter: 'blur(4px)',
+  },
+}));
+
+const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius * 1.5,
+  margin: theme.spacing(0.5, 2),
+  padding: theme.spacing(1.5, 2),
+  transition: theme.transitions.create(
+    ['background-color', 'color', 'transform', 'box-shadow'],
+    {
+      duration: theme.transitions.duration.shorter,
+    }
+  ),
+  '&.Mui-selected': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+    color: theme.palette.primary.main,
+    transform: 'scale(1.02)',
+    boxShadow: `0 2px 4px ${alpha(theme.palette.primary.main, 0.15)}`,
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.15),
+    },
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: -8,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: 4,
+      height: '60%',
+      backgroundColor: theme.palette.primary.main,
+      borderRadius: theme.shape.borderRadius,
+    },
+  },
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.action.hover, 0.7),
+    transform: 'translateX(4px)',
+  },
+}));
+
+const NavigationHeader = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(3, 2, 2),
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: theme.spacing(1, 2, 2),
+  borderColor: alpha(theme.palette.divider, 0.1),
+}));
+
 const useCurrentSection = () => {
   const [currentSection, setCurrentSection] = React.useState('');
-
-  // Use scroll spy to update URL on scroll
   useScrollSpy();
 
   React.useEffect(() => {
@@ -20,13 +99,9 @@ const useCurrentSection = () => {
       setCurrentSection(hash || 'about');
     };
 
-    // Set initial section
     updateSection();
-
-    // Listen for hash changes (from both scroll spy and manual navigation)
     window.addEventListener('hashchange', updateSection);
 
-    // Listen for scroll events to update immediately
     const handleScroll = () => {
       const sections = document.querySelectorAll<HTMLElement>('section[id]');
       let currentSectionId = '';
@@ -48,7 +123,6 @@ const useCurrentSection = () => {
       }
     };
 
-    // Add scroll event listener with throttling
     let ticking = false;
     const scrollListener = () => {
       if (!ticking) {
@@ -72,6 +146,7 @@ const useCurrentSection = () => {
 };
 
 const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
+  const theme = useTheme();
   const currentSection = useCurrentSection();
 
   const sections = [
@@ -85,50 +160,126 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
   const handleNavClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Get the header height from CSS variable
-      const headerHeight = parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue('--header-height')
-        .trim()
-        .replace('px', ''));
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = window.scrollY + elementPosition - HEADER_HEIGHT;
 
-      // First scroll to bring the element into view
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
       });
-      
-      // Then adjust for header height
-      setTimeout(() => {
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = window.scrollY + elementPosition - headerHeight;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }, 100); // Small delay to ensure scrollIntoView has completed
 
       onClose();
     }
   };
 
   return (
-    <>
-      <div className={`side-panel-overlay ${isOpen ? 'active' : ''}`} onClick={onClose} />
-      <nav className={`side-panel ${isOpen ? 'open' : ''}`}>
-        <div className="side-panel-content">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => handleNavClick(section.id)}
-              className={`nav-item ${currentSection === section.id ? 'active' : ''}`}
+    <StyledDrawer
+      anchor="left"
+      open={isOpen}
+      onClose={onClose}
+      variant="temporary"
+      ModalProps={{
+        keepMounted: true,
+      }}
+      SlideProps={{
+        timeout: {
+          enter: theme.transitions.duration.enteringScreen,
+          exit: theme.transitions.duration.leavingScreen,
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: 280,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        role="presentation"
+      >
+        <NavigationHeader>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{
+              fontWeight: 700,
+              letterSpacing: '-0.5px',
+              mb: 0.5,
+            }}
+          >
+            Navigation
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ 
+              fontWeight: 500,
+              opacity: 0.8,
+            }}
+          >
+            Jump to any section
+          </Typography>
+        </NavigationHeader>
+
+        <StyledDivider />
+
+        <List sx={{ flex: 1, py: 0 }}>
+          {sections.map((section, index) => (
+            <ListItem 
+              key={section.id} 
+              disablePadding
+              sx={{
+                opacity: 0,
+                animation: 'slideIn 0.3s ease forwards',
+                animationDelay: `${index * 0.05}s`,
+                '@keyframes slideIn': {
+                  from: {
+                    opacity: 0,
+                    transform: 'translateX(-20px)',
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: 'translateX(0)',
+                  },
+                },
+              }}
             >
-              {section.label}
-            </button>
+              <StyledListItemButton
+                onClick={() => handleNavClick(section.id)}
+                selected={currentSection === section.id}
+              >
+                <ListItemText 
+                  primary={section.label}
+                  primaryTypographyProps={{
+                    sx: {
+                      fontWeight: currentSection === section.id ? 600 : 500,
+                      letterSpacing: '0.2px',
+                      transition: theme.transitions.create('font-weight', {
+                        duration: theme.transitions.duration.shorter,
+                      }),
+                    }
+                  }}
+                />
+              </StyledListItemButton>
+            </ListItem>
           ))}
-        </div>
-      </nav>
-    </>
+        </List>
+
+        <Box sx={{ p: 2, opacity: 0.7 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ 
+              display: 'block',
+              textAlign: 'center',
+              fontStyle: 'italic',
+            }}
+          >
+            Click anywhere outside to close
+          </Typography>
+        </Box>
+      </Box>
+    </StyledDrawer>
   );
 };
 

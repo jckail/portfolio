@@ -1,5 +1,14 @@
 import React, { Suspense, ReactNode } from 'react';
-import { Spinner } from '@/shared/components/elements';
+
+import { CircularProgress, Box, styled } from '@mui/material';
+
+const LoadingContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '100vh',
+  padding: theme.spacing(2),
+}));
 
 interface LoadingBoundaryProps {
   children: ReactNode;
@@ -11,9 +20,18 @@ export function LoadingBoundary({ children, fallback }: LoadingBoundaryProps) {
     <Suspense
       fallback={
         fallback || (
-          <div className="loading-boundary">
-            <Spinner size="large" />
-          </div>
+          <LoadingContainer>
+            <CircularProgress
+              size={40}
+              thickness={4}
+              sx={{
+                color: (theme) => theme.palette.primary.main,
+                '& .MuiCircularProgress-circle': {
+                  strokeLinecap: 'round',
+                },
+              }}
+            />
+          </LoadingContainer>
         )
       }
     >

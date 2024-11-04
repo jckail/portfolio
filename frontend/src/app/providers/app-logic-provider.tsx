@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { useThemeStore, Theme } from '@/features/theme/stores/theme-store';
+import { useThemeStore, Theme } from '../../features/theme/stores/theme-store';
 
 interface AppLogicContextType {
   theme: Theme;

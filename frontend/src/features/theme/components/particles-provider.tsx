@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import type { ParticlesConfig } from '../lib/particles/types';
 
 interface ParticlesContextType {
   particlesLoaded: boolean;
@@ -6,7 +7,7 @@ interface ParticlesContextType {
 
 interface ParticlesProviderProps {
   children: React.ReactNode;
-  updateParticlesConfig: () => Record<string, unknown>;
+  updateParticlesConfig: () => ParticlesConfig;
 }
 
 declare global {
@@ -26,7 +27,7 @@ declare global {
 
 const ParticlesContext = React.createContext<ParticlesContextType | undefined>(undefined);
 
-function useParticles(): ParticlesContextType {
+export function useParticles(): ParticlesContextType {
   const context = React.useContext(ParticlesContext);
   if (!context) {
     throw new Error('useParticles must be used within a ParticlesProvider');
@@ -34,7 +35,7 @@ function useParticles(): ParticlesContextType {
   return context;
 }
 
-function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProviderProps) {
+export function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProviderProps) {
   const [particlesLoaded, setParticlesLoaded] = React.useState(false);
 
   const destroyParticles = () => {
@@ -55,7 +56,7 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
     }
 
     const config = updateParticlesConfig();
-    window.particlesJS('particles-js', config);
+    window.particlesJS('particles-js', config as unknown as Record<string, unknown>);
     setParticlesLoaded(true);
   };
 
@@ -117,5 +118,3 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
     </ParticlesContext.Provider>
   );
 }
-
-export { ParticlesProvider, useParticles };

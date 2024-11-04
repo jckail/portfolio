@@ -1,22 +1,30 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import { useThemeStore } from '../stores/theme-store';
+import createAppTheme from '../config/mui-theme';
+import { ParticlesProvider } from './particles-provider';
+import { particlesConfig } from '../lib/particles/config';
+import type { ParticlesConfig } from '../lib/particles/types';
 
-type ThemeProviderProps = {
+interface ThemeProviderProps {
   children: React.ReactNode;
-};
+}
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { theme, initTheme } = useThemeStore();
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const theme = useThemeStore(state => state.theme);
+  const muiTheme = React.useMemo(() => createAppTheme(theme), [theme]);
 
-  useEffect(() => {
-    // Initialize theme from URL on mount
-    initTheme();
-  }, [initTheme]);
-
-  useEffect(() => {
-    // Apply theme to the document root whenever theme changes
-    document.documentElement.dataset.theme = theme;
+  const updateParticlesConfig = React.useCallback((): ParticlesConfig => {
+    return particlesConfig[theme];
   }, [theme]);
 
-  return <>{children}</>;
-}
+  return (
+    <MuiThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
+        {children}
+      </ParticlesProvider>
+    </MuiThemeProvider>
+  );
+};

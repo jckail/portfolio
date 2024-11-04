@@ -1,5 +1,3 @@
-@import '@/features/theme/styles/theme.css';
-
 /* Base app styles */
 .app {
   min-height: 100vh;
@@ -10,40 +8,18 @@
 /* Layout */
 .container {
   width: 100%;
-  max-width: var(--max-width);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 0 16px;
 }
 
-/* Utility classes */
-.text-center {
-  text-align: center;
-}
-
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.gap-sm {
-  gap: var(--spacing-sm);
-}
-
-.gap-md {
-  gap: var(--spacing-md);
-}
-
-.gap-lg {
-  gap: var(--spacing-lg);
-}
+/* Note: Most utility classes can be replaced with MUI's sx prop:
+   text-center -> sx={{ textAlign: 'center' }}
+   flex -> sx={{ display: 'flex' }}
+   flex-col -> sx={{ flexDirection: 'column' }}
+   items-center -> sx={{ alignItems: 'center' }}
+   justify-center -> sx={{ justifyContent: 'center' }}
+   gap-sm -> sx={{ gap: 1 }}
+   gap-md -> sx={{ gap: 2 }}
+   gap-lg -> sx={{ gap: 3 }}
+*/

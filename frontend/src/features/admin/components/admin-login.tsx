@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Alert,
+  useTheme,
+  alpha
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAdminStore } from '../stores/admin-store';
-import '../styles/admin-login.css';
 
 interface AdminLoginProps {
   isOpen: boolean;
@@ -12,6 +23,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAdminStore();
+  const theme = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,41 +37,112 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="admin-login-overlay">
-      <div className="admin-login-modal">
-        <button className="close-button" onClick={onClose}>×</button>
-        <h2>Admin Login</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              disabled={isLoading}
-            />
-          </div>
-          <div className="form-group">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              required
-              disabled={isLoading}
-            />
-          </div>
-          <button type="submit" className="login-button" disabled={isLoading}>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      aria-labelledby="admin-login-modal"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2,
+      }}
+      BackdropProps={{
+        sx: {
+          backgroundColor: alpha(theme.palette.background.default, 0.5),
+          backdropFilter: 'blur(3px)',
+        }
+      }}
+    >
+      <Box
+        component="div"
+        sx={{
+          position: 'relative',
+          width: '90%',
+          maxWidth: 400,
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 3,
+          p: 4,
+        }}
+      >
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: 'text.secondary',
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+
+        <Typography
+          variant="h5"
+          component="h2"
+          align="center"
+          gutterBottom
+          sx={{ mb: 3 }}
+        >
+          Admin Login
+        </Typography>
+
+        {error && (
+          <Alert 
+            severity="error" 
+            sx={{ mb: 2 }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+            sx={{ mb: 3 }}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={isLoading}
+            sx={{
+              py: 1.5,
+              fontWeight: 600,
+            }}
+          >
             {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
   );
 };
 

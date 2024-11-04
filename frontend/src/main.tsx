@@ -4,8 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { AppLogicProvider } from './app/providers/app-logic-provider';
 import { ResumeProvider } from './features/resume/components/resume-provider';
 import { ThemeProvider } from './features/theme/components/theme-provider';
+import { TelemetryProvider } from './features/telemetry/components/telemetry-provider';
 import App from './app/app';
-import './shared/styles/variables.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -13,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <AppLogicProvider>
         <ThemeProvider>
           <ResumeProvider>
-            <App />
+            <TelemetryProvider>
+              <App />
+            </TelemetryProvider>
           </ResumeProvider>
         </ThemeProvider>
       </AppLogicProvider>
