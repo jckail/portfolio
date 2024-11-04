@@ -10,7 +10,7 @@ const AboutMe: React.FC<AboutMeProps> = ({ aboutMe }) => {
   }
 
   return (
-    <section id="about-me" className="section">
+    <section id="about" className="section">
       <div className="section-header">
         <h2>About Me</h2>
       </div>

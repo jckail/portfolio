@@ -12,7 +12,7 @@ const TechnicalSkills: React.FC<TechnicalSkillsProps> = ({ skills }) => {
   }
 
   return (
-    <section id="technical-skills" className="section">
+    <section id="skills" className="section">
       <div className="section-header">
         <h2>Technical Skills</h2>
       </div>

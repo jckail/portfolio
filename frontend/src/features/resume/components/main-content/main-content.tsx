@@ -33,13 +33,13 @@ const MainContent = () => {
         isAdminLoggedIn={isAdminLoggedIn}
       />
       <div className="section-container">
-        <section id="about-me">
+        <section id="about">
           <AboutMe aboutMe={resumeData.aboutMe} />
         </section>
       </div>
       
       <div className="section-container">
-        <section id="technical-skills">
+        <section id="skills">
           <TechnicalSkills skills={resumeData.technicalSkills} />
         </section>
       </div>

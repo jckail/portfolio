@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TechnicalSkills from './sections/technical-skills';
 import Experience from './sections/experience';
 import Projects from './sections/projects';
 import MyResume from './sections/my-resume';
 import AboutMe from './sections/about-me';
-import { ResumeData } from '@/features/resume/types';
+import { ResumeData } from '../types';
 import { useResume } from './resume-provider';
+import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
 import './styles/main-content.css';
 
 interface MainContentProps {
@@ -15,6 +16,14 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
   const { isLoading } = useResume();
+  useScrollSpy(); // Initialize scroll spy
+
+  useEffect(() => {
+    // Force a layout recalculation after content loads
+    if (!isLoading && resumeData) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [isLoading, resumeData]);
 
   if (isLoading) {
     return (
@@ -45,11 +54,23 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
 
   return (
     <main className="main-content">
-      <AboutMe aboutMe={resumeData.aboutMe} />
-      <TechnicalSkills skills={resumeData.technicalSkills} />
-      <Experience experience={resumeData.experience} />
-      <Projects projects={resumeData.projects} />
-      <MyResume />
+      <div className="main-content-inner">
+        <section id="about" className="section">
+          <AboutMe aboutMe={resumeData.aboutMe} />
+        </section>
+        <section id="skills" className="section">
+          <TechnicalSkills skills={resumeData.technicalSkills} />
+        </section>
+        <section id="experience" className="section">
+          <Experience experience={resumeData.experience} />
+        </section>
+        <section id="projects" className="section">
+          <Projects projects={resumeData.projects} />
+        </section>
+        <section id="resume" className="section">
+          <MyResume />
+        </section>
+      </div>
     </main>
   );
 };
