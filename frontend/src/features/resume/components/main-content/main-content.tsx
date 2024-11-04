@@ -1,50 +1,67 @@
-import React from 'react';
-import { useResume } from '@/features/resume/components/resume-provider';
+import { useScrollSpy } from '../../../../shared/hooks/use-scroll-spy';
+import { useResume } from '../../components/resume-provider';
+import { useThemeStore } from '../../../theme/stores/theme-store';
+import { useAdminStore } from '../../../admin/stores/admin-store';
+import Header from '../header';
+import AboutMe from '../sections/about-me';
 import TechnicalSkills from '../sections/technical-skills';
 import Experience from '../sections/experience';
 import Projects from '../sections/projects';
 import MyResume from '../sections/my-resume';
-import AboutMe from '../sections/about-me';
-import './styles/main-content.css';
+import '../../styles/resume.css';
 
-const MainContent: React.FC = () => {
-  const { resumeData, error, isLoading } = useResume();
+const MainContent = () => {
+  useScrollSpy();
+  const { resumeData, handleDownload } = useResume();
+  const { theme, toggleTheme } = useThemeStore();
+  const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
 
-  if (isLoading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
-        <p>Loading resume data...</p>
-      </div>
-    );
-  }
+  if (!resumeData) return null;
 
-  if (error) {
-    return (
-      <div className="error-message">
-        <p>{error}</p>
-        <p>Please try refreshing the page.</p>
-      </div>
-    );
-  }
-
-  if (!resumeData) {
-    return (
-      <div className="error-message">
-        <p>No resume data available.</p>
-        <p>Please try refreshing the page.</p>
-      </div>
-    );
-  }
+  const handleAdminClick = () => {
+    // Admin click handler is managed by the admin store
+  };
 
   return (
-    <main className="main-content">
-      <AboutMe aboutMe={resumeData.aboutMe} />
-      <TechnicalSkills skills={resumeData.technicalSkills} />
-      <Experience experience={resumeData.experience} />
-      <Projects projects={resumeData.projects} />
-      <MyResume />
-    </main>
+    <div className="resume">
+      <Header 
+        resumeData={resumeData}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        handleResumeClick={handleDownload}
+        handleAdminClick={handleAdminClick}
+        isAdminLoggedIn={isAdminLoggedIn}
+      />
+      <div className="section-container">
+        <section id="about-me">
+          <AboutMe aboutMe={resumeData.aboutMe} />
+        </section>
+      </div>
+      
+      <div className="section-container">
+        <section id="technical-skills">
+          <TechnicalSkills skills={resumeData.technicalSkills} />
+        </section>
+      </div>
+      
+      <div className="section-container">
+        <section id="experience">
+          <Experience experience={resumeData.experience} />
+        </section>
+      </div>
+      
+      <div className="section-container">
+        <section id="projects">
+          <Projects projects={resumeData.projects} />
+        </section>
+      </div>
+      
+      <div className="section-container">
+        <section id="resume">
+          <MyResume />
+        </section>
+      </div>
+    </div>
   );
 };
 
