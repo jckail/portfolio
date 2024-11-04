@@ -14,24 +14,23 @@ export const useScrollSpy = () => {
 
     // Function to handle scroll events
     const handleScroll = () => {
-      const sections = document.querySelectorAll<HTMLElement>('section[id]');
+      const nodeList = document.querySelectorAll<HTMLElement>('section[id]');
+      const sections = Array.from<HTMLElement>(nodeList);
       let currentSection: HTMLElement | null = null;
       let minDistance = Infinity;
 
       // Find the section closest to the top of the viewport
-      sections.forEach((section) => {
-        if (section.id) {  // Type guard to ensure id exists
-          const rect = section.getBoundingClientRect();
-          const distance = Math.abs(rect.top);
-          if (distance < minDistance) {
-            minDistance = distance;
-            currentSection = section;
-          }
+      for (const section of sections) {
+        const rect = section.getBoundingClientRect();
+        const distance = Math.abs(rect.top);
+        if (distance < minDistance) {
+          minDistance = distance;
+          currentSection = section;
         }
-      });
+      }
 
       // Update URL if we found a section
-      if (currentSection && currentSection.id) {
+      if (currentSection?.id) {
         updateURL(currentSection.id);
       }
     };
@@ -57,6 +56,12 @@ export const useScrollSpy = () => {
         const targetSection = document.getElementById(targetId);
         
         if (targetSection) {
+          // Get the header height from CSS variable
+          const headerHeight = parseInt(getComputedStyle(document.documentElement)
+            .getPropertyValue('--header-height')
+            .trim()
+            .replace('px', ''));
+
           // First scroll to bring the element into view
           targetSection.scrollIntoView({
             behavior: 'smooth',
@@ -64,10 +69,9 @@ export const useScrollSpy = () => {
           });
           
           // Then adjust for header height
-          const headerOffset = 80;
           setTimeout(() => {
             const elementPosition = targetSection.getBoundingClientRect().top;
-            const offsetPosition = window.scrollY + elementPosition - headerOffset;
+            const offsetPosition = window.scrollY + elementPosition - headerHeight;
             
             window.scrollTo({
               top: offsetPosition,
