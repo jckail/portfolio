@@ -67,7 +67,7 @@ body {
   border-radius: 8px;
   padding: var(--spacing-md) var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
-  box-shadow: 0 4px 6px var(--section-background);
+  
   width: 100%;
   box-sizing: border-box;
   color: var(--text-color);
@@ -78,9 +78,9 @@ body {
   background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
   -webkit-backdrop-filter: blur(var(--section-background-blur));
-  border-radius: 8px;
+  
   padding: var(--spacing-lg);
-  box-shadow: 0 4px 6px var(--section-background);
+  
   margin: var(--spacing-md) 0;
   width: 100%;
   box-sizing: border-box;
