@@ -38,10 +38,66 @@ body {
   z-index: 2;
 }
 
+/* Main container */
+.resume {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Section styles */
+.section {
+  padding: var(--spacing-xl) 0;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+/* Section header with blur effect */
+.section-header {
+  background: var(--section-background);
+  backdrop-filter: blur(var(--section-background-blur));
+  -webkit-backdrop-filter: blur(var(--section-background-blur));
+  border-radius: 8px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 4px 6px var(--section-background);
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--text-color);
+}
+
+/* Section content with blur effect */
+.section-content {
+  background: var(--section-background);
+  backdrop-filter: blur(var(--section-background-blur));
+  -webkit-backdrop-filter: blur(var(--section-background-blur));
+  border-radius: 8px;
+  padding: var(--spacing-lg);
+  box-shadow: 0 4px 6px var(--section-background);
+  margin: var(--spacing-md) 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-color);
-  margin: 0 0 var(--spacing-md);
+  margin: 0;
+}
+
+.section-header h2 {
+  color: var(--text-color);
+  font-size: 2rem;
+  border-bottom: 2px solid var(--primary-border);
+  padding-bottom: var(--spacing-sm);
+  margin: 0;
 }
 
 p {
@@ -59,21 +115,14 @@ a:hover {
   color: var(--primary-hover);
 }
 
-/* Section styles */
-.section {
-  padding: var(--spacing-xl) 0;
-  border-bottom: 1px solid var(--border-color);
-  position: relative;
-}
-
-.section:last-child {
-  border-bottom: none;
-}
-
-.section h2 {
-  font-size: 2rem;
-  margin-bottom: var(--spacing-lg);
-  color: var(--primary);
-  border-bottom: 2px solid var(--primary-border);
-  padding-bottom: var(--spacing-sm);
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .resume {
+    padding: 0 15px;
+  }
+  
+  .section-header,
+  .section-content {
+    padding: var(--spacing-md);
+  }
 }

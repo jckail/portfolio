@@ -1,22 +1,52 @@
+/* Resume container */
+.resume {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-color);
+}
+
 /* Section Container */
 .section-container {
-  background: var(--surface-color);
+  background: var(--section-background);
   border-radius: var(--radius-lg);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--section-background);
   padding: var(--spacing-xl);
-  margin: var(--spacing-xl) auto;
-  max-width: var(--max-width);
-  backdrop-filter: blur(10px);
+  margin: var(--spacing-xl) 0;
+  width: 100%;
+  box-sizing: border-box;
+  backdrop-filter: blur(var(--section-background-blur));
+  -webkit-backdrop-filter: blur(var(--section-background-blur));
   border: 1px solid var(--border-color);
+  text-align: left;
 }
 
 /* Section Headers */
-.section-header {
-  color: var(--primary);
+.section-header, 
+.section h2,
+#about-me h2,
+#technical-skills h2,
+#experience h2,
+#projects h2,
+#my-resume h2 {
+  color: var(--text-color);
   font-size: 2rem;
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 2px solid var(--primary-border);
+  border-bottom: 2px solid var(--border-color);
+  text-align: left;
+  width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+}
+
+/* Section Content */
+.section-content {
+  text-align: left;
+  width: 100%;
 }
 
 /* Skills Section */
@@ -24,6 +54,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-lg);
+  width: 100%;
 }
 
 .skill-category {
@@ -34,7 +65,7 @@
 }
 
 .skill-category h3 {
-  color: var(--primary);
+  color: var(--text-color);
   margin-bottom: var(--spacing-md);
 }
 
@@ -52,13 +83,13 @@
 }
 
 .experience-title {
-  color: var(--primary);
+  color: var(--text-color);
   font-size: 1.5rem;
   margin-bottom: var(--spacing-xs);
 }
 
 .experience-company {
-  color: var(--text-secondary);
+  color: var(--text-color);
   font-size: 1.25rem;
 }
 
@@ -72,6 +103,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
+  width: 100%;
 }
 
 .project-card {
@@ -87,7 +119,7 @@
 }
 
 .project-title {
-  color: var(--primary);
+  color: var(--text-color);
   font-size: 1.25rem;
   margin-bottom: var(--spacing-sm);
 }
@@ -111,4 +143,34 @@
 
 .download-button:hover {
   background: var(--primary-hover);
+}
+
+/* Links */
+a:not(.resume-button) {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+a:not(.resume-button):hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section-container {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+  }
+  
+  .skills-grid,
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-container {
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+  }
 }
