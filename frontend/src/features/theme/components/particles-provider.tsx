@@ -37,29 +37,29 @@ function useParticles(): ParticlesContextType {
 function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProviderProps) {
   const [particlesLoaded, setParticlesLoaded] = React.useState(false);
 
+  const destroyParticles = () => {
+    if (window.pJSDom?.[0]?.pJS) {
+      window.pJSDom[0].pJS.fn.vendors.destroypJS();
+      window.pJSDom = [];
+    }
+  };
+
+  const initParticles = () => {
+    if (!window.particlesJS) {
+      console.warn('particles.js not loaded');
+      return;
+    }
+
+    if (particlesLoaded) {
+      destroyParticles();
+    }
+
+    const config = updateParticlesConfig();
+    window.particlesJS('particles-js', config);
+    setParticlesLoaded(true);
+  };
+
   useEffect(() => {
-    const destroyParticles = () => {
-      if (window.pJSDom?.[0]?.pJS) {
-        window.pJSDom[0].pJS.fn.vendors.destroypJS();
-        window.pJSDom = [];
-      }
-    };
-
-    const initParticles = () => {
-      if (!window.particlesJS) {
-        console.warn('particles.js not loaded');
-        return;
-      }
-
-      if (particlesLoaded) {
-        destroyParticles();
-      }
-
-      const config = updateParticlesConfig();
-      window.particlesJS('particles-js', config);
-      setParticlesLoaded(true);
-    };
-
     let particlesContainer = document.getElementById('particles-js');
     if (!particlesContainer) {
       particlesContainer = document.createElement('div');
@@ -72,7 +72,6 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
         height: 100%;
         z-index: -1;
         pointer-events: none;
-        background-color: transparent;
       `;
       document.body.insertBefore(particlesContainer, document.body.firstChild);
     }
@@ -87,11 +86,26 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
 
     checkAndInit();
 
+    // Watch for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'data-theme') {
+          initParticles();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+
     return () => {
       destroyParticles();
       particlesContainer?.remove();
+      observer.disconnect();
     };
-  }, [particlesLoaded, updateParticlesConfig]);
+  }, [updateParticlesConfig]);
 
   const value = {
     particlesLoaded

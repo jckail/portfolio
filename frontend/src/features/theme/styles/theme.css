@@ -1,4 +1,4 @@
-@import '@/shared/styles/variables.css';
+@import '../../../shared/styles/variables.css';
 @import './theme-variables.css';
 
 /* Base styles */
@@ -9,21 +9,33 @@ html, body {
 }
 
 body {
-  background-color: var(--background-color);
   color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: color 0.3s ease;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
     'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-  z-index: 0;
+  background-color: var(--background-color);
+  transition: background-color 0.3s ease;
 }
 
-/* Ensure content is above particles */
+/* Particles layer */
+#particles-js {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent !important;
+}
+
+/* Content layer */
 #root {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Typography */
@@ -52,7 +64,6 @@ a:hover {
   padding: var(--spacing-xl) 0;
   border-bottom: 1px solid var(--border-color);
   position: relative;
-  z-index: 1;
 }
 
 .section:last-child {
@@ -65,16 +76,4 @@ a:hover {
   color: var(--primary);
   border-bottom: 2px solid var(--primary-border);
   padding-bottom: var(--spacing-sm);
-}
-
-/* Particles container styles */
-#particles-js {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  background-color: transparent;
 }

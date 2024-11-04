@@ -6,11 +6,16 @@ type ThemeProviderProps = {
 };
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const { theme } = useThemeStore();
+  const { theme, initTheme } = useThemeStore();
 
   useEffect(() => {
-    // Apply theme to the document body
-    document.body.className = theme === 'dark' ? 'dark-theme' : '';
+    // Initialize theme from URL on mount
+    initTheme();
+  }, [initTheme]);
+
+  useEffect(() => {
+    // Apply theme to the document root whenever theme changes
+    document.documentElement.dataset.theme = theme;
   }, [theme]);
 
   return <>{children}</>;
