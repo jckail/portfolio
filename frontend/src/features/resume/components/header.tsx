@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResumeData } from '../types';
 import { Theme } from '../../theme/stores/theme-store';
 import GitHubIcon from '../../theme/components/icons/github-icon';
@@ -25,8 +25,36 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
+  // Update URL to reflect current state
+  const updateURL = (isOpen: boolean) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sidepanel', isOpen ? 'open' : 'closed');
+    window.history.replaceState({}, '', url.toString());
+  };
+
+  // Initialize state from URL or default to closed
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sidePanelState = params.get('sidepanel');
+    const shouldBeOpen = sidePanelState === 'open';
+    
+    setIsSidePanelOpen(shouldBeOpen);
+    
+    // Ensure URL always shows the state, defaulting to closed if not set
+    if (!sidePanelState) {
+      updateURL(false);
+    }
+  }, []);
+
   const toggleSidePanel = () => {
-    setIsSidePanelOpen(!isSidePanelOpen);
+    const newState = !isSidePanelOpen;
+    setIsSidePanelOpen(newState);
+    updateURL(newState);
+  };
+
+  const handleCloseSidePanel = () => {
+    setIsSidePanelOpen(false);
+    updateURL(false);
   };
 
   return (
@@ -100,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({
       </header>
       <SidePanel 
         isOpen={isSidePanelOpen} 
-        onClose={() => setIsSidePanelOpen(false)} 
+        onClose={handleCloseSidePanel} 
       />
     </>
   );

@@ -22,7 +22,9 @@
   top: var(--header-height);
   left: 0;
   bottom: 0;
-  width: 280px;
+  width: 10vw;
+  max-width: 10%;
+  min-width: 100px;
   background: var(--surface);
   border-right: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -63,7 +65,8 @@
 
 @media (max-width: 768px) {
   .side-panel {
-    width: 240px;
+    width: 10vw;
+    min-width: 80px;
   }
   
   .nav-item {
