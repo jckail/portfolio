@@ -1,9 +1,11 @@
-import React from 'react';
-import { ResumeData } from '@/features/resume/types';
-import { Theme } from '@/features/theme/stores/theme-store';
-import GitHubIcon from '@/features/theme/components/icons/github-icon';
-import LinkedInIcon from '@/features/theme/components/icons/linkedin-icon';
-import '@/features/resume/styles/header.css';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { ResumeData } from '../types';
+import { Theme } from '../../theme/stores/theme-store';
+import GitHubIcon from '../../theme/components/icons/github-icon';
+import LinkedInIcon from '../../theme/components/icons/linkedin-icon';
+import { SidePanel } from '../../layouts/components/side-panel';
+import '../styles/header.css';
 
 interface HeaderProps {
   resumeData: ResumeData | null;
@@ -22,12 +24,45 @@ const Header: React.FC<HeaderProps> = ({
   handleAdminClick,
   isAdminLoggedIn
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setIsMenuOpen(params.has('menu'));
+  }, [location]);
+
+  const toggleMenu = () => {
+    const newIsOpen = !isMenuOpen;
+    const currentUrl = new URL(window.location.href);
+    const params = new URLSearchParams(currentUrl.search);
+    
+    if (newIsOpen) {
+      params.set('menu', 'open');
+    } else {
+      params.delete('menu');
+    }
+    
+    const newUrl = `${currentUrl.pathname}?${params.toString()}${currentUrl.hash}`;
+    window.history.pushState({}, '', newUrl);
+    setIsMenuOpen(newIsOpen);
+  };
+
   return (
     <header className="header">
       <nav className="nav-container">
         <div className="nav-left">
-          <h1>{resumeData?.name || 'Loading...'}</h1>
-          <h2>{resumeData?.title || ''}</h2>
+          <button className="menu-button" onClick={toggleMenu} aria-label="Toggle navigation menu">
+            <div className="menu-icon">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </button>
+          <div className="title-container">
+            <h1>{resumeData?.name || 'Loading...'}</h1>
+            <h2>{resumeData?.title || ''}</h2>
+          </div>
         </div>
         <div className="nav-right">
           {resumeData?.github && (
@@ -67,6 +102,7 @@ const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </nav>
+      <SidePanel isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </header>
   );
 };

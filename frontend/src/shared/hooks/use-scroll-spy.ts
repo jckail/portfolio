@@ -14,7 +14,7 @@ export const useScrollSpy = () => {
           if (entry.isIntersecting) {
             const id = entry.target.id;
             const currentUrl = new URL(window.location.href);
-            const searchParams = currentUrl.search; // Keep the query params
+            const searchParams = currentUrl.search;
             window.history.replaceState(null, '', `${currentUrl.pathname}${searchParams}#${id}`);
           }
         });
@@ -35,7 +35,12 @@ export const useScrollSpy = () => {
     if (location.hash) {
       const element = document.querySelector(location.hash);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 72;
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: elementPosition - headerHeight,
+          behavior: 'smooth'
+        });
       }
     }
 
