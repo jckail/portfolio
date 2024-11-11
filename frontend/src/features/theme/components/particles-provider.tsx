@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useThemeStore } from '../stores/theme-store';
 
 interface ParticlesContextType {
   particlesLoaded: boolean;
@@ -36,6 +37,8 @@ function useParticles(): ParticlesContextType {
 
 function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProviderProps) {
   const [particlesLoaded, setParticlesLoaded] = React.useState(false);
+  const { theme } = useThemeStore();
+  const previousTheme = useRef(theme);
 
   const destroyParticles = () => {
     if (window.pJSDom?.[0]?.pJS) {
@@ -59,6 +62,7 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
     setParticlesLoaded(true);
   };
 
+  // Initialize particles container
   useEffect(() => {
     let particlesContainer = document.getElementById('particles-js');
     if (!particlesContainer) {
@@ -90,7 +94,19 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
       destroyParticles();
       particlesContainer?.remove();
     };
-  }, []); // Only run once on mount, removed updateParticlesConfig dependency
+  }, []); // Initial setup
+
+  // Only reinitialize particles when entering or leaving party mode
+  useEffect(() => {
+    const isEnteringPartyMode = theme === 'party' && previousTheme.current !== 'party';
+    const isLeavingPartyMode = theme !== 'party' && previousTheme.current === 'party';
+
+    if (particlesLoaded && (isEnteringPartyMode || isLeavingPartyMode)) {
+      initParticles();
+    }
+
+    previousTheme.current = theme;
+  }, [theme]); // Track theme changes
 
   const value = {
     particlesLoaded

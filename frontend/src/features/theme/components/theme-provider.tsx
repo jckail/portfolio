@@ -21,8 +21,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   useEffect(() => {
     const applyTheme = () => {
       try {
-        // Remove existing theme class
-        document.documentElement.classList.remove('theme-light', 'theme-dark');
+        // Remove all theme classes
+        document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-party');
         // Add new theme class
         document.documentElement.classList.add(`theme-${theme}`);
         // Set data attribute for CSS variables

@@ -10,6 +10,10 @@
   color-scheme: dark;
 }
 
+:root[data-theme='party'] {
+  color-scheme: light;
+}
+
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
@@ -55,6 +59,28 @@
   --border-thickness: 2px;
 }
 
+.theme-party {
+  --background-color: #000000;
+  --surface-color: rgba(255, 0, 255, 0.1);
+  --section-background: rgba(255, 255, 255, 0.05);
+  --section-background-blur: 8px;
+  --text-color: #ff00ff;
+  --text-secondary: #00ffff;
+  --border-color: #ff00ff;
+  --primary: #ff00ff;
+  --primary-hover: #00ffff;
+  --primary-light: rgba(255, 0, 255, 0.2);
+  --primary-light-hover: rgba(0, 255, 255, 0.3);
+  --primary-border: #ff00ff;
+  --subsection-primary: rgba(255, 0, 255, 0.3);
+  --subsection-border: #00ffff;
+  --shadow-sm: 0 1px 2px rgba(255, 0, 255, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 255, 255, 0.3);
+  --shadow-lg: 0 10px 15px rgba(255, 0, 255, 0.3);
+  --background-color-invert: #ffffff;
+  --border-thickness: 3px;
+}
+
 /* Base styles */
 html {
   margin: 0;
@@ -81,6 +107,31 @@ body * {
   transition-property: color, border-color;
   transition-duration: 0.3s;
   transition-timing-function: ease;
+}
+
+/* Party mode animations */
+.theme-party * {
+  animation: party-colors 5s infinite;
+}
+
+@keyframes party-colors {
+  0% { color: #ff00ff; }
+  25% { color: #00ffff; }
+  50% { color: #ffff00; }
+  75% { color: #00ff00; }
+  100% { color: #ff00ff; }
+}
+
+.theme-party .section-header,
+.theme-party .section-content {
+  animation: party-border 3s infinite;
+}
+
+@keyframes party-border {
+  0% { border-color: #ff00ff; }
+  33% { border-color: #00ffff; }
+  66% { border-color: #ffff00; }
+  100% { border-color: #ff00ff; }
 }
 
 /* Disable transitions for elements that shouldn't animate */

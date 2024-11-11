@@ -13,6 +13,7 @@ interface HeaderProps {
   handleResumeClick: () => void;
   handleAdminClick: () => void;
   isAdminLoggedIn: boolean;
+  isToggleHidden: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -21,7 +22,8 @@ const Header: React.FC<HeaderProps> = ({
   toggleTheme,
   handleResumeClick,
   handleAdminClick,
-  isAdminLoggedIn
+  isAdminLoggedIn,
+  isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
@@ -55,6 +57,19 @@ const Header: React.FC<HeaderProps> = ({
   const handleCloseSidePanel = () => {
     setIsSidePanelOpen(false);
     updateURL(false);
+  };
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return '🌙';
+      case 'dark':
+        return '☀️';
+      case 'party':
+        return '🎉';
+      default:
+        return '🌙';
+    }
   };
 
   return (
@@ -116,13 +131,15 @@ const Header: React.FC<HeaderProps> = ({
             >
               See My Resume
             </button>
-            <button 
-              onClick={toggleTheme}
-              className="theme-toggle"
-              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
+            {!isToggleHidden && (
+              <button 
+                onClick={toggleTheme}
+                className="theme-toggle"
+                aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'light' : 'light'} mode`}
+              >
+                {getThemeIcon()}
+              </button>
+            )}
           </div>
         </nav>
       </header>

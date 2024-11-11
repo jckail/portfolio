@@ -11,7 +11,7 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { resumeData } = useResume();
-  const { theme, toggleTheme } = useAppLogic();
+  const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
 
   const handleResumeClick = () => {
@@ -35,6 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         handleResumeClick={handleResumeClick}
         handleAdminClick={handleAdminClick}
         isAdminLoggedIn={isAdminLoggedIn}
+        isToggleHidden={isToggleHidden}
       />
       <main>
         {children}

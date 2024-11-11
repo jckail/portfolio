@@ -1,5 +1,5 @@
 import React from 'react';
-import { Theme } from '@/features/theme/stores/theme-store';
+import { Theme } from '../../../features/theme/stores/theme-store';
 import '../styles/nav.css';
 
 interface HeaderNavProps {
@@ -8,6 +8,7 @@ interface HeaderNavProps {
   handleResumeClick: () => void;
   handleAdminClick: () => void;
   isAdminLoggedIn: boolean;
+  isToggleHidden: boolean;
 }
 
 const HeaderNav: React.FC<HeaderNavProps> = ({
@@ -15,18 +16,21 @@ const HeaderNav: React.FC<HeaderNavProps> = ({
   toggleTheme,
   handleResumeClick,
   handleAdminClick,
-  isAdminLoggedIn
+  isAdminLoggedIn,
+  isToggleHidden
 }) => {
   return (
     <nav className="header-nav">
       <div className="nav-buttons">
-        <button 
-          onClick={toggleTheme}
-          className="theme-toggle"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
+        {!isToggleHidden && (
+          <button 
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙' : theme === 'dark' ? '☀️' : '🎉'}
+          </button>
+        )}
         <button 
           onClick={handleResumeClick}
           className="resume-button"
