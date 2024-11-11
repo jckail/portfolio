@@ -15,6 +15,11 @@
   border-radius: var(--radius-md);
 }
 
+.resume-content:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
 .resume-icon {
   font-size: 3rem;
   margin-bottom: var(--spacing-md);

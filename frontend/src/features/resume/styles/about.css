@@ -41,6 +41,11 @@
 
 }
 
+.about-content:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
 
 .section-content p {
   color: var(--text-color);
