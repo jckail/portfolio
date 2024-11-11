@@ -1,20 +1,25 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { AppLogicProvider } from '@/app/providers/app-logic-provider';
-import { ResumeProvider } from '@/features/resume/components/resume-provider';
-import { ParticlesProvider } from '@/features/theme/components/particles-provider';
-import { particlesConfig } from '@/features/theme/lib/particles';
+import { AppLogicProvider } from '../app/providers/app-logic-provider';
+import { ResumeProvider } from '../features/resume/components/resume-provider';
+import { ParticlesProvider } from '../features/theme/components/particles-provider';
+import getParticlesConfig from '../features/theme/lib/particles/config';
+import { PRIMARY } from '../config/constants';
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  const updateParticlesConfig = () => {
-    // First cast to unknown, then to Record<string, unknown>
-    return JSON.parse(JSON.stringify(particlesConfig)) as Record<string, unknown>;
-  };
+  // Use light theme config for testing
+  const config = getParticlesConfig({
+    particleColor: PRIMARY,
+    lineColor: PRIMARY
+  });
+
+  // Use JSON parse/stringify to ensure a clean object for testing
+  const testConfig = JSON.parse(JSON.stringify(config)) as Record<string, unknown>;
 
   return (
     <AppLogicProvider>
       <ResumeProvider>
-        <ParticlesProvider updateParticlesConfig={updateParticlesConfig}>
+        <ParticlesProvider config={testConfig}>
           {children}
         </ParticlesProvider>
       </ResumeProvider>
