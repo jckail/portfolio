@@ -1,7 +1,8 @@
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */
+  gap: 1.5rem;
+  padding: 1rem;
 }
 
 .project-card {
@@ -10,9 +11,11 @@
   border: 1px solid var(--border-color);
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
-  height: 100%;
   animation: fadeInUp 0.5s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.1s);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-card:hover {
@@ -20,16 +23,38 @@
   box-shadow: var(--shadow-lg);
 }
 
+.project-image {
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: var(--section-background);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.project-image img {
+  width: 60px;
+  height: 60px;
+  color: var(--text-color);
+  transition: transform var(--transition-normal);
+}
+
+.project-card:hover .project-image img {
+  transform: scale(1.1);
+}
+
 .project-content {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
 }
 
 .project-content h3 {
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-md);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
   color: var(--text-color);
 }
 
@@ -45,8 +70,9 @@
 
 .project-content p {
   color: var(--text-color);
-  line-height: 1.6;
-  margin-bottom: var(--spacing-lg);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-md);
   flex-grow: 1;
 }
 
@@ -58,10 +84,10 @@
 
 .project-link {
   display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all var(--transition-fast);
   text-align: center;
   flex: 1;
@@ -101,31 +127,58 @@
   }
 }
 
+/* Tablet breakpoint */
+@media (max-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on tablet */
+    gap: 1rem;
+  }
+}
+
+/* Mobile breakpoint */
 @media (max-width: 768px) {
   .projects-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+    gap: 1rem;
+    padding: 0.5rem;
   }
 
   .project-content {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .project-content h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .project-content p {
-    font-size: 0.9rem;
-    margin-bottom: var(--spacing-md);
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-sm);
   }
 
   .project-links {
     flex-direction: column;
+    gap: 0.5rem;
   }
 
   .project-link {
     width: 100%;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 0.4rem 0.8rem;
+  }
+
+  .project-image {
+    height: 100px;
+  }
+
+  .project-image img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Small mobile breakpoint */
+@media (max-width: 480px) {
+  .projects-grid {
+    grid-template-columns: 1fr; /* 1 column on very small screens */
   }
 }

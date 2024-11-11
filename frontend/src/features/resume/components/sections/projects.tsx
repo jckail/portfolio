@@ -21,6 +21,13 @@ const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
               style={{ '--item-index': index } as React.CSSProperties}
             >
               <div className="project-content">
+                <div className="project-image">
+                  <img 
+                    src="/images/projects/github-logo.svg"
+                    alt="GitHub"
+                    loading="lazy"
+                  />
+                </div>
                 <h3>
                   <a href={project.link} target="_blank" rel="noopener noreferrer">
                     {project.title}
