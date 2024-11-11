@@ -10,57 +10,58 @@ interface ThemeState {
   initTheme: () => void;
 }
 
-const getThemeFromUrl = (): Theme => {
-  if (typeof window === 'undefined') return 'light';
-  const params = new URLSearchParams(window.location.search);
-  const themeParam = params.get('theme');
-  return themeParam === 'dark' ? 'dark' : 'light';
+const THEME_STORAGE_KEY = 'portfolio-theme-preference';
+
+const getStoredTheme = (): Theme | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    return (storedTheme === 'light' || storedTheme === 'dark') ? storedTheme : null;
+  } catch (error) {
+    console.error('[Theme Store] Error reading from localStorage:', error);
+    return null;
+  }
 };
 
-const updateUrlTheme = (theme: Theme) => {
-  if (typeof window === 'undefined') return;
-  const url = new URL(window.location.href);
-  url.searchParams.set('theme', theme);
-  window.history.replaceState({}, '', url.toString());
+const saveThemePreference = (theme: Theme): void => {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    console.log('[Theme Store] Saved theme preference:', theme);
+  } catch (error) {
+    console.error('[Theme Store] Error saving theme preference:', error);
+  }
 };
 
-const initialTheme = getThemeFromUrl();
+// Always default to light theme initially
+const DEFAULT_THEME: Theme = 'light';
 
 export const useThemeStore = create<ThemeState>()(
   devtools(
-    (set) => {
-      // Listen for URL changes (browser back/forward)
-      if (typeof window !== 'undefined') {
-        window.addEventListener('popstate', () => {
-          const theme = getThemeFromUrl();
-          set({ theme }, false, 'theme/url-change');
-        });
+    (set) => ({
+      theme: DEFAULT_THEME,
+      toggleTheme: () => {
+        set(
+          (state) => {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            saveThemePreference(newTheme);
+            return { theme: newTheme };
+          },
+          false,
+          'theme/toggle'
+        );
+      },
+      setTheme: (theme) => {
+        saveThemePreference(theme);
+        set({ theme }, false, 'theme/set');
+      },
+      initTheme: () => {
+        const storedTheme = getStoredTheme();
+        const theme = storedTheme || DEFAULT_THEME;
+        saveThemePreference(theme);
+        set({ theme }, false, 'theme/init');
       }
-
-      return {
-        theme: initialTheme,
-        toggleTheme: () => {
-          set(
-            (state) => {
-              const newTheme = state.theme === 'light' ? 'dark' : 'light';
-              updateUrlTheme(newTheme);
-              return { theme: newTheme };
-            },
-            false,
-            'theme/toggle'
-          );
-        },
-        setTheme: (theme) => {
-          updateUrlTheme(theme);
-          set({ theme }, false, 'theme/set');
-        },
-        initTheme: () => {
-          const theme = getThemeFromUrl();
-          updateUrlTheme(theme);
-          set({ theme }, false, 'theme/init');
-        }
-      };
-    },
+    }),
     { name: 'Theme Store' }
   )
 );
