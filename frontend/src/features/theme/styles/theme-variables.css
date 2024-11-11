@@ -1,7 +1,7 @@
 /* Light theme */
 :root[data-theme='light'] {
   --background-color: #ffffff;
-  --surface-color: rgba(255, 255, 255, 0.9);
+  --surface-color: #0303ff32;
   --section-background: transparent;
   --section-background-blur: 5px;
   --text-color: #000000;
@@ -19,13 +19,13 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --background-color-invert:#000000; 
-  --subsection-primary: #0303ff56;
+  --subsection-primary: #0303ff32;
 }
 
 /* Dark theme */
 :root[data-theme='dark'] {
   --background-color: #000000;
-  --surface-color: rgba(20, 20, 20, 0.9);
+  --surface-color: #0303ff32;
   --section-background: transparent;
   --section-background-blur: 5px;
   --text-color: #ffffff;

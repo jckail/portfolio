@@ -105,7 +105,7 @@
 }
 
 .resume-button {
-  background: var(--primary);
+  background: var(--surface-color);
   color: #ffffff;
   border: none;
   padding: var(--spacing-xs) var(--spacing-md);
@@ -118,7 +118,7 @@
 }
 
 .resume-button:hover {
-  background: var(--primary-hover);
+  background: var(--primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }

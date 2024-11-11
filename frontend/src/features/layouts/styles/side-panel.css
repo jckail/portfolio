@@ -59,13 +59,17 @@
 }
 
 .nav-item:hover {
-  background: var(--primary-light);
-  color: var(--primary);
+  background: var(--primary);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .nav-item.active {
-  background: var(--primary);
+  background: var(--surface-color);
   color: var(--surface);
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+
 }
 
 .nav-item.active:hover {
