@@ -8,20 +8,45 @@ import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import './styles/app.css';
 
+// Array of available Zuni image numbers (2 through 19)
+const ZUNI_IMAGE_NUMBERS = Array.from({ length: 18 }, (_, i) => i + 2);
+
 const App: React.FC = () => {
   const { theme } = useThemeStore();
 
-  const config = useMemo(() => getThemeConfig(theme), [
+  const baseConfig = useMemo(() => getThemeConfig(theme, 2), [
     // Only recalculate when party mode changes
     theme === 'party'
   ]);
 
+  const overlayConfig = useMemo(() => 
+    theme === 'party' 
+      ? getThemeConfig(theme, 19)
+      : baseConfig, 
+    [theme === 'party']
+  );
+
   return (
     <ErrorBoundary>
       <LoadingBoundary>
-        <ParticlesProvider config={config}>
+        <ParticlesProvider config={baseConfig}>
           <MainLayout>
             <MainContent />
+            {theme === 'party' && (
+              <div style={{ 
+                position: 'fixed', 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                bottom: 0, 
+                pointerEvents: 'none', 
+                zIndex: 1000 
+              }}>
+                <ParticlesProvider config={overlayConfig}>
+                  <div />
+                </ParticlesProvider>
+              </div>
+            )}
           </MainLayout>
         </ParticlesProvider>
       </LoadingBoundary>

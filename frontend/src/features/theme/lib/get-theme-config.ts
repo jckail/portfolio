@@ -4,12 +4,11 @@ import type { Theme } from '../stores/theme-store';
 import type { ParticlesConfig } from './particles/types';
 
 // Array of available Zuni image numbers (2 through 19)
-const ZUNI_IMAGE_NUMBERS = Array.from({ length: 18 }, (_, i) => i + 2);
 
-export const getThemeConfig = (theme: Theme): Record<string, unknown> => {
+export const getThemeConfig = (theme: Theme, imageNum: number): Record<string, unknown> => {
   // Select random Zuni image if in party mode
   const randomZuniImage = theme === 'party' 
-    ? `/images/zuni/Subject ${ZUNI_IMAGE_NUMBERS[Math.floor(Math.random() * ZUNI_IMAGE_NUMBERS.length)]}.png`
+    ? `/images/zuni/Subject ${imageNum}.png`
     : '';
 
   const configs: Record<Theme, ParticlesConfig> = {
