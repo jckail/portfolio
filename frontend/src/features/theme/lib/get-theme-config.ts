@@ -3,12 +3,10 @@ import getParticlesConfig from './particles/config';
 import type { Theme } from '../stores/theme-store';
 import type { ParticlesConfig } from './particles/types';
 
-// Array of available Zuni image numbers (2 through 19)
-
-export const getThemeConfig = (theme: Theme, imageNum: number): Record<string, unknown> => {
-  // Select random Zuni image if in party mode
-  const randomZuniImage = theme === 'party' 
-    ? `/images/zuni/Subject ${imageNum}.png`
+export const getThemeConfig = (theme: Theme): Record<string, unknown> => {
+  // Use API endpoint for party mode
+  const zuniImageUrl = theme === 'party' 
+    ? '/api/zuni'
     : '';
 
   const configs: Record<Theme, ParticlesConfig> = {
@@ -38,7 +36,7 @@ export const getThemeConfig = (theme: Theme, imageNum: number): Record<string, u
       lineDistance: 200,
       lineWidth: 2,
       moveSpeed: 1,
-      imageUrl: randomZuniImage,
+      imageUrl: zuniImageUrl,
       imageSizeAnimation: {
         enable: true,
         speed: 10,
