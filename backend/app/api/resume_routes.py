@@ -24,7 +24,8 @@ async def get_resume():
                     "company": job["company"],
                     "date": job["date"],
                     "responsibilities": job["highlights"],
-                    "link": job["link"]
+                    "link": job["link"],
+                    "logoPath": job["logoPath"]
                 }
                 for job in resume_data["experience"]
             ],

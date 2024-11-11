@@ -16,6 +16,13 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
         <div className="timeline">
           {experience.map((item, index) => (
             <div key={index} className="timeline-item">
+              {item.logoPath && (
+                <img 
+                  src={item.logoPath} 
+                  alt={`${item.company} logo`} 
+                  className="company-logo"
+                />
+              )}
               <div className="timeline-content">
                 <div className="timeline-header">
                   <h3>{item.title}</h3>

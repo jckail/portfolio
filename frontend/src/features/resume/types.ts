@@ -13,6 +13,7 @@ export interface ResumeData {
     date: string;
     responsibilities: string[];
     link: string;
+    logoPath: string;
   }[];
   projects: {
     title: string;

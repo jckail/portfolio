@@ -12,7 +12,7 @@ resume_data = {
     "about_me": str("""
 I'm a data engineer with a deep curiosity for technology, always excited to explore AI, machine learning, and data systems. I've helped build efficient, scalable systems, developed complex pipelines, and worked with transformer models.
 
-I love collaborating with others to create technology that makes a real impact. When I’m not working, you’ll likely find me building computers, hiking with my dog in the mountains, or experimenting with new machine learning tools.
+I love collaborating with others to create technology that makes a real impact. When I'm not working, you'll likely find me building computers, hiking with my dog in the mountains, or experimenting with new machine learning tools.
 
 For me, the goal is simple:
 "Make the world work better, one dataset—and adventure—at a time."
@@ -30,6 +30,7 @@ For me, the goal is simple:
                 "Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes.",
             ],
             "link": "https://www.prove.com/",
+            "logoPath": "/images/companylogos/prove.svg"
         },
         {
             "company": "Meta (Facebook)",
@@ -43,6 +44,7 @@ For me, the goal is simple:
                 "Re-architected petabyte-scale data models, reducing storage costs by 25%.",
             ],
             "link": "https://about.fb.com/",
+            "logoPath": "/images/companylogos/meta.svg"
         },
         {
             "company": "Deloitte",
@@ -55,6 +57,7 @@ For me, the goal is simple:
                 "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.",
             ],
             "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
+            "logoPath": "/images/companylogos/deloitte.svg"
         },
         {
             "company": "Wide Open West",
@@ -66,6 +69,7 @@ For me, the goal is simple:
                 "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
             ],
             "link": "https://www.wowway.com/",
+            "logoPath": "/images/companylogos/wow.svg"
         },
         {
             "company": "Common Spirit Health (Formerly CHI)",
@@ -76,6 +80,7 @@ For me, the goal is simple:
                 "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes."
             ],
             "link": "https://www.commonspirit.org/",
+            "logoPath": "/images/companylogos/commonspirit.svg"
         },
         {
             "company": "AcuStream (Acquired by R1 RCM)",
@@ -86,6 +91,7 @@ For me, the goal is simple:
                 "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue."
             ],
             "link": "https://www.r1rcm.com/",
+            "logoPath": "/images/companylogos/r1.svg"
         },
     ],
     "skills": {
