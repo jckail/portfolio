@@ -1,6 +1,6 @@
 .main-content {
   width: 100%;
-  max-width: var(--max-width, 1200px);
+  max-width: var(--max-width, 1444px);
   margin: 0 auto;
   padding: var(--spacing-lg);
 }

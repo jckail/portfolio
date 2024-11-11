@@ -15,7 +15,7 @@
   padding: var(--spacing-sm);
   margin: var(--spacing-sm) auto;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1444px;
   box-sizing: border-box;
 
   display: flex;
@@ -37,7 +37,7 @@
   padding-bottom: var(--spacing-sm);
   text-align: left;
   width: 100%;
-  max-width: 2200px;
+  max-width: 1444px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -48,7 +48,7 @@ h1, h2, h3, h4, h5, h6 {
 .section-content {
   text-align: left;
   width: 100%;
-  max-width: 2200px;
+  max-width: 1444px;
   margin: 0 auto;
 }
 
@@ -134,7 +134,7 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: var(--spacing-xl) 0;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1444px;
 }
 
 .download-button {

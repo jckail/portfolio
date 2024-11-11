@@ -1,8 +1,8 @@
 import React from 'react';
-import Header from '@/features/resume/components/header';
-import { useResume } from '@/features/resume/components/resume-provider';
-import { useAppLogic } from '@/app/providers/app-logic-provider';
-import { useAdminStore } from '@/features/admin/stores/admin-store';
+import Header from '../../../features/resume/components/header';
+import { useResume } from '../../../features/resume/components/resume-provider';
+import { useAppLogic } from '../../../app/providers/app-logic-provider';
+import { useAdminStore } from '../../../features/admin/stores/admin-store';
 import '../styles/main-layout.css';
 
 interface MainLayoutProps {
@@ -15,7 +15,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
 
   const handleResumeClick = () => {
-    const resumeSection = document.getElementById('my-resume');
+    const resumeSection = document.getElementById('resume');
     if (resumeSection) {
       resumeSection.scrollIntoView({ behavior: 'smooth' });
     }
