@@ -1,18 +1,23 @@
 /* Light theme */
 :root[data-theme='light'] {
   --background-color: #ffffff;
-  --surface-color: #0303ff32;
+  --surface-color: #ffffff00;
   --section-background: transparent;
-  --section-background-blur: 5px;
+  --section-background-blur: 4px;
   --text-color: #000000;
   --text-secondary: #666666;
-  --border-color: rgba(0, 0, 0, 0.1);
+  --border-color: #0303ff91;
   
   --primary: #0403ff;
   --primary-hover: #0302cc;
   --primary-light: rgba(4, 3, 255, 0.1);
   --primary-light-hover: rgba(4, 3, 255, 0.2);
-  --primary-border: rgba(4, 3, 255, 0.3);
+  --primary-border: #0303ff91;
+
+  --subsection-primary: rgba(4, 3, 255, 0.4);
+  --subsection-border: rgba(4, 3, 255, 0.4);
+
+
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -20,12 +25,13 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --background-color-invert:#000000; 
   --subsection-primary: #0303ff32;
+  --border-thickness: 2px;
 }
 
 /* Dark theme */
 :root[data-theme='dark'] {
   --background-color: #000000;
-  --surface-color: #0303ff32;
+  --surface-color: #0303ff11;
   --section-background: transparent;
   --section-background-blur: 5px;
   --text-color: #ffffff;
@@ -38,12 +44,16 @@
   --primary-light-hover: rgba(4, 3, 255, 0.3);
   --primary-border: rgba(4, 3, 255, 0.4);
 
+  --subsection-primary: rgba(4, 3, 255, 0.4);
+  --subsection-border: rgba(4, 3, 255, 0.4);
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
   --background-color-invert:#ffffff; 
   --subsection-primary: #0303ff56;
+  --border-thickness: 2px;
 }
 
 /* Spacing */

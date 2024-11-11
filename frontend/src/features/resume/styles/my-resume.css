@@ -1,8 +1,11 @@
 .resume-section {
+  height: 100vp;
   text-align: center;
   background: var(--section-background);
   border: none;
   margin-bottom: 0;
+  border: var(--border-thickness) solid var(--primary-border);
+  border-radius: var(--radius-md);
 }
 
 .resume-content {

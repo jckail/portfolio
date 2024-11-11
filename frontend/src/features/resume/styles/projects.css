@@ -8,7 +8,7 @@
 .project-card {
   background: var(--section-background);
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  border: var(--border-thickness) solid var(--primary-border);
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
   animation: fadeInUp 0.5s ease-out forwards;
