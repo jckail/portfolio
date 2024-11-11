@@ -16,19 +16,36 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
         <div className="timeline">
           {experience.map((item, index) => (
             <div key={index} className="timeline-item">
-              {item.logoPath && (
-                <img 
-                  src={item.logoPath} 
-                  alt={`${item.company} logo`} 
-                  className="company-logo"
-                />
-              )}
               <div className="timeline-content">
-                <div className="timeline-header">
-                  <h3>{item.title}</h3>
-                  <h4>{item.company}</h4>
-                  <div className="timeline-meta">
-                    <span className="date">{item.date}</span>
+                <div className="timeline-header-wrapper">
+                  {item.logoPath && (
+                    item.link ? (
+                      <a 
+                        href={item.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="logo-link"
+                      >
+                        <img 
+                          src={item.logoPath} 
+                          alt={`${item.company} logo`} 
+                          className="company-logo"
+                        />
+                      </a>
+                    ) : (
+                      <img 
+                        src={item.logoPath} 
+                        alt={`${item.company} logo`} 
+                        className="company-logo"
+                      />
+                    )
+                  )}
+                  <div className="timeline-header">
+                    <h3>{item.title}</h3>
+                    <h4>{item.company}</h4>
+                    <div className="timeline-meta">
+                      <span className="date">{item.date}</span>
+                    </div>
                   </div>
                 </div>
                 {item.responsibilities && (
@@ -37,16 +54,6 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
                       <li key={idx}>{responsibility}</li>
                     ))}
                   </ul>
-                )}
-                {item.link && (
-                  <a 
-                    href={item.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="company-link"
-                  >
-                    Company Website
-                  </a>
                 )}
               </div>
             </div>

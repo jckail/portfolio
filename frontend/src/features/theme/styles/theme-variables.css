@@ -3,7 +3,7 @@
   --background-color: #ffffff;
   --surface-color: rgba(255, 255, 255, 0.9);
   --section-background: transparent;
-  --section-background-blur: 3px;
+  --section-background-blur: 5px;
   --text-color: #000000;
   --text-secondary: #666666;
   --border-color: rgba(0, 0, 0, 0.1);
@@ -19,6 +19,7 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --background-color-invert:#000000; 
+  --subsection-primary: #0303ff56;
 }
 
 /* Dark theme */
@@ -26,7 +27,7 @@
   --background-color: #000000;
   --surface-color: rgba(20, 20, 20, 0.9);
   --section-background: transparent;
-  --section-background-blur: 3px;
+  --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #999999;
   --border-color: rgba(255, 255, 255, 0.1);
@@ -42,6 +43,7 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
   --background-color-invert:#ffffff; 
+  --subsection-primary: #0303ff56;
 }
 
 /* Spacing */

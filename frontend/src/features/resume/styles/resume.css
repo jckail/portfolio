@@ -13,13 +13,16 @@
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 6px var(--section-background);
   padding: var(--spacing-xl);
-  margin: var(--spacing-xl) 0;
+  margin: var(--spacing-xl) auto;
   width: 100%;
+  max-width: 1200px;
   box-sizing: border-box;
   backdrop-filter: blur(var(--section-background-blur));
   -webkit-backdrop-filter: blur(var(--section-background-blur));
-  border: 1px solid var(--border-color);
-  text-align: left;
+  border: 1px solid var(--primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Section Headers */
@@ -34,9 +37,9 @@
   font-size: 2rem;
   margin-bottom: var(--spacing-lg);
   padding-bottom: var(--spacing-sm);
-  border-bottom: 2px solid var(--border-color);
   text-align: left;
   width: 100%;
+  max-width: 2200px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -47,6 +50,8 @@ h1, h2, h3, h4, h5, h6 {
 .section-content {
   text-align: left;
   width: 100%;
+  max-width: 2200px;
+  margin: 0 auto;
 }
 
 /* Skills Section */
@@ -128,6 +133,8 @@ h1, h2, h3, h4, h5, h6 {
 .resume-download {
   text-align: center;
   padding: var(--spacing-xl) 0;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .download-button {
@@ -159,7 +166,7 @@ a:not(.resume-button):hover {
 @media (max-width: 768px) {
   .section-container {
     padding: var(--spacing-lg);
-    margin: var(--spacing-lg) 0;
+    margin: var(--spacing-lg) auto;
   }
   
   .skills-grid,
@@ -171,6 +178,6 @@ a:not(.resume-button):hover {
 @media (max-width: 480px) {
   .section-container {
     padding: var(--spacing-md);
-    margin: var(--spacing-md) 0;
+    margin: var(--spacing-md) auto;
   }
 }

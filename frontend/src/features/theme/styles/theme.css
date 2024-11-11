@@ -36,13 +36,21 @@ body {
 #root {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 /* Main container */
 .resume {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 2200px;
   margin: 0 auto;
   padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Section styles */
@@ -51,8 +59,11 @@ body {
   border-bottom: 1px solid var(--border-color);
   position: relative;
   width: 100%;
-  max-width: 100%;
+  max-width: 2200px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .section:last-child {
@@ -67,8 +78,8 @@ body {
   border-radius: 8px;
   padding: var(--spacing-md) var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
-  
   width: 100%;
+  max-width: 2200px;
   box-sizing: border-box;
   color: var(--text-color);
 }
@@ -78,11 +89,11 @@ body {
   background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
   -webkit-backdrop-filter: blur(var(--section-background-blur));
-  
   padding: var(--spacing-lg);
-  
+  border-color: transparent;
   margin: var(--spacing-md) 0;
   width: 100%;
+  max-width: 2200px;
   box-sizing: border-box;
 }
 
@@ -95,7 +106,7 @@ h1, h2, h3, h4, h5, h6 {
 .section-header h2 {
   color: var(--text-color);
   font-size: 2rem;
-  border-bottom: 2px solid var(--primary-border);
+  border-bottom: 2px solid var(--primary);
   padding-bottom: var(--spacing-sm);
   margin: 0;
 }
