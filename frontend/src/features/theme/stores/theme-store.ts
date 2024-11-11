@@ -18,6 +18,18 @@ const CLICK_THRESHOLD = 10;
 const TIME_WINDOW = 5000; // 5 seconds in milliseconds
 const PARTY_HIDE_DURATION = 10000; // 10 seconds in milliseconds
 
+const getThemeFromUrl = (): Theme | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = urlParams.get('theme');
+    return (themeParam === 'light' || themeParam === 'dark' || themeParam === 'party') ? themeParam as Theme : null;
+  } catch (error) {
+    console.error('[Theme Store] Error reading theme from URL:', error);
+    return null;
+  }
+};
+
 const getStoredTheme = (): Theme | null => {
   try {
     if (typeof window === 'undefined') return null;
@@ -36,6 +48,17 @@ const saveThemePreference = (theme: Theme): void => {
     console.log('[Theme Store] Saved theme preference:', theme);
   } catch (error) {
     console.error('[Theme Store] Error saving theme preference:', error);
+  }
+};
+
+const updateUrlTheme = (theme: Theme): void => {
+  try {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('theme', theme);
+    window.history.replaceState({}, '', url.toString());
+  } catch (error) {
+    console.error('[Theme Store] Error updating URL theme:', error);
   }
 };
 
@@ -66,6 +89,7 @@ export const useThemeStore = create<ThemeState>()(
             isToggleHidden: true
           });
           saveThemePreference('party');
+          updateUrlTheme('party');
           
           // Show toggle again after PARTY_HIDE_DURATION
           setTimeout(() => {
@@ -81,6 +105,7 @@ export const useThemeStore = create<ThemeState>()(
                         'light'; // If in party mode, go back to light
         
         saveThemePreference(newTheme);
+        updateUrlTheme(newTheme);
         set({ 
           theme: newTheme,
           clickCount: newClickCount,
@@ -89,6 +114,7 @@ export const useThemeStore = create<ThemeState>()(
       },
       setTheme: (theme) => {
         saveThemePreference(theme);
+        updateUrlTheme(theme);
         set({ 
           theme, 
           clickCount: 0, 
@@ -97,9 +123,13 @@ export const useThemeStore = create<ThemeState>()(
         }, false, 'theme/set');
       },
       initTheme: () => {
+        // Check URL first, then localStorage, then default
+        const urlTheme = getThemeFromUrl();
         const storedTheme = getStoredTheme();
-        const theme = storedTheme || DEFAULT_THEME;
+        const theme = urlTheme || storedTheme || DEFAULT_THEME;
+        
         saveThemePreference(theme);
+        updateUrlTheme(theme);
         set({ 
           theme, 
           clickCount: 0, 

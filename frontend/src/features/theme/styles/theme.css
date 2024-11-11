@@ -63,7 +63,7 @@
   --background-color: #000000;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);
-  --section-background-blur: 8px;
+  --section-background-blur: 0;
   --text-color: #ff00ff;
   --text-secondary: #00ffff;
   --border-color: #ff00ff;

@@ -14,14 +14,18 @@ const ZUNI_IMAGE_NUMBERS = Array.from({ length: 18 }, (_, i) => i + 2);
 const App: React.FC = () => {
   const { theme } = useThemeStore();
 
-  const baseConfig = useMemo(() => getThemeConfig(theme, 2), [
+  
+
+  const ZUNI_IMAGE_NUMBERS = Array.from({ length: 18 }, (_, i) => i + 2);
+
+  const baseConfig = useMemo(() => getThemeConfig(theme, ZUNI_IMAGE_NUMBERS[Math.floor(Math.random() * ZUNI_IMAGE_NUMBERS.length)]), [
     // Only recalculate when party mode changes
     theme === 'party'
   ]);
 
   const overlayConfig = useMemo(() => 
     theme === 'party' 
-      ? getThemeConfig(theme, 19)
+      ? getThemeConfig(theme, ZUNI_IMAGE_NUMBERS[Math.floor(Math.random() * ZUNI_IMAGE_NUMBERS.length)]+1)
       : baseConfig, 
     [theme === 'party']
   );
@@ -29,6 +33,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <LoadingBoundary>
+      <ParticlesProvider config={baseConfig}>
         <ParticlesProvider config={baseConfig}>
           <MainLayout>
             <MainContent />
@@ -49,6 +54,8 @@ const App: React.FC = () => {
             )}
           </MainLayout>
         </ParticlesProvider>
+        </ParticlesProvider>
+        
       </LoadingBoundary>
     </ErrorBoundary>
   );
