@@ -86,26 +86,11 @@ function ParticlesProvider({ children, updateParticlesConfig }: ParticlesProvide
 
     checkAndInit();
 
-    // Watch for theme changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-theme') {
-          initParticles();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    });
-
     return () => {
       destroyParticles();
       particlesContainer?.remove();
-      observer.disconnect();
     };
-  }, [updateParticlesConfig]);
+  }, []); // Only run once on mount, removed updateParticlesConfig dependency
 
   const value = {
     particlesLoaded
