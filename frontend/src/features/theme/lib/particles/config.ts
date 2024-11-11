@@ -11,6 +11,13 @@ const getParticlesConfig = (
     moveSpeed?: number;
     bubbleSize?: number;
     bubbleSpeed?: number;
+    imageUrl?: string;
+    imageSizeAnimation?: {
+      enable?: boolean;
+      speed?: number;
+      minSize?: number;
+      sync?: boolean;
+    };
   }
 ): ParticlesConfig => {
   const {
@@ -22,8 +29,28 @@ const getParticlesConfig = (
     lineWidth = 2,
     moveSpeed = 0.3,
     bubbleSize = 8,
-    bubbleSpeed = 5
+    bubbleSpeed = 5,
+    imageUrl,
+    imageSizeAnimation
   } = options;
+  
+  const baseSize = imageUrl ? particleSize : particleSize;
+  
+  // Default animation settings
+  const defaultSizeAnimation = {
+    enable: false,
+    speed: 10,
+    minSize: baseSize / 2,
+    sync: false
+  };
+
+  // Merge with provided animation settings
+  const finalSizeAnimation = {
+    ...defaultSizeAnimation,
+    ...(imageSizeAnimation || {}),
+    // Ensure enable is always boolean
+    enable: imageSizeAnimation?.enable ?? defaultSizeAnimation.enable
+  };
   
   return {
     background: {
@@ -40,7 +67,14 @@ const getParticlesConfig = (
       color: {
         value: particleColor
       },
-      shape: {
+      shape: imageUrl ? {
+        type: "image",
+        image: {
+          src: imageUrl,
+          width: baseSize,
+          height: baseSize
+        }
+      } : {
         type: "circle",
         stroke: {
           width: 0,
@@ -58,13 +92,13 @@ const getParticlesConfig = (
         }
       },
       size: {
-        value: particleSize,
+        value: baseSize,
         random: false,
         anim: {
-          enable: false,
-          speed: 0.1,
-          size_min: 2,
-          sync: true
+          enable: finalSizeAnimation.enable,
+          speed: finalSizeAnimation.speed,
+          size_min: finalSizeAnimation.minSize,
+          sync: finalSizeAnimation.sync
         }
       },
       line_linked: {
