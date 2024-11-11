@@ -75,10 +75,10 @@ body {
   color: var(--text-color);
 }
 
-/* Apply transitions */
+/* Apply transitions only to color and border-color, not background-color */
 body,
 body * {
-  transition-property: background-color, color, border-color;
+  transition-property: color, border-color;
   transition-duration: 0.3s;
   transition-timing-function: ease;
 }

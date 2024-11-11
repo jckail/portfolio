@@ -28,10 +28,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         // Set data attribute for CSS variables
         document.documentElement.setAttribute('data-theme', theme);
         
-        // Force a repaint to ensure styles are applied immediately
-        document.documentElement.style.display = 'none';
-        void document.documentElement.offsetHeight;
-        document.documentElement.style.display = '';
+        // Force a repaint on iOS without affecting scroll position
+        document.documentElement.style.transform = 'translateZ(0)';
+        requestAnimationFrame(() => {
+          document.documentElement.style.transform = '';
+        });
         
         console.log('[Theme Provider] Applied theme:', theme);
       } catch (error) {
@@ -41,10 +42,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     // Apply theme immediately
     applyTheme();
-
-    // Add a small delay to ensure transitions work properly on mobile
-    const timeoutId = setTimeout(applyTheme, 50);
-    return () => clearTimeout(timeoutId);
   }, [theme]);
 
   return <>{children}</>;
