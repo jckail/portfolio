@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
+  
 }
 
 .skill-category {
@@ -16,6 +17,7 @@
 .skill-category:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  
 }
 
 .skill-category h3 {
@@ -50,6 +52,8 @@
   background: var(--border-color);
   color: var(--text-color);
   border-color: var(--border-color);
+  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 30px var(--primary);
 }
 
 @media (max-width: 768px) {

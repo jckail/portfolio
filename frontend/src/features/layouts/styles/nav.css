@@ -29,6 +29,8 @@
   background: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  box-shadow: 0 0 30px var(--primary);
+  
 }
 
 .theme-toggle {
@@ -50,6 +52,8 @@
 .theme-toggle:hover {
   background: var(--primary-light);
   transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 30px var(--primary);
 }
 
 .admin-button {
