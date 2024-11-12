@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ResumeData } from '../types';
 import { Theme } from '../../theme/stores/theme-store';
+import SidePanel from '../../layouts/components/side-panel';
 import GitHubIcon from '../../theme/components/icons/github-icon';
 import LinkedInIcon from '../../theme/components/icons/linkedin-icon';
-import SidePanel from '../../layouts/components/side-panel';
+import MoonIcon from '../../theme/components/icons/moon-icon';
+import SunIcon from '../../theme/components/icons/sun-icon';
+import PartyIcon from '../../theme/components/icons/party-icon';
+import ResumeIcon from '../../theme/components/icons/resume-icon';
 import '../styles/header.css';
 
 interface HeaderProps {
@@ -62,13 +66,13 @@ const Header: React.FC<HeaderProps> = ({
   const getThemeIcon = () => {
     switch (theme) {
       case 'light':
-        return '🌙';
+        return <MoonIcon />;
       case 'dark':
-        return '☀️';
+        return <SunIcon />;
       case 'party':
-        return '🎉';
+        return <PartyIcon />;
       default:
-        return '🌙';
+        return <MoonIcon />;
     }
   };
 
@@ -103,34 +107,38 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           <div className="nav-right">
-            {resumeData?.github && (
-              <a 
-                href={resumeData.github} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="icon-link"
-                aria-label="GitHub Profile"
-              >
-                <GitHubIcon />
-              </a>
-            )}
-            {resumeData?.linkedin && (
-              <a 
-                href={resumeData.linkedin} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="icon-link"
-                aria-label="LinkedIn Profile"
-              >
-                <LinkedInIcon />
-              </a>
-            )}
-            <button 
-              onClick={handleResumeClick}
-              className="resume-button"
-            >
-              See My Resume
-            </button>
+          
+                {resumeData?.github && (
+                  <a 
+                    href={resumeData.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="icon-link"
+                    aria-label="GitHub Profile"
+                  >
+                    <GitHubIcon />
+                  </a>
+                )}
+                {resumeData?.linkedin && (
+                  <a 
+                    href={resumeData.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="icon-link"
+                    aria-label="LinkedIn Profile"
+                  >
+                    <LinkedInIcon />
+                  </a>
+                )}
+                <button 
+                  onClick={handleResumeClick}
+                  className="resume-button"
+                  aria-label="Download Resume"
+                >
+                  <strong>Resume</strong>
+              <ResumeIcon/>
+                </button>
+              
             {!isToggleHidden && (
               <button 
                 onClick={toggleTheme}

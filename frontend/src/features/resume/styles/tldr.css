@@ -1,0 +1,131 @@
+.section {
+  margin-bottom: var(--spacing-s);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-m);
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.section-content {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xl);
+  margin: 0 auto;
+  max-width: 900px;
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+}
+
+.section-content:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.tldr-section {
+  background: var(--surface-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: var(--border-thickness) solid var(--primary-border);
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+}
+
+.tldr-section:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
+.tldr-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.tldr-text {
+  flex: 1;
+}
+
+.tldr-section h2 {
+  color: var(--text-color);
+  font-size: 2rem;
+  margin-bottom: var(--spacing-m);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tldr-section p {
+  color: var(--text-color);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+.headshot-container {
+  flex-shrink: 0;
+  width: 155px;
+  height: 200px;
+  border-radius: var(--radius-sm);
+  background: black;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid transparent;
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+  margin-left: auto;
+}
+
+.headshot {
+  width: 98%;
+  height: 99%;
+  object-fit: fill;
+  border-radius: 10%;
+  display: block;
+  margin: 0 auto;
+  transition: transform var(--transition-normal),
+  box-shadow var(--transition-normal);
+}
+
+@media (max-width: 768px) {
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .section-content {
+    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-md);
+  }
+
+  .tldr-section h2 {
+    font-size: 1.75rem;
+  }
+
+  .tldr-section p {
+    font-size: 0.95rem;
+  }
+
+  .tldr-content {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+
+  .headshot-container {
+    width: 115px;
+    height: 148px;
+    margin-left: 0;
+  }
+  
+  .headshot {
+    width: 99%;
+    height: 99%;
+  }
+}

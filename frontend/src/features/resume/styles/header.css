@@ -75,6 +75,10 @@
   margin: 0;
   font-weight: 500;
 }
+:root { 
+  --icon-size-desktop:30px;
+  --icon-size-mobile:12px;
+}
 
 .nav-right {
   display: flex;
@@ -82,59 +86,70 @@
   gap: var(--spacing-md);
 }
 
-.icon-link {
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.nav-right .icon-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  background: transparent;
-  border: var(--border-thickness) solid var(--primary-border);
-  transition: all var(--transition-fast);
-  padding: var(--spacing-xs);
   color: var(--text-color);
-}
-
-.icon-link:hover {
-  background: var(--primary-light-hover);
-  transform: translateY(-2px);
-  color: var(--primary);
-  box-shadow: var(--shadow-md);
-  box-shadow: 0 0 30px var(--primary);
-}
-
-.icon-link svg {
-  width: 20px;
-  height: 20px;
-  transition: transform var(--transition-fast);
-}
-
-.resume-button {
-  
-  
-  color: var(--text-color);
-  height: 36px;
+  transition: all var(--transition-normal);
+  padding: var(--spacing-xs) var(--spacing-s);
+  border-radius: var(--radius-sm);
+  height: var(--icon-size-desktop);
+  min-width: var(--icon-size-desktop);
   background: transparent;
-  border: var(--border-thickness) solid var(--primary-border);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-full);
-  font-size: 0.9rem;
-  font-weight: 800;
+  border: 1px solid var(--primary-border);
+}
+
+.nav-right .icon-link:hover {
+  color: var(--primary-hover);
+  background:var(--primary);
+  border-color: var(--primary-hover);
+}
+
+.nav-right .icon-link svg {
+  width: var(--icon-size-desktop);
+  height: var(--icon-size-desktop);
+  background: var(--text-color);
+  color: var(--background-color);
+}
+
+.nav-right .resume-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-m);
+  background: var(--text-color);
+  color: var(--background-color);
+
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
+  font-size: var(--font-size-base);
+  transition: all var(--transition-normal);
+  min-height: var(--icon-size-desktop);
+  width: 120px;
 }
 
-.resume-button:hover {
-  background: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  box-shadow: var(--shadow-md);
-  box-shadow: 0 0 30px var(--primary);
+.nav-right .resume-button:hover {
+  background:var(--primary);
+  border-color: var(--primary-hover);
 }
 
-.theme-toggle {
+.resume-button svg {
+  padding: var(--spacing-s);
+  width: var(--icon-size-desktop);
+  height: var(--icon-size-desktop);
+}
+
+.nav-right .theme-toggle {
   background: transparent;
   border: var(--border-thickness) solid var(--primary-border);
   font-size: 1.2rem;
@@ -143,15 +158,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-color);
-  border-radius: var(--radius-full);
+  background: var(--text-color);
+  color: var(--background-color);
+  border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
-  width: 36px;
-  height: 36px;
+  width: var(--icon-size-desktop);
+  height: var(--icon-size-desktop);
 }
 
-.theme-toggle:hover {
-  background: var(--primary-light);
+.nav-right .theme-toggle svg {
+  width: var(--icon-size-desktop);
+  height: var(--icon-size-desktop);
+}
+
+.nav-right .theme-toggle:hover {
+  background: var(--primary);
   transform: scale(1.1);
   box-shadow: var(--shadow-md);
   box-shadow: 0 0 30px var(--primary);
@@ -176,7 +197,9 @@
   }
 
   .nav-right {
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-s);
+    justify-content: center;
   }
 
   .resume-button {
@@ -198,6 +221,11 @@
     width: 32px;
     height: 32px;
     font-size: 1rem;
+  }
+
+  .nav-right .theme-toggle svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -229,5 +257,10 @@
     width: 28px;
     height: 28px;
     font-size: 0.9rem;
+  }
+
+  .nav-right .theme-toggle svg {
+    width: 14px;
+    height: 14px;
   }
 }
