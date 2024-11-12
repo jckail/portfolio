@@ -7,6 +7,7 @@ import { getThemeConfig } from '../features/theme/lib/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import ChatPortal from '../features/resume/components/ChatPortal';
+import AdminHandler from '../features/admin/components/admin-handler';
 import './styles/app.css';
 
 const App: React.FC = () => {
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             </MainLayout>
           </ParticlesProvider>
           <ChatPortal />
+          <AdminHandler />
         </>
       </LoadingBoundary>
     </ErrorBoundary>

@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdminStore } from '../stores/admin-store';
 import AdminLogin from './admin-login';
+import TelemetryBanner from '../../telemetry/components/telemetry-banner';
 
-export const AdminHandler = () => {
+const AdminHandler: React.FC = () => {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-  const { isLoggedIn, logout } = useAdminStore();
+  const { isLoggedIn, logout, verifyToken } = useAdminStore();
+
+  // Check for existing token on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem('adminToken');
+    if (storedToken && !isLoggedIn) {
+      verifyToken(storedToken).catch(console.error);
+    }
+  }, []);
+
+  // Handle keyboard shortcut
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        setIsAdminLoginOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const handleAdminClick = async () => {
     if (isLoggedIn) {
-      await logout();
+      try {
+        await logout();
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
     } else {
       setIsAdminLoginOpen(true);
     }
@@ -18,18 +44,16 @@ export const AdminHandler = () => {
     setIsAdminLoginOpen(false);
   };
 
-  return {
-    isAdminLoginOpen,
-    isLoggedIn,
-    handleAdminClick,
-    AdminLoginComponent: (
+  return (
+    <>
+      {isLoggedIn && <TelemetryBanner isAdminLoggedIn={isLoggedIn} />}
       <AdminLogin 
         isOpen={isAdminLoginOpen} 
         onClose={() => setIsAdminLoginOpen(false)}
         onLoginSuccess={handleLoginSuccess}
       />
-    )
-  };
+    </>
+  );
 };
 
 export default AdminHandler;
