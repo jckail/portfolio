@@ -6,3 +6,4 @@ typing_extensions==4.12.2
 python-dotenv==1.0.0
 supabase==2.9.1
 watchfiles==0.24.0
+anthropic==0.39.0

@@ -1,5 +1,5 @@
 import logging
-from backend.app.utils.supabase_client import supabase
+from ..utils.supabase_client import supabase
 import asyncio
 import socket
 import os

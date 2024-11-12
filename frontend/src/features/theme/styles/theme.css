@@ -16,7 +16,7 @@
 
 /* Theme classes for more reliable switching */
 .theme-light {
-  --background-color: transparent;
+  --background-color: white;
   --surface-color: #ffffff00;
   --section-background: transparent;
   --section-background-blur: 4px;

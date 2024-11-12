@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from .api.routes import router as api_router
 from .api.zuni_routes import router as zuni_router
+from .api.chat_routes import router as chat_router
 from .utils.logger import setup_logging
 import os
 from dotenv import load_dotenv
@@ -26,7 +27,8 @@ required_env_vars = [
     "ADMIN_EMAIL",
     "RESUME_FILE",
     "SUPABASE_JWT_SECRET",
-    "SUPABASE_PW"
+    "SUPABASE_PW",
+    "ANTHROPIC_API_KEY"
 ]
 
 # Log all environment variables (excluding sensitive ones)
@@ -70,6 +72,7 @@ app.add_middleware(
 # Mount API routes
 app.include_router(api_router, prefix="/api")
 app.include_router(zuni_router)  # Added Zuni router
+app.include_router(chat_router)  # Added Chat router
 
 # Mount static files
 try:
