@@ -5,7 +5,7 @@ import TechnicalSkills from '../sections/technical-skills';
 import Experience from '../sections/experience';
 import Projects from '../sections/projects';
 import MyResume from '../sections/my-resume';
-import Chat from '../Chat';
+
 import '../../styles/resume.css';
 
 const MainContent = () => {
@@ -47,7 +47,7 @@ const MainContent = () => {
           </section>
         </div>
       </div>
-      <Chat />
+      
     </>
   );
 };

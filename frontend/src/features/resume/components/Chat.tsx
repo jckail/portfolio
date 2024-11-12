@@ -127,7 +127,9 @@ const Chat: React.FC = () => {
     };
   }, [open, initialContextSent]);
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setOpen(true);
   };
 
@@ -156,13 +158,14 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <>
+    <div style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'none', isolation: 'isolate' }}>
       <Box
         sx={{
           position: 'fixed',
           bottom: 20,
           left: 20,
-          zIndex: 1000,
+          zIndex: 9999,
+          pointerEvents: 'auto',
           '@keyframes glowPulse': {
             '0%': {
               boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
@@ -179,9 +182,7 @@ const Chat: React.FC = () => {
         <Fab
           sx={{
             bgcolor: 'var(--primary-border)',
-            
             color: 'var(--text-color)',
-
             width: 65,
             height: 65,
             transition: 'all 0.3s ease-in-out',
@@ -193,7 +194,6 @@ const Chat: React.FC = () => {
             },
             fontSize: '1.5rem',
             backdropFilter: 'blur(5px)',
-            
           }}
           aria-label="Chat with AI"
           onClick={handleClickOpen}
@@ -204,25 +204,48 @@ const Chat: React.FC = () => {
 
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(_, reason) => {
+          if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+            handleClose();
+          }
+        }}
         maxWidth={false}
         fullScreen={isMobile}
+        disableScrollLock
+        hideBackdrop={!isMobile}
         PaperProps={{
           sx: {
-            width: isMobile ? '100%' : '400px',
-            height: isMobile ? '100%' : '80vh',
-            maxHeight: isMobile ? '100%' : '80vh',
+            width: isMobile ? '100%' : 'calc(33.33% - 5%)',
+            height: isMobile ? '100%' : '90vh',
+            maxHeight: isMobile ? '100%' : '90vh',
             borderRadius: isMobile ? 0 : 2,
-            margin: isMobile ? 0 : '10vh 20px 10vh auto',
+            margin: isMobile ? 0 : '5vh 5% 5vh 5%',
             display: 'flex',
             flexDirection: 'column',
             position: isMobile ? 'relative' : 'fixed',
-            left: isMobile ? 'auto' : 20,
+            left: isMobile ? 'auto' : 0,
             top: isMobile ? 'auto' : 0,
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',
             backdropFilter: 'blur(16px)',
             background: 'rgba(var(--surface-color-rgb), 0.85)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            isolation: 'isolate',
+          }
+        }}
+        sx={{
+          position: 'fixed',
+          '& .MuiDialog-container': {
+            position: 'fixed',
+            pointerEvents: 'none',
+            alignItems: 'flex-start',
+            justifyContent: 'flex-start',
+          },
+          '& .MuiPaper-root': {
+            pointerEvents: 'auto',
+          },
+          '& .MuiBackdrop-root': {
+            position: 'fixed',
           }
         }}
       >
@@ -391,7 +414,7 @@ const Chat: React.FC = () => {
           </Box>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 

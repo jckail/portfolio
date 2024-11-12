@@ -6,6 +6,7 @@ import { useThemeStore } from '../features/theme/stores/theme-store';
 import { getThemeConfig } from '../features/theme/lib/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
+import ChatPortal from '../features/resume/components/ChatPortal';
 import './styles/app.css';
 
 const App: React.FC = () => {
@@ -19,11 +20,14 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <LoadingBoundary>
-        <ParticlesProvider config={baseConfig}>
-          <MainLayout>
-            <MainContent />
-          </MainLayout>
-        </ParticlesProvider>
+        <>
+          <ParticlesProvider config={baseConfig}>
+            <MainLayout>
+              <MainContent />
+            </MainLayout>
+          </ParticlesProvider>
+          <ChatPortal />
+        </>
       </LoadingBoundary>
     </ErrorBoundary>
   );

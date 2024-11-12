@@ -85,8 +85,17 @@ export const useScrollSpy = () => {
     };
 
     // Create a MutationObserver to watch for content changes
-    const observer = new MutationObserver(() => {
-      if (location.hash) {
+    const observer = new MutationObserver((mutations) => {
+      // Check if the mutation is from the chat dialog
+      const isChatMutation = mutations.some(mutation => {
+        const target = mutation.target as HTMLElement;
+        return target.closest('[role="dialog"]') !== null || 
+               target.getAttribute('role') === 'dialog' ||
+               target.closest('[aria-label="Chat with AI"]') !== null;
+      });
+
+      // Only handle scroll if it's not a chat-related mutation
+      if (location.hash && !isChatMutation) {
         handleInitialScroll();
       }
     });
@@ -94,7 +103,9 @@ export const useScrollSpy = () => {
     // Start observing the document with the configured parameters
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['role', 'aria-label']
     });
 
     // Handle initial scroll after DOM is ready
