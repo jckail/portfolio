@@ -46,11 +46,11 @@
 
 .company-logo {
   justify-content: center;
-  width: 90px;
-  height: 50px;
-  border-radius: 5%;
+  width: 135px;
+  height: 45px;
+  border-radius: var(--radius-sm);
   background: white;
-  border: var(--border-thickness) solid white;
+
   box-shadow: 0 0 10px var(--primary);
   object-fit: contain;
   flex-shrink: 0;
@@ -63,11 +63,12 @@
   border: var(--border-thickness) solid var(--primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  box-shadow: 0 0 30px var(--primary);
+  box-shadow: 0 0 350px var(--primary);
 }
 
 /* Ensure the link container doesn't affect logo positioning */
 .logo-link {
+  margin-top:25px;
   justify-content: center;
   display: block;
   width: 90px;
@@ -82,7 +83,7 @@
 .timeline-header {
   display: column;
   align-items: center; /* Vertically center the content */
-  margin-left: var(--spacing-md);
+  margin-left:  75px;
   justify-content: center;
   height: 70px;
 }
@@ -96,7 +97,7 @@
 }
 
 .timeline-header h4 {
-  margin-top: 8px;
+  margin-top: 5px;
   color: var(--text-color);
   font-size: 1.0rem;
   margin-bottom: 1px;
