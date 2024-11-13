@@ -5,7 +5,7 @@
   --background-color: transparent;
   --surface-color: #ffffff00;
   --section-background: transparent;
-  --section-background-blur: 3px; /* Reduced blur for better performance */
+  --section-background-blur: 7px;
   --text-color: #000000;
   --text-secondary: #666666;
   --border-color: #0303ff91;
@@ -27,7 +27,7 @@
   --background-color: transparent;
   --surface-color: #0303ff11;
   --section-background: #0303ff1d;
-  --section-background-blur: 3px; /* Reduced blur for better performance */
+  --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #999999;
   --border-color: rgba(255, 255, 255, 0.1);
@@ -71,52 +71,53 @@
 html {
   margin: 0;
   padding: 0;
-  min-height: 100vh; /* Changed from 100vmax for better performance */
+  min-height: 100vh;
 }
 
 body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
     'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  position: relative !important;
-  will-change: color, border-color; /* Optimize transitions */
+  position: relative;
+  
+  
 }
 
-/* Optimize transitions by only applying to specific elements that need them */
-.animated-element {
+/* Apply transitions only to color and border-color, not background-color */
+body,
+body * {
   transition-property: color, border-color;
   transition-duration: 0.2s;
   transition-timing-function: ease;
 }
 
-/* Party mode animations - optimized for performance */
-@media (min-width: 769px) {
-  /* Only apply party animations on desktop */
-  .theme-party .party-animate {
-    animation: party-colors 5s infinite;
-  }
-
-  .theme-party .section-header,
-  .theme-party .section-content {
-    animation: party-border 3s infinite;
-  }
+/* Party mode animations */
+.theme-party * {
+  animation: party-colors 5s infinite;
 }
 
 @keyframes party-colors {
-  0%, 100% { color: #ff00ff; }
+  0% { color: #ff00ff; }
   25% { color: #00ffff; }
   50% { color: #ffff00; }
   75% { color: #00ff00; }
+  100% { color: #ff00ff; }
+}
+
+.theme-party .section-header,
+.theme-party .section-content {
+  animation: party-border 3s infinite;
 }
 
 @keyframes party-border {
-  0%, 100% { border-color: #ff00ff; }
+  0% { border-color: #ff00ff; }
   33% { border-color: #00ffff; }
   66% { border-color: #ffff00; }
+  100% { border-color: #ff00ff; }
 }
 
 /* Disable transitions for elements that shouldn't animate */
@@ -125,6 +126,16 @@ body {
   transition: none !important;
 }
 
+/* Particles layer */
+#particles-js {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
 /* Content layer */
 #root {
   position: relative;
@@ -133,26 +144,6 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 100vh; /* Changed from 100vmax for better performance */
+  min-height: 100vh;
   background-color: transparent;
-  will-change: transform; /* Optimize compositing */
-}
-
-/* Mobile-specific optimizations */
-@media (max-width: 768px) {
-  /* Remove animations on mobile */
-  .theme-party * {
-    animation: none !important;
-  }
-  
-  /* Reduce transition duration on mobile */
-  .animated-element {
-    transition-duration: 0.1s;
-  }
-
-  /* Disable blur effects on mobile */
-  .theme-light,
-  .theme-dark {
-    --section-background-blur: 0;
-  }
 }
