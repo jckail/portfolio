@@ -3,11 +3,28 @@ import getParticlesConfig from './particles/config';
 import type { Theme } from '../stores/theme-store';
 import type { ParticlesConfig, ParticleConfig } from './particles/types';
 
+
+
+const generateRandomZuniUrls = (): string[] => {
+  const usedNumbers: Set<number> = new Set();
+  const urls: string[] = [];
+
+  while (urls.length < 4) {
+    const randomNum: number = Math.floor(Math.random() * 19) + 1; // Random number between 1 and 19
+    if (!usedNumbers.has(randomNum)) {
+      usedNumbers.add(randomNum);
+      urls.push(`/api/zuni?subject=${randomNum}`);
+    }
+  }
+
+  return urls;
+};
+
+
+
 export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<string, unknown>[] => {
   // Use API endpoint for party mode
-  const zuniImageUrls = theme === 'party' 
-    ? ['/api/zuni','/api/zuni','/api/zuni','/api/zuni'] // Add more URLs here for multiple images
-    : [];
+  const zuniImageUrls: string[] = theme === 'party' ? generateRandomZuniUrls() : [];
 
   // Party color palette
   const partyColors = [
@@ -25,22 +42,23 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
     '#90ee90'  // Light green
   ];
 
-  if (theme === 'party' && zuniImageUrls.length > 0) {
+  if (theme === 'party') {
+    
     return zuniImageUrls.map((url, index) => ({
       ...getParticlesConfig({
         particleColor: partyColors[index % partyColors.length],
         lineColor: partyColors[index % partyColors.length],
         backgroundColor: index === 0 ? BLACK : 'transparent', // Only first container sets background
         particleCount: 5,
-        particleSize: 20,
-        lineDistance: 250,
+        particleSize: 50,
+        lineDistance: 450,
         lineWidth: 5,
         moveSpeed: 1,
         imageUrls: [url], // Pass single-element array with current URL
         imageSizeAnimation: {
           enable: true,
           speed: 1,
-          minSize: 10,
+          minSize: 30,
           sync: false
         }
       })
