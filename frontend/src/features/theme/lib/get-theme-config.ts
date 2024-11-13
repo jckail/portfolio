@@ -1,4 +1,4 @@
-import { PRIMARY } from '../../../config/constants';
+import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
 import getParticlesConfig from './particles/config';
 import type { Theme } from '../stores/theme-store';
 import type { ParticlesConfig } from './particles/types';
@@ -11,26 +11,21 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> => {
 
   const configs: Record<Theme, ParticlesConfig> = {
     light: getParticlesConfig({
-      particleColor: PRIMARY,
+      particleColor: [PRIMARY],
       lineColor: PRIMARY,
-      particleCount: 20,
-      particleSize: 6,
-      lineDistance: 400,
-      lineWidth: 3,
-      moveSpeed: .25,
+      backgroundColor: WHITE,
     }),
     dark: getParticlesConfig({
-      particleColor: PRIMARY,
+      particleColor: [PRIMARY],
       lineColor: PRIMARY,
-      particleCount: 20,
-      particleSize: 6,
-      lineDistance: 400,
-      lineWidth: 3,
-      moveSpeed: .25,
+      backgroundColor: BLACK,
+      particleCount: 10,
+
     }),
     party: getParticlesConfig({
-      particleColor: '#ff00ff',
+      particleColor: ['#ff00ff'],
       lineColor: '#ff00ff',
+      backgroundColor: BLACK,
       particleCount: 15,
       particleSize: 64,
       lineDistance: 200,

@@ -2,7 +2,7 @@
 
 /* Theme classes for more reliable switching */
 .theme-light {
-  --background-color: white;
+  --background-color: transparent;
   --surface-color: #ffffff00;
   --section-background: transparent;
   --section-background-blur: 7px;
@@ -24,7 +24,7 @@
 }
 
 .theme-dark {
-  --background-color: #000000;
+  --background-color: transparent;
   --surface-color: #0303ff11;
   --section-background: #0303ff1d;
   --section-background-blur: 5px;
@@ -46,7 +46,7 @@
 }
 
 .theme-party {
-  --background-color: #000000;
+  --background-color: transparent;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);
   --section-background-blur: 0;
@@ -83,8 +83,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-  background-color: var(--background-color);
-  color: var(--text-color);
+  
+  
 }
 
 /* Apply transitions only to color and border-color, not background-color */
@@ -135,7 +135,6 @@ body * {
   height: 100%;
   z-index: 1;
   pointer-events: none;
-  background: transparent !important;
 }
 
 /* Content layer */

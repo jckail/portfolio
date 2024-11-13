@@ -12,11 +12,12 @@ import './styles/app.css';
 
 const App: React.FC = () => {
   const { theme } = useThemeStore();
+  const baseConfig = getThemeConfig(theme);
 
-  const baseConfig = useMemo(() => getThemeConfig(theme), [
-    // Only recalculate when party mode changes
-    theme === 'party'
-  ]);
+  // const baseConfig = useMemo(() => getThemeConfig(theme), [
+  //   // Only recalculate when party mode changes
+  //   theme === 'party'
+  // ]);
 
   return (
     <ErrorBoundary>

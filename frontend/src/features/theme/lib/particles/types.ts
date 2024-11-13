@@ -1,47 +1,72 @@
+export interface ParticleImage {
+  src: string;
+  width: number;
+  height: number;
+}
+
+export interface ParticleShape {
+  type: string;
+  stroke?: {
+    width: number;
+    color: string | string[];
+  };
+  image?: ParticleImage;
+}
+
+
+export interface ParticleOpacity {
+  value: number;
+  random: boolean;
+  anim?: {
+    enable: boolean;
+    speed: number;
+    opacity_min: number;
+    sync: boolean;
+  };
+};
+export interface ParticleSize {
+  value: number;
+  random: boolean;
+  anim?: {
+    enable: boolean;
+    speed: number;
+    size_min: number;
+    sync: boolean;
+  };
+};
+export interface ParticleColor  {
+  value: string | string[];
+}
+
+export interface Particle {
+  color?: ParticleColor;
+  number?:{
+    value: number;
+    density: {
+      enable: boolean;
+      value_area: number;
+    };
+  };
+  shape?: ParticleShape;
+  opacity?: ParticleOpacity;
+  size?: ParticleSize;
+};
+
+
 export interface ParticlesConfig {
+  background?: {
+    color: string;
+    image?: string;
+    position?: string;
+    repeat?: string;
+    size?: string;
+  };
   particles: {
-    number: {
-      value: number;
-      density: {
-        enable: boolean;
-        value_area: number;
-      };
-    };
-    color: {
-      value: string | string[];
-    };
-    shape: {
-      type: string;
-      stroke?: {
-        width: number;
-        color: string;
-      };
-      image?: {
-        src: string;
-        width: number;
-        height: number;
-      };
-    };
-    opacity: {
-      value: number;
-      random: boolean;
-      anim?: {
-        enable: boolean;
-        speed: number;
-        opacity_min: number;
-        sync: boolean;
-      };
-    };
-    size: {
-      value: number;
-      random: boolean;
-      anim?: {
-        enable: boolean;
-        speed: number;
-        size_min: number;
-        sync: boolean;
-      };
-    };
+    number: Particle["number"];
+    color: Particle["color"];
+    shape?: Particle["shape"];
+    opacity?: Particle["opacity"];
+    size: Particle["size"];
     line_linked: {
       enable: boolean;
       distance: number;
@@ -109,11 +134,4 @@ export interface ParticlesConfig {
     };
   };
   retina_detect: boolean;
-  background?: {
-    color: string;
-    image?: string;
-    position?: string;
-    repeat?: string;
-    size?: string;
-  };
 }

@@ -1,9 +1,11 @@
+import { list } from 'postcss';
 import { ParticlesConfig } from './types';
 
 const getParticlesConfig = (
   options: {
-    particleColor: string;
+    particleColor: string | string[];
     lineColor: string;
+    backgroundColor: string;
     particleCount?: number;
     particleSize?: number;
     lineDistance?: number;
@@ -23,11 +25,12 @@ const getParticlesConfig = (
   const {
     particleColor,
     lineColor,
-    particleCount = 25,
-    particleSize = 1,
-    lineDistance = 225,
-    lineWidth = 2,
-    moveSpeed = 0.3,
+    backgroundColor,
+    particleCount = 10,
+    particleSize = 40,
+    lineDistance = 400,
+    lineWidth = 10,
+    moveSpeed = 0.25,
     bubbleSize = 8,
     bubbleSpeed = 5,
     imageUrl,
@@ -54,7 +57,7 @@ const getParticlesConfig = (
   
   return {
     background: {
-      color: 'transparent'
+      color:  backgroundColor
     },
     particles: {
       number: {

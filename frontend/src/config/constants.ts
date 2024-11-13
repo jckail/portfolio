@@ -17,19 +17,7 @@ export const PRIMARY = "#0403ff";
 export const BLACK = "#000000";
 export const WHITE = "#ffffff";
 
-// Particle configurations for dark and light themes
-export const particleConfig = {
-    dark: {
-        background_color: BLACK,
-        particle_color: [PRIMARY, WHITE, PRIMARY],
-        line_color: PRIMARY
-    },
-    light: {
-        background_color: WHITE,
-        particle_color: [PRIMARY, BLACK, PRIMARY],
-        line_color: PRIMARY
-    }
-} as const;
+
 
 // Styles configuration for light and dark themes
 export const stylesConfig = {

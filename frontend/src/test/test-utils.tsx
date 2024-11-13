@@ -10,7 +10,8 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   // Use light theme config for testing
   const config = getParticlesConfig({
     particleColor: PRIMARY,
-    lineColor: PRIMARY
+    lineColor: PRIMARY,
+    backgroundColor: '#ffffff' // Added required backgroundColor property
   });
 
   // Use JSON parse/stringify to ensure a clean object for testing
