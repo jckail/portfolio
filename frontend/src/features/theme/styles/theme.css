@@ -272,12 +272,19 @@ a:hover {
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
+
+  h1, h2, h3, h4, h5, h6 {
+    color: inherit;
+    margin: 0;
+  }
+
   .resume {
     padding: 0 15px;
   }
   
   .section-header,
   .section-content {
+    font-size: 1.2rem;
     padding: var(--spacing-md);
   }
   

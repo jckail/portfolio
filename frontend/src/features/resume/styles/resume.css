@@ -168,6 +168,22 @@ a:not(.resume-button):hover {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  /* Section Headers */
+.section-header, 
+.section h2,
+#about-me h2,
+#skills h2,
+#experience h2,
+#projects h2,
+#my-resume h2 {
+  color: var(--text-color);
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+}
   .section-container {
     padding: var(--spacing-lg);
     margin: var(--spacing-sm) auto;
