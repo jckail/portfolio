@@ -83,14 +83,15 @@
 .nav-right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
   margin-top: var(--spacing-lg);
+  margin-right: 10px;
 }
 
 .nav-right .icon-link {
@@ -135,7 +136,7 @@
   font-size: var(--font-size-base);
   transition: all var(--transition-normal);
   min-height: var(--icon-size-desktop);
-  width: 120px;
+  width: 125px;
 }
 
 .nav-right .resume-button:hover {
