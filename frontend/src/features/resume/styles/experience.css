@@ -4,7 +4,6 @@
 }
 
 .timeline::before {
-  
   content: '';
   position: absolute;
   left: 24px;
@@ -15,7 +14,6 @@
 }
 
 .timeline-item {
-  
   position: relative;
   margin-bottom: 3rem;
   background: var(--section-background);
@@ -30,7 +28,6 @@
 .timeline-item:last-child {
   margin-bottom: 0;
 }
-
 
 .timeline-item:hover {
   transform: translateY(-2px);
@@ -51,7 +48,6 @@
   border-radius: var(--radius-sm);
   background: white;
   border: 1px solid var(--primary);
-  
   object-fit: contain;
   flex-shrink: 0;
   transition: transform var(--transition-normal),
@@ -68,23 +64,18 @@
 
 /* Ensure the link container doesn't affect logo positioning */
 .logo-link {
-  margin-top:25px;
-  
+  margin-top: 25px;
   justify-content: center;
   display: block;
   width: 90px;
   height: 60px;
   flex-shrink: 0;
-  
-  
 }
-
-
 
 .timeline-header {
   display: column;
-  align-items: center; /* Vertically center the content */
-  margin-left:  75px;
+  align-items: center;
+  margin-left: 75px;
   justify-content: center;
   height: 70px;
 }
@@ -104,11 +95,7 @@
   font-size: 1.0rem;
   margin-bottom: 1px;
   text-align: left;
-  
 }
-
-
-
 
 .timeline-meta {
   display: flex;
@@ -116,7 +103,6 @@
   color: var(--text-secondary);
   font-size: 1.0rem;
   margin-top: 0;
-  
 }
 
 .responsibilities {
@@ -148,9 +134,10 @@
 
   .timeline-header-wrapper {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
   }
 
   .company-logo {
@@ -162,32 +149,52 @@
   .logo-link {
     width: 36px;
     height: 36px;
+    margin-top: 0;
   }
-
-
 
   .timeline-header {
     flex-grow: 1;
     align-items: flex-start;
     margin-left: var(--spacing-sm);
+    height: auto;
+    min-height: 50px;
   }
 
   .timeline-header h3 {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     text-align: left;
+    margin-bottom: 4px;
+    line-height: 1.2;
   }
 
   .timeline-header h4 {
-    font-size: 1rem;
+    font-size: 0.8rem;
     text-align: left;
+    margin-top: 2px;
+    line-height: 1.2;
   }
 
   .timeline-meta {
     justify-content: flex-start;
     text-align: left;
+    font-size: 0.8rem;
+    margin-top: 2px;
   }
 
+  .responsibilities {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    clear: both;
+  }
+  
   .responsibilities li {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  
+  .responsibilities li::before {
+    font-size: 1em;
+    top: 0;
   }
 }
