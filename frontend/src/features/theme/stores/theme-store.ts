@@ -62,8 +62,8 @@ const updateUrlTheme = (theme: Theme): void => {
   }
 };
 
-// Always default to light theme initially
-const DEFAULT_THEME: Theme = 'light';
+// Default to dark theme initially
+const DEFAULT_THEME: Theme = 'dark';
 
 export const useThemeStore = create<ThemeState>()(
   devtools(
