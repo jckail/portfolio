@@ -184,11 +184,11 @@
   }
 
   .nav-left h1 {
-    font-size: 1.2rem;
+    font-size: 1.0rem;
   }
 
   .nav-left h2 {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
   }
 
   .nav-right {
@@ -246,12 +246,13 @@
 
 @media (max-width: 480px) {
   .nav-left h1 {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .nav-left h2 {
-    font-size: 0.8rem;
+    font-size: 0.5rem;
   }
+
 
   .resume-button {
     padding: var(--spacing-xs);

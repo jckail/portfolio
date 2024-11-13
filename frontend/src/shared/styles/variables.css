@@ -24,7 +24,7 @@
   --z-overlay: 1000;
 
   /* Layout */
-  --header-height: 80px;
+  --header-height: 60px;
   --max-width: 1444px;
 
   /* Transitions */
@@ -37,6 +37,24 @@
 
   /* Font Sizes - increased for better readability */
   --font-size-base: 1.25rem;  /* Increased base size for better readability */
+}
+
+@media (max-width: 768px) {
+  :root {
+      --header-height: 40px;
+  }
+
+  .main-content {
+      padding: 10px;
+  }
+  
+  .main-content-inner {
+      padding: 10px;
+  }
+
+  .section {
+      padding: 40px 0;
+  }
 }
 
 /* Import Poppins font */

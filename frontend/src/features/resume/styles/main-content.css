@@ -1,5 +1,5 @@
 :root {
-    --header-height: 80px;
+    --header-height: 60px;
 }
 
 .main-content {
@@ -8,6 +8,8 @@
     padding: 20px;
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;
+    
 }
 
 .main-content-inner {
@@ -65,7 +67,7 @@ html {
 
 @media (max-width: 768px) {
     :root {
-        --header-height: 80px;
+        --header-height: 60px;
     }
 
     .main-content {
