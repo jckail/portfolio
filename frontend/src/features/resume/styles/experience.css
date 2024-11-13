@@ -50,8 +50,8 @@
   height: 45px;
   border-radius: var(--radius-sm);
   background: white;
-
-  box-shadow: 0 0 10px var(--primary);
+  border: 1px solid var(--primary);
+  
   object-fit: contain;
   flex-shrink: 0;
   transition: transform var(--transition-normal),
@@ -69,6 +69,7 @@
 /* Ensure the link container doesn't affect logo positioning */
 .logo-link {
   margin-top:25px;
+  
   justify-content: center;
   display: block;
   width: 90px;
@@ -94,6 +95,7 @@
   font-size: 1.5rem;
   margin-bottom: 1.25px;
   text-align: left;
+  border-bottom: 2px solid var(--primary);
 }
 
 .timeline-header h4 {

@@ -181,10 +181,11 @@ const Chat: React.FC = () => {
       >
         <Fab
           sx={{
-            bgcolor: 'var(--primary-border)',
+            bgcolor: 'var(--section-background)',
+            border:'var(--border-thickness) solid var(--primary-border)', 
             color: 'var(--text-color)',
-            width: 65,
-            height: 65,
+            width: 70,
+            height: 70,
             transition: 'all 0.3s ease-in-out',
             animation: isScrolled ? 'glowPulse 2s infinite' : 'none',
             '&:hover': {
@@ -193,7 +194,7 @@ const Chat: React.FC = () => {
               transform: 'scale(1.05)',
             },
             fontSize: '1.5rem',
-            backdropFilter: 'blur(5px)',
+            backdropFilter: 'blur(var(--section-background-blur))',
           }}
           aria-label="Chat with AI"
           onClick={handleClickOpen}
