@@ -14,12 +14,6 @@ declare global {
 
 function ParticlesProvider({ children, config }: ParticlesProviderProps) {
   useEffect(() => {
-    // Extract background from config
-    const background = (config as any)?.background?.color || 'transparent';
-
-    // Set background color on body
-    document.body.style.backgroundColor = background;
-
     // Create container
     const container = document.createElement('div');
     container.id = 'particles-js';
@@ -32,7 +26,7 @@ function ParticlesProvider({ children, config }: ParticlesProviderProps) {
       z-index: 1;
       pointer-events: none;
       transition: opacity 0.3s ease-in-out;
-      background-color: ${background};
+      background-color: 'transparent';
     `;
     document.body.appendChild(container);
 
@@ -50,7 +44,6 @@ function ParticlesProvider({ children, config }: ParticlesProviderProps) {
     // Cleanup
     return () => {
       document.getElementById('particles-js')?.remove();
-      document.body.style.backgroundColor = '';
     };
   }, [config]); // Re-run when config changes
 

@@ -13,7 +13,6 @@ export interface ParticleShape {
   image?: ParticleImage;
 }
 
-
 export interface ParticleOpacity {
   value: number;
   random: boolean;
@@ -23,7 +22,8 @@ export interface ParticleOpacity {
     opacity_min: number;
     sync: boolean;
   };
-};
+}
+
 export interface ParticleSize {
   value: number;
   random: boolean;
@@ -33,14 +33,35 @@ export interface ParticleSize {
     size_min: number;
     sync: boolean;
   };
-};
-export interface ParticleColor  {
+}
+
+export interface ParticleColor {
   value: string | string[];
+}
+
+export interface ParticleConfig {
+  backgroundColor?: string;
+  particleColor?: string | string[];
+  lineColor?: string;
+  particleCount?: number;
+  particleSize?: number;
+  lineDistance?: number;
+  lineWidth?: number;
+  moveSpeed?: number;
+  bubbleSize?: number;
+  bubbleSpeed?: number;
+  imageUrls?: string[];  // Updated to support multiple image URLs
+  imageSizeAnimation?: {
+    enable?: boolean;
+    speed?: number;
+    minSize?: number;
+    sync?: boolean;
+  };
 }
 
 export interface Particle {
   color?: ParticleColor;
-  number?:{
+  number?: {
     value: number;
     density: {
       enable: boolean;
@@ -50,8 +71,7 @@ export interface Particle {
   shape?: ParticleShape;
   opacity?: ParticleOpacity;
   size?: ParticleSize;
-};
-
+}
 
 export interface ParticlesConfig {
   background?: {

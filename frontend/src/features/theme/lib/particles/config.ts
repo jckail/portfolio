@@ -1,27 +1,6 @@
-import { list } from 'postcss';
-import { ParticlesConfig } from './types';
+import { ParticlesConfig, ParticleConfig, ParticleImage } from './types';
 
-const getParticlesConfig = (
-  options: {
-    particleColor: string | string[];
-    lineColor: string;
-    backgroundColor: string;
-    particleCount?: number;
-    particleSize?: number;
-    lineDistance?: number;
-    lineWidth?: number;
-    moveSpeed?: number;
-    bubbleSize?: number;
-    bubbleSpeed?: number;
-    imageUrl?: string;
-    imageSizeAnimation?: {
-      enable?: boolean;
-      speed?: number;
-      minSize?: number;
-      sync?: boolean;
-    };
-  }
-): ParticlesConfig => {
+const getParticlesConfig = (config: ParticleConfig): ParticlesConfig => {
   const {
     particleColor,
     lineColor,
@@ -33,12 +12,12 @@ const getParticlesConfig = (
     moveSpeed = 0.25,
     bubbleSize = 8,
     bubbleSpeed = 5,
-    imageUrl,
+    imageUrls = [],
     imageSizeAnimation
-  } = options;
-  
-  const baseSize = imageUrl ? particleSize : particleSize;
-  
+  } = config;
+
+  const baseSize = imageUrls.length > 0 ? particleSize : particleSize;
+
   // Default animation settings
   const defaultSizeAnimation = {
     enable: false,
@@ -54,10 +33,10 @@ const getParticlesConfig = (
     // Ensure enable is always boolean
     enable: imageSizeAnimation?.enable ?? defaultSizeAnimation.enable
   };
-  
+
   return {
     background: {
-      color:  backgroundColor
+      color: backgroundColor || '#000000'
     },
     particles: {
       number: {
@@ -68,20 +47,20 @@ const getParticlesConfig = (
         }
       },
       color: {
-        value: particleColor
+        value: particleColor || '#ffffff'
       },
-      shape: imageUrl ? {
+      shape: imageUrls.length > 0 ? {
         type: "image",
-        image: {
-          src: imageUrl,
+        image: imageUrls.map(url => ({
+          src: url,
           width: baseSize,
           height: baseSize
-        }
+        }))[Math.floor(Math.random() * imageUrls.length)]
       } : {
         type: "circle",
         stroke: {
           width: 0,
-          color: particleColor
+          color: particleColor || '#ffffff'
         }
       },
       opacity: {
@@ -107,7 +86,7 @@ const getParticlesConfig = (
       line_linked: {
         enable: true,
         distance: lineDistance,
-        color: lineColor,
+        color: lineColor || '#ffffff',
         opacity: 1,
         width: lineWidth
       },

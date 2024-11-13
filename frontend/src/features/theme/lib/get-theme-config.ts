@@ -1,29 +1,28 @@
 import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
 import getParticlesConfig from './particles/config';
 import type { Theme } from '../stores/theme-store';
-import type { ParticlesConfig } from './particles/types';
+import type { ParticlesConfig, ParticleConfig } from './particles/types';
 
 export const getThemeConfig = (theme: Theme): Record<string, unknown> => {
   // Use API endpoint for party mode
-  const zuniImageUrl = theme === 'party' 
-    ? '/api/zuni'
-    : '';
+  const zuniImageUrls = theme === 'party' 
+    ? ['/api/zuni','/api/zuni'] // You can add more URLs here for multiple images
+    : [];
 
-  const configs: Record<Theme, ParticlesConfig> = {
-    light: getParticlesConfig({
-      particleColor: [PRIMARY],
+  const configs: Record<Theme, ParticleConfig> = {
+    light: {
+      particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: WHITE,
-    }),
-    dark: getParticlesConfig({
-      particleColor: [PRIMARY],
+    },
+    dark: {
+      particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: BLACK,
       particleCount: 10,
-
-    }),
-    party: getParticlesConfig({
-      particleColor: ['#ff00ff'],
+    },
+    party: {
+      particleColor: '#ff00ff',
       lineColor: '#ff00ff',
       backgroundColor: BLACK,
       particleCount: 15,
@@ -31,15 +30,15 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> => {
       lineDistance: 200,
       lineWidth: 2,
       moveSpeed: 1,
-      imageUrl: zuniImageUrl,
+      imageUrls: zuniImageUrls,
       imageSizeAnimation: {
         enable: true,
         speed: 10,
         minSize: 4,
         sync: false
       }
-    })
+    }
   };
 
-  return configs[theme] as unknown as Record<string, unknown>;
+  return getParticlesConfig(configs[theme]) as unknown as Record<string, unknown>;
 };
