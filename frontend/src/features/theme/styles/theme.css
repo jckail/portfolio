@@ -71,20 +71,18 @@
 html {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  min-height: 100vmax !important;
 }
 
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  min-height:  100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
     'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  position: relative;
-  
-  
+  position: relative !important;
 }
 
 /* Apply transitions only to color and border-color, not background-color */
@@ -126,17 +124,6 @@ body * {
   transition: none !important;
 }
 
-/* Particles layer */
-#particles-js {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
 /* Content layer */
 #root {
   position: relative;
@@ -145,7 +132,7 @@ body * {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100vmax !important;
   background-color: transparent;
 }
 

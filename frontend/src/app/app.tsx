@@ -10,11 +10,13 @@ import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import ChatPortal from '../features/resume/components/ChatPortal';
 import AdminHandler from '../features/admin/components/admin-handler';
+import { useResume } from '../features/resume/components/resume-provider';
 import './styles/app.css';
 
 const App: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
+  const { isLoading } = useResume();
   
   const baseConfig = useMemo(() => getThemeConfig(theme), [
     // Only recalculate when party mode changes
@@ -26,7 +28,7 @@ const App: React.FC = () => {
       <LoadingBoundary>
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
-            <ParticlesProvider config={baseConfig}>
+            <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}>
               <MainLayout>
                 <MainContent />
               </MainLayout>
