@@ -4,10 +4,10 @@ const SunIcon: React.FC = () => (
   <svg
     width="24"
     height="24"
-    viewBox="0 0 24 24"
+    viewBox="-6 -6 36 36"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="1.5"
     strokeLinecap="round"
     strokeLinejoin="round"
   >

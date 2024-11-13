@@ -4,7 +4,7 @@ const MoonIcon: React.FC = () => (
   <svg
     width="24"
     height="24"
-    viewBox="0 0 24 24"
+    viewBox="-6 -6 36 36"
     fill="currentColor"
     stroke="none"
     strokeWidth="2"

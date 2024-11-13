@@ -1,9 +1,26 @@
 @import '../../../shared/styles/variables.css';
-@import './theme-variables.css';
+
 
 /* Base theme setup */
 :root {
   color-scheme: light;
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+  
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-full: 9999px;
+  
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.2s ease;
 }
 
 :root[data-theme='dark'] {
@@ -108,7 +125,7 @@ body {
 body,
 body * {
   transition-property: color, border-color;
-  transition-duration: 0.3s;
+  transition-duration: 0.2s;
   transition-timing-function: ease;
 }
 
@@ -170,7 +187,7 @@ body * {
 /* Main container */
 .resume {
   width: 100%;
-  max-width: 1444px;
+  max-width: 1088px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
@@ -246,7 +263,7 @@ p {
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 a:hover {
