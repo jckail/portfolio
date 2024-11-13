@@ -70,12 +70,17 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
       particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: WHITE,
+      particleCount: 45,
+      particleSize: 30,
+      lineDistance: 500,
     },
     dark: {
       particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: BLACK,
-      particleCount: 10,
+      particleCount: 45,
+      particleSize: 30,
+      lineDistance: 500,
     },
     party: {
       particleColor: partyColors[0],
@@ -98,3 +103,4 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
 
   return { ...getParticlesConfig(configs[theme]) };
 };
+
