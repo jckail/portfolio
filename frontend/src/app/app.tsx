@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { MainLayout } from '../features/layouts';
 import MainContent from '../features/resume/components/main-content/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
@@ -9,11 +9,9 @@ import { getThemeConfig } from '../features/theme/lib/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import { useResume } from '../features/resume/components/resume-provider';
+import ChatPortal from '../features/resume/components/ChatPortal';
+import AdminHandler from '../features/admin/components/admin-handler';
 import './styles/app.css';
-
-// Lazy load non-critical components
-const ChatPortal = lazy(() => import('../features/resume/components/ChatPortal'));
-const AdminHandler = lazy(() => import('../features/admin/components/admin-handler'));
 
 const App: React.FC = () => {
   const { theme } = useThemeStore();
@@ -32,14 +30,8 @@ const App: React.FC = () => {
             </ParticlesProvider>
           </BackgroundProvider>
           
-          {/* Lazy load non-critical components */}
-          <Suspense fallback={null}>
-            <ChatPortal />
-          </Suspense>
-          
-          <Suspense fallback={null}>
-            <AdminHandler />
-          </Suspense>
+          <ChatPortal />
+          <AdminHandler />
         </>
       </LoadingBoundary>
     </ErrorBoundary>

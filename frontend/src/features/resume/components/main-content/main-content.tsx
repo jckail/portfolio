@@ -1,19 +1,12 @@
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useScrollSpy } from '../../../../shared/hooks/use-scroll-spy';
 import { useResume } from '../../components/resume-provider';
 import TLDR from '../sections/tldr';
+import Experience from '../sections/experience';
+import TechnicalSkills from '../sections/technical-skills';
+import Projects from '../sections/projects';
+import MyResume from '../sections/my-resume';
 import '../../styles/resume.css';
-
-// Lazy load sections that are not immediately visible
-const Experience = lazy(() => import('../sections/experience'));
-const TechnicalSkills = lazy(() => import('../sections/technical-skills'));
-const Projects = lazy(() => import('../sections/projects'));
-const MyResume = lazy(() => import('../sections/my-resume'));
-
-// Loading placeholder
-const SectionLoader = () => (
-  <div className="section-loading" style={{ minHeight: '200px' }} />
-);
 
 const MainContent = () => {
   useScrollSpy();
@@ -38,33 +31,25 @@ const MainContent = () => {
 
       <div className="section-container">
         <section id="experience">
-          <Suspense fallback={<SectionLoader />}>
-            <Experience experience={resumeData.experience} />
-          </Suspense>
+          <Experience experience={resumeData.experience} />
         </section>
       </div>
 
       <div className="section-container">
         <section id="skills">
-          <Suspense fallback={<SectionLoader />}>
-            <TechnicalSkills skills={resumeData.technicalSkills} />
-          </Suspense>
+          <TechnicalSkills skills={resumeData.technicalSkills} />
         </section>
       </div>
 
       <div className="section-container">
         <section id="projects">
-          <Suspense fallback={<SectionLoader />}>
-            <Projects projects={resumeData.projects} />
-          </Suspense>
+          <Projects projects={resumeData.projects} />
         </section>
       </div>
 
       <div className="section-container">
         <section id="resume">
-          <Suspense fallback={<SectionLoader />}>
-            <MyResume />
-          </Suspense>
+          <MyResume />
         </section>
       </div>
     </div>
