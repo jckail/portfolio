@@ -36,24 +36,24 @@ const MainContent = () => {
             />
           </section>
         </div>
-
+{/* 
         <div className="section-container">
           <section id="about">
             <AboutMe aboutMe={resumeData.aboutMe} />
           </section>
+        </div> */}
+                <div className="section-container">
+          <section id="experience">
+            <Experience experience={resumeData.experience} />
+          </section>
         </div>
-        
         <div className="section-container">
           <section id="skills">
             <TechnicalSkills skills={resumeData.technicalSkills} />
           </section>
         </div>
         
-        <div className="section-container">
-          <section id="experience">
-            <Experience experience={resumeData.experience} />
-          </section>
-        </div>
+
         
         <div className="section-container">
           <section id="projects">

@@ -88,6 +88,23 @@
   max-width: 1444px;
   border-bottom: 4px solid var(--primary-border);
 }
+.section h3,
+#about-me h3,
+#skills h3,
+#experience h3,
+#projects h3,
+#my-resume h3 {
+  color: var(--text-color);
+  
+  
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+  
+}
 
 @media (max-width: 768px) {
   .section h2,

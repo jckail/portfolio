@@ -5,7 +5,7 @@
 
 
 .tldr-section {
-  background: var(--surface-color);
+  background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);

@@ -17,7 +17,7 @@ const useCurrentSection = () => {
   React.useEffect(() => {
     const updateSection = () => {
       const hash = window.location.hash.slice(1);
-      setCurrentSection(hash || 'about');
+      setCurrentSection(hash || 'tldr');
     };
 
     // Set initial section
@@ -75,11 +75,11 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
   const currentSection = useCurrentSection();
 
   const sections = [
-    { id: 'about', label: 'About Me' },
-    { id: 'skills', label: 'Technical Skills' },
+    { id: 'tldr', label: 'About' },
     { id: 'experience', label: 'Experience' },
+    { id: 'skills', label: 'Technical Skills' },
     { id: 'projects', label: 'Projects' },
-    { id: 'resume', label: 'My Resume' },
+    { id: 'resume', label: 'Resume' },
   ];
 
   const handleNavClick = (id: string) => {

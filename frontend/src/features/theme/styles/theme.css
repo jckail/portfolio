@@ -26,7 +26,7 @@
 .theme-dark {
   --background-color: #000000;
   --surface-color: #0303ff11;
-  --section-background: transparent;
+  --section-background: #0303ff1d;
   --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #999999;
