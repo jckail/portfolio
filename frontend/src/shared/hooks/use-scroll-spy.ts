@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useSectionStore } from '../stores/section-store';
 
 export const useScrollSpy = () => {
   const location = useLocation();
+  const setCurrentSection = useSectionStore((state) => state.setCurrentSection);
 
   useEffect(() => {
-    // Function to update URL based on section ID
+    // Function to update URL and store based on section ID without scrolling
     const updateURL = (id: string) => {
       const currentPath = window.location.pathname;
       const currentSearch = window.location.search;
       window.history.replaceState({}, '', `${currentPath}${currentSearch}#${id}`);
+      setCurrentSection(id);
     };
 
     // Function to handle scroll events
@@ -55,7 +58,11 @@ export const useScrollSpy = () => {
         const targetId = location.hash.slice(1); // Remove the # from the hash
         const targetSection = document.getElementById(targetId);
         
-        if (targetSection) {
+        // Only scroll if it's a page load/refresh or resume button click
+        const isInitialLoad = !window.performance.getEntriesByType('navigation')[0].toJSON().type.includes('navigate');
+        const isResumeClick = location.state?.fromResumeButton;
+        
+        if (targetSection && (isInitialLoad || isResumeClick)) {
           // Get the header height from CSS variable
           const headerHeight = parseInt(getComputedStyle(document.documentElement)
             .getPropertyValue('--header-height')
@@ -78,35 +85,14 @@ export const useScrollSpy = () => {
               behavior: 'smooth'
             });
           }, 100); // Small delay to ensure scrollIntoView has completed
+        } else if (targetSection) {
+          // Just update the URL and store without scrolling
+          updateURL(targetId);
         }
       } else {
         updateURL('about');
       }
     };
-
-    // Create a MutationObserver to watch for content changes
-    const observer = new MutationObserver((mutations) => {
-      // Check if the mutation is from the chat dialog
-      const isChatMutation = mutations.some(mutation => {
-        const target = mutation.target as HTMLElement;
-        return target.closest('[role="dialog"]') !== null || 
-               target.getAttribute('role') === 'dialog' ||
-               target.closest('[aria-label="Chat with AI"]') !== null;
-      });
-
-      // Only handle scroll if it's not a chat-related mutation
-      if (location.hash && !isChatMutation) {
-        handleInitialScroll();
-      }
-    });
-
-    // Start observing the document with the configured parameters
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['role', 'aria-label']
-    });
 
     // Handle initial scroll after DOM is ready
     if (document.readyState === 'complete') {
@@ -118,7 +104,6 @@ export const useScrollSpy = () => {
     return () => {
       window.removeEventListener('scroll', scrollListener);
       window.removeEventListener('load', handleInitialScroll);
-      observer.disconnect();
     };
-  }, [location]);
+  }, [location, setCurrentSection]);
 };
