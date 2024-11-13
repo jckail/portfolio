@@ -1,65 +1,18 @@
-.section {
-  margin-bottom: var(--spacing-s);
-}
+/* Import the unified resume sections styles */
+@import 'resume-sections.css';
 
-.section-header {
-  text-align: center;
-  margin-bottom: var(--spacing-m);
-}
-
-.section-content {
-  
-  border-radius: var(--radius-md);
-  
-  padding: var(--spacing-xl);
-  margin: 0 auto;
-  max-width: 900px;
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-              
-}
-
-.section-content:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  
-}
-
+/* Any additional specific styles for the About section can be added here */
 .about-content {
   background: var(--surface-color);
+  backdrop-filter: blur(var(--section-background-blur));
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   border: var(--border-thickness) solid var(--primary-border);
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
-
 }
 
 .about-content:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--primary-hover);
-}
-
-
-.section-content p {
-  color: var(--text-color);
-  line-height: 1.8;
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-base);
-}
-
-.section-content p:last-child {
-  margin-bottom: 0;
-}
-
-@media (max-width: 768px) {
-
-  .section-content {
-    padding: var(--spacing-lg);
-    margin: 0 var(--spacing-md);
-  }
-
-  .section-content p {
-    font-size: 0.95rem;
-  }
 }

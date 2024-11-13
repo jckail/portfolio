@@ -4,32 +4,48 @@
 }
 
 .timeline::before {
+  
   content: '';
   position: absolute;
   left: 24px;
   top: 0;
   width: 2px;
   height: 100%;
-  background: transparent;
+  background:  var(--section-background);
 }
 
 .timeline-item {
+  
   position: relative;
   margin-bottom: 3rem;
+  background: var(--section-background);
+  backdrop-filter: blur(var(--section-background-blur));
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: var(--border-thickness) solid var(--primary-border);
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
 }
 
 .timeline-item:last-child {
   margin-bottom: 0;
 }
 
+
+.timeline-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
 .timeline-header-wrapper {
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-sm);
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .company-logo {
+  justify-content: center;
   width: 90px;
   height: 70px;
   border-radius: 5%;
@@ -52,48 +68,51 @@
 
 /* Ensure the link container doesn't affect logo positioning */
 .logo-link {
+  justify-content: center;
   display: block;
   width: 90px;
   height: 70px;
   flex-shrink: 0;
+  
 }
 
-.timeline-content {
-  background: var(--surface-color);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  border: var(--border-thickness) solid var(--primary-border);
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-}
 
-.timeline-content:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-hover);
-}
 
 .timeline-header {
-  flex-grow: 1;
+  display: column;
+  align-items: center; /* Vertically center the content */
+  margin-left: var(--spacing-md);
+  justify-content: center;
+  height: 70px;
 }
 
 .timeline-header h3 {
+  margin-top: 2px;
   color: var(--text-color);
-  font-size: 1.3rem;
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.5rem;
+  margin-bottom: 1.25px;
+  text-align: left;
 }
 
 .timeline-header h4 {
+  margin-top: 8px;
   color: var(--text-color);
-  font-size: .9rem;
-  margin-bottom: var(--spacing-xs);
+  font-size: 1.0rem;
+  margin-bottom: 1px;
+  text-align: left;
+  
 }
+
+
+
 
 .timeline-meta {
   display: flex;
   gap: var(--spacing-md);
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 1.0rem;
+  margin-top: 0;
+  
 }
 
 .responsibilities {
@@ -124,7 +143,9 @@
   }
 
   .timeline-header-wrapper {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     gap: var(--spacing-md);
   }
 
@@ -139,21 +160,27 @@
     height: 36px;
   }
 
-  .timeline-content {
-    padding: var(--spacing-md);
+
+
+  .timeline-header {
+    flex-grow: 1;
+    align-items: flex-start;
+    margin-left: var(--spacing-sm);
   }
 
   .timeline-header h3 {
     font-size: 1.1rem;
+    text-align: left;
   }
 
   .timeline-header h4 {
     font-size: 1rem;
+    text-align: left;
   }
 
   .timeline-meta {
-    flex-direction: column;
-    gap: var(--spacing-xs);
+    justify-content: flex-start;
+    text-align: left;
   }
 
   .responsibilities li {

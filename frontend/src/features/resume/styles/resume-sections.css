@@ -1,0 +1,101 @@
+/* Unified Resume Sections Styling */
+
+/* Base Section Styles */
+.section {
+  margin-bottom: var(--spacing-s);
+  width: 100%;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--spacing-m);
+  color: var(--text-color);
+  padding: var(--spacing-lg);
+}
+
+.section-content {
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+  margin: 0 auto;
+  
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xl);
+  
+  box-sizing: border-box;
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+}
+
+.section-content:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
+.section-content p {
+  color: var(--text-color);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-base);
+}
+
+.section-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .section-content {
+    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-md);
+  }
+
+  .section-content p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Specific Section Variations */
+.section-container {
+  
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 6px var(--section-background);
+  padding: var(--spacing-sm);
+  margin: var(--spacing-sm) auto;
+  width: 100%;
+  max-width: 1444px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Section Headers */
+.section h2,
+#about-me h2,
+#skills h2,
+#experience h2,
+#projects h2,
+#my-resume h2 {
+  color: var(--text-color);
+  backdrop-filter: blur(var(--section-background-blur));
+  
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+  border-bottom: 4px solid var(--primary-border);
+}
+
+@media (max-width: 768px) {
+  .section h2,
+  #about-me h2,
+  #skills h2,
+  #experience h2,
+  #projects h2,
+  #my-resume h2 {
+    font-size: 1.2rem;
+  }
+}

@@ -16,7 +16,7 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
         <div className="timeline">
           {experience.map((item, index) => (
             <div key={index} className="timeline-item">
-              <div className="timeline-content">
+              
                 <div className="timeline-header-wrapper">
                   {item.logoPath && (
                     item.link ? (
@@ -41,8 +41,8 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
                     )
                   )}
                   <div className="timeline-header">
-                    <h3>{item.title}</h3>
-                    <h4>{item.company}</h4>
+                    <h3>{item.company}</h3>
+                    <h4>{item.title}</h4>
                     <div className="timeline-meta">
                       <span className="date">{item.date}</span>
                     </div>
@@ -55,7 +55,7 @@ const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
                     ))}
                   </ul>
                 )}
-              </div>
+              
             </div>
           ))}
         </div>

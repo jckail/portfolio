@@ -1,58 +1,7 @@
-/* Resume container */
-.resume {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--text-color);
-}
+/* Import the unified resume sections styles */
+@import 'resume-sections.css';
 
-/* Section Container */
-.section-container {
-  background: var(--section-background);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 6px var(--section-background);
-  padding: var(--spacing-sm);
-  margin: var(--spacing-sm) auto;
-  width: 100%;
-  max-width: 1444px;
-  box-sizing: border-box;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Section Headers */
-
-.section h2,
-#about-me h2,
-#skills h2,
-#experience h2,
-#projects h2,
-#my-resume h2 {
-  color: var(--text-color);
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  text-align: left;
-  width: 100%;
-  max-width: 1444px;
-  border-bottom: 1px solid var(--primary-border);
-  
-}
-
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-color);
-}
-
-/* Section Content */
-.section-content {
-  text-align: left;
-  width: 100%;
-  max-width: 1444px;
-  margin: 0 auto;
-}
+/* Specific styles for the Resume page that are not covered in resume-sections.css */
 
 /* Skills Section */
 .skills-grid {
@@ -154,7 +103,6 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--primary-hover);
   box-shadow: var(--shadow-md);
   box-shadow: 0 0 30px var(--primary);
-  
 }
 
 /* Links */
@@ -165,42 +113,4 @@ a:not(.resume-button) {
 
 a:not(.resume-button):hover {
   text-decoration: underline;
-  
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  /* Section Headers */
- 
-.section h2,
-#about-me h2,
-#skills h2,
-#experience h2,
-#projects h2,
-#my-resume h2 {
-  color: var(--text-color);
-  font-size: 1.2rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  text-align: left;
-  width: 100%;
-  max-width: 1444px;
-  border-bottom: 1px solid var(--primary-border);
-}
-  .section-container {
-    padding: var(--spacing-lg);
-    margin: var(--spacing-sm) auto;
-  }
-  
-  .skills-grid,
-  .project-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .section-container {
-    padding: var(--spacing-md);
-    margin: var(--spacing-sm) auto;
-  }
 }
