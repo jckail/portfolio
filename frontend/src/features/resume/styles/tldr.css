@@ -92,10 +92,7 @@
 @media (max-width: 768px) {
 
 
-  .section-content {
-    padding: var(--spacing-lg);
-    margin: 0 var(--spacing-md);
-  }
+
 
   .tldr-section h2 {
     font-size: 1.75rem;

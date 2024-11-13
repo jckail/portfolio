@@ -24,7 +24,7 @@
 }
 
 /* Section Headers */
-.section-header, 
+
 .section h2,
 #about-me h2,
 #skills h2,
@@ -38,6 +38,8 @@
   text-align: left;
   width: 100%;
   max-width: 1444px;
+  border-bottom: 1px solid var(--primary-border);
+  
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -169,7 +171,7 @@ a:not(.resume-button):hover {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   /* Section Headers */
-.section-header, 
+ 
 .section h2,
 #about-me h2,
 #skills h2,
@@ -183,6 +185,7 @@ a:not(.resume-button):hover {
   text-align: left;
   width: 100%;
   max-width: 1444px;
+  border-bottom: 1px solid var(--primary-border);
 }
   .section-container {
     padding: var(--spacing-lg);
