@@ -1,0 +1,11 @@
+/* Import all resume-related styles */
+@import './about.css';
+@import './experience.css';
+@import './header.css';
+@import './main-content.css';
+@import './my-resume.css';
+@import './projects.css';
+@import './resume-sections.css';
+@import './resume.css';
+@import './technical-skills.css';
+@import './tldr.css';

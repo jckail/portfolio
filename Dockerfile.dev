@@ -11,7 +11,7 @@ ENV NODE_ENV=development
 RUN npm run build
 
 # Backend setup
-FROM python:3.11-slim
+FROM python:3.12.3-slim
 WORKDIR /app
 
 # Copy the frontend build
@@ -29,9 +29,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the backend code
 COPY backend /app/backend/
-
-# Create the images directory and copy images
-COPY images /app/images/
 
 # Set environment variables
 ENV PYTHONPATH=/app

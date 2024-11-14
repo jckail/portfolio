@@ -79,3 +79,7 @@ lerna-debug.log*
 .notes.txt
 .ignorefolder/
 .aider*
+
+cline_docs*
+
+backend/app/utils/startup_logs/*

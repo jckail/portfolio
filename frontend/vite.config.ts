@@ -18,4 +18,5 @@ export default defineConfig({
       },
     },
   },
+  logLevel: 'warn', // Only show warnings and errors
 })

@@ -77,11 +77,11 @@ app.include_router(chat_router)  # Added Chat router
 # Mount static files
 try:
     # Serve static files (images)
-    images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
-    logger.info(f"Images directory path: {images_dir}")
-    if not os.path.exists(images_dir):
-        logger.warning(f"Images directory does not exist: {images_dir}")
-    app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
+    # images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'images'))
+    # logger.info(f"Images directory path: {images_dir}")
+    # if not os.path.exists(images_dir):
+    #     logger.warning(f"Images directory does not exist: {images_dir}")
+    # app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
 
     # Define the path to the assets directory
     assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))

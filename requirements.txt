@@ -1,9 +1,8 @@
-fastapi==0.115.0
-uvicorn==0.31.0
-pydantic==2.9.2
-starlette==0.38.6
-typing_extensions==4.12.2
+fastapi==0.115.5
+uvicorn==0.32.0
 python-dotenv==1.0.0
-supabase==2.9.1
-watchfiles==0.24.0
+python-jose==3.3.0
+python-multipart==0.0.17
+supabase==2.10.0
 anthropic==0.39.0
+psutil==6.1.0
