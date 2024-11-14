@@ -17,6 +17,14 @@ async def get_resume():
             "github": resume_data["contact"]["github"],
             "linkedin": resume_data["contact"]["linkedin"],
             "aboutMe": resume_data["about_me"],
+            "contact": {
+                "email": resume_data["contact"]["email"],
+                "phone": resume_data["contact"]["phone"],
+                "website": resume_data["contact"]["website"],
+                "location": resume_data["contact"]["location"],
+                "github": resume_data["contact"]["github"],
+                "linkedin": resume_data["contact"]["linkedin"],
+            },
             "technicalSkills": resume_data["skills"],
             "experience": [
                 {

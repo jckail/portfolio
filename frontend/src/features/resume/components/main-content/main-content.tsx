@@ -5,6 +5,7 @@ import TLDR from '../sections/tldr';
 import Experience from '../sections/experience';
 import TechnicalSkills from '../sections/technical-skills';
 import Projects from '../sections/projects';
+import Contact from '../sections/contact';
 import MyResume from '../sections/my-resume';
 import '../../styles/resume.css';
 
@@ -44,6 +45,12 @@ const MainContent = () => {
       <div className="section-container">
         <section id="projects">
           <Projects projects={resumeData.projects} />
+        </section>
+      </div>
+
+      <div className="section-container">
+        <section id="contact">
+          <Contact contact={resumeData.contact} />
         </section>
       </div>
 

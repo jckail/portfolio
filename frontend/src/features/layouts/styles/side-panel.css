@@ -19,7 +19,7 @@
 
 .side-panel {
   position: fixed;
-  top: var(--header-height);
+  top: calc(var(--header-height) + 20px);
   left: -200px;
   height: auto;
   width: 10vw;
@@ -68,10 +68,10 @@
 }
 
 .nav-item.active {
-  background: var(--surface-color);
-  box-shadow: var(--shadow-md);
+  background:var(--primary);
+  box-shadow: var(--primary);
   box-shadow: 0 0 30px var(--primary);
-  color: var(--surface);
+  color: var(--text-color);
   width: 100%;
   
   border-radius: 10px;
