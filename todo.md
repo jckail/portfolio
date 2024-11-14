@@ -8,6 +8,7 @@ Add Darkmode to fastapi docs
 Front:
 Features
 Add Contact Info Section
+default dark mode
 
 
 

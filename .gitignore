@@ -83,3 +83,5 @@ lerna-debug.log*
 cline_docs*
 
 backend/app/utils/startup_logs/*
+
+openai-chatgpt-latest.vsix
