@@ -59,7 +59,7 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
           <AboutMe aboutMe={resumeData.aboutMe} />
         </section>
         <section id="skills" className="section">
-          <TechnicalSkills skills={resumeData.technicalSkills} />
+          <TechnicalSkills />
         </section>
         <section id="experience" className="section">
           <Experience experience={resumeData.experience} />

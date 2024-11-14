@@ -1,7 +1,7 @@
 """
 Helper module for counting records in the skills list.
 """
-from .skills_updated import skills
+from .old_skils import skills
 
 def count_skills():
     """

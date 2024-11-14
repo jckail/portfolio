@@ -1,8 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
-from ..models.skills_updated import skills
+from ..models.skills import skills
 
 router = APIRouter()
+
+@router.get("/skills")
+async def get_all_skills() -> dict:
+    """
+    Get all skills.
+    Returns a dictionary of all skills.
+    """
+    return skills
 
 @router.get("/skills/{skill_name}")
 async def get_skill(skill_name: str) -> dict:

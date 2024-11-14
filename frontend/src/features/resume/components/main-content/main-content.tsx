@@ -38,7 +38,7 @@ const MainContent = () => {
 
       <div className="section-container">
         <section id="skills">
-          <TechnicalSkills skills={resumeData.technicalSkills} />
+          <TechnicalSkills />
         </section>
       </div>
 

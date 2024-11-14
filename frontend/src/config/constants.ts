@@ -6,7 +6,9 @@ export const API_CONFIG = {
             login: '/api/admin/login',
             verify: '/api/admin/verify',
             logout: '/api/admin/logout',
-            logs: '/api/admin/logs'
+            logs: '/api/admin/logs',
+            skils: '/api/skills'
+
         },
         telemetry: '/api/telemetry'
     }
