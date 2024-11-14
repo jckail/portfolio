@@ -48,11 +48,11 @@ const MainContent = () => {
         </section>
       </div>
 
-      <div className="section-container">
+      {/* <div className="section-container">
         <section id="contact">
           <Contact contact={resumeData.contact} />
         </section>
-      </div>
+      </div> */}
 
       <div className="section-container">
         <section id="resume">
