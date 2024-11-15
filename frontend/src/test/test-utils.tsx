@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { AppLogicProvider } from '../app/providers/app-logic-provider';
-import { ResumeProvider } from '../features/resume/components/resume-provider';
+import { ResumeProvider } from '../features/content/components/resume-provider';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import getParticlesConfig from '../features/theme/lib/particles/config';
 import { PRIMARY } from '../config/constants';

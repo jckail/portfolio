@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from '../../../features/resume/components/header';
-import { useResume } from '../../../features/resume/components/resume-provider';
+import Header from '../../../features/content/components/header';
+import { useResume } from '../../../features/content/components/resume-provider';
 import { useAppLogic } from '../../../app/providers/app-logic-provider';
 import { useAdminStore } from '../../../features/admin/stores/admin-store';
 import '../styles/main-layout.css';

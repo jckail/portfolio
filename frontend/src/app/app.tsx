@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { RouteObject, useLocation } from 'react-router-dom';
 import { MainLayout } from '../features/layouts';
-import MainContent from '../features/resume/components/main-content';
+import MainContent from '../features/content/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import { BackgroundProvider } from '../features/theme/components/background-provider';
 import { useThemeStore } from '../features/theme/stores/theme-store';
@@ -9,8 +9,8 @@ import { useThemeBackground } from '../features/theme/hooks/use-theme-background
 import { getThemeConfig } from '../features/theme/lib/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
-import { useResume } from '../features/resume/components/resume-provider';
-import ChatPortal from '../features/resume/components/ChatPortal';
+import { useResume } from '../features/content/components/resume-provider';
+import ChatPortal from '../features/content/components/ChatPortal';
 import AdminHandler from '../features/admin/components/admin-handler';
 import AdminLogin from '../features/admin/components/admin-login';
 import './styles/app.css';

@@ -51,7 +51,7 @@ export type WithOptionalChildren = {
 export type { ImportMetaEnv } from './env';
 
 // Export feature-specific types
-export * from '@/features/resume/types';
+export * from '@/features/content/types';
 export * from '@/features/admin/types';
 export * from '@/features/telemetry/types';
 export * from '@/features/theme/types';
