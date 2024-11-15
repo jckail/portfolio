@@ -38,6 +38,13 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
             {skill.professional_experience && " (Professional)"}
           </p>
           <p className="skill-description">{skill.description}</p>
+          <div className="skill-tags">
+            {skill.tags.map((tag, index) => (
+              <span key={index} className="skill-tag">
+                {tag.replace(/-/g, ' ')}
+              </span>
+            ))}
+          </div>
           {Object.keys(skill.examples).length > 0 && (
             <div className="examples-section">
               <h4>Examples:</h4>

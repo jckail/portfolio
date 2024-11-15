@@ -41,7 +41,7 @@
   transition: all var(--transition-fast);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  background: var(--section-background);
+  background: var(--surface-color);
   border: 1px solid transparent;
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
@@ -157,6 +157,28 @@
 .skill-description {
   line-height: 1.6;
   margin-bottom: var(--spacing-md);
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.skill-tag {
+  background: var(--border-color);
+  color: var(--text-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  transition: all var(--transition-fast);
+}
+
+.skill-tag:hover {
+  background: var(--primary);
+  transform: translateY(-1px);
 }
 
 .examples-section {

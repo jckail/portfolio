@@ -3,8 +3,8 @@
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
-  --surface-color: #ffffff00;
-  --section-background: transparent;
+  --surface-color: #0303ff11;
+  --section-background: #0303ff1d;
   --section-background-blur: 7px;
   --text-color: #000000;
   --text-secondary: #666666;
@@ -20,7 +20,7 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --background-color-invert: #000000;
-  --border-thickness: 2px;
+  --border-thickness: 3px;
 }
 
 .theme-dark {

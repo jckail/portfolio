@@ -23,11 +23,11 @@ const App: React.FC = () => {
       <LoadingBoundary>
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
-            <ParticlesProvider config={getThemeConfig(theme)} isResumeLoaded={!isLoading}>
+            {/* <ParticlesProvider config={getThemeConfig(theme)} isResumeLoaded={!isLoading}> */}
               <MainLayout>
                 <MainContent />
               </MainLayout>
-            </ParticlesProvider>
+            {/* </ParticlesProvider> */}
           </BackgroundProvider>
           
           <ChatPortal />

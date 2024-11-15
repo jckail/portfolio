@@ -425,7 +425,7 @@ skills = {
     },
     "flink": {
         "display_name": "Flink",
-        "image": "flink.svg",
+        "image": "apacheflink.svg",
         "professional_experience": True,
         "years_of_experience": 3,
         "tags": ["streaming", "processing", "big-data", "apache", "real-time", "distributed"],
