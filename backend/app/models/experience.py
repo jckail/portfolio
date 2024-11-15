@@ -11,7 +11,19 @@ experience= {
             ],
             "link": "https://www.prove.com/",
             "logoPath": "/images/companylogos/prove.svg",
-            "company_description" : "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience."
+            "company_description" : "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
+                        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+            "more_highlights":[
+                        "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
+                        "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
+                        "Engineered AI-powered RAG chatbots leveraging Airflow, LangChain, and OpenAI APIs to automate customer service workflows, reducing manual efforts by 150 hours per week. Addressed NLP challenges in ambiguous query handling, driving a 20% improvement in first-contact resolution.",
+                        "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds, significantly boosting dashboard accuracy and enabling data-driven decision-making for executive teams.",
+                        "Implemented real-time telemetry services with Prometheus, Grafana, Splunk, and AWS CloudWatch, addressing complex monitoring needs. Reduced incident response times by 40% while maintaining 99.9% system uptime for mission-critical services.",
+                        "Designed and developed data pipelines using Spark, Airflow, and DBT to streamline ETL processes, improving performance by 35%. Reduced report generation timelines from days to hours, enhancing reporting capabilities for product managers and business teams.",
+                        "Established robust data governance frameworks with Apache Atlas, ensuring full GDPR and SOC2 compliance. Implemented metadata standards, lineage tracking, and access policies, reducing audit preparation times by 30%.",
+                        "Optimized CI/CD pipelines for Apache Beam and Kubernetes deployments, resolving bottlenecks and reducing deployment times by 30%. Improved release frequency to support faster feature rollouts and iterative development cycles.",
+                        "Migrated computationally intensive SQL queries from RDS to Spark DataFrames, improving query performance by 70% and reducing compute costs by 30%. Enabled seamless processing of large datasets for business-critical applications.",
+            ]
         },
         "meta":{
             "company": "Meta (Facebook)",
@@ -26,7 +38,20 @@ experience= {
             ],
             "link": "https://about.fb.com/",
             "logoPath": "/images/companylogos/meta.svg",
-            "company_description" : "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service."
+            "company_description" : "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.", 
+            "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+            "more_highlights":[                        "",
+                        "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers. Collaborated with data science, ML, and hardware teams to align product goals, resulting in a 20% faster delivery of cross-platform features.",
+                        "Designed exabyte scale data models for Community Messenger to handle multi-platform data streams, increasing user engagement by 35% across Instagram, WhatsApp, Facebook, and Quest despite complex cross-platform dependencies.",
+                        "Developed modular frameworks for data pipelines, streamlining data flows for thousands of engineers. Reduced integration issues by 40% and accelerated feature deployments by 25% through automation and standardization.",
+                        "Built telemetry systems capable of processing 10M+ events/second, improving signal quality by 20%. Developed Jinja-based monitoring tools, reducing downtime by 15% and ensuring reliable system performance.",
+                         "Implemented graph and entity models to support 10 billion monthly interactions, ensuring seamless experiences across Instagram, WhatsApp, Facebook, and Quest. Addressed latency and consistency challenges to maintain real-time performance.",
+                          "Served as the liaison between Facebook Messenger, Groups, and the early precursor to the LLaMA project, fine-tuning models for automated group management. Increased group engagement by 15% in pilot testing, paving the way for future LLM-powered features.",
+                        "Created from scratch QR code group invites, increasing join rates by 50%. Enabled offline engagement in multilingual regions, facilitating family reconnections and shelter logistics coordination during humanitarian efforts. Featured on Tech Crunch.",
+                        "Designed KPI dashboards to monitor DAUs, MAUs, and engagement trends using tools such as Tableau and internal data visualization frameworks. Enabled real-time insights, increasing engagement by 10% and retention by 12%.",
+                        "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
+                        "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%. Overcame orchestration challenges, improving resource utilization and processing times.",
+]
         },
         "deloitte":{
             "company": "Deloitte",
@@ -40,7 +65,16 @@ experience= {
             ],
             "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
             "logoPath": "/images/companylogos/deloitte.svg",
-            "company_description" : "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom"
+            "company_description" : "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom",
+                        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+                        "more_highlights":[                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                         "",
+                          "",
+]
         },
 
         "wide_open_west":{
@@ -54,7 +88,16 @@ experience= {
             ],
             "link": "https://www.wowway.com/",
             "logoPath": "/images/companylogos/wow.svg",
-            "company_description" : "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services"
+            "company_description" : "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services",
+                        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+                        "more_highlights":[                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                         "",
+                          "",
+]
         },
 
         "common_spirit_health":{
@@ -67,7 +110,16 @@ experience= {
             ],
             "link": "https://www.commonspirit.org/",
             "logoPath": "/images/companylogos/commonspirit.svg",
-            "company_description" : "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states."
+            "company_description" : "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states.",
+                        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+                        "more_highlights":[                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                         "",
+                          "",
+]
         },
         "acustream":{
             "company": "AcuStream (Acquired by R1 RCM)",
@@ -79,6 +131,15 @@ experience= {
             ],
             "link": "https://www.r1rcm.com/",
             "logoPath": "/images/companylogos/r1.svg",
-            "company_description" : "R1 RCM is an American healthcare revenue cycle management company servicing hospitals, health systems and physician groups across the United States. Headquartered in Chicago, Illinois, R1 RCM is publicly traded on the NASDAQ."
+            "company_description" : "R1 RCM is an American healthcare revenue cycle management company servicing hospitals, health systems and physician groups across the United States. Headquartered in Chicago, Illinois, R1 RCM is publicly traded on the NASDAQ.",
+                        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+                        "more_highlights":[                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                         "",
+                          "",
+]
         }
 }
