@@ -11,6 +11,7 @@ from .health_routes import router as health_router
 from .custom_resolution import router as custom_resolution_router
 from .skills_routes import router as skills_router
 from .experience_routes import router as experience_router
+from .project_routes import router as project_router
 
 # Include all route modules in a specific order
 router.include_router(health_router, tags=["health"])  # Health check first
@@ -20,3 +21,4 @@ router.include_router(admin_router, prefix="/admin", tags=["admin"])  # Admin la
 router.include_router(custom_resolution_router, tags=["custom_resolution"])  # Custom resolution last
 router.include_router(skills_router, tags=["skills"])  # Skills routes
 router.include_router(experience_router, tags=["experience"])  # Experience routes
+router.include_router(project_router, tags=["projects"])  # Project routes
