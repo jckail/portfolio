@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 
 import { ThemeProvider } from '@/features/theme/components/theme-provider';
 import { ResumeProvider } from '@/features/content/components/resume-provider';
-import { TelemetryProvider } from '@/features/telemetry/components/telemetry-provider';
+import { TelemetryProvider } from '@/features/content/components/telemetry-provider';
 
 interface AppProviderProps {
   children: ReactNode;

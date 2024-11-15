@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminStore } from '../stores/admin-store';
 import AdminLogin from './admin-login';
-import TelemetryBanner from '../../telemetry/components/telemetry-banner';
+import TelemetryBanner from './telemetry-banner';
 
 const AdminHandler: React.FC = () => {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);

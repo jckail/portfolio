@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdminStore } from '../stores/admin-store';
-import { useTelemetryStore } from '../../telemetry/stores/telemetry-store';
+import { useTelemetryStore } from '../stores/telemetry-store';
 import '../styles/admin-login.css';
 
 interface AdminLoginProps {

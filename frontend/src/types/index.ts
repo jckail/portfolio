@@ -52,5 +52,4 @@ export type { ImportMetaEnv } from './env';
 
 // Export feature-specific types
 export * from '../features/content/types';
-export * from '../features/telemetry/types';
 export * from '../features/theme/types';
