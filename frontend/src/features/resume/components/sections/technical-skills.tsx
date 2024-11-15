@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/sections/technical-skills.css';
 
+// Import SVGs directly
+import AirbyteIcon from '@/assets/icons/neutral/airbyte.svg?react';
+import ApachePulsarIcon from '@/assets/icons/neutral/apachepulsar.svg?react';
+import ApacheRocketMQIcon from '@/assets/icons/neutral/apacherocketmq.svg?react';
+import PrefectIcon from '@/assets/icons/neutral/prefect.svg?react';
+import KafkaIcon from '@/assets/icons/neutral/kafka.svg?react';
+import LangchainIcon from '@/assets/icons/neutral/langchain.svg?react';
+import OpenAIIcon from '@/assets/icons/neutral/openai.svg?react';
+import Trino from '@/assets/icons/neutral/trino.svg?react';
+
 interface Skill {
   display_name: string;
   image: string;
@@ -23,6 +33,52 @@ interface SkillModalProps {
   onClose: () => void;
 }
 
+interface IconProps {
+  name: string;
+  className?: string;
+  size?: number;
+  'aria-label'?: string;
+}
+
+// Map of SVG components
+const SVG_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  'airbyte.svg': AirbyteIcon,
+  'apachepulsar.svg': ApachePulsarIcon,
+  'apacherocketmq.svg': ApacheRocketMQIcon,
+  'prefect.svg': PrefectIcon,
+  'kafka.svg': KafkaIcon,
+  'langchain.svg': LangchainIcon,
+  'openai.svg': OpenAIIcon,
+  'trino.svg': Trino,
+};
+
+const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
+  const SvgComponent = SVG_COMPONENTS[name];
+
+  if (SvgComponent) {
+    return (
+      <SvgComponent
+        width={size}
+        height={size}
+        className={className}
+        {...props}
+      />
+    );
+  }
+
+  // Fallback to regular image for non-neutral icons
+  return (
+    <img 
+      src={`/images/icons/${name}`}
+      alt={name.replace('.svg', '')}
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+    />
+  );
+};
+
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
   return (
     <div className="skill-modal-overlay" onClick={onClose}>
@@ -30,13 +86,14 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="modal-header">
           <div className="modal-icon-wrapper">
-            <img 
-              src={`/images/icons/${skill.image}`} 
-              alt={skill.display_name}
-              width="48"
-              height="48"
-              className="modal-skill-icon"
-            />
+          <div className="icon-wrapper">
+                        <SkillIcon
+                          name={skill.image}
+                          className="skill-icon"
+                          size={32}
+                          aria-label={skill.display_name}
+                        />
+                      </div>
           </div>
           <h3>{skill.display_name}</h3>
         </div>
@@ -126,12 +183,11 @@ const TechnicalSkills: React.FC = () => {
                   >
                     <div className="skill-icon-container">
                       <div className="icon-wrapper">
-                        <img 
-                          src={`/images/icons/${skill.image}`} 
-                          alt={skill.display_name}
-                          width="32"
-                          height="32"
+                        <SkillIcon
+                          name={skill.image}
                           className="skill-icon"
+                          size={32}
+                          aria-label={skill.display_name}
                         />
                       </div>
                       <span className="skill-name">{skill.display_name}</span>
