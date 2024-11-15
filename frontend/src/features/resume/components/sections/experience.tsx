@@ -10,6 +10,8 @@ interface ExperienceItem {
   link: string;
   logoPath: string;
   company_description: string;
+  tech_stack: string[];
+  more_highlights: string[];
 }
 
 interface ExperienceData {
@@ -52,12 +54,21 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
       <div className="modal-body">
         <p className="company-description">{experience.company_description}</p>
         <div className="highlights-section">
-          <h4>Key Highlights:</h4>
+        <div className="skill-tags">
+            {experience.tech_stack.map((tag, index) => (
+              <span key={index} className="skill-tag">
+                {tag.replace(/-/g, ' ')}
+              </span>
+            ))}
+          </div>
+          <h4>Detailed Highlights:</h4>
           <ul className="highlights">
-            {experience.highlights.map((highlight, index) => (
+            {experience.more_highlights.map((highlight, index) => (
               <li key={index}>{highlight}</li>
             ))}
           </ul>
+
+
         </div>
       </div>
     </div>
