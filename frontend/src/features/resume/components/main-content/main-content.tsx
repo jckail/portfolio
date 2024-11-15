@@ -25,7 +25,7 @@ const MainContent = () => {
   return (
     <div className="resume">
           <TLDR tldr={tldrData} />
-          <Experience experience={resumeData.experience} />
+          <Experience/>
           <TechnicalSkills />
           <Projects projects={resumeData.projects} />
 

@@ -15,14 +15,6 @@ export interface ResumeData {
   technicalSkills: {
     [category: string]: string[];
   };
-  experience: {
-    title: string;
-    company: string;
-    date: string;
-    responsibilities: string[];
-    link: string;
-    logoPath: string;
-  }[];
   projects: {
     title: string;
     description: string;
