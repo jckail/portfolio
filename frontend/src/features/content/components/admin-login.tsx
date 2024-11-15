@@ -14,7 +14,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const { login, isLoading, error: loginError } = useAdminStore();
-  const { fetchLogs, error: telemetryError } = useTelemetryStore();
+  //const { fetchLogs, error: telemetryError } = useTelemetryStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,14 +24,14 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
       const success = await login({ email, password });
       if (success) {
         const token = localStorage.getItem('adminToken');
-        if (token) {
-          try {
-            await fetchLogs(token);
-          } catch (err) {
-            console.error('Failed to fetch logs:', err);
-            // Don't block login success if logs fail
-          }
-        }
+        // if (token) {
+        //   try {
+        //     await fetchLogs(token);
+        //   } catch (err) {
+        //     console.error('Failed to fetch logs:', err);
+        //     // Don't block login success if logs fail
+        //   }
+        // }
         onLoginSuccess();
         onClose();
         setEmail('');
@@ -45,7 +45,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
 
   if (!isOpen) return null;
 
-  const displayError = localError || loginError || telemetryError;
+  const displayError = localError || loginError; // || telemetryError;
 
   return (
     <div className="admin-login-overlay">
