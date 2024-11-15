@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResumeData } from '../../types';
-import '../../styles/projects.css';
+import '../../styles/sections/projects.css';
 
 interface ProjectsProps {
   projects: ResumeData['projects'];

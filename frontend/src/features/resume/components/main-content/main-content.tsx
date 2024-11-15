@@ -7,7 +7,7 @@ import TechnicalSkills from '../sections/technical-skills';
 import Projects from '../sections/projects';
 import Contact from '../sections/contact';
 import MyResume from '../sections/my-resume';
-import '../../styles/resume.css';
+import '../../styles/sections/main-sections.css';
 
 const MainContent = () => {
   useScrollSpy();

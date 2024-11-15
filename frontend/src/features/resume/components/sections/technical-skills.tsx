@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../styles/technical-skills.css';
+import '../../styles/sections/technical-skills.css';
 
 interface Skill {
   display_name: string;
@@ -29,7 +29,15 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
       <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="modal-header">
-          <img src={`/images/icons/${skill.image}`} alt={skill.display_name} className="modal-skill-icon" />
+          <div className="modal-icon-wrapper">
+            <img 
+              src={`/images/icons/${skill.image}`} 
+              alt={skill.display_name}
+              width="48"
+              height="48"
+              className="modal-skill-icon"
+            />
+          </div>
           <h3>{skill.display_name}</h3>
         </div>
         <div className="modal-body">
@@ -90,7 +98,6 @@ const TechnicalSkills: React.FC = () => {
   if (loading) return <div className="loading-skills">Loading skills...</div>;
   if (error) return <div className="error-message">Error: {error}</div>;
 
-  // Group skills by general category
   const categorizedSkills = Object.entries(skills).reduce((acc, [key, skill]) => {
     const category = skill.general_category;
     if (!acc[category]) acc[category] = [];
@@ -118,11 +125,15 @@ const TechnicalSkills: React.FC = () => {
                     title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
                   >
                     <div className="skill-icon-container">
-                      <img 
-                        src={`/images/icons/${skill.image}`} 
-                        alt={skill.display_name}
-                        className="skill-icon"
-                      />
+                      <div className="icon-wrapper">
+                        <img 
+                          src={`/images/icons/${skill.image}`} 
+                          alt={skill.display_name}
+                          width="32"
+                          height="32"
+                          className="skill-icon"
+                        />
+                      </div>
                       <span className="skill-name">{skill.display_name}</span>
                     </div>
                   </div>

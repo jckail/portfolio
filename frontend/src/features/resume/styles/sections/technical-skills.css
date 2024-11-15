@@ -41,7 +41,7 @@
   transition: all var(--transition-fast);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  background: var(--surface-color);
+  background: var(--image-background);
   border: 1px solid transparent;
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
@@ -65,6 +65,7 @@
   height: 40px;
   object-fit: contain;
   transition: transform var(--transition-fast);
+  color: red;
 }
 
 .skill-item:hover .skill-icon {

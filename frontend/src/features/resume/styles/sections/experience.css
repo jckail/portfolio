@@ -76,7 +76,7 @@
   width: 135px;
   height: 45px;
   border-radius: var(--radius-sm);
-  background: white;
+  background: var(--image-background);
   border: 1px solid var(--primary);
   object-fit: contain;
   flex-shrink: 0;

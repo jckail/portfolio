@@ -1,6 +1,6 @@
 import React from 'react';
 
-import '../../styles/tldr.css';
+import '../../styles/sections/tldr.css';
 
 interface TLDRProps {
   tldr: {

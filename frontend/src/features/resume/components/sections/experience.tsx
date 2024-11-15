@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResumeData } from '../../types';
-import '../../styles/experience.css';
+import '../../styles/sections/experience.css';
 
 interface ExperienceProps {
   experience?: ResumeData['experience'];

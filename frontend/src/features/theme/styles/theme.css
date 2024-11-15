@@ -3,7 +3,7 @@
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
-  --surface-color: #0303ff11;
+  --surface-color: #dcdcdc11;
   --section-background: #0303ff1d;
   --section-background-blur: 7px;
   --text-color: #000000;
@@ -21,6 +21,7 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --background-color-invert: #000000;
   --border-thickness: 3px;
+  --image-background: #ffffff;
 }
 
 .theme-dark {
@@ -43,6 +44,7 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
   --background-color-invert: #ffffff;
   --border-thickness: 2px;
+  --image-background: #0303ff11;
 }
 
 .theme-party {
@@ -65,6 +67,7 @@
   --shadow-lg: 0 10px 15px rgba(255, 0, 255, 0.3);
   --background-color-invert: #ffffff;
   --border-thickness: 3px;
+  --image-background: #ffffff;
 }
 
 /* Base styles */

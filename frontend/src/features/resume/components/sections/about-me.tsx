@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/about.css';
+import '../../styles/sections/about.css';
 
 interface AboutMeProps {
   aboutMe: string;
