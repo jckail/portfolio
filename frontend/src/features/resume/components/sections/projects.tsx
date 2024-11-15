@@ -20,11 +20,10 @@ const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
               className="project-card"
               style={{ '--item-index': index } as React.CSSProperties}
             >
-              <div className="project-content">
                 <div className="project-image">
                   <img 
-                    src="/images/projects/github-logo.svg"
-                    alt="GitHub"
+                    src={project.image || "/images/projects/github-logo.svg"}
+                    alt={`${project.title} project image`}
                     loading="lazy"
                   />
                 </div>
@@ -54,7 +53,6 @@ const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
                     </a>
                   )}
                 </div>
-              </div>
             </div>
           ))}
         </div>

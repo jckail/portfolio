@@ -28,6 +28,7 @@ export interface ResumeData {
     description: string;
     link: string;
     link2?: string;
+    image?: string;  // Added optional image property
   }[];
 }
 

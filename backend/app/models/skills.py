@@ -684,7 +684,7 @@ skills = {
         "description": "A business intelligence software and big data analytics platform that helps explore, analyze and share real-time business analytics.",
         "weblink": "https://www.looker.com/",
         "examples": {},
-        "general_category": "Data Analytics",
+        "general_category": "Data Science",
         "sub_category": "Business Intelligence"
     },
 "material_ui": {
@@ -768,7 +768,7 @@ skills = {
         "description": "A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache.",
         "weblink": "https://nginx.org/",
         "examples": {},
-        "general_category": "Web Infrastructure",
+        "general_category": "DevOps",
         "sub_category": "Web Server"
     },
     "node.js": {
@@ -924,7 +924,7 @@ skills = {
         "description": "Google Cloud's real-time messaging service for independent applications to publish and subscribe to asynchronous events.",
         "weblink": "https://cloud.google.com/pubsub",
         "examples": {},
-        "general_category": "Cloud Services",
+        "general_category": "Data Engineering",
         "sub_category": "Messaging"
     },
     "python": {
@@ -972,7 +972,7 @@ skills = {
         "description": "A message broker that supports multiple messaging protocols and enables asynchronous processing and communication.",
         "weblink": "https://www.rabbitmq.com/",
         "examples": {},
-        "general_category": "Message Brokers",
+        "general_category": "Data Engineering",
         "sub_category": "Message Queue"
     },
     "rds": {
@@ -984,7 +984,7 @@ skills = {
         "description": "Amazon's Relational Database Service that makes it easy to set up, operate, and scale a relational database in the cloud.",
         "weblink": "https://aws.amazon.com/rds/",
         "examples": {},
-        "general_category": "Cloud Services",
+        "general_category": "Databases",
         "sub_category": "Database Service"
     },
     "react": {
@@ -1164,7 +1164,7 @@ skills = {
         "description": "An open source Firebase alternative providing all the backend features developers need to build a product.",
         "weblink": "https://supabase.com/",
         "examples": {},
-        "general_category": "Backend as a Service",
+        "general_category": "Databases",
         "sub_category": "Database Platform"
     },
     "svelte": {
@@ -1188,7 +1188,7 @@ skills = {
         "description": "A visual analytics platform that helps people see and understand their data.",
         "weblink": "https://www.tableau.com/",
         "examples": {},
-        "general_category": "Data Analytics",
+        "general_category": "Data Science",
         "sub_category": "Business Intelligence"
     },
     "tailwind_css": {
