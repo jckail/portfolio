@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { Theme } from '../../theme/stores/theme-store';
 import { Contact } from '../types';
-import SidePanel from '../../layouts/components/side-panel';
+import SidePanel from './side-panel';
 import GitHubIcon from '../../theme/components/icons/github-icon';
 import LinkedInIcon from '../../theme/components/icons/linkedin-icon';
 import MoonIcon from '../../theme/components/icons/moon-icon';

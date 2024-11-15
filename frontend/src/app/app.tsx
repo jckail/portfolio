@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { RouteObject, useLocation } from 'react-router-dom';
-import { MainLayout } from '../features/layouts';
 import MainContent from '../features/content/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import { BackgroundProvider } from '../features/theme/components/background-provider';
@@ -40,14 +39,12 @@ const AppContent: React.FC = () => {
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
             {/* <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}> */}
-              <MainLayout>
-                <MainContent error={error} />
-                <AdminLogin 
-                  isOpen={isAdminModalOpen} 
-                  onClose={() => setIsAdminModalOpen(false)}
-                  onLoginSuccess={handleLoginSuccess}
-                />
-              </MainLayout>
+              <MainContent error={error} />
+              <AdminLogin 
+                isOpen={isAdminModalOpen} 
+                onClose={() => setIsAdminModalOpen(false)}
+                onLoginSuccess={handleLoginSuccess}
+              />
             {/* </ParticlesProvider> */}
           </BackgroundProvider>
           

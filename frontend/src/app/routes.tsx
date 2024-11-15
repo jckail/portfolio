@@ -1,6 +1,5 @@
 import { RouteObject } from 'react-router-dom';
 import { useMemo } from 'react';
-import { MainLayout } from '../features/layouts';
 import MainContent from '../features/content/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import { useThemeStore } from '../features/theme/stores/theme-store';
@@ -22,14 +21,12 @@ const AppRoutes = () => {
 
   return (
     <ParticlesProvider config={baseConfig}>
-      <MainLayout>
-        <MainContent error={error} />
-        <AdminLogin 
-          isOpen={isAdminModalOpen} 
-          onClose={() => setIsAdminModalOpen(false)}
-          onLoginSuccess={handleLoginSuccess}
-        />
-      </MainLayout>
+      <MainContent error={error} />
+      <AdminLogin 
+        isOpen={isAdminModalOpen} 
+        onClose={() => setIsAdminModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </ParticlesProvider>
   );
 };
