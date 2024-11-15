@@ -159,49 +159,51 @@ const Chat: React.FC = () => {
 
   return (
     <div style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'none', isolation: 'isolate' }}>
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 20,
-          left: 20,
-          zIndex: 9999,
-          pointerEvents: 'auto',
-          '@keyframes glowPulse': {
-            '0%': {
-              boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
-            },
-            '50%': {
-              boxShadow: '0 0 12px 5px rgba(0, 0, 0, 0.3), 0 0 20px 8px rgba(0, 0, 0, 0.15)'
-            },
-            '100%': {
-              boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
-            }
-          }
-        }}
-      >
-        <Fab
+      {!open && (
+        <Box
           sx={{
-            bgcolor: 'var(--section-background)',
-            border:'var(--border-thickness) solid var(--primary-border)', 
-            color: 'var(--text-color)',
-            width: 70,
-            height: 70,
-            transition: 'all 0.3s ease-in-out',
-            animation: isScrolled ? 'glowPulse 2s infinite' : 'none',
-            '&:hover': {
-              bgcolor: 'var(--primary)',
-              color: 'white',
-              transform: 'scale(1.05)',
-            },
-            fontSize: '1.5rem',
-            backdropFilter: 'blur(var(--section-background-blur))',
+            position: 'fixed',
+            bottom: 20,
+            left: 20,
+            zIndex: 9999,
+            pointerEvents: 'auto',
+            '@keyframes glowPulse': {
+              '0%': {
+                boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
+              },
+              '50%': {
+                boxShadow: '0 0 12px 5px rgba(0, 0, 0, 0.3), 0 0 20px 8px rgba(0, 0, 0, 0.15)'
+              },
+              '100%': {
+                boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
+              }
+            }
           }}
-          aria-label="Chat with AI"
-          onClick={handleClickOpen}
         >
-          ✨AI
-        </Fab>
-      </Box>
+          <Fab
+            sx={{
+              bgcolor: 'var(--section-background)',
+              border:'var(--border-thickness) solid var(--primary-border)', 
+              color: 'var(--text-color)',
+              width: 70,
+              height: 70,
+              transition: 'all 0.3s ease-in-out',
+              animation: isScrolled ? 'glowPulse 2s infinite' : 'none',
+              '&:hover': {
+                bgcolor: 'var(--primary)',
+                color: 'white',
+                transform: 'scale(1.05)',
+              },
+              fontSize: '1.5rem',
+              backdropFilter: 'blur(var(--section-background-blur))',
+            }}
+            aria-label="Chat with AI"
+            onClick={handleClickOpen}
+          >
+            ✨AI
+          </Fab>
+        </Box>
+      )}
 
       <Dialog
         open={open}
@@ -216,11 +218,11 @@ const Chat: React.FC = () => {
         hideBackdrop={!isMobile}
         PaperProps={{
           sx: {
-            width: isMobile ? '100%' : 'calc(33.33% - 5%)',
+            width: isMobile ? '100%' : '500px', // Fixed width instead of percentage
             height: isMobile ? '100%' : '90vh',
-            maxHeight: isMobile ? '100%' : '90vh',
+            maxHeight: isMobile ? '99%' : '90vh',
             borderRadius: isMobile ? 0 : 2,
-            margin: isMobile ? 0 : '5vh 5% 5vh 5%',
+            margin: isMobile ? 0 : '1vh 0 15vh 0', // Removed right margin
             display: 'flex',
             flexDirection: 'column',
             position: isMobile ? 'relative' : 'fixed',
@@ -232,6 +234,7 @@ const Chat: React.FC = () => {
             background: 'rgba(var(--surface-color-rgb), 0.85)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             isolation: 'isolate',
+            overflowY: 'hidden',
           }
         }}
         sx={{
@@ -286,13 +289,14 @@ const Chat: React.FC = () => {
 
         <DialogContent 
           sx={{ 
-            p: 2,
             display: 'flex',
             flexDirection: 'column',
             flexGrow: 1,
             height: '100%',
             overflow: 'hidden',
             bgcolor: 'var(--background-color)',
+            position: 'relative',
+            p: '16px !important',
           }}
         >
           <Box 
@@ -303,7 +307,7 @@ const Chat: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               gap: 1,
-              mb: 2,
+              pb: '130px',
               WebkitOverflowScrolling: 'touch',
             }}
           >
@@ -355,11 +359,16 @@ const Chat: React.FC = () => {
               display: 'flex', 
               gap: 1, 
               alignItems: 'flex-end',
-              position: 'sticky',
+              position: 'absolute',
               bottom: 0,
+              left: 0,
+              right: 0,
               bgcolor: 'var(--surface-color)',
-              pt: 1,
-              flexShrink: 0,
+              p: 2,
+              pb: '1px',
+              borderTop: '1px solid var(--primary-border)',
+              backgroundColor: 'var(--solid-color)',
+              
             }}
           >
             <TextField
