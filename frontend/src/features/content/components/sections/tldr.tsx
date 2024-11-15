@@ -10,7 +10,7 @@ const TLDR: React.FC = () => {
   useEffect(() => {
     const fetchAboutMeData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/aboutme');
+        const response = await fetch('/api/aboutme');
         if (!response.ok) {
           throw new Error('Failed to fetch contact data');
         }
@@ -26,25 +26,10 @@ const TLDR: React.FC = () => {
     fetchAboutMeData();
   }, []);
 
-  if (loading) {
-    return (
-      <section id="tldr" className="section-container">
-        <div className="section-content">
-          <div>Loading...</div>
-        </div>
-      </section>
-    );
-  }
+  if (loading) return <div className="loading-aboutme">Loading aboutme...</div>;
+  if (error) return <div className="error-aboutme">Error: {error}</div>;
 
-  if (error) {
-    return (
-      <section id="tldr" className="section-container">
-        <div className="section-content">
-          <div>Error: {error}</div>
-        </div>
-      </section>
-    );
-  }
+
 
   if (!aboutMeData) {
     return (

@@ -84,7 +84,7 @@ const Experience: React.FC = () => {
   useEffect(() => {
     const fetchExperience = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/experience');
+        const response =  await fetch('/api/experience');
         if (!response.ok) {
           throw new Error('Failed to fetch experience data');
         }

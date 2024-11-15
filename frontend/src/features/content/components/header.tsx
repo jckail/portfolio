@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const fetchContactData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/contact');
+        const response = await fetch('/api/contact');
         if (!response.ok) {
           throw new Error('Failed to fetch contact data');
         }
