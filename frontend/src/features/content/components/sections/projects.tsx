@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { ResumeData } from '../../types';
 import '../../styles/sections/projects.css';
 

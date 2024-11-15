@@ -18,7 +18,7 @@
     },
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": "frontend/tsconfig.json"
+    "project": "./tsconfig.json"
   },
   "plugins": [
     "react",
@@ -76,7 +76,10 @@
       "version": "detect"
     },
     "import/resolver": {
-      "typescript": {}
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
     }
   }
 }

@@ -20,11 +20,6 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
   const { isLoading } = useResume();
   useScrollSpy(); // Initialize scroll spy
   
-  const tldrData = useMemo(() => ({
-    greeting: "hi there 👋",
-    description: "I am a software engineer specializing in Ai, Analytics, and Machine Learning. With over 12 years of experience programming in Python, JavaScript, and SQL. I've helped build winning data cultures from scrappy start ups to fortune 50 companies.",
-    aidetails: "Ask the ✨Ai for even more details about me!"
-  }), []);
 
   useEffect(() => {
     // Force a layout recalculation after content loads
@@ -62,7 +57,7 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
 
   return (
     <div className="resume">
-          <TLDR tldr={tldrData} />
+          <TLDR />
           <Experience/>
           <TechnicalSkills />
           <Projects projects={resumeData.projects} />

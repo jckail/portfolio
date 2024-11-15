@@ -1,6 +1,5 @@
 import React from 'react';
 import Header from '../../../features/content/components/header';
-import { useResume } from '../../../features/content/components/resume-provider';
 import { useAppLogic } from '../../../app/providers/app-logic-provider';
 import { useAdminStore } from '../../../features/admin/stores/admin-store';
 import '../styles/main-layout.css';
@@ -10,7 +9,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { resumeData } = useResume();
+
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
 
@@ -29,7 +28,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="layout">
       <Header 
-        resumeData={resumeData}
         theme={theme}
         toggleTheme={toggleTheme}
         handleResumeClick={handleResumeClick}

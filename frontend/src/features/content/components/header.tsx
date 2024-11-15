@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ResumeData } from '../types';
+
 import { Theme } from '../../theme/stores/theme-store';
+import { Contact } from '../types';
 import SidePanel from '../../layouts/components/side-panel';
 import GitHubIcon from '../../theme/components/icons/github-icon';
 import LinkedInIcon from '../../theme/components/icons/linkedin-icon';
@@ -9,10 +10,10 @@ import SunIcon from '../../theme/components/icons/sun-icon';
 import PartyIcon from '../../theme/components/icons/party-icon';
 import ResumeIcon from '../../theme/components/icons/resume-icon';
 import SadwichIcon from '../../theme/components/icons/sandwich-icon';
+
 import '../styles/header.css';
 
 interface HeaderProps {
-  resumeData: ResumeData | null;
   theme: Theme;
   toggleTheme: () => void;
   handleResumeClick: () => void;
@@ -22,7 +23,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  resumeData,
   theme,
   toggleTheme,
   handleResumeClick,
@@ -31,15 +31,35 @@ const Header: React.FC<HeaderProps> = ({
   isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const [contactData, setContactData] = useState<Contact | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Update URL to reflect current state
+  useEffect(() => {
+    const fetchContactData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/contact');
+        if (!response.ok) {
+          throw new Error('Failed to fetch contact data');
+        }
+        const data = await response.json();
+        setContactData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContactData();
+  }, []);
+
   const updateURL = (isOpen: boolean) => {
     const url = new URL(window.location.href);
     url.searchParams.set('sidepanel', isOpen ? 'open' : 'closed');
     window.history.replaceState({}, '', url.toString());
   };
 
-  // Initialize state from URL or default to closed
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sidePanelState = params.get('sidepanel');
@@ -47,7 +67,6 @@ const Header: React.FC<HeaderProps> = ({
     
     setIsSidePanelOpen(shouldBeOpen);
     
-    // Ensure URL always shows the state, defaulting to closed if not set
     if (!sidePanelState) {
       updateURL(false);
     }
@@ -77,6 +96,10 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!contactData) return <div>No contact data available</div>;
+
   return (
     <>
       <header className="header">
@@ -90,43 +113,42 @@ const Header: React.FC<HeaderProps> = ({
               <SadwichIcon/>
             </button>
             <div className="header-titles">
-              <h1>{resumeData?.name || 'Loading...'}</h1>
-              <h2>{resumeData?.title || ''}</h2>
+              <h1>{contactData.firstName}{" "}{contactData.lastName}</h1>
+              <h2>{contactData.title}</h2>
             </div>
           </div>
           <div className="nav-right">
-          
-                {resumeData?.github && (
-                  <a 
-                    href={resumeData.github} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="icon-link"
-                    aria-label="GitHub Profile"
-                  >
-                    <GitHubIcon />
-                  </a>
-                )}
-                {resumeData?.linkedin && (
-                  <a 
-                    href={resumeData.linkedin} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="icon-link"
-                    aria-label="LinkedIn Profile"
-                  >
-                    <LinkedInIcon />
-                  </a>
-                )}
-                <button 
-                  onClick={handleResumeClick}
-                  className="resume-button"
-                  aria-label="Download Resume"
-                >
-                  <strong>Resume</strong>
+            {contactData.github && (
+              <a 
+                href={contactData.github} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="icon-link"
+                aria-label="GitHub Profile"
+              >
+                <GitHubIcon />
+              </a>
+            )}
+            {contactData.linkedin && (
+              <a 
+                href={contactData.linkedin} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="icon-link"
+                aria-label="LinkedIn Profile"
+              >
+                <LinkedInIcon />
+              </a>
+            )}
+            <button 
+              onClick={handleResumeClick}
+              className="resume-button"
+              aria-label="Download Resume"
+            >
+              <strong>Resume</strong>
               <ResumeIcon/>
-                </button>
-              
+            </button>
+          
             {!isToggleHidden && (
               <button 
                 onClick={toggleTheme}
