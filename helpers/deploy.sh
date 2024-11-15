@@ -6,6 +6,9 @@ set -e
 # Default to prod if no argument is specified
 ENVIRONMENT="prod"
 
+# Get the absolute path to the project root (one directory up from this script)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -26,6 +29,9 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Navigate to the project root directory
+cd "$SCRIPT_DIR" || { echo "Failed to navigate to project root directory"; exit 1; }
 
 # Get current git commit hash
 GIT_COMMIT=$(git rev-parse HEAD)
@@ -49,11 +55,11 @@ done
 
 # Set environment-specific variables
 if [ "$ENVIRONMENT" = "prod" ]; then
-    DOCKERFILE="Dockerfile.prod"
+    DOCKERFILE="helpers/Dockerfile.prod"
     ALLOWED_ORIGINS="https://portfolio-292025398859.us-central1.run.app"
     PRODUCTION_URL="https://portfolio-292025398859.us-central1.run.app"
 else
-    DOCKERFILE="Dockerfile.dev"
+    DOCKERFILE="helpers/Dockerfile.dev"
     ALLOWED_ORIGINS="http://localhost:5173"
     PRODUCTION_URL="http://localhost:8080"
 fi
@@ -111,5 +117,5 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     exit 1
 else
     echo "Development environment setup complete"
-    echo "You can now run ./local_test.sh to start the development servers"
+    echo "You can now run ./helpers/local_test.sh to start the development servers"
 fi

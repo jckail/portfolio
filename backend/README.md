@@ -1,130 +1,143 @@
-# QuickResume Backend
+# Backend Technical Documentation 🔧
 
-## Overview
-The backend of QuickResume is built with FastAPI, providing a high-performance API layer for serving resume data and handling file operations. It features automatic API documentation, type checking, and efficient request handling.
+## Technology Stack
 
-## Features
-- Fast and efficient API endpoints
-- Automatic OpenAPI documentation
-- Type validation with Pydantic
-- Asynchronous request handling
-- Comprehensive logging system
-- PDF file serving capabilities
+- **FastAPI** for high-performance API
+- **Pydantic** for data validation
+- **Uvicorn** for ASGI server
+- **Python 3.12+** for modern features
+- **Custom middleware** for security
 
-## API Documentation
+## Core Features 🚀
 
-### Endpoints
+### API Endpoints
 
-#### 1. Get Resume Data
+#### Resume Data Management
 ```http
-GET /api/resume_data
-```
-Returns formatted resume data including personal information, skills, experience, and projects.
-
-Example Response:
-```json
-{
-    "name": "John Doe",
-    "title": "Software Engineer",
-    "github": "https://github.com/johndoe",
-    "linkedin": "https://linkedin.com/in/johndoe",
-    "aboutMe": "Professional software engineer...",
-    "technicalSkills": ["Python", "JavaScript", "React"],
-    "experience": [
-        {
-            "title": "Senior Developer",
-            "company": "Tech Corp",
-            "date": "2020-Present",
-            "responsibilities": ["Led team...", "Developed..."],
-            "link": "https://techcorp.com"
-        }
-    ],
-    "projects": [
-        {
-            "name": "Project Name",
-            "description": "Project description...",
-            "technologies": ["React", "Node.js"],
-            "link": "https://project.com"
-        }
-    ]
-}
+GET /api/resume_data       # Get formatted resume data
+GET /api/resume           # Download PDF resume
+GET /api/resume_file_name # Get resume filename
 ```
 
-#### 2. Serve Resume PDF
+#### AI Assistant Integration
 ```http
-GET /api/resume
+POST /api/chat           # AI chat interactions
+GET /api/chat/history    # Retrieve chat history
 ```
-Serves the resume PDF file.
 
-Response: PDF file (application/pdf)
-
-#### 3. Get Resume Filename
+#### Analytics & Telemetry
 ```http
-GET /api/resume_file_name
-```
-Returns the current resume file name.
-
-Example Response:
-```json
-{
-    "resumeFileName": "JohnDoe_Resume.pdf"
-}
+POST /api/telemetry      # Log user interactions
+GET /api/health         # Service health check
 ```
 
-#### 4. Log Frontend Messages
-```http
-POST /api/log
-```
-Logs messages from the frontend for debugging and monitoring.
+## Architecture 🏗️
 
-Request Body:
-```json
-{
-    "message": "Log message content"
-}
 ```
-
-Example Response:
-```json
-{
-    "status": "success",
-    "message": "Log written successfully"
-}
+backend/
+├── app/
+│   ├── api/            # API routes
+│   ├── middleware/     # Custom middleware
+│   ├── models/        # Data models
+│   ├── utils/         # Helper functions
+│   └── main.py       # Application entry
+├── tests/            # Test suite
+└── logs/            # Application logs
 ```
 
-## Development Setup
+## Security Features 🔒
 
-1. Install dependencies:
+- CORS configuration
+- Rate limiting
+- Request validation
+- Error handling
+- Secure file operations
+
+## Data Models 📊
+
+### Resume Data
+```python
+class ResumeData(BaseModel):
+    personal_info: PersonalInfo
+    experience: List[Experience]
+    projects: List[Project]
+    skills: TechnicalSkills
+```
+
+### Chat Messages
+```python
+class ChatMessage(BaseModel):
+    content: str
+    timestamp: datetime
+    user_id: str
+```
+
+## Logging System 📝
+
+- Structured JSON logging
+- Rotating file handlers
+- Error tracking
+- Performance metrics
+- Debug information
+
+## Development Guide 👩‍💻
+
+### Setup
 ```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Start development server
+uvicorn app.main:app --reload --port 8080
+
+# Run tests
+pytest
 ```
 
-2. Set up environment variables:
+### Environment Variables
 ```env
-FLASK_APP=backend/main.py
 ALLOWED_ORIGINS=http://localhost:5173
 RESUME_FILE=YourResume.pdf
+LOG_LEVEL=INFO
 ```
 
-3. Run the development server:
-```bash
-uvicorn backend.app.main:app --reload --port 8080
-```
+### Best Practices
 
-## Logging System
-- Logs are stored in `backend/app/logs/`
-- Filename format: `frontend_YYYY_MM_DD_HH.logs`
-- Includes timestamps and error tracking
-- Automatic log rotation by hour
+#### Code Organization
+- Clear module structure
+- Type hints everywhere
+- Docstrings for functions
+- Proper error handling
 
-## Error Handling
-- Comprehensive error messages
-- HTTP status codes for different scenarios
-- Error logging for debugging
-- Graceful fallbacks for missing files
+#### API Design
+- RESTful principles
+- Clear endpoint naming
+- Proper status codes
+- Comprehensive validation
 
-## Best Practices
-- Use type hints for better code quality
-- Implement proper error handling
-- Follow REST API conventions
-- Maintain clear documentation
+#### Performance
+- Async operations
+- Efficient data processing
+- Proper caching
+- Resource optimization
+
+## Testing Strategy 🧪
+
+- Unit tests for utilities
+- Integration tests for APIs
+- Performance benchmarks
+- Security testing
+
+## Monitoring 📊
+
+- Health checks
+- Performance metrics
+- Error tracking
+- Usage analytics
+
+## Contributing 🤝
+
+1. Follow Python best practices
+2. Add tests for new features
+3. Update documentation
+4. Maintain type safety

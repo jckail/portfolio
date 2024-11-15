@@ -30,7 +30,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the backend code
 COPY backend /app/backend/
 
-
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV NODE_ENV=production

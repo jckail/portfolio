@@ -182,6 +182,17 @@ For me, the goal is simple:
         ],
     },
     "projects": [
+                        {
+            "title": "Super Teacher",
+            "description": "A powerful web application designed to help teachers leverage AI to enhance student learning outcomes while saving time and reducing stress.",
+            "link": "https://github.com/jckail/superteacher",
+            "link2": "https://www.the-super-teacher.com",
+        },
+                {
+            "title": "Personal Portfolio Website",
+            "description": "Full Stack web application that brings my professional experience to life through an interactive and engaging interface",
+            "link": "https://github.com/jckail/portfolio",
+        },
         {
             "title": 'TechCrunch - "Join Group via QR"',
             "description": "Created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
@@ -212,11 +223,6 @@ For me, the goal is simple:
             "title": "Data Playground - A Shop Like App",
             "description": "A website designed to produce data to test data pipelines and ETL processes. Made with FastAPI, Streamlit, and Docker.",
             "link": "https://github.com/jckail/shop_project",
-        },
-        {
-            "title": "Personal Portfolio Website",
-            "description": "A fully custom website using FastAPI and Streamlit. Why Streamlit? Simply because I wanted to learn a new technology. Hosted in GCP via CloudRun.",
-            "link": "https://github.com/jckail/portfolio",
         },
     ],
 }

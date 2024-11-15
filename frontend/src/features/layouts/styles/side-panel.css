@@ -23,8 +23,8 @@
   left: -200px;
   height: auto;
   width: 10vw;
-  max-width: 100px;
-  min-width: 100px;
+  max-width: 75px;
+  min-width: 75px;
   background: var(--surface);
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
@@ -73,7 +73,7 @@
   box-shadow: 0 0 30px var(--primary);
   color: var(--text-color);
   width: 100%;
-  
+  transform: scale(1.2);
   border-radius: 10px;
 }
 

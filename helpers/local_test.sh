@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Get the absolute path to the project root (where this script is located)
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-echo "Script directory: $SCRIPT_DIR"
+# Get the absolute path to the project root (one directory up from this script)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+echo "Project root directory: $SCRIPT_DIR"
 
 # Navigate to the project root directory
-cd "$SCRIPT_DIR" || { echo "Failed to navigate to script directory"; exit 1; }
+cd "$SCRIPT_DIR" || { echo "Failed to navigate to project root directory"; exit 1; }
 
 echo "Starting local test environment..."
 
 # Run kill_hanging.sh to terminate any existing processes
 echo "Executing kill_hanging.sh to clean up any hanging processes..."
-bash ./kill_hanging.sh
+bash ./helpers/kill_hanging.sh
 
 echo "Removing frontend/dist directory..."
 rm -rf frontend/dist
@@ -25,7 +25,7 @@ else
 fi
 
 echo "Starting the backend..."
-cd "$SCRIPT_DIR" || { echo "Failed to navigate back to script directory"; exit 1; }
+cd "$SCRIPT_DIR" || { echo "Failed to navigate back to project root directory"; exit 1; }
 uvicorn backend.app.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir backend --log-level debug &
 
 # Function to check the health of the backend with exponential backoff

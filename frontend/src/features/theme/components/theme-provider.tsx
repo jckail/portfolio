@@ -28,6 +28,23 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
         // Set data attribute for CSS variables
         document.documentElement.setAttribute('data-theme', theme);
         
+        // Update meta theme-color tags
+        const themeColors = {
+          light: '#ffffff',
+          dark: '#000000',
+          party: '#ff00ff'
+        };
+        
+        // Remove existing theme-color meta tags
+        const existingMetaTags = document.querySelectorAll('meta[name="theme-color"]');
+        existingMetaTags.forEach(tag => tag.remove());
+        
+        // Create and append new theme-color meta tag
+        const metaThemeColor = document.createElement('meta');
+        metaThemeColor.name = 'theme-color';
+        metaThemeColor.content = themeColors[theme as keyof typeof themeColors];
+        document.head.appendChild(metaThemeColor);
+        
         // Force a repaint on iOS without affecting scroll position
         document.documentElement.style.transform = 'translateZ(0)';
         requestAnimationFrame(() => {

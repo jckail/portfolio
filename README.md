@@ -1,81 +1,68 @@
-# Portfolio
+# Portfolio 🚀
 
-## Overview
-Portfolio is a modern, interactive resume application that transforms the traditional resume into a dynamic web experience. Built with React and FastAPI, it offers a unique way to showcase professional experience through an interactive interface with real-time data updates, smooth animations, and a responsive design that adapts to any device.
+Welcome to my professional portfolio! Visit [jckail.com](https://www.jckail.com) to see it in action.
 
-### Key Features
-- Interactive UI with dark/light theme support
-- Real-time data updates through FastAPI backend
-- Responsive design for all devices
-- PDF resume download capability
-- Particle.js background animations
-- Comprehensive logging system
-- Professional section organization (Experience, Projects, Skills)
+## What's Inside 🎯
 
-## Project Structure
+This portfolio is a dynamic web application that brings my professional experience to life through an interactive and engaging interface. Here's what you'll find:
+
+### Resume Experience 📝
+- Professional journey and accomplishments
+- Detailed project showcases
+- Comprehensive skill breakdown
+- Downloadable PDF resume
+
+### Interactive Features ✨
+- 🤖 AI Assistant for smart interactions
+- 🌓 Light/Dark mode for comfortable viewing
+- 📱 Responsive design for all devices
+- 🔄 Real-time data updates
+
+### Connect With Me 🤝
+- [LinkedIn](https://www.linkedin.com/in/jordan-kail)
+- [GitHub](https://github.com/jkail-dev)
+- Direct contact options
+- Professional network links
+
+## Technology Stack 💻
+
+Built with modern technologies for optimal performance:
+
+### Frontend 🎨
+- React with TypeScript
+- React Router for navigation
+- Modern UI/UX design
+- Responsive CSS architecture
+
+### Backend 🔧
+- FastAPI for high performance
+- Real-time data processing
+- Secure API endpoints
+- Comprehensive logging
+
+## Project Structure 📂
+
 ```
 portfolio/
-├── frontend/    # React/Vite application
-├── backend/     # FastAPI server
-├── images/      # Static assets
-└── scripts/     # Utility scripts
+├── frontend/    # React application (see frontend/README.md for details)
+├── backend/     # FastAPI server (see backend/README.md for details)
+└── helpers/     # Deployment and utility scripts
 ```
 
-## Quick Start
+## Getting Started 🚀
 
-### Prerequisites
-- Python 3.6+
-- Node.js 14+
-- npm or yarn
-
-### Running Locally
-1. Clone the repository:
-```bash
-git clone [repository-url]
-cd portfolio
-```
-
-2. Start both frontend and backend:
+1. Clone the repository
+2. Run the local development script:
 ```bash
 ./local_test.sh
 ```
 
-This script will:
-- Install all necessary dependencies
-- Start the FastAPI backend server
-- Launch the Vite development server
-- Open the application in your default browser
-
-### Access the Application
+The application will be available at:
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8080
-- API Documentation: http://localhost:8080/docs
 
-## Development
+## Learn More 📚
 
-### Frontend Development
-The frontend is built with React and Vite, offering:
-- Hot module replacement
-- Fast refresh
-- Component-based architecture
-- Modern JavaScript features
-
-### Backend Development
-The backend uses FastAPI, providing:
-- Fast API endpoints
-- Automatic API documentation
-- Type checking
-- Asynchronous request handling
-
-## Environment Configuration
-Create a `.env` file in the root directory:
-```env
-FLASK_APP=backend/main.py
-ALLOWED_ORIGINS=http://localhost:5173
-VITE_API_URL=http://localhost:8080/api
-RESUME_FILE=YourResume.pdf
-```
-
-## Additional Documentation
+For detailed technical information, check out:
 - [Frontend Documentation](./frontend/README.md)
 - [Backend Documentation](./backend/README.md)

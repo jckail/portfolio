@@ -1,45 +1,59 @@
-# Use Python 3.11 slim as the base image
-FROM python:3.11-slim
+# Development Dockerfile
+FROM node:18-alpine as frontend-build
 
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y nodejs npm
+WORKDIR /app/frontend
+COPY ../frontend/package*.json ./
+RUN npm install
+COPY ../frontend/ ./
 
-# Set the working directory in the container
+# Build frontend with development configuration
+ENV NODE_ENV=development
+RUN npm run build
+
+# Backend setup
+FROM python:3.12.3-slim
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+# Copy the frontend build
+COPY --from=frontend-build /app/frontend/dist/ /app/frontend/dist/
 
-# Install any needed packages specified in requirements.txt
+# Create directory for favicon files
+RUN mkdir -p /app/frontend/dist/public/
+
+# Copy favicon files (if they exist)
+COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/public/
+
+# Install backend dependencies
+COPY ../requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the backend application code
-COPY backend/ ./backend/
+# Copy the backend code
+COPY ../backend /app/backend/
 
-# Copy the frontend application code
-COPY frontend/ ./frontend/
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV NODE_ENV=development
 
-# Copy the images directory
-COPY images/ ./images/
+# Entry point script
+COPY <<EOF /app/start.sh
+#!/bin/sh
+echo "Starting development environment..."
+echo "Checking environment variables..."
 
-# Copy entrypoint script
-COPY entrypoint.sh .
+# List of required environment variables
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW"
 
-# Make the entrypoint script executable
-RUN chmod +x entrypoint.sh
+# Check each required variable
+for var in \$required_vars; do
+    if [ -z "\$(eval echo \\\$\${var})" ]; then
+        echo "Error: Required environment variable \$var is not set"
+        exit 1
+    fi
+done
 
-# Set default environment variable for API_URL
-ENV API_URL=http://localhost:8080
+echo "Environment check passed"
+exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080} --reload
+EOF
 
-# Expose the ports for both frontend and backend
-EXPOSE 8080 5173
-
-# Install frontend dependencies
-WORKDIR /app/frontend
-RUN npm install
-
-# Return to the app directory
-WORKDIR /app
-
-# Set the command to run the application
-CMD ["./entrypoint.sh"]
+RUN chmod +x /app/start.sh
+CMD ["/app/start.sh"]

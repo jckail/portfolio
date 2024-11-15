@@ -1,104 +1,120 @@
-# Quick Resume
+# Frontend Technical Documentation 🎨
 
-A modern, interactive resume website built with React and TypeScript.
+## Technology Stack
 
-## Project Structure
+- **React 18+** with TypeScript
+- **React Router** for client-side routing
+- **Vite** for fast development and building
+- **CSS Modules** for scoped styling
+- **Custom Hooks** for shared logic
+- **Context API** for state management
 
-The project follows a feature-based architecture:
+## Architecture Overview 🏗️
+
+The frontend follows a feature-based architecture for better maintainability and scalability:
 
 ```
 src/
-├── app/                    # Application-wide setup and configuration
-│   ├── components/        # App-level components (error boundaries, etc.)
-│   ├── providers/        # App-level providers
+├── app/                    # Application core
+│   ├── components/        # App-wide components
+│   ├── providers/        # Context providers
 │   └── styles/          # Global styles
 │
-├── features/             # Feature-based modules
-│   ├── admin/           # Admin feature
-│   ├── layouts/         # Layout components
-│   ├── resume/          # Resume feature
-│   ├── telemetry/       # Telemetry feature
-│   └── theme/           # Theme feature
+├── features/             # Feature modules
+│   ├── admin/           # Admin dashboard
+│   ├── layouts/         # Page layouts
+│   ├── resume/          # Resume components
+│   ├── telemetry/       # Usage tracking
+│   └── theme/           # Theme management
 │
-└── shared/              # Shared code
-    ├── components/      # Shared components
-    ├── hooks/          # Shared hooks
-    ├── types/          # Shared types
-    └── utils/          # Shared utilities
+└── shared/              # Shared utilities
+    ├── components/      # Reusable components
+    ├── hooks/          # Custom hooks
+    ├── types/          # TypeScript types
+    └── utils/          # Helper functions
 ```
 
-Each feature follows a similar structure:
+## Key Features 🔑
 
+### Theme Management
+- Light/Dark mode support
+- CSS variables for consistent theming
+- Smooth theme transitions
+- System preference detection
+
+### Resume Components
+- Interactive sections
+- Responsive layouts
+- Animated transitions
+- Dynamic content loading
+
+### Performance Optimizations
+- Code splitting
+- Lazy loading
+- Memoized components
+- Optimized assets
+
+## Development Guide 👩‍💻
+
+### Setup
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
 ```
-feature/
-├── components/          # Feature-specific components
-├── hooks/              # Feature-specific hooks
-├── stores/             # State management
-├── styles/             # Feature-specific styles
-├── types.ts           # Feature-specific types
-└── utils/             # Feature-specific utilities
-```
 
-## Development
+### Code Quality Tools
+- ESLint for code linting
+- Prettier for code formatting
+- TypeScript for type safety
+- Vitest for unit testing
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Best Practices
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+#### Component Guidelines
+- Use functional components with hooks
+- Implement proper TypeScript types
+- Follow React best practices
+- Maintain single responsibility
 
-3. Build for production:
-   ```bash
-   npm run build
-   ```
+#### State Management
+- Use Context for global state
+- Local state for component-specific data
+- Custom hooks for shared logic
+- Proper error boundaries
 
-## Code Style
+#### Styling
+- CSS Modules for component styles
+- Global variables for theming
+- Mobile-first approach
+- BEM naming convention
 
-The project uses ESLint and Prettier for code formatting and linting:
+## API Integration 🔌
 
-- ESLint enforces code quality rules
-- Prettier ensures consistent code formatting
-- Import order is enforced through ESLint rules
-- Cross-feature imports are restricted to maintain modularity
+The frontend communicates with the FastAPI backend through:
+- RESTful endpoints
+- Type-safe API calls
+- Error handling
+- Loading states
 
-## Best Practices
+## Testing Strategy 🧪
 
-1. Feature-First Organization:
-   - Keep feature-related code together
-   - Avoid cross-feature dependencies
-   - Share common code through the shared directory
+- Unit tests for components
+- Integration tests for features
+- E2E tests for critical paths
+- Snapshot testing for UI
 
-2. Component Guidelines:
-   - Use TypeScript for type safety
-   - Follow React hooks best practices
-   - Implement proper error boundaries
-   - Use loading states appropriately
+## Contributing 🤝
 
-3. Styling:
-   - CSS modules for component-specific styles
-   - Theme variables for consistency
-   - Responsive design principles
-
-4. State Management:
-   - Use React Context for feature-specific state
-   - Keep state close to where it's used
-   - Implement proper loading and error states
-
-## Testing
-
-TODO: Add testing guidelines and setup
-
-## Contributing
-
-1. Create a new branch for your feature/fix
-2. Follow the existing code style
-3. Add appropriate tests
-4. Submit a pull request
-
-## License
-
-MIT
+1. Follow the existing architecture
+2. Maintain code style guidelines
+3. Write tests for new features
+4. Document your changes
