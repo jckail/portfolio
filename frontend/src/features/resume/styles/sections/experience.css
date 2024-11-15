@@ -171,21 +171,24 @@
   }
 
   .company-logo {
-    width: 36px;
-    height: 36px;
+    width: 100px;
+    height: 33px;
     padding: 6px;
+    margin-top: 10px;
   }
 
   .logo-link {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 56px;
     margin-top: 0;
+    justify-content: center;
+
   }
 
   .timeline-header {
     flex-grow: 1;
     align-items: flex-start;
-    margin-left: var(--spacing-sm);
+    margin-left: 75px;
     height: auto;
     min-height: 50px;
   }
