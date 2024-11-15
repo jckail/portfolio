@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResumeData } from '../../types';
 import '../../styles/sections/experience.css';
+
+// Import SVGs directly
+import CommonSpiritIcon from '../../../../assets/icons/companylogos/commonspirit.svg?react';
+import DeloitteIcon from '../../../../assets/icons/companylogos/deloitte.svg?react';
+import MetaIcon from '../../../../assets/icons/companylogos/meta.svg?react';
+import ProveIcon from '../../../../assets/icons/companylogos/prove.svg?react';
+import ROneIcon from '../../../../assets/icons/companylogos/r1.svg?react';
+import WowIcon from '../../../../assets/icons/companylogos/wow.svg?react';
 
 interface ExperienceProps {
   experience?: ResumeData['experience'];
