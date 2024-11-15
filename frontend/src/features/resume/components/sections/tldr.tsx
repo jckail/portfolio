@@ -23,7 +23,7 @@ const TLDR: React.FC<TLDRProps> = ({ tldr,  }) => {
         <div className="tldr-section">
           <div className="tldr-content">
             <div className="tldr-text">
-              <h3>{tldr.greeting}</h3>
+              <h2>{tldr.greeting}</h2>
               <p>{tldr.description}</p>
               <p>{tldr.aidetails}</p>
             </div>

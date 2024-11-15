@@ -24,7 +24,7 @@ skills = {
         "description": "A cloud collaboration platform that combines the functionality of a database with the visual organization of a spreadsheet.",
         "weblink": "https://airtable.com/",
         "examples": {},
-        "general_category": "Productivity Tools",
+        "general_category": "Development Tools",
         "sub_category": "Collaboration Platform"
     },
     "amazon_bedrock": {
@@ -264,7 +264,7 @@ skills = {
         "description": "A unified analytics platform built on top of Apache Spark, offering collaborative notebooks and ML tools.",
         "weblink": "https://databricks.com/",
         "examples": {},
-        "general_category": "Data Engineering",
+        "general_category": "Big Data",
         "sub_category": "Data Platform"
     },
     "datadog": {
@@ -396,7 +396,7 @@ skills = {
         "description": "A collaborative interface design tool that enables team design processes with real-time collaboration.",
         "weblink": "https://www.figma.com/",
         "examples": {},
-        "general_category": "Design",
+        "general_category": "Development Tools",
         "sub_category": "UI/UX Design"
     },
     "firestore": {
@@ -900,7 +900,7 @@ skills = {
         "description": "A distributed SQL query engine optimized for ad-hoc analysis of data at a massive scale.",
         "weblink": "https://prestodb.io/",
         "examples": {},
-        "general_category": "Data Engineering",
+        "general_category": "Big Data",
         "sub_category": "Query Engine"
     },
     "prometheus": {
@@ -1092,7 +1092,7 @@ skills = {
         "description": "A cloud-based data warehousing platform that enables storage, processing, and analysis of data at scale.",
         "weblink": "https://www.snowflake.com/",
         "examples": {},
-        "general_category": "Data Engineering",
+        "general_category": "Big Data",
         "sub_category": "Data Warehouse"
     },
     "socket.io": {

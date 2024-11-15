@@ -30,6 +30,7 @@ import SQLAlchemyIcon from '../../../../assets/icons/neutral/sqlalchemy.svg?reac
 import TimescaleIcon from '../../../../assets/icons/neutral/timescale.svg?react';
 import TrinoIcon from '../../../../assets/icons/neutral/trino.svg?react';
 import tRPCIcon from '../../../../assets/icons/neutral/trpc.svg?react';
+import PostgreSQLIcon from '../../../../assets/icons/neutral/postgresql.svg?react';
 
 interface Skill {
   display_name: string;
@@ -90,6 +91,7 @@ const SVG_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = 
   'timescale.svg': TimescaleIcon,
   'trino.svg': TrinoIcon,
   'trpc.svg': tRPCIcon,
+  'postgresql.svg': PostgreSQLIcon,
 };
 
 const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {

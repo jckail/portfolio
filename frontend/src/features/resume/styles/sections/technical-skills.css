@@ -41,7 +41,7 @@
   transition: all var(--transition-fast);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  background: var(--image-background);
+  background: var(--surface-color);
   border: 1px solid transparent;
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
