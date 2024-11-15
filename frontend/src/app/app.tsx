@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { RouteObject, useLocation } from 'react-router-dom';
 import { MainLayout } from '../features/layouts';
 import MainContent from '../features/resume/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
@@ -11,21 +12,41 @@ import { LoadingBoundary } from './components/loading-boundary';
 import { useResume } from '../features/resume/components/resume-provider';
 import ChatPortal from '../features/resume/components/ChatPortal';
 import AdminHandler from '../features/admin/components/admin-handler';
+import AdminLogin from '../features/admin/components/admin-login';
 import './styles/app.css';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
   const { isLoading, resumeData, error } = useResume();
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const location = useLocation();
+  const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
+
+  // Open admin modal if on admin route
+  React.useEffect(() => {
+    if (location.pathname === '/admin') {
+      setIsAdminModalOpen(true);
+    }
+  }, [location]);
+
+  const handleLoginSuccess = () => {
+    setIsAdminModalOpen(false);
+  };
   
   return (
     <ErrorBoundary>
       <LoadingBoundary>
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
-            <ParticlesProvider config={getThemeConfig(theme)} isResumeLoaded={!isLoading}>
+            <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}>
               <MainLayout>
                 <MainContent resumeData={resumeData} error={error} />
+                <AdminLogin 
+                  isOpen={isAdminModalOpen} 
+                  onClose={() => setIsAdminModalOpen(false)}
+                  onLoginSuccess={handleLoginSuccess}
+                />
               </MainLayout>
             </ParticlesProvider>
           </BackgroundProvider>
@@ -39,4 +60,17 @@ const App: React.FC = () => {
 };
 
 // Prevent unnecessary re-renders
-export default React.memo(App);
+const App = React.memo(AppContent);
+
+export const routes: RouteObject[] = [
+  {
+    path: '/',
+    element: <App />,
+  },
+  {
+    path: '/admin',
+    element: <App />,
+  }
+];
+
+export default App;
