@@ -60,7 +60,7 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
           <TLDR />
           <Experience/>
           <TechnicalSkills />
-          <Projects projects={resumeData.projects} />
+          <Projects  />
           <MyResume />
     </div>
   );

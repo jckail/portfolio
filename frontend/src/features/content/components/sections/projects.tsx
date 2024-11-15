@@ -1,13 +1,40 @@
-import React from 'react';
-
-import { ResumeData } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { ProjectsData, Project } from '../../types';
 import '../../styles/sections/projects.css';
 
-interface ProjectsProps {
-  projects: ResumeData['projects'];
-}
+const Projects: React.FC = () => {
+  const [projects, setProjects] = useState<ProjectsData>({});
+  //to be used with Modal
+  //const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        if (!response.ok) throw new Error('Failed to fetch Projects');
+        const data = await response.json();
+        setProjects(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load Projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) return <div className="loading-projects">Loading Projects...</div>;
+  if (error) return <div className="error-message">Error: {error}</div>;
+
+  // Convert projects object to array for rendering
+  const projectsArray = Object.entries(projects).map(([key, project]) => ({
+    ...project,
+    key
+  }));
+
   return (
     <section id="projects" className="section-container">
       <div className="section-header">
@@ -15,15 +42,15 @@ const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
       </div>
       <div className="section-content">
         <div className="projects-grid">
-          {projects.map((project, index) => (
+          {projectsArray.map((project, index) => (
             <div 
-              key={index} 
+              key={project.key} 
               className="project-card"
               style={{ '--item-index': index } as React.CSSProperties}
             >
                 <div className="project-image">
                   <img 
-                    src={project.image || "/images/projects/github-logo.svg"}
+                    src={project.logoPath || "/images/projects/github-logo.svg"}
                     alt={`${project.title} project image`}
                     loading="lazy"
                   />

@@ -4,10 +4,10 @@ export interface Project {
   description_detail: string;
   link: string;
   link2?: string;
-  image?: string;
+  logoPath?: string;
 }
 
-export interface Projects {
+export interface ProjectsData {
   [key: string]: Project;
 }
 
