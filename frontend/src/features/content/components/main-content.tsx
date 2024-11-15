@@ -1,5 +1,5 @@
 import React from 'react';
-import TechnicalSkills from './sections/technical-skills';
+import TechnicalSkills from './sections/skills';
 import Experience from './sections/experience';
 import Projects from './sections/projects';
 import MyResume from './sections/my-resume';

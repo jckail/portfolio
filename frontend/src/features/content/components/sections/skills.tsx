@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLoading } from '../../context/loading-context';
-import '../../styles/sections/technical-skills.css';
+import '../../styles/sections/skills.css';
 
 // Import SVGs directly
 import AirbyteIcon from '../../../../assets/icons/airbyte.svg?react';
@@ -219,7 +219,7 @@ const TechnicalSkills: React.FC = () => {
   return (
     <section id="skills" className="section-container">
       <div className="section-header">
-        <h2>Technical Skills</h2>
+        <h2>Skills</h2>
       </div>
       <div className="section-content">
         <div className="skills-grid">

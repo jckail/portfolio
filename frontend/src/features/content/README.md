@@ -13,7 +13,7 @@ Context provider for resume data and operations.
 ### Sections
 - `about-me.tsx`: About section
 - `experience.tsx`: Work experience section
-- `technical-skills.tsx`: Skills section
+- `skills.tsx`: Skills section
 - `projects.tsx`: Projects section
 - `my-resume.tsx`: Resume download section
 
@@ -29,7 +29,7 @@ Uses `resume-store.ts` for managing:
 
 Each component has its own CSS module:
 - `experience.css`
-- `technical-skills.css`
+- `skills.css`
 - `projects.css`
 - etc.
 
