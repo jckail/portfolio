@@ -10,28 +10,18 @@ import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import { useResume } from '../features/content/components/resume-provider';
 import ChatPortal from '../features/content/components/ChatPortal';
-import AdminHandler from '../features/admin/components/admin-handler';
-import AdminLogin from '../features/admin/components/admin-login';
+
+
 import './styles/app.css';
 
 const AppContent: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
   const { isLoading, resumeData, error } = useResume();
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  
   const location = useLocation();
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
-  // Open admin modal if on admin route
-  React.useEffect(() => {
-    if (location.pathname === '/admin') {
-      setIsAdminModalOpen(true);
-    }
-  }, [location]);
-
-  const handleLoginSuccess = () => {
-    setIsAdminModalOpen(false);
-  };
   
   return (
     <ErrorBoundary>
@@ -40,16 +30,12 @@ const AppContent: React.FC = () => {
           <BackgroundProvider backgroundColor={backgroundColor}>
             {/* <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}> */}
               <MainContent error={error} />
-              <AdminLogin 
-                isOpen={isAdminModalOpen} 
-                onClose={() => setIsAdminModalOpen(false)}
-                onLoginSuccess={handleLoginSuccess}
-              />
+
             {/* </ParticlesProvider> */}
           </BackgroundProvider>
           
           <ChatPortal />
-          <AdminHandler />
+          
         </>
       </LoadingBoundary>
     </ErrorBoundary>

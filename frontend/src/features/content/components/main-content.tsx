@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import Header from './header';
 import TechnicalSkills from './sections/skills';
 import Experience from './sections/experience';
 import Projects from './sections/projects';
 import MyResume from './sections/my-resume';
 import TLDR from './sections/tldr';
+import AdminHandler from './admin-handler';
+import AdminLogin from './admin-login';
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
 import { LoadingProvider, useLoading } from '../context/loading-context';
 import { useAppLogic } from '../../../app/providers/app-logic-provider';
-import { useAdminStore } from '../../../features/admin/stores/admin-store';
+import { useAdminStore } from '../stores/admin-store';
 import '../styles/main-content.css';
 import '../styles/loading.css';
 
@@ -77,9 +79,27 @@ const MainContentInner: React.FC<MainContentProps> = ({ error }) => {
 };
 
 const MainContent: React.FC<MainContentProps> = (props) => {
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  React.useEffect(() => {
+    if (location.pathname === '/admin') {
+      setIsAdminModalOpen(true);
+    }
+  }, [location]);
+
+  const handleLoginSuccess = () => {
+    setIsAdminModalOpen(false);
+  };
+
   return (
     <LoadingProvider>
+                    <AdminLogin 
+                isOpen={isAdminModalOpen} 
+                onClose={() => setIsAdminModalOpen(false)}
+                onLoginSuccess={handleLoginSuccess}
+              />
+              <AdminHandler />
       <MainContentInner {...props} />
+
     </LoadingProvider>
   );
 };

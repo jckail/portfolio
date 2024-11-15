@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTelemetryStore } from '../stores/telemetry-store';
-import { useAdminStore } from '../../admin/stores/admin-store';
+import { useAdminStore } from '../../content/stores/admin-store';
 import '../styles/telemetry-banner.css';
 
 interface TelemetryBannerProps {
