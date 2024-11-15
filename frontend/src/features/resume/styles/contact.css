@@ -1,0 +1,45 @@
+/* Contact Section */
+.contact-section {
+    background: var(--surface-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    border: var(--border-thickness) solid var(--primary-border);
+  }
+  
+  .contact-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+  }
+  
+  .contact-item {
+    padding: var(--spacing-md);
+    background: var(--background-color);
+    border-radius: var(--radius-sm);
+    transition: transform var(--transition-fast);
+  }
+  
+  .contact-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .contact-item h3 {
+    color: var(--text-color);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1rem;
+  }
+  
+  .contact-item a,
+  .contact-item span {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1rem;
+    word-break: break-all;
+  }
+  
+  .contact-item a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+  }

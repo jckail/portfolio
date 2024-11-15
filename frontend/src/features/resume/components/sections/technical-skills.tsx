@@ -99,7 +99,7 @@ const TechnicalSkills: React.FC = () => {
   }, {} as Record<string, (Skill & { key: string })[]>);
 
   return (
-    <section id="skills" className="section">
+    <section id="skills" className="section-container">
       <div className="section-header">
         <h2>Technical Skills</h2>
       </div>

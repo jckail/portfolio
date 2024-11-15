@@ -8,7 +8,7 @@ interface ExperienceProps {
 
 const Experience: React.FC<ExperienceProps> = ({ experience = [] }) => {
   return (
-    <section id="experience" className="section">
+    <section id="experience" className="section-container">
       <div className="section-header">
         <h2>Experience</h2>
       </div>

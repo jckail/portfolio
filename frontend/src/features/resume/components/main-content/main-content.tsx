@@ -24,29 +24,11 @@ const MainContent = () => {
 
   return (
     <div className="resume">
-      <div className="section-container">
-        <section id="tldr">
           <TLDR tldr={tldrData} />
-        </section>
-      </div>
-
-      <div className="section-container">
-        <section id="experience">
           <Experience experience={resumeData.experience} />
-        </section>
-      </div>
-
-      <div className="section-container">
-        <section id="skills">
           <TechnicalSkills />
-        </section>
-      </div>
-
-      <div className="section-container">
-        <section id="projects">
           <Projects projects={resumeData.projects} />
-        </section>
-      </div>
+
 
       {/* <div className="section-container">
         <section id="contact">
@@ -54,11 +36,9 @@ const MainContent = () => {
         </section>
       </div> */}
 
-      <div className="section-container">
-        <section id="resume">
+
           <MyResume />
-        </section>
-      </div>
+
     </div>
   );
 };

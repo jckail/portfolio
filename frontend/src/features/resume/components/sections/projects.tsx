@@ -8,7 +8,7 @@ interface ProjectsProps {
 
 const Projects: React.FC<ProjectsProps> = ({ projects = [] }) => {
   return (
-    <section id="projects" className="section">
+    <section id="projects" className="section-container">
       <div className="section-header">
         <h2>Projects</h2>
       </div>

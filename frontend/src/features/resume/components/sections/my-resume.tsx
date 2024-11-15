@@ -6,7 +6,7 @@ const MyResume: React.FC = () => {
   const { handleDownload } = useResume();
 
   return (
-    <section id="resume" className="section resume-section">
+    <section id="resume" className="section-container">
       <div className="section-header">
         <h2>Get My Full Resume</h2>
       </div>

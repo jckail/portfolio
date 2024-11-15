@@ -17,7 +17,7 @@ const TLDR: React.FC<TLDRProps> = ({ tldr,  }) => {
   }
 
   return (
-    <section id="tldr" className="section">
+    <section id="tldr" className="section-container">
       
       <div className="section-content">
         <div className="tldr-section">
