@@ -65,7 +65,7 @@
   height: 40px;
   object-fit: contain;
   transition: transform var(--transition-fast);
-  color: red;
+  color: var(--text-color);
 }
 
 .skill-item:hover .skill-icon {
