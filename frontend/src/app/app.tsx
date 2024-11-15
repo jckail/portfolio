@@ -39,16 +39,16 @@ const AppContent: React.FC = () => {
       <LoadingBoundary>
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
-            <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}>
+            {/* <ParticlesProvider config={baseConfig} isResumeLoaded={!isLoading}> */}
               <MainLayout>
-                <MainContent resumeData={resumeData} error={error} />
+                <MainContent error={error} />
                 <AdminLogin 
                   isOpen={isAdminModalOpen} 
                   onClose={() => setIsAdminModalOpen(false)}
                   onLoginSuccess={handleLoginSuccess}
                 />
               </MainLayout>
-            </ParticlesProvider>
+            {/* </ParticlesProvider> */}
           </BackgroundProvider>
           
           <ChatPortal />

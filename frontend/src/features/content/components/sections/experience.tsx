@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLoading } from '../../context/loading-context';
 import '../../styles/sections/experience.css';
 
 interface ExperienceItem {
@@ -54,7 +55,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
       <div className="modal-body">
         <p className="company-description">{experience.company_description}</p>
         <div className="highlights-section">
-        <div className="skill-tags">
+          <div className="skill-tags">
             {experience.tech_stack.map((tag, index) => (
               <span key={index} className="skill-tag">
                 {tag.replace(/-/g, ' ')}
@@ -67,8 +68,6 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
               <li key={index}>{highlight}</li>
             ))}
           </ul>
-
-
         </div>
       </div>
     </div>
@@ -78,29 +77,41 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
 const Experience: React.FC = () => {
   const [experience, setExperience] = useState<ExperienceData>({});
   const [selectedExperience, setSelectedExperience] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchExperience = async () => {
       try {
-        const response =  await fetch('/api/experience');
+        setComponentLoading('experience', true);
+        const response = await fetch('/api/experience');
         if (!response.ok) {
           throw new Error('Failed to fetch experience data');
         }
         const data = await response.json();
-        setExperience(data);
+        if (mounted) {
+          setExperience(data);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setComponentLoading('experience', false);
+        }
       }
     };
 
     fetchExperience();
-  }, []);
 
-  if (loading) return <div>Loading...</div>;
+    return () => {
+      mounted = false;
+    };
+  }, [setComponentLoading]);
+
   if (error) return <div>Error: {error}</div>;
 
   return (

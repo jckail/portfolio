@@ -1,41 +1,21 @@
-import React, { useEffect,useMemo } from 'react';
+import React from 'react';
 import TechnicalSkills from './sections/technical-skills';
 import Experience from './sections/experience';
 import Projects from './sections/projects';
 import MyResume from './sections/my-resume';
-//import AboutMe from './sections/about-me';
 import TLDR from './sections/tldr';
-//import Contact from '../sections/contact';
-import { ResumeData } from '../types';
-import { useResume } from './resume-provider';
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
+import { LoadingProvider, useLoading } from '../context/loading-context';
 import '../styles/main-content.css';
+import '../styles/loading.css';
 
 interface MainContentProps {
-  resumeData: ResumeData | null;
   error: string | null | undefined;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
-  const { isLoading } = useResume();
-  useScrollSpy(); // Initialize scroll spy
-  
-
-  useEffect(() => {
-    // Force a layout recalculation after content loads
-    if (!isLoading && resumeData) {
-      window.dispatchEvent(new Event('resize'));
-    }
-  }, [isLoading, resumeData]);
-
-  if (isLoading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
-        <p>Loading resume data...</p>
-      </div>
-    );
-  }
+const MainContentInner: React.FC<MainContentProps> = ({ error }) => {
+  useScrollSpy();
+  const { loadingStates } = useLoading();
 
   if (error) {
     return (
@@ -46,23 +26,31 @@ const MainContent: React.FC<MainContentProps> = ({ resumeData, error }) => {
     );
   }
 
-  if (!resumeData) {
-    return (
-      <div className="error-message">
-        <p>No resume data available.</p>
-        <p>Please try refreshing the page.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="resume">
-          <TLDR />
-          <Experience/>
-          <TechnicalSkills />
-          <Projects  />
-          <MyResume />
+      <div className="loading-states">
+        {Object.entries(loadingStates).map(([section, isLoading]) => (
+          isLoading && (
+            <div key={section} className="loading-item pending">
+              {section}: Loading...
+            </div>
+          )
+        ))}
+      </div>
+      <TLDR />
+      <Experience />
+      <TechnicalSkills />
+      <Projects />
+      <MyResume />
     </div>
+  );
+};
+
+const MainContent: React.FC<MainContentProps> = (props) => {
+  return (
+    <LoadingProvider>
+      <MainContentInner {...props} />
+    </LoadingProvider>
   );
 };
 

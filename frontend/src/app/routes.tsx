@@ -23,7 +23,7 @@ const AppRoutes = () => {
   return (
     <ParticlesProvider config={baseConfig}>
       <MainLayout>
-        <MainContent resumeData={resumeData} error={error} />
+        <MainContent error={error} />
         <AdminLogin 
           isOpen={isAdminModalOpen} 
           onClose={() => setIsAdminModalOpen(false)}

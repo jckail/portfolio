@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLoading } from '../../context/loading-context';
 import '../../styles/sections/technical-skills.css';
 
 // Import SVGs directly
@@ -108,7 +109,6 @@ const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size =
     );
   }
 
-  // Fallback to regular image for non-neutral icons
   return (
     <img 
       src={`/images/icons/${name}`}
@@ -128,14 +128,14 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="modal-header">
           <div className="modal-icon-wrapper">
-          <div className="icon-wrapper">
-                        <SkillIcon
-                          name={skill.image}
-                          className="skill-icon"
-                          size={32}
-                          aria-label={skill.display_name}
-                        />
-                      </div>
+            <div className="icon-wrapper">
+              <SkillIcon
+                name={skill.image}
+                className="skill-icon"
+                size={32}
+                aria-label={skill.display_name}
+              />
+            </div>
           </div>
           <h3>{skill.display_name}</h3>
         </div>
@@ -174,27 +174,39 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
 const TechnicalSkills: React.FC = () => {
   const [skills, setSkills] = useState<SkillsData>({});
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchSkills = async () => {
       try {
+        setComponentLoading('technicalSkills', true);
         const response = await fetch('/api/skills');
         if (!response.ok) throw new Error('Failed to fetch skills');
         const data = await response.json();
-        setSkills(data);
+        if (mounted) {
+          setSkills(data);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load skills');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to load skills');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setComponentLoading('technicalSkills', false);
+        }
       }
     };
 
     fetchSkills();
-  }, []);
 
-  if (loading) return <div className="loading-skills">Loading skills...</div>;
+    return () => {
+      mounted = false;
+    };
+  }, [setComponentLoading]);
+
   if (error) return <div className="error-message">Error: {error}</div>;
 
   const categorizedSkills = Object.entries(skills).reduce((acc, [key, skill]) => {

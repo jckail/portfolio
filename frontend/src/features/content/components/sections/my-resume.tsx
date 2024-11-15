@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useResume } from '../resume-provider';
+import { useLoading } from '../../context/loading-context';
 import '../../styles/sections/resume.css';
 
 const MyResume: React.FC = () => {
   const { handleDownload } = useResume();
+  const { setComponentLoading } = useLoading();
+
+  useEffect(() => {
+    // Set initial load state to false since this component
+    // doesn't need to fetch data initially
+    setComponentLoading('myResume', false);
+  }, [setComponentLoading]);
+
+  const handleDownloadWithLoading = async () => {
+    try {
+      setComponentLoading('myResume', true);
+      await handleDownload();
+    } finally {
+      setComponentLoading('myResume', false);
+    }
+  };
 
   return (
     <section id="resume" className="section-container">
@@ -19,7 +36,7 @@ const MyResume: React.FC = () => {
             details about my projects and achievements.
           </p>
           <button 
-            onClick={handleDownload}
+            onClick={handleDownloadWithLoading}
             className="download-button"
             aria-label="Download Resume PDF"
           >

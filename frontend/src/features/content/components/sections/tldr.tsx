@@ -1,41 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { AboutMe } from '../../types';
+import { useLoading } from '../../context/loading-context';
 import '../../styles/sections/tldr.css';
 
 const TLDR: React.FC = () => {
   const [aboutMeData, setAboutMeData] = useState<AboutMe | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchAboutMeData = async () => {
       try {
+        setComponentLoading('tldr', true);
         const response = await fetch('/api/aboutme');
         if (!response.ok) {
           throw new Error('Failed to fetch contact data');
         }
         const data = await response.json();
-        setAboutMeData(data);
+        if (mounted) {
+          setAboutMeData(data);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setComponentLoading('tldr', false);
+        }
       }
     };
 
     fetchAboutMeData();
-  }, []);
 
-  if (loading) return <div className="loading-aboutme">Loading aboutme...</div>;
+    return () => {
+      mounted = false;
+    };
+  }, [setComponentLoading]);
+
   if (error) return <div className="error-aboutme">Error: {error}</div>;
-
-
 
   if (!aboutMeData) {
     return (
       <section id="tldr" className="section-container">
         <div className="section-content">
-          <div>No data available</div>
+          <div>Loading...</div>
         </div>
       </section>
     );
@@ -53,7 +64,7 @@ const TLDR: React.FC = () => {
             </div>
             <div className="headshot-container">
               <img 
-                src={aboutMeData.full_portrait || "/images/headshot.jpg"}
+                src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
                 alt="Profile headshot"
                 className="headshot"
               />

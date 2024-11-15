@@ -1,32 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { ProjectsData, Project } from '../../types';
+import { ProjectsData } from '../../types';
+import { useLoading } from '../../context/loading-context';
 import '../../styles/sections/projects.css';
 
 const Projects: React.FC = () => {
   const [projects, setProjects] = useState<ProjectsData>({});
-  //to be used with Modal
-  //const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchProjects = async () => {
       try {
+        setComponentLoading('projects', true);
         const response = await fetch('/api/projects');
         if (!response.ok) throw new Error('Failed to fetch Projects');
         const data = await response.json();
-        setProjects(data);
+        if (mounted) {
+          setProjects(data);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load Projects');
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to load Projects');
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setComponentLoading('projects', false);
+        }
       }
     };
 
     fetchProjects();
-  }, []);
 
-  if (loading) return <div className="loading-projects">Loading Projects...</div>;
+    return () => {
+      mounted = false;
+    };
+  }, [setComponentLoading]);
+
   if (error) return <div className="error-message">Error: {error}</div>;
 
   // Convert projects object to array for rendering
