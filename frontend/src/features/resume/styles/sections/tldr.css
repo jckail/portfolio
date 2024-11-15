@@ -21,12 +21,13 @@
 
 .tldr-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-xl);
 }
 
 .tldr-text {
   flex: 1;
+  order: 1;
 }
 
 .tldr-section h2 {
@@ -58,7 +59,7 @@
   border: 4px solid transparent;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
-  margin-left: auto;
+  order: 2;
 }
 
 .headshot {
@@ -73,10 +74,6 @@
 }
 
 @media (max-width: 768px) {
-
-
-
-
   .tldr-section h2 {
     font-size: 1.75rem;
   }
@@ -86,15 +83,14 @@
   }
 
   .tldr-content {
-    flex-direction: column-reverse;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     gap: var(--spacing-lg);
   }
 
   .headshot-container {
     width: 115px;
     height: 148px;
-    margin-left: 0;
   }
   
   .headshot {
