@@ -1,6 +1,6 @@
 import React from 'react';
 import { MainLayout } from '../features/layouts';
-import MainContent from '../features/resume/components/main-content/main-content';
+import MainContent from '../features/resume/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import { BackgroundProvider } from '../features/theme/components/background-provider';
 import { useThemeStore } from '../features/theme/stores/theme-store';
@@ -16,7 +16,7 @@ import './styles/app.css';
 const App: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
-  const { isLoading } = useResume();
+  const { isLoading, resumeData, error } = useResume();
   
   return (
     <ErrorBoundary>
@@ -25,7 +25,7 @@ const App: React.FC = () => {
           <BackgroundProvider backgroundColor={backgroundColor}>
             <ParticlesProvider config={getThemeConfig(theme)} isResumeLoaded={!isLoading}>
               <MainLayout>
-                <MainContent />
+                <MainContent resumeData={resumeData} error={error} />
               </MainLayout>
             </ParticlesProvider>
           </BackgroundProvider>
