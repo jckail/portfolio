@@ -8,12 +8,11 @@ import TLDR from './sections/tldr';
 import AdminHandler from './admin-handler';
 import AdminLogin from './admin-login';
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
-import { LoadingProvider, useLoading } from '../context/loading-context';
+import { useLoading } from '../context/loading-context';
 import { useAppLogic } from '../../../app/providers/app-logic-provider';
 import { useAdminStore } from '../stores/admin-store';
 import '../styles/main-content.css';
 import '../styles/loading.css';
-
 
 interface MainContentProps {
   error: string | null | undefined;
@@ -91,16 +90,15 @@ const MainContent: React.FC<MainContentProps> = (props) => {
   };
 
   return (
-    <LoadingProvider>
-                    <AdminLogin 
-                isOpen={isAdminModalOpen} 
-                onClose={() => setIsAdminModalOpen(false)}
-                onLoginSuccess={handleLoginSuccess}
-              />
-              <AdminHandler />
+    <>
+      <AdminLogin 
+        isOpen={isAdminModalOpen} 
+        onClose={() => setIsAdminModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <AdminHandler />
       <MainContentInner {...props} />
-
-    </LoadingProvider>
+    </>
   );
 };
 
