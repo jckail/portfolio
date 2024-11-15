@@ -1,3 +1,31 @@
+/* Projects Section */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.project-card {
+  background: var(--surface-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  border: var(--border-thickness) solid var(--primary-border);
+  transition: transform var(--transition-fast);
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-hover);
+}
+
+.project-title {
+  color: var(--text-color);
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-sm);
+}
+
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */

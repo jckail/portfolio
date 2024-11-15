@@ -1,6 +1,6 @@
 import React from 'react';
 import { useResume } from '../../components/resume-provider';
-import '../../styles/my-resume.css';
+import '../../styles/resume.css';
 
 const MyResume: React.FC = () => {
   const { handleDownload } = useResume();

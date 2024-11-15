@@ -1,5 +1,5 @@
 /* Import the unified resume sections styles */
-@import 'resume-sections.css';
+@import 'main-sections.css';
 
 /* Any additional specific styles for the About section can be added here */
 .about-content {
