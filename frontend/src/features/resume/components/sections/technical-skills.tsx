@@ -2,14 +2,34 @@ import React, { useState, useEffect } from 'react';
 import '../../styles/sections/technical-skills.css';
 
 // Import SVGs directly
-import AirbyteIcon from '@/assets/icons/neutral/airbyte.svg?react';
-import ApachePulsarIcon from '@/assets/icons/neutral/apachepulsar.svg?react';
-import ApacheRocketMQIcon from '@/assets/icons/neutral/apacherocketmq.svg?react';
-import PrefectIcon from '@/assets/icons/neutral/prefect.svg?react';
-import KafkaIcon from '@/assets/icons/neutral/kafka.svg?react';
-import LangchainIcon from '@/assets/icons/neutral/langchain.svg?react';
-import OpenAIIcon from '@/assets/icons/neutral/openai.svg?react';
-import Trino from '@/assets/icons/neutral/trino.svg?react';
+import AirbyteIcon from '../../../../assets/icons/neutral/airbyte.svg?react';
+import ApacheFlinkIcon from '../../../../assets/icons/neutral/apacheflink.svg?react';
+import ApachePulsarIcon from '../../../../assets/icons/neutral/apachepulsar.svg?react';
+import ApacheRocketMQIcon from '../../../../assets/icons/neutral/apacherocketmq.svg?react';
+import AWSIcon from '../../../../assets/icons/neutral/aws.svg?react';
+import DatadogIcon from '../../../../assets/icons/neutral/datadog.svg?react';
+import DjangoIcon from '../../../../assets/icons/neutral/django.svg?react';
+import DuckDBIcon from '../../../../assets/icons/neutral/duckdb.svg?react';
+import FlaskIcon from '../../../../assets/icons/neutral/flask.svg?react';
+import JupyterIcon from '../../../../assets/icons/neutral/jupyter.svg?react';
+import KafkaIcon from '../../../../assets/icons/neutral/kafka.svg?react';
+import LangchainIcon from '../../../../assets/icons/neutral/langchain.svg?react';
+import LlamaIndexIcon from '../../../../assets/icons/neutral/llamaindex.svg?react';
+import MilvusIcon from '../../../../assets/icons/neutral/milvus_black.svg?react';
+import Neo4jIcon from '../../../../assets/icons/neutral/neo4j.svg?react';
+import OpenAIIcon from '../../../../assets/icons/neutral/openai.svg?react';
+import PandasIcon from '../../../../assets/icons/neutral/pandas.svg?react';
+import PineconeIcon from '../../../../assets/icons/neutral/pinecone.svg?react';
+import PrefectIcon from '../../../../assets/icons/neutral/prefect.svg?react';
+import RetoolIcon from '../../../../assets/icons/neutral/retool.svg?react';
+import RustIcon from '../../../../assets/icons/neutral/rust.svg?react';
+import ScikitLearnIcon from '../../../../assets/icons/neutral/scikit_learn.svg?react';
+import SocketIOIcon from '../../../../assets/icons/neutral/socketdotio.svg?react';
+import SplunkIcon from '../../../../assets/icons/neutral/splunk.svg?react';
+import SQLAlchemyIcon from '../../../../assets/icons/neutral/sqlalchemy.svg?react';
+import TimescaleIcon from '../../../../assets/icons/neutral/timescale.svg?react';
+import TrinoIcon from '../../../../assets/icons/neutral/trino.svg?react';
+import tRPCIcon from '../../../../assets/icons/neutral/trpc.svg?react';
 
 interface Skill {
   display_name: string;
@@ -43,13 +63,33 @@ interface IconProps {
 // Map of SVG components
 const SVG_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'airbyte.svg': AirbyteIcon,
+  'apacheflink.svg': ApacheFlinkIcon,
   'apachepulsar.svg': ApachePulsarIcon,
   'apacherocketmq.svg': ApacheRocketMQIcon,
-  'prefect.svg': PrefectIcon,
+  'aws.svg': AWSIcon,
+  'datadog.svg': DatadogIcon,
+  'django.svg': DjangoIcon,
+  'duckdb.svg': DuckDBIcon,
+  'flask.svg': FlaskIcon,
+  'jupyter.svg': JupyterIcon,
   'kafka.svg': KafkaIcon,
   'langchain.svg': LangchainIcon,
+  'llamaindex.svg': LlamaIndexIcon,
+  'milvus_black.svg': MilvusIcon,
+  'neo4j.svg': Neo4jIcon,
   'openai.svg': OpenAIIcon,
-  'trino.svg': Trino,
+  'pandas.svg': PandasIcon,
+  'pinecone.svg': PineconeIcon,
+  'prefect.svg': PrefectIcon,
+  'retool.svg': RetoolIcon,
+  'rust.svg': RustIcon,
+  'scikit_learn.svg': ScikitLearnIcon,
+  'socketdotio.svg': SocketIOIcon,
+  'splunk.svg': SplunkIcon,
+  'sqlalchemy.svg': SQLAlchemyIcon,
+  'timescale.svg': TimescaleIcon,
+  'trino.svg': TrinoIcon,
+  'trpc.svg': tRPCIcon,
 };
 
 const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
