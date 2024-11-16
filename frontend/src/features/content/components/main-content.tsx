@@ -14,11 +14,8 @@ import { useAdminStore } from '../stores/admin-store';
 import '../styles/main-content.css';
 import '../styles/loading.css';
 
-interface MainContentProps {
-  error: string | null | undefined;
-}
 
-const MainContentInner: React.FC<MainContentProps> = ({ error }) => {
+const MainContentInner: React.FC = () => {
   useScrollSpy();
   const { loadingStates } = useLoading();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
@@ -36,14 +33,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ error }) => {
     console.log('Admin click');
   };
 
-  if (error) {
-    return (
-      <div className="error-message">
-        <p>{error}</p>
-        <p>Please try refreshing the page.</p>
-      </div>
-    );
-  }
+
 
   return (
     <div className="layout">
@@ -77,7 +67,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ error }) => {
   );
 };
 
-const MainContent: React.FC<MainContentProps> = (props) => {
+const MainContent: React.FC = (props) => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   React.useEffect(() => {
     if (location.pathname === '/admin') {

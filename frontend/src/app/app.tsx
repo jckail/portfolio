@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { RouteObject, useLocation } from 'react-router-dom';
+import { RouteObject } from 'react-router-dom';
 import MainContent from '../features/content/components/main-content';
 import { ParticlesProvider } from '../features/theme/components/particles-provider';
 import { BackgroundProvider } from '../features/theme/components/background-provider';
@@ -8,7 +8,6 @@ import { useThemeBackground } from '../features/theme/hooks/use-theme-background
 import { getThemeConfig } from '../features/theme/lib/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
-import { useResume } from '../features/content/components/resume-provider';
 import { useLoading, LoadingProvider } from '../features/content/context/loading-context';
 import ChatPortal from '../features/content/components/ChatPortal';
 
@@ -17,10 +16,9 @@ import './styles/app.css';
 const AppContent: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
-  const { error } = useResume();
   const { isFullyLoaded } = useLoading();
   
-  const location = useLocation();
+
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
   return (
@@ -29,7 +27,7 @@ const AppContent: React.FC = () => {
         <>
           <BackgroundProvider backgroundColor={backgroundColor}>
             <ParticlesProvider config={baseConfig} isResumeLoaded={isFullyLoaded}>
-              <MainContent error={error} />
+              <MainContent />
             </ParticlesProvider>
           </BackgroundProvider>
           
