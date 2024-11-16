@@ -14,6 +14,17 @@ load_dotenv()
 # Initialize router
 router = APIRouter()
 
+# Load system prompt from file
+def load_system_prompt():
+    prompt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                              'assets', 'portfoliosystemprompt.md')
+    try:
+        with open(prompt_path, 'r') as file:
+            return file.read()
+    except Exception as e:
+        print(f"Error loading system prompt: {e}")
+        return None
+
 # Connection Manager for WebSocket clients
 class ConnectionManager:
     def __init__(self):
@@ -72,15 +83,17 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 # Get the stored context for this client
                 context = manager.get_context(client_id)
                 
-                # Create a message to Claude with context about being a portfolio assistant
-                system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
-                1. Learn about Jordan's background, experience, and technical skills
-                2. Understand his projects and achievements
-                3. Discuss potential collaborations or opportunities
-                4. Answer questions about his work and expertise
-                
-                Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
-                You have access to the current page content to provide accurate, contextual responses."""
+                # Load system prompt from file
+                system_prompt = load_system_prompt()
+                if system_prompt is None:
+                    system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
+                    1. Learn about Jordan's background, experience, and technical skills
+                    2. Understand his projects and achievements
+                    3. Discuss potential collaborations or opportunities
+                    4. Answer questions about his work and expertise
+                    
+                    Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
+                    You have access to the current page content to provide accurate, contextual responses."""
                 
                 # Construct the user message with context
                 user_message = f"""Page Context: {context}
