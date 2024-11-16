@@ -44,3 +44,6 @@ claude is a bit janky
 
 Design:
 Break apart resume object payload
+
+
+use particles react instead of particles js
