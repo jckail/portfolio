@@ -22,7 +22,6 @@ const AppContent: React.FC = () => {
         theme === 'party'
      ]);
   
-  //const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = backgroundColor;
