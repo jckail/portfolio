@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { RouteObject } from 'react-router-dom';
 import MainContent from '../features/content/components/main-content';
-import { ParticlesProvider } from '../features/theme/components/particles-provider';
-import { BackgroundProvider } from '../features/theme/components/background-provider';
-import { useThemeStore } from '../features/theme/stores/theme-store';
-import { useThemeBackground } from '../features/theme/hooks/use-theme-background';
-import { getThemeConfig } from '../features/theme/lib/get-theme-config';
+import { ParticlesProvider } from '../features/content/components/particles-provider';
+import { useThemeStore } from '../features/content/stores/theme-store';
+import { useThemeBackground } from '../features/content/hooks';
+import { getThemeConfig } from '../features/content/lib';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import { useLoading, LoadingProvider } from '../features/content/context/loading-context';
@@ -18,19 +17,19 @@ const AppContent: React.FC = () => {
   const backgroundColor = useThemeBackground(theme);
   const { isFullyLoaded } = useLoading();
   
-
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
+
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = backgroundColor;
+  }, [backgroundColor]);
 
   return (
     <ErrorBoundary>
       <LoadingBoundary>
         <>
-          <BackgroundProvider backgroundColor={backgroundColor}>
-            <ParticlesProvider config={baseConfig} isResumeLoaded={isFullyLoaded}>
-              <MainContent />
-            </ParticlesProvider>
-          </BackgroundProvider>
-          
+          <ParticlesProvider config={baseConfig} isResumeLoaded={isFullyLoaded}>
+            <MainContent />
+          </ParticlesProvider>
           <ChatPortal />
         </>
       </LoadingBoundary>

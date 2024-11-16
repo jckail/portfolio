@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-export type Theme = 'light' | 'dark' | 'party';
+import { Theme } from '../types';
 
 interface ThemeState {
   theme: Theme;

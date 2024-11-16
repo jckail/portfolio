@@ -1,12 +1,14 @@
-@import '@/features/theme/styles/theme.css';
+@import '../../features/content/styles/theme.css';
 
 /* Base app styles */
 .app {
   overflow-x: hidden;
-
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 2;
+  background-color: transparent;
 }
 
 /* Layout */
@@ -15,6 +17,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--spacing-md);
+  position: relative;
 }
 
 /* Utility classes */
@@ -48,4 +51,12 @@
 
 .gap-lg {
   gap: var(--spacing-lg);
+}
+
+/* Ensure root takes full height */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
 }

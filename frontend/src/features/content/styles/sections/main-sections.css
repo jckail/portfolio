@@ -44,27 +44,12 @@
   margin-bottom: 0;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .section-content {
-    padding: var(--spacing-lg);
-    margin: 0 var(--spacing-md);
-  }
 
-  .section-content p {
-    color: var(--text-color);
-    line-height: 1.3;
-    margin-bottom: var(--spacing-sm);
-    font-size: var(--font-size-mobile-base);
-    max-width: 95%;
-  }
-}
 
 /* Specific Section Variations */
 .section-container {
   
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 6px var(--section-background);
   padding: var(--spacing-sm);
   margin: var(--spacing-sm) auto;
   width: 100%;
@@ -118,5 +103,17 @@
   #projects h2,
   #my-resume h2 {
     font-size: 1.2rem;
+  }
+  .section-content {
+    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-md);
+  }
+
+  .section-content p {
+    color: var(--text-color);
+    line-height: 1.3;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-mobile-base);
+    max-width: 95%;
   }
 }

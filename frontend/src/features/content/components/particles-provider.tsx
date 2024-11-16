@@ -4,7 +4,7 @@ import type { ParticlesConfig } from '../lib/particles/types';
 interface ParticlesProviderProps {
   children: React.ReactNode;
   config: Record<string, unknown> | Record<string, unknown>[];
-  isResumeLoaded?: boolean; // New prop to control particles rendering
+  isResumeLoaded?: boolean;
 }
 
 declare global {
@@ -15,10 +15,9 @@ declare global {
 
 function ParticlesProvider({ children, config, isResumeLoaded = false }: ParticlesProviderProps) {
   useEffect(() => {
-    // Only initialize particles if main is loaded
     if (!isResumeLoaded) return;
 
-    // Create multi-particle container if multiple configs
+    // Create multi-particle container
     const multiContainer = document.createElement('div');
     multiContainer.id = 'multi-particles';
     multiContainer.style.cssText = `
@@ -70,19 +69,24 @@ function ParticlesProvider({ children, config, isResumeLoaded = false }: Particl
 
     initParticles();
 
+    // Ensure body has relative positioning and minimum height
+    document.body.style.position = 'relative';
+    document.body.style.minHeight = '100vh';
+
     // Cleanup
     return () => {
       containerIds.forEach(id => {
         document.getElementById(id)?.remove();
       });
       document.getElementById('multi-particles')?.remove();
-      // Reset body styles
-      document.body.style.position = '';
-      document.body.style.minHeight = '';
     };
-  }, [config, isResumeLoaded]); // Added isResumeLoaded to dependencies
+  }, [config, isResumeLoaded]);
 
-  return <>{children}</>;
+  return (
+    <div style={{ position: 'relative', zIndex: 2 }}>
+      {children}
+    </div>
+  );
 }
 
 export { ParticlesProvider };

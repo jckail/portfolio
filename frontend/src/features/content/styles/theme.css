@@ -88,8 +88,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-  
-  
 }
 
 /* Apply transitions only to color and border-color, not background-color */
@@ -132,7 +130,7 @@ body * {
 }
 
 /* Particles layer */
-#particles-js {
+#multi-particles {
   position: fixed !important;
   top: 0;
   left: 0;
@@ -141,6 +139,7 @@ body * {
   z-index: 1;
   pointer-events: none;
 }
+
 /* Content layer */
 #root {
   position: relative;

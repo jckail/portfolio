@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SadwichIcon: React.FC = () => (
+const SandwichIcon: React.FC = () => (
     <svg 
     width="24" 
     height="24" 
@@ -17,4 +17,4 @@ const SadwichIcon: React.FC = () => (
   </svg>
 );
 
-export default SadwichIcon;
+export default SandwichIcon;

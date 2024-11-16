@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-import { Theme } from '../../theme/stores/theme-store';
+import { Theme } from '../types';
 import { Contact } from '../types';
 import SidePanel from './side-panel';
-import GitHubIcon from '../../theme/components/icons/github-icon';
-import LinkedInIcon from '../../theme/components/icons/linkedin-icon';
-import MoonIcon from '../../theme/components/icons/moon-icon';
-import SunIcon from '../../theme/components/icons/sun-icon';
-import PartyIcon from '../../theme/components/icons/party-icon';
-import ResumeIcon from '../../theme/components/icons/resume-icon';
-import SadwichIcon from '../../theme/components/icons/sandwich-icon';
+import {
+  GitHubIcon,
+  LinkedInIcon,
+  MoonIcon,
+  SunIcon,
+  PartyIcon,
+  ResumeIcon,
+  SandwichIcon
+} from './icons';
 
 import '../styles/header.css';
 
@@ -110,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
               className={`menu-toggle ${isSidePanelOpen ? 'active' : ''}`}
               aria-label="Toggle navigation menu"
             >
-              <SadwichIcon/>
+              <SandwichIcon/>
             </button>
             <div className="header-titles">
               <h1>{contactData.firstName}{" "}{contactData.lastName}</h1>

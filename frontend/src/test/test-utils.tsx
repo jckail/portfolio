@@ -2,8 +2,8 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { AppLogicProvider } from '../app/providers/app-logic-provider';
 import { ResumeProvider } from '../features/content/components/resume-provider';
-import { ParticlesProvider } from '../features/theme/components/particles-provider';
-import getParticlesConfig from '../features/theme/lib/particles/config';
+import { ParticlesProvider } from '../features/content/components/particles-provider';
+import getParticlesConfig from '../features/content/lib/particles/config';
 import { PRIMARY } from '../config/constants';
 
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {

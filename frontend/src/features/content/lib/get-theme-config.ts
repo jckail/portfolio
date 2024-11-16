@@ -1,9 +1,7 @@
 import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
 import getParticlesConfig from './particles/config';
-import type { Theme } from '../stores/theme-store';
+import type { Theme } from '../types';
 import type { ParticlesConfig, ParticleConfig } from './particles/types';
-
-
 
 const generateRandomZuniUrls = (): string[] => {
   const usedNumbers: Set<number> = new Set();
@@ -19,8 +17,6 @@ const generateRandomZuniUrls = (): string[] => {
 
   return urls;
 };
-
-
 
 export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<string, unknown>[] => {
   // Use API endpoint for party mode
@@ -107,4 +103,3 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
 
   return { ...getParticlesConfig(configs[theme]) };
 };
-

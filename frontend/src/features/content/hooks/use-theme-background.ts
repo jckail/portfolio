@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Theme } from '../stores/theme-store';
+import { Theme } from '../types';
 import { WHITE, BLACK } from '../../../config/constants';
 
 export const useThemeBackground = (theme: Theme): string => {
