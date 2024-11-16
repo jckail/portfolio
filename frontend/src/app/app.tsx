@@ -16,8 +16,13 @@ const AppContent: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
   const { isFullyLoaded } = useLoading();
+
+  const baseConfig = useMemo(() => getThemeConfig(theme), [
+        // Only recalculate when party mode changes
+        theme === 'party'
+     ]);
   
-  const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
+  //const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = backgroundColor;

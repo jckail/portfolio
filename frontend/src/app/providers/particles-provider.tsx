@@ -28,7 +28,6 @@ function ParticlesProvider({ children, config, isResumeLoaded = false }: Particl
       height: 100%;
       min-height: 100%;
       z-index: 1;
-      pointer-events: none;
       transition: opacity 0.3s ease-in-out;
       background-color: transparent;
     `;
@@ -50,7 +49,6 @@ function ParticlesProvider({ children, config, isResumeLoaded = false }: Particl
         width: 100%;
         height: 100%;
         min-height: 100%;
-        pointer-events: none;
         background-color: transparent;
       `;
       multiContainer.appendChild(container);
