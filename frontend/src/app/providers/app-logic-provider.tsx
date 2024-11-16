@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
-import { useThemeStore } from '../../features/content/stores/theme-store';
-import { Theme } from '../../features/content/types';
+import { useThemeStore } from '../../shared/stores/theme-store';
+import { Theme } from '../../types/theme';
 
 interface AppLogicContextType {
   theme: Theme;

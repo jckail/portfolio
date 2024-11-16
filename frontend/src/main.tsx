@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AppLogicProvider } from './app/providers/app-logic-provider';
-import { ResumeProvider } from './features/content/components/resume-provider';
-import { ThemeProvider } from './features/content/components/theme-provider';
+import { ResumeProvider } from './app/providers/resume-provider';
+import { ThemeProvider } from './app/providers/theme-provider';
 import App from './app/app';
 import './shared/styles/variables.css';
 

@@ -33,6 +33,10 @@ migrate python build to uv
 #TODO use system prompt for ai. 
 
 
+
+use curl commands to 
+
+
 bugs:
 it loads to slowly
 claude is a bit janky

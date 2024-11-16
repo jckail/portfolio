@@ -20,8 +20,8 @@ export interface ThemeColors {
 export interface ThemeConfig {
   defaultTheme: Theme;
   particles: {
-    dark: ParticleConfig;
-    light: ParticleConfig;
+    dark: ThemeParticleConfig;
+    light: ThemeParticleConfig;
   };
 }
 
@@ -34,7 +34,7 @@ export interface ThemePreferences {
   };
 }
 
-export interface ParticleConfig {
+export interface ThemeParticleConfig {
   background_color: string;
   particle_color: string;
   line_color: string;

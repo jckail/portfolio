@@ -1,14 +1,14 @@
 import React, { useMemo, useEffect } from 'react';
 import { RouteObject } from 'react-router-dom';
-import MainContent from '../features/content/components/main-content';
-import { ParticlesProvider } from '../features/content/components/particles-provider';
-import { useThemeStore } from '../features/content/stores/theme-store';
-import { useThemeBackground } from '../features/content/hooks';
-import { getThemeConfig } from '../features/content/lib';
+import MainContent from './components/layout/main-content';
+import { ParticlesProvider } from './providers/particles-provider';
+import { useThemeStore } from '../shared/stores/theme-store';
+import { useThemeBackground } from '../shared/hooks';
+import { getThemeConfig } from '../shared/utils/theme';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
-import { useLoading, LoadingProvider } from '../features/content/context/loading-context';
-import ChatPortal from '../features/content/components/ChatPortal';
+import { useLoading, LoadingProvider } from '../shared/context/loading-context';
+import { ChatPortal } from './components/chat';
 
 import './styles/app.css';
 

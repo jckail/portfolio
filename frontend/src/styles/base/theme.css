@@ -1,4 +1,4 @@
-@import '../shared/variables.css';
+@import './variables.css';
 
 /* Theme classes for more reliable switching */
 .theme-light {
