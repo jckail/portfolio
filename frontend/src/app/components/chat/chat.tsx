@@ -31,7 +31,7 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'none', isolation: 'isolate' }}>
+    <div style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'none', width: '100%', height: '100%' }}>
       {!open && <ChatButton onClick={handleClickOpen} />}
 
       <Dialog
@@ -60,25 +60,29 @@ const Chat: React.FC = () => {
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',
             backdropFilter: 'blur(16px)',
-            background: 'rgba(var(--surface-color-rgb), 0.85)',
+            background: 'rgba(var(--surface-color-rgb), 0.75)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            isolation: 'isolate',
-            overflowY: 'hidden',
+            overflowY: 'hidden'
           }
         }}
         sx={{
           position: 'fixed',
+          pointerEvents: 'none',
           '& .MuiDialog-container': {
             position: 'fixed',
             pointerEvents: 'none',
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
           },
-          '& .MuiPaper-root': {
-            pointerEvents: 'auto',
-          },
           '& .MuiBackdrop-root': {
             position: 'fixed',
+            pointerEvents: 'none'
+          },
+          '& .MuiPaper-root': {
+            pointerEvents: 'none',
+            '& > *': {
+              pointerEvents: 'auto'
+            }
           }
         }}
       >
@@ -94,6 +98,7 @@ const Chat: React.FC = () => {
             bgcolor: 'var(--background-color)',
             position: 'relative',
             p: '16px !important',
+            pointerEvents: 'auto'
           }}
         >
           <ChatMessages 
