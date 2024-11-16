@@ -36,7 +36,7 @@ const MainContentInner: React.FC = () => {
 
 
   return (
-    <div className="layout">
+    <div className="main">
       <Header 
         theme={theme}
         toggleTheme={toggleTheme}
@@ -55,7 +55,7 @@ const MainContentInner: React.FC = () => {
             )
           ))}
         </div>
-        <div className="resume">
+        <div className="main-content">
           <TLDR />
           <Experience />
           <TechnicalSkills />

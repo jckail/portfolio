@@ -15,7 +15,7 @@ declare global {
 
 function ParticlesProvider({ children, config, isResumeLoaded = false }: ParticlesProviderProps) {
   useEffect(() => {
-    // Only initialize particles if resume is loaded
+    // Only initialize particles if main is loaded
     if (!isResumeLoaded) return;
 
     // Create multi-particle container if multiple configs

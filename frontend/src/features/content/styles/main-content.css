@@ -2,7 +2,7 @@
     --header-height: 60px;
 }
 
-.layout {
+.main {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -10,7 +10,7 @@
     overflow-x: hidden;
   }
   
-  .layout main {
+  .main main {
     flex: 1;
     width: 90%;
     margin: 0 auto;
@@ -91,7 +91,7 @@ html {
     :root {
         --header-height: 60px;
     }
-    .layout main {
+    .main main {
         width: 90%;
         margin-right: 40px;
         padding:  25px 0 var(--spacing-lg);
@@ -113,7 +113,7 @@ html {
 
 
 @media (max-width: 480px) {
-    .layout main {
+    .main main {
       width: 90%;
       padding:  25px 0 var(--spacing-lg);
       margin-right: 40px;
