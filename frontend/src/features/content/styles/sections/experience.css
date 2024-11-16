@@ -12,6 +12,8 @@
   padding: var(--spacing-sm) 0;
 }
 
+/* this is the actual line for the time line*/
+
 .timeline::before {
   content: '';
   position: absolute;
@@ -19,7 +21,7 @@
   top: 0;
   width: 2px;
   height: 100%;
-  background: var(--section-background);
+  background: transparent; 
 }
 
 .timeline-item {
