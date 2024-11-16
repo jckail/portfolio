@@ -60,23 +60,40 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
                 system_prompt = file.read()
         except Exception as e:
             print(f"Error loading system prompt: {e}")
-            system_prompt = """You are an AI assistant for Jordan Kail's portfolio website..."""
+            system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
+                1. Learn about Jordan's background, experience, and technical skills
+                2. Understand his projects and achievements
+                3. Discuss potential collaborations or opportunities
+                4. Answer questions about his work and expertise
+                
+                Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
+                You have access to the current page content to provide accurate, contextual responses."""
 
-        # Create the message - using await with async client
-        response = await manager.client.messages.create(
+
+        # Create the message stream with the stream parameter set to True
+        stream = await manager.client.messages.create(
             model="claude-3-sonnet-20240229",
             max_tokens=1024,
             system=system_prompt,
             messages=[{
                 "role": "user", 
                 "content": f"Context: {context}\n\nUser Message: {data['content']}"
-            }]
+            }],
+            stream=True  # Enable streaming
         )
 
-        # Handle the response - no streaming needed as Claude 3 is very fast
-        if response.content:
-            # Send the complete message
-            await manager.send_message(response.content[0].text, client_id, is_chunk=False)
+        complete_response = ""
+        
+        # Process the stream
+        async for message in stream:
+            if hasattr(message, 'type') and message.type == "content_block_delta":
+                # Send the chunk
+                await manager.send_message(message.delta.text, client_id, is_chunk=True)
+                complete_response += message.delta.text
+
+        # Send the complete message at the end
+        if complete_response:
+            await manager.send_message(complete_response, client_id, is_chunk=False)
 
     except Exception as e:
         error_message = f"Error: {str(e)}"

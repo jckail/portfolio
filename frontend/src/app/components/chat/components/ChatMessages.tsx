@@ -5,13 +5,11 @@ import { Message } from '../../../../types/chat';
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
-  streamingMessageId: number | null;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({ 
   messages, 
-  isLoading, 
-  streamingMessageId 
+  isLoading
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -61,12 +59,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           >
             <Typography variant="body1">
               {msg.text}
-              {index === streamingMessageId && <span className="cursor">|</span>}
+              {msg.isStreaming && <span className="cursor">|</span>}
             </Typography>
           </Paper>
         </Box>
       ))}
-      {isLoading && streamingMessageId === null && (
+      {isLoading && !messages[messages.length - 1]?.isStreaming && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
           <Paper
             elevation={1}

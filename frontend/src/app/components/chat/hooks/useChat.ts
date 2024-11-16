@@ -11,7 +11,6 @@ export const useChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
   const [initialContextSent, setInitialContextSent] = useState(false);
-  const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
   const clientId = useRef(Date.now().toString());
 
   const getPageContext = () => {
@@ -54,27 +53,39 @@ export const useChat = () => {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        if (data.is_chunk) {
-          setMessages(prev => {
-            const newMessages = [...prev];
-            if (streamingMessageId !== null) {
-              newMessages[streamingMessageId] = {
-                ...newMessages[streamingMessageId],
-                text: newMessages[streamingMessageId].text + data.message
-              };
-            } else {
-              newMessages.push({ type: 'agent', text: data.message });
-              setStreamingMessageId(newMessages.length - 1);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastMessage = newMessages[newMessages.length - 1];
+          
+          if (data.is_chunk) {
+            // If there's no existing streaming message, create one
+            if (!lastMessage?.isStreaming) {
+              return [...newMessages, { type: 'agent', text: data.message, isStreaming: true }];
             }
-            return newMessages;
-          });
-        } else {
-          if (data.message) {
-            setMessages(prev => [...prev, { type: 'agent', text: data.message }]);
+            
+            // Update the existing streaming message
+            newMessages[newMessages.length - 1] = {
+              ...lastMessage,
+              text: lastMessage.text + data.message
+            };
+          } else {
+            // If this is a final message
+            if (lastMessage?.isStreaming) {
+              // Update the streaming message to its final state
+              newMessages[newMessages.length - 1] = {
+                type: 'agent',
+                text: data.message || lastMessage.text,
+                isStreaming: false
+              };
+            } else if (data.message) {
+              // Add a new complete message
+              newMessages.push({ type: 'agent', text: data.message });
+            }
+            setIsLoading(false);
           }
-          setStreamingMessageId(null);
-          setIsLoading(false);
-        }
+          
+          return newMessages;
+        });
       };
 
       ws.onerror = (error) => {
@@ -84,14 +95,12 @@ export const useChat = () => {
           text: 'I apologize, but I encountered an error. Please try again.' 
         }]);
         setIsLoading(false);
-        setStreamingMessageId(null);
       };
 
       ws.onclose = () => {
         console.log('WebSocket Disconnected');
         setWebSocket(null);
         setInitialContextSent(false);
-        setStreamingMessageId(null);
       };
 
       setWebSocket(ws);
@@ -124,7 +133,6 @@ export const useChat = () => {
     setMessage,
     messages,
     isLoading,
-    streamingMessageId,
     handleSendMessage
   };
 };

@@ -14,7 +14,6 @@ const Chat: React.FC = () => {
     setMessage,
     messages,
     isLoading,
-    streamingMessageId,
     handleSendMessage
   } = useChat();
 
@@ -100,7 +99,6 @@ const Chat: React.FC = () => {
           <ChatMessages 
             messages={messages}
             isLoading={isLoading}
-            streamingMessageId={streamingMessageId}
           />
 
           <ChatInput
