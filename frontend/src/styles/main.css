@@ -39,6 +39,15 @@ body {
   color: var(--text-color);
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@media screen and (max-width: 768px) {
+  .main-content {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
 }
 
 code {
