@@ -5,6 +5,10 @@ import os
 from dotenv import load_dotenv
 import json
 import asyncio
+from contextlib import asynccontextmanager
+from backend.app.models import get_all_models
+all_data = get_all_models()
+
 
 # Load environment variables
 load_dotenv()
@@ -16,7 +20,14 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.page_contexts: Dict[str, str] = {}
-        self.client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        # Create one client for the entire application
+        self.client = AsyncAnthropic(
+            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            max_retries=3,  # Add retry handling
+            timeout=30.0    # Increase timeout slightly
+        )
+        # Cache the system prompt
+        self._system_prompt: str | None = None
 
     async def connect(self, client_id: str, websocket: WebSocket):
         await websocket.accept()
@@ -36,31 +47,33 @@ class ConnectionManager:
 
     async def send_message(self, message: str, client_id: str, is_chunk: bool = False):
         if client_id in self.active_connections:
-            await self.active_connections[client_id].send_json({
-                "message": message,
-                "sender": "assistant",
-                "is_chunk": is_chunk
-            })
+            try:
+                # Prepare the message once
+                json_message = {
+                    "message": message,
+                    "sender": "assistant",
+                    "is_chunk": is_chunk
+                }
+                websocket = self.active_connections[client_id]
+                await websocket.send_json(json_message)
+            except Exception as e:
+                print(f"Error sending message: {e}")
 
-manager = ConnectionManager()
-
-async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict):
-    try:
-        if data["type"] == "context":
-            manager.store_context(client_id, data["content"])
-            return
+    @asynccontextmanager
+    async def get_streaming_response(self, client_id: str, user_message: str):
+        """Context manager to handle Claude API streaming responses"""
+        context = self.get_context(client_id)
         
-        context = manager.get_context(client_id)
-        
-        # Load system prompt
-        prompt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                                'assets', 'portfoliosystemprompt.md')
-        try:
-            with open(prompt_path, 'r') as file:
-                system_prompt = file.read()
-        except Exception as e:
-            print(f"Error loading system prompt: {e}")
-            system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
+        # Load system prompt if not cached
+        if self._system_prompt is None:
+            try:
+                prompt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                                    'assets', 'portfoliosystemprompt.md')
+                with open(prompt_path, 'r') as file:
+                    self._system_prompt = file.read()
+            except Exception as e:
+                print(f"Error loading system prompt: {e}")
+                self._system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
                 1. Learn about Jordan's background, experience, and technical skills
                 2. Understand his projects and achievements
                 3. Discuss potential collaborations or opportunities
@@ -69,31 +82,45 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
                 Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
                 You have access to the current page content to provide accurate, contextual responses."""
 
+        try:
+            stream = await self.client.messages.create(
+                model="claude-3-5-haiku-20241022",
+                max_tokens=1024,
+                system=self._system_prompt,
+                messages=[{
+                    "role": "user", 
+                    "content": f"Context: {all_data}\n\nUser Message: {user_message}"
+                }],
+                stream=True
+            )
+            yield stream
+        except Exception as e:
+            print(f"Error creating stream: {e}")
+            raise
 
-        # Create the message stream with the stream parameter set to True
-        stream = await manager.client.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=1024,
-            system=system_prompt,
-            messages=[{
-                "role": "user", 
-                "content": f"Context: {context}\n\nUser Message: {data['content']}"
-            }],
-            stream=True  # Enable streaming
-        )
+manager = ConnectionManager()
 
-        complete_response = ""
+async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict):
+    try:
+        if data["type"] == "context":
+            manager.store_context(client_id, data["content"])
+            return
+
+        complete_response = []  # Use list for efficient string building
         
-        # Process the stream
-        async for message in stream:
-            if hasattr(message, 'type') and message.type == "content_block_delta":
-                # Send the chunk
-                await manager.send_message(message.delta.text, client_id, is_chunk=True)
-                complete_response += message.delta.text
-
-        # Send the complete message at the end
-        if complete_response:
-            await manager.send_message(complete_response, client_id, is_chunk=False)
+        async with manager.get_streaming_response(client_id, data['content']) as stream:
+            async for chunk in stream:
+                if hasattr(chunk, 'type'):
+                    if chunk.type == "content_block_delta":
+                        if chunk.delta.text:
+                            # Immediately send chunk
+                            await manager.send_message(chunk.delta.text, client_id, is_chunk=True)
+                            complete_response.append(chunk.delta.text)
+                    elif chunk.type == "content_block_stop":
+                        # Send complete message
+                        if complete_response:
+                            final_response = ''.join(complete_response)
+                            await manager.send_message(final_response, client_id, is_chunk=False)
 
     except Exception as e:
         error_message = f"Error: {str(e)}"
