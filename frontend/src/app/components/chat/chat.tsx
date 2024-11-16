@@ -21,8 +21,8 @@ const Chat: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { type: 'agent', text: 'Hello! I\'m your AI assistant. I can help you with:' },
-    { type: 'agent', text: '• Understanding my background and experience\n• Learning about my technical skills\n• Discussing potential collaborations' }
+    { type: 'agent', text: 'Welcome! I\'m Jordan\'s AI assistant, here to help you explore his expertise in software engineering and data architecture.' },
+    { type: 'agent', text: 'Feel free to ask about:\n• Technical projects and implementations\n• Professional experience at Meta, Deloitte, and other companies\n• Full-stack development and cloud architecture expertise\n• Potential collaboration opportunities' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
