@@ -1,0 +1,239 @@
+import React, { useState, useEffect } from 'react';
+import { Skill, SkillsData, SkillModalProps, IconProps } from '../../../types/skills';
+import { useLoading } from '../../../shared/context/loading-context';
+import '../../../styles/features/sections/skills.css';
+
+// Import SVGs directly
+import AirbyteIcon from '../../../assets/icons/airbyte.svg?react';
+import ApacheFlinkIcon from '../../../assets/icons/apacheflink.svg?react';
+import ApachePulsarIcon from '../../../assets/icons/apachepulsar.svg?react';
+import ApacheRocketMQIcon from '../../../assets/icons/apacherocketmq.svg?react';
+import AWSIcon from '../../../assets/icons/aws.svg?react';
+import DatadogIcon from '../../../assets/icons/datadog.svg?react';
+import DjangoIcon from '../../../assets/icons/django.svg?react';
+import DuckDBIcon from '../../../assets/icons/duckdb.svg?react';
+import FlaskIcon from '../../../assets/icons/flask.svg?react';
+import JupyterIcon from '../../../assets/icons/jupyter.svg?react';
+import KafkaIcon from '../../../assets/icons/kafka.svg?react';
+import LangchainIcon from '../../../assets/icons/langchain.svg?react';
+import LlamaIndexIcon from '../../../assets/icons/llamaindex.svg?react';
+import MilvusIcon from '../../../assets/icons/milvus_black.svg?react';
+import Neo4jIcon from '../../../assets/icons/neo4j.svg?react';
+import OpenAIIcon from '../../../assets/icons/openai.svg?react';
+import PandasIcon from '../../../assets/icons/pandas.svg?react';
+import PineconeIcon from '../../../assets/icons/pinecone.svg?react';
+import PrefectIcon from '../../../assets/icons/prefect.svg?react';
+import RetoolIcon from '../../../assets/icons/retool.svg?react';
+import RustIcon from '../../../assets/icons/rust.svg?react';
+import ScikitLearnIcon from '../../../assets/icons/scikit_learn.svg?react';
+import SocketIOIcon from '../../../assets/icons/socketdotio.svg?react';
+import SplunkIcon from '../../../assets/icons/splunk.svg?react';
+import SQLAlchemyIcon from '../../../assets/icons/sqlalchemy.svg?react';
+import TimescaleIcon from '../../../assets/icons/timescale.svg?react';
+import TrinoIcon from '../../../assets/icons/trino.svg?react';
+import tRPCIcon from '../../../assets/icons/trpc.svg?react';
+import PostgreSQLIcon from '../../../assets/icons/postgresql.svg?react';
+
+// Map of SVG components
+const SVG_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  'airbyte.svg': AirbyteIcon,
+  'apacheflink.svg': ApacheFlinkIcon,
+  'apachepulsar.svg': ApachePulsarIcon,
+  'apacherocketmq.svg': ApacheRocketMQIcon,
+  'aws.svg': AWSIcon,
+  'datadog.svg': DatadogIcon,
+  'django.svg': DjangoIcon,
+  'duckdb.svg': DuckDBIcon,
+  'flask.svg': FlaskIcon,
+  'jupyter.svg': JupyterIcon,
+  'kafka.svg': KafkaIcon,
+  'langchain.svg': LangchainIcon,
+  'llamaindex.svg': LlamaIndexIcon,
+  'milvus_black.svg': MilvusIcon,
+  'neo4j.svg': Neo4jIcon,
+  'openai.svg': OpenAIIcon,
+  'pandas.svg': PandasIcon,
+  'pinecone.svg': PineconeIcon,
+  'prefect.svg': PrefectIcon,
+  'retool.svg': RetoolIcon,
+  'rust.svg': RustIcon,
+  'scikit_learn.svg': ScikitLearnIcon,
+  'socketdotio.svg': SocketIOIcon,
+  'splunk.svg': SplunkIcon,
+  'sqlalchemy.svg': SQLAlchemyIcon,
+  'timescale.svg': TimescaleIcon,
+  'trino.svg': TrinoIcon,
+  'trpc.svg': tRPCIcon,
+  'postgresql.svg': PostgreSQLIcon,
+};
+
+const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
+  const SvgComponent = SVG_COMPONENTS[name];
+
+  if (SvgComponent) {
+    return (
+      <SvgComponent
+        width={size}
+        height={size}
+        className={className}
+        {...props}
+      />
+    );
+  }
+
+  return (
+    <img 
+      src={`/images/icons/${name}`}
+      alt={name.replace('.svg', '')}
+      width={size}
+      height={size}
+      className={className}
+      {...props}
+    />
+  );
+};
+
+const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
+  return (
+    <div className="skill-modal-overlay" onClick={onClose}>
+      <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close-button" onClick={onClose}>&times;</button>
+        <div className="modal-header">
+          <div className="modal-icon-wrapper">
+            <div className="icon-wrapper">
+              <SkillIcon
+                name={skill.image}
+                className="skill-icon"
+                size={32}
+                aria-label={skill.display_name}
+              />
+            </div>
+          </div>
+          <h3>{skill.display_name}</h3>
+        </div>
+        <div className="modal-body">
+          <p className="experience-info">
+            <strong>{skill.years_of_experience} years</strong> of experience
+            {skill.professional_experience && " (Professional)"}
+          </p>
+          <p className="skill-description">{skill.description}</p>
+          <div className="skill-tags">
+            {skill.tags.map((tag, index) => (
+              <span key={index} className="skill-tag">
+                {tag.replace(/-/g, ' ')}
+              </span>
+            ))}
+          </div>
+          {Object.keys(skill.examples).length > 0 && (
+            <div className="examples-section">
+              <h4>Examples:</h4>
+              <ul>
+                {Object.entries(skill.examples).map(([key, value]) => (
+                  <li key={key}>{value}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
+            Visit Website
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TechnicalSkills: React.FC = () => {
+  const [skills, setSkills] = useState<SkillsData>({});
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { setComponentLoading } = useLoading();
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchSkills = async () => {
+      try {
+        setComponentLoading('technicalSkills', true);
+        const response = await fetch('/api/skills');
+        if (!response.ok) throw new Error('Failed to fetch skills');
+        const data = await response.json();
+        if (mounted) {
+          setSkills(data);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Failed to load skills');
+        }
+      } finally {
+        if (mounted) {
+          setComponentLoading('technicalSkills', false);
+        }
+      }
+    };
+
+    fetchSkills();
+
+    return () => {
+      mounted = false;
+    };
+  }, [setComponentLoading]);
+
+  if (error) return <div className="error-message">Error: {error}</div>;
+
+  const categorizedSkills = Object.entries(skills).reduce((acc, [key, skill]) => {
+    const category = skill.general_category;
+    if (!acc[category]) acc[category] = [];
+    acc[category].push({ key, ...skill });
+    return acc;
+  }, {} as Record<string, (Skill & { key: string })[]>);
+
+  return (
+    <section id="skills" className="section-container">
+      <div className="section-header">
+        <h2>Skills</h2>
+      </div>
+      <div className="section-content">
+        <div className="skills-grid">
+          {Object.entries(categorizedSkills).map(([category, skillList]) => (
+            <div key={category} className="skill-category">
+              <h3>{category}</h3>
+              <div className="skill-list">
+                {skillList.map((skill, index) => (
+                  <div
+                    key={skill.key}
+                    className="skill-item"
+                    onClick={() => setSelectedSkill(skill.key)}
+                    style={{ '--item-index': index } as React.CSSProperties}
+                    title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+                  >
+                    <div className="skill-icon-container">
+                      <div className="icon-wrapper">
+                        <SkillIcon
+                          name={skill.image}
+                          className="skill-icon"
+                          size={32}
+                          aria-label={skill.display_name}
+                        />
+                      </div>
+                      <span className="skill-name">{skill.display_name}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {selectedSkill && skills[selectedSkill] && (
+        <SkillModal
+          skill={skills[selectedSkill]}
+          onClose={() => setSelectedSkill(null)}
+        />
+      )}
+    </section>
+  );
+};
+
+export default TechnicalSkills;

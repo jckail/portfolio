@@ -1,0 +1,1 @@
+export { getParticlesConfig } from './config';

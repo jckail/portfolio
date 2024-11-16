@@ -1,6 +1,6 @@
 about_me = {
     "greeting": "hi there 👋",
-    "description": "I am a software engineer specializing in Ai, Analytics, and Machine Learning. With over 12 years of experience programming in Python, JavaScript, and SQL. I've helped build winning data cultures from scrappy start ups to fortune 50 companies.",
+    "description": "I am a software engineer specializing in Ai, Analytics, and Machine Learning. With 12 years of experience programming in Python, JavaScript, and SQL. I've helped build winning data cultures from scrappy start ups to fortune 50 companies.",
     "aidetails": "Ask the ✨Ai for even more details about me!",
     "brief_bio": str(
         """

@@ -1,2 +1,1 @@
-export * from './use-async';
-export * from './use-media-query';
+export { useThemeBackground } from './use-theme-background';

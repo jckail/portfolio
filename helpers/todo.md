@@ -30,6 +30,7 @@ Features
 add in more resume data via simplify extension
 Pull resume from supabase
 migrate python build to uv
+#TODO use system prompt for ai. 
 
 
 bugs:
