@@ -4,7 +4,7 @@ import MainContent from './components/layout/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
-import { getThemeConfig } from '../shared/utils/theme';
+import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { LoadingBoundary } from './components/loading-boundary';
 import { useLoading, LoadingProvider } from '../shared/context/loading-context';
@@ -18,10 +18,9 @@ const AppContent: React.FC = () => {
   const { isFullyLoaded } = useLoading();
 
   const baseConfig = useMemo(() => getThemeConfig(theme), [
-        // Only recalculate when party mode changes
-        theme === 'party'
-     ]);
-  
+    // Only recalculate when party mode changes
+    theme === 'party'
+  ]);
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = backgroundColor;
@@ -31,7 +30,7 @@ const AppContent: React.FC = () => {
     <ErrorBoundary>
       <LoadingBoundary>
         <>
-          <ParticlesProvider config={baseConfig} isResumeLoaded={isFullyLoaded}>
+          <ParticlesProvider config={baseConfig}>
             <MainContent />
           </ParticlesProvider>
           <ChatPortal />

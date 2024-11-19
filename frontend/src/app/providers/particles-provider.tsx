@@ -1,90 +1,60 @@
-import React, { useEffect } from 'react';
-import type { ParticlesConfig } from '../../types/particles';
+import React, { useEffect, useState } from 'react';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import type { Container, ISourceOptions } from "@tsparticles/engine";
 
 interface ParticlesProviderProps {
   children: React.ReactNode;
-  config: Record<string, unknown> | Record<string, unknown>[];
-  isResumeLoaded?: boolean;
+  config: ISourceOptions | ISourceOptions[];
 }
 
-declare global {
-  interface Window {
-    particlesJS?: (id: string, config: Record<string, unknown>) => void;
-  }
-}
+export function ParticlesProvider({ children, config }: ParticlesProviderProps) {
+  const [init, setInit] = useState(false);
 
-function ParticlesProvider({ children, config, isResumeLoaded = false }: ParticlesProviderProps) {
   useEffect(() => {
-    if (!isResumeLoaded) return;
-
-    // Create multi-particle container
-    const multiContainer = document.createElement('div');
-    multiContainer.id = 'multi-particles';
-    multiContainer.style.cssText = `
-      position: absolute !important;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      z-index: 1;
-      transition: opacity 0.3s ease-in-out;
-      background-color: transparent;
-    `;
-    document.body.appendChild(multiContainer);
-
-    // Convert single config to array for consistent handling
-    const configs = Array.isArray(config) ? config : [config];
-
-    // Create individual particle containers
-    const containerIds = configs.map((_, index) => `particles-js-${index}`);
-    
-    containerIds.forEach((id, index) => {
-      const container = document.createElement('div');
-      container.id = id;
-      container.style.cssText = `
-        position: absolute !important;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-        background-color: transparent;
-      `;
-      multiContainer.appendChild(container);
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
     });
+  }, []);
 
-    // Initialize particles with a delay to ensure DOM and script are ready
-    const initParticles = () => {
-      if (window.particlesJS) {
-        containerIds.forEach((id, index) => {
-          window.particlesJS?.(id, configs[index]);
-        });
-      } else {
-        setTimeout(initParticles, 100);
-      }
-    };
+  const particlesLoaded = async (container?: Container) => {
+    console.log('Particles container loaded', container);
+  };
 
-    initParticles();
+  if (!init) {
+    return <>{children}</>;
+  }
 
-    // Ensure body has relative positioning and minimum height
-    document.body.style.position = 'relative';
-    document.body.style.minHeight = '100vh';
-
-    // Cleanup
-    return () => {
-      containerIds.forEach(id => {
-        document.getElementById(id)?.remove();
-      });
-      document.getElementById('multi-particles')?.remove();
-    };
-  }, [config, isResumeLoaded]);
+  if (Array.isArray(config)) {
+    return (
+      <>
+        {config.map((conf, index) => (
+          <Particles
+            key={`particles-${index}`}
+            id={`tsparticles-${index}`}
+            particlesLoaded={particlesLoaded}
+            options={conf}
+          />
+        ))}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {children}
+        </div>
+      </>
+    );
+  }
 
   return (
-    <div style={{ position: 'relative', zIndex: 2 }}>
-      {children}
-    </div>
+    <>
+      <Particles
+        id="tsparticles"
+        particlesLoaded={particlesLoaded}
+        options={config}
+      />
+      <div style={{ position: 'relative', zIndex: 2 }}>
+        {children}
+      </div>
+    </>
   );
 }
-
-export { ParticlesProvider };

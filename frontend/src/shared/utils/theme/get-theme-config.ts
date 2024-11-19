@@ -1,14 +1,13 @@
 import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
-import { getParticlesConfig } from '../particles';
 import type { Theme } from '../../../types/theme';
-import type { ParticlesConfig, ParticleConfig } from '../../../types/particles';
+import type { ISourceOptions } from "@tsparticles/engine";
 
 const generateRandomZuniUrls = (): string[] => {
   const usedNumbers: Set<number> = new Set();
   const urls: string[] = [];
 
   while (urls.length < 4) {
-    const randomNum: number = Math.floor(Math.random() * 19) + 1; // Random number between 1 and 19
+    const randomNum: number = Math.floor(Math.random() * 19) + 1;
     if (!usedNumbers.has(randomNum)) {
       usedNumbers.add(randomNum);
       urls.push(`/api/zuni?subject=${randomNum}`);
@@ -18,11 +17,118 @@ const generateRandomZuniUrls = (): string[] => {
   return urls;
 };
 
-export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<string, unknown>[] => {
-  // Use API endpoint for party mode
-  const zuniImageUrls: string[] = theme === 'party' ? generateRandomZuniUrls() : [];
+const createParticleConfig = ({
+  particleColor,
+  lineColor,
+  backgroundColor,
+  particleCount,
+  particleSize,
+  lineDistance,
+  lineWidth,
+  moveSpeed,
+  imageUrls,
+  imageSizeAnimation
+}: {
+  particleColor: string | string[],
+  lineColor: string,
+  backgroundColor: string,
+  particleCount: number,
+  particleSize: number,
+  lineDistance: number,
+  lineWidth: number,
+  moveSpeed: number,
+  imageUrls?: string[],
+  imageSizeAnimation?: {
+    enable: boolean,
+    speed: number,
+    minSize: number,
+    sync: boolean
+  }
+}): ISourceOptions => ({
+  background: {
+    color: {
+      value: backgroundColor,
+    },
+  },
+  fpsLimit: 120,
+  interactivity: {
+    events: {
+      onClick: {
+        enable: true,
+        mode: "push",
+      },
+      onHover: {
+        enable: true,
+        mode: "grab",
+      },
+    },
+    modes: {
+      grab: {
+        distance: 400,
+      },
+      bubble: {
+        distance: 400,
+        duration: 0.4,
+      },
+    },
+  },
+  particles: {
+    color: {
+      value: particleColor,
+    },
+    links: {
+      color: lineColor,
+      distance: lineDistance,
+      enable: true,
+      opacity: 0.5,
+      width: lineWidth,
+    },
+    move: {
+      direction: "none",
+      enable: true,
+      outModes: {
+        default: "bounce",
+      },
+      random: false,
+      speed: moveSpeed,
+      straight: false,
+    },
+    number: {
+      density: {
+        enable: true,
+      },
+      value: particleCount,
+    },
+    opacity: {
+      value: 0.5,
+    },
+    shape: {
+      type: imageUrls && imageUrls.length > 0 ? ["image"] : ["circle"],
+      options: {
+        image: imageUrls && imageUrls.length > 0 ? imageUrls.map(url => ({
+          src: url,
+          width: particleSize,
+          height: particleSize
+        })) : undefined
+      }
+    },
+    size: {
+      value: { min: particleSize / 2, max: particleSize },
+      animation: imageSizeAnimation ? {
+        enable: imageSizeAnimation.enable,
+        speed: imageSizeAnimation.speed,
+        sync: imageSizeAnimation.sync,
+        startValue: "min",
+        destroy: "max"
+      } : undefined
+    },
+  },
+  detectRetina: true,
+});
 
-  // Party color palette
+export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] => {
+  const zuniImageUrls: string[] = theme === 'party' ? generateRandomZuniUrls() : [];
+  
   const partyColors = [
     '#ff00ff', // Hot pink
     '#00ffff', // Cyan
@@ -39,52 +145,50 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
   ];
 
   if (theme === 'party') {
-    return zuniImageUrls.map((url, index) => ({
-      ...getParticlesConfig({
-        particleColor: partyColors[index % partyColors.length],
-        lineColor: partyColors[index % partyColors.length],
-        backgroundColor: index === 0 ? BLACK : 'transparent', // Only first container sets background
-        particleCount: 15,
-        particleSize: 50,
-        lineDistance: 1000,
-        lineWidth: 20,
-        moveSpeed: 1,
-        imageUrls: [url], // Pass single-element array with current URL
-        imageSizeAnimation: {
-          enable: true,
-          speed: 1,
-          minSize: 30,
-          sync: false
-        }
-      })
+    return zuniImageUrls.map((url, index) => createParticleConfig({
+      particleColor: partyColors[index % partyColors.length],
+      lineColor: partyColors[index % partyColors.length],
+      backgroundColor: 'transparent',
+      particleCount: 25,
+      particleSize: 50,
+      lineDistance: 1000,
+      lineWidth: 20,
+      moveSpeed: 1,
+      imageUrls: [url],
+      imageSizeAnimation: {
+        enable: true,
+        speed: 1,
+        minSize: 30,
+        sync: false
+      }
     }));
   }
 
-  const configs: Record<Theme, ParticleConfig> = {
+  const configs = {
     light: {
       particleColor: PRIMARY,
       lineColor: PRIMARY,
-      backgroundColor: WHITE,
+      backgroundColor: 'transparent',
       particleCount: 40,
       particleSize: 15,
       lineDistance: 750,
       lineWidth: 5,
-      moveSpeed: 1,
+      moveSpeed: .1,
     },
     dark: {
       particleColor: PRIMARY,
       lineColor: PRIMARY,
-      backgroundColor: BLACK,
+      backgroundColor: 'transparent',
       particleCount: 40,
       particleSize: 15,
       lineDistance: 750,
       lineWidth: 5,
-      moveSpeed: 1,
+      moveSpeed: .1,
     },
     party: {
       particleColor: partyColors[0],
       lineColor: partyColors[0],
-      backgroundColor: BLACK,
+      backgroundColor: 'transparent',
       particleCount: 15,
       particleSize: 64,
       lineDistance: 200,
@@ -100,5 +204,5 @@ export const getThemeConfig = (theme: Theme): Record<string, unknown> | Record<s
     }
   };
 
-  return { ...getParticlesConfig(configs[theme]) };
+  return createParticleConfig(configs[theme]);
 };

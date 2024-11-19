@@ -1,37 +1,27 @@
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { AppLogicProvider } from '../app/providers/app-logic-provider';
+import React from 'react';
+import { render } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { ResumeProvider } from '../app/providers/resume-provider';
 import { ParticlesProvider } from '../app/providers/particles-provider';
-import { getParticlesConfig } from '../shared/utils/particles';
+import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { PRIMARY } from '../config/constants';
 
+const testConfig = getThemeConfig('light');
+
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  // Use light theme config for testing
-  const config = getParticlesConfig({
-    particleColor: PRIMARY,
-    lineColor: PRIMARY,
-    backgroundColor: '#ffffff' // Added required backgroundColor property
-  });
-
-  // Use JSON parse/stringify to ensure a clean object for testing
-  const testConfig = JSON.parse(JSON.stringify(config)) as Record<string, unknown>;
-
   return (
-    <AppLogicProvider>
+    <BrowserRouter>
       <ResumeProvider>
         <ParticlesProvider config={testConfig}>
           {children}
         </ParticlesProvider>
       </ResumeProvider>
-    </AppLogicProvider>
+    </BrowserRouter>
   );
 };
 
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+const customRender = (ui: React.ReactElement, options = {}) =>
+  render(ui, { wrapper: AllTheProviders, ...options });
 
 export * from '@testing-library/react';
 export { customRender as render };
