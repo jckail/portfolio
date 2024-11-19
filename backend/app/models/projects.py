@@ -1,4 +1,12 @@
 projects = {
+        "super_teacher": {
+        "title": "Super Teacher",
+        "description": 'A "Super Teacher" app that uses AI to help teachers create personalized lesson plans for students. Made with Python, FastAPI, and Pydantic.',
+        "link": "https://github.com/jckail/superteacher",
+        "link2": "https://www.the-super-teacher.com/",
+        "description_detail": """Developed Super Teacher, an AI-powered web application that revolutionizes lesson planning for educators by providing personalized lesson plans tailored to individual student needs.""",
+        "logoPath": "/images/projects/github-logo.svg",
+    },
     "qr_for_groups": {
         "title": 'TechCrunch - "Join Group via QR"',
         "description": "Created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
