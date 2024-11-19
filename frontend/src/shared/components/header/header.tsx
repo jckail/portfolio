@@ -3,12 +3,9 @@ import { Theme } from '../../../types/theme';
 import { Contact } from '../../../types/resume';
 import { SidePanel } from '../navigation';
 import {
-  GitHubIcon,
-  LinkedInIcon,
   MoonIcon,
   SunIcon,
   PartyIcon,
-  ResumeIcon,
   SandwichIcon
 } from '../icons';
 
@@ -119,37 +116,6 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           <div className="nav-right">
-            {contactData.github && (
-              <a 
-                href={contactData.github} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="icon-link"
-                aria-label="GitHub Profile"
-              >
-                <GitHubIcon />
-              </a>
-            )}
-            {contactData.linkedin && (
-              <a 
-                href={contactData.linkedin} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="icon-link"
-                aria-label="LinkedIn Profile"
-              >
-                <LinkedInIcon />
-              </a>
-            )}
-            <button 
-              onClick={handleResumeClick}
-              className="resume-button"
-              aria-label="Download Resume"
-            >
-              <strong>Resume</strong>
-              <ResumeIcon/>
-            </button>
-          
             {!isToggleHidden && (
               <button 
                 onClick={toggleTheme}

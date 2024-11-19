@@ -1,26 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { AboutMe } from '../../../types/resume';
 import { useLoading } from '../../../shared/context/loading-context';
+import { GitHubIcon, LinkedInIcon, ResumeIcon } from '../../../shared/components/icons';
 import '../../../styles/features/sections/tldr.css';
 
 const TLDR: React.FC = () => {
   const [aboutMeData, setAboutMeData] = useState<AboutMe | null>(null);
+  const [contactData, setContactData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const { setComponentLoading } = useLoading();
 
   useEffect(() => {
     let mounted = true;
 
-    const fetchAboutMeData = async () => {
+    const fetchData = async () => {
       try {
         setComponentLoading('tldr', true);
-        const response = await fetch('/api/aboutme');
-        if (!response.ok) {
-          throw new Error('Failed to fetch contact data');
+        const [aboutMeResponse, contactResponse] = await Promise.all([
+          fetch('/api/aboutme'),
+          fetch('/api/contact')
+        ]);
+        
+        if (!aboutMeResponse.ok || !contactResponse.ok) {
+          throw new Error('Failed to fetch data');
         }
-        const data = await response.json();
+        
+        const [aboutMeData, contactData] = await Promise.all([
+          aboutMeResponse.json(),
+          contactResponse.json()
+        ]);
+
         if (mounted) {
-          setAboutMeData(data);
+          setAboutMeData(aboutMeData);
+          setContactData(contactData);
         }
       } catch (err) {
         if (mounted) {
@@ -33,7 +45,7 @@ const TLDR: React.FC = () => {
       }
     };
 
-    fetchAboutMeData();
+    fetchData();
 
     return () => {
       mounted = false;
@@ -42,7 +54,7 @@ const TLDR: React.FC = () => {
 
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
-  if (!aboutMeData) {
+  if (!aboutMeData || !contactData) {
     return (
       <section id="tldr" className="section-container">
         <div className="section-content">
@@ -51,6 +63,13 @@ const TLDR: React.FC = () => {
       </section>
     );
   }
+
+  const handleResumeClick = () => {
+    const resumeSection = document.getElementById('resume');
+    if (resumeSection) {
+      resumeSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <section id="tldr" className="section-container">
@@ -61,6 +80,38 @@ const TLDR: React.FC = () => {
               <h2>{aboutMeData.greeting}</h2>
               <p>{aboutMeData.description}</p>
               <p>{aboutMeData.aidetails}</p>
+              <div className="social-links">
+                {contactData.github && (
+                  <a 
+                    href={contactData.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="icon-link"
+                    aria-label="GitHub Profile"
+                  >
+                    <GitHubIcon />
+                  </a>
+                )}
+                {contactData.linkedin && (
+                  <a 
+                    href={contactData.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="icon-link"
+                    aria-label="LinkedIn Profile"
+                  >
+                    <LinkedInIcon />
+                  </a>
+                )}
+                <button 
+                  onClick={handleResumeClick}
+                  className="resume-button"
+                  aria-label="View Resume"
+                >
+                  <strong>Resume</strong>
+                  <ResumeIcon/>
+                </button>
+              </div>
             </div>
             <div className="headshot-container">
               <img 

@@ -1,6 +1,11 @@
 /* Import the unified resume sections styles */
 @import './main-sections.css';
 
+:root { 
+  --icon-size-desktop: 40px;
+  --icon-size-mobile: 30px;
+}
+
 /* Any additional specific styles for the TLDR section can be added here */
 .tldr-section {
   background: var(--section-background);
@@ -42,6 +47,69 @@
   line-height: 1.8;
   margin-bottom: var(--spacing-lg);
   font-size: var(--font-size-base);
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-m);
+}
+
+.social-links .icon-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: all var(--transition-normal);
+  padding: var(--spacing-xs) var(--spacing-s);
+  border-radius: var(--radius-sm);
+  height: var(--icon-size-desktop);
+  background: transparent;
+}
+
+.social-links .icon-link:hover {
+  color: var(--primary-hover);
+  background: var(--primary);
+  border-color: var(--primary-hover);
+}
+
+.social-links .icon-link svg {
+  min-width: var(--icon-size-desktop);
+  min-height: var(--icon-size-desktop);
+  background: var(--background-color);
+  color: var(--text-color);
+  border: var(--border-thickness) solid var(--primary-border);
+  border-radius: var(--radius-sm);
+}
+
+.social-links .resume-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-m) var(--spacing-m) var(--spacing-m);
+  background: var(--background-color);
+  color: var(--text-color);
+  border: var(--border-thickness) solid var(--primary-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 15px;
+  transition: all var(--transition-normal);
+  min-height: var(--icon-size-desktop);
+  width: 125px;
+}
+
+.social-links .resume-button svg {
+  width: var(--icon-size-desktop);
+  height: var(--icon-size-desktop);
+}
+
+.social-links .icon-link:hover svg,
+.social-links .resume-button:hover {
+  background: var(--primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 35px var(--primary);
 }
 
 .headshot-container {
@@ -94,5 +162,36 @@
   .headshot {
     width: 99%;
     height: 99%;
+  }
+
+  .social-links {
+    gap: var(--spacing-sm);
+  }
+
+  .social-links .resume-button {
+    min-height: var(--icon-size-mobile);
+    font-size: 15px;
+  }
+
+  .social-links .resume-button svg {
+    width: var(--icon-size-mobile);
+    height: var(--icon-size-mobile);
+  }
+
+  .social-links .icon-link svg {
+    min-width: var(--icon-size-mobile);
+    min-height: var(--icon-size-mobile);
+  }
+}
+
+@media (max-width: 480px) {
+  .social-links .resume-button {
+    padding: var(--spacing-xs);
+    font-size: 0.75rem;
+  }
+
+  .social-links .icon-link svg {
+    width: var(--icon-size-mobile);
+    height: var(--icon-size-mobile);
   }
 }
