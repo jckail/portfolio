@@ -75,43 +75,10 @@ const TLDR: React.FC = () => {
     <section id="tldr" className="section-container">
       <div className="section-content">
         <div className="tldr-section">
+          <h2>{aboutMeData.greeting}</h2>
           <div className="tldr-content">
             <div className="tldr-text">
-              <h2>{aboutMeData.greeting}</h2>
               <p>{aboutMeData.description}</p>
-              <p>{aboutMeData.aidetails}</p>
-              <div className="social-links">
-                {contactData.github && (
-                  <a 
-                    href={contactData.github} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="icon-link"
-                    aria-label="GitHub Profile"
-                  >
-                    <GitHubIcon />
-                  </a>
-                )}
-                {contactData.linkedin && (
-                  <a 
-                    href={contactData.linkedin} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="icon-link"
-                    aria-label="LinkedIn Profile"
-                  >
-                    <LinkedInIcon />
-                  </a>
-                )}
-                <button 
-                  onClick={handleResumeClick}
-                  className="resume-button"
-                  aria-label="View Resume"
-                >
-                  <strong>Resume</strong>
-                  <ResumeIcon/>
-                </button>
-              </div>
             </div>
             <div className="headshot-container">
               <img 
@@ -119,6 +86,41 @@ const TLDR: React.FC = () => {
                 alt="Profile headshot"
                 className="headshot"
               />
+            </div>
+          </div>
+          <div className="brief-bio">
+            <p>{aboutMeData.aidetails}</p>
+            <div className="social-links">
+              {contactData.github && (
+                <a 
+                  href={contactData.github} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="icon-link"
+                  aria-label="GitHub Profile"
+                >
+                  <GitHubIcon />
+                </a>
+              )}
+              {contactData.linkedin && (
+                <a 
+                  href={contactData.linkedin} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="icon-link"
+                  aria-label="LinkedIn Profile"
+                >
+                  <LinkedInIcon />
+                </a>
+              )}
+              <button 
+                onClick={handleResumeClick}
+                className="resume-button"
+                aria-label="View Resume"
+              >
+                <strong>Resume</strong>
+                <ResumeIcon/>
+              </button>
             </div>
           </div>
         </div>

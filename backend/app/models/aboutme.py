@@ -1,7 +1,7 @@
 about_me = {
     "greeting": "hi there 👋",
     "description": "I am a software engineer specializing in Ai, Analytics, and Machine Learning. With 12 years of experience programming in Python, JavaScript, and SQL. I've helped build winning data cultures from scrappy start ups to fortune 50 companies.",
-    "aidetails": "Ask the ✨Ai for even more details about me!",
+    "aidetails": "Ask the ✨Ai for more details about me!",
     "brief_bio": str(
         """
 I'm a data engineer with a deep curiosity for technology, always excited to explore AI, machine learning, and data systems. I've helped build efficient, scalable systems, developed complex pipelines, and worked with transformer models.

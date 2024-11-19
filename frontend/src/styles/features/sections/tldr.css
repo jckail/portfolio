@@ -6,7 +6,6 @@
   --icon-size-mobile: 30px;
 }
 
-/* Any additional specific styles for the TLDR section can be added here */
 .tldr-section {
   background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
@@ -22,38 +21,78 @@
   border-color: var(--primary-hover);
 }
 
-.tldr-content {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-xl);
-}
-
-.tldr-text {
-  flex: 1;
-  order: 1;
-}
-
 .tldr-section h2 {
   color: var(--text-color);
   font-size: 2rem;
-  margin-bottom: var(--spacing-m);
+  margin-bottom: var(--spacing-lg);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+.tldr-content {
+  display: flex;
+  align-items: center; /* Center items vertically */
+  justify-content: space-between;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  width: 100%;
+  min-height: 320px; /* Match headshot height to ensure vertical space */
+}
+
+.tldr-text {
+  flex: 1;
+  min-width: 0; /* Prevents text from overflowing */
+  max-width: calc(100% - 300px); /* Ensures space for larger headshot */
+  align-self: center; /* Ensures text is centered vertically */
+}
+
 .tldr-section p {
   color: var(--text-color);
-  line-height: 1.8;
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-base);
+  line-height: 1.5;
+  margin-bottom: 0; /* Remove bottom margin to help with centering */
+  font-size: 1.5rem;
+}
+
+.headshot-container {
+  flex: 0 0 auto; /* Prevents shrinking and growing */
+  width: 250px;
+  height: 320px;
+  border-radius: var(--radius-sm);
+  background: black;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid transparent;
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+  align-self: center; /* Ensures headshot is centered vertically */
+}
+
+.headshot {
+  width: 98%;
+  height: 99%;
+  object-fit: cover;
+  border-radius: 10%;
+  display: block;
+  margin: 0 auto;
+  transition: transform var(--transition-normal),
+  box-shadow var(--transition-normal);
+}
+
+.brief-bio {
+  border-top: var(--border-thickness) solid var(--primary-border);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  clear: both;
 }
 
 .social-links {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-m);
+  margin-top: var(--spacing-lg);
 }
 
 .social-links .icon-link {
@@ -112,33 +151,6 @@
   box-shadow: 0 0 35px var(--primary);
 }
 
-.headshot-container {
-  flex-shrink: 0;
-  width: 155px;
-  height: 200px;
-  border-radius: var(--radius-sm);
-  background: black;
-  border-radius: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 4px solid transparent;
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-  order: 2;
-}
-
-.headshot {
-  width: 98%;
-  height: 99%;
-  object-fit: fill;
-  border-radius: 10%;
-  display: block;
-  margin: 0 auto;
-  transition: transform var(--transition-normal),
-  box-shadow var(--transition-normal);
-}
-
 @media (max-width: 768px) {
   .tldr-section h2 {
     font-size: 1.75rem;
@@ -149,19 +161,16 @@
   }
 
   .tldr-content {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--spacing-lg);
+    min-height: 148px; /* Match tablet headshot height */
+  }
+
+  .tldr-text {
+    max-width: calc(100% - 150px);
   }
 
   .headshot-container {
     width: 115px;
     height: 148px;
-  }
-  
-  .headshot {
-    width: 99%;
-    height: 99%;
   }
 
   .social-links {
@@ -185,13 +194,35 @@
 }
 
 @media (max-width: 480px) {
-  .social-links .resume-button {
-    padding: var(--spacing-xs);
-    font-size: 0.75rem;
+  .tldr-content {
+    min-height: 103px; /* Match mobile headshot height */
   }
 
-  .social-links .icon-link svg {
+  .tldr-section p {
+    font-size: .75rem;
+  }
+
+  .tldr-text {
+    max-width: calc(100% - 100px);
+  }
+
+  .headshot-container {
+    width: 120px;
+    height: 145px;
+  }
+  .social-links {
+    gap: var(--spacing-lg);
+  }
+  .social-links .resume-button {
+    padding: var(--spacing-xs);
+    
+  }
+
+  .social-links .icon-link svg 
+  {
+    padding: var(--spacing-xs);
     width: var(--icon-size-mobile);
     height: var(--icon-size-mobile);
+    gap: var(--spacing-lg);
   }
 }
