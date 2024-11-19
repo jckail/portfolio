@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ProjectsData } from '../../../types/resume';
 import { useLoading } from '../../../shared/context/loading-context';
+import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import '../../../styles/features/sections/projects.css';
 
 const Projects: React.FC = () => {
@@ -60,10 +61,11 @@ const Projects: React.FC = () => {
               style={{ '--item-index': index } as React.CSSProperties}
             >
                 <div className="project-image">
-                  <img 
-                    src={project.logoPath || "/images/projects/github-logo.svg"}
-                    alt={`${project.title} project image`}
-                    loading="lazy"
+                  <ProjectIcon 
+                    name={project.logoPath || "github-logo.svg"}
+                    size={100}
+                    aria-label={`${project.title} project icon`}
+                    className="project-icon"
                   />
                 </div>
                 <h3>

@@ -5,14 +5,14 @@ projects = {
         "link": "https://github.com/jckail/superteacher",
         "link2": "https://www.the-super-teacher.com/",
         "description_detail": """Developed Super Teacher, an AI-powered web application that revolutionizes lesson planning for educators by providing personalized lesson plans tailored to individual student needs.""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "super-teacher.svg",
     },
     "qr_for_groups": {
         "title": 'TechCrunch - "Join Group via QR"',
         "description": "Created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
         "link": "https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/",
         "description_detail": """""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "techcrunch-icon.svg",
     },
     "jobbr": {
         "title": "AI Agent Job Matching - Jobbr",
@@ -29,7 +29,7 @@ Prioritized security through token management, Supabase authentication, and pass
 Employed Pandas, BeautifulSoup4, lxml, and NumPy for data processing and parsing job postings efficiently.
 Demonstrated proficiency across AI/ML, web development, data engineering, and cloud integration, solving real-world recruitment challenges with an AI-first approach.
 Tech Stack: Python 3.9+, FastAPI, SQLAlchemy, Pydantic, Supabase, Docker""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "jobbr-icon.svg",
     },
     "pointup": {
         "title": "Loyalty Management App - Pointup.io",
@@ -43,7 +43,7 @@ Integrated Auth0 for user authentication and encrypted sensitive data, ensuring 
 Designed modular bot classes for easy integration of new loyalty programs, enhancing extensibility and user experience.
 Overcame complex anti-scraping challenges while maintaining ethical considerations around automation.
 Demonstrated expertise in Python development, cloud infrastructure, and secure web scraping through a real-world solution.""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "pointup.svg",
     },
     "lit_crypto": {
         "title": "Algorithmic Crypto Trading Project",
@@ -55,7 +55,7 @@ Leveraged AWS services (S3, Glue, Athena) to create a scalable cloud-native arch
 Applied stepwise regression and K-means clustering to detect market trends and correlations between traditional assets and cryptocurrencies.
 Demonstrated advanced data engineering skills by building modular components focused on data acquisition and ML-powered reporting.
 Highlighted problem-solving and financial technology expertise, navigating API integration challenges and delivering actionable insights into cryptocurrency trends.""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "litcrypto-icon.svg",
     },
     "go_pilot": {
         "title": "AI Developer Assistant - goPilot",
@@ -68,7 +68,7 @@ Implemented golangci-lint and Go’s native testing framework to streamline lint
 Added web scraping capabilities to fetch the latest Go documentation, ensuring developers stay updated on best practices.
 Developed a customizable CLI interface with task toggles and output path definitions to adapt to diverse workflows.
 Demonstrated proficiency in Go, Bash scripting, and AI-enhanced development, showcasing innovative problem-solving and productivity enhancement.""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "gopilot-icon.svg",
     },
     "data_playground": {
         "title": "Data Playground - A Shop Like App",
@@ -81,13 +81,13 @@ Designed efficient data partitioning (hourly and daily) to optimize querying and
 Leveraged Prometheus for monitoring and built pipelines for future Grafana dashboard integration to improve observability.
 Demonstrated proficiency in asynchronous operations, microservices architecture, and backend development for data-intensive applications.
 Created an interactive platform with optional Streamlit visualizations for insight generation, targeting both developers and data engineers.""",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "playground-icon.svg",
     },
     "portfolio": {
         "title": "Personal Portfolio Website",
         "description": "A custom-built portfolio site showcasing my work. Made with FastAPI and React, hosted on Google Cloud Platform via CloudRun.",
         "link": "https://github.com/jckail/portfolio",
         "description_detail": "This website is a custom-built portfolio site that I created to showcase my work. It is built using FastAPI and React, and is hosted on Google Cloud Platform via CloudRun. I chose to use Streamlit for this project because I wanted to learn a new technology, and I found it to be a great tool for building interactive web applications. The site features a clean and modern design, with sections for my projects, skills, and experience. It also includes a contact form that allows visitors to get in touch with me. Overall, I am very happy with how the site turned out, and I think it does a great job of highlighting my work and skills.",
-        "logoPath": "/images/projects/github-logo.svg",
+        "logoPath": "jk-icon.svg",
     },
 }
