@@ -57,7 +57,7 @@
 .headshot-container {
   flex: 0 0 auto; /* Prevents shrinking and growing */
   width: 250px;
-  height: 320px;
+  height: 250px;
   border-radius: var(--radius-sm);
   background: black;
   border-radius: 10%;
@@ -76,9 +76,10 @@
   object-fit: cover;
   border-radius: 10%;
   display: block;
-  margin: 0 auto;
+  padding: auto;
   transition: transform var(--transition-normal),
-  box-shadow var(--transition-normal);
+              box-shadow var(--transition-normal);
+  object-position: top; /* Move the view port of the image up */
 }
 
 .brief-bio {
@@ -169,8 +170,8 @@
   }
 
   .headshot-container {
-    width: 115px;
-    height: 148px;
+    width: 125px;
+    height: 125px;
   }
 
   .social-links {
@@ -199,7 +200,7 @@
   }
 
   .tldr-section p {
-    font-size: .75rem;
+    font-size: .65rem;
   }
 
   .tldr-text {
@@ -207,8 +208,8 @@
   }
 
   .headshot-container {
-    width: 120px;
-    height: 145px;
+    width: 125px;
+    height: 125px;
   }
   .social-links {
     gap: var(--spacing-lg);

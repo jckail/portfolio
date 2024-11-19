@@ -112,7 +112,7 @@ const Header: React.FC<HeaderProps> = ({
             </button>
             <div className="header-titles">
               <h1>{contactData.firstName}{" "}{contactData.lastName}</h1>
-              <h2>{contactData.title}</h2>
+              <h2>AI | Data Engineer</h2>
             </div>
           </div>
           <div className="nav-right">

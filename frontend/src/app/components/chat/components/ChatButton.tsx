@@ -41,20 +41,20 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
     >
       <Fab
         sx={{
-          bgcolor: 'var(--section-background)',
+          bgcolor: 'var(--primary)',
           border:'var(--border-thickness) solid var(--primary-border)', 
           color: 'var(--text-color)',
-          width: 70,
-          height: 70,
-          transition: 'all 0.3s ease-in-out',
-          animation: isScrolled ? 'glowPulse 2s infinite' : 'none',
+          width: 80,
+          height: 80,
+          transition: 'all 0.8s ease-in-out',
+          animation: isScrolled ? 'glowPulse 5s infinite' : 'none',
           '&:hover': {
             bgcolor: 'var(--primary)',
             color: 'white',
             transform: 'scale(1.05)',
           },
           fontSize: '1.5rem',
-          backdropFilter: 'blur(var(--section-background-blur))',
+          backdropFilter: '20px',
         }}
         aria-label="Chat with AI"
         onClick={onClick}

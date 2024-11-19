@@ -75,11 +75,10 @@ const TLDR: React.FC = () => {
     <section id="tldr" className="section-container">
       <div className="section-content">
         <div className="tldr-section">
-          <h2>{aboutMeData.greeting}</h2>
+          <h2>{aboutMeData.greeting} </h2>
           <div className="tldr-content">
-            <div className="tldr-text">
-              <p>{aboutMeData.description}</p>
-            </div>
+          <p>{aboutMeData.description}</p>
+
             <div className="headshot-container">
               <img 
                 src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
@@ -89,7 +88,7 @@ const TLDR: React.FC = () => {
             </div>
           </div>
           <div className="brief-bio">
-            <p>{aboutMeData.aidetails}</p>
+            
             <div className="social-links">
               {contactData.github && (
                 <a 
@@ -122,6 +121,7 @@ const TLDR: React.FC = () => {
                 <ResumeIcon/>
               </button>
             </div>
+            <p>{aboutMeData.aidetails}</p>
           </div>
         </div>
       </div>
