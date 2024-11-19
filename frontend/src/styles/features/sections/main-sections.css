@@ -18,10 +18,8 @@
   width: 100%;
   max-width: 1444px;
   margin: 0 auto;
-  
   border-radius: var(--radius-md);
   padding: var(--spacing-xl);
-  
   box-sizing: border-box;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
@@ -48,7 +46,7 @@
 .section-container {
   border-radius: var(--radius-lg);
   padding: var(--spacing-sm);
-  margin: var(--spacing-sm) auto;
+  margin: 0 auto;
   width: 100%;
   max-width: 1444px;
   display: flex;
@@ -90,6 +88,10 @@
 }
 
 @media (max-width: 768px) {
+  .section-container {
+    padding-top: var(--header-height);
+  }
+
   .section h2,
   #about-me h2,
   #skills h2,
@@ -98,6 +100,7 @@
   #my-resume h2 {
     font-size: 1.2rem;
   }
+
   .section-content {
     padding: var(--spacing-lg);
     margin: 0 var(--spacing-md);
@@ -110,32 +113,40 @@
     font-size: var(--font-size-mobile-base);
     max-width: 95%;
   }
+
   .section h3,
-#about-me h3,
-#skills h3,
-#experience h3,
-#projects h3,
-#my-resume h3 {
-  color: var(--text-color);
-  font-size: 1.1rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  text-align: left;
-  width: 100%;
-  max-width: 1444px;
+  #about-me h3,
+  #skills h3,
+  #experience h3,
+  #projects h3,
+  #my-resume h3 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    text-align: left;
+    width: 100%;
+    max-width: 1444px;
+  }
+
+  .section h4,
+  #about-me h4,
+  #skills h4,
+  #experience h4,
+  #projects h4,
+  #my-resume h4 {
+    color: var(--text-color);
+    font-size: .75rem;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    text-align: left;
+    width: 100%;
+    max-width: 1444px;
+  }
 }
-.section h4,
-#about-me h4,
-#skills h4,
-#experience h4,
-#projects h4,
-#my-resume h4 {
-  color: var(--text-color);
-  font-size: .75rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  text-align: left;
-  width: 100%;
-  max-width: 1444px;
-}
+
+@media (max-width: 480px) {
+  .section-container {
+    padding-top: var(--header-height);
+  }
 }

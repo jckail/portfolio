@@ -13,8 +13,7 @@
   z-index: 1000;
   padding: var(--spacing-sm);
   border-bottom: 1px solid var(--border);
-  height: var(--header-height);
-  
+  height: 80px;
 }
 
 .nav-container {
@@ -24,6 +23,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 var(--spacing-md);
+  height: 100%;
 }
 
 .nav-left {
@@ -168,20 +168,21 @@
 
 @media (max-width: 768px) {
   .header {
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    height: var(--header-height);
   }
 
   .nav-container {
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     gap: var(--spacing-md);
   }
 
   .nav-left h1 {
-    font-size: 1.0rem;
+    font-size: 1.2rem;
   }
 
   .nav-left h2 {
-    font-size: 0.75rem;
+    font-size: 0.9rem;
   }
 
   .nav-right {
@@ -239,12 +240,17 @@
 }
 
 @media (max-width: 480px) {
+  .header {
+    height: var(--header-height);
+    padding: var(--spacing-md);
+  }
+
   .nav-left h1 {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 
   .nav-left h2 {
-    font-size: 0.6rem;
+    font-size: 0.8rem;
   }
 
   .resume-button {
