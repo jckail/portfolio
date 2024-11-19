@@ -1,78 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useLoading } from '../../../shared/context/loading-context';
 import '../../../styles/features/sections/experience.css';
+import type { ExperienceItem } from './modals/ExperienceModal';
 
-interface ExperienceItem {
-  company: string;
-  title: string;
-  date: string;
-  location: string;
-  highlights: string[];
-  link: string;
-  logoPath: string;
-  company_description: string;
-  tech_stack: string[];
-  more_highlights: string[];
-}
+const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
 
 interface ExperienceData {
   [key: string]: ExperienceItem;
 }
 
-interface ExperienceModalProps {
-  experience: ExperienceItem;
-  onClose: () => void;
-}
-
-const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }) => (
-  <div className="experience-modal-overlay" onClick={onClose}>
-    <div className="experience-modal-content" onClick={e => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={onClose}>&times;</button>
-      <div className="timeline-header-wrapper">
-        {experience.logoPath && (
-          <a 
-            href={experience.link}
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="logo-link"
-          >
-            <img 
-              src={experience.logoPath} 
-              alt={`${experience.company} logo`} 
-              className="company-logo"
-            />
-          </a>
-        )}
-        <div className="timeline-header">
-          <h3>{experience.company}</h3>
-          <h4>{experience.title}</h4>
-          <div className="timeline-meta">
-            <span className="date">{experience.date}</span>
-            <span className="location">{experience.location}</span>
-          </div>
-        </div>
-      </div>
-      <div className="modal-body">
-        <p className="company-description">{experience.company_description}</p>
-        <div className="highlights-section">
-          <div className="skill-tags">
-            {experience.tech_stack.map((tag, index) => (
-              <span key={index} className="skill-tag">
-                {tag.replace(/-/g, ' ')}
-              </span>
-            ))}
-          </div>
-          <h4>Detailed Highlights:</h4>
-          <ul className="highlights">
-            {experience.more_highlights.map((highlight, index) => (
-              <li key={index}>{highlight}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+// Cache for API data
+let experienceCache: ExperienceData | null = null;
+let lastFetchTime: number | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const Experience: React.FC = () => {
   const [experience, setExperience] = useState<ExperienceData>({});
@@ -85,12 +25,24 @@ const Experience: React.FC = () => {
 
     const fetchExperience = async () => {
       try {
+        // Check cache first
+        const now = Date.now();
+        if (experienceCache && lastFetchTime && (now - lastFetchTime < CACHE_DURATION)) {
+          setExperience(experienceCache);
+          return;
+        }
+
         setComponentLoading('experience', true);
         const response = await fetch('/api/experience');
         if (!response.ok) {
           throw new Error('Failed to fetch experience data');
         }
         const data = await response.json();
+        
+        // Update cache
+        experienceCache = data;
+        lastFetchTime = now;
+
         if (mounted) {
           setExperience(data);
         }
@@ -110,7 +62,7 @@ const Experience: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [setComponentLoading]);
+  }, []); // Removed setComponentLoading from dependencies
 
   if (error) return <div>Error: {error}</div>;
 
@@ -134,6 +86,10 @@ const Experience: React.FC = () => {
                       src={item.logoPath} 
                       alt={`${item.company} logo`} 
                       className="company-logo"
+                      loading="lazy"
+                      width="64"
+                      height="64"
+                      decoding="async"
                     />
                   </div>
                 )}
@@ -159,10 +115,12 @@ const Experience: React.FC = () => {
       </div>
 
       {selectedExperience && experience[selectedExperience] && (
-        <ExperienceModal
-          experience={experience[selectedExperience]}
-          onClose={() => setSelectedExperience(null)}
-        />
+        <Suspense fallback={<div className="modal-loading">Loading...</div>}>
+          <ExperienceModal
+            experience={experience[selectedExperience]}
+            onClose={() => setSelectedExperience(null)}
+          />
+        </Suspense>
       )}
     </section>
   );

@@ -1,8 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AboutMe } from '../../../types/resume';
 import { useLoading } from '../../../shared/context/loading-context';
-import { GitHubIcon, LinkedInIcon, ResumeIcon, EmailIcon } from '../../../shared/components/icons';
 import '../../../styles/features/sections/tldr.css';
+
+const SocialLinks = lazy(() => import('./social-links/SocialLinks'));
+
+interface TLDRContentProps {
+  aboutMeData: AboutMe;
+  contactData: any;
+  onResumeClick: () => void;
+}
+
+const TLDRContent: React.FC<TLDRContentProps> = ({ aboutMeData, contactData, onResumeClick }) => (
+  <div className="tldr-section">
+    <h2>{aboutMeData.greeting}</h2>
+    <div className="tldr-content">
+      <p>{aboutMeData.description}</p>
+      <div className="headshot-container">
+        <img 
+          src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
+          alt="Profile headshot"
+          className="headshot"
+          loading="lazy"
+        />
+      </div>
+    </div>
+    <div className="brief-bio">
+      <Suspense fallback={<div className="social-links-skeleton" />}>
+        <SocialLinks
+          github={contactData.github}
+          linkedin={contactData.linkedin}
+          email={contactData.email}
+          onResumeClick={onResumeClick}
+        />
+      </Suspense>
+      <p>{aboutMeData.aidetails}</p>
+    </div>
+  </div>
+);
 
 const TLDR: React.FC = () => {
   const [aboutMeData, setAboutMeData] = useState<AboutMe | null>(null);
@@ -50,7 +85,14 @@ const TLDR: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [setComponentLoading]);
+  }, []); // Removed setComponentLoading from dependencies
+
+  const handleResumeClick = () => {
+    const resumeSection = document.getElementById('resume');
+    if (resumeSection) {
+      resumeSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
@@ -64,75 +106,16 @@ const TLDR: React.FC = () => {
     );
   }
 
-  const handleResumeClick = () => {
-    const resumeSection = document.getElementById('resume');
-    if (resumeSection) {
-      resumeSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <section id="tldr" className="section-container">
       <div className="section-content">
-        <div className="tldr-section">
-          <h2>{aboutMeData.greeting} </h2>
-          <div className="tldr-content">
-          <p>{aboutMeData.description}</p>
-
-            <div className="headshot-container">
-              <img 
-                src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
-                alt="Profile headshot"
-                className="headshot"
-              />
-            </div>
-          </div>
-          <div className="brief-bio">
-            
-            <div className="social-links">
-              {contactData.github && (
-                <a 
-                  href={contactData.github} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="icon-link"
-                  aria-label="GitHub Profile"
-                >
-                  <GitHubIcon />
-                </a>
-              )}
-              {contactData.linkedin && (
-                <a 
-                  href={contactData.linkedin} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="icon-link"
-                  aria-label="LinkedIn Profile"
-                >
-                  <LinkedInIcon />
-                </a>
-              )}
-              {contactData.email && (
-                <a 
-                  href={`mailto:${contactData.email}`}
-                  className="icon-link"
-                  aria-label="Email Contact"
-                >
-                  <EmailIcon />
-                </a>
-              )}
-              <button 
-                onClick={handleResumeClick}
-                className="resume-button"
-                aria-label="View Resume"
-              >
-                <strong>Resume</strong>
-                <ResumeIcon/>
-              </button>
-            </div>
-            <p>{aboutMeData.aidetails}</p>
-          </div>
-        </div>
+        <Suspense fallback={<div>Loading content...</div>}>
+          <TLDRContent
+            aboutMeData={aboutMeData}
+            contactData={contactData}
+            onResumeClick={handleResumeClick}
+          />
+        </Suspense>
       </div>
     </section>
   );

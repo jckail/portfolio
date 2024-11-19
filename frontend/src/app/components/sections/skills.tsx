@@ -1,143 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { Skill, SkillsData, SkillModalProps, IconProps } from '../../../types/skills';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useLoading } from '../../../shared/context/loading-context';
+import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+import type { Skill } from './modals/SkillModal';
 import '../../../styles/features/sections/skills.css';
 
-// Import SVGs directly
-import AirbyteIcon from '../../../assets/icons/airbyte.svg?react';
-import ApacheFlinkIcon from '../../../assets/icons/apacheflink.svg?react';
-import ApachePulsarIcon from '../../../assets/icons/apachepulsar.svg?react';
-import ApacheRocketMQIcon from '../../../assets/icons/apacherocketmq.svg?react';
-import AWSIcon from '../../../assets/icons/aws.svg?react';
-import DatadogIcon from '../../../assets/icons/datadog.svg?react';
-import DjangoIcon from '../../../assets/icons/django.svg?react';
-import DuckDBIcon from '../../../assets/icons/duckdb.svg?react';
-import FlaskIcon from '../../../assets/icons/flask.svg?react';
-import JupyterIcon from '../../../assets/icons/jupyter.svg?react';
-import KafkaIcon from '../../../assets/icons/kafka.svg?react';
-import LangchainIcon from '../../../assets/icons/langchain.svg?react';
-import LlamaIndexIcon from '../../../assets/icons/llamaindex.svg?react';
-import MilvusIcon from '../../../assets/icons/milvus_black.svg?react';
-import Neo4jIcon from '../../../assets/icons/neo4j.svg?react';
-import OpenAIIcon from '../../../assets/icons/openai.svg?react';
-import PandasIcon from '../../../assets/icons/pandas.svg?react';
-import PineconeIcon from '../../../assets/icons/pinecone.svg?react';
-import PrefectIcon from '../../../assets/icons/prefect.svg?react';
-import RetoolIcon from '../../../assets/icons/retool.svg?react';
-import RustIcon from '../../../assets/icons/rust.svg?react';
-import ScikitLearnIcon from '../../../assets/icons/scikit_learn.svg?react';
-import SocketIOIcon from '../../../assets/icons/socketdotio.svg?react';
-import SplunkIcon from '../../../assets/icons/splunk.svg?react';
-import SQLAlchemyIcon from '../../../assets/icons/sqlalchemy.svg?react';
-import TimescaleIcon from '../../../assets/icons/timescale.svg?react';
-import TrinoIcon from '../../../assets/icons/trino.svg?react';
-import tRPCIcon from '../../../assets/icons/trpc.svg?react';
-import PostgreSQLIcon from '../../../assets/icons/postgresql.svg?react';
+const SkillModal = lazy(() => import('./modals/SkillModal'));
 
-// Map of SVG components
-const SVG_COMPONENTS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
-  'airbyte.svg': AirbyteIcon,
-  'apacheflink.svg': ApacheFlinkIcon,
-  'apachepulsar.svg': ApachePulsarIcon,
-  'apacherocketmq.svg': ApacheRocketMQIcon,
-  'aws.svg': AWSIcon,
-  'datadog.svg': DatadogIcon,
-  'django.svg': DjangoIcon,
-  'duckdb.svg': DuckDBIcon,
-  'flask.svg': FlaskIcon,
-  'jupyter.svg': JupyterIcon,
-  'kafka.svg': KafkaIcon,
-  'langchain.svg': LangchainIcon,
-  'llamaindex.svg': LlamaIndexIcon,
-  'milvus_black.svg': MilvusIcon,
-  'neo4j.svg': Neo4jIcon,
-  'openai.svg': OpenAIIcon,
-  'pandas.svg': PandasIcon,
-  'pinecone.svg': PineconeIcon,
-  'prefect.svg': PrefectIcon,
-  'retool.svg': RetoolIcon,
-  'rust.svg': RustIcon,
-  'scikit_learn.svg': ScikitLearnIcon,
-  'socketdotio.svg': SocketIOIcon,
-  'splunk.svg': SplunkIcon,
-  'sqlalchemy.svg': SQLAlchemyIcon,
-  'timescale.svg': TimescaleIcon,
-  'trino.svg': TrinoIcon,
-  'trpc.svg': tRPCIcon,
-  'postgresql.svg': PostgreSQLIcon,
-};
+interface SkillsData {
+  [key: string]: Skill;
+}
 
-const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
-  const SvgComponent = SVG_COMPONENTS[name];
+const SkillCategory: React.FC<{
+  category: string;
+  skillList: (Skill & { key: string })[];
+  onSkillSelect: (key: string) => void;
+}> = ({ category, skillList, onSkillSelect }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
 
-  if (SvgComponent) {
-    return (
-      <SvgComponent
-        width={size}
-        height={size}
-        className={className}
-        {...props}
-      />
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.1
+      }
     );
+
+    if (categoryRef.current) {
+      observer.observe(categoryRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  if (!isVisible) {
+    return <div ref={categoryRef} className="skill-category skeleton-category" />;
   }
 
   return (
-    <img 
-      src={`/images/icons/${name}`}
-      alt={name.replace('.svg', '')}
-      width={size}
-      height={size}
-      className={className}
-      {...props}
-    />
-  );
-};
-
-const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
-  return (
-    <div className="skill-modal-overlay" onClick={onClose}>
-      <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
-        <div className="modal-header">
-          <div className="modal-icon-wrapper">
-            <div className="icon-wrapper">
-              <SkillIcon
-                name={skill.image}
-                className="skill-icon"
-                size={32}
-                aria-label={skill.display_name}
-              />
+    <div ref={categoryRef} className="skill-category">
+      <h3>{category}</h3>
+      <div className="skill-list">
+        {skillList.map((skill, index) => (
+          <div
+            key={skill.key}
+            className="skill-item"
+            onClick={() => onSkillSelect(skill.key)}
+            style={{ '--item-index': index } as React.CSSProperties}
+            title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+          >
+            <div className="skill-icon-container">
+              <div className="icon-wrapper">
+                <SkillIcon
+                  name={skill.image}
+                  className="skill-icon"
+                  size={32}
+                  aria-label={skill.display_name}
+                />
+              </div>
+              <span className="skill-name">{skill.display_name}</span>
             </div>
           </div>
-          <h3>{skill.display_name}</h3>
-        </div>
-        <div className="modal-body">
-          <p className="experience-info">
-            <strong>{skill.years_of_experience} years</strong> of experience
-            {skill.professional_experience && " (Professional)"}
-          </p>
-          <p className="skill-description">{skill.description}</p>
-          <div className="skill-tags">
-            {skill.tags.map((tag, index) => (
-              <span key={index} className="skill-tag">
-                {tag.replace(/-/g, ' ')}
-              </span>
-            ))}
-          </div>
-          {Object.keys(skill.examples).length > 0 && (
-            <div className="examples-section">
-              <h4>Examples:</h4>
-              <ul>
-                {Object.entries(skill.examples).map(([key, value]) => (
-                  <li key={key}>{value}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
-            Visit Website
-          </a>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -177,7 +106,7 @@ const TechnicalSkills: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [setComponentLoading]);
+  }, []); // Removed setComponentLoading from dependencies
 
   if (error) return <div className="error-message">Error: {error}</div>;
 
@@ -196,41 +125,23 @@ const TechnicalSkills: React.FC = () => {
       <div className="section-content">
         <div className="skills-grid">
           {Object.entries(categorizedSkills).map(([category, skillList]) => (
-            <div key={category} className="skill-category">
-              <h3>{category}</h3>
-              <div className="skill-list">
-                {skillList.map((skill, index) => (
-                  <div
-                    key={skill.key}
-                    className="skill-item"
-                    onClick={() => setSelectedSkill(skill.key)}
-                    style={{ '--item-index': index } as React.CSSProperties}
-                    title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
-                  >
-                    <div className="skill-icon-container">
-                      <div className="icon-wrapper">
-                        <SkillIcon
-                          name={skill.image}
-                          className="skill-icon"
-                          size={32}
-                          aria-label={skill.display_name}
-                        />
-                      </div>
-                      <span className="skill-name">{skill.display_name}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SkillCategory
+              key={category}
+              category={category}
+              skillList={skillList}
+              onSkillSelect={setSelectedSkill}
+            />
           ))}
         </div>
       </div>
 
       {selectedSkill && skills[selectedSkill] && (
-        <SkillModal
-          skill={skills[selectedSkill]}
-          onClose={() => setSelectedSkill(null)}
-        />
+        <Suspense fallback={<div className="modal-loading">Loading...</div>}>
+          <SkillModal
+            skill={skills[selectedSkill]}
+            onClose={() => setSelectedSkill(null)}
+          />
+        </Suspense>
       )}
     </section>
   );

@@ -7,19 +7,18 @@
 }
 
 .section-header {
-  text-align: center;
-  margin-bottom: var(--spacing-xs);
+  text-align: left;
   color: var(--text-color);
-  padding: var(--spacing-md);
+  
 }
 
 .section-content {
   text-align: left;
   width: 100%;
-  max-width: 1444px;
+  max-width: 1080px;
   margin: 0 auto;
   border-radius: var(--radius-md);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
   box-sizing: border-box;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
@@ -48,7 +47,7 @@
   padding: var(--spacing-sm);
   margin: 0 auto;
   width: 100%;
-  max-width: 1444px;
+  max-width: 1080px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,15 +59,15 @@
 #skills h2,
 #experience h2,
 #projects h2,
-#my-resume h2 {
+#resume h2 {
   color: var(--text-color);
   backdrop-filter: blur(var(--section-background-blur));
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
   text-align: left;
   width: 100%;
-  max-width: 1444px;
+  max-width: 1080px;
   border-bottom: 4px solid var(--primary-border);
 }
 
@@ -77,14 +76,14 @@
 #skills h3,
 #experience h3,
 #projects h3,
-#my-resume h3 {
+#resume h3 {
   color: var(--text-color);
   font-size: 1.25rem;
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
   text-align: left;
   width: 100%;
-  max-width: 1444px;
+  max-width: 1080px;
 }
 
 @media (max-width: 768px) {
@@ -98,11 +97,11 @@
   #experience h2,
   #projects h2,
   #my-resume h2 {
-    font-size: 1.2rem;
+    font-size: 1.75rem;
   }
 
   .section-content {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     margin: 0 var(--spacing-md);
   }
 
@@ -126,7 +125,7 @@
     padding-bottom: var(--spacing-sm);
     text-align: left;
     width: 100%;
-    max-width: 1444px;
+    max-width: 1080px;
   }
 
   .section h4,
@@ -141,7 +140,7 @@
     padding-bottom: var(--spacing-sm);
     text-align: left;
     width: 100%;
-    max-width: 1444px;
+    max-width: 1080px;
   }
 }
 

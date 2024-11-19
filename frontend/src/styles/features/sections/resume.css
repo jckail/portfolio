@@ -3,7 +3,7 @@
   text-align: center;
   padding: var(--spacing-xl) 0;
   width: 100%;
-  max-width: 1444px;
+  max-width: 1080px;
 }
 
 .download-button {
@@ -41,7 +41,7 @@ a:not(.resume-button):hover {
 }
 
 .resume-content {
-  max-width: 1444px;  /* Increased for better readability */
+  max-width: 1080px;  /* Increased for better readability */
   margin: 0 auto;
   backdrop-filter: blur(var(--section-background-blur));
   padding: var(--spacing-xl) var(--spacing-lg);

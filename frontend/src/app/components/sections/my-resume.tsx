@@ -25,15 +25,14 @@ const MyResume: React.FC = () => {
   return (
     <section id="resume" className="section-container">
       <div className="section-header">
-        <h2>Get My Full Resume</h2>
+        <h2>My Resume</h2>
       </div>
       <div className="section-content">
         <div className="resume-content">
           <div className="resume-icon">📄</div>
           <p>
-            Download my complete resume to learn more about my experience, 
-            skills, and qualifications. The PDF version includes additional 
-            details about my projects and achievements.
+            Download a 1 page PDF version of my resume that includes a summary of
+             my experience, projects, and achievements.
           </p>
           <button 
             onClick={handleDownloadWithLoading}

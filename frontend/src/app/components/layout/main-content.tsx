@@ -1,18 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Header } from '../../../shared/components/header';
-import TechnicalSkills from '../sections/skills';
-import Experience from '../sections/experience';
-import Projects from '../sections/projects';
-import MyResume from '../sections/my-resume';
-import TLDR from '../sections/tldr';
-import AdminHandler from '../admin/admin-handler';
-import AdminLogin from '../admin/admin-login';
+import TLDR from '../sections/tldr';  // Keep TLDR eager loaded as it's above the fold
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
 import { useLoading } from '../../../shared/context/loading-context';
 import { useAppLogic } from '../../providers/app-logic-provider';
 import { useAdminStore } from '../../../shared/stores/admin-store';
 import '../../../styles/components/layout/main-content.css';
 import '../../../styles/components/layout/loading.css';
+
+// Lazy load components below the fold
+const TechnicalSkills = React.lazy(() => import('../sections/skills'));
+const Experience = React.lazy(() => import('../sections/experience'));
+const Projects = React.lazy(() => import('../sections/projects'));
+const MyResume = React.lazy(() => import('../sections/my-resume'));
+const AdminHandler = React.lazy(() => import('../admin/admin-handler'));
+const AdminLogin = React.lazy(() => import('../admin/admin-login'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="section-loading">
+    <div className="loading-spinner"></div>
+  </div>
+);
 
 const MainContentInner: React.FC = () => {
   useScrollSpy();
@@ -28,7 +37,6 @@ const MainContentInner: React.FC = () => {
   };
 
   const handleAdminClick = () => {
-    // This should be handled by the admin feature
     console.log('Admin click');
   };
 
@@ -54,10 +62,12 @@ const MainContentInner: React.FC = () => {
         </div>
         <div className="main-content">
           <TLDR />
-          <Experience />
-          <TechnicalSkills />
-          <Projects />
-          <MyResume />
+          <Suspense fallback={<LoadingFallback />}>
+            <Experience />
+            <TechnicalSkills />
+            <Projects />
+            <MyResume />
+          </Suspense>
         </div>
       </main>
     </div>
@@ -66,7 +76,8 @@ const MainContentInner: React.FC = () => {
 
 const MainContent: React.FC = (props) => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  React.useEffect(() => {
+  
+  useEffect(() => {
     if (location.pathname === '/admin') {
       setIsAdminModalOpen(true);
     }
@@ -78,12 +89,16 @@ const MainContent: React.FC = (props) => {
 
   return (
     <>
-      <AdminLogin 
-        isOpen={isAdminModalOpen} 
-        onClose={() => setIsAdminModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
-      <AdminHandler />
+      <Suspense fallback={<LoadingFallback />}>
+        {isAdminModalOpen && (
+          <AdminLogin 
+            isOpen={isAdminModalOpen} 
+            onClose={() => setIsAdminModalOpen(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+        <AdminHandler />
+      </Suspense>
       <MainContentInner {...props} />
     </>
   );

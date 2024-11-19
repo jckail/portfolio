@@ -172,8 +172,10 @@
   }
 
   .nav-container {
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     gap: var(--spacing-md);
+    justify-content: space-between;
+    align-items: center;
   }
 
   .nav-left h1 {

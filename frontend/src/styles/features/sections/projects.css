@@ -96,7 +96,7 @@
 
 .project-card p {
   color: var(--text-color);
-  font-size: 0.5rem;
+  font-size: 0.85rem;
   line-height: 1.0;
   margin: 0;
   padding: 0 var(--spacing-md);
@@ -184,7 +184,7 @@
   }
 
   .project-card p {
-    font-size: 0.3rem;
+    font-size: 0.8rem;
   }
 
   .project-links {
@@ -205,6 +205,6 @@
   }
   
   .project-card p {
-    font-size: 0.1rem;
+    font-size: 0.7rem;
   }
 }
