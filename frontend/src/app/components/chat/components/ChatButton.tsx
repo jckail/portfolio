@@ -46,7 +46,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
           color: 'var(--text-color)',
           width: 80,
           height: 80,
-          transition: 'all 0.8s ease-in-out',
+          transition: ' 0.3s ease-in-out',
           animation: isScrolled ? 'glowPulse 5s infinite' : 'none',
           '&:hover': {
             bgcolor: 'var(--primary)',
