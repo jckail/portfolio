@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AboutMe } from '../../../types/resume';
 import { useLoading } from '../../../shared/context/loading-context';
-import { GitHubIcon, LinkedInIcon, ResumeIcon } from '../../../shared/components/icons';
+import { GitHubIcon, LinkedInIcon, ResumeIcon, EmailIcon } from '../../../shared/components/icons';
 import '../../../styles/features/sections/tldr.css';
 
 const TLDR: React.FC = () => {
@@ -110,6 +110,15 @@ const TLDR: React.FC = () => {
                   aria-label="LinkedIn Profile"
                 >
                   <LinkedInIcon />
+                </a>
+              )}
+              {contactData.email && (
+                <a 
+                  href={`mailto:${contactData.email}`}
+                  className="icon-link"
+                  aria-label="Email Contact"
+                >
+                  <EmailIcon />
                 </a>
               )}
               <button 

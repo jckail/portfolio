@@ -5,3 +5,4 @@ export { default as PartyIcon } from './party-icon';
 export { default as ResumeIcon } from './resume-icon';
 export { default as SandwichIcon } from './sandwich-icon';
 export { default as SunIcon } from './sun-icon';
+export { default as EmailIcon } from './email-icon';
