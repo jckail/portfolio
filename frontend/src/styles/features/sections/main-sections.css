@@ -110,4 +110,32 @@
     font-size: var(--font-size-mobile-base);
     max-width: 95%;
   }
+  .section h3,
+#about-me h3,
+#skills h3,
+#experience h3,
+#projects h3,
+#my-resume h3 {
+  color: var(--text-color);
+  font-size: 1.1rem;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+}
+.section h4,
+#about-me h4,
+#skills h4,
+#experience h4,
+#projects h4,
+#my-resume h4 {
+  color: var(--text-color);
+  font-size: .75rem;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  text-align: left;
+  width: 100%;
+  max-width: 1444px;
+}
 }
