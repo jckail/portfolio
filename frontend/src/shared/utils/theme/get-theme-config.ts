@@ -64,10 +64,12 @@ const createParticleConfig = ({
     },
     modes: {
       grab: {
-        distance: 400,
+        distance: 250,
       },
+      push: {quantity:1,},
+      
       bubble: {
-        distance: 400,
+        distance: 200,
         duration: 0.4,
       },
     },
@@ -80,7 +82,7 @@ const createParticleConfig = ({
       color: lineColor,
       distance: lineDistance,
       enable: true,
-      opacity: 0.5,
+      opacity: 1,
       width: lineWidth,
     },
     move: {
@@ -95,12 +97,12 @@ const createParticleConfig = ({
     },
     number: {
       density: {
-        enable: true,
+        enable: false,
       },
       value: particleCount,
     },
     opacity: {
-      value: 0.5,
+      value: 1,
     },
     shape: {
       type: imageUrls && imageUrls.length > 0 ? ["image"] : ["circle"],
@@ -169,29 +171,29 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: 'transparent',
-      particleCount: 40,
-      particleSize: 15,
-      lineDistance: 750,
-      lineWidth: 5,
+      particleCount: 10,
+      particleSize: 10,
+      lineDistance: 250,
+      lineWidth: 3,
       moveSpeed: .1,
     },
     dark: {
       particleColor: PRIMARY,
       lineColor: PRIMARY,
       backgroundColor: 'transparent',
-      particleCount: 40,
-      particleSize: 15,
-      lineDistance: 750,
-      lineWidth: 5,
+      particleCount: 10,
+      particleSize: 10,
+      lineDistance: 250,
+      lineWidth: 3,
       moveSpeed: .1,
     },
     party: {
       particleColor: partyColors[0],
       lineColor: partyColors[0],
       backgroundColor: 'transparent',
-      particleCount: 15,
+      particleCount: 10,
       particleSize: 64,
-      lineDistance: 200,
+      lineDistance: 100,
       lineWidth: 2,
       moveSpeed: 1,
       imageUrls: zuniImageUrls,
