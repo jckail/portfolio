@@ -45,7 +45,8 @@ a:not(.resume-button):hover {
   margin: 0 auto;
   backdrop-filter: blur(var(--section-background-blur));
   padding: var(--spacing-xl) var(--spacing-lg);
-  font-family: var(--font-primary);
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 500;
   border: var(--border-thickness) solid var(--primary-border);
   border-radius: var(--radius-md);
 }
@@ -66,7 +67,7 @@ a:not(.resume-button):hover {
   margin-bottom: var(--spacing-lg);
   color: var(--text-color);
   border: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .resume-content p {

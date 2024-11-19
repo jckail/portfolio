@@ -77,14 +77,16 @@ html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 500;
 }
 
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
-    'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
@@ -93,6 +95,8 @@ body {
 /* Apply transitions only to color and border-color, not background-color */
 body,
 body * {
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 500;
   transition-property: color, border-color;
   transition-duration: 0.2s;
   transition-timing-function: ease;
