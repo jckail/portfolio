@@ -9,7 +9,7 @@
   left: 0;
   right: 0;
   background: var(--surface);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
   z-index: 1000;
   padding: var(--spacing-sm);
   border-bottom: 1px solid var(--border);
@@ -50,7 +50,7 @@
 .menu-toggle:hover {
   background: var(--primary);
   transform: scale(1.1);
-  box-shadow: 0 0 35px var(--primary);
+  
 }
 
 .menu-toggle.active {
