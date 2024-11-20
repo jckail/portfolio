@@ -24,16 +24,16 @@
   --z-overlay: 1000;
 
   /* Layout */
-  --header-height: 60px;
+  --header-height: 80px;
   --max-width: 1080px;
 
   /* Transitions */
-  --transition-fast: 0.1s ease;
-  --transition-normal: 0.2s ease;
-  --transition-slow: 0.3s ease;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
 
   /* Font Family */
-  --font-primary: 'Quantico', sans-serif;
+  --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Quantico', Arial, sans-serif;
 
   /* Font Sizes - increased for better readability */
   --font-size-base: 1.0rem;  /* Increased base size for better readability */
@@ -42,7 +42,7 @@
 
 @media (max-width: 768px) {
   :root {
-      --header-height: 40px;
+      --header-height: 50px;
   }
 
   .main-content {

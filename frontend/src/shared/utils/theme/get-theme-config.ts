@@ -151,16 +151,16 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       particleColor: partyColors[index % partyColors.length],
       lineColor: partyColors[index % partyColors.length],
       backgroundColor: 'transparent',
-      particleCount: 15,
+      particleCount: 5,
       particleSize: 50,
-      lineDistance: 250,
+      lineDistance: 550,
       lineWidth: 5,
       moveSpeed: .5,
       imageUrls: [url],
       imageSizeAnimation: {
         enable: true,
-        speed: 1,
-        minSize: 30,
+        speed: .75,
+        minSize: 40,
         sync: false
       }
     }));
@@ -191,8 +191,8 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       particleColor: partyColors[0],
       lineColor: partyColors[0],
       backgroundColor: 'transparent',
-      particleCount: 10,
-      particleSize: 64,
+      particleCount: 3,
+      particleSize: 32,
       lineDistance: 100,
       lineWidth: 2,
       moveSpeed: 1,

@@ -46,7 +46,6 @@ const TLDRContent = memo(({
             src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
             alt="Profile headshot"
             className="headshot"
-            fetchPriority="high"
             loading="eager"
             width="200"
             height="200"

@@ -22,7 +22,7 @@
 
 .side-panel {
   position: fixed;
-  top: calc(var(--header-height) + 35px);
+  top: calc(var(--header-height) + 15px);
   left: -500px;
   height: auto;
   width: 120px;
@@ -116,7 +116,7 @@
 @media (max-width: 768px) {
   .side-panel {
     position: fixed;
-    top: calc(var(--header-height));
+    top: calc(var(--header-height) + 15px);
     left: -500px;
     height: auto;
     width: 120px;
@@ -142,9 +142,9 @@
     gap: var(--spacing-sm);
     width: 120px;
     backdrop-filter: blur(15px);
-    min-height: 250px;
+    min-height: 240px;
     /* Sets a minimum height */
-    height: 250px;
+    height: 240px;
     /* Sets a minimum height */
     justify-content: flex-end;
     border-bottom-right-radius: 10px;
@@ -155,7 +155,7 @@
     background: none;
     border: none;
     color: var(--text-color);
-    font-size: .75rem;
+    font-size: .95rem;
     text-align: left;
     transition: all var(--transition-fast);
 
@@ -189,6 +189,7 @@
   }
 
   .nav-item.active:hover {
+    width: 100px;
     background: var(--primary);
     color: var(--surface);
     opacity: 0.9;
