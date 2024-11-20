@@ -123,11 +123,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isLoading: false,
           error: null,
         });
-      } catch (err) {
+      } catch (err: unknown) {
         if (err instanceof Error && err.name !== 'AbortError') {
           setState(prev => ({
             ...prev,
-            error: err.message || 'Failed to fetch data',
+            error: err instanceof Error ? err.message : 'Failed to fetch data',
             isLoading: false,
           }));
         }
