@@ -124,15 +124,18 @@ const MainContentInner: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <TechnicalSkills />
-            </Suspense>
-          </ErrorBoundary>
+
 
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>
               <Projects />
+            </Suspense>
+          </ErrorBoundary>
+
+
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <TechnicalSkills />
             </Suspense>
           </ErrorBoundary>
 
