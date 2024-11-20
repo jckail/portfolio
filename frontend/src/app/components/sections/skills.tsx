@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { useLoading } from '../../../shared/context/loading-context';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import type { Skill } from './modals/SkillModal';
 import '../../../styles/features/sections/skills.css';
@@ -76,14 +75,12 @@ const TechnicalSkills: React.FC = () => {
   const [skills, setSkills] = useState<SkillsData>({});
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
     let mounted = true;
 
     const fetchSkills = async () => {
       try {
-        setComponentLoading('technicalSkills', true);
         const response = await fetch('/api/skills');
         if (!response.ok) throw new Error('Failed to fetch skills');
         const data = await response.json();
@@ -94,10 +91,6 @@ const TechnicalSkills: React.FC = () => {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load skills');
         }
-      } finally {
-        if (mounted) {
-          setComponentLoading('technicalSkills', false);
-        }
       }
     };
 
@@ -106,9 +99,19 @@ const TechnicalSkills: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, []); // Removed setComponentLoading from dependencies
+  }, []);
 
   if (error) return <div className="error-message">Error: {error}</div>;
+
+  if (Object.keys(skills).length === 0) {
+    return (
+      <section id="skills" className="section-container">
+        <div className="section-content">
+          <div>Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   const categorizedSkills = Object.entries(skills).reduce((acc, [key, skill]) => {
     const category = skill.general_category;

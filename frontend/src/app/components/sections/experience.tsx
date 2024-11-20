@@ -1,5 +1,4 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { useLoading } from '../../../shared/context/loading-context';
 import '../../../styles/features/sections/experience.css';
 import type { ExperienceItem } from './modals/ExperienceModal';
 
@@ -18,7 +17,6 @@ const Experience: React.FC = () => {
   const [experience, setExperience] = useState<ExperienceData>({});
   const [selectedExperience, setSelectedExperience] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
     let mounted = true;
@@ -32,7 +30,6 @@ const Experience: React.FC = () => {
           return;
         }
 
-        setComponentLoading('experience', true);
         const response = await fetch('/api/experience');
         if (!response.ok) {
           throw new Error('Failed to fetch experience data');
@@ -50,10 +47,6 @@ const Experience: React.FC = () => {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'An error occurred');
         }
-      } finally {
-        if (mounted) {
-          setComponentLoading('experience', false);
-        }
       }
     };
 
@@ -62,9 +55,19 @@ const Experience: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, []); // Removed setComponentLoading from dependencies
+  }, []);
 
   if (error) return <div>Error: {error}</div>;
+
+  if (Object.keys(experience).length === 0) {
+    return (
+      <section id="experience" className="section-container">
+        <div className="section-content">
+          <div>Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="experience" className="section-container">

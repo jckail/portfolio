@@ -2,7 +2,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Header } from '../../../shared/components/header';
 import TLDR from '../sections/about';  // Keep TLDR eager loaded as it's above the fold
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
-import { useLoading } from '../../../shared/context/loading-context';
 import { useAppLogic } from '../../providers/app-logic-provider';
 import { useAdminStore } from '../../../shared/stores/admin-store';
 import '../../../styles/components/layout/main-content.css';
@@ -25,7 +24,6 @@ const LoadingFallback = () => (
 
 const MainContentInner: React.FC = () => {
   useScrollSpy();
-  const { loadingStates } = useLoading();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
 
@@ -51,15 +49,6 @@ const MainContentInner: React.FC = () => {
         isToggleHidden={isToggleHidden}
       />
       <main>
-        <div className="loading-states">
-          {Object.entries(loadingStates).map(([section, isLoading]) => (
-            isLoading && (
-              <div key={section} className="loading-item pending">
-                {section}: Loading...
-              </div>
-            )
-          ))}
-        </div>
         <div className="main-content">
           <TLDR />
           <Suspense fallback={<LoadingFallback />}>

@@ -6,15 +6,13 @@ import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
-import { useLoading, LoadingProvider } from '../shared/context/loading-context';
 import { ChatPortal } from './components/chat';
 
 import './styles/app.css';
 
-const AppContent: React.FC = () => {
+const App: React.FC = () => {
   const { theme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
-  const { isFullyLoaded } = useLoading();
 
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
@@ -30,17 +28,9 @@ const AppContent: React.FC = () => {
           </ParticlesProvider>
           <ChatPortal />
         </>
-
     </ErrorBoundary>
   );
 };
-
-// Prevent unnecessary re-renders
-const App = React.memo(() => (
-  <LoadingProvider>
-    <AppContent />
-  </LoadingProvider>
-));
 
 export const routes: RouteObject[] = [
   {

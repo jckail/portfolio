@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { ProjectsData } from '../../../types/resume';
-import { useLoading } from '../../../shared/context/loading-context';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import '../../../styles/features/sections/projects.css';
 
 const Projects: React.FC = () => {
   const [projects, setProjects] = useState<ProjectsData>({});
   const [error, setError] = useState<string | null>(null);
-  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
     let mounted = true;
 
     const fetchProjects = async () => {
       try {
-        setComponentLoading('projects', true);
         const response = await fetch('/api/projects');
         if (!response.ok) throw new Error('Failed to fetch Projects');
         const data = await response.json();
@@ -25,10 +22,6 @@ const Projects: React.FC = () => {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load Projects');
         }
-      } finally {
-        if (mounted) {
-          setComponentLoading('projects', false);
-        }
       }
     };
 
@@ -37,9 +30,19 @@ const Projects: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [setComponentLoading]);
+  }, []);
 
   if (error) return <div className="error-message">Error: {error}</div>;
+
+  if (Object.keys(projects).length === 0) {
+    return (
+      <section id="projects" className="section-container">
+        <div className="section-content">
+          <div>Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   // Convert projects object to array for rendering
   const projectsArray = Object.entries(projects).map(([key, project]) => ({

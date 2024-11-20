@@ -1,6 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AboutMe } from '../../../types/resume';
-import { useLoading } from '../../../shared/context/loading-context';
 import '../../../styles/features/sections/about.css';
 
 const SocialLinks = lazy(() => import('./social-links/SocialLinks'));
@@ -43,14 +42,12 @@ const TLDR: React.FC = () => {
   const [aboutMeData, setAboutMeData] = useState<AboutMe | null>(null);
   const [contactData, setContactData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const { setComponentLoading } = useLoading();
 
   useEffect(() => {
     let mounted = true;
 
     const fetchData = async () => {
       try {
-        setComponentLoading('about', true);
         const [aboutMeResponse, contactResponse] = await Promise.all([
           fetch('/api/aboutme'),
           fetch('/api/contact')
@@ -73,10 +70,6 @@ const TLDR: React.FC = () => {
         if (mounted) {
           setError(err instanceof Error ? err.message : 'An error occurred');
         }
-      } finally {
-        if (mounted) {
-          setComponentLoading('about', false);
-        }
       }
     };
 
@@ -85,7 +78,7 @@ const TLDR: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, []); // Removed setComponentLoading from dependencies
+  }, []);
 
   const handleResumeClick = () => {
     const resumeSection = document.getElementById('resume');
