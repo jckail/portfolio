@@ -26,11 +26,8 @@ const MyResume: React.FC = () => {
       </div>
       <div className="section-content">
         <div className="resume-content">
-          <div className="resume-icon">📄</div>
-          <p>
-            Download a 1 page PDF version of my resume that includes a summary of
-             my experience, projects, and achievements.
-          </p>
+          <div className="resume-icon">
+          
           <button 
             onClick={handleDownloadWithLoading}
             className="download-button"
@@ -41,13 +38,14 @@ const MyResume: React.FC = () => {
               {isDownloading ? (
                 <LoadingSpinner />
               ) : (
-                <>
-                  <span className="button-icon">⬇️</span>
-                  <span className="button-text">Download Resume PDF</span>
-                </>
+                
+                  
+                  <span className="button-text">⬇️ Download Resume PDF 📄</span>
+                
               )}
             </span>
           </button>
+          </div>
         </div>
       </div>
     </section>

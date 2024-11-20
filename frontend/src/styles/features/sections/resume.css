@@ -8,12 +8,21 @@
 
 .download-button {
   background: var(--primary-border);
-  color: white;
+  
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   border: none;
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   transition: background-color var(--transition-fast);
+
+
+}
+
+.button-text{
+  color: white;
+  font-size: 1.5rem;
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 900;
 }
 
 .download-button:hover {
@@ -27,6 +36,7 @@ a:not(.resume-button) {
   color: white;
   text-decoration: none;
   font-weight: bold;
+  
 }
 
 a:not(.resume-button):hover {
