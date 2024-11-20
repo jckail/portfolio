@@ -6,7 +6,6 @@ import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
-import { LoadingBoundary } from './components/loading-boundary';
 import { useLoading, LoadingProvider } from '../shared/context/loading-context';
 import { ChatPortal } from './components/chat';
 
@@ -25,14 +24,13 @@ const AppContent: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <LoadingBoundary>
         <>
           <ParticlesProvider config={baseConfig} key={theme === 'party' ? Math.random() : theme}>
             <MainContent />
           </ParticlesProvider>
           <ChatPortal />
         </>
-      </LoadingBoundary>
+
     </ErrorBoundary>
   );
 };
