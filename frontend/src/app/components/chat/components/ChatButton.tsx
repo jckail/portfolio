@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Fab } from '@mui/material';
+import {useMediaQuery,useTheme } from '@mui/material';
 
 interface ChatButtonProps {
   onClick: (e: React.MouseEvent) => void;
 }
 
 export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -26,15 +29,54 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
         left: 20,
         zIndex: 9999,
         pointerEvents: 'auto',
+        fontSize: isMobile ? '1.5rem' :'2.2rem',
+        fontFamily: 'Quantico, sans-serif !important',
+        fontWeight: '700 !important',
+        backdropFilter: '1px',
         '@keyframes glowPulse': {
           '0%': {
-            boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
+            transform: 'scale(1)',
+            
+          },
+          '5%': {
+            transform: 'scale(1.0125)',
+            
+          },
+          '15%': {
+            transform: 'scale(1.025)',
+            
+          },
+          '25%': {
+            transform: 'scale(1.05)',
+            
+          },
+          '35%': {
+            transform: 'scale(1.1)',
+            
           },
           '50%': {
-            boxShadow: '0 0 12px 5px rgba(0, 0, 0, 0.3), 0 0 20px 8px rgba(0, 0, 0, 0.15)'
+            transform: 'scale(1.1)',
+            
+          },
+          '65%': {
+            transform: 'scale(1.1)',
+            
+          },
+          '75%': {
+            transform: 'scale(1.05)',
+            
+          },
+          '85%': {
+            transform: 'scale(1.025)',
+            
+          },
+          '95%': {
+            transform: 'scale(1.0125)',
+            
           },
           '100%': {
-            boxShadow: '0 0 8px 3px rgba(0, 0, 0, 0.2), 0 0 15px 5px rgba(0, 0, 0, 0.1)'
+            transform: 'scale(1)',
+            
           }
         }
       }}
@@ -44,19 +86,19 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
           bgcolor: 'var(--primary)',
           border:'var(--border-thickness) solid var(--primary)', 
           color: 'white',
-          width: 80,
-          height: 80,
-          transition: ' 0.3s ease-in-out',
-          animation: isScrolled ? 'glowPulse 5s infinite' : 'none',
+          width: isMobile ? 60 : 80,
+          height: isMobile ? 60 : 80,
+          transition: ' .5s ease-in-out',
+          animation:  'glowPulse 10s infinite' ,
           '&:hover': {
-            bgcolor: 'var(--primary)',
-            color: 'white',
-            transform: 'scale(1.05)',
+            bgcolor: 'white',
+            color: 'var(--primary)',
+            transform: 'scale(1.5)',
           },
-          fontSize: '2.2rem',
+          fontSize: isMobile ? '1.5rem' :'2.2rem',
           fontFamily: 'Quantico, sans-serif !important',
           fontWeight: '700 !important',
-          backdropFilter: '20px'
+          backdropFilter: '1px'
         }}
         aria-label="Chat with AI"
         onClick={onClick}
