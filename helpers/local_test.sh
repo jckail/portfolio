@@ -70,9 +70,9 @@ if check_health; then
       --app="http://localhost:8080/api/custom_resolution?width=$width&height=$height"
   else
     echo "Opening browser in default resolution..."
-    open http://localhost:5173/?sidepanel=closed&theme=dark#about
-    open http://localhost:8080/?sidepanel=closed&theme=dark#about
-    open http://localhost:8080/docs
+    # open http://localhost:5173/?sidepanel=closed&theme=dark#about
+    # open http://localhost:8080/?sidepanel=closed&theme=dark#about
+    # open http://localhost:8080/docs
   fi
 else
   echo "Skipping frontend dev server startup due to backend health check failure."
