@@ -64,7 +64,7 @@ const createParticleConfig = ({
     },
     modes: {
       grab: {
-        distance: 250,
+        distance: 450,
       },
       push: {quantity:1,},
       
@@ -171,10 +171,10 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       particleColor: BLACK,
       lineColor: BLACK,
       backgroundColor: 'transparent',
-      particleCount: 10,
-      particleSize: 10,
-      lineDistance: 250,
-      lineWidth: 3,
+      particleCount: 0,
+      particleSize: 8,
+      lineDistance: 450,
+      lineWidth: 2,
       moveSpeed: .1,
     },
     dark: {
@@ -182,9 +182,9 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       lineColor: PRIMARY,
       backgroundColor: 'transparent',
       particleCount: 10,
-      particleSize: 10,
-      lineDistance: 250,
-      lineWidth: 3,
+      particleSize: 8,
+      lineDistance: 450,
+      lineWidth: 2,
       moveSpeed: .1,
     },
     party: {
