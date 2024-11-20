@@ -82,6 +82,7 @@
   border: 1px solid transparent;
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
+  backdrop-filter: blur(var(--section-background-blur));
 }
 
 .skill-item:hover {

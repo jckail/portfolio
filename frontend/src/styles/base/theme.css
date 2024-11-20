@@ -3,14 +3,14 @@
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
-  --surface-color: #0303ff11;
+  --surface-color: #0303ff08;
   --section-background: transparent;
   --section-background-blur: 7px;
   --text-color: #000000;
   --text-secondary: #666666;
   --border-color: #000000;
   --primary: #0403ff;
-  --primary-hover: #0302cc;
+  --primary-hover: #000000;
   --primary-light: rgba(4, 3, 255, 0.1);
   --primary-light-hover: rgba(4, 3, 255, 0.2);
   --primary-border: #000000;
@@ -23,7 +23,7 @@
   --solid-color: #ffffff;
   --border-thickness: 3px;
   --image-background: #ffffff;
-  --underline-color: #0403ff;
+  --underline-color: #000000;
 }
 
 .theme-dark {
@@ -79,7 +79,7 @@ html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: 'Quantico', sans-serif !important;
   font-weight: 600;
 }
 
@@ -87,7 +87,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: 'Quantico', sans-serif !important;
   font-weight: 600;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

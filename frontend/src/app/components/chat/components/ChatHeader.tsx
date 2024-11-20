@@ -24,7 +24,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => 
       <div style={{ 
         fontSize: '1.25rem',
         fontWeight: 500,
-        fontFamily: '"Roboto","Helvetica","Arial",sans-serif'
+        fontFamily: '"Quantico",sans-serif'
       }}>
         ✨ Jordan's AI Assistant
       </div>

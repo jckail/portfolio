@@ -7,8 +7,6 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Montserrat', 'sans-serif'],
-        'montserrat': ['Montserrat', 'sans-serif'],
         'quantico': ['Quantico', 'sans-serif'],
       },
     },

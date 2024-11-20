@@ -48,8 +48,8 @@ const Chat: React.FC = () => {
         PaperProps={{
           sx: {
             width: isMobile ? '100%' : '500px',
-            height: isMobile ? '100%' : '90vh',
-            maxHeight: isMobile ? '99%' : '90vh',
+            height: isMobile ? '100%' : '100vh',
+            maxHeight: isMobile ? '100%' : '100vh',
             borderRadius: isMobile ? 0 : 2,
             margin: isMobile ? 0 : '1vh 0 15vh 0',
             display: 'flex',
@@ -59,8 +59,8 @@ const Chat: React.FC = () => {
             top: isMobile ? 'auto' : 0,
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',
-            backdropFilter: 'blur(16px)',
-            background: 'rgba(var(--surface-color-rgb), 0.75)',
+            backdropFilter: 'blur(30px)',
+            background: isMobile ? 'var(--solid-color)':'var(--surface-color)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             overflowY: 'hidden'
           }

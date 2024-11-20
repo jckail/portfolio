@@ -28,6 +28,7 @@
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary-hover);
+  
 }
 
 .section-content p {
