@@ -63,7 +63,7 @@
   font-size: 1.2rem;
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
 }
 
 .skill-list {
@@ -75,7 +75,6 @@
 }
 
 .skill-item {
-  cursor: pointer;
   transition: all var(--transition-fast);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
@@ -152,7 +151,6 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  cursor: pointer;
   color: var(--text-color);
   padding: var(--spacing-xs);
   border-radius: 50%;

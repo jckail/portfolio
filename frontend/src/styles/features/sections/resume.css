@@ -13,7 +13,6 @@
   border-radius: var(--radius-md);
   border: none;
   font-size: 1.125rem;
-  cursor: pointer;
   transition: background-color var(--transition-fast);
 }
 
@@ -91,7 +90,6 @@ a:not(.resume-button):hover {
   background: var(--primary);
   border: none;
   border-radius: var(--radius-full);
-  cursor: pointer;
   transition: all var(--transition-normal);
   box-shadow: var(--shadow-md);
 }

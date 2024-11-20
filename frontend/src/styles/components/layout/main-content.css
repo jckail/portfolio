@@ -40,7 +40,7 @@
 .section {
     min-height: calc(100vh - var(--header-height));
     padding: 60px 0;
-    scroll-margin-top: var(--header-height);
+    scroll-margin-top: calc(var(--header-height)+ 10px);
     position: relative;
 }
 
@@ -80,7 +80,7 @@
 /* Ensure smooth scrolling behavior */
 html {
     scroll-behavior: smooth;
-    scroll-padding-top: var(--header-height);
+    scroll-margin-top: calc(var(--header-height)+ 10px);
 }
 
 @media (max-width: 768px) {

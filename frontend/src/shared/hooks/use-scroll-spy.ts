@@ -64,10 +64,10 @@ export const useScrollSpy = () => {
         
         if (targetSection && (isInitialLoad || isResumeClick)) {
           // Get the header height from CSS variable
-          const headerHeight = parseInt(getComputedStyle(document.documentElement)
+            const headerHeight = parseInt(getComputedStyle(document.documentElement)
             .getPropertyValue('--header-height')
             .trim()
-            .replace('px', ''));
+            .replace('px', '')) + 5;
 
           // First scroll to bring the element into view
           targetSection.scrollIntoView({

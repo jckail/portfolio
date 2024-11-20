@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 interface LoadingState {
-  tldr: boolean;
+  about: boolean;
   experience: boolean;
   technicalSkills: boolean;
   projects: boolean;
@@ -18,7 +18,7 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loadingStates, setLoadingStates] = useState<LoadingState>({
-    tldr: false,
+    about: false,
     experience: false,
     technicalSkills: false,
     projects: false,

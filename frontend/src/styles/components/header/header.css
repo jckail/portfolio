@@ -44,7 +44,7 @@
   transition: all var(--transition-normal);
   width: var(--icon-size-desktop);
   height: var(--icon-size-desktop);
-  cursor: pointer;
+  
 }
 
 .menu-toggle:hover {
@@ -130,7 +130,7 @@
   color: var(--text-color);
   border: var(--border-thickness) solid var(--primary-border);
   border-radius: var(--radius-sm);
-  cursor: pointer;
+  
   font-size: 15px;
   transition: all var(--transition-normal);
   min-height: var(--icon-size-desktop);
@@ -149,6 +149,7 @@
   transform: scale(1.1);
   box-shadow: 0 0 35px var(--primary);
   transition: all var(--transition-normal);
+  border: var(--border-thickness) solid var(--primary);
 }
 
 .nav-right .resume-button:hover {
@@ -220,7 +221,7 @@
     color: var(--text-color);
     border: var(--border-thickness) solid var(--primary-border);
     border-radius: var(--radius-sm);
-    cursor: pointer;
+    
     font-size: 15px;
     transition: all var(--transition-normal);
     min-height: var(--icon-size-mobile);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { AboutMe } from '../../../types/resume';
 import { useLoading } from '../../../shared/context/loading-context';
-import '../../../styles/features/sections/tldr.css';
+import '../../../styles/features/sections/about.css';
 
 const SocialLinks = lazy(() => import('./social-links/SocialLinks'));
 
@@ -12,9 +12,9 @@ interface TLDRContentProps {
 }
 
 const TLDRContent: React.FC<TLDRContentProps> = ({ aboutMeData, contactData, onResumeClick }) => (
-  <div className="tldr-section">
+  <div className="about-section">
     <h2>{aboutMeData.greeting}</h2>
-    <div className="tldr-content">
+    <div className="about-content">
       <p>{aboutMeData.description}</p>
       <div className="headshot-container">
         <img 
@@ -50,7 +50,7 @@ const TLDR: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        setComponentLoading('tldr', true);
+        setComponentLoading('about', true);
         const [aboutMeResponse, contactResponse] = await Promise.all([
           fetch('/api/aboutme'),
           fetch('/api/contact')
@@ -75,7 +75,7 @@ const TLDR: React.FC = () => {
         }
       } finally {
         if (mounted) {
-          setComponentLoading('tldr', false);
+          setComponentLoading('about', false);
         }
       }
     };
@@ -98,7 +98,7 @@ const TLDR: React.FC = () => {
 
   if (!aboutMeData || !contactData) {
     return (
-      <section id="tldr" className="section-container">
+      <section id="about" className="section-container">
         <div className="section-content">
           <div>Loading...</div>
         </div>
@@ -107,7 +107,7 @@ const TLDR: React.FC = () => {
   }
 
   return (
-    <section id="tldr" className="section-container">
+    <section id="about" className="section-container">
       <div className="section-content">
         <Suspense fallback={<div>Loading content...</div>}>
           <TLDRContent

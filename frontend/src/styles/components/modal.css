@@ -44,7 +44,6 @@
   right: 1rem;
   background: none;
   border: none;
-  cursor: pointer;
   padding: 0.5rem;
   color: var(--text-color);
   transition: transform 0.2s ease;
@@ -57,7 +56,7 @@
 .modal-title {
   padding: 1.5rem;
   margin: 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
   color: var(--text-color);
 }
 

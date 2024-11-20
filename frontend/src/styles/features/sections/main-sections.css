@@ -55,7 +55,7 @@
 
 /* Section Headers */
 .section h2,
-#about-me h2,
+#about h2,
 #skills h2,
 #experience h2,
 #projects h2,
@@ -68,12 +68,12 @@
   text-align: left;
   width: 100%;
   max-width: 1080px;
-  border-bottom: 4px solid var(--primary-border);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
   font-weight: bold;
 }
 
 .section h3,
-#about-me h3,
+#about h3,
 #skills h3,
 #experience h3,
 #projects h3,
@@ -94,7 +94,7 @@
   }
 
   .section h2,
-  #about-me h2,
+  #about h2,
   #skills h2,
   #experience h2,
   #projects h2,
@@ -116,7 +116,7 @@
   }
 
   .section h3,
-  #about-me h3,
+  #about h3,
   #skills h3,
   #experience h3,
   #projects h3,
@@ -131,7 +131,7 @@
   }
 
   .section h4,
-  #about-me h4,
+  #about h4,
   #skills h4,
   #experience h4,
   #projects h4,

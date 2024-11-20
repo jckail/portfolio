@@ -43,7 +43,7 @@
   align-items: center;
   justify-content: center;
   background: var(--section-background);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
   overflow: hidden;
 }
 

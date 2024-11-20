@@ -58,7 +58,7 @@
   height: 45px;
   border-radius: var(--radius-sm);
   background: var(--image-background);
-  border: 2px solid var(--primary);
+  border: 2px solid var(--border-color);
   object-fit: contain;
   flex-shrink: 0;
   transition: transform var(--transition-normal),
@@ -71,7 +71,6 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   box-shadow: 0 0 350px var(--primary);
-  cursor: pointer;
 }
 
 .logo-link {
@@ -81,7 +80,6 @@
   width: 90px;
   height: 60px;
   flex-shrink: 0;
-  cursor: pointer;
 }
 
 .timeline-header {
@@ -98,7 +96,7 @@
   font-size: 1.5rem;
   margin-bottom: 1.25px;
   text-align: left;
-  border-bottom: 2px solid var(--primary);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
 }
 
 .timeline-header h4 {
@@ -188,7 +186,6 @@
   border: none;
   font-size: 1.5rem;
   color: var(--text-color);
-  cursor: pointer;
   padding: var(--spacing-xs);
   line-height: 1;
 }
@@ -208,7 +205,7 @@
   color: var(--text-color);
   font-size: 1.5rem;
   margin: 0;
-  border-bottom: 2px solid var(--primary);
+  border-bottom: var(--border-thickness) solid var(--underline-color);
 }
 
 .modal-body {

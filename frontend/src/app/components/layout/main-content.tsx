@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Header } from '../../../shared/components/header';
-import TLDR from '../sections/tldr';  // Keep TLDR eager loaded as it's above the fold
+import TLDR from '../sections/about';  // Keep TLDR eager loaded as it's above the fold
 import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
 import { useLoading } from '../../../shared/context/loading-context';
 import { useAppLogic } from '../../providers/app-logic-provider';

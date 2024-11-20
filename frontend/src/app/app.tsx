@@ -17,10 +17,7 @@ const AppContent: React.FC = () => {
   const backgroundColor = useThemeBackground(theme);
   const { isFullyLoaded } = useLoading();
 
-  const baseConfig = useMemo(() => getThemeConfig(theme), [
-    // Only recalculate when party mode changes
-    theme === 'party'
-  ]);
+  const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = backgroundColor;
@@ -30,7 +27,7 @@ const AppContent: React.FC = () => {
     <ErrorBoundary>
       <LoadingBoundary>
         <>
-          <ParticlesProvider config={baseConfig}>
+          <ParticlesProvider config={baseConfig} key={theme === 'party' ? Math.random() : theme}>
             <MainContent />
           </ParticlesProvider>
           <ChatPortal />

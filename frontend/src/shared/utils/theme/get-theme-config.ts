@@ -168,8 +168,8 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
 
   const configs = {
     light: {
-      particleColor: PRIMARY,
-      lineColor: PRIMARY,
+      particleColor: BLACK,
+      lineColor: BLACK,
       backgroundColor: 'transparent',
       particleCount: 10,
       particleSize: 10,
