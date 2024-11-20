@@ -12,7 +12,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => 
     <DialogTitle 
       sx={{ 
         m: 0, 
-        p: 2, 
+        p: 1, 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between',
@@ -22,11 +22,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => 
       }}
     >
       <div style={{ 
-        fontSize: '1.25rem',
-        fontWeight: 500,
+        fontSize: '1.5rem',
+        fontWeight: 600,
         fontFamily: '"Quantico",sans-serif'
       }}>
-        ✨ Jordan's AI Assistant
+         Jordan's ✨AI Assistant
       </div>
       <IconButton
         aria-label="close"
@@ -35,11 +35,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => 
           color: 'white',
           padding: '12px',
           '&:hover': {
-            bgcolor: 'rgba(255,255,255,0.1)',
+            bgcolor: 'var(--primary)',
           }
         }}
       >
-        <CloseIcon sx={{ fontSize: isMobile ? 28 : 24 }} />
+        <CloseIcon sx={{ fontSize: isMobile ? 35 : 35 }} />
       </IconButton>
     </DialogTitle>
   );

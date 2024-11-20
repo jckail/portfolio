@@ -5,8 +5,7 @@ export const useChat = () => {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { type: 'agent', text: 'Welcome! I\'m Jordan\'s AI assistant, here to help you explore his expertise in software engineering and data architecture.' },
-    { type: 'agent', text: 'Feel free to ask about:\n• Technical projects and implementations\n• Professional experience at Meta, Deloitte, and other companies\n• Full-stack development and cloud architecture expertise\n• Potential collaboration opportunities' }
+    { type: 'agent', text: 'Welcome! \n I\'m Jordan\'s AI assistant, ask me a question: \n• Explain Jordan\'s professional experience at Meta, Deloitte, or other companies? \n• Explain Jordan\'s github projects?\n • What are Jordan\'s top skills?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);

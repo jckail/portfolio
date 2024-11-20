@@ -34,7 +34,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         right: 0,
         bgcolor: 'var(--surface-color)',
         p: 2,
-        pb: '1px',
+        pb: '20px',
         borderTop: '1px solid var(--primary-border)',
         backgroundColor: 'var(--solid-color)',
       }}

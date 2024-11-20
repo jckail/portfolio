@@ -50,12 +50,14 @@ const Chat: React.FC = () => {
             width: isMobile ? '100%' : '500px',
             height: isMobile ? '100%' : '100vh',
             maxHeight: isMobile ? '100%' : '100vh',
-            borderRadius: isMobile ? 0 : 2,
+            borderRadius: isMobile ? 0 : 5,
             margin: isMobile ? 0 : '1vh 0 15vh 0',
             display: 'flex',
             flexDirection: 'column',
             position: isMobile ? 'relative' : 'fixed',
             left: isMobile ? 'auto' : 0,
+  // height: var(--header-height);
+            
             top: isMobile ? 'auto' : 0,
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',

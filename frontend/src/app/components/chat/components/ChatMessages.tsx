@@ -49,7 +49,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             elevation={1}
             sx={{
               p: 1.5,
-              maxWidth: '85%',
+              maxWidth: '95%',
               backgroundColor: msg.type === 'user' ? 'var(--primary-border)' : 'var(--section-background)',
               color: msg.type === 'user' ? 'white' : 'var(--text-color)',
               borderRadius: msg.type === 'user' ? '15px 15px 5px 15px' : '15px 15px 15px 5px',
@@ -57,7 +57,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               border: `1px solid ${msg.type === 'user' ? 'transparent' : 'var(--primary-border)'}`,
             }}
           >
-            <Typography variant="body1">
+            <Typography 
+              sx={{
+                fontSize: '0.9rem',
+                fontFamily: "'Montserrat', sans-serif !important",
+                fontWeight: "600",
+                lineHeight: 1.5
+              }}
+            >
               {msg.text}
               {msg.isStreaming && <span className="cursor">|</span>}
             </Typography>
@@ -76,7 +83,16 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               border: '1px solid var(--primary-border)',
             }}
           >
-            <Typography variant="body1">Thinking...</Typography>
+            <Typography 
+              sx={{
+                fontSize: '0.9rem',
+                fontFamily: "'Montserrat', sans-serif !important",
+                fontWeight: "600",
+                lineHeight: 1.5
+              }}
+            >
+              Thinking...
+            </Typography>
           </Paper>
         </Box>
       )}

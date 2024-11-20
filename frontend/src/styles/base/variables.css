@@ -33,6 +33,7 @@
   --transition-slow: 0.5s ease;
 
   /* Font Family */
+  /* --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; */
   --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Quantico', Arial, sans-serif;
 
   /* Font Sizes - increased for better readability */
