@@ -1,51 +1,125 @@
-import React, { useState, useEffect } from 'react';
-import { ProjectsData } from '../../../types/resume';
+import React, { useState, useRef, useEffect, memo } from 'react';
+import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import '../../../styles/features/sections/projects.css';
 
-const Projects: React.FC = () => {
-  const [projects, setProjects] = useState<ProjectsData>({});
-  const [error, setError] = useState<string | null>(null);
+const LoadingSpinner = () => (
+  <div className="section-loading">
+    <div className="loading-spinner"></div>
+  </div>
+);
+
+const ProjectCard = memo(({ 
+  project, 
+  index 
+}: { 
+  project: {
+    key: string;
+    title: string;
+    description: string;
+    link: string;
+    link2?: string;
+    logoPath?: string;
+  }; 
+  index: number;
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects');
-        if (!response.ok) throw new Error('Failed to fetch Projects');
-        const data = await response.json();
-        if (mounted) {
-          setProjects(data);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
         }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load Projects');
-        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '50px'
       }
-    };
+    );
 
-    fetchProjects();
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
 
-    return () => {
-      mounted = false;
-    };
+    return () => observer.disconnect();
   }, []);
+
+  // Preload project icon
+  useEffect(() => {
+    if (isVisible && project.logoPath) {
+      const img = new Image();
+      img.src = project.logoPath;
+    }
+  }, [isVisible, project.logoPath]);
+
+  if (!isVisible) {
+    return <div ref={cardRef} className="project-card skeleton-card" />;
+  }
+
+  return (
+    <div 
+      ref={cardRef}
+      className="project-card"
+      style={{ '--item-index': index } as React.CSSProperties}
+    >
+      <div className="project-image">
+        <ProjectIcon 
+          name={project.logoPath || "github-logo.svg"}
+          size={100}
+          aria-label={`${project.title} project icon`}
+          className="project-icon"
+        />
+      </div>
+      <h3>
+        <a href={project.link} target="_blank" rel="noopener noreferrer">
+          {project.title}
+        </a>
+      </h3>
+      <p>{project.description}</p>
+      <div className="project-links">
+        <a 
+          href={project.link} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="project-link primary"
+        >
+          View Project
+        </a>
+        {project.link2 && (
+          <a 
+            href={project.link2} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="project-link secondary"
+          >
+            Live Demo
+          </a>
+        )}
+      </div>
+    </div>
+  );
+});
+
+const Projects: React.FC = () => {
+  const { projectsData, isLoading, error } = useData();
 
   if (error) return <div className="error-message">Error: {error}</div>;
 
-  if (Object.keys(projects).length === 0) {
+  if (isLoading || !projectsData) {
     return (
       <section id="projects" className="section-container">
         <div className="section-content">
-          <div>Loading...</div>
+          <LoadingSpinner />
         </div>
       </section>
     );
   }
 
   // Convert projects object to array for rendering
-  const projectsArray = Object.entries(projects).map(([key, project]) => ({
+  const projectsArray = Object.entries(projectsData).map(([key, project]) => ({
     ...project,
     key
   }));
@@ -58,46 +132,11 @@ const Projects: React.FC = () => {
       <div className="section-content">
         <div className="projects-grid">
           {projectsArray.map((project, index) => (
-            <div 
-              key={project.key} 
-              className="project-card"
-              style={{ '--item-index': index } as React.CSSProperties}
-            >
-                <div className="project-image">
-                  <ProjectIcon 
-                    name={project.logoPath || "github-logo.svg"}
-                    size={100}
-                    aria-label={`${project.title} project icon`}
-                    className="project-icon"
-                  />
-                </div>
-                <h3>
-                  <a href={project.link} target="_blank" rel="noopener noreferrer">
-                    {project.title}
-                  </a>
-                </h3>
-                <p>{project.description}</p>
-                <div className="project-links">
-                  <a 
-                    href={project.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="project-link primary"
-                  >
-                    View Project
-                  </a>
-                  {project.link2 && (
-                    <a 
-                      href={project.link2} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="project-link secondary"
-                    >
-                      Live Demo
-                    </a>
-                  )}
-                </div>
-            </div>
+            <ProjectCard
+              key={project.key}
+              project={project}
+              index={index}
+            />
           ))}
         </div>
       </div>

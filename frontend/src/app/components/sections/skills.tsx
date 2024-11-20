@@ -1,19 +1,69 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useRef, lazy, Suspense, useEffect, memo } from 'react';
+import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import type { Skill } from './modals/SkillModal';
 import '../../../styles/features/sections/skills.css';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
 
-interface SkillsData {
-  [key: string]: Skill;
-}
+// Prefetch function for the modal
+const prefetchModal = () => {
+  const modalPromise = import('./modals/SkillModal');
+  return modalPromise;
+};
 
-const SkillCategory: React.FC<{
+const LoadingSpinner = () => (
+  <div className="section-loading">
+    <div className="loading-spinner"></div>
+  </div>
+);
+
+const SkillItem = memo(({ 
+  skill, 
+  index, 
+  onSelect 
+}: { 
+  skill: Skill & { key: string }; 
+  index: number;
+  onSelect: (key: string) => void;
+}) => {
+  // Preload modal on hover
+  const handleMouseEnter = () => {
+    prefetchModal();
+  };
+
+  return (
+    <div
+      className="skill-item"
+      onClick={() => onSelect(skill.key)}
+      onMouseEnter={handleMouseEnter}
+      style={{ '--item-index': index } as React.CSSProperties}
+      title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+    >
+      <div className="skill-icon-container">
+        <div className="icon-wrapper">
+          <SkillIcon
+            name={skill.image}
+            className="skill-icon"
+            size={32}
+            aria-label={skill.display_name}
+          />
+        </div>
+        <span className="skill-name">{skill.display_name}</span>
+      </div>
+    </div>
+  );
+});
+
+const SkillCategory = memo(({ 
+  category, 
+  skillList, 
+  onSkillSelect 
+}: {
   category: string;
   skillList: (Skill & { key: string })[];
   onSkillSelect: (key: string) => void;
-}> = ({ category, skillList, onSkillSelect }) => {
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
 
@@ -46,74 +96,35 @@ const SkillCategory: React.FC<{
       <h3>{category}</h3>
       <div className="skill-list">
         {skillList.map((skill, index) => (
-          <div
+          <SkillItem
             key={skill.key}
-            className="skill-item"
-            onClick={() => onSkillSelect(skill.key)}
-            style={{ '--item-index': index } as React.CSSProperties}
-            title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
-          >
-            <div className="skill-icon-container">
-              <div className="icon-wrapper">
-                <SkillIcon
-                  name={skill.image}
-                  className="skill-icon"
-                  size={32}
-                  aria-label={skill.display_name}
-                />
-              </div>
-              <span className="skill-name">{skill.display_name}</span>
-            </div>
-          </div>
+            skill={skill}
+            index={index}
+            onSelect={onSkillSelect}
+          />
         ))}
       </div>
     </div>
   );
-};
+});
 
 const TechnicalSkills: React.FC = () => {
-  const [skills, setSkills] = useState<SkillsData>({});
+  const { skillsData, isLoading, error } = useData();
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchSkills = async () => {
-      try {
-        const response = await fetch('/api/skills');
-        if (!response.ok) throw new Error('Failed to fetch skills');
-        const data = await response.json();
-        if (mounted) {
-          setSkills(data);
-        }
-      } catch (err) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load skills');
-        }
-      }
-    };
-
-    fetchSkills();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   if (error) return <div className="error-message">Error: {error}</div>;
 
-  if (Object.keys(skills).length === 0) {
+  if (isLoading || !skillsData) {
     return (
       <section id="skills" className="section-container">
         <div className="section-content">
-          <div>Loading...</div>
+          <LoadingSpinner />
         </div>
       </section>
     );
   }
 
-  const categorizedSkills = Object.entries(skills).reduce((acc, [key, skill]) => {
+  const categorizedSkills = Object.entries(skillsData).reduce((acc, [key, skill]) => {
     const category = skill.general_category;
     if (!acc[category]) acc[category] = [];
     acc[category].push({ key, ...skill });
@@ -138,10 +149,10 @@ const TechnicalSkills: React.FC = () => {
         </div>
       </div>
 
-      {selectedSkill && skills[selectedSkill] && (
-        <Suspense fallback={<div className="modal-loading">Loading...</div>}>
+      {selectedSkill && skillsData[selectedSkill] && (
+        <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
-            skill={skills[selectedSkill]}
+            skill={skillsData[selectedSkill]}
             onClose={() => setSelectedSkill(null)}
           />
         </Suspense>

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Theme } from '../../../types/theme';
 import { Contact } from '../../../types/resume';
 import { SidePanel } from '../navigation';
+import { useData } from '../../../app/providers/data-provider';
 import {
   MoonIcon,
   SunIcon,
@@ -20,7 +21,35 @@ interface HeaderProps {
   isToggleHidden: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
+// Memoize icons to prevent unnecessary re-renders
+const ThemeIcon = memo(({ theme }: { theme: Theme }) => {
+  switch (theme) {
+    case 'light':
+      return <MoonIcon />;
+    case 'dark':
+      return <SunIcon />;
+    case 'party':
+      return <PartyIcon />;
+    default:
+      return <MoonIcon />;
+  }
+});
+
+// Loading state component
+const HeaderSkeleton = () => (
+  <header className="header">
+    <nav className="nav-container">
+      <div className="nav-left">
+        <div className="header-titles skeleton">
+          <div className="skeleton-text" style={{ width: '200px', height: '24px' }}></div>
+          <div className="skeleton-text" style={{ width: '150px', height: '20px' }}></div>
+        </div>
+      </div>
+    </nav>
+  </header>
+);
+
+const Header: React.FC<HeaderProps> = memo(({
   theme,
   toggleTheme,
   handleResumeClick,
@@ -29,28 +58,7 @@ const Header: React.FC<HeaderProps> = ({
   isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
-  const [contactData, setContactData] = useState<Contact | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchContactData = async () => {
-      try {
-        const response = await fetch('/api/contact');
-        if (!response.ok) {
-          throw new Error('Failed to fetch contact data');
-        }
-        const data = await response.json();
-        setContactData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContactData();
-  }, []);
+  const { contactData, isLoading, error } = useData();
 
   const updateURL = (isOpen: boolean) => {
     const url = new URL(window.location.href);
@@ -81,22 +89,8 @@ const Header: React.FC<HeaderProps> = ({
     updateURL(false);
   };
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return <MoonIcon />;
-      case 'dark':
-        return <SunIcon />;
-      case 'party':
-        return <PartyIcon />;
-      default:
-        return <MoonIcon />;
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (!contactData) return <div>No contact data available</div>;
+  if (isLoading || !contactData) return <HeaderSkeleton />;
 
   return (
     <>
@@ -122,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({
                 className="theme-toggle"
                 aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'light' : 'light'} mode`}
               >
-                {getThemeIcon()}
+                <ThemeIcon theme={theme} />
               </button>
             )}
           </div>
@@ -134,6 +128,6 @@ const Header: React.FC<HeaderProps> = ({
       />
     </>
   );
-};
+});
 
 export default Header;
