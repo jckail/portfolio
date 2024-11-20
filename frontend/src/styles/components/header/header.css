@@ -176,11 +176,15 @@
     height: var(--header-height);
   }
 
+
   .nav-container {
-    padding: var(--spacing-sm);
-    gap: var(--spacing-md);
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 var(--spacing-md);
+    height: 100%;
   }
 
   .nav-left h1 {
@@ -244,7 +248,7 @@
     border-radius: var(--radius-sm);
   }
 }
-
+/* 
 @media (max-width: 480px) {
   .header {
     height: var(--header-height);
@@ -283,4 +287,4 @@
     width: var(--icon-size-mobile);
     height: var(--icon-size-mobile);
   }
-}
+} */
