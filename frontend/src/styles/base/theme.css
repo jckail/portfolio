@@ -77,16 +77,16 @@ html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
 }
 
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
@@ -95,11 +95,20 @@ body {
 /* Apply transitions only to color and border-color, not background-color */
 body,
 body * {
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
   transition-property: color, border-color;
   transition-duration: 0.2s;
   transition-timing-function: ease;
+}
+
+/* Font styles */
+p {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 700;
 }
 
 /* Party mode animations */

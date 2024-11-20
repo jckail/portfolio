@@ -97,7 +97,7 @@
 .project-card p {
   color: var(--text-color);
   font-size: 0.85rem;
-  line-height: 1.0;
+  line-height: 1.2;
   margin: 0;
   padding: 0 var(--spacing-md);
   width: 98%;

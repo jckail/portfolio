@@ -29,25 +29,27 @@
 
 /* Global font application */
 :root {
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
 }
 
-html {
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+/* Apply Montserrat to p tags */
+p {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
 }
 
-*, *::before, *::after {
+/* Apply Quantico to all heading tags */
+h1, h2, h3, h4, h5, h6 {
   font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 500;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 600;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color);
