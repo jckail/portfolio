@@ -116,7 +116,7 @@
   min-height: var(--icon-size-desktop);
   background: var(--background-color);
   color: var(--text-color);
-  border: var(--border-thickness) solid var(--primary-border);
+  border: 1px solid var(--text-color);
   border-radius: var(--radius-sm);
 }
 

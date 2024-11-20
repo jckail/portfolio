@@ -2,9 +2,9 @@ import React from 'react';
 
 const SandwichIcon: React.FC = () => (
     <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
+    width="40" 
+    height="40" 
+    viewBox="0 0 25 25" 
     fill="none" 
     stroke="currentColor" 
     strokeWidth="2" 

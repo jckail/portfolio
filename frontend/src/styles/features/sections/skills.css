@@ -79,16 +79,18 @@
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
   background: var(--surface-color);
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
   backdrop-filter: blur(var(--section-background-blur));
 }
 
 .skill-item:hover {
+  background: var(--primary);
   transform: translateY(-2px);
   border-color: var(--primary-hover);
   box-shadow: var(--shadow-sm);
+  
 }
 
 .skill-icon-container {
@@ -111,7 +113,7 @@
 }
 
 .skill-name {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-align: center;
   color: var(--text-color);
   margin-top: var(--spacing-xs);
@@ -164,7 +166,7 @@
 }
 
 .modal-close-button:hover {
-  background-color: var(--border-color);
+  background-color: var(--primary);
 }
 
 .modal-header {
@@ -185,10 +187,10 @@
 }
 
 .experience-info {
-  color: white;
+  color: var(--text-color);
   margin-bottom: var(--spacing-md);
   padding: var(--spacing-sm);
-  background: var(--border-color);
+  border: var(--border-thickness) solid var(--primary-border);
   border-radius: var(--radius-md);
   display: inline-block;
 }
@@ -240,7 +242,7 @@
   display: inline-block;
   margin-top: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--primary);
+  background-color: var(--primary-border);
   color: var(--text-color);
   text-decoration: none;
   border-radius: var(--radius-md);
@@ -248,7 +250,7 @@
 }
 
 .visit-website-btn:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--primary);
 }
 
 /* Loading and Error States */

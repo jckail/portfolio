@@ -3,7 +3,7 @@
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
-  --surface-color: #0303ff08;
+  --surface-color: transparent;
   --section-background: transparent;
   --section-background-blur: 7px;
   --text-color: #000000;
@@ -11,7 +11,7 @@
   --border-color: #000000;
   --primary: #0403ff;
   --primary-hover: #000000;
-  --primary-light: rgba(4, 3, 255, 0.1);
+  --primary-light: rgba(43, 43, 79, 0.1);
   --primary-light-hover: rgba(4, 3, 255, 0.2);
   --primary-border: #000000;
   --subsection-primary: #0303ff32;
@@ -33,7 +33,7 @@
   --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #999999;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color: #0303ff11;
   --primary: #0403ff;
   --primary-hover: #3332ff;
   --primary-light: rgba(4, 3, 255, 0.2);
