@@ -3,7 +3,7 @@
 /* Theme classes for more reliable switching */
 .theme-light {
   --background-color: transparent;
-  --surface-color: #dcdcdc11;
+  --surface-color: #0303ff11;
   --section-background: #0303ff1d;
   --section-background-blur: 7px;
   --text-color: #000000;
@@ -43,7 +43,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
-  --solid-color: #000000;
+  --solid-color: #000000be;
   --background-color-invert: #ffffff;
   --border-thickness: 2px;
   --image-background: #ffffff;

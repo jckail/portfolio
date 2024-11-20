@@ -26,7 +26,7 @@ experience = {
         ],
     },
     "meta": {
-        "company": "Meta (Facebook)",
+        "company": "Meta | Facebook",
         "title": "Senior Data Engineer",
         "date": "01/2021 - 09/2022",
         "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
@@ -108,7 +108,7 @@ experience = {
         ],
     },
     "common_spirit_health": {
-        "company": "Common Spirit Health (Formerly CHI)",
+        "company": "Common Spirit Health",
         "title": "Data Engineer - Business Intelligence",
         "date": "09/2016 - 11/2017",
         "location": "Denver, CO",
@@ -136,7 +136,7 @@ experience = {
         ],
     },
     "acustream": {
-        "company": "AcuStream (Acquired by R1 RCM)",
+        "company": "AcuStream (R1)",
         "title": "Software Engineer - Data",
         "date": "04/2013 - 09/2016",
         "location": "Boulder, CO",

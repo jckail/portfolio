@@ -133,7 +133,7 @@
 }
 
 .skill-modal-content {
-  background: var(--section-background);
+  background: var(--solid-color);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   max-width: 500px;
@@ -186,6 +186,7 @@
 }
 
 .experience-info {
+  color: white;
   margin-bottom: var(--spacing-md);
   padding: var(--spacing-sm);
   background: var(--border-color);
@@ -207,7 +208,7 @@
 
 .skill-tag {
   background: var(--border-color);
-  color: var(--text-color);
+  color: white;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-full);
   font-size: 0.8rem;

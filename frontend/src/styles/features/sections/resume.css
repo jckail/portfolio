@@ -25,12 +25,16 @@
 
 /* Links */
 a:not(.resume-button) {
-  color: var(--text-color);
+  color: white;
   text-decoration: none;
+  font-weight: bold;
 }
 
 a:not(.resume-button):hover {
   text-decoration: underline;
+  box-shadow: var(--shadow-lg);
+  border-color: white;
+
 }
 
 .resume-section {

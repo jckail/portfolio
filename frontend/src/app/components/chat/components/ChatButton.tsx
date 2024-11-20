@@ -43,7 +43,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
         sx={{
           bgcolor: 'var(--primary)',
           border:'var(--border-thickness) solid var(--primary-border)', 
-          color: 'var(--text-color)',
+          color: 'white',
           width: 80,
           height: 80,
           transition: ' 0.3s ease-in-out',
@@ -53,7 +53,8 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
             color: 'white',
             transform: 'scale(1.05)',
           },
-          fontSize: '1.5rem',
+          fontSize: '2.2rem',
+          fontWeight: '700',
           backdropFilter: '20px',
         }}
         aria-label="Chat with AI"

@@ -49,6 +49,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-bottom: var(--spacing-md);
 }
 
 .company-logo {
@@ -57,7 +58,7 @@
   height: 45px;
   border-radius: var(--radius-sm);
   background: var(--image-background);
-  border: 1px solid var(--primary);
+  border: 2px solid var(--primary);
   object-fit: contain;
   flex-shrink: 0;
   transition: transform var(--transition-normal),
@@ -131,6 +132,8 @@
   list-style: none;
   margin: var(--spacing-md) 0 0 0;
   padding: 0;
+  margin-top: 50px;
+  
 }
 
 .highlights li {
@@ -165,15 +168,16 @@
 }
 
 .experience-modal-content {
-  background: var(--surface-color);
+  background: var(--solid-color);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  max-width: 500px;
+  max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
   border: var(--border-thickness) solid var(--primary-border);
+  backdrop-filter: blur(5px);
 }
 
 .modal-close-button {
@@ -209,6 +213,7 @@
 
 .modal-body {
   color: var(--text-color);
+  margin-top: 75px;
 }
 
 .modal-details {
@@ -332,6 +337,7 @@
 
   .experience-modal-content {
     padding: var(--spacing-md);
+    height: 90vh;
     width: 95%;
   }
 

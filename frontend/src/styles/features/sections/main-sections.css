@@ -69,6 +69,7 @@
   width: 100%;
   max-width: 1080px;
   border-bottom: 4px solid var(--primary-border);
+  font-weight: bold;
 }
 
 .section h3,
@@ -84,6 +85,7 @@
   text-align: left;
   width: 100%;
   max-width: 1080px;
+  font-weight: bold;
 }
 
 @media (max-width: 768px) {

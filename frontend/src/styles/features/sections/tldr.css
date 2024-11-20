@@ -127,14 +127,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-m) var(--spacing-m) var(--spacing-m);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-xs) var(--spacing-xs);
   background: var(--background-color);
   color: var(--text-color);
   border: var(--border-thickness) solid var(--primary-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 20px;
   transition: all var(--transition-normal);
   min-height: var(--icon-size-desktop);
   width: 125px;
@@ -166,7 +166,7 @@
   }
 
   .tldr-text {
-    max-width: calc(100% - 150px);
+    max-width: calc(100% - 200px);
   }
 
   .headshot-container {
@@ -180,7 +180,7 @@
 
   .social-links .resume-button {
     min-height: var(--icon-size-mobile);
-    font-size: 15px;
+    font-size: 20px;
   }
 
   .social-links .resume-button svg {
