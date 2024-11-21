@@ -239,10 +239,10 @@
     color: var(--text-color);
     border: var(--border-thickness) solid var(--primary-border);
     border-radius: var(--radius-sm);
-    font-size: 25px;
+    font-size: 15px;
     transition: all var(--transition-normal);
     min-height: var(--icon-size-mobile);
-    width: 165px;
+    width: 135px;
     font-weight: bold;
   }
   
