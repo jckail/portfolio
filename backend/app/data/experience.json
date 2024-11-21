@@ -12,7 +12,7 @@
         "link": "https://www.prove.com/",
         "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "go", "airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",

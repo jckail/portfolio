@@ -123,72 +123,7 @@
   margin-top: 0px;
 }
 
-/* Modal Styles */
-.skill-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
-}
 
-.skill-modal-content {
-  background: var(--solid-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  max-width: 500px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  border: var(--border-thickness) solid var(--primary-border);
-  animation: modalFadeIn 0.3s ease-out forwards;
-}
-
-.modal-close-button {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text-color);
-  padding: var(--spacing-xs);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color var(--transition-fast);
-}
-
-.modal-close-button:hover {
-  background-color: var(--primary);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.modal-skill-icon {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-.modal-body {
-  color: var(--text-color);
-}
 
 .experience-info {
   color: var(--text-color);
@@ -277,16 +212,6 @@
   }
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -313,13 +238,18 @@
   .skill-name {
     font-size: 0.65rem;
   }
-
-  .skill-modal-content {
-    width: 95%;
-    padding: var(--spacing-md);
-  }
+  
   .skill-item {
     height: 70px;
     width: 60px;
+  }
+  .skill-tag {
+    background: var(--skill-tag-background);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.6rem;
+    text-transform: capitalize;
+    transition: all var(--transition-fast);
   }
 }

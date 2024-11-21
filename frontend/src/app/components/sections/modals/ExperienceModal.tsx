@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
-
+import type { Skill } from './SkillModal';
+import '../../../../styles/components/modal.css';
 
 export interface ExperienceItem {
   company: string;
@@ -17,61 +18,113 @@ export interface ExperienceItem {
 
 interface ExperienceModalProps {
   experience: ExperienceItem;
+  skillsData: Record<string, Skill>;
   onClose: () => void;
+  onSelectSkill: (skillKey: string) => void;
 }
 
-const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }) => (
-  <div className="experience-modal-overlay" onClick={onClose}>
-    <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={onClose}>&times;</button>
-      <div className="timeline-header-wrapper">
-        {experience.logoPath && (
-          <a 
-            href={experience.link}
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="logo-link"
-          >
-                        <CompanyLogo 
-          name={experience.logoPath || "github-logo.svg"}
-          size={64}
-          aria-label={`${experience.company} logo`}
-          className="company-logo"
-        />
-          </a>
-        )}
-        <div className="timeline-header">
-          <h3>{experience.company}</h3>
-          <h4>{experience.title}</h4>
-          <div className="timeline-meta">
-            <span className="date">{experience.date}</span>
-            <span className="location">{experience.location}</span>
+const ExperienceModal: React.FC<ExperienceModalProps> = ({ 
+  experience, 
+  skillsData,
+  onClose,
+  onSelectSkill 
+}) => {
+  useEffect(() => {
+    // Save current URL to restore it when modal closes
+    const currentUrl = window.location.pathname;
+    
+    // Update URL to include the company name (URL friendly)
+    const experienceUrl = `/experience/${experience.company.toLowerCase().replace(/\s+/g, '-')}`;
+    window.history.pushState({ experienceModal: true }, '', experienceUrl);
+
+    // Restore original URL when modal closes
+    return () => {
+      window.history.pushState({ experienceModal: false }, '', currentUrl);
+    };
+  }, [experience.company]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (!event.state?.experienceModal) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [onClose]);
+
+  // Function to find skill key by display name
+  const findSkillKey = (tagName: string): string | undefined => {
+    return Object.entries(skillsData).find(
+      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
+    )?.[0];
+  };
+
+  return (
+    <div className="experience-modal-overlay" onClick={onClose}>
+      <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+        <button className="modal-close-button" onClick={onClose}>&times;</button>
+        <div className="experience-modal-wrapper"></div>
+        <div className="timeline-header-wrapper">
+          {experience.logoPath && (
+            <a 
+              href={experience.link}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="logo-link"
+            >
+              <CompanyLogo 
+                name={experience.logoPath || "github-logo.svg"}
+                size={64}
+                aria-label={`${experience.company} logo`}
+                className="company-logo"
+              />
+            </a>
+          )}
+          <div className="timeline-header">
+            <h3>{experience.company}</h3>
+            <h4>{experience.title}</h4>
+            <div className="timeline-meta">
+              <span className="date">{experience.date}</span>
+              <span className="location">{experience.location}</span>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="modal-body">
-      <h4>Company Description:</h4>
-        <p className="company-description">{experience.company_description}</p>
-        <div className="highlights-section">
-        <h4>Tech Stack:</h4>
-          <div className="skill-tags">
-            {experience.tech_stack.map((tag: string, index: number) => (
-              <span key={index} className="skill-tag">
-                {tag.replace(/-/g, ' ')}
-              </span>
-            ))}
+        
+        <div className="modal-body">
+          <h4>Company Description:</h4>
+          <p className="company-description">{experience.company_description}</p>
+          <div className="highlights-section">
+            <h4>Tech Stack:</h4>
+            <div className="skill-tags">
+              {experience.tech_stack.map((tag: string, index: number) => {
+                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
+                return (
+                  <span 
+                    key={index} 
+                    className="skill-tag"
+                    onClick={() => skillKey && onSelectSkill(skillKey)}
+                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                  >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                );
+              })}
+            </div>
+            <h4>Detailed Highlights:</h4>
+            <ul className="highlights">
+              {experience.more_highlights.map((highlight: string, index: number) => (
+                <li key={index}>{highlight}</li>
+              ))}
+            </ul>
           </div>
-          <h4>Detailed Highlights:</h4>
-          <ul className="highlights">
-            {experience.more_highlights.map((highlight: string, index: number) => (
-              <li key={index}>{highlight}</li>
-            ))}
-          </ul>
         </div>
+        
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ExperienceModal;

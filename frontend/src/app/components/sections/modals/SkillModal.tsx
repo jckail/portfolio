@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
+import '../../../../styles/components/modal.css';
+
 
 export interface Skill {
   display_name: string;
@@ -50,17 +52,18 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
       <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="modal-header">
+        <h5>{skill.display_name}</h5>
           <div className="modal-icon-wrapper">
             <div className="icon-wrapper">
               <SkillIcon
                 name={skill.image}
-                className="skill-icon"
+                className="modal-skill-icon"
                 size={32}
                 aria-label={skill.display_name}
               />
             </div>
           </div>
-          <h3>{skill.display_name}</h3>
+          
         </div>
         <div className="modal-body">
           <p className="experience-info">
@@ -86,7 +89,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
             </div>
           )}
           <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
-            Visit Website
+            Click to learn More about {skill.display_name}
           </a>
         </div>
       </div>

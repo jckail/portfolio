@@ -35,8 +35,8 @@
         "general_category": "Artificial Intelligence",
         "sub_category": "Cloud AI Services"
     },
-    "apache_airflow": {
-        "display_name": "Apache Airflow",
+    "airflow": {
+        "display_name": "Airflow",
         "image": "airflow.svg",
         "professional_experience": true,
         "years_of_experience": 7,
@@ -47,9 +47,9 @@
         "general_category": "Data Engineering",
         "sub_category": "Workflow Orchestration"
     },
-    "apache_cassandra": {
-        "display_name": "Apache Cassandra",
-        "image": "apache_cassandra.svg",
+    "cassandra": {
+        "display_name": "Cassandra",
+        "image": "cassandra.svg",
         "professional_experience": true,
         "years_of_experience": 4,
         "tags": ["database", "nosql", "distributed", "apache", "big-data", "wide-column", "scalable"],
@@ -59,9 +59,9 @@
         "general_category": "Databases",
         "sub_category": "NoSQL Databases"
     },
-    "apache_hadoop": {
-        "display_name": "Apache Hadoop",
-        "image": "apache_hadoop.svg",
+    "hadoop": {
+        "display_name": "Hadoop",
+        "image": "hadoop.svg",
         "professional_experience": true,
         "years_of_experience": 6,
         "tags": ["big-data", "distributed-computing", "storage", "apache", "java", "mapreduce", "hdfs"],
@@ -71,9 +71,9 @@
         "general_category": "Big Data",
         "sub_category": "Distributed Computing"
     },
-    "apache_iceberg": {
-        "display_name": "Apache Iceberg",
-        "image": "apache_iceberg.svg",
+    "iceberg": {
+        "display_name": "Iceberg",
+        "image": "iceberg.svg",
         "professional_experience": true,
         "years_of_experience": 2,
         "tags": ["data-lake", "table-format", "analytics", "apache", "big-data", "storage", "data-format"],
@@ -83,8 +83,8 @@
         "general_category": "Data Engineering",
         "sub_category": "Data Lake Technology"
     },
-    "apache_kafka": {
-        "display_name": "Apache Kafka",
+    "kafka": {
+        "display_name": "Kafka",
         "image": "kafka.svg",
         "professional_experience": true,
         "years_of_experience": 7,
@@ -95,8 +95,8 @@
         "general_category": "Data Engineering",
         "sub_category": "Stream Processing"
     },
-    "apache_pulsar": {
-        "display_name": "Apache Pulsar",
+    "pulsar": {
+        "display_name": "Pulsar",
         "image": "apachepulsar.svg",
         "professional_experience": true,
         "years_of_experience": 2,
@@ -107,8 +107,8 @@
         "general_category": "Data Engineering",
         "sub_category": "Stream Processing"
     },
-    "apache_rocketmq": {
-        "display_name": "Apache RocketMQ",
+    "rocketmq": {
+        "display_name": "RocketMQ",
         "image": "apacherocketmq.svg",
         "professional_experience": true,
         "years_of_experience": 2,
@@ -119,9 +119,9 @@
         "general_category": "Data Engineering",
         "sub_category": "Message Queue"
     },
-    "apache_spark": {
-        "display_name": "Apache Spark",
-        "image": "apache_spark.svg",
+    "spark": {
+        "display_name": "Spark",
+        "image": "spark.svg",
         "professional_experience": true,
         "years_of_experience": 7,
         "tags": ["processing", "big-data", "analytics", "apache", "scala", "python", "java", "distributed-computing"],
@@ -197,7 +197,7 @@
         "professional_experience": true,
         "years_of_experience": 3,
         "tags": ["orchestration", "google-cloud", "airflow", "workflow", "data-pipeline", "serverless"],
-        "description": "Google Cloud's fully managed workflow orchestration service built on Apache Airflow.",
+        "description": "Google Cloud's fully managed workflow orchestration service built on Airflow.",
         "weblink": "https://cloud.google.com/composer",
         "examples": {},
         "general_category": "Data Engineering",
@@ -257,7 +257,7 @@
         "professional_experience": true,
         "years_of_experience": 4,
         "tags": ["data-platform", "analytics", "spark", "lakehouse", "ml", "cloud"],
-        "description": "A unified analytics platform built on top of Apache Spark, offering collaborative notebooks and ML tools.",
+        "description": "A unified analytics platform built on top of Spark, offering collaborative notebooks and ML tools.",
         "weblink": "https://databricks.com/",
         "examples": {},
         "general_category": "Big Data",
@@ -293,7 +293,7 @@
         "professional_experience": true,
         "years_of_experience": 4,
         "tags": ["data-processing", "google-cloud", "spark", "hadoop", "big-data", "serverless"],
-        "description": "A fully managed and highly scalable service for running Apache Spark and Apache Hadoop clusters.",
+        "description": "A fully managed and highly scalable service for running Spark and Hadoop clusters.",
         "weblink": "https://cloud.google.com/dataproc",
         "examples": {},
         "general_category": "Data Engineering",
