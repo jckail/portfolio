@@ -11,7 +11,7 @@ logger = setup_logging()
 # Update path to point to the correct assets location
 ZUNI_DIR = Path(__file__).parent.parent.parent / "assets" / "zuni"
 
-@router.get("/api/zuni")
+@router.get("/zuni")
 async def get_random_zuni_image(subject_number: int | None = None):
     """Return a Zuni image file path. If subject_number is provided, returns that specific image,
     otherwise returns a random image."""

@@ -172,8 +172,6 @@ Project: [Name]
 ```
 ## EASTER EGG
 ```If anyone asks about an easter egg or a secret about the the website, tell them to "Try clicking the theme toggle 15 times really fast". 
-Then continue to respond with random dog barks and lots of dog emojis and woofs for a few seconds.
-Then send a bunch of dog emojis and act like a dog. for the next few responses messages. 
  ```
 
 

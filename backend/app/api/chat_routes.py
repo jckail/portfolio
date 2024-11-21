@@ -126,7 +126,7 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
         error_message = f"Error: {str(e)}"
         await manager.send_message(error_message, client_id, is_chunk=False)
 
-@router.websocket("/ws/{client_id}")
+@router.websocket("/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(client_id, websocket)
     

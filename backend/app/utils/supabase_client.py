@@ -2,7 +2,7 @@ from supabase import create_client, Client
 import os
 import sys
 from dotenv import load_dotenv
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 load_dotenv()
@@ -126,6 +126,32 @@ class SupabaseClient:
             return result
         except Exception as e:
             print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
+            return None
+
+    @classmethod
+    async def store_logs_batch(cls, logs: List[Dict[str, Any]]):
+        """Store multiple log entries in Supabase at once."""
+        try:
+            admin_client = cls.get_admin_client()
+            log_entries = []
+            
+            for log in logs:
+                log_entry = {
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'level': log['level'].upper(),
+                    'message': log['message'],
+                    'metadata': log['metadata'],
+                    'source': log['source'],
+                    'ip_address': log['ip_address']
+                }
+                log_entries.append(log_entry)
+            
+            if log_entries:
+                result = admin_client.table('logs').insert(log_entries).execute()
+                return result
+            return None
+        except Exception as e:
+            print(f"Failed to store log batch in Supabase: {str(e)}", file=sys.stderr)
             return None
 
 # Create a module-level interface
