@@ -5,11 +5,13 @@
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   border: 1px solid var(--border-color);
+  color: var(--text-color);
 }
 
 .timeline {
   position: relative;
   padding: var(--spacing-sm) 0;
+  color: var(--text-color);
 }
 
 /* this is the actual line for the time line*/
@@ -21,6 +23,7 @@
   width: 2px;
   height: 100%;
   background: transparent; 
+  color: var(--text-color);
 }
 
 .timeline-item {
@@ -33,16 +36,19 @@
   border: var(--border-thickness) solid var(--primary-border);
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
+  color: var(--text-color);
 }
 
 .timeline-item:last-child {
   margin-bottom: 0;
+  color: var(--text-color);
 }
 
 .timeline-item:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
   border-color: var(--primary-hover);
+  color: var(--text-color);
 }
 
 .timeline-header-wrapper {
@@ -50,6 +56,7 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: var(--spacing-md);
+  color: var(--text-color);
 }
 
 .company-logo {
@@ -57,10 +64,12 @@
   width: 135px;
   height: 45px;
   border-radius: var(--radius-sm);
-  background: var(--image-background);
+  background: var(--section-background);
+  /* background: var(--section-background); */
   border: 2px solid var(--border-color);
   object-fit: contain;
   flex-shrink: 0;
+  color: yellow;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
 }
@@ -71,6 +80,7 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   
+  
 }
 
 .logo-link {
@@ -80,6 +90,7 @@
   width: 90px;
   height: 60px;
   flex-shrink: 0;
+  color: var(--text-color);
 }
 
 .timeline-header {
@@ -88,6 +99,7 @@
   margin-left: 75px;
   justify-content: center;
   height: 70px;
+  color: var(--text-color);
 }
 
 .timeline-header h3 {
@@ -131,6 +143,7 @@
   margin: var(--spacing-md) 0 0 0;
   padding: 0;
   margin-top: 50px;
+  color: var(--text-color);
   
 }
 
@@ -164,6 +177,7 @@
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(5px);
+  color: var(--text-color);
 }
 
 .experience-modal-content {
@@ -177,6 +191,7 @@
   position: relative;
   border: var(--border-thickness) solid var(--primary-border);
   backdrop-filter: blur(5px);
+  color: var(--text-color);
 }
 
 .modal-close-button {
@@ -196,6 +211,7 @@
   align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+  color: var(--text-color);
 }
 
 .modal-icon-wrapper {
@@ -274,6 +290,7 @@
     height: 33px;
     padding: 6px;
     margin-top: 10px;
+    color: var(--text-color);
   }
 
   .logo-link {

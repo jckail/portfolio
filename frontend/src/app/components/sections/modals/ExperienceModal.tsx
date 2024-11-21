@@ -1,4 +1,6 @@
 import React from 'react';
+import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+
 
 export interface ExperienceItem {
   company: string;
@@ -30,14 +32,12 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
             rel="noopener noreferrer"
             className="logo-link"
           >
-            <img 
-              src={experience.logoPath} 
-              alt={`${experience.company} logo`} 
-              className="company-logo"
-              loading="lazy"
-              width="64"
-              height="64"
-            />
+                        <CompanyLogo 
+          name={experience.logoPath || "github-logo.svg"}
+          size={64}
+          aria-label={`${experience.company} logo`}
+          className="company-logo"
+        />
           </a>
         )}
         <div className="timeline-header">

@@ -10,7 +10,7 @@ experience = {
             "Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes.",
         ],
         "link": "https://www.prove.com/",
-        "logoPath": "/images/companylogos/prove.svg",
+        "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
@@ -37,7 +37,7 @@ experience = {
             "Re-architected petabyte-scale data models, reducing storage costs by 25%.",
         ],
         "link": "https://about.fb.com/",
-        "logoPath": "/images/companylogos/meta.svg",
+        "logoPath": "meta.svg",
         "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
@@ -64,7 +64,7 @@ experience = {
             "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.",
         ],
         "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
-        "logoPath": "/images/companylogos/deloitte.svg",
+        "logoPath": "deloitte.svg",
         "company_description": "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
@@ -91,7 +91,7 @@ experience = {
             "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.",
         ],
         "link": "https://www.wowway.com/",
-        "logoPath": "/images/companylogos/wow.svg",
+        "logoPath": "wow.svg",
         "company_description": "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
@@ -116,7 +116,7 @@ experience = {
             "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes."
         ],
         "link": "https://www.commonspirit.org/",
-        "logoPath": "/images/companylogos/commonspirit.svg",
+        "logoPath": "commonspirit.svg",
         "company_description": "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states.",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
@@ -144,7 +144,7 @@ experience = {
             "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue."
         ],
         "link": "https://www.r1rcm.com/",
-        "logoPath": "/images/companylogos/r1.svg",
+        "logoPath": "r1.svg",
         "company_description": "R1 RCM is an American healthcare revenue cycle management company servicing hospitals, health systems and physician groups across the United States. Headquartered in Chicago, Illinois, R1 RCM is publicly traded on the NASDAQ.",
         "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [

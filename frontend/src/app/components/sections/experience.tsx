@@ -1,5 +1,6 @@
 import React, { useState, lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
+import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/features/sections/experience.css';
 import type { ExperienceItem } from './modals/ExperienceModal';
 
@@ -36,15 +37,13 @@ const ExperienceTimeline = memo(({
                 onMouseEnter={prefetchModal}
                 style={{ cursor: 'pointer' }}
               >
-                <img 
-                  src={item.logoPath} 
-                  alt={`${item.company} logo`} 
-                  className="company-logo"
-                  loading="lazy"
-                  width="64"
-                  height="64"
-                  decoding="async"
-                />
+
+                        <CompanyLogo 
+          name={item.logoPath || "github-logo.svg"}
+          size={64}
+          aria-label={`${item.company} logo`}
+          className="company-logo"
+        />
               </div>
             )}
             <div className="timeline-header">
