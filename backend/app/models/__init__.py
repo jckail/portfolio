@@ -1,8 +1,16 @@
-from .old_models.aboutme import about_me
-from .old_models.contact import contact
-from .old_models.experience import experience
-from .old_models.projects import projects
-from .old_models.skills import skills
+from .experience import Experience, ExperienceHighlight
+from .projects import Projects, ProjectDetail
+from .skills import Skills, SkillDetail
+from .aboutme import AboutMe
+from .contact import Contact
+from .data_loader import (
+    load_experience,
+    load_projects,
+    load_skills,
+    load_aboutme,
+    load_contact,
+    load_all
+)
 
 def get_all_models():
     """
@@ -10,9 +18,29 @@ def get_all_models():
     Returns a dictionary containing all model data.
     """
     return {
-        "about_me": about_me,
-        "contact": contact,
-        "experience": experience,
-        "projects": projects,
-        "skills": skills
+        "about_me": load_aboutme(),
+        "contact": load_contact(),
+        "experience": load_experience(),
+        "projects": load_projects(),
+        "skills": load_skills()
     }
+
+
+__all__ = [
+    # Models
+    'Experience',
+    'ExperienceHighlight',
+    'Projects',
+    'ProjectDetail',
+    'Skills',
+    'SkillDetail',
+    'AboutMe',
+    'Contact',
+    # Data loaders
+    'load_experience',
+    'load_projects',
+    'load_skills',
+    'load_aboutme',
+    'load_contact',
+    'load_all'
+]

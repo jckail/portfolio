@@ -1,21 +1,20 @@
-from fastapi import APIRouter, Response
-from ..models.old_models.aboutme import about_me
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
+from ..models import AboutMe
+from ..models.data_loader import load_aboutme
 
 router = APIRouter()
 
-@router.get("/aboutme")
-async def get_aboutme() -> Response:
+@router.get("/aboutme", response_model=AboutMe)
+async def get_aboutme() -> AboutMe:
     """
     Get all about me information.
-    Returns a dictionary of all about me details with caching headers.
+    Returns AboutMe model with all about me details.
     """
-    headers = {
-        "Cache-Control": "public, max-age=3600",  # Cache for 1 hour
-        "Vary": "Accept-Encoding"
-    }
-    
-    return JSONResponse(
-        content=about_me,
-        headers=headers
-    )
+    try:
+        about_me = load_aboutme()
+        return about_me
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

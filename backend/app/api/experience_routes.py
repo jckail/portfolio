@@ -1,27 +1,42 @@
 from fastapi import APIRouter, HTTPException
-from typing import Optional
-from ..models.old_models.experience import experience
+from typing import Dict
+from ..models import Experience, ExperienceHighlight
+from ..models.data_loader import load_experience
 
 router = APIRouter()
 
-@router.get("/experience")
-async def get_all_experience() -> dict:
+@router.get("/experience", response_model=Dict[str, ExperienceHighlight])
+async def get_all_experience() -> Dict[str, ExperienceHighlight]:
     """
     Get all experience entries.
-    Returns a dictionary of all professional experience.
+    Returns dictionary of experience details mapped by company key.
     """
-    return experience
+    try:
+        experience = load_experience()
+        return experience.model_dump()
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/experience/{company_key}")
-async def get_experience(company_key: str) -> dict:
+@router.get("/experience/{company_key}", response_model=ExperienceHighlight)
+async def get_experience(company_key: str) -> ExperienceHighlight:
     """
     Get experience by company key.
     Returns the experience details if found, otherwise raises 404.
     """
-    # Convert company key to lowercase for dictionary lookup
-    company_key = company_key.lower()
-    
-    if company_key in experience:
-        return experience[company_key]
-    
-    raise HTTPException(status_code=404, detail="Experience not found")
+    try:
+        # Convert company key to lowercase for dictionary lookup
+        company_key = company_key.lower()
+        
+        experience = load_experience()
+        experience_dict = experience.model_dump()
+        
+        if company_key in experience_dict:
+            return experience_dict[company_key]
+        
+        raise HTTPException(status_code=404, detail="Experience not found")
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,12 +1,19 @@
-from fastapi import APIRouter
-from ..models.old_models.contact import contact
+from fastapi import APIRouter, HTTPException
+from ..models import Contact
+from ..models.data_loader import load_contact
 
 router = APIRouter()
 
-@router.get("/contact")
-async def get_contact() -> dict:
+@router.get("/contact", response_model=Contact)
+async def get_contact() -> Contact:
     """
     Get all contact information.
-    Returns a dictionary of all contact details.
+    Returns Contact model with all contact details.
     """
-    return contact
+    try:
+        contact = load_contact()
+        return contact
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
