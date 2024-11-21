@@ -55,6 +55,15 @@ const ExperienceTimeline = memo(({
               </div>
             </div>
           </div>
+          <div className="experience-highlights">
+          <div className="skill-tags">
+            {item.tech_stack.map((tag: string, index: number) => (
+              <span key={index} className="skill-tag">
+                {tag.replace(/-/g, ' ')}
+              </span>
+            ))}
+          </div>
+          
           {item.highlights && (
             <ul className="highlights">
               {item.highlights.map((highlight, idx) => (
@@ -62,6 +71,7 @@ const ExperienceTimeline = memo(({
               ))}
             </ul>
           )}
+        </div>
         </div>
       ))}
     </div>

@@ -138,11 +138,15 @@
   margin-left: var(--spacing-sm);
 }
 
+.experience-highlights {
+  margin-top: 50px;
+}
+
 .highlights {
   list-style: none;
   margin: var(--spacing-md) 0 0 0;
   padding: 0;
-  margin-top: 50px;
+  
   color: var(--text-color);
   
 }
