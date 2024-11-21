@@ -60,7 +60,7 @@
 
 .skill-category h3 {
   color: var(--text-color);
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   margin-bottom: var(--spacing-md);
   padding-bottom: var(--spacing-xs);
   border-bottom: var(--border-thickness) solid var(--underline-color);
@@ -224,7 +224,10 @@
     padding: var(--spacing-md);
     
   }
-
+  .skill-category h3 {
+    color: var(--text-color);
+    font-size: 1.2rem;
+  }
   .skill-list {
     grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     gap: var(--spacing-sm);

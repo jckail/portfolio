@@ -72,21 +72,7 @@
   font-weight: bold;
 }
 
-/* .section h3,
-#about h3,
-#skills h3,
-#experience h3,
-#projects h3,
-#resume h3 {
-  color: var(--text-color);
-  font-size: 1.25rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-  text-align: left;
-  width: 100%;
-  max-width: 1080px;
-  font-weight: bold;
-} */
+
 
 @media (max-width: 768px) {
   .section-container {
@@ -115,35 +101,7 @@
     max-width: 95%;
   }
 
-  /* .section h3,
-  #about h3,
-  #skills h3,
-  #experience h3,
-  #projects h3,
-  #resume h3 {
-    color: var(--text-color);
-    font-size: 1.1rem;
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-    text-align: left;
-    width: 100%;
-    max-width: 1080px;
-  } */
-
-  /* .section h4,
-  #about h4,
-  #skills h4,
-  #experience h4,
-  #projects h4,
-  #resume h4 {
-    color: var(--text-color);
-    font-size: .75rem;
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-    text-align: left;
-    width: 100%;
-    max-width: 1080px;
-  } */
+  
 }
 
 @media (max-width: 480px) {
