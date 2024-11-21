@@ -49,9 +49,12 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({ experience, onClose }
           </div>
         </div>
       </div>
+      
       <div className="modal-body">
+      <h4>Company Description:</h4>
         <p className="company-description">{experience.company_description}</p>
         <div className="highlights-section">
+        <h4>Tech Stack:</h4>
           <div className="skill-tags">
             {experience.tech_stack.map((tag: string, index: number) => (
               <span key={index} className="skill-tag">

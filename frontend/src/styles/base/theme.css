@@ -7,7 +7,7 @@
   --section-background: transparent;
   --section-background-blur: 7px;
   --text-color: #000000;
-  --text-secondary: #666666;
+  --text-secondary: #535353;
   --border-color: #000000;
   --primary: #0403ff;
   --primary-hover: #000000;
@@ -24,6 +24,7 @@
   --border-thickness: 3px;
   --image-background: #ffffff;
   --underline-color: #000000;
+  --skill-tag-background:#000000;
 }
 
 .theme-dark {
@@ -32,7 +33,7 @@
   --section-background: #0303ff1d;
   --section-background-blur: 5px;
   --text-color: #ffffff;
-  --text-secondary: #999999;
+  --text-secondary: #d4d4d4;
   --border-color: #0303ff11;
   --primary: #0403ff;
   --primary-hover: #3332ff;
@@ -49,6 +50,7 @@
   --border-thickness: 2px;
   --image-background: #ffffff;
   --underline-color: #0403ff;
+  --skill-tag-background:#0403ff;
 }
 
 .theme-party {
