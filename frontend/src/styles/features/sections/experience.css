@@ -69,7 +69,7 @@
   border: 2px solid var(--border-color);
   object-fit: contain;
   flex-shrink: 0;
-  color: yellow;
+  color: var(--text-color);
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
 }

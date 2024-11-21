@@ -17,12 +17,12 @@ export interface IconProps {
   'aria-label'?: string;
 }
 
-const CompanyLogo: React.FC<IconProps> = ({ name, className = 'project-icon', size = 32, ...props }) => {
+const CompanyLogo: React.FC<IconProps> = ({ name, className = 'company-logo', size = 32, ...props }) => {
   const SvgComponent = SVG_COMPONENTS[name];
 
   if (SvgComponent) {
     return (
-      <Suspense fallback={<div className={`${className} skeleton`} style={{ width: size, height: size }} />}>
+      <Suspense fallback={<div className={`${className} company-logo`} style={{ width: size, height: size }} />}>
         <SvgComponent
           width={size}
           height={size}
