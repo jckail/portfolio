@@ -128,27 +128,30 @@
 }
 
 .project-link.primary {
-  background: var(--primary);
-  color: white;
+  background: var(--section-background);
+  border: var(--border-thickness) solid var(--primary-border);
+  color: var(--text-color);
 }
 
 .project-link.primary:hover {
+  color: white;
+  background: var(--primary);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  box-shadow: 0 0 30px var(--primary);
+  border: var(--border-thickness) solid var(--primary);
 }
 
 .project-link.secondary {
   background: var(--section-background);
-  color: var(--text-color);
   border: var(--border-thickness) solid var(--primary-border);
+  color: var(--text-color);
+  
 }
 
 .project-link.secondary:hover {
+  color: white;
   background: var(--primary);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  box-shadow: 0 0 30px var(--primary);
+  border: var(--border-thickness) solid var(--primary);
 }
 
 @keyframes fadeInUp {
