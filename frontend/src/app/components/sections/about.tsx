@@ -1,6 +1,6 @@
 import React, { useEffect, memo } from 'react';
 import { useData } from '../../providers/data-provider';
-import '../../../styles/features/sections/about.css';
+import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
 

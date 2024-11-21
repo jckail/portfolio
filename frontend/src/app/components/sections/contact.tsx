@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../../styles/features/sections/contact.css';
+import '../../../styles/components/sections/contact.css';
 
 interface ContactProps {
   contact: {

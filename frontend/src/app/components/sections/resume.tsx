@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useResume } from '../../providers/resume-provider';
-import '../../../styles/features/sections/resume.css';
+import '../../../styles/components/sections/resume.css';
 import PDFViewer from './modals/PDFViewer';
 
 const LoadingSpinner = () => (

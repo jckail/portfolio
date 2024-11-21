@@ -89,7 +89,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 fontFamily: "'Montserrat', sans-serif !important",
                 fontWeight: "600",
                 lineHeight: 1.5,
-                color: 'var(--primary)',
+                color: 'white',
               }}
             >
               Thinking...

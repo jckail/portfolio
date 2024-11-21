@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
-import '../../../styles/features/sections/projects.css';
+import '../../../styles/components/sections/projects.css';
 
 const LoadingSpinner = () => (
   <div className="section-loading">

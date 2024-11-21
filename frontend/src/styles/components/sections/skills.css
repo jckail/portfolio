@@ -78,11 +78,11 @@
   transition: all var(--transition-fast);
   padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  background: var(--surface-color);
+  background: var(--section-background);
   border: 1px solid var(--border-color);
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
-  backdrop-filter: blur(var(--section-background-blur));
+  
 }
 
 .skill-item:hover {

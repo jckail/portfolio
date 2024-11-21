@@ -2,7 +2,7 @@ import React, { useState, useRef, lazy, Suspense, useEffect, memo } from 'react'
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import type { Skill } from './modals/SkillModal';
-import '../../../styles/features/sections/skills.css';
+import '../../../styles/components/sections/skills.css';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
 

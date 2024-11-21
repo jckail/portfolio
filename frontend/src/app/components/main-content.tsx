@@ -1,37 +1,37 @@
 import React, { useState, useEffect, Suspense } from 'react';
-import { Header } from '../../../shared/components/header';
-import TLDR from '../sections/about';  // Keep TLDR eager loaded as it's above the fold
-import { useScrollSpy } from '../../../shared/hooks/use-scroll-spy';
-import { useAppLogic } from '../../providers/app-logic-provider';
-import { useAdminStore } from '../../../shared/stores/admin-store';
-import { ErrorBoundary } from '../../components/error-boundary';
-import '../../../styles/components/layout/main-content.css';
-import '../../../styles/components/layout/loading.css';
+import { Header } from '../../shared/components/header';
+import TLDR from './sections/about';  // Keep TLDR eager loaded as it's above the fold
+import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
+import { useAppLogic } from '../providers/app-logic-provider';
+import { useAdminStore } from '../../shared/stores/admin-store';
+import { ErrorBoundary } from './error-boundary';
+import '../../styles/components/main-content.css';
+import '../../styles/components/loading.css';
 
 // Lazy load components below the fold
 const TechnicalSkills = React.lazy(() => 
-  import('../sections/skills').then(module => ({
+  import('./sections/skills').then(module => ({
     default: module.default,
     __esModule: true,
   }))
 );
 
 const Experience = React.lazy(() => 
-  import('../sections/experience').then(module => ({
+  import('./sections/experience').then(module => ({
     default: module.default,
     __esModule: true,
   }))
 );
 
 const Projects = React.lazy(() => 
-  import('../sections/projects').then(module => ({
+  import('./sections/projects').then(module => ({
     default: module.default,
     __esModule: true,
   }))
 );
 
 const MyResume = React.lazy(() => 
-  import('../sections/resume').then(module => ({
+  import('./sections/resume').then(module => ({
     default: module.default,
     __esModule: true,
   }))
@@ -39,14 +39,14 @@ const MyResume = React.lazy(() =>
 
 // Admin components
 const AdminHandler = React.lazy(() => 
-  import('../admin/admin-handler').then(module => ({
+  import('./admin/admin-handler').then(module => ({
     default: module.default,
     __esModule: true,
   }))
 );
 
 const AdminLogin = React.lazy(() => 
-  import('../admin/admin-login').then(module => ({
+  import('./admin/admin-login').then(module => ({
     default: module.default,
     __esModule: true,
   }))
@@ -124,14 +124,11 @@ const MainContentInner: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
 
-
-
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>
               <Projects />
             </Suspense>
           </ErrorBoundary>
-
 
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>

@@ -1,7 +1,7 @@
 import React, { useState, lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
-import '../../../styles/features/sections/experience.css';
+import '../../../styles/components/sections/experience.css';
 import type { ExperienceItem } from './modals/ExperienceModal';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));

@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
-import MainContent from './components/layout/main-content';
+import MainContent from './components/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
 import { DataProvider } from './providers/data-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
@@ -8,7 +8,7 @@ import { useThemeBackground } from '../shared/hooks';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 
-import './styles/app.css';
+import '../styles/base/app.css';
 
 // Lazy load ChatPortal since it's not immediately needed
 const ChatPortal = React.lazy(() => import('./components/chat').then(module => ({
