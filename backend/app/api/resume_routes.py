@@ -1,49 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from ..utils.logger import setup_logging
-from ..models.resume_data import resume_data
 import os
 from dotenv import load_dotenv
 
 router = APIRouter()
 logger = setup_logging()
 
-@router.get("/resume_data")
-async def get_resume():
-    try:
-        transformed_data = {
-            "name": resume_data["name"],
-            "title": resume_data["title"],
-            "github": resume_data["contact"]["github"],
-            "linkedin": resume_data["contact"]["linkedin"],
-            "aboutMe": resume_data["about_me"],
-            "contact": {
-                "email": resume_data["contact"]["email"],
-                "phone": resume_data["contact"]["phone"],
-                "website": resume_data["contact"]["website"],
-                "location": resume_data["contact"]["location"],
-                "github": resume_data["contact"]["github"],
-                "linkedin": resume_data["contact"]["linkedin"],
-            },
-            "technicalSkills": resume_data["skills"],
-            "experience": [
-                {
-                    "title": job["title"],
-                    "company": job["company"],
-                    "date": job["date"],
-                    "responsibilities": job["highlights"],
-                    "link": job["link"],
-                    "logoPath": job["logoPath"]
-                }
-                for job in resume_data["experience"]
-            ],
-            "projects": resume_data["projects"]
-        }
-        logger.info("Resume data successfully retrieved")
-        return transformed_data
-    except Exception as e:
-        logger.error(f"Error retrieving resume data: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 def get_resume_file_path():
     """Fetch the resume file path, ensuring the environment variable is set and the file exists."""

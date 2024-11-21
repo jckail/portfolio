@@ -47,8 +47,8 @@ logger.info("All required environment variables are present")
 
 # Initialize FastAPI
 app = FastAPI(
-    title="QuickResume API",
-    description="API for the QuickResume application",
+    title="jordan-kail.com API",
+    description="API for the Jordan-Kail.com application",
     version="1.0.0"
 )
 

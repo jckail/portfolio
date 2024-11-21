@@ -1,5 +1,5 @@
 {
-    "name": "QuickResume Dev Container",
+    "name": "Portfolio Dev Container",
     "dockerFile": "Dockerfile",
     "context": "..",
     "runArgs": ["--env-file", "../.env"],

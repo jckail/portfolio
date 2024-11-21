@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..models.contact import contact
+from ..models.old_models.contact import contact
 
 router = APIRouter()
 

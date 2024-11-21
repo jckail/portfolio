@@ -1,8 +1,8 @@
-from .aboutme import about_me
-from .contact import contact
-from .experience import experience
-from .projects import projects
-from .skills import skills
+from .old_models.aboutme import about_me
+from .old_models.contact import contact
+from .old_models.experience import experience
+from .old_models.projects import projects
+from .old_models.skills import skills
 
 def get_all_models():
     """

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
-from ..models.skills import skills
+from ..models.old_models.skills import skills
 
 router = APIRouter()
 

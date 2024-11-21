@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Optional
 from backend.app.utils.supabase_client import SupabaseClient
-from backend.app.models.resume_data import resume_data
 from backend.app.middleware.auth_middleware import verify_admin_token
 import os
 import json
@@ -102,21 +101,7 @@ async def get_admin_logs(user = Depends(verify_admin_token)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.put("/resume-data")
-async def update_resume_data(updated_data: dict, user = Depends(verify_admin_token)):
-    """Update resume data"""
-    try:
-        resume_data.update(updated_data)
-        
-        backup_path = os.path.join(os.path.dirname(__file__), "../data/resume_backup.json")
-        os.makedirs(os.path.dirname(backup_path), exist_ok=True)
-        
-        with open(backup_path, 'w') as f:
-            json.dump(resume_data, f, indent=2)
-            
-        return {"message": "Resume data updated successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/health")
 async def get_admin_health(user = Depends(verify_admin_token)):

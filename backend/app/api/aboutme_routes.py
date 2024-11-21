@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from ..models.aboutme import about_me
+from ..models.old_models.aboutme import about_me
 from fastapi.responses import JSONResponse
 
 router = APIRouter()

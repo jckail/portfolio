@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ResumeData } from '../../types/resume';
 
 interface ResumeContextType {
-  resumeData: ResumeData | null;
   error: string | null;
   isLoading: boolean;
   pdfUrl: string | null;
@@ -11,7 +9,6 @@ interface ResumeContextType {
 }
 
 const ResumeContext = createContext<ResumeContextType>({
-  resumeData: null,
   error: null,
   isLoading: true,
   pdfUrl: null,
@@ -26,7 +23,6 @@ interface ResumeProviderProps {
 }
 
 export const ResumeProvider: React.FC<ResumeProviderProps> = ({ children }) => {
-  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -46,23 +42,6 @@ export const ResumeProvider: React.FC<ResumeProviderProps> = ({ children }) => {
     }
   };
 
-  const fetchResumeData = async () => {
-    try {
-      const response = await fetch('/api/resume_data');
-      if (!response.ok) {
-        throw new Error('Failed to fetch resume data');
-      }
-      const data = await response.json();
-      setResumeData(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching resume data:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setResumeData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDownload = async () => {
     if (!resumeFileName) {
@@ -91,7 +70,7 @@ export const ResumeProvider: React.FC<ResumeProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    Promise.all([fetchResumeData(), fetchResumeFileName()]);
+    Promise.all([ fetchResumeFileName()]);
   }, []);
 
   // Cleanup PDF URL when component unmounts
@@ -106,7 +85,7 @@ export const ResumeProvider: React.FC<ResumeProviderProps> = ({ children }) => {
   return (
     <ResumeContext.Provider
       value={{
-        resumeData,
+        
         error,
         isLoading,
         pdfUrl,
