@@ -79,7 +79,6 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
     { id: 'experience', label: 'Experience' },
     { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
-    
     // { id: 'contact', label: 'Contact' },
     { id: 'resume', label: 'Resume' },
   ];

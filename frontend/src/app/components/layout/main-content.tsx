@@ -31,7 +31,7 @@ const Projects = React.lazy(() =>
 );
 
 const MyResume = React.lazy(() => 
-  import('../sections/my-resume').then(module => ({
+  import('../sections/resume').then(module => ({
     default: module.default,
     __esModule: true,
   }))

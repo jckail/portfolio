@@ -7,18 +7,17 @@
 }
 
 .download-button {
+  width: 100%;
   background: var(--primary-border);
-  
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   border: none;
   font-size: 1.5rem;
   transition: background-color var(--transition-fast);
-
-
+  margin-bottom: 2rem;
 }
 
-.button-text{
+.button-text {
   color: white;
   font-size: 1.5rem;
   font-family: 'Quantico', sans-serif !important;
@@ -36,14 +35,12 @@ a:not(.resume-button) {
   color: white;
   text-decoration: none;
   font-weight: bold;
-  
 }
 
 a:not(.resume-button):hover {
   text-decoration: underline;
   box-shadow: var(--shadow-lg);
   border-color: white;
-
 }
 
 .resume-section {
@@ -54,7 +51,7 @@ a:not(.resume-button):hover {
 }
 
 .resume-content {
-  max-width: 1080px;  /* Increased for better readability */
+  max-width: 1080px;
   margin: 0 auto;
   backdrop-filter: blur(var(--section-background-blur));
   padding: var(--spacing-xl) var(--spacing-lg);
@@ -76,7 +73,7 @@ a:not(.resume-button):hover {
 }
 
 .resume-content h2 {
-  font-size: 2.75rem;  /* Slightly increased */
+  font-size: 2.75rem;
   margin-bottom: var(--spacing-lg);
   color: var(--text-color);
   border: none;
@@ -85,23 +82,10 @@ a:not(.resume-button):hover {
 
 .resume-content p {
   font-size: var(--font-size-base);
-  line-height: 2;  /* Increased for better readability */
+  line-height: 2;
   color: var(--text-color);
   margin-bottom: var(--spacing-xl);
-  letter-spacing: 0.01em;  /* Slight letter spacing for readability */
-}
-
-.download-button {
-  display: inline-block;
-  padding: var(--spacing-md) var(--spacing-xl);
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  color: white;
-  background: var(--primary);
-  border: none;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow-md);
+  letter-spacing: 0.01em;
 }
 
 .button-content {
@@ -116,19 +100,87 @@ a:not(.resume-button):hover {
   transition: transform var(--transition-normal);
 }
 
-.download-button:hover {
+
+
+
+.loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-md);
+}
+
+.error-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: var(--radius-md);
+  max-width: 80%;
+}
+
+.error-message {
+  color: var(--error-color, #ff4444);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.retry-button {
+  background: var(--primary-border);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-family: 'Quantico', sans-serif;
+}
+
+.retry-button:hover {
   background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
-.download-button:hover .button-icon {
-  transform: translateY(2px);
+.hidden {
+  display: none;
 }
 
-.download-button:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+.block {
+  display: block;
+}
+
+.resume-pdf-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  overflow: auto;
+  background: transparent;
+  box-sizing: border-box;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resume-pdf-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
 }
 
 @keyframes float {
@@ -154,9 +206,10 @@ a:not(.resume-button):hover {
   }
 
   .resume-content p {
-    font-size: 1.15rem;  /* Increased mobile size */
+    font-size: 1.15rem;
     line-height: 1.8;
     margin-bottom: var(--spacing-lg);
+    min-height: 1200px;
   }
 
   .download-button {
@@ -164,4 +217,13 @@ a:not(.resume-button):hover {
     font-size: 1.15rem;
     width: 100%;
   }
+  .resume-pdf-container {
+    height: 85vh;
+    margin: 2rem auto;
+    padding: 0.5rem;
+  }
+
+
+  
+  
 }
