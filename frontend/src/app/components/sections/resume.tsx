@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useResume } from '../../providers/resume-provider';
 import '../../../styles/features/sections/resume.css';
+import PDFViewer from './modals/PDFViewer';
 
 const LoadingSpinner = () => (
   <div className="loading-spinner"></div>
@@ -9,7 +10,6 @@ const LoadingSpinner = () => (
 const MyResume: React.FC = () => {
   const { handleDownload } = useResume();
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleDownloadWithLoading = async () => {
@@ -19,15 +19,6 @@ const MyResume: React.FC = () => {
     } finally {
       setIsDownloading(false);
     }
-  };
-
-  const handleIframeLoad = () => {
-    setIsLoading(false);
-  };
-
-  const handleIframeError = () => {
-    setError('Failed to load PDF. Please ensure the server is running and the PDF is available.');
-    setIsLoading(false);
   };
 
   return (
@@ -54,27 +45,12 @@ const MyResume: React.FC = () => {
             </button>
           </div>
           <div className="resume-pdf-container">
-            {isLoading && (
-              <div className="loading-container">
-                <LoadingSpinner />
-              </div>
-            )}
-            
             {error && (
               <div className="error-container">
                 <p className="error-message">{error}</p>
               </div>
             )}
-
-            <iframe
-              src="/api/resume"
-              className={`pdf-frame ${isLoading ? 'hidden' : 'block'}`}
-              onLoad={handleIframeLoad}
-              onError={handleIframeError}
-              title="Resume PDF Viewer"
-              
-            />
-            
+            <PDFViewer />
           </div>
         </div>
       </div>

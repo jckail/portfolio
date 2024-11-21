@@ -1,6 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { ThemeProvider } from './providers/theme-provider';
-import { ResumeProvider } from './providers/resume-provider';
 import { TelemetryProvider } from './providers/telemetry-provider';
 
 interface AppProviderProps {
@@ -13,11 +12,9 @@ export function AppProvider({ children }: AppProviderProps) {
   return (
     <AppContext.Provider value={null}>
       <ThemeProvider>
-        <ResumeProvider>
           <TelemetryProvider>
             {children}
           </TelemetryProvider>
-        </ResumeProvider>
       </ThemeProvider>
     </AppContext.Provider>
   );
