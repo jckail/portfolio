@@ -3,12 +3,19 @@ import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/components/sections/experience.css';
 import type { ExperienceItem } from './modals/ExperienceModal';
+import type { Skill } from './modals/SkillModal';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
+const SkillModal = lazy(() => import('./modals/SkillModal'));
 
-// Prefetch function for the modal
-const prefetchModal = () => {
+// Prefetch functions for the modals
+const prefetchExperienceModal = () => {
   const modalPromise = import('./modals/ExperienceModal');
+  return modalPromise;
+};
+
+const prefetchSkillModal = () => {
+  const modalPromise = import('./modals/SkillModal');
   return modalPromise;
 };
 
@@ -20,11 +27,22 @@ const LoadingSpinner = () => (
 
 const ExperienceTimeline = memo(({ 
   experience, 
-  onSelectExperience 
+  skillsData,
+  onSelectExperience,
+  onSelectSkill 
 }: { 
   experience: Record<string, ExperienceItem>;
+  skillsData: Record<string, Skill>;
   onSelectExperience: (key: string) => void;
+  onSelectSkill: (skillName: string) => void;
 }) => {
+  // Function to find skill key by display name
+  const findSkillKey = (tagName: string): string | undefined => {
+    return Object.entries(skillsData).find(
+      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
+    )?.[0];
+  };
+
   return (
     <div className="timeline">
       {Object.entries(experience).map(([key, item]) => (
@@ -34,16 +52,15 @@ const ExperienceTimeline = memo(({
               <div 
                 className="logo-link"
                 onClick={() => onSelectExperience(key)}
-                onMouseEnter={prefetchModal}
+                onMouseEnter={prefetchExperienceModal}
                 style={{ cursor: 'pointer' }}
               >
-
-                        <CompanyLogo 
-          name={item.logoPath || "github-logo.svg"}
-          size={64}
-          aria-label={`${item.company} logo`}
-          className="company-logo"
-        />
+                <CompanyLogo 
+                  name={item.logoPath || "github-logo.svg"}
+                  size={64}
+                  aria-label={`${item.company} logo`}
+                  className="company-logo"
+                />
               </div>
             )}
             <div className="timeline-header">
@@ -56,22 +73,31 @@ const ExperienceTimeline = memo(({
             </div>
           </div>
           <div className="experience-highlights">
-          <div className="skill-tags">
-            {item.tech_stack.map((tag: string, index: number) => (
-              <span key={index} className="skill-tag">
-                {tag.replace(/-/g, ' ')}
-              </span>
-            ))}
+            <div className="skill-tags">
+              {item.tech_stack.map((tag: string, index: number) => {
+                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
+                return (
+                  <span 
+                    key={index} 
+                    className="skill-tag"
+                    onClick={() => skillKey && onSelectSkill(skillKey)}
+                    onMouseEnter={prefetchSkillModal}
+                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                  >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                );
+              })}
+            </div>
+            
+            {item.highlights && (
+              <ul className="highlights">
+                {item.highlights.map((highlight, idx) => (
+                  <li key={idx}>{highlight}</li>
+                ))}
+              </ul>
+            )}
           </div>
-          
-          {item.highlights && (
-            <ul className="highlights">
-              {item.highlights.map((highlight, idx) => (
-                <li key={idx}>{highlight}</li>
-              ))}
-            </ul>
-          )}
-        </div>
         </div>
       ))}
     </div>
@@ -79,12 +105,13 @@ const ExperienceTimeline = memo(({
 });
 
 const Experience: React.FC = () => {
-  const { experienceData, isLoading, error } = useData();
+  const { experienceData, skillsData, isLoading, error } = useData();
   const [selectedExperience, setSelectedExperience] = useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
   if (error) return <div>Error: {error}</div>;
 
-  if (isLoading || !experienceData) {
+  if (isLoading || !experienceData || !skillsData) {
     return (
       <section id="experience" className="section-container">
         <div className="section-content">
@@ -102,7 +129,9 @@ const Experience: React.FC = () => {
       <div className="section-content">
         <ExperienceTimeline 
           experience={experienceData}
+          skillsData={skillsData}
           onSelectExperience={setSelectedExperience}
+          onSelectSkill={setSelectedSkill}
         />
       </div>
 
@@ -111,6 +140,15 @@ const Experience: React.FC = () => {
           <ExperienceModal
             experience={experienceData[selectedExperience]}
             onClose={() => setSelectedExperience(null)}
+          />
+        </Suspense>
+      )}
+
+      {selectedSkill && skillsData[selectedSkill] && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <SkillModal
+            skill={skillsData[selectedSkill]}
+            onClose={() => setSelectedSkill(null)}
           />
         </Suspense>
       )}

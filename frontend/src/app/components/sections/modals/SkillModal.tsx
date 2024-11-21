@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 
 export interface Skill {
@@ -19,6 +19,32 @@ interface SkillModalProps {
 }
 
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
+  useEffect(() => {
+    // Save current URL to restore it when modal closes
+    const currentUrl = window.location.pathname;
+    
+    // Update URL to include the skill name (URL friendly)
+    const skillUrl = `/skills/${skill.display_name.toLowerCase().replace(/\s+/g, '-')}`;
+    window.history.pushState({ skillModal: true }, '', skillUrl);
+
+    // Restore original URL when modal closes
+    return () => {
+      window.history.pushState({ skillModal: false }, '', currentUrl);
+    };
+  }, [skill.display_name]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (!event.state?.skillModal) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [onClose]);
+
   return (
     <div className="skill-modal-overlay" onClick={onClose}>
       <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
