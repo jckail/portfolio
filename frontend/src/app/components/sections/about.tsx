@@ -1,5 +1,6 @@
 import React, { useEffect, memo, useState, lazy, Suspense } from 'react';
 import { useData } from '../../providers/data-provider';
+import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
@@ -61,31 +62,6 @@ const TLDRContent = memo(({
           />
         </div>
       </div>
-      {/* keep this for rainy day
-      <div className="about-skill-icons">
-      <ErrorBoundary>
-          {aboutMeData.primary_skills.map((skillName, index) => (
-            <div
-              key={index}
-              className="about-skill-item"
-              onClick={() => setSelectedSkill(skillName.toLowerCase())}
-              style={{ '--item-index': index } as React.CSSProperties}
-            >
-              <div className="about-skill-icon-container">
-                <div className="icon-wrapper">
-                  <SkillIcon
-                    name={`${skillName.toLowerCase()}.svg`}
-                    className="about-skill-icon"
-                    size={32}
-                    aria-label={skillName}
-                  />
-                </div>
-                <span className="about-skill-name">{skillName}</span>
-              </div>
-            </div>
-          ))}
-          </ErrorBoundary>
-        </div> */}
 
       <div className="brief-bio">
         <ErrorBoundary>
@@ -115,10 +91,7 @@ const TLDR: React.FC = () => {
   const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
 
   const handleResumeClick = () => {
-    const resumeSection = document.getElementById('resume');
-    if (resumeSection) {
-      resumeSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToSection('resume');
   };
 
   // Start preloading the default headshot immediately

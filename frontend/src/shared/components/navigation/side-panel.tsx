@@ -1,5 +1,6 @@
 import React from 'react';
 import { useScrollSpy } from '../../hooks/use-scroll-spy';
+import { scrollToSection } from '../../utils/scroll-utils';
 import '../../../styles/components/navigation/side-panel.css';
 
 interface SidePanelProps {
@@ -79,38 +80,12 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
     { id: 'experience', label: 'Experience' },
     { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
-    // { id: 'contact', label: 'Contact' },
     { id: 'resume', label: 'Resume' },
   ];
 
   const handleNavClick = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      // Get the header height from CSS variable
-      const headerHeight = parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue('--header-height')
-        .trim()
-        .replace('px', ''));
-
-      // First scroll to bring the element into view
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-      
-      // Then adjust for header height
-      setTimeout(() => {
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = window.scrollY + elementPosition - headerHeight;
-        
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }, 100); // Small delay to ensure scrollIntoView has completed
-
-      onClose();
-    }
+    scrollToSection(id);
+    onClose();
   };
 
   return (
