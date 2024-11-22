@@ -55,11 +55,12 @@ const TLDRContent = memo(({
               key={index}
               className="about-skill-item"
               onClick={() => setSelectedSkill(skillName.toLowerCase())}
+              style={{ '--item-index': index } as React.CSSProperties}
             >
               <div className="about-skill-icon-container">
                 <div className="icon-wrapper">
                   <SkillIcon
-                    name={skillName.toLowerCase()}
+                    name={`${skillName.toLowerCase()}.svg`}
                     className="about-skill-icon"
                     size={32}
                     aria-label={skillName}
