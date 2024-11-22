@@ -38,4 +38,5 @@ export interface AboutMe {
   aidetails: string;
   brief_bio: string;
   full_portrait: string;
+  primary_skills: string[];
 }

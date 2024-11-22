@@ -20,6 +20,7 @@ const TLDRContent = memo(({
     description: string;
     aidetails: string;
     full_portrait: string;
+    primary_skills: string[];
   };
   contactData: {
     github: string;
@@ -41,6 +42,18 @@ const TLDRContent = memo(({
       <h2>{aboutMeData.greeting}</h2>
       <div className="about-content">
         <p>{aboutMeData.description}</p>
+        <div className="skill-icons">
+          {aboutMeData.primary_skills.map((skill, index) => (
+            <img
+              key={index}
+              src={`/images/icons/${skill.toLowerCase()}.svg`}
+              alt={`${skill} icon`}
+              className="skill-icon"
+              width="40"
+              height="40"
+            />
+          ))}
+        </div>
         <div className="headshot-container">
           <img 
             src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
