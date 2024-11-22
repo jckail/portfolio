@@ -104,6 +104,31 @@ const TechnicalSkills: React.FC = () => {
     return acc;
   }, {} as Record<string, (Skill & { key: string })[]>);
 
+  // Define the desired category order
+  const categoryOrder = [
+    'Programming Languages',
+    'Artificial Intelligence',
+    'Data Engineering',
+  ];
+
+  // Sort categories based on the defined order, with remaining categories alphabetically
+  const sortedCategories = Object.keys(categorizedSkills).sort((a, b) => {
+    const aIndex = categoryOrder.indexOf(a);
+    const bIndex = categoryOrder.indexOf(b);
+    
+    // If both categories are in the order list, sort by their index
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    
+    // If only one category is in the order list, prioritize it
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    
+    // For categories not in the order list, sort alphabetically
+    return a.localeCompare(b);
+  });
+
   return (
     <section id="skills" className="section-container">
       <div className="section-header">
@@ -111,11 +136,11 @@ const TechnicalSkills: React.FC = () => {
       </div>
       <div className="section-content">
         <div className="skills-grid">
-          {Object.entries(categorizedSkills).map(([category, skillList]) => (
+          {sortedCategories.map(category => (
             <SkillCategory
               key={category}
               category={category}
-              skillList={skillList}
+              skillList={categorizedSkills[category]}
               onSkillSelect={setSelectedSkill}
             />
           ))}
