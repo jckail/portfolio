@@ -120,6 +120,7 @@
 }
 
 .timeline-meta {
+  flex-direction: row;
   display: flex;
   gap: var(--spacing-xs);
   color: var(--text-secondary);
@@ -129,7 +130,7 @@
 
 .timeline-meta .date,
 .timeline-meta .location {
-  display: inline-flex;
+  flex-direction: row;
   color: var(--text-secondary);
   text-align: left;
 }
@@ -206,7 +207,6 @@
   }
 
   .timeline-header-wrapper {
-    
     flex-direction: row;
     align-items: flex-start;
     justify-content: flex-start;
@@ -258,6 +258,7 @@
 
   .timeline-meta {
     display: flex;
+    flex-direction: column;
     gap: var(--spacing-xs);
     color: var(--text-secondary);
     font-size: 0.7rem;
@@ -266,15 +267,16 @@
   
   .timeline-meta .date,
   .timeline-meta .location {
-    display: inline-flex;
     color: var(--text-secondary);
     text-align: left;
   }
   
   .timeline-meta .location {
-    margin-left: var(--spacing-sm);
+    margin-left: 0;
+    margin-top: 2px;
     text-align: left;
   }
+
   .experience-highlights {
     margin-top: 20px;
   }
@@ -298,4 +300,3 @@
   }
 
 }
-
