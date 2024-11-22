@@ -48,27 +48,57 @@
   font-size: 1.5rem;
 }
 
-.skill-icons {
+.about-skill-icons {
   grid-column: 1;
   display: flex;
   gap: var(--spacing-md);
   margin-top: auto;
 }
 
-.skill-icon {
-  width: 40px;
-  height: 40px;
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  background: var(--background-color);
-  border: var(--border-thickness) solid var(--primary-border);
-  transition: all var(--transition-normal);
+.about-skill-item {
+  transition: all var(--transition-fast);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: var(--section-background);
+  border: 2px solid var(--border-color);
+  animation: fadeInUp 0.3s ease-out forwards;
+  animation-delay: calc(var(--item-index) * 0.05s);
+  height: 80px;
+  width: 70px;
 }
 
-.skill-icon:hover {
-  transform: scale(1.1);
-  border-color: var(--primary);
+.about-skill-item:hover {
   background: var(--primary);
+  transform: translateY(-2px);
+  border-color: var(--primary-hover);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.about-skill-icon-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.about-skill-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  transition: transform var(--transition-fast);
+  color: var(--text-color);
+}
+
+.about-skill-item:hover .about-skill-icon {
+  transform: scale(1.1);
+}
+
+.about-skill-name {
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--text-color);
+  margin-top: 0px;
 }
 
 .headshot-container {
@@ -179,6 +209,17 @@
   cursor: pointer;
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 768px) {
   .about-section h2 {
     font-size: 1.35rem;
@@ -195,14 +236,22 @@
     gap: var(--spacing-md);
   }
 
-  .skill-icons {
+  .about-skill-icons {
     gap: var(--spacing-sm);
   }
 
-  .skill-icon {
+  .about-skill-item {
+    height: 70px;
+    width: 60px;
+  }
+
+  .about-skill-icon {
     width: 30px;
     height: 30px;
-    padding: 4px;
+  }
+
+  .about-skill-name {
+    font-size: 0.65rem;
   }
 
   .headshot-container {

@@ -1,8 +1,11 @@
-import React, { useEffect, memo } from 'react';
+import React, { useEffect, memo, useState, lazy, Suspense } from 'react';
 import { useData } from '../../providers/data-provider';
 import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
+import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+
+const SkillModal = lazy(() => import('./modals/SkillModal'));
 
 const LoadingSpinner = () => (
   <div className="section-loading">
@@ -13,7 +16,8 @@ const LoadingSpinner = () => (
 const TLDRContent = memo(({ 
   aboutMeData, 
   contactData, 
-  onResumeClick 
+  onResumeClick,
+  skillsData
 }: { 
   aboutMeData: {
     greeting: string;
@@ -28,7 +32,10 @@ const TLDRContent = memo(({
     email: string;
   };
   onResumeClick: () => void;
+  skillsData: any;
 }) => {
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+
   // Preload the full portrait when data is available
   useEffect(() => {
     if (aboutMeData.full_portrait) {
@@ -42,16 +49,25 @@ const TLDRContent = memo(({
       <h2>{aboutMeData.greeting}</h2>
       <div className="about-content">
         <p>{aboutMeData.description}</p>
-        <div className="skill-icons">
-          {aboutMeData.primary_skills.map((skill, index) => (
-            <img
+        <div className="about-skill-icons">
+          {aboutMeData.primary_skills.map((skillName, index) => (
+            <div
               key={index}
-              src={`/images/icons/${skill.toLowerCase()}.svg`}
-              alt={`${skill} icon`}
-              className="skill-icon"
-              width="40"
-              height="40"
-            />
+              className="about-skill-item"
+              onClick={() => setSelectedSkill(skillName.toLowerCase())}
+            >
+              <div className="about-skill-icon-container">
+                <div className="icon-wrapper">
+                  <SkillIcon
+                    name={skillName.toLowerCase()}
+                    className="about-skill-icon"
+                    size={32}
+                    aria-label={skillName}
+                  />
+                </div>
+                <span className="about-skill-name">{skillName}</span>
+              </div>
+            </div>
           ))}
         </div>
         <div className="headshot-container">
@@ -76,12 +92,21 @@ const TLDRContent = memo(({
         </ErrorBoundary>
         <p>{aboutMeData.aidetails}</p>
       </div>
+
+      {selectedSkill && skillsData && skillsData[selectedSkill] && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <SkillModal
+            skill={skillsData[selectedSkill]}
+            onClose={() => setSelectedSkill(null)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 });
 
 const TLDR: React.FC = () => {
-  const { aboutMeData, contactData, isLoading, error } = useData();
+  const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
 
   const handleResumeClick = () => {
     const resumeSection = document.getElementById('resume');
@@ -98,7 +123,7 @@ const TLDR: React.FC = () => {
 
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
-  if (isLoading || !aboutMeData || !contactData) {
+  if (isLoading || !aboutMeData || !contactData || !skillsData) {
     return (
       <section id="about" className="section-container">
         <div className="section-content">
@@ -115,6 +140,7 @@ const TLDR: React.FC = () => {
           <TLDRContent
             aboutMeData={aboutMeData}
             contactData={contactData}
+            skillsData={skillsData}
             onResumeClick={handleResumeClick}
           />
         </ErrorBoundary>
