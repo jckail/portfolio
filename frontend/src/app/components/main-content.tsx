@@ -5,6 +5,7 @@ import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
 import { useAppLogic } from '../providers/app-logic-provider';
 import { useAdminStore } from '../../shared/stores/admin-store';
 import { ErrorBoundary } from './error-boundary';
+import { scrollToSection } from '../../shared/utils/scroll-utils';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
@@ -88,6 +89,24 @@ const MainContentInner: React.FC = () => {
   useScrollSpy();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
+  const [contentLoaded, setContentLoaded] = useState(false);
+
+  useEffect(() => {
+    // Set a flag when all content is loaded
+    setContentLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    // Only attempt to scroll once content is loaded
+    if (contentLoaded && window.location.hash) {
+      // Remove the # from the hash
+      const sectionId = window.location.hash.substring(1);
+      // Add a small delay to ensure all lazy-loaded components are rendered
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 100);
+    }
+  }, [contentLoaded]);
 
   const handleResumeClick = () => {
     const resumeSection = document.getElementById('resume');
