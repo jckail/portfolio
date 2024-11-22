@@ -136,6 +136,7 @@
   width: 125px;
   height: 125px;
   object-fit: contain;
+  color: var(--text-color);
 }
 
 .modal-body {
@@ -302,6 +303,7 @@
   width: 100px;
   height: 100px;
   object-fit: contain;
+  color: var(--text-color);
 }
 .timeline-header-wrapper{
   margin-top: 35px;
