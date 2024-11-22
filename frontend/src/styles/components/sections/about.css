@@ -52,7 +52,13 @@
   grid-column: 1;
   display: flex;
   gap: var(--spacing-md);
-  margin-top: auto;
+
+  border-top: var(--border-thickness) solid var(--primary-border);
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  clear: both;
+  
 }
 
 .about-skill-item {
@@ -63,7 +69,7 @@
   border: 2px solid var(--border-color);
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
-  height: 80px;
+  height: 70px;
   width: 70px;
 }
 
@@ -143,6 +149,7 @@
   margin-top: var(--spacing-xl);
   height: var(--icon-size-desktop);
   margin-bottom: var(--spacing-xl);
+  
 }
 
 .social-links .icon-link {
@@ -237,21 +244,22 @@
   }
 
   .about-skill-icons {
-    gap: var(--spacing-sm);
+    
+    gap: var(--spacing-lg);
   }
 
   .about-skill-item {
-    height: 70px;
-    width: 60px;
+    height: 40px;
+    width: 40px;
   }
 
   .about-skill-icon {
     width: 30px;
-    height: 30px;
+    height: 20px;
   }
 
   .about-skill-name {
-    font-size: 0.65rem;
+    font-size: 0.50rem;
   }
 
   .headshot-container {

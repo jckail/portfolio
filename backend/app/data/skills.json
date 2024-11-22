@@ -437,7 +437,7 @@
         "professional_experience": true,
         "years_of_experience": 2,
         "tags": ["backend", "framework", "go", "web", "rest", "api", "middleware"],
-        "description": "A high-performance HTTP web framework written in Go (Golang) that features a martini-like API.",
+        "description": "A high-performance HTTP web framework written in Go (go) that features a martini-like API.",
         "weblink": "https://gin-gonic.com/",
         "examples": {},
         "general_category": "Web Development",
@@ -469,12 +469,12 @@
     },
     "go": {
         "display_name": "Go",
-        "image": "golang.svg",
+        "image": "go.svg",
         "professional_experience": true,
         "years_of_experience": 3,
         "tags": ["language", "general-purpose", "compiled", "concurrent", "systems", "backend"],
         "description": "An open source programming language designed for building simple, reliable, and efficient software.",
-        "weblink": "https://golang.org/",
+        "weblink": "https://go.org/",
         "examples": {},
         "general_category": "Programming Languages",
         "sub_category": "Systems Programming"

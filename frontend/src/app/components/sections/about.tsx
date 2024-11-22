@@ -49,7 +49,21 @@ const TLDRContent = memo(({
       <h2>{aboutMeData.greeting}</h2>
       <div className="about-content">
         <p>{aboutMeData.description}</p>
-        <div className="about-skill-icons">
+
+        <div className="headshot-container">
+          <img 
+            src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
+            alt="Profile headshot"
+            className="headshot"
+            loading="eager"
+            width="200"
+            height="200"
+          />
+        </div>
+      </div>
+      {/* keep this for rainy day
+      <div className="about-skill-icons">
+      <ErrorBoundary>
           {aboutMeData.primary_skills.map((skillName, index) => (
             <div
               key={index}
@@ -70,18 +84,9 @@ const TLDRContent = memo(({
               </div>
             </div>
           ))}
-        </div>
-        <div className="headshot-container">
-          <img 
-            src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
-            alt="Profile headshot"
-            className="headshot"
-            loading="eager"
-            width="200"
-            height="200"
-          />
-        </div>
-      </div>
+          </ErrorBoundary>
+        </div> */}
+
       <div className="brief-bio">
         <ErrorBoundary>
           <SocialLinks

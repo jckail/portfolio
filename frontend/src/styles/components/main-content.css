@@ -113,7 +113,7 @@ html {
 @media (max-width: 480px) {
     .main main {
         width: 100%;
-        padding: 25px 0 var(--spacing-lg);
+        padding: 0px 0 var(--spacing-lg);
         margin: 0;
     }
 }
