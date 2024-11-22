@@ -143,7 +143,7 @@
 .skill-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
 
@@ -152,7 +152,7 @@
   color: white;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   text-transform: capitalize;
   transition: all var(--transition-fast);
 }
@@ -247,12 +247,18 @@
     height: 70px;
     width: 60px;
   }
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+  }
   .skill-tag {
     background: var(--skill-tag-background);
     color: white;
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-full);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);
   }

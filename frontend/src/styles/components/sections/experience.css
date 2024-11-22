@@ -159,6 +159,7 @@
   margin-bottom: var(--spacing-sm);
   color: var(--text-color);
   line-height: 1.6;
+  font-weight: 400;
 }
 
 .highlights li::before {
@@ -288,6 +289,7 @@
     font-size: 0.8rem;
     line-height: 1.4;
     margin-bottom: 8px;
+    font-weight: 400;
   }
   
   .highlights li::before {

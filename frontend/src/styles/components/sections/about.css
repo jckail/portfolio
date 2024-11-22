@@ -35,7 +35,7 @@
   display: grid;
   grid-template-columns: 1fr 250px;
   gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
   width: 100%;
   min-height: 250px;
 }
@@ -46,6 +46,7 @@
   line-height: 1.5;
   margin-bottom: var(--spacing-md);
   font-size: 1.5rem;
+  font-weight: 400;
 }
 
 .about-skill-icons {
@@ -110,8 +111,8 @@
 .headshot-container {
   grid-column: 2;
   grid-row: 1 / span 2;
-  width: 250px;
-  height: 250px;
+  width: 200px;
+  height: 200px;
   border-radius: var(--radius-sm);
   background: black;
   border-radius: 10%;
@@ -235,12 +236,14 @@
   .about-section p {
     font-size: .8rem;
     margin-top: 10px;
+    font-weight: 400;
   }
 
   .about-content {
     grid-template-columns: 1fr 125px;
     min-height: 125px;
     gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
   }
 
   .about-skill-icons {

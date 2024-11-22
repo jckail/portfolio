@@ -189,6 +189,7 @@
     width: 100px;
     font-family: 'Quantico', sans-serif !important;
     font-weight: 900;
+    font-weight: bold;
     background: var(--surface);
   }
 

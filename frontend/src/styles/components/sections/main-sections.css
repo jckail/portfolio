@@ -36,6 +36,7 @@
   line-height: 1.8;
   margin-bottom: var(--spacing-md);
   font-size: var(--font-size-base);
+  font-weight: 400;
 }
 
 .section-content p:last-child {
@@ -45,7 +46,7 @@
 /* Specific Section Variations */
 .section-container {
   border-radius: var(--radius-lg);
-  padding: var(--spacing-sm);
+  padding: var(--spacing-xs);
   margin: 0 auto;
   width: 100%;
   max-width: 1080px;
@@ -75,9 +76,7 @@
 
 
 @media (max-width: 768px) {
-  .section-container {
-    padding-top: var(--header-height);
-  }
+
 
   .section h2,
   #about h2,
@@ -99,13 +98,10 @@
     margin-bottom: var(--spacing-sm);
     font-size: var(--font-size-mobile-base);
     max-width: 95%;
+    font-weight: 400;
   }
 
   
 }
 
-@media (max-width: 480px) {
-  .section-container {
-    padding-top: var(--header-height);
-  }
-}
+

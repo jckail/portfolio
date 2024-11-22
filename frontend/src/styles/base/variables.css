@@ -47,7 +47,7 @@
   }
 
   .main-content {
-      padding: 0px;
+      padding: var(--header-height);
   }
   
   .main-content-inner {
