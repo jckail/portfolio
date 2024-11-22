@@ -38,16 +38,21 @@
 
   /* Font Sizes - increased for better readability */
   --font-size-base: 1.0rem;  /* Increased base size for better readability */
-  --font-size-mobile-base: .85rem;
+  --font-size-mobile-base: .75rem;
 }
+
 
 @media (max-width: 768px) {
   :root {
       --header-height: 50px;
   }
 
+  html {
+    scroll-behavior: smooth;
+    scroll-margin-top: calc(var(--header-height)+ 20px);
+}
   .main-content {
-      padding: var(--header-height);
+      padding-top: var(--header-height);
   }
   
   .main-content-inner {

@@ -63,13 +63,14 @@
 #projects h2,
 #resume h2 {
   color: var(--text-color);
+  margin-top: 5px;
   font-size: 2rem;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
   text-align: left;
   width: 100%;
   max-width: 1080px;
-  border-bottom: var(--border-thickness) solid var(--underline-color);
+  border-bottom: var(--border-thickness) solid var(--primary-border);
   font-weight: bold;
 }
 
