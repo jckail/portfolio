@@ -12,6 +12,32 @@ export const useChat = () => {
   const [initialContextSent, setInitialContextSent] = useState(false);
   const clientId = useRef(Date.now().toString());
 
+  // Update URL when modal state changes
+  useEffect(() => {
+    if (open) {
+      window.history.pushState({modal: 'ai_chat'}, '', '/ai_chat');
+    } else {
+      window.history.pushState({modal: null}, '', '/');
+    }
+  }, [open]);
+
+  // Check URL on mount to set initial modal state
+  useEffect(() => {
+    if (window.location.pathname === '/ai_chat') {
+      setOpen(true);
+    }
+  }, []);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      setOpen(window.location.pathname === '/ai_chat');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const getPageContext = () => {
     const mainContent = document.querySelector('#root') as HTMLElement;
     if (!mainContent) return '';
