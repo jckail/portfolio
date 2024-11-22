@@ -3,6 +3,7 @@ import { RouteObject } from 'react-router-dom';
 import MainContent from './components/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
 import { DataProvider } from './providers/data-provider';
+import { ResumeProvider } from './providers/resume-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
@@ -27,22 +28,24 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <DataProvider>
-        <ParticlesProvider 
-          config={baseConfig} 
-          key={theme === 'party' ? Math.random() : theme}
-        >
-          <div style={{ isolation: 'isolate' }}>
-            {/* Main content in its own error boundary */}
-            <ErrorBoundary>
-              <MainContent />
-            </ErrorBoundary>
+        <ResumeProvider>
+          <ParticlesProvider 
+            config={baseConfig} 
+            key={theme === 'party' ? Math.random() : theme}
+          >
+            <div style={{ isolation: 'isolate' }}>
+              {/* Main content in its own error boundary */}
+              <ErrorBoundary>
+                <MainContent />
+              </ErrorBoundary>
 
-            {/* Chat portal lazy loaded */}
-            <Suspense fallback={null}>
-              <ChatPortal />
-            </Suspense>
-          </div>
-        </ParticlesProvider>
+              {/* Chat portal lazy loaded */}
+              <Suspense fallback={null}>
+                <ChatPortal />
+              </Suspense>
+            </div>
+          </ParticlesProvider>
+        </ResumeProvider>
       </DataProvider>
     </ErrorBoundary>
   );

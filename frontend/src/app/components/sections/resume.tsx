@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useResume } from '../../providers/resume-provider';
 import '../../../styles/components/sections/resume.css';
 import PDFViewer from './modals/PDFViewer';
@@ -8,18 +8,34 @@ const LoadingSpinner = () => (
 );
 
 const MyResume: React.FC = () => {
-  const { handleDownload } = useResume();
+  const { handleDownload, error: providerError } = useResume();
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDownloadWithLoading = async () => {
+  const handleDownloadWithLoading = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any default button behavior
+    console.log('Download button clicked');
+    
+    if (!handleDownload) {
+      console.error('handleDownload function is not available');
+      return;
+    }
+
     try {
       setIsDownloading(true);
+      setError(null);
+      console.log('Calling handleDownload...');
       await handleDownload();
+      console.log('handleDownload completed');
+    } catch (err) {
+      console.error('Download error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to download resume');
     } finally {
       setIsDownloading(false);
     }
-  };
+  }, [handleDownload]);
+
+  console.log('Resume component rendered, handleDownload available:', !!handleDownload);
 
   return (
     <section id="resume" className="section-container">
@@ -34,6 +50,8 @@ const MyResume: React.FC = () => {
               className="download-button"
               aria-label="Download Resume PDF"
               disabled={isDownloading}
+              type="button"
+              style={{ cursor: 'pointer' }}
             >
               <span className="button-content">
                 {isDownloading ? (
@@ -43,13 +61,13 @@ const MyResume: React.FC = () => {
                 )}
               </span>
             </button>
-          </div>
-          <div className="resume-pdf-container">
-            {error && (
+            {(error || providerError) && (
               <div className="error-container">
-                <p className="error-message">{error}</p>
+                <p className="error-message">{error || providerError}</p>
               </div>
             )}
+          </div>
+          <div className="resume-pdf-container">
             <PDFViewer />
           </div>
         </div>
