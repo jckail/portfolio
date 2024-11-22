@@ -91,6 +91,7 @@
   transform: translateY(-2px);
   border-color: var(--primary-hover);
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
   
   
 

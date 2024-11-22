@@ -50,6 +50,7 @@
 .menu-toggle:hover {
   background: var(--primary);
   transform: scale(1.1);
+  cursor: pointer;
   
 }
 
@@ -147,15 +148,16 @@
 .theme-toggle:hover svg {
   background: var(--primary);
   transform: scale(1.1);
-  box-shadow: 0 0 35px var(--primary);
+  
   transition: all var(--transition-normal);
   border: var(--border-thickness) solid var(--primary);
+  cursor: pointer;
 }
 
 .nav-right .resume-button:hover {
   background: var(--primary);
   transform: scale(1.1);
-  box-shadow: 0 0 35px var(--primary);
+  
 }
 
 .theme-toggle {

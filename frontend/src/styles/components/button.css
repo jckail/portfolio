@@ -34,7 +34,7 @@
   background-color: var(--primary-color-hover);
   color: white;
   box-shadow: var(--shadow-md);
-  box-shadow: 0 0 35px var(--primary);
+  
 }
 
 .button-text {

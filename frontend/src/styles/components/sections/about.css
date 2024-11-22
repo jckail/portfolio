@@ -159,8 +159,9 @@
 .social-links .resume-button:hover {
   background: var(--primary);
   transform: scale(1.1);
-  box-shadow: 0 0 35px var(--primary);
+  
   border: var(--border-thickness) solid var(--primary);
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -255,7 +256,8 @@
   .social-links .resume-button:hover {
     background: var(--primary);
     transform: scale(1.1);
-    box-shadow: 0 0 35px var(--primary);
+    
     border: var(--border-thickness) solid var(--primary);
+    cursor: pointer;
   }
 }
