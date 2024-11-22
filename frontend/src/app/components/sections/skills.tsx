@@ -1,4 +1,4 @@
-import React, { useState, useRef, lazy, Suspense, useEffect, memo } from 'react';
+import React, { useState, useRef, lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import type { Skill } from './modals/SkillModal';
@@ -64,35 +64,8 @@ const SkillCategory = memo(({
   skillList: (Skill & { key: string })[];
   onSkillSelect: (key: string) => void;
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const categoryRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      {
-        threshold: 0.1
-      }
-    );
-
-    if (categoryRef.current) {
-      observer.observe(categoryRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  if (!isVisible) {
-    return <div ref={categoryRef} className="skill-category skeleton-category" />;
-  }
-
   return (
-    <div ref={categoryRef} className="skill-category">
+    <div className="skill-category">
       <h3>{category}</h3>
       <div className="skill-list">
         {skillList.map((skill, index) => (
