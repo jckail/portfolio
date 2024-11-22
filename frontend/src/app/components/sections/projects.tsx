@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import '../../../styles/components/sections/projects.css';
@@ -23,45 +23,8 @@ const ProjectCard = memo(({
   }; 
   index: number;
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '50px'
-      }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Preload project icon
-  useEffect(() => {
-    if (isVisible && project.logoPath) {
-      const img = new Image();
-      img.src = project.logoPath;
-    }
-  }, [isVisible, project.logoPath]);
-
-  if (!isVisible) {
-    return <div ref={cardRef} className="project-card skeleton-card" />;
-  }
-
   return (
     <div 
-      ref={cardRef}
       className="project-card"
       style={{ '--item-index': index } as React.CSSProperties}
     >
