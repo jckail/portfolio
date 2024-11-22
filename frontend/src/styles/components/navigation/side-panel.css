@@ -84,6 +84,7 @@
   color: var(--text-color);
   border-radius: 10px;
   margin-left: 15px;
+  cursor: pointer;
 
 }
 
@@ -111,6 +112,7 @@
   border: var(--border-thickness) solid var(--primary-border);
   margin-left: 15px;
   width: 150px;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -170,6 +172,8 @@
     color: var(--text-color);
     border-radius: 10px;
     background: var(--surface);
+    cursor: pointer;
+
 
   }
 
@@ -195,5 +199,6 @@
     opacity: 0.9;
     color: var(--text-color);
     background: var(--surface);
+    cursor: pointer;
   }
 }
