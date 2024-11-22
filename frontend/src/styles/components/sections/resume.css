@@ -14,7 +14,7 @@
   border: none;
   font-size: 1.5rem;
   transition: background-color var(--transition-fast);
-  margin-bottom: 2rem;
+  
 }
 
 .button-text {
@@ -158,12 +158,11 @@ a:not(.resume-button):hover {
 
 /* Resume PDF Container */
 .resume-pdf-container {
-  width: 90%;
+  width: 100%;
   height: 1200px;
   position: relative;
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 0.5rem;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -181,7 +180,6 @@ a:not(.resume-button):hover {
   border: none;
   background: transparent;
   transform-origin: top left;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Loading state */
@@ -209,7 +207,7 @@ a:not(.resume-button):hover {
   }
 
   .resume-icon {
-    font-size: 2.5rem;
+    font-size: 2.0rem;
   }
 
   .resume-content h2 {
@@ -227,9 +225,15 @@ a:not(.resume-button):hover {
     font-size: 1.15rem;
     width: 100%;
   }
+  .button-text {
+    color: white;
+    font-size: 1.25rem;
+    font-family: 'Quantico', sans-serif !important;
+    font-weight: 900;
+  }
 
   .resume-pdf-container {
-    height: 90vh;
-    padding: 0.5rem;
+    height: 100vh;
+    
   }
 }

@@ -1,6 +1,6 @@
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--spacing-lg);
 }
 
@@ -68,7 +68,7 @@
 
 .skill-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(6, minmax(100px, 1fr));
   gap: var(--spacing-md);
   margin: 0;
   padding: 0;
@@ -76,14 +76,14 @@
 
 .skill-item {
   transition: all var(--transition-fast);
-  padding: var(--spacing-sm);
+  padding: var(--spacing-xs);
   border-radius: var(--radius-md);
   background: var(--section-background);
   border: 2px solid var(--border-color);
   animation: fadeInUp 0.3s ease-out forwards;
   animation-delay: calc(var(--item-index) * 0.05s);
   height: 80px;
-  width: 70px;
+  width: 80px;
 }
 
 .skill-item:hover {
@@ -92,9 +92,6 @@
   border-color: var(--primary-hover);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  
-  
-
 }
 
 .skill-icon-container {
@@ -102,7 +99,6 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xs);
-
 }
 
 .skill-icon {
@@ -123,8 +119,6 @@
   color: var(--text-color);
   margin-top: 0px;
 }
-
-
 
 .experience-info {
   color: var(--text-color);
@@ -213,7 +207,6 @@
   }
 }
 
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .skills-grid {
@@ -223,36 +216,39 @@
 
   .skill-category {
     padding: var(--spacing-md);
-    
   }
+  
   .skill-category h3 {
     color: var(--text-color);
     font-size: 1.2rem;
   }
+  
   .skill-list {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    grid-template-columns: repeat(4, minmax(70px, 1fr));
     gap: var(--spacing-sm);
   }
 
   .skill-icon {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
   }
 
   .skill-name {
-    font-size: 0.65rem;
+    font-size: 0.60rem;
   }
   
   .skill-item {
-    height: 70px;
+    height: 60px;
     width: 60px;
   }
+  
   .skill-tags {
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-xs);
     margin-bottom: var(--spacing-md);
   }
+  
   .skill-tag {
     background: var(--skill-tag-background);
     color: white;
