@@ -24,3 +24,12 @@
   max-height: 100vh;
   opacity: 1;
 }
+
+.doodle-container.party-mode {
+  max-height: 100vh;
+  opacity: 1;
+}
+
+.doodle-container.party-mode .doodle-section {
+  min-height: 100vh;
+}

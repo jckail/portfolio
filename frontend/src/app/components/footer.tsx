@@ -32,7 +32,7 @@ const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount }) => 
           </span>
         </div>
         <p className="footer-text">
-          © {new Date().getFullYear()} Jordan Kail. All rights reserved.
+          Designed by Jordan Kail - {new Date().getFullYear()}
         </p>
       </div>
     </footer>

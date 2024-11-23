@@ -102,6 +102,7 @@ const MainContentInner: React.FC = () => {
   const [contentLoaded, setContentLoaded] = useState(false);
   const [showDoodle, setShowDoodle] = useState(false);
   const [doodleClickCount, setDoodleClickCount] = useState(0);
+  const isPartyMode = theme === 'party';
 
   useEffect(() => {
     // Set a flag when all content is loaded
@@ -201,7 +202,7 @@ const MainContentInner: React.FC = () => {
           {/* Doodle section with smooth transition */}
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>
-              <Doodle isVisible={showDoodle} />
+              <Doodle isVisible={showDoodle} isPartyMode={isPartyMode} />
             </Suspense>
           </ErrorBoundary>
 
