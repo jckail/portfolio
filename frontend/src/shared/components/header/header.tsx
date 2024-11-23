@@ -62,7 +62,11 @@ const Header: React.FC<HeaderProps> = memo(({
 
   const updateURL = (isOpen: boolean) => {
     const url = new URL(window.location.href);
-    url.searchParams.set('sidepanel', isOpen ? 'open' : 'closed');
+    if (isOpen) {
+      url.searchParams.set('sidepanel', 'open');
+    } else {
+      url.searchParams.delete('sidepanel');
+    }
     window.history.replaceState({}, '', url.toString());
   };
 
@@ -72,10 +76,6 @@ const Header: React.FC<HeaderProps> = memo(({
     const shouldBeOpen = sidePanelState === 'open';
     
     setIsSidePanelOpen(shouldBeOpen);
-    
-    if (!sidePanelState) {
-      updateURL(false);
-    }
   }, []);
 
   const toggleSidePanel = () => {
