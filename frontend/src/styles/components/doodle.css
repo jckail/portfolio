@@ -1,0 +1,26 @@
+.doodle-section {
+  @apply w-full relative;
+  min-height: 0;
+  transition: min-height 0.5s ease-in-out;
+}
+
+.doodle-section.visible {
+  min-height: 100vh;
+}
+
+.doodle-content {
+  @apply w-full border border-gray-800;
+  height: 100vh;
+}
+
+.doodle-container {
+  @apply overflow-hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.doodle-container.visible {
+  max-height: 100vh;
+  opacity: 1;
+}

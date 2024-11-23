@@ -1,11 +1,13 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Header } from '../../shared/components/header';
-import TLDR from './sections/about';  // Keep TLDR eager loaded as it's above the fold
+import TLDR from './sections/about';
+import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
 import { useAppLogic } from '../providers/app-logic-provider';
 import { useAdminStore } from '../../shared/stores/admin-store';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';
+import { useThemeStore } from '../../shared/stores/theme-store';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
@@ -33,6 +35,13 @@ const Projects = React.lazy(() =>
 
 const MyResume = React.lazy(() => 
   import('./sections/resume').then(module => ({
+    default: module.default,
+    __esModule: true,
+  }))
+);
+
+const Doodle = React.lazy(() => 
+  import('./sections/doodle').then(module => ({
     default: module.default,
     __esModule: true,
   }))
@@ -88,17 +97,26 @@ const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void
 const MainContentInner: React.FC = () => {
   useScrollSpy();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
+  const setTheme = useThemeStore(state => state.setTheme);
   const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
   const [contentLoaded, setContentLoaded] = useState(false);
+  const [showDoodle, setShowDoodle] = useState(false);
+  const [doodleClickCount, setDoodleClickCount] = useState(0);
 
   useEffect(() => {
     // Set a flag when all content is loaded
     setContentLoaded(true);
+    
+    // Check URL hash for doodle section
+    if (window.location.hash === '#doodle') {
+      setShowDoodle(true);
+      setDoodleClickCount(1);
+    }
   }, []);
 
   useEffect(() => {
     // Only attempt to scroll once content is loaded
-    if (contentLoaded && window.location.hash) {
+    if (contentLoaded && window.location.hash && window.location.hash !== '#doodle') {
       // Remove the # from the hash
       const sectionId = window.location.hash.substring(1);
       // Add a small delay to ensure all lazy-loaded components are rendered
@@ -117,6 +135,25 @@ const MainContentInner: React.FC = () => {
 
   const handleAdminClick = () => {
     console.log('Admin click');
+  };
+
+  const handleDoodleToggle = () => {
+    if (doodleClickCount === 0) {
+      // First click: Show doodle and update URL hash
+      setShowDoodle(true);
+      window.history.pushState(null, '', '#doodle');
+      // Scroll to doodle section
+      setTimeout(() => {
+        const doodleSection = document.getElementById('doodle');
+        if (doodleSection) {
+          doodleSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else if (doodleClickCount === 1) {
+      // Second click: Set theme to party
+      setTheme('party');
+    }
+    setDoodleClickCount(prev => prev + 1);
   };
 
   return (
@@ -160,6 +197,20 @@ const MainContentInner: React.FC = () => {
               <MyResume />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Doodle section with smooth transition */}
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <Doodle isVisible={showDoodle} />
+            </Suspense>
+          </ErrorBoundary>
+
+          {/* Footer with doodle toggle handler and theme toggle */}
+          <Footer 
+            onDoodleToggle={handleDoodleToggle} 
+            doodleClickCount={doodleClickCount}
+            toggleTheme={toggleTheme}
+          />
         </div>
       </main>
     </div>

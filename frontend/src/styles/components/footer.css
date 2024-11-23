@@ -1,0 +1,32 @@
+.footer {
+  @apply w-full py-6 mt-12 border-t border-gray-800;
+  margin-top: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  
+}
+
+.footer-content {
+  @apply container mx-auto px-4 flex flex-col items-center gap-2;
+}
+
+.footer-text {
+  @apply text-sm text-gray-400 text-center;
+}
+
+.footer-text:hover {
+  @apply text-white transition-colors duration-300;
+}
+
+.footer-links {
+  @apply flex gap-4 text-sm text-gray-500;
+}
+
+.footer-link {
+  @apply cursor-pointer hover:text-gray-300 transition-colors duration-300;
+}
+
+.doodle-section {
+  @apply w-full h-screen border border-gray-800 mt-8;
+  transition: height 0.3s ease-in-out;
+}
