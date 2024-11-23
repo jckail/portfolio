@@ -1,8 +1,8 @@
 .footer {
   @apply w-full py-6 mt-12 border-t border-gray-800;
   margin-top: 0px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-top: 20px;
+  padding-bottom: 5px;
 }
 
 .footer-content {
@@ -22,12 +22,28 @@
   @apply cursor-pointer;
   color: var(--text-color) !important;
   transition: opacity 0.3s ease;
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+.footer-link-doodle {
+  @apply cursor-pointer;
+  color: var(--text-color) !important;
+  transition: opacity 0.3s ease;
   text-decoration: none;
+}
+
+.footer-link-doodle:hover {
+  @apply cursor-pointer;
+  color: var(--primary) !important;
+  transition: opacity 0.3s ease;
+  text-decoration: none;
+  font-size: 1.75;
 }
 
 .footer-link:hover {
   opacity: 0.7;
-  color: var(--text-color) !important;
+  color:  var(--primary) !important;
 }
 
 /* Ensure anchor tags in footer use the correct color */

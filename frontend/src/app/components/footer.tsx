@@ -31,22 +31,21 @@ const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount, isPar
           >
             OpenAPI Doc
           </a>
-          <span 
-            onClick={onDoodleToggle}
-            className="footer-link"
-          >
-            {getDoodleText()}
-          </span>
+
           <span 
             onClick={handleScrollToTop}
             className="footer-link"
           >
             Scroll to top
           </span>
+          <span 
+            onClick={onDoodleToggle}
+            className="footer-link-doodle"
+          >
+            {getDoodleText()}
+          </span>
         </div>
-        <p className="footer-text">
-          © {new Date().getFullYear()} Jordan Kail. All rights reserved.
-        </p>
+
       </div>
     </footer>
   );
