@@ -1,4 +1,5 @@
 import React from 'react';
+import { scrollToSection } from '../../shared/utils/scroll-utils';
 import '../../styles/components/footer.css';
 
 interface FooterProps {
@@ -9,7 +10,11 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount }) => {
   const getDoodleText = () => {
-    return doodleClickCount === 0 ? "Click To Doodle with the Dots" : "Click again to Doodle with Doodles";
+    return doodleClickCount === 0 ? "Click To Doodle" : "Click again to doodle more";
+  };
+
+  const handleScrollToTop = () => {
+    scrollToSection('about');
   };
 
   return (
@@ -30,9 +35,15 @@ const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount }) => 
           >
             {getDoodleText()}
           </span>
+          <span 
+            onClick={handleScrollToTop}
+            className="footer-link"
+          >
+            Scroll to top
+          </span>
         </div>
         <p className="footer-text">
-          Designed by Jordan Kail - {new Date().getFullYear()}
+          © {new Date().getFullYear()} Jordan Kail. All rights reserved.
         </p>
       </div>
     </footer>
