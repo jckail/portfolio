@@ -31,6 +31,7 @@
   color: var(--text-color) !important;
   transition: opacity 0.3s ease;
   text-decoration: none;
+  font-size: 1rem;
 }
 
 .footer-link-doodle:hover {
@@ -55,4 +56,14 @@
 .footer a:hover {
   color: var(--text-color) !important;
   opacity: 0.7;
+}
+
+
+@media (max-width: 768px) {
+  .footer-link {
+    font-size: 0.5rem;
+  }
+  .footer-link-doodle {
+    font-size: 0.5rem;
+  }
 }
