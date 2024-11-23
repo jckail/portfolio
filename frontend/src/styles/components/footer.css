@@ -3,10 +3,12 @@
   margin-top: 0px;
   padding-top: 20px;
   padding-bottom: 5px;
+  
 }
 
 .footer-content {
   @apply container mx-auto px-4 flex flex-col items-center gap-2;
+  
 }
 
 .footer-text {
@@ -15,7 +17,8 @@
 }
 
 .footer-links {
-  @apply flex gap-4 text-sm;
+  @apply flex gap-4 text-sm ;
+  
 }
 
 .footer-link {
@@ -60,10 +63,15 @@
 
 
 @media (max-width: 768px) {
+  .footer-links{
+    margin-left: 60px;
+    gap:12px;
+  }
+
   .footer-link {
-    font-size: 0.5rem;
+    font-size: 0.7rem;
   }
   .footer-link-doodle {
-    font-size: 0.5rem;
+    font-size: 0.7rem;
   }
 }
