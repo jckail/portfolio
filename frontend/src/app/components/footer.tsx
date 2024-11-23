@@ -6,11 +6,13 @@ interface FooterProps {
   onDoodleToggle: () => void;
   doodleClickCount: number;
   toggleTheme: () => void;
+  isPartyMode: boolean;
 }
 
-const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount }) => {
+const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount, isPartyMode }) => {
   const getDoodleText = () => {
-    return doodleClickCount === 0 ? "Click To Doodle" : "Click again to doodle more";
+    if (isPartyMode) return "Click to end the party";
+    return doodleClickCount === 0 ? "Click To Doodle with Dots" : "Click To Doodle with Doodles";
   };
 
   const handleScrollToTop = () => {

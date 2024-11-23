@@ -139,7 +139,11 @@ const MainContentInner: React.FC = () => {
   };
 
   const handleDoodleToggle = () => {
-    if (doodleClickCount === 0) {
+    if (isPartyMode) {
+      // End party mode
+      setTheme('dark');
+      setDoodleClickCount(1); // Reset to "Click again to doodle more" state
+    } else if (doodleClickCount === 0) {
       // First click: Show doodle and update URL hash
       setShowDoodle(true);
       window.history.pushState(null, '', '#doodle');
@@ -150,11 +154,12 @@ const MainContentInner: React.FC = () => {
           doodleSection.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
+      setDoodleClickCount(1);
     } else if (doodleClickCount === 1) {
       // Second click: Set theme to party
       setTheme('party');
+      setDoodleClickCount(2);
     }
-    setDoodleClickCount(prev => prev + 1);
   };
 
   return (
@@ -211,6 +216,7 @@ const MainContentInner: React.FC = () => {
             onDoodleToggle={handleDoodleToggle} 
             doodleClickCount={doodleClickCount}
             toggleTheme={toggleTheme}
+            isPartyMode={isPartyMode}
           />
         </div>
       </main>
