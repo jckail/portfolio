@@ -104,28 +104,32 @@ const MainContentInner: React.FC = () => {
   const [doodleClickCount, setDoodleClickCount] = useState(0);
   const isPartyMode = theme === 'party';
 
+  // Handle initial hash navigation
   useEffect(() => {
-    // Set a flag when all content is loaded
-    setContentLoaded(true);
+    const hash = window.location.hash;
     
     // Check URL hash for doodle section
-    if (window.location.hash === '#doodle') {
+    if (hash === '#doodle') {
       setShowDoodle(true);
       setDoodleClickCount(1);
     }
-  }, []);
 
-  useEffect(() => {
-    // Only attempt to scroll once content is loaded
-    if (contentLoaded && window.location.hash && window.location.hash !== '#doodle') {
-      // Remove the # from the hash
-      const sectionId = window.location.hash.substring(1);
-      // Add a small delay to ensure all lazy-loaded components are rendered
-      setTimeout(() => {
-        scrollToSection(sectionId);
-      }, 100);
-    }
-  }, [contentLoaded]);
+    // Set a flag when the component mounts
+    const timer = setTimeout(() => {
+      setContentLoaded(true);
+      
+      // Handle scrolling to section after content is loaded
+      if (hash && hash !== '#doodle') {
+        const sectionId = hash.substring(1);
+        // Add a longer delay to ensure all lazy-loaded components are rendered
+        setTimeout(() => {
+          scrollToSection(sectionId);
+        }, 500); // Increased delay to ensure components are mounted
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleResumeClick = () => {
     const resumeSection = document.getElementById('resume');
