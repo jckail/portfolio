@@ -81,7 +81,7 @@
         "description": "An open table format for huge analytic datasets designed to improve on the known limitations of Hive tables.",
         "weblink": "https://iceberg.apache.org/",
         "examples": {},
-        "general_category": "Data Engineering",
+        "general_category": "Big Data",
         "sub_category": "Data Lake Technology"
     },
     "kafka": {
@@ -108,18 +108,7 @@
         "general_category": "Data Engineering",
         "sub_category": "Stream Processing"
     },
-    "rocketmq": {
-        "display_name": "RocketMQ",
-        "image": "apacherocketmq.svg",
-        "professional_experience": false,
-        "years_of_experience": 1,
-        "tags": ["messaging", "queue", "pub-sub", "apache", "distributed-systems", "java", "alibaba"],
-        "description": "A distributed messaging and streaming platform with low latency, high performance and reliability.",
-        "weblink": "https://rocketmq.apache.org/",
-        "examples": {},
-        "general_category": "Data Engineering",
-        "sub_category": "Message Queue"
-    },
+
     "spark": {
         "display_name": "Spark",
         "image": "spark.svg",
@@ -132,18 +121,7 @@
         "general_category": "Big Data",
         "sub_category": "Data Processing"
     },
-    "automl": {
-        "display_name": "AutoML",
-        "image": "automl.svg",
-        "professional_experience": true,
-        "years_of_experience": 1,
-        "tags": ["ai", "ml", "automation", "machine-learning", "data-science", "model-optimization"],
-        "description": "Automated machine learning that handles feature engineering, model selection, and hyperparameter tuning automatically.",
-        "weblink": "https://cloud.google.com/automl",
-        "examples": {},
-        "general_category": "Artificial Intelligence",
-        "sub_category": "Machine Learning Automation"
-    },
+
     "aws": {
         "display_name": "AWS",
         "image": "aws.svg",
@@ -216,18 +194,7 @@
         "general_category": "Data Engineering",
         "sub_category": "Data Integration"
     },
-    "cockroachdb": {
-        "display_name": "CockroachDB",
-        "image": "cockroachdb.svg",
-        "professional_experience": false,
-        "years_of_experience": 4,
-        "tags": ["database", "distributed", "sql", "cloud-native", "scalable", "postgresql-compatible"],
-        "description": "A distributed SQL database designed for global scale and survivability.",
-        "weblink": "https://www.cockroachlabs.com/",
-        "examples": {},
-        "general_category": "Databases",
-        "sub_category": "Distributed SQL"
-    },
+
     "couchdb": {
         "display_name": "CouchDB",
         "image": "couchdb.svg",
@@ -481,7 +448,7 @@
         "sub_category": "Systems Programming"
     },
 
-"google_cloud": {
+"gcp": {
         "display_name": "Google Cloud",
         "image": "google_cloud.svg",
         "professional_experience": true,
@@ -649,18 +616,7 @@
         "general_category": "Artificial Intelligence",
         "sub_category": "LLM Framework"
     },
-    "llamaindex": {
-        "display_name": "LlamaIndex",
-        "image": "llamaindex.svg",
-        "professional_experience": false,
-        "years_of_experience": 1,
-        "tags": ["ai", "llm", "rag", "data-connection", "python", "indexing"],
-        "description": "A data framework for LLM applications to ingest, structure, and access private or domain-specific data.",
-        "weblink": "https://www.llamaindex.ai/",
-        "examples": {},
-        "general_category": "Artificial Intelligence",
-        "sub_category": "LLM Framework"
-    },
+
     "looker": {
         "display_name": "Looker",
         "image": "looker.svg",
@@ -866,18 +822,7 @@
         "general_category": "Databases",
         "sub_category": "Relational Database"
     },
-    "prefect": {
-        "display_name": "Prefect",
-        "image": "prefect.svg",
-        "professional_experience": false,
-        "years_of_experience": 3,
-        "tags": ["workflow", "orchestration", "data-pipeline", "python", "automation", "scheduling"],
-        "description": "A modern workflow orchestration tool that makes it easy to build, run and monitor data pipelines.",
-        "weblink": "https://www.prefect.io/",
-        "examples": {},
-        "general_category": "Data Engineering",
-        "sub_category": "Workflow Orchestration"
-    },
+
     "presto": {
         "display_name": "Presto",
         "image": "presto.svg",
@@ -950,18 +895,7 @@
         "general_category": "Databases",
         "sub_category": "Vector Database"
     },
-    "rabbitmq": {
-        "display_name": "RabbitMQ",
-        "image": "rabbitmq.svg",
-        "professional_experience": false,
-        "years_of_experience": 2,
-        "tags": ["messaging", "queue", "broker", "amqp", "distributed-systems", "event-driven"],
-        "description": "A message broker that supports multiple messaging protocols and enables asynchronous processing and communication.",
-        "weblink": "https://www.rabbitmq.com/",
-        "examples": {},
-        "general_category": "Data Engineering",
-        "sub_category": "Message Queue"
-    },
+
     "rds": {
         "display_name": "RDS",
         "image": "rds.svg",
@@ -1082,18 +1016,7 @@
         "general_category": "Big Data",
         "sub_category": "Data Warehouse"
     },
-    "socket.io": {
-        "display_name": "Socket.io",
-        "image": "socketdotio.svg",
-        "professional_experience": false,
-        "years_of_experience": 2,
-        "tags": ["realtime", "websockets", "networking", "javascript", "node.js", "bidirectional", "event-based"],
-        "description": "A library that enables real-time, bidirectional and event-based communication between web clients and servers.",
-        "weblink": "https://socket.io/",
-        "examples": {},
-        "general_category": "Web Development",
-        "sub_category": "Real-time Communication"
-    },
+
     "splunk": {
         "display_name": "Splunk",
         "image": "splunk.svg",

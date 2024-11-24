@@ -72,6 +72,8 @@
   gap: var(--spacing-md);
   margin: 0;
   padding: 0;
+  align-items: center;
+  justify-content:center;
 }
 
 .skill-item {
@@ -84,6 +86,8 @@
   animation-delay: calc(var(--item-index) * 0.05s);
   height: 80px;
   width: 80px;
+  align-items: center;
+  justify-content:center;
 }
 
 .skill-item:hover {
@@ -216,6 +220,8 @@
 
   .skill-category {
     padding: var(--spacing-md);
+    align-items: center;
+    justify-content:center;
   }
   
   .skill-category h3 {
@@ -226,11 +232,13 @@
   .skill-list {
     grid-template-columns: repeat(4, minmax(70px, 1fr));
     gap: var(--spacing-sm);
+    align-items: center;
+    justify-content:center;
   }
 
   .skill-icon {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
   }
 
   .skill-name {
@@ -238,8 +246,10 @@
   }
   
   .skill-item {
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 50px;
+    align-items: center;
+    justify-content:center;
   }
   
   .skill-tags {

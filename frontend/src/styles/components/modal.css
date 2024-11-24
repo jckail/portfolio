@@ -305,7 +305,7 @@
   object-fit: contain;
   color: var(--text-color);
 }
-.timeline-header-wrapper{
+.modal-timeline-header-wrapper{
   margin-top: 35px;
 }
 

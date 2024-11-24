@@ -67,7 +67,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
       <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="experience-modal-wrapper"></div>
-        <div className="timeline-header-wrapper">
+        <div className="modal-timeline-header-wrapper">
           {experience.logoPath && (
             <a 
               href={experience.link}
