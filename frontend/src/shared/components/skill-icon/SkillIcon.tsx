@@ -59,7 +59,7 @@ const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size =
 
   return (
     <img 
-      src={`/images/icons/${name}`}
+      src={`../../../assets/icons/${name}`}
       alt={name.replace('.svg', '')}
       width={size}
       height={size}
