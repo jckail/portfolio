@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { Theme } from '../../types/theme';
+import { trackThemeChange } from '../utils/analytics';
 
 interface ThemeState {
   theme: Theme;
@@ -81,6 +82,7 @@ export const useThemeStore = create<ThemeState>()(
         
         // Check for party mode activation
         if (newClickCount === CLICK_THRESHOLD && isWithinTimeWindow) {
+          const previousTheme = theme;
           set({ 
             theme: 'party',
             clickCount: 0,
@@ -89,6 +91,9 @@ export const useThemeStore = create<ThemeState>()(
           });
           saveThemePreference('party');
           updateUrlTheme('party');
+          
+          // Track theme change to party mode
+          trackThemeChange('party', previousTheme);
           
           // Show toggle again after PARTY_HIDE_DURATION
           setTimeout(() => {
@@ -99,12 +104,17 @@ export const useThemeStore = create<ThemeState>()(
         }
         
         // Normal theme toggle
+        const previousTheme = theme;
         const newTheme = theme === 'light' ? 'dark' : 
                         theme === 'dark' ? 'light' : 
                         'light'; // If in party mode, go back to light
         
         saveThemePreference(newTheme);
         updateUrlTheme(newTheme);
+        
+        // Track normal theme change
+        trackThemeChange(newTheme, previousTheme);
+        
         set({ 
           theme: newTheme,
           clickCount: newClickCount,
@@ -112,8 +122,13 @@ export const useThemeStore = create<ThemeState>()(
         }, false, 'theme/toggle');
       },
       setTheme: (theme) => {
+        const previousTheme = get().theme;
         saveThemePreference(theme);
         updateUrlTheme(theme);
+        
+        // Track theme change when explicitly set
+        trackThemeChange(theme, previousTheme);
+        
         set({ 
           theme, 
           clickCount: 0, 

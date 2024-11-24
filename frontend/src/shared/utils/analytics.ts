@@ -114,6 +114,20 @@ const getFullPagePath = (): string => {
   return hash ? `${pathname}${hash}` : pathname;
 };
 
+// Track theme change
+export const trackThemeChange = async (newTheme: string, previousTheme: string): Promise<void> => {
+  await waitForGtag();
+  const sessionId = getSessionId();
+  safeGtagCall('event', `theme_change_${newTheme}`, {
+    event_category: 'Theme',
+    event_action: 'Change',
+    new_theme: newTheme,
+    previous_theme: previousTheme,
+    page_path: getFullPagePath(),
+    session_id: sessionId
+  });
+};
+
 // Track URL anchor change
 export const trackAnchorChange = async (
   newAnchor: string,
@@ -230,6 +244,18 @@ export const trackSocialClick = async (
 ): Promise<void> => {
   await waitForGtag();
   const sessionId = getSessionId();
+  
+  // Send platform-specific event
+  const eventName = `${platform}_clicked`;
+  safeGtagCall('event', eventName, {
+    event_category: 'Social Links',
+    event_action: 'Click',
+    platform: platform,
+    destination_url: url,
+    session_id: sessionId
+  });
+
+  // Also send the general social_interaction event for backwards compatibility
   safeGtagCall('event', 'social_interaction', {
     platform: platform,
     action: action,
@@ -263,6 +289,17 @@ export const trackResumeView = async (
 ): Promise<void> => {
   await waitForGtag();
   const sessionId = getSessionId();
+  
+  // Send specific clicked_resume event
+  safeGtagCall('event', 'clicked_resume', {
+    event_category: 'Resume',
+    event_action: 'Click',
+    format: format,
+    source: source,
+    session_id: sessionId
+  });
+
+  // Also send the general resume_view event for backwards compatibility
   safeGtagCall('event', 'resume_view', {
     format: format,
     source: source,
