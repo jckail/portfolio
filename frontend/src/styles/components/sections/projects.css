@@ -76,19 +76,15 @@
   font-size: 1.1rem;
   color: var(--text-color);
   margin: 0;
-  padding: var(--spacing-sm) 0;
-  width: 100%;
-  text-align: center;
-}
-
-.project-card h3 a {
-  color: var(--text-color);
-  font-size: 1.2rem;
   text-decoration: none;
+  padding: var(--spacing-sm) 0;
   transition: color var(--transition-fast);
   display: inline-block;
-  max-width: 95%;
+  width: 100%;
+  text-align: center;
+  text-decoration: underline;
 }
+
 
 .project-card h3 a:hover {
   text-decoration: underline;
@@ -183,11 +179,11 @@
   }
 
   .project-card h3 a {
-    font-size: .9rem;
+    font-size: 1rem;
   }
 
   .project-card p {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .project-links {
@@ -196,7 +192,7 @@
   }
 
   .project-link {
-    width: 95%;
+    width: 100%;
   }
 }
 
