@@ -37,14 +37,6 @@ const TLDRContent = memo(({
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  // Preload the full portrait when data is available
-  useEffect(() => {
-    if (aboutMeData.full_portrait) {
-      const img = new Image();
-      img.src = aboutMeData.full_portrait;
-    }
-  }, [aboutMeData.full_portrait]);
-
   return (
     <div className="about-section">
       <h2>{aboutMeData.greeting}</h2>
@@ -53,7 +45,7 @@ const TLDRContent = memo(({
 
         <div className="headshot-container">
           <img 
-            src={aboutMeData.full_portrait || "/images/headshot/headshot.jpg"}
+            src={aboutMeData.full_portrait}
             alt="Profile headshot"
             className="headshot"
             loading="eager"
@@ -93,12 +85,6 @@ const TLDR: React.FC = () => {
   const handleResumeClick = () => {
     scrollToSection('resume');
   };
-
-  // Start preloading the default headshot immediately
-  useEffect(() => {
-    const defaultImg = new Image();
-    defaultImg.src = "/images/headshot/headshot.jpg";
-  }, []);
 
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
