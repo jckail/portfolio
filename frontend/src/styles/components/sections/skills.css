@@ -118,7 +118,7 @@
 }
 
 .skill-name {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   text-align: center;
   color: var(--text-color);
   margin-top: 0px;
@@ -237,17 +237,17 @@
   }
 
   .skill-icon {
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
   }
 
   .skill-name {
-    font-size: 0.60rem;
+    font-size: 0.7rem;
   }
   
   .skill-item {
-    height: 60px;
-    width: 60px;
+    height: 75px;
+    width: 75px;
     align-items: center;
     justify-content:center;
   }
@@ -264,7 +264,7 @@
     color: white;
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: var(--radius-full);
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);
   }
