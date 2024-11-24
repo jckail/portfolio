@@ -49,10 +49,10 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height)+ 20px);
+    scroll-margin-top: calc(var(--header-height)+ 75px);
 }
   .main-content {
-      padding-top: var(--header-height);
+      padding-top: 55px;
   }
   
   .main-content-inner {
