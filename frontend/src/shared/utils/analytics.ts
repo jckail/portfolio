@@ -50,7 +50,7 @@ const generateSessionId = (): string => {
 };
 
 // Get or create session ID
-const getSessionId = (): string => {
+export const getSessionId = (): string => {
   let sessionId = sessionStorage.getItem('ga_session_id');
   if (!sessionId) {
     sessionId = generateSessionId();

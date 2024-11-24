@@ -7,8 +7,9 @@ import json
 import asyncio
 from contextlib import asynccontextmanager
 from backend.app.models import get_all_models
-all_data = get_all_models()
+from backend.app.utils.supabase_client import supabase
 
+all_data = get_all_models()
 
 # Load environment variables
 load_dotenv()
@@ -45,7 +46,7 @@ class ConnectionManager:
     def get_context(self, client_id: str) -> str:
         return self.page_contexts.get(client_id, '')
 
-    async def send_message(self, message: str, client_id: str, is_chunk: bool = False):
+    async def send_message(self, message: str, client_id: str, is_chunk: bool = False, ga_session_id: str = None):
         if client_id in self.active_connections:
             try:
                 # Prepare the message once
@@ -56,6 +57,14 @@ class ConnectionManager:
                 }
                 websocket = self.active_connections[client_id]
                 await websocket.send_json(json_message)
+
+                # Store complete messages in Supabase
+                if not is_chunk and ga_session_id:
+                    await supabase.store_chat_message(
+                        google_analytics_session_id=ga_session_id,
+                        message_type='received',
+                        message_detail=message
+                    )
             except Exception as e:
                 print(f"Error sending message: {e}")
 
@@ -106,6 +115,15 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             manager.store_context(client_id, data["content"])
             return
 
+        # Store user message in Supabase
+        ga_session_id = data.get('ga_session_id')
+        if ga_session_id and data["type"] == "message":
+            await supabase.store_chat_message(
+                google_analytics_session_id=ga_session_id,
+                message_type='sent',
+                message_detail=data['content']
+            )
+
         complete_response = []  # Use list for efficient string building
         
         async with manager.get_streaming_response(client_id, data['content']) as stream:
@@ -120,7 +138,7 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
                         # Send complete message
                         if complete_response:
                             final_response = ''.join(complete_response)
-                            await manager.send_message(final_response, client_id, is_chunk=False)
+                            await manager.send_message(final_response, client_id, is_chunk=False, ga_session_id=ga_session_id)
 
     except Exception as e:
         error_message = f"Error: {str(e)}"

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Message } from '../../../../types/chat';
-import { trackChatMessage } from '../../../../shared/utils/analytics';
+import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
 
 export const useChat = () => {
   const [open, setOpen] = useState(false);
@@ -153,7 +153,8 @@ export const useChat = () => {
       
       webSocket.send(JSON.stringify({
         type: 'message',
-        content: message
+        content: message,
+        ga_session_id: getSessionId()
       }));
       setMessage('');
     }

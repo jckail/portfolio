@@ -154,5 +154,23 @@ class SupabaseClient:
             print(f"Failed to store log batch in Supabase: {str(e)}", file=sys.stderr)
             return None
 
+    @classmethod
+    async def store_chat_message(cls, google_analytics_session_id: str, message_type: str, message_detail: str):
+        """Store a chat message in Supabase."""
+        try:
+            admin_client = cls.get_admin_client()
+            message_entry = {
+                'timestamp': datetime.utcnow().isoformat(),
+                'google_analytics_session_id': google_analytics_session_id,
+                'type': message_type,  # 'sent' or 'received'
+                'message_detail': message_detail
+            }
+            
+            result = admin_client.table('portfolio_assistant_messages').insert(message_entry).execute()
+            return result
+        except Exception as e:
+            print(f"Failed to store chat message in Supabase: {str(e)}", file=sys.stderr)
+            return None
+
 # Create a module-level interface
 supabase = SupabaseClient()
