@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- Cape (now behind everything) -->
+  <path d="M70 120 Q100 140 130 120 L150 270 Q100 250 50 270 Z" fill="#E74C3C" opacity="0.9"/>
+  
+  <!-- Body -->
+  <path d="M70 120 L130 120 L140 300 L60 300 Z" fill="#2C3E50"/>
+  
+  <!-- Shirt -->
+  <path d="M85 120 L115 120 L110 200 L90 200 Z" fill="#FFFFFF"/>
+  
+  <!-- Emblem on shirt -->
+  <path d="M95 140 L105 140 L110 160 L100 170 L90 160 Z" fill="#F1C40F"/>
+  
+  <!-- Tie -->
+  <path d="M95 120 L105 120 L108 170 L100 180 L92 170 L95 120 Z" fill="#E74C3C"/>
+  
+  <!-- Arms in confident pose -->
+  <path d="M60 150 Q40 170 45 200" stroke="#2C3E50" stroke-width="30" stroke-linecap="round"/>
+  <path d="M140 150 Q160 170 155 200" stroke="#2C3E50" stroke-width="30" stroke-linecap="round"/>
+  
+  <!-- Hands -->
+  <circle cx="45" cy="200" r="12" fill="#FFD7B5"/>
+  <circle cx="155" cy="200" r="12" fill="#FFD7B5"/>
+  
+  <!-- Head -->
+  <circle cx="100" cy="70" r="35" fill="#FFD7B5"/>
+  
+  
+  
+  
+  <!-- Eyes - Larger and more friendly -->
+  <circle cx="85" cy="65" r="6" fill="#FFFFFF"/>
+  <circle cx="115" cy="65" r="6" fill="#FFFFFF"/>
+  <circle cx="85" cy="65" r="3" fill="#513D34"/>
+  <circle cx="115" cy="65" r="3" fill="#513D34"/>
+  
+  <!-- Eyebrows -->
+  <path d="M80 60 Q85 58 90 60" stroke="#513D34" stroke-width="2" fill="none"/>
+  <path d="M110 60 Q115 58 120 60" stroke="#513D34" stroke-width="2" fill="none"/>
+  
+  <!-- Smile - Clear and visible -->
+  <path d="M85 80 Q100 90 115 80" fill="none" stroke="#513D34" stroke-width="3"/>
+</svg>
