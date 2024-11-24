@@ -5,6 +5,7 @@ import { ChatButton } from './components/ChatButton';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessages } from './components/ChatMessages';
 import { ChatInput } from './components/ChatInput';
+import { trackChatOpen } from '../../../shared/utils/analytics';
 
 const Chat: React.FC = () => {
   const {
@@ -20,9 +21,10 @@ const Chat: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleClickOpen = (e: React.MouseEvent) => {
+  const handleClickOpen = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    await trackChatOpen();
     setOpen(true);
   };
 

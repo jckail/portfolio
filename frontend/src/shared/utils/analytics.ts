@@ -271,6 +271,35 @@ export const trackResumeView = async (
   });
 };
 
+// Track chat open
+export const trackChatOpen = async (): Promise<void> => {
+  await waitForGtag();
+  const sessionId = getSessionId();
+  safeGtagCall('event', 'chat_open', {
+    event_category: 'Chat',
+    event_action: 'Open',
+    page_path: getFullPagePath(),
+    session_id: sessionId
+  });
+};
+
+// Track chat message
+export const trackChatMessage = async (
+  messageType: 'sent' | 'received',
+  messageLength: number
+): Promise<void> => {
+  await waitForGtag();
+  const sessionId = getSessionId();
+  safeGtagCall('event', 'chat_message', {
+    event_category: 'Chat',
+    event_action: 'Message',
+    message_type: messageType,
+    message_length: messageLength,
+    page_path: getFullPagePath(),
+    session_id: sessionId
+  });
+};
+
 // Initialize analytics with route tracking
 export const initializeAnalytics = async (): Promise<void> => {
   debugLog('Initializing analytics...');
@@ -280,7 +309,7 @@ export const initializeAnalytics = async (): Promise<void> => {
   const fullPath = getFullPagePath();
   trackPageView(fullPath);
 
-  // Track initial anchor if present
+  // Initial anchor if present
   const initialAnchor = window.location.hash.slice(1);
   if (initialAnchor) {
     trackAnchorChange(initialAnchor);

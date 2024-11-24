@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Message } from '../../../../types/chat';
+import { trackChatMessage } from '../../../../shared/utils/analytics';
 
 export const useChat = () => {
   const [open, setOpen] = useState(false);
@@ -102,9 +103,13 @@ export const useChat = () => {
                 text: data.message || lastMessage.text,
                 isStreaming: false
               };
+              // Track received message
+              trackChatMessage('received', (data.message || lastMessage.text).length);
             } else if (data.message) {
               // Add a new complete message
               newMessages.push({ type: 'agent', text: data.message });
+              // Track received message
+              trackChatMessage('received', data.message.length);
             }
             setIsLoading(false);
           }
@@ -140,6 +145,9 @@ export const useChat = () => {
 
   const handleSendMessage = async () => {
     if (message.trim() && webSocket && webSocket.readyState === WebSocket.OPEN) {
+      // Track sent message
+      await trackChatMessage('sent', message.trim().length);
+      
       setMessages(prev => [...prev, { type: 'user', text: message }]);
       setIsLoading(true);
       
