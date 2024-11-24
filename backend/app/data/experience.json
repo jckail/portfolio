@@ -12,7 +12,7 @@
         "link": "https://www.prove.com/",
         "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
-        "tech_stack": ["python", "go", "airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "go", "java", "aws","spark", "airflow", "kafka","flink","dbt","looker"],
         "more_highlights": [
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
@@ -39,7 +39,7 @@
         "link": "https://about.fb.com/",
         "logoPath": "meta.svg",
         "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql","javascript","php","airflow", "spark","pytorch"],
         "more_highlights": [
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers. Collaborated with data science, ML, and hardware teams to align product goals, resulting in a 20% faster delivery of cross-platform features.",
             "Designed exabyte scale data models for Community Messenger to handle multi-platform data streams, increasing user engagement by 35% across Instagram, WhatsApp, Facebook, and Quest despite complex cross-platform dependencies.",
@@ -66,7 +66,7 @@
         "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
         "logoPath": "deloitte.svg",
         "company_description": "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "javascript","rust","mongodb","google_cloud","pytorch","tableau"],
         "more_highlights": [
             "Automated 31% of healthcare claims processing with transformer-based ML models, addressing data inconsistencies and regulatory constraints. Saved 250,000+ human-hours annually and improved claim accuracy by 20%",
             "Optimized exabyte-scale video reliability metrics using distributed data processing frameworks. Cut daily processing time by 90% and expanded metric coverage across multiple product lines, improving monitoring precision.",
@@ -93,7 +93,7 @@
         "link": "https://www.wowway.com/",
         "logoPath": "wow.svg",
         "company_description": "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "javascript", "PyTorch", "NLP", "Computer Vision"],
         "more_highlights": [
             "Built machine learning models, including custom classification and churn prediction algorithms (e.g., logistic regression, K-means clustering). Increased customer package upgrades by 22% YoY and reduced churn by 15%.",
             "Managed a team of 5 data practitioners, providing BI and insights to sales, product, and engineering teams. Established KPIs and standardized reporting through governance committees, driving a 10% increase in sales performance.",
