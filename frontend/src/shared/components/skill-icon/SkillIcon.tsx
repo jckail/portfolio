@@ -13,6 +13,7 @@ const SVG_COMPONENTS: Record<string, React.LazyExoticComponent<React.FC<React.SV
   'flask.svg': lazy(() => import('../../../assets/icons/flask.svg?react')),
   'jupyter.svg': lazy(() => import('../../../assets/icons/jupyter.svg?react')),
   'kafka.svg': lazy(() => import('../../../assets/icons/kafka.svg?react')),
+  'kubernetes.svg': lazy(() => import('../../../assets/icons/kubernetes.svg?react')),
   'langchain.svg': lazy(() => import('../../../assets/icons/langchain.svg?react')),
   'llamaindex.svg': lazy(() => import('../../../assets/icons/llamaindex.svg?react')),
   'milvus_black.svg': lazy(() => import('../../../assets/icons/milvus_black.svg?react')),

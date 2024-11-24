@@ -195,18 +195,7 @@
         "sub_category": "Data Integration"
     },
 
-    "couchdb": {
-        "display_name": "CouchDB",
-        "image": "couchdb.svg",
-        "professional_experience": false,
-        "years_of_experience": 2,
-        "tags": ["database", "nosql", "document", "apache", "json", "rest"],
-        "description": "A document-oriented NoSQL database that uses JSON for documents, JavaScript for MapReduce queries.",
-        "weblink": "https://couchdb.apache.org/",
-        "examples": {},
-        "general_category": "Databases",
-        "sub_category": "Document Store"
-    },
+
     "css3": {
         "display_name": "CSS3",
         "image": "css3.svg",
@@ -420,7 +409,7 @@
         "description": "A distributed version control system for tracking changes in source code during software development.",
         "weblink": "https://git-scm.com/",
         "examples": {},
-        "general_category": "Development Tools",
+        "general_category": "DevOps",
         "sub_category": "Version Control"
     },
     "github_actions": {
@@ -641,18 +630,7 @@
         "general_category": "Web Development",
         "sub_category": "UI Framework"
     },
-    "milvus": {
-        "display_name": "Milvus",
-        "image": "milvus_black.svg",
-        "professional_experience": true,
-        "years_of_experience": 1,
-        "tags": ["vector-db", "similarity-search", "ai", "machine-learning", "embeddings", "distributed"],
-        "description": "An open-source vector database built for scalable similarity search and AI applications.",
-        "weblink": "https://milvus.io/",
-        "examples": {},
-        "general_category": "Databases",
-        "sub_category": "Vector Database"
-    },
+
     "mistral_ai": {
         "display_name": "Mistral AI",
         "image": "mistral_ai.svg",
@@ -896,18 +874,7 @@
         "sub_category": "Vector Database"
     },
 
-    "rds": {
-        "display_name": "RDS",
-        "image": "rds.svg",
-        "professional_experience": true,
-        "years_of_experience": 8,
-        "tags": ["database", "aws", "managed", "cloud", "relational", "mysql", "postgresql"],
-        "description": "Amazon's Relational Database Service that makes it easy to set up, operate, and scale a relational database in the cloud.",
-        "weblink": "https://aws.amazon.com/rds/",
-        "examples": {},
-        "general_category": "Databases",
-        "sub_category": "Database Service"
-    },
+
     "react": {
         "display_name": "React",
         "image": "react.svg",

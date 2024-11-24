@@ -106,7 +106,7 @@ const Header: React.FC<HeaderProps> = memo(({
             </button>
             <div className="header-titles">
               <h1>{contactData.firstName}{" "}{contactData.lastName}</h1>
-              <h2>AI | Data Engineer</h2>
+              <h2>AI | Data | ML</h2>
             </div>
           </div>
           <div className="nav-right">
