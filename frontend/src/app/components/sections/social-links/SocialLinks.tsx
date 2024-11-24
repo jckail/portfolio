@@ -1,10 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { trackSocialClick, trackResumeView } from '../../../../shared/utils/analytics';
 
 const GitHubIcon = lazy(() => import('../../../../shared/components/icons/github-icon'));
 const LinkedInIcon = lazy(() => import('../../../../shared/components/icons/linkedin-icon'));
 const EmailIcon = lazy(() => import('../../../../shared/components/icons/email-icon'));
 const ResumeIcon = lazy(() => import('../../../../shared/components/icons/resume-icon'));
+const ContactModal = lazy(() => import('../modals/ContactModal'));
 
 interface SocialLinksProps {
   github?: string;
@@ -21,6 +22,8 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
   email,
   onResumeClick
 }) => {
+  const [showContactModal, setShowContactModal] = useState(false);
+
   const handleSocialClick = (platform: string, url: string) => {
     trackSocialClick(platform, 'visit', url);
   };
@@ -30,8 +33,9 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
     onResumeClick();
   };
 
-  const handleEmailClick = () => {
-    trackSocialClick('email', 'contact', `mailto:${email}`);
+  const handleContactClick = () => {
+    trackSocialClick('contact', 'open_modal', 'contact_info');
+    setShowContactModal(true);
   };
 
   return (
@@ -71,19 +75,18 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
         </a>
       )}
       {email && (
-        <a 
-          href={`mailto:${email}`}
+        <button 
+          onClick={handleContactClick}
           className="icon-link"
-          aria-label="Email Contact"
-          onClick={handleEmailClick}
-          data-social="email"
-          data-action="contact"
+          aria-label="Contact Information"
+          data-social="contact"
+          data-action="open_modal"
           data-category="Contact Link"
         >
           <Suspense fallback={<IconFallback />}>
             <EmailIcon />
           </Suspense>
-        </a>
+        </button>
       )}
       <button 
         onClick={handleResumeClick}
@@ -99,6 +102,16 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           <ResumeIcon />
         </Suspense>
       </button>
+
+      {showContactModal && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ContactModal
+            email={email || ''}
+            location="San Francisco Bay Area, CA"
+            onClose={() => setShowContactModal(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
