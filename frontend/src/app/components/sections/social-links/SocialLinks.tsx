@@ -1,4 +1,5 @@
 import React, { lazy, Suspense } from 'react';
+import { trackSocialClick, trackResumeView } from '../../../../shared/utils/analytics';
 
 const GitHubIcon = lazy(() => import('../../../../shared/components/icons/github-icon'));
 const LinkedInIcon = lazy(() => import('../../../../shared/components/icons/linkedin-icon'));
@@ -20,6 +21,19 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
   email,
   onResumeClick
 }) => {
+  const handleSocialClick = (platform: string, url: string) => {
+    trackSocialClick(platform, 'visit', url);
+  };
+
+  const handleResumeClick = () => {
+    trackResumeView('web', 'navigation');
+    onResumeClick();
+  };
+
+  const handleEmailClick = () => {
+    trackSocialClick('email', 'contact', `mailto:${email}`);
+  };
+
   return (
     <div className="social-links">
       {github && (
@@ -29,6 +43,10 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           rel="noopener noreferrer"
           className="icon-link"
           aria-label="GitHub Profile"
+          onClick={() => handleSocialClick('github', github)}
+          data-social="github"
+          data-action="visit"
+          data-category="Social Link"
         >
           <Suspense fallback={<IconFallback />}>
             <GitHubIcon />
@@ -42,6 +60,10 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           rel="noopener noreferrer"
           className="icon-link"
           aria-label="LinkedIn Profile"
+          onClick={() => handleSocialClick('linkedin', linkedin)}
+          data-social="linkedin"
+          data-action="visit"
+          data-category="Social Link"
         >
           <Suspense fallback={<IconFallback />}>
             <LinkedInIcon />
@@ -53,6 +75,10 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           href={`mailto:${email}`}
           className="icon-link"
           aria-label="Email Contact"
+          onClick={handleEmailClick}
+          data-social="email"
+          data-action="contact"
+          data-category="Contact Link"
         >
           <Suspense fallback={<IconFallback />}>
             <EmailIcon />
@@ -60,9 +86,13 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
         </a>
       )}
       <button 
-        onClick={onResumeClick}
+        onClick={handleResumeClick}
         className="resume-button"
         aria-label="View Resume"
+        data-action="view"
+        data-label="Resume Section"
+        id="resume-button"
+        type="button"
       >
         <strong>Resume</strong>
         <Suspense fallback={<IconFallback />}>

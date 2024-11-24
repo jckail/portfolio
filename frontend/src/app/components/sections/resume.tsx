@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useResume } from '../../providers/resume-provider';
+import { trackResumeDownload } from '../../../shared/utils/analytics';
 import '../../../styles/components/sections/resume.css';
 import PDFViewer from './modals/PDFViewer';
 
@@ -26,10 +27,14 @@ const MyResume: React.FC = () => {
       setError(null);
       console.log('Calling handleDownload...');
       await handleDownload();
+      // Track successful download
+      await trackResumeDownload('pdf', 'latest', 'download_button');
       console.log('handleDownload completed');
     } catch (err) {
       console.error('Download error:', err);
       setError(err instanceof Error ? err.message : 'Failed to download resume');
+      // Track failed download with the same function
+      await trackResumeDownload('pdf', 'latest', 'download_button_error');
     } finally {
       setIsDownloading(false);
     }
@@ -52,6 +57,9 @@ const MyResume: React.FC = () => {
               disabled={isDownloading}
               type="button"
               style={{ cursor: 'pointer' }}
+              data-action="download"
+              data-label="Resume PDF"
+              id="resume-download-button"
             >
               <span className="button-content">
                 {isDownloading ? (
