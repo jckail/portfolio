@@ -5,14 +5,14 @@
         "date": "06/2023 - Present",
         "location": "Denver, CO",
         "highlights": [
-            "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%.",
+            "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
             "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
             "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
         ],
         "link": "https://www.prove.com/",
         "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
-        "tech_stack": ["python", "sql", "go", "javascript","typescript","aws"],
+        "tech_stack": ["python", "sql", "go", "javascript","typescript","java","aws"],
         "more_highlights": [
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
@@ -114,7 +114,7 @@
         "location": "Denver, CO",
         "highlights": [
             "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.",
-            "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days"
+            "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days."
         ],
         "link": "https://www.commonspirit.org/",
         "logoPath": "commonspirit.svg",
@@ -142,7 +142,7 @@
         "date": "04/2013 - 09/2016",
         "location": "Boulder, CO",
         "highlights": [
-            "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue.",
+            "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual revenue.",
             "Migrated clients from SFTP to real-time APIs with Flask and Apache Kafka, reducing data delivery times by 50%."
         ],
         "link": "https://www.r1rcm.com/",
