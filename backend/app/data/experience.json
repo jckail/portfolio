@@ -5,14 +5,14 @@
         "date": "06/2023 - Present",
         "location": "Denver, CO",
         "highlights": [
-            "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product API response time to 120ms and operational expenses by 95%.",
+            "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%.",
             "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
-            "Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes."
+            "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
         ],
         "link": "https://www.prove.com/",
         "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
-        "tech_stack": ["python", "sql", "go", "java", "aws","spark", "airflow", "kafka","flink","dbt","looker"],
+        "tech_stack": ["python", "sql", "go", "aws"],
         "more_highlights": [
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
@@ -31,15 +31,15 @@
         "date": "01/2021 - 09/2022",
         "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
         "highlights": [
-            "Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team of 10+ engineers.",
-            "Developed and deployed 100+ ML pipelines with Airflow, Spark, and PyTorch, leveraging NLP, computer vision, and user segmentation to optimize ad targeting and notifications for billions of users.",
-            "Designed an automated framework to dynamically generate thousands of async Spark data pipelines, increasing compute efficiency by 66%.",
+            "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.",
+            "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
+            "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.",
             "Re-architected petabyte-scale data models, reducing storage costs by 25%."
         ],
         "link": "https://about.fb.com/",
         "logoPath": "meta.svg",
         "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.",
-        "tech_stack": ["python", "sql","javascript","php","airflow", "spark","pytorch"],
+        "tech_stack": ["python", "sql","javascript","php","scala"],
         "more_highlights": [
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers. Collaborated with data science, ML, and hardware teams to align product goals, resulting in a 20% faster delivery of cross-platform features.",
             "Designed exabyte scale data models for Community Messenger to handle multi-platform data streams, increasing user engagement by 35% across Instagram, WhatsApp, Facebook, and Quest despite complex cross-platform dependencies.",
@@ -61,12 +61,12 @@
         "highlights": [
             "Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.",
             "Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.",
-            "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions."
+            "Led teams of 20+ consultants on high-profile Fortune 50 engagements, delivering advanced technical solutions aligned with client needs."
         ],
         "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
         "logoPath": "deloitte.svg",
         "company_description": "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom",
-        "tech_stack": ["python", "sql", "javascript","rust","mongodb","google_cloud","pytorch","tableau"],
+        "tech_stack": ["python", "sql", "javascript","php","rust","google_cloud"],
         "more_highlights": [
             "Automated 31% of healthcare claims processing with transformer-based ML models, addressing data inconsistencies and regulatory constraints. Saved 250,000+ human-hours annually and improved claim accuracy by 20%",
             "Optimized exabyte-scale video reliability metrics using distributed data processing frameworks. Cut daily processing time by 90% and expanded metric coverage across multiple product lines, improving monitoring precision.",
@@ -83,7 +83,7 @@
     },
     "wide_open_west": {
         "company": "Wide Open West",
-        "title": "Lead Data Scientist",
+        "title": "Senior Data Scientist",
         "date": "11/2017 - 12/2018",
         "location": "Denver, CO",
         "highlights": [
@@ -93,7 +93,7 @@
         "link": "https://www.wowway.com/",
         "logoPath": "wow.svg",
         "company_description": "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services",
-        "tech_stack": ["python", "sql", "javascript", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "javascript", "aws"],
         "more_highlights": [
             "Built machine learning models, including custom classification and churn prediction algorithms (e.g., logistic regression, K-means clustering). Increased customer package upgrades by 22% YoY and reduced churn by 15%.",
             "Managed a team of 5 data practitioners, providing BI and insights to sales, product, and engineering teams. Established KPIs and standardized reporting through governance committees, driving a 10% increase in sales performance.",
@@ -109,19 +109,20 @@
     },
     "common_spirit_health": {
         "company": "Common Spirit Health",
-        "title": "Data Engineer - Business Intelligence",
+        "title": "Data Engineer",
         "date": "09/2016 - 11/2017",
         "location": "Denver, CO",
         "highlights": [
-            "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes."
+            "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.",
+            "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days"
         ],
         "link": "https://www.commonspirit.org/",
         "logoPath": "commonspirit.svg",
         "company_description": "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states.",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "javascript","java"],
         "more_highlights": [
             "",
-            "Architected and delivered new REST APIs and data lakes, reducing external partner data processing time from 7 days to 5 minutes and improving partner satisfaction by 30%. Enhanced data accessibility and scalability through efficient data structures.",
+            "Architected and delivered new REST APIs and data lakes, reducing external partner data processing time from 7 days to 5 minutes. Enhanced data accessibility and scalability through efficient data structures.",
             "Managed tier-one vendor data extracts containing patient records, financial data, and ICD codes. Improved extract performance by 40% and ensured 100% HIPAA compliance through encryption and access control measures.",
             "Developed a data quality dashboard using Tableau and Python, enabling real-time failure detection. Reduced issue resolution time by 50% and improved overall data integrity and operational reliability.",
             "Conducted advanced data analysis using Dimensional Fact Models in SMP and MPP environments, improving query performance by 35%. Delivered actionable insights to executives, enhancing decision-making processes.",
@@ -130,23 +131,24 @@
             "Created analytics dashboards using Qlik Sense, Tableau, and Python to track key metrics. Delivered actionable insights to executives, increasing reporting efficiency by 25% and enhancing operational visibility.",
             "Developed optimized storage and compute solutions, reducing third-party vendor data costs by 45%. Earned recognition from the VP of Business Intelligence for faster issue resolution and improved efficiency.",
             "Migrated data from relational to columnar formats (e.g., Parquet) using Redshift, improving query speed by 40% and enabling large-scale data processing for analytics.",
-            "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 10 days, optimized surgical room usage by 3000%, and enabled predictive staffing to improve patient care.",
+            "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 5 days, optimized surgical room usage by 3000%, and enabled predictive staffing to improve patient care.",
             "Worked with orchestration tools similar to Airflow and utilized cloud technologies (Microsoft Azure and AWS) for data infrastructure, achieving seamless cloud operations and reducing deployment times.",
             "Leveraged strong Python and SQL expertise for ETL/ELT processes, developing scalable solutions with continuous improvement and adhering to best coding practices."
         ]
     },
     "acustream": {
-        "company": "AcuStream (R1)",
-        "title": "Software Engineer - Data",
+        "company": "AcuStream | R1",
+        "title": "Software Engineer",
         "date": "04/2013 - 09/2016",
         "location": "Boulder, CO",
         "highlights": [
-            "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue."
+            "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue.",
+            "Migrated clients from SFTP to real-time APIs with Flask and Apache Kafka, reducing data delivery times by 50%."
         ],
         "link": "https://www.r1rcm.com/",
         "logoPath": "r1.svg",
         "company_description": "R1 RCM is an American healthcare revenue cycle management company servicing hospitals, health systems and physician groups across the United States. Headquartered in Chicago, Illinois, R1 RCM is publicly traded on the NASDAQ.",
-        "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+        "tech_stack": ["python", "sql", "javascript", "java","aws"],
         "more_highlights": [
             "Developed a custom invoicing system using Python and rule-based algorithms with ML components, generating $300M+ in annual revenue. Improved invoice accuracy by 35% and automated processes to reduce manual effort by 60%.",
             "Partnered with executives on high-impact initiatives, driving a 200% increase in revenue and boosting client retention by 25%. Optimized operational strategies, improving profit margins from 41% to 78%.",
