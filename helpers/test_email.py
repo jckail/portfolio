@@ -2,6 +2,10 @@ import requests
 import json
 import sys
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def test_email_sending(base_url="http://localhost:8080"):
     """
@@ -62,7 +66,7 @@ def test_email_sending(base_url="http://localhost:8080"):
     except requests.exceptions.RequestException as e:
         print("\n❌ Error making request:")
         print(str(e))
-        if hasattr(e.response, 'text'):
+        if hasattr(e, 'response') and e.response is not None:
             try:
                 error_detail = json.loads(e.response.text)
                 print("Error details:", json.dumps(error_detail, indent=2))
@@ -70,9 +74,12 @@ def test_email_sending(base_url="http://localhost:8080"):
                 print("Error response:", e.response.text)
 
 if __name__ == "__main__":
+    # Get production URL from environment variables
+    production_url = os.getenv('PRODUCTION_URL', 'https://quickresume-292025398859.us-central1.run.app')
+    
     # Check if production URL is provided as argument
     if len(sys.argv) > 1 and sys.argv[1] == "--prod":
-        base_url = os.getenv('PRODUCTION_URL', 'https://portfolio-292025398859.us-central1.run.app')
+        base_url = production_url
         print(f"Testing against production URL: {base_url}")
     else:
         base_url = "http://localhost:8080"

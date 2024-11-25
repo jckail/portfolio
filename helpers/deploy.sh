@@ -45,7 +45,7 @@ else
 fi
 
 # Check if required environment variables are set
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY SMTP_PASSWORD"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY SENDGRID_API_KEY"
 for var in $required_vars; do
     if [ -z "${!var}" ]; then
         echo "Error: Required environment variable $var is not set in .env file"
@@ -56,8 +56,8 @@ done
 # Set environment-specific variables
 if [ "$ENVIRONMENT" = "prod" ]; then
     DOCKERFILE="helpers/Dockerfile.prod"
-    ALLOWED_ORIGINS="https://portfolio-292025398859.us-central1.run.app"
-    PRODUCTION_URL="https://portfolio-292025398859.us-central1.run.app"
+    ALLOWED_ORIGINS="https://quickresume-292025398859.us-central1.run.app"
+    PRODUCTION_URL="https://quickresume-292025398859.us-central1.run.app"
     
     echo "Enabling required Google Cloud APIs..."
     gcloud services enable cloudfunctions.googleapis.com
@@ -98,7 +98,7 @@ if [ "$ENVIRONMENT" = "prod" ]; then
         --set-env-vars "SUPABASE_PW=${SUPABASE_PW}" \
         --set-env-vars "GIT_COMMIT=${GIT_COMMIT}" \
         --set-env-vars "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" \
-        --set-env-vars "SMTP_PASSWORD=${SMTP_PASSWORD}" \
+        --set-env-vars "SENDGRID_API_KEY=${SENDGRID_API_KEY}" \
         --allow-unauthenticated
 
     echo "Deployment complete! Checking service health..."
