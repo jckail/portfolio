@@ -25,7 +25,7 @@ COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/publ
 
 # Install backend dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install  -r requirements.txt
 
 # Copy the backend code
 COPY backend /app/backend/
@@ -41,7 +41,7 @@ echo "Starting production environment..."
 echo "Checking environment variables..."
 
 # List of required environment variables
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY SMTP_PASSWORD"
 
 # Check each required variable
 for var in \$required_vars; do

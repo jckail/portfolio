@@ -65,7 +65,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8080/api/contact/send-email', {
+      const response = await fetch('api/contact/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

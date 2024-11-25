@@ -1,11 +1,10 @@
 import base64
 import json
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
 from typing import Union, Tuple
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email, To, Content
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -25,43 +24,40 @@ def send_email(message_data: dict) -> Union[Tuple[str, int], str]:
         if not admin_email:
             raise ValueError("ADMIN_EMAIL environment variable is not set")
 
-        # Create the email message
-        msg = MIMEMultipart()
-        msg['From'] = os.environ.get('SMTP_USERNAME', admin_email)
-        msg['To'] = message_data['to']
-        msg['Subject'] = message_data['subject']
+        # Create SendGrid mail object
+        message = Mail(
+            from_email=Email(admin_email),
+            to_emails=[
+                To(message_data['to']),
+                To(message_data['from'])
+            ],
+            subject=message_data['subject'],
+            plain_text_content=Content(
+                "text/plain", 
+                f"From: {message_data['from']}\n\n{message_data['text']}"
+            )
+        )
         
-        # Add reply-to header with sender's email
-        msg.add_header('Reply-To', message_data['from'])
+        # Set reply-to header
+        message.reply_to = Email(message_data['from'])
 
-        # Create the email body with both sender's email and message
-        body = f"From: {message_data['from']}\n\n{message_data['text']}"
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Set up the SMTP server
-        server = smtplib.SMTP(os.environ.get('SMTP_SERVER', 'smtp.gmail.com'), 
-                            int(os.environ.get('SMTP_PORT', 587)))
-        server.starttls()
+        # Initialize SendGrid client
+        sg = SendGridAPIClient(os.environ.get('SMTP_PASSWORD'))
         
-        # Login to the SMTP server
-        smtp_password = os.environ.get('SMTP_PASSWORD')
-        if not smtp_password:
-            raise ValueError("SMTP_PASSWORD environment variable is not set")
-            
-        server.login(os.environ.get('SMTP_USERNAME', admin_email),
-                    smtp_password)
-
         # Send the email
-        server.send_message(msg)
-        server.quit()
-
-        success_msg = f"Email sent successfully to {message_data['to']}"
-        logger.info(success_msg)
+        response = sg.send(message)
         
-        # Return appropriate response based on context
-        if os.environ.get('ENVIRONMENT') == 'cloud_function':
-            return (success_msg, 200)
-        return success_msg
+        # Check if the email was sent successfully
+        if response.status_code in [200, 201, 202]:
+            success_msg = f"Email sent successfully to {message_data['to']}"
+            logger.info(success_msg)
+            
+            # Return appropriate response based on context
+            if os.environ.get('ENVIRONMENT') == 'cloud_function':
+                return (success_msg, 200)
+            return success_msg
+        else:
+            raise Exception(f"SendGrid API returned status code: {response.status_code}")
 
     except Exception as e:
         error_message = f"Error sending email: {str(e)}"

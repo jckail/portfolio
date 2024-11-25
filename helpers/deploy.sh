@@ -45,7 +45,7 @@ else
 fi
 
 # Check if required environment variables are set
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY SMTP_PASSWORD"
 for var in $required_vars; do
     if [ -z "${!var}" ]; then
         echo "Error: Required environment variable $var is not set in .env file"
@@ -114,6 +114,7 @@ if [ "$ENVIRONMENT" = "prod" ]; then
         --set-env-vars "SUPABASE_PW=${SUPABASE_PW}" \
         --set-env-vars "GIT_COMMIT=${GIT_COMMIT}" \
         --set-env-vars "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" \
+        --set-env-vars "SMTP_PASSWORD=${SMTP_PASSWORD}" \
         --allow-unauthenticated
 
     echo "Deployment complete! Checking service health..."
