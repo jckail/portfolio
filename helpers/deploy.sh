@@ -82,22 +82,6 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     docker tag ${IMAGE_NAME} gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
     docker push gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
 
-    echo "Creating Pub/Sub topic if it doesn't exist..."
-    gcloud pubsub topics create portfolio-contact-emails --project=portfolio-383615 || true
-
-    echo "Deploying Email Cloud Function..."
-    gcloud functions deploy portfolio-contact \
-        --trigger-topic=portfolio-contact-emails \
-        --runtime=python39 \
-        --entry-point=send_email \
-        --source=backend/app/cloud_functions/email \
-        --region=us-central1 \
-        --set-env-vars "SMTP_SERVER=smtp.gmail.com" \
-        --set-env-vars "SMTP_PORT=587" \
-        --set-env-vars "SMTP_USERNAME=jckail13@gmail.com" \
-        --set-secrets "SMTP_PASSWORD=smtp-password:latest" \
-        --gen2
-
     echo "Deploying to Cloud Run..."
     gcloud run deploy quickresume \
         --image gcr.io/portfolio-383615/quickresume:${GIT_COMMIT} \
