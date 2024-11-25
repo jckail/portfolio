@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, Suspense } from 'react';
-import { RouteObject, useLocation } from 'react-router-dom';
+import { RouteObject, useLocation, useNavigate } from 'react-router-dom';
 import MainContent from './components/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
 import { DataProvider } from './providers/data-provider';
@@ -22,6 +22,10 @@ const App: React.FC = () => {
   const backgroundColor = useThemeBackground(theme);
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if we should show contact modal based on route
+  const showContactModal = location.pathname === '/contact';
 
   useEffect(() => {
     // Initialize analytics on mount
@@ -69,7 +73,7 @@ const App: React.FC = () => {
             <div style={{ isolation: 'isolate' }}>
               {/* Main content in its own error boundary */}
               <ErrorBoundary>
-                <MainContent />
+                <MainContent showContactModal={showContactModal} />
               </ErrorBoundary>
 
               {/* Chat portal lazy loaded */}
@@ -91,6 +95,10 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/admin',
+    element: <App />,
+  },
+  {
+    path: '/contact',
     element: <App />,
   }
 ];

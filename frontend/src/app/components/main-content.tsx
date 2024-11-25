@@ -11,6 +11,10 @@ import { useThemeStore } from '../../shared/stores/theme-store';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
+interface MainContentProps {
+  showContactModal?: boolean;
+}
+
 // Lazy load components below the fold
 const TechnicalSkills = React.lazy(() => 
   import('./sections/skills').then(module => ({
@@ -94,7 +98,7 @@ const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void
   );
 };
 
-const MainContentInner: React.FC = () => {
+const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
   useScrollSpy();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const setTheme = useThemeStore(state => state.setTheme);
@@ -180,7 +184,7 @@ const MainContentInner: React.FC = () => {
         <div className="main-content">
           {/* About section is eagerly loaded */}
           <ErrorBoundary>
-            <TLDR />
+            <TLDR showContactModal={showContactModal} />
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
@@ -228,7 +232,7 @@ const MainContentInner: React.FC = () => {
   );
 };
 
-const MainContent: React.FC = (props) => {
+const MainContent: React.FC<MainContentProps> = (props) => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   
   useEffect(() => {

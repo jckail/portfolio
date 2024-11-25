@@ -15,6 +15,10 @@ const LoadingSpinner = () => (
   </div>
 );
 
+interface TLDRProps {
+  showContactModal?: boolean;
+}
+
 const TLDRContent = memo(({ 
   aboutMeData, 
   contactData, 
@@ -86,9 +90,16 @@ const TLDRContent = memo(({
   );
 });
 
-const TLDR: React.FC = () => {
+const TLDR: React.FC<TLDRProps> = ({ showContactModal }) => {
   const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
   const [selectedContact, setSelectedContact] = useState<boolean>(false);
+
+  // Effect to handle showContactModal prop
+  useEffect(() => {
+    if (showContactModal) {
+      setSelectedContact(true);
+    }
+  }, [showContactModal]);
 
   const handleResumeClick = () => {
     scrollToSection('resume');
@@ -127,7 +138,11 @@ const TLDR: React.FC = () => {
             phone={contactData.phone}
             location={contactData.location}
             country={contactData.country}
-            onClose={() => setSelectedContact(false)}
+            onClose={() => {
+              setSelectedContact(false);
+              // Navigate back to home when contact modal is closed
+              window.history.pushState({}, '', '/');
+            }}
           />
         </Suspense>
       )}
