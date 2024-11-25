@@ -29,6 +29,7 @@
   width: 90%;
   max-height: 85vh;
   overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   border: 4px solid var(--primary-border);
   animation: modalFadeIn 0.3s ease-out forwards;
@@ -74,7 +75,7 @@
   margin: var(--spacing-xs) 0;
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xs);
   color: var(--text-color);
   max-width: 100%;
 }
@@ -618,6 +619,7 @@
     margin: var(--spacing-sm);
     width: 95%;
     max-height: 90vh;
+    overflow-x: hidden;
   }
 
   .contact-modal-body {
@@ -627,7 +629,7 @@
 
   .contact-details {
     padding: var(--spacing-sm);
-    font-size: 16px;
+    font-size: 15px;
     
   }
 

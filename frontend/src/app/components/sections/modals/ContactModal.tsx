@@ -127,17 +127,18 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
         <div className="contact-modal-body">
         <div className="contact-details">
+
           <p className="contact-info">
-            🇺🇸 <strong> {country}</strong>
+            🏔️<strong>{location}</strong>
           </p>
           <p className="contact-info">
-            🏔️ <strong>{location}</strong>
+            📧<strong>{email}</strong>
           </p>
           <p className="contact-info">
-            📧 <strong>{email}</strong>
+            🇺🇸<strong>{country}</strong>
           </p>
           <p className="contact-info">
-            ☎️ <strong>{phone}</strong>
+            ☎️<strong>{phone}</strong>
           </p>
         </div>
 
