@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel, EmailStr
-from google.cloud import pubsub_v1
-import json
 import os
 import logging
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from ..models import Contact
 from ..models.data_loader import load_contact
-from ..utils.email_function import send_email
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -36,48 +35,48 @@ async def get_contact() -> Contact:
 @router.post("/send-email")
 async def handle_email(email_data: EmailMessage = Body(...)):
     """
-    Send an email using Google Cloud Pub/Sub in production or direct SMTP in local development.
+    Send an email using SendGrid API directly.
     """
     try:
         admin_email = os.environ.get('ADMIN_EMAIL')
         if not admin_email:
             raise ValueError("ADMIN_EMAIL environment variable is not set")
 
-        # Create message payload
-        message = {
-            "to": admin_email,
-            "from": email_data.from_email,
-            "subject": email_data.subject,
-            "text": email_data.message
-        }
+        sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+        if not sendgrid_api_key:
+            raise ValueError("SENDGRID_API_KEY environment variable is not set")
 
-        # Check if we're in local development
-        if os.environ.get('ENVIRONMENT') != 'production':
-            logger.info("Using direct SMTP for local development")
-            result = send_email(message)
-            return {
-                "message": result,
-            }
-        
-        # Production: Use Pub/Sub
-        logger.info("Using Pub/Sub for production environment")
-        publisher = pubsub_v1.PublisherClient()
-        topic_path = publisher.topic_path(
-            "portfolio-383615",  # Project ID
-            "portfolio-contact-emails"  # Topic name
+        # Create the email message using the verified sender email
+        message = Mail(
+            from_email='assistant@jordan-kail.com',  # Using verified sender email
+            to_emails=[email_data.from_email,admin_email],
+            subject=f"Jordan Kail: {email_data.subject}",
+            plain_text_content=f"From: {email_data.from_email}\n\n{email_data.message}",
+            html_content=f"<p><strong>From:</strong> {email_data.from_email}</p><p>{email_data.message}</p>"
         )
 
-        # Convert message to bytes
-        message_bytes = json.dumps(message).encode('utf-8')
+        # Send the email using SendGrid
+        sg = SendGridAPIClient(sendgrid_api_key)
+        response = sg.send(message)
 
-        # Publish message
-        future = publisher.publish(topic_path, message_bytes)
-        message_id = future.result()
+        if response.status_code >= 200 and response.status_code < 300:
+            logger.info(f"Email sent successfully from {email_data.from_email}")
+            return {
+                "message": "Email sent successfully",
+                "status_code": response.status_code
+            }
+        else:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail=f"SendGrid API returned status code: {response.status_code}"
+            )
 
-        return {
-            "message": "Email notification sent successfully via Pub/Sub",
-            "message_id": message_id
-        }
+    except ValueError as ve:
+        logger.error(f"Configuration error: {str(ve)}")
+        raise HTTPException(
+            status_code=500,
+            detail=str(ve)
+        )
     except Exception as e:
         error_msg = f"Failed to send email: {str(e)}"
         logger.error(error_msg)
