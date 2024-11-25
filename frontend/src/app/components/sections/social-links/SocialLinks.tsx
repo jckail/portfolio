@@ -74,19 +74,22 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
         </a>
       )}
       {email && (
-        <button 
-          onClick={handleContactClick}
-          className="icon-link"
-          aria-label="Contact Information"
-          data-social="contact"
-          data-action="open_modal"
-          data-category="Contact Link"
-        >
-          <Suspense fallback={<IconFallback />}>
-            <EmailIcon />
-          </Suspense>
-        </button>
+            <button 
+            onClick={handleContactClick}
+            className="contact-button"
+            aria-label="View Contact"
+            data-action="view"
+            data-label="Contact modal"
+            id="contact-button"
+            type="button"
+          >
+            <strong>Contact</strong>
+            <Suspense fallback={<IconFallback />}>
+                <EmailIcon />
+              </Suspense>
+          </button>
       )}
+
       <button 
         onClick={handleResumeClick}
         className="resume-button"

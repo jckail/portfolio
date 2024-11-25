@@ -205,6 +205,33 @@
   width: 165px;
   font-weight: bold;
 }
+.contact-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: 0px 0px 0px 15px;
+  background: var(--background-color);
+  color: var(--text-color);
+  border: var(--border-thickness) solid var(--primary-border);
+  border-radius: var(--radius-sm);
+  font-size: 25px;
+  transition: all var(--transition-normal);
+  min-height: var(--icon-size-desktop);
+  width: 165px;
+  font-weight: bold;
+}
+.contact-button svg {
+  min-width: var(--icon-size-desktop);
+  min-height: var(--icon-size-desktop);
+}
+
+.contact-button:hover {
+  background: var(--primary);
+  transform: scale(1.1);
+  border: var(--border-thickness) solid var(--primary);
+  cursor: pointer;
+}
 
 .social-links .resume-button svg {
   min-width: var(--icon-size-desktop);
@@ -218,6 +245,8 @@
   border: var(--border-thickness) solid var(--primary);
   cursor: pointer;
 }
+
+
 
 @keyframes fadeInUp {
   from {
@@ -288,7 +317,7 @@
     justify-content: center;
     color: var(--text-color);
     transition: all var(--transition-normal);
-    padding: var(--spacing-xs) var(--spacing-s);
+    padding: var(--spacing-xs) 0px;
     border-radius: var(--radius-sm);
     height: var(--icon-size-mobile);
     min-height: var(--icon-size-mobile);
@@ -321,7 +350,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    padding: 0px 0px 0px 15px;
+    padding: 0px 0px 0px 0px;
     background: var(--background-color);
     color: var(--text-color);
     border: var(--border-thickness) solid var(--primary-border);
@@ -329,7 +358,7 @@
     font-size: 15px;
     transition: all var(--transition-normal);
     min-height: var(--icon-size-mobile);
-    width: 135px;
+    width: 125px;
     font-weight: bold;
   }
   
@@ -345,6 +374,35 @@
     border: var(--border-thickness) solid var(--primary);
     cursor: pointer;
   }
+  .contact-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: 0px 0px 0px 0px;
+    background: var(--background-color);
+    color: var(--text-color);
+    border: var(--border-thickness) solid var(--primary-border);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    transition: all var(--transition-normal);
+    min-height: var(--icon-size-mobile);
+    width: 125px;
+    font-weight: bold;
+  }
+  .contact-button svg {
+    min-width: var(--icon-size-mobile);
+    min-height: var(--icon-size-mobile);
+  }
+  
+  .contact-button:hover {
+    background: var(--primary);
+    transform: scale(1.1);
+    border: var(--border-thickness) solid var(--primary);
+    cursor: pointer;
+  }
+  
+
   .brief-bio p {
     font-size: .7rem;
   }
