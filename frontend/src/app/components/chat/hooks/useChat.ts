@@ -16,10 +16,12 @@ export const useChat = () => {
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
   const [initialContextSent, setInitialContextSent] = useState(false);
   const clientId = useRef(Date.now().toString());
+  const lastUrlState = useRef<string | null>(null);
 
-  // Update URL when modal state changes
+  // Update URL when modal state changes, with state tracking to prevent unnecessary updates
   useEffect(() => {
     const currentUrl = new URL(window.location.href);
+    const previousState = lastUrlState.current;
     
     if (open) {
       currentUrl.searchParams.set('ai_chat', 'open');
@@ -34,7 +36,11 @@ export const useChat = () => {
     // Construct the final URL with at most one hash
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
     
-    window.history.pushState({}, '', finalUrl);
+    // Only update if the URL state has actually changed
+    if (finalUrl !== previousState) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({}, '', finalUrl); // Use replaceState instead of pushState
+    }
   }, [open]);
 
   // Handle browser back/forward navigation

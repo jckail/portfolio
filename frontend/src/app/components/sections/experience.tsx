@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, memo } from 'react';
+import React, { lazy, Suspense, memo, useRef } from 'react';
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/components/sections/experience.css';
@@ -109,6 +109,7 @@ const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();
   const { selectedExperience, setSelectedExperience } = useExperience();
   const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
+  const lastUrlState = useRef<string | null>(null);
 
   // Map company slugs to experience keys
   const companyKeyMap: { [key: string]: string } = {
@@ -130,11 +131,7 @@ const Experience: React.FC = () => {
     'acustream': 'acustream-r1'
   };
 
-  const handleSelectExperience = (key: string) => {
-    // Get the URL-friendly slug for this experience
-    const slug = keyCompanyMap[key] || key;
-    
-    // Update the URL with the company parameter
+  const updateUrl = (slug: string) => {
     const url = new URL(window.location.href);
     url.searchParams.set('company', slug);
     
@@ -143,9 +140,19 @@ const Experience: React.FC = () => {
     const urlWithoutHash = url.toString().split('#')[0];
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
     
-    window.history.pushState({}, '', finalUrl);
+    // Only update if the URL has actually changed
+    if (finalUrl !== lastUrlState.current) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({}, '', finalUrl);
+    }
+  };
+
+  const handleSelectExperience = (key: string) => {
+    // Get the URL-friendly slug for this experience
+    const slug = keyCompanyMap[key] || key;
     
-    // Update the state
+    // Update the URL and state
+    updateUrl(slug);
     setSelectedExperience(slug);
   };
 

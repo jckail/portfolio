@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useContact = () => {
   const [selectedContact, setSelectedContact] = useState<boolean>(() => {
@@ -6,12 +6,12 @@ export const useContact = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get('contact') === 'open';
   });
+  const lastUrlState = useRef<string | null>(null);
 
-  // Update URL when modal state changes
-  useEffect(() => {
+  const updateUrl = (isOpen: boolean) => {
     const currentUrl = new URL(window.location.href);
     
-    if (selectedContact) {
+    if (isOpen) {
       currentUrl.searchParams.set('contact', 'open');
     } else {
       currentUrl.searchParams.delete('contact');
@@ -24,7 +24,16 @@ export const useContact = () => {
     // Construct the final URL with at most one hash
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
     
-    window.history.pushState({}, '', finalUrl);
+    // Only update if the URL has actually changed
+    if (finalUrl !== lastUrlState.current) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({}, '', finalUrl);
+    }
+  };
+
+  // Update URL when modal state changes
+  useEffect(() => {
+    updateUrl(selectedContact);
   }, [selectedContact]);
 
   // Handle browser back/forward navigation

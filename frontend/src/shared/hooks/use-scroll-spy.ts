@@ -28,6 +28,7 @@ export const useScrollSpy = () => {
   const setCurrentSection = useSectionStore((state) => state.setCurrentSection);
   const lastTrackedSection = useRef<string>('');
   const lastAnchor = useRef<string>('');
+  const lastUrlState = useRef<string | null>(null);
 
   useEffect(() => {
     debugLog('ScrollSpy hook initialized');
@@ -35,18 +36,36 @@ export const useScrollSpy = () => {
     // Function to update URL and store based on section ID without scrolling
     const updateURL = (id: string) => {
       debugLog('Updating URL', { section: id });
+      
+      // Only proceed if the section has actually changed
+      if (lastTrackedSection.current === id) {
+        debugLog('Section unchanged, skipping URL update', { section: id });
+        return;
+      }
+
       const currentPath = window.location.pathname;
       const currentSearch = window.location.search;
       const newHash = `${currentPath}${currentSearch}#${id}`;
       
-      // Track anchor change if different from last tracked
-      if (lastAnchor.current !== id) {
-        trackAnchorChange(id, lastAnchor.current);
-        lastAnchor.current = id;
+      // Only update if the URL has actually changed
+      if (newHash !== lastUrlState.current) {
+        debugLog('URL changed, updating state', { 
+          from: lastUrlState.current, 
+          to: newHash 
+        });
+        
+        // Track anchor change if different from last tracked
+        if (lastAnchor.current !== id) {
+          trackAnchorChange(id, lastAnchor.current);
+          lastAnchor.current = id;
+        }
+        
+        lastUrlState.current = newHash;
+        window.history.replaceState({}, '', newHash);
+        setCurrentSection(id);
+      } else {
+        debugLog('URL unchanged, skipping update', { url: newHash });
       }
-      
-      window.history.replaceState({}, '', newHash);
-      setCurrentSection(id);
     };
 
     // Debounced analytics tracking to prevent excessive events

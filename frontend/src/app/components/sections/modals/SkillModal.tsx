@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import '../../../../styles/components/modal.css';
 
@@ -20,35 +20,42 @@ interface SkillModalProps {
 }
 
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
-  useEffect(() => {
-    // Add modal-open class to body when modal opens
-    document.body.classList.add('modal-open');
+  const lastUrlState = useRef<string | null>(null);
 
-    // Update URL with skill parameter
+  const updateUrl = (isOpen: boolean) => {
     const url = new URL(window.location.href);
-    url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
+    
+    if (isOpen) {
+      url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
+    } else {
+      url.searchParams.delete('skill');
+    }
     
     // Preserve the hash if it exists
     const hash = window.location.hash;
     const urlWithoutHash = url.toString().split('#')[0];
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
     
-    window.history.pushState({ skillModal: true }, '', finalUrl);
+    // Only update if the URL has actually changed
+    if (finalUrl !== lastUrlState.current) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({ skillModal: isOpen }, '', finalUrl);
+    }
+  };
+
+  useEffect(() => {
+    // Add modal-open class to body when modal opens
+    document.body.classList.add('modal-open');
+
+    // Update URL when modal opens
+    updateUrl(true);
 
     return () => {
       // Remove modal-open class from body when modal closes
       document.body.classList.remove('modal-open');
 
-      // Remove skill parameter when modal closes
-      const closeUrl = new URL(window.location.href);
-      closeUrl.searchParams.delete('skill');
-      
-      // Preserve the hash if it exists
-      const closeHash = window.location.hash;
-      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
-      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-      
-      window.history.pushState({ skillModal: false }, '', closeFinalUrl);
+      // Update URL when modal closes
+      updateUrl(false);
     };
   }, [skill.display_name]);
 

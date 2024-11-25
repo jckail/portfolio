@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 
@@ -25,6 +25,28 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const lastUrlState = useRef<string | null>(null);
+
+  const updateUrl = (isOpen: boolean) => {
+    const url = new URL(window.location.href);
+    
+    if (isOpen) {
+      url.searchParams.set('contact', 'open');
+    } else {
+      url.searchParams.delete('contact');
+    }
+
+    // Preserve the hash if it exists
+    const hash = window.location.hash;
+    const urlWithoutHash = url.toString().split('#')[0];
+    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+
+    // Only update if the URL has actually changed
+    if (finalUrl !== lastUrlState.current) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({ contactModal: isOpen }, '', finalUrl);
+    }
+  };
 
   useEffect(() => {
     // Track modal open
@@ -33,28 +55,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // Add modal-open class to body
     document.body.classList.add('modal-open');
 
-    // Update URL with contact parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('contact', 'open');
-
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-
-    window.history.pushState({ contactModal: true }, '', finalUrl);
+    // Update URL when modal opens
+    updateUrl(true);
 
     return () => {
-      // Remove contact parameter when modal closes
-      const closeUrl = new URL(window.location.href);
-      closeUrl.searchParams.delete('contact');
-
-      // Preserve the hash if it exists
-      const closeHash = window.location.hash;
-      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
-      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-
-      window.history.pushState({ contactModal: false }, '', closeFinalUrl);
+      // Update URL when modal closes
+      updateUrl(false);
 
       // Remove modal-open class from body
       document.body.classList.remove('modal-open');
@@ -127,7 +133,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
         <div className="contact-modal-body">
         <div className="contact-details">
-
           <p className="contact-info">
             🏔️<strong>{location}</strong>
           </p>

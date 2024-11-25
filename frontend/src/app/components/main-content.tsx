@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from '../../shared/components/header';
 import TLDR from './sections/about';
@@ -109,6 +109,7 @@ const MainContentInner: React.FC<MainContentProps> = () => {
   const [doodleClickCount, setDoodleClickCount] = useState(0);
   const isPartyMode = theme === 'party';
   const location = useLocation();
+  const lastUrlState = useRef<string | null>(null);
 
   // Handle initial hash navigation
   useEffect(() => {
@@ -148,15 +149,29 @@ const MainContentInner: React.FC<MainContentProps> = () => {
     console.log('Admin click');
   };
 
+  const updateUrlHash = (hash: string | null) => {
+    const currentUrl = window.location.href;
+    const baseUrl = currentUrl.split('#')[0];
+    const newUrl = hash ? `${baseUrl}${hash}` : baseUrl;
+    
+    // Only update if the URL has actually changed
+    if (newUrl !== lastUrlState.current) {
+      lastUrlState.current = newUrl;
+      window.history.replaceState({}, '', newUrl);
+    }
+  };
+
   const handleDoodleToggle = () => {
     if (isPartyMode) {
       // End party mode
       setTheme('dark');
       setDoodleClickCount(1); // Reset to "Click again to doodle more" state
+      // Keep the doodle hash since we're still showing the doodle
+      updateUrlHash('#doodle');
     } else if (doodleClickCount === 0) {
       // First click: Show doodle and update URL hash
       setShowDoodle(true);
-      window.history.pushState(null, '', '#doodle');
+      updateUrlHash('#doodle');
       // Scroll to doodle section
       setTimeout(() => {
         const doodleSection = document.getElementById('doodle');

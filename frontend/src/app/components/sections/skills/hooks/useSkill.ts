@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useSkill = () => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(() => {
@@ -6,13 +6,13 @@ export const useSkill = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get('skill');
   });
+  const lastUrlState = useRef<string | null>(null);
 
-  // Update URL when modal state changes
-  useEffect(() => {
+  const updateUrl = (skill: string | null) => {
     const currentUrl = new URL(window.location.href);
     
-    if (selectedSkill) {
-      currentUrl.searchParams.set('skill', selectedSkill);
+    if (skill) {
+      currentUrl.searchParams.set('skill', skill);
     } else {
       currentUrl.searchParams.delete('skill');
     }
@@ -24,7 +24,16 @@ export const useSkill = () => {
     // Construct the final URL with at most one hash
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
     
-    window.history.pushState({}, '', finalUrl);
+    // Only update if the URL has actually changed
+    if (finalUrl !== lastUrlState.current) {
+      lastUrlState.current = finalUrl;
+      window.history.replaceState({}, '', finalUrl);
+    }
+  };
+
+  // Update URL when modal state changes
+  useEffect(() => {
+    updateUrl(selectedSkill);
   }, [selectedSkill]);
 
   // Handle browser back/forward navigation
