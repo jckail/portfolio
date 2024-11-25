@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header } from '../../shared/components/header';
 import TLDR from './sections/about';
 import Footer from './footer';
@@ -107,6 +108,12 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
   const [showDoodle, setShowDoodle] = useState(false);
   const [doodleClickCount, setDoodleClickCount] = useState(0);
   const isPartyMode = theme === 'party';
+  const location = useLocation();
+
+  // Extract experience slug from URL if present
+  const experienceSlug = location.pathname.startsWith('/experience/') 
+    ? location.pathname.split('/experience/')[1]
+    : undefined;
 
   // Handle initial hash navigation
   useEffect(() => {
@@ -190,7 +197,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>
-              <Experience />
+              <Experience experienceSlug={experienceSlug} />
             </Suspense>
           </ErrorBoundary>
 
@@ -234,6 +241,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
 
 const MainContent: React.FC<MainContentProps> = (props) => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const location = useLocation();
   
   useEffect(() => {
     if (location.pathname === '/admin') {

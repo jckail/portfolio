@@ -22,7 +22,6 @@ const App: React.FC = () => {
   const backgroundColor = useThemeBackground(theme);
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Check if we should show contact modal based on route
   const showContactModal = location.pathname === '/contact';
@@ -99,6 +98,10 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/contact',
+    element: <App />,
+  },
+  {
+    path: '/experience/*',
     element: <App />,
   }
 ];
