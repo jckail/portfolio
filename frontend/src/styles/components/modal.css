@@ -1,4 +1,12 @@
 /* Contact Modal Styles */
+/* Add body scroll lock utility class */
+.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 .contact-modal-overlay {
   position: fixed;
   top: 0;
@@ -21,6 +29,7 @@
   width: 90%;
   max-height: 85vh;
   overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   border: 4px solid var(--primary-border);
   animation: modalFadeIn 0.3s ease-out forwards;
@@ -66,7 +75,7 @@
   margin: var(--spacing-xs) 0;
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xs);
   color: var(--text-color);
   max-width: 100%;
 }
@@ -147,9 +156,12 @@
   transition: all var(--transition-fast);
   max-width: 98%;
 }
+.contact-submit-button:hover{
+  background-color: var(--primary);
+}
 
 .contact-submit-button:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  background-color: var(--primary);
   transform: translateY(-1px);
 }
 
@@ -607,6 +619,7 @@
     margin: var(--spacing-sm);
     width: 95%;
     max-height: 90vh;
+    overflow-x: hidden;
   }
 
   .contact-modal-body {
@@ -616,7 +629,7 @@
 
   .contact-details {
     padding: var(--spacing-sm);
-    font-size: 16px;
+    font-size: 15px;
     
   }
 
