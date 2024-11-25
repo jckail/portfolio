@@ -28,12 +28,13 @@ export const useScrollSpy = () => {
   const setCurrentSection = useSectionStore((state) => state.setCurrentSection);
   const lastTrackedSection = useRef<string>('');
   const lastAnchor = useRef<string>('');
+  const lastUpdateTime = useRef<number>(0);
 
   useEffect(() => {
     debugLog('ScrollSpy hook initialized');
 
-    // Function to update URL and store based on section ID without scrolling
-    const updateURL = (id: string) => {
+    // Debounced URL update function
+    const debouncedUpdateURL = debounce((id: string) => {
       debugLog('Updating URL', { section: id });
       const currentPath = window.location.pathname;
       const currentSearch = window.location.search;
@@ -45,11 +46,12 @@ export const useScrollSpy = () => {
         lastAnchor.current = id;
       }
       
+      // Use replaceState to avoid adding new history entries
       window.history.replaceState({}, '', newHash);
       setCurrentSection(id);
-    };
+    }, 100); // Debounce URL updates by 100ms
 
-    // Debounced analytics tracking to prevent excessive events
+    // Debounced analytics tracking
     const debouncedTrackSection = debounce((sectionId: string) => {
       debugLog('Tracking section view', { 
         section: sectionId,
@@ -68,8 +70,15 @@ export const useScrollSpy = () => {
       }
     }, 500);
 
-    // Function to handle scroll events
+    // Function to handle scroll events with rate limiting
     const handleScroll = () => {
+      const now = Date.now();
+      // Limit updates to once every 50ms
+      if (now - lastUpdateTime.current < 50) {
+        return;
+      }
+      lastUpdateTime.current = now;
+
       const nodeList = document.querySelectorAll<HTMLElement>('section[id]');
       const sections = Array.from<HTMLElement>(nodeList);
       let currentSection: HTMLElement | null = null;
@@ -88,7 +97,7 @@ export const useScrollSpy = () => {
       // Update URL and track analytics if we found a section
       if (currentSection?.id) {
         debugLog('Found current section', { id: currentSection.id });
-        updateURL(currentSection.id);
+        debouncedUpdateURL(currentSection.id);
         debouncedTrackSection(currentSection.id);
       }
     };
@@ -150,12 +159,12 @@ export const useScrollSpy = () => {
         } else if (targetSection) {
           // Just update the URL and store without scrolling
           debugLog('Updating URL without scrolling', { id: targetId });
-          updateURL(targetId);
+          debouncedUpdateURL(targetId);
           debouncedTrackSection(targetId);
         }
       } else {
         debugLog('No hash found, defaulting to about section');
-        updateURL('about');
+        debouncedUpdateURL('about');
         debouncedTrackSection('about');
       }
     };
