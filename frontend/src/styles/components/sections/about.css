@@ -7,7 +7,7 @@
 }
 
 .about-section {
-  /* margin-top: 25px; */
+  margin-top: 25px;
   background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
   border-radius: var(--radius-md);
@@ -44,7 +44,7 @@
   grid-column: 1;
   color: var(--text-color);
   line-height: 1.5;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
   font-size: 1.4rem;
   font-weight: 400;
 }
@@ -297,7 +297,7 @@
   }
 
   .headshot-container {
-    margin-top:5px;
+    margin-top:10px;
     width: 125px;
     height: 125px;
   }
@@ -405,5 +405,13 @@
 
   .brief-bio p {
     font-size: .7rem;
+  }
+  .about-content p {
+    grid-column: 1;
+    color: var(--text-color);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-xs);
+    font-size: .9rem;
+    font-weight: 400;
   }
 }

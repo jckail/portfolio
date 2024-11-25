@@ -86,11 +86,13 @@
   #projects h2,
   #resume h2 {
     font-size: 1.75rem;
+    margin-top: 0px;
   }
 
   .section-content {
-    padding: var(--spacing-md);
-    margin: 0 var(--spacing-md);
+    padding: var(--spacing-xs);
+    margin: 0 var(--spacing-xs);
+    margin-bottom: 15px;
   }
 
   .section-content p {

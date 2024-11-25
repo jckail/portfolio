@@ -168,13 +168,13 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
 
   const configs = {
     light: {
-      particleColor: BLACK,
-      lineColor: BLACK,
+      particleColor: "rgba(0, 0, 0, 0.5)",
+      lineColor: "rgba(0, 0, 0, 0.5)",
       backgroundColor: 'transparent',
       particleCount: 0,
-      particleSize: 8,
+      particleSize: 6,
       lineDistance: 450,
-      lineWidth: 2,
+      lineWidth: 1,
       moveSpeed: .1,
     },
     dark: {
@@ -182,9 +182,9 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       lineColor: PRIMARY,
       backgroundColor: 'transparent',
       particleCount: 10,
-      particleSize: 8,
+      particleSize: 6,
       lineDistance: 450,
-      lineWidth: 2,
+      lineWidth: 1,
       moveSpeed: .1,
     },
     party: {
