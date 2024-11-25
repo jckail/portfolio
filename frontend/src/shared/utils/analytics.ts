@@ -337,6 +337,31 @@ export const trackChatMessage = async (
   });
 };
 
+// Track contact modal opened
+export const trackContactOpened = async (): Promise<void> => {
+  await waitForGtag();
+  const sessionId = getSessionId();
+  safeGtagCall('event', 'contact_opened', {
+    event_category: 'Contact',
+    event_action: 'Open',
+    page_path: getFullPagePath(),
+    session_id: sessionId
+  });
+};
+
+// Track contact message submitted
+export const trackContactMessage = async (messageLength: number): Promise<void> => {
+  await waitForGtag();
+  const sessionId = getSessionId();
+  safeGtagCall('event', 'contact_message', {
+    event_category: 'Contact',
+    event_action: 'Submit',
+    message_length: messageLength,
+    page_path: getFullPagePath(),
+    session_id: sessionId
+  });
+};
+
 // Initialize analytics with route tracking
 export const initializeAnalytics = async (): Promise<void> => {
   debugLog('Initializing analytics...');
