@@ -49,7 +49,7 @@ export const useScrollSpy = () => {
       // Use replaceState to avoid adding new history entries
       window.history.replaceState({}, '', newHash);
       setCurrentSection(id);
-    }, 100); // Debounce URL updates by 100ms
+    }, 200); // Debounce URL updates by 200ms
 
     // Debounced analytics tracking
     const debouncedTrackSection = debounce((sectionId: string) => {
@@ -155,7 +155,7 @@ export const useScrollSpy = () => {
               top: offsetPosition,
               behavior: 'smooth'
             });
-          }, 100); // Small delay to ensure scrollIntoView has completed
+          }, 200); // Small delay to ensure scrollIntoView has completed
         } else if (targetSection) {
           // Just update the URL and store without scrolling
           debugLog('Updating URL without scrolling', { id: targetId });
