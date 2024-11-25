@@ -10,12 +10,12 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
-const ContactModal: React.FC<ContactModalProps> = ({ 
-  email, 
+const ContactModal: React.FC<ContactModalProps> = ({
+  email,
   phone,
-  location, 
+  location,
   country,
-  onClose 
+  onClose
 }) => {
   const [formData, setFormData] = useState({
     from_email: '',
@@ -29,28 +29,28 @@ const ContactModal: React.FC<ContactModalProps> = ({
   useEffect(() => {
     // Track modal open
     trackContactOpened();
-    
+
     // Update URL with contact parameter
     const url = new URL(window.location.href);
     url.searchParams.set('contact', 'open');
-    
+
     // Preserve the hash if it exists
     const hash = window.location.hash;
     const urlWithoutHash = url.toString().split('#')[0];
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
+
     window.history.pushState({ contactModal: true }, '', finalUrl);
 
     return () => {
       // Remove contact parameter when modal closes
       const closeUrl = new URL(window.location.href);
       closeUrl.searchParams.delete('contact');
-      
+
       // Preserve the hash if it exists
       const closeHash = window.location.hash;
       const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
       const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-      
+
       window.history.pushState({ contactModal: false }, '', closeFinalUrl);
     };
   }, []);
@@ -79,7 +79,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch('api/contact/send-email', {
         method: 'POST',
@@ -113,29 +113,33 @@ const ContactModal: React.FC<ContactModalProps> = ({
   return (
     <div className="contact-modal-overlay" onClick={onClose}>
       <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
-        
+      <button className="modal-close-button" onClick={onClose}>&times;</button>
+
         <div className="contact-modal-header">
-          
-            <h5>Contact</h5>
-            <div className="contact-details">
-            
-            <p className="contact-info">
-            📍 <strong>{location}, {country}</strong>
-            </p>
-            <p className="contact-info">
-            📧 <strong>{email}</strong> 
-            </p>
-            <p className="contact-info">
-            ☎️ <strong>{phone}</strong> 
-            </p>
 
+          <h5>Contact</h5>
 
-          </div>
         </div>
-        
-        <div className="contact-modal-body">
 
+        <div className="contact-modal-body">
+        <div className="contact-details">
+
+          <p className="contact-info">
+            🇺🇸 <strong> {country}</strong>
+
+          </p>
+          <p className="contact-info">
+            🏔️ <strong>{location}</strong>
+          </p>
+          <p className="contact-info">
+            📧 <strong>{email}</strong>
+          </p>
+          <p className="contact-info">
+            ☎️ <strong>{phone}</strong>
+          </p>
+
+
+        </div>
 
           <div className="contact-form-container">
             <form onSubmit={handleSubmit} className="contact-form">
@@ -179,8 +183,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
               {error && <div className="contact-error-message">{error}</div>}
               {success && <div className="contact-success-message">Message sent successfully!</div>}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="contact-submit-button"
                 disabled={isLoading}
               >
