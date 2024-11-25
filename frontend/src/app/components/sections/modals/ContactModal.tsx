@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 
@@ -17,15 +17,16 @@ const ContactModal: React.FC<ContactModalProps> = ({
   country,
   onClose
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = React.useState({
     from_email: '',
     subject: 'Connecting via your Portfolio',
     message: 'Hi Jordan, I wanted to connect '
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState(false);
   const lastUrlState = useRef<string | null>(null);
+  const currentHash = useRef(window.location.hash);
 
   const updateUrl = (isOpen: boolean) => {
     const url = new URL(window.location.href);
@@ -36,11 +37,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
       url.searchParams.delete('contact');
     }
 
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
+    // Preserve the original hash
     const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-
+    const finalUrl = currentHash.current ? `${urlWithoutHash}${currentHash.current}` : urlWithoutHash;
+    
     // Only update if the URL has actually changed
     if (finalUrl !== lastUrlState.current) {
       lastUrlState.current = finalUrl;
@@ -52,22 +52,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // Track modal open
     trackContactOpened();
 
-    // Add modal-open class to body
-    document.body.classList.add('modal-open');
-
     // Update URL when modal opens
     updateUrl(true);
 
-    return () => {
-      // Update URL when modal closes
-      updateUrl(false);
-
-      // Remove modal-open class from body
-      document.body.classList.remove('modal-open');
-    };
-  }, []);
-
-  useEffect(() => {
+    // Handle browser back/forward navigation
     const handlePopState = (event: PopStateEvent) => {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('contact')) {
@@ -76,7 +64,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      // Update URL when modal closes
+      updateUrl(false);
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [onClose]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -125,27 +117,27 @@ const ContactModal: React.FC<ContactModalProps> = ({
   return (
     <div className="contact-modal-overlay" onClick={onClose}>
       <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={onClose}>&times;</button>
+        <button className="modal-close-button" onClick={onClose}>&times;</button>
 
         <div className="contact-modal-header">
           <h5>Contact</h5>
         </div>
 
         <div className="contact-modal-body">
-        <div className="contact-details">
-          <p className="contact-info">
-            🏔️<strong>{location}</strong>
-          </p>
-          <p className="contact-info">
-            📧<strong>{email}</strong>
-          </p>
-          <p className="contact-info">
-            🇺🇸<strong>{country}</strong>
-          </p>
-          <p className="contact-info">
-            ☎️<strong>{phone}</strong>
-          </p>
-        </div>
+          <div className="contact-details">
+            <p className="contact-info">
+              🏔️<strong>{location}</strong>
+            </p>
+            <p className="contact-info">
+              📧<strong>{email}</strong>
+            </p>
+            <p className="contact-info">
+              🇺🇸<strong>{country}</strong>
+            </p>
+            <p className="contact-info">
+              ☎️<strong>{phone}</strong>
+            </p>
+          </div>
 
           <div className="contact-form-container">
             <form onSubmit={handleSubmit} className="contact-form">

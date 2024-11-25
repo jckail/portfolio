@@ -29,16 +29,34 @@ export const useScrollSpy = () => {
   const lastTrackedSection = useRef<string>('');
   const lastAnchor = useRef<string>('');
   const lastUrlState = useRef<string | null>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     debugLog('ScrollSpy hook initialized');
 
+    // Check if a modal is open based on URL parameters and history state
+    const isModalOpen = () => {
+      const params = new URLSearchParams(window.location.search);
+      const hasModalParam = params.has('company') || 
+                           params.has('skill') || 
+                           params.has('contact') || 
+                           params.has('ai_chat');
+      const hasModalState = history.state?.modalOpen === true;
+      return hasModalParam || hasModalState;
+    };
+
     // Function to update URL and store based on section ID without scrolling
-    const updateURL = (id: string) => {
-      debugLog('Updating URL', { section: id });
+    const updateURL = (id: string, force: boolean = false) => {
+      debugLog('Updating URL', { section: id, force });
       
-      // Only proceed if the section has actually changed
-      if (lastTrackedSection.current === id) {
+      // Don't update section while modal is open
+      if (isModalOpen() && !force) {
+        debugLog('Modal is open, skipping section update');
+        return;
+      }
+      
+      // Only proceed if the section has actually changed or force update is requested
+      if (!force && lastTrackedSection.current === id) {
         debugLog('Section unchanged, skipping URL update', { section: id });
         return;
       }
@@ -48,7 +66,7 @@ export const useScrollSpy = () => {
       const newHash = `${currentPath}${currentSearch}#${id}`;
       
       // Only update if the URL has actually changed
-      if (newHash !== lastUrlState.current) {
+      if (force || newHash !== lastUrlState.current) {
         debugLog('URL changed, updating state', { 
           from: lastUrlState.current, 
           to: newHash 
@@ -61,7 +79,9 @@ export const useScrollSpy = () => {
         }
         
         lastUrlState.current = newHash;
-        window.history.replaceState({}, '', newHash);
+        // Preserve modal state if present
+        const state = history.state?.modalOpen ? { modalOpen: true } : {};
+        window.history.replaceState(state, '', newHash);
         setCurrentSection(id);
       } else {
         debugLog('URL unchanged, skipping update', { url: newHash });
@@ -89,6 +109,12 @@ export const useScrollSpy = () => {
 
     // Function to handle scroll events
     const handleScroll = () => {
+      // Don't update section while modal is open
+      if (isModalOpen()) {
+        debugLog('Modal is open, skipping scroll handling');
+        return;
+      }
+
       const nodeList = document.querySelectorAll<HTMLElement>('section[id]');
       const sections = Array.from<HTMLElement>(nodeList);
       let currentSection: HTMLElement | null = null;
@@ -129,6 +155,16 @@ export const useScrollSpy = () => {
     // Function to handle initial scroll
     const handleInitialScroll = () => {
       debugLog('Handling initial scroll');
+      
+      // Only default to 'about' on initial page load when no modal is open
+      if (isInitialMount.current && !location.hash && !isModalOpen()) {
+        debugLog('Initial mount with no hash and no modal, defaulting to about section');
+        updateURL('about', true);
+        debouncedTrackSection('about');
+        isInitialMount.current = false;
+        return;
+      }
+
       if (location.hash) {
         const targetId = location.hash.slice(1); // Remove the # from the hash
         const targetSection = document.getElementById(targetId);
@@ -137,6 +173,7 @@ export const useScrollSpy = () => {
         // Track initial anchor
         trackAnchorChange(targetId, null);
         lastAnchor.current = targetId;
+        lastTrackedSection.current = targetId;
         
         // Only scroll if it's a page load/refresh or resume button click
         const isInitialLoad = !window.performance.getEntriesByType('navigation')[0].toJSON().type.includes('navigate');
@@ -172,10 +209,6 @@ export const useScrollSpy = () => {
           updateURL(targetId);
           debouncedTrackSection(targetId);
         }
-      } else {
-        debugLog('No hash found, defaulting to about section');
-        updateURL('about');
-        debouncedTrackSection('about');
       }
     };
 

@@ -7,22 +7,20 @@ export const useExperience = () => {
     return params.get('company') || null;
   });
   const lastUrlState = useRef<string | null>(null);
+  const currentHash = useRef(window.location.hash);
 
   const updateUrl = (company: string | null) => {
-    const currentUrl = new URL(window.location.href);
+    const url = new URL(window.location.href);
     
     if (company) {
-      currentUrl.searchParams.set('company', company);
+      url.searchParams.set('company', company);
     } else {
-      currentUrl.searchParams.delete('company');
+      url.searchParams.delete('company');
     }
 
-    // Remove the hash from the URL object
-    const hash = window.location.hash;
-    const urlWithoutHash = currentUrl.toString().split('#')[0];
-    
-    // Construct the final URL with at most one hash
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    // Keep the original hash without modifying it
+    const urlWithoutHash = url.toString().split('#')[0];
+    const finalUrl = currentHash.current ? `${urlWithoutHash}${currentHash.current}` : urlWithoutHash;
     
     // Only update if the URL has actually changed
     if (finalUrl !== lastUrlState.current) {
@@ -30,6 +28,11 @@ export const useExperience = () => {
       window.history.replaceState({}, '', finalUrl);
     }
   };
+
+  // Store initial hash when component mounts
+  useEffect(() => {
+    currentHash.current = window.location.hash;
+  }, []);
 
   // Update URL when modal state changes
   useEffect(() => {

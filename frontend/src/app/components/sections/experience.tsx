@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, memo, useRef } from 'react';
+import React, { lazy, Suspense, memo, useRef, useEffect } from 'react';
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/components/sections/experience.css';
@@ -110,6 +110,7 @@ const Experience: React.FC = () => {
   const { selectedExperience, setSelectedExperience } = useExperience();
   const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
   const lastUrlState = useRef<string | null>(null);
+  const currentHash = useRef<string>(window.location.hash || '#experience');
 
   // Map company slugs to experience keys
   const companyKeyMap: { [key: string]: string } = {
@@ -135,19 +136,22 @@ const Experience: React.FC = () => {
     const url = new URL(window.location.href);
     url.searchParams.set('company', slug);
     
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
+    // Keep the original hash without modifying it
     const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    // Use the current section hash or default to experience
+    const finalUrl = `${urlWithoutHash}${currentHash.current}`;
     
     // Only update if the URL has actually changed
     if (finalUrl !== lastUrlState.current) {
       lastUrlState.current = finalUrl;
-      window.history.replaceState({}, '', finalUrl);
+      window.history.replaceState({ modalOpen: true }, '', finalUrl);
     }
   };
 
   const handleSelectExperience = (key: string) => {
+    // Store current hash before any updates
+    currentHash.current = window.location.hash || '#experience';
+    
     // Get the URL-friendly slug for this experience
     const slug = keyCompanyMap[key] || key;
     

@@ -20,47 +20,8 @@ interface SkillModalProps {
 }
 
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
-  const lastUrlState = useRef<string | null>(null);
-
-  const updateUrl = (isOpen: boolean) => {
-    const url = new URL(window.location.href);
-    
-    if (isOpen) {
-      url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
-    } else {
-      url.searchParams.delete('skill');
-    }
-    
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
-    // Only update if the URL has actually changed
-    if (finalUrl !== lastUrlState.current) {
-      lastUrlState.current = finalUrl;
-      window.history.replaceState({ skillModal: isOpen }, '', finalUrl);
-    }
-  };
-
   useEffect(() => {
-    // Add modal-open class to body when modal opens
-    document.body.classList.add('modal-open');
-
-    // Update URL when modal opens
-    updateUrl(true);
-
-    return () => {
-      // Remove modal-open class from body when modal closes
-      document.body.classList.remove('modal-open');
-
-      // Update URL when modal closes
-      updateUrl(false);
-    };
-  }, [skill.display_name]);
-
-  // Handle browser back button
-  useEffect(() => {
+    // Handle browser back button
     const handlePopState = (event: PopStateEvent) => {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('skill')) {
@@ -69,7 +30,9 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [onClose]);
 
   return (
