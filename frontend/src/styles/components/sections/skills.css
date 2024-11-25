@@ -256,16 +256,16 @@
   .skill-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    gap: 0.35rem;
     margin-bottom: var(--spacing-md);
   }
   
   .skill-tag {
     background: var(--skill-tag-background);
     color: white;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    padding: var(--spacing-xs) var(--spacing-xs);
+    border-radius: 8px;
+    font-size: 0.7rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);
   }
