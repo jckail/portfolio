@@ -5,6 +5,7 @@ import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+import { useContact } from './about/hooks/useContact';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
 const ContactModal = lazy(() => import('./modals/ContactModal'));
@@ -14,10 +15,6 @@ const LoadingSpinner = () => (
     <div className="loading-spinner"></div>
   </div>
 );
-
-interface TLDRProps {
-  showContactModal?: boolean;
-}
 
 const TLDRContent = memo(({ 
   aboutMeData, 
@@ -90,16 +87,9 @@ const TLDRContent = memo(({
   );
 });
 
-const TLDR: React.FC<TLDRProps> = ({ showContactModal }) => {
+const TLDR: React.FC = () => {
   const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
-  const [selectedContact, setSelectedContact] = useState<boolean>(false);
-
-  // Effect to handle showContactModal prop
-  useEffect(() => {
-    if (showContactModal) {
-      setSelectedContact(true);
-    }
-  }, [showContactModal]);
+  const { selectedContact, setSelectedContact } = useContact();
 
   const handleResumeClick = () => {
     scrollToSection('resume');
@@ -138,11 +128,7 @@ const TLDR: React.FC<TLDRProps> = ({ showContactModal }) => {
             phone={contactData.phone}
             location={contactData.location}
             country={contactData.country}
-            onClose={() => {
-              setSelectedContact(false);
-              // Navigate back to home when contact modal is closed
-              window.history.pushState({}, '', '/');
-            }}
+            onClose={() => setSelectedContact(false)}
           />
         </Suspense>
       )}

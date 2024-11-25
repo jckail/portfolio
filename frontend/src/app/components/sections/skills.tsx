@@ -1,7 +1,8 @@
-import React, { useState, useRef, lazy, Suspense, memo } from 'react';
+import React, { useRef, lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import type { Skill } from './modals/SkillModal';
+import { useSkill } from './skills/hooks/useSkill';
 import '../../../styles/components/sections/skills.css';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -83,7 +84,7 @@ const SkillCategory = memo(({
 
 const TechnicalSkills: React.FC = () => {
   const { skillsData, isLoading, error } = useData();
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const { selectedSkill, setSelectedSkill } = useSkill();
 
   if (error) return <div className="error-message">Error: {error}</div>;
 

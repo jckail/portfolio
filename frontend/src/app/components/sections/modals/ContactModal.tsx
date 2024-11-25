@@ -31,18 +31,35 @@ const ContactModal: React.FC<ContactModalProps> = ({
     // Track modal open
     trackContactOpened();
     
-    const currentUrl = window.location.pathname;
-    const contactUrl = `/contact`;
-    window.history.pushState({ contactModal: true }, '', contactUrl);
+    // Update URL with contact parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('contact', 'open');
+    
+    // Preserve the hash if it exists
+    const hash = window.location.hash;
+    const urlWithoutHash = url.toString().split('#')[0];
+    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    
+    window.history.pushState({ contactModal: true }, '', finalUrl);
 
     return () => {
-      window.history.pushState({ contactModal: false }, '', currentUrl);
+      // Remove contact parameter when modal closes
+      const closeUrl = new URL(window.location.href);
+      closeUrl.searchParams.delete('contact');
+      
+      // Preserve the hash if it exists
+      const closeHash = window.location.hash;
+      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
+      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
+      
+      window.history.pushState({ contactModal: false }, '', closeFinalUrl);
     };
   }, []);
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (!event.state?.contactModal) {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('contact')) {
         onClose();
       }
     };

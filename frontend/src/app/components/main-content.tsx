@@ -13,7 +13,7 @@ import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
 interface MainContentProps {
-  showContactModal?: boolean;
+  isAdminModalOpen?: boolean;
 }
 
 // Lazy load components below the fold
@@ -99,7 +99,7 @@ const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void
   );
 };
 
-const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
+const MainContentInner: React.FC<MainContentProps> = () => {
   useScrollSpy();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const setTheme = useThemeStore(state => state.setTheme);
@@ -186,7 +186,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
         <div className="main-content">
           {/* About section is eagerly loaded */}
           <ErrorBoundary>
-            <TLDR showContactModal={showContactModal} />
+            <TLDR />
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}

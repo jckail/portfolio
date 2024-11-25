@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import '../../../../styles/components/modal.css';
 
-
 export interface Skill {
   display_name: string;
   description: string;
@@ -22,23 +21,36 @@ interface SkillModalProps {
 
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
   useEffect(() => {
-    // Save current URL to restore it when modal closes
-    const currentUrl = window.location.pathname;
+    // Update URL with skill parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
     
-    // Update URL to include the skill name (URL friendly)
-    const skillUrl = `/skills/${skill.display_name.toLowerCase().replace(/\s+/g, '-')}`;
-    window.history.pushState({ skillModal: true }, '', skillUrl);
+    // Preserve the hash if it exists
+    const hash = window.location.hash;
+    const urlWithoutHash = url.toString().split('#')[0];
+    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    
+    window.history.pushState({ skillModal: true }, '', finalUrl);
 
-    // Restore original URL when modal closes
     return () => {
-      window.history.pushState({ skillModal: false }, '', currentUrl);
+      // Remove skill parameter when modal closes
+      const closeUrl = new URL(window.location.href);
+      closeUrl.searchParams.delete('skill');
+      
+      // Preserve the hash if it exists
+      const closeHash = window.location.hash;
+      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
+      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
+      
+      window.history.pushState({ skillModal: false }, '', closeFinalUrl);
     };
   }, [skill.display_name]);
 
   // Handle browser back button
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (!event.state?.skillModal) {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('skill')) {
         onClose();
       }
     };
@@ -52,7 +64,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
       <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="modal-header">
-        <h5>{skill.display_name}</h5>
+          <h5>{skill.display_name}</h5>
           <div className="modal-icon-wrapper">
             <div className="icon-wrapper">
               <SkillIcon
@@ -63,7 +75,6 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
               />
             </div>
           </div>
-          
         </div>
         <div className="modal-body">
           <p className="experience-info">
