@@ -42,7 +42,7 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', zIndex: 9999, pointerEvents: 'none', width: '100%', height: '100%' }}>
+    <div style={{ position: 'fixed', zIndex: 9999, width: '100%', height: '100%' }}>
       {!open && <ChatButton onClick={handleClickOpen} />}
 
       <Dialog
@@ -78,22 +78,13 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
         }}
         sx={{
           position: 'fixed',
-          pointerEvents: 'none',
           '& .MuiDialog-container': {
             position: 'fixed',
-            pointerEvents: 'none',
             alignItems: 'flex-start',
             justifyContent: 'flex-start',
           },
           '& .MuiBackdrop-root': {
-            position: 'fixed',
-            pointerEvents: 'none'
-          },
-          '& .MuiPaper-root': {
-            pointerEvents: 'none',
-            '& > *': {
-              pointerEvents: 'auto'
-            }
+            position: 'fixed'
           }
         }}
       >
@@ -108,8 +99,7 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
             overflow: 'hidden',
             bgcolor: 'var(--background-color)',
             position: 'relative',
-            p: '16px !important',
-            pointerEvents: 'auto'
+            p: '16px !important'
           }}
         >
           <ChatMessages 
