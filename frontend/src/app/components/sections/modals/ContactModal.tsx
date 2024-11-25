@@ -115,14 +115,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
       <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         
-        <div className="modal-header">
+        <div className="contact-modal-header">
           
             <h5>Contact</h5>
-          
-        </div>
-        
-        <div className="contact-modal-body">
-          <div className="contact-details">
+            <div className="contact-details">
             
             <p className="contact-info">
             📍 <strong>{location}, {country}</strong>
@@ -136,9 +132,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
 
           </div>
+        </div>
+        
+        <div className="contact-modal-body">
+
 
           <div className="contact-form-container">
-            <h4>Send me a message:</h4>
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="contact-form-group">
                 <label htmlFor="from_email">Your Email:</label>
@@ -166,7 +165,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
               </div>
 
               <div className="contact-form-group">
-                <label htmlFor="message">Message:</label>
+                <label htmlFor="message">Send me a message:</label>
                 <textarea
                   id="message"
                   name="message"
