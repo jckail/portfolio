@@ -20,7 +20,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [formData, setFormData] = useState({
     from_email: '',
     subject: 'Connecting via your Portfolio',
-    message: 'Hi I wanted to connect ...'
+    message: 'Hi Jordan, I wanted to connect '
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
   useEffect(() => {
     // Track modal open
     trackContactOpened();
+
+    // Add modal-open class to body
+    document.body.classList.add('modal-open');
 
     // Update URL with contact parameter
     const url = new URL(window.location.href);
@@ -52,6 +55,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
       const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
 
       window.history.pushState({ contactModal: false }, '', closeFinalUrl);
+
+      // Remove modal-open class from body
+      document.body.classList.remove('modal-open');
     };
   }, []);
 
@@ -101,7 +107,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       setFormData({
         from_email: '',
         subject: 'Connecting via your Portfolio',
-        message: 'Hi I wanted to connect ...'
+        message: 'Hi Jordan, I wanted to connect '
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -116,17 +122,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
       <button className="modal-close-button" onClick={onClose}>&times;</button>
 
         <div className="contact-modal-header">
-
           <h5>Contact</h5>
-
         </div>
 
         <div className="contact-modal-body">
         <div className="contact-details">
-
           <p className="contact-info">
             🇺🇸 <strong> {country}</strong>
-
           </p>
           <p className="contact-info">
             🏔️ <strong>{location}</strong>
@@ -137,8 +139,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
           <p className="contact-info">
             ☎️ <strong>{phone}</strong>
           </p>
-
-
         </div>
 
           <div className="contact-form-container">

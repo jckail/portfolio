@@ -1,4 +1,12 @@
 /* Contact Modal Styles */
+/* Add body scroll lock utility class */
+.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 .contact-modal-overlay {
   position: fixed;
   top: 0;
@@ -147,9 +155,12 @@
   transition: all var(--transition-fast);
   max-width: 98%;
 }
+.contact-submit-button:hover{
+  background-color: var(--primary);
+}
 
 .contact-submit-button:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  background-color: var(--primary);
   transform: translateY(-1px);
 }
 

@@ -21,6 +21,9 @@ interface SkillModalProps {
 
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
   useEffect(() => {
+    // Add modal-open class to body when modal opens
+    document.body.classList.add('modal-open');
+
     // Update URL with skill parameter
     const url = new URL(window.location.href);
     url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
@@ -33,6 +36,9 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
     window.history.pushState({ skillModal: true }, '', finalUrl);
 
     return () => {
+      // Remove modal-open class from body when modal closes
+      document.body.classList.remove('modal-open');
+
       // Remove skill parameter when modal closes
       const closeUrl = new URL(window.location.href);
       closeUrl.searchParams.delete('skill');

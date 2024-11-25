@@ -30,6 +30,9 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   onSelectSkill 
 }) => {
   useEffect(() => {
+    // Add modal-open class to body when modal opens
+    document.body.classList.add('modal-open');
+
     // Handle browser back button
     const handlePopState = (event: PopStateEvent) => {
       const params = new URLSearchParams(window.location.search);
@@ -39,7 +42,11 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      // Remove modal-open class from body when modal closes
+      document.body.classList.remove('modal-open');
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [onClose]);
 
   // Function to find skill key by display name
