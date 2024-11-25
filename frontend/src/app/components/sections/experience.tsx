@@ -1,9 +1,10 @@
-import React, { useState, lazy, Suspense, memo, useEffect } from 'react';
+import React, { lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/components/sections/experience.css';
 import type { ExperienceItem } from './modals/ExperienceModal';
 import type { Skill } from './modals/SkillModal';
+import { useExperience } from './experience/hooks/useExperience';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -24,10 +25,6 @@ const LoadingSpinner = () => (
     <div className="loading-spinner"></div>
   </div>
 );
-
-interface ExperienceProps {
-  experienceSlug?: string;
-}
 
 const ExperienceTimeline = memo(({ 
   experience, 
@@ -108,37 +105,48 @@ const ExperienceTimeline = memo(({
   );
 });
 
-const Experience: React.FC<ExperienceProps> = ({ experienceSlug }) => {
+const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();
-  const [selectedExperience, setSelectedExperience] = useState<string | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const { selectedExperience, setSelectedExperience } = useExperience();
+  const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
 
-  // Effect to handle URL-based modal opening
-  useEffect(() => {
-    if (experienceSlug && experienceData) {
-      // Convert URL-friendly names back to keys
-      const keyMap: { [key: string]: string } = {
-        'prove-identity': 'prove',
-        'meta-%7C-facebook': 'meta',
-        'meta-|-facebook': 'meta',
-        'deloitte': 'deloitte',
-        'wide-open-west': 'wide_open_west',
-        'common-spirit-health': 'common_spirit_health',
-        'acustream-%7C-r1': 'acustream',
-        'acustream-|-r1': 'acustream'
-      };
+  // Map company slugs to experience keys
+  const companyKeyMap: { [key: string]: string } = {
+    'prove-identity': 'prove',
+    'meta-facebook': 'meta',
+    'deloitte': 'deloitte',
+    'wide-open-west': 'wide_open_west',
+    'common-spirit-health': 'common_spirit_health',
+    'acustream-r1': 'acustream'
+  };
 
-      const key = keyMap[experienceSlug];
-      if (key && experienceData[key]) {
-        setSelectedExperience(key);
-      }
-    }
-  }, [experienceSlug, experienceData]);
+  // Map experience keys to company slugs
+  const keyCompanyMap: { [key: string]: string } = {
+    'prove': 'prove-identity',
+    'meta': 'meta-facebook',
+    'deloitte': 'deloitte',
+    'wide_open_west': 'wide-open-west',
+    'common_spirit_health': 'common-spirit-health',
+    'acustream': 'acustream-r1'
+  };
 
-  const handleCloseExperience = () => {
-    setSelectedExperience(null);
-    // Navigate back to home when modal is closed
-    window.history.pushState({}, '', '/');
+  const handleSelectExperience = (key: string) => {
+    // Get the URL-friendly slug for this experience
+    const slug = keyCompanyMap[key] || key;
+    
+    // Update the URL with the company parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('company', slug);
+    
+    // Preserve the hash if it exists
+    const hash = window.location.hash;
+    const urlWithoutHash = url.toString().split('#')[0];
+    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    
+    window.history.pushState({}, '', finalUrl);
+    
+    // Update the state
+    setSelectedExperience(slug);
   };
 
   if (error) return <div>Error: {error}</div>;
@@ -162,30 +170,17 @@ const Experience: React.FC<ExperienceProps> = ({ experienceSlug }) => {
         <ExperienceTimeline 
           experience={experienceData}
           skillsData={skillsData}
-          onSelectExperience={(key) => {
-            setSelectedExperience(key);
-            // Map keys to URL-friendly names
-            const urlMap: { [key: string]: string } = {
-              'prove': 'prove-identity',
-              'meta': 'meta-%7C-facebook',
-              'deloitte': 'deloitte',
-              'wide_open_west': 'wide-open-west',
-              'common_spirit_health': 'common-spirit-health',
-              'acustream': 'acustream-%7C-r1'
-            };
-            const urlSlug = urlMap[key] || key;
-            window.history.pushState({}, '', `/experience/${urlSlug}`);
-          }}
+          onSelectExperience={handleSelectExperience}
           onSelectSkill={setSelectedSkill}
         />
       </div>
 
-      {selectedExperience && experienceData[selectedExperience] && (
+      {selectedExperience && experienceData[companyKeyMap[selectedExperience] || selectedExperience] && (
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
-            experience={experienceData[selectedExperience]}
+            experience={experienceData[companyKeyMap[selectedExperience] || selectedExperience]}
             skillsData={skillsData}
-            onClose={handleCloseExperience}
+            onClose={() => setSelectedExperience(null)}
             onSelectSkill={setSelectedSkill}
           />
         </Suspense>

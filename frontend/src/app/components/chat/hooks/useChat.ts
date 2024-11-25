@@ -3,7 +3,11 @@ import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
 
 export const useChat = () => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(() => {
+    // Initialize state based on URL parameter
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ai_chat') === 'open';
+  });
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { type: 'agent', text: 'Welcome! \n I\'m Jordan\'s AI assistant, ask me a question: \n• Explain Jordan\'s professional experience at Meta, Deloitte, or other companies? \n• Explain Jordan\'s github projects?\n • What are Jordan\'s top skills?' }
@@ -15,24 +19,29 @@ export const useChat = () => {
 
   // Update URL when modal state changes
   useEffect(() => {
+    const currentUrl = new URL(window.location.href);
+    
     if (open) {
-      window.history.pushState({modal: 'ai_chat'}, '', '/ai_chat');
+      currentUrl.searchParams.set('ai_chat', 'open');
     } else {
-      window.history.pushState({modal: null}, '', '/');
+      currentUrl.searchParams.delete('ai_chat');
     }
-  }, [open]);
 
-  // Check URL on mount to set initial modal state
-  useEffect(() => {
-    if (window.location.pathname === '/ai_chat') {
-      setOpen(true);
-    }
-  }, []);
+    // Remove the hash from the URL object
+    const hash = window.location.hash;
+    const urlWithoutHash = currentUrl.toString().split('#')[0];
+    
+    // Construct the final URL with at most one hash
+    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
+    
+    window.history.pushState({}, '', finalUrl);
+  }, [open]);
 
   // Handle browser back/forward navigation
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      setOpen(window.location.pathname === '/ai_chat');
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setOpen(params.get('ai_chat') === 'open');
     };
 
     window.addEventListener('popstate', handlePopState);

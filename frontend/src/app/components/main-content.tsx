@@ -110,11 +110,6 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
   const isPartyMode = theme === 'party';
   const location = useLocation();
 
-  // Extract experience slug from URL if present
-  const experienceSlug = location.pathname.startsWith('/experience/') 
-    ? location.pathname.split('/experience/')[1]
-    : undefined;
-
   // Handle initial hash navigation
   useEffect(() => {
     const hash = window.location.hash;
@@ -197,7 +192,7 @@ const MainContentInner: React.FC<MainContentProps> = ({ showContactModal }) => {
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback />}>
-              <Experience experienceSlug={experienceSlug} />
+              <Experience />
             </Suspense>
           </ErrorBoundary>
 

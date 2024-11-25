@@ -30,23 +30,10 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   onSelectSkill 
 }) => {
   useEffect(() => {
-    // Save current URL to restore it when modal closes
-    const currentUrl = window.location.pathname;
-    
-    // Update URL to include the company name (URL friendly)
-    const experienceUrl = `/experience/${experience.company.toLowerCase().replace(/\s+/g, '-')}`;
-    window.history.pushState({ experienceModal: true }, '', experienceUrl);
-
-    // Restore original URL when modal closes
-    return () => {
-      window.history.pushState({ experienceModal: false }, '', currentUrl);
-    };
-  }, [experience.company]);
-
-  // Handle browser back button
-  useEffect(() => {
+    // Handle browser back button
     const handlePopState = (event: PopStateEvent) => {
-      if (!event.state?.experienceModal) {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('company')) {
         onClose();
       }
     };

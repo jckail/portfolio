@@ -1,6 +1,3 @@
-export { default as ChatPortal } from './chat';
+export { default as ChatPortal } from './chat-portal';
 export { ChatButton } from './components/ChatButton';
-export { ChatHeader } from './components/ChatHeader';
-export { ChatInput } from './components/ChatInput';
-export { ChatMessages } from './components/ChatMessages';
-export { useChat } from './hooks/useChat';
+export { default as Chat } from './chat';

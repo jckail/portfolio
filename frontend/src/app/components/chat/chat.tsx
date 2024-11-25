@@ -7,16 +7,25 @@ import { ChatMessages } from './components/ChatMessages';
 import { ChatInput } from './components/ChatInput';
 import { trackChatOpen } from '../../../shared/utils/analytics';
 
-const Chat: React.FC = () => {
+interface ChatProps {
+  externalOpen?: boolean;
+  externalSetOpen?: (open: boolean) => void;
+}
+
+const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
   const {
-    open,
-    setOpen,
+    open: internalOpen,
+    setOpen: internalSetOpen,
     message,
     setMessage,
     messages,
     isLoading,
     handleSendMessage
   } = useChat();
+
+  // Use external state if provided, otherwise use internal state
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = externalSetOpen || internalSetOpen;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -58,8 +67,6 @@ const Chat: React.FC = () => {
             flexDirection: 'column',
             position: isMobile ? 'relative' : 'fixed',
             left: isMobile ? 'auto' : 0,
-  // height: var(--header-height);
-            
             top: isMobile ? 'auto' : 0,
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',

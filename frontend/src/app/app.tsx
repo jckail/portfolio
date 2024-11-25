@@ -99,10 +99,6 @@ export const routes: RouteObject[] = [
   {
     path: '/contact',
     element: <App />,
-  },
-  {
-    path: '/experience/*',
-    element: <App />,
   }
 ];
 
