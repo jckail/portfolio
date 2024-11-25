@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
 import { useChat } from './hooks/useChat';
 import { ChatButton } from './components/ChatButton';
@@ -20,7 +20,8 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
     setMessage,
     messages,
     isLoading,
-    handleSendMessage
+    handleSendMessage,
+    initializeChat
   } = useChat();
 
   // Use external state if provided, otherwise use internal state
@@ -29,6 +30,13 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Initialize chat when component mounts if it should be open
+  useEffect(() => {
+    if (open) {
+      initializeChat();
+    }
+  }, [open, initializeChat]);
 
   const handleClickOpen = async (e: React.MouseEvent) => {
     e.preventDefault();
