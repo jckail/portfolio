@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import '../../../../styles/components/modal.css';
-import '../../../../styles/components/modals/contact-modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 
 interface ContactModalProps {
@@ -116,13 +115,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
       <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         
-        <div className="modal-timeline-header-wrapper">
-          <div className="timeline-header">
-            <h3>Contact</h3>
-          </div>
+        <div className="modal-header">
+          
+            <h5>Contact</h5>
+          
         </div>
         
-        <div className="modal-body">
+        <div className="contact-modal-body">
           <div className="contact-details">
             
             <p className="contact-info">
@@ -141,7 +140,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
           <div className="contact-form-container">
             <h4>Send me a message:</h4>
             <form onSubmit={handleSubmit} className="contact-form">
-              <div className="form-group">
+              <div className="contact-form-group">
                 <label htmlFor="from_email">Your Email:</label>
                 <input
                   type="email"
@@ -154,7 +153,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="contact-form-group">
                 <label htmlFor="subject">Subject:</label>
                 <input
                   type="text"
@@ -166,7 +165,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="contact-form-group">
                 <label htmlFor="message">Message:</label>
                 <textarea
                   id="message"
@@ -178,12 +177,12 @@ const ContactModal: React.FC<ContactModalProps> = ({
                 />
               </div>
 
-              {error && <div className="error-message">{error}</div>}
-              {success && <div className="success-message">Message sent successfully!</div>}
+              {error && <div className="contact-error-message">{error}</div>}
+              {success && <div className="contact-success-message">Message sent successfully!</div>}
 
               <button 
                 type="submit" 
-                className="submit-button"
+                className="contact-submit-button"
                 disabled={isLoading}
               >
                 {isLoading ? 'Sending...' : 'Send Message'}

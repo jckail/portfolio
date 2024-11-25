@@ -1,3 +1,176 @@
+/* Contact Modal Styles */
+.contact-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.contact-modal-content {
+  background: var(--solid-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  border: 4px solid var(--primary-border);
+  animation: modalFadeIn 0.3s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contact-modal-timeline-header-wrapper {
+  width: 100%;
+  text-align: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.contact-modal-body {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.contact-details {
+  background: var(--background-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xs);
+  border: 2px solid var(--primary-border);
+  width: 100%;
+}
+
+.contact-details h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-color);
+}
+
+.contact-info {
+  margin: var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--text-color);
+}
+
+.contact-info strong {
+  color: var(--primary-color);
+  min-width: 80px;
+}
+
+.contact-form-container {
+  width: 100%;
+  padding-top: var(--spacing-lg);
+}
+
+.contact-form-container h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.contact-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.contact-form-group label {
+  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.contact-form-group input,
+.contact-form-group textarea {
+  padding: var(--spacing-xs);
+  border: 2px solid var(--primary-border);
+  border-radius: var(--radius-md);
+  background: var(--background-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.contact-form-group input:focus,
+.contact-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-transparent);
+}
+
+.contact-form-group textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.contact-submit-button {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--primary-border);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.contact-submit-button:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.contact-submit-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.contact-error-message {
+  color: var(--error-color, #dc3545);
+  background-color: var(--error-bg, rgba(220, 53, 69, 0.1));
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+  border: 1px solid var(--error-color, #dc3545);
+  width: 100%;
+  text-align: center;
+}
+
+.contact-success-message {
+  color: var(--success-color, #28a745);
+  background-color: var(--success-bg, rgba(40, 167, 69, 0.1));
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+  border: 1px solid var(--success-color, #28a745);
+  width: 100%;
+  text-align: center;
+}
+
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -35,41 +208,62 @@
   padding: var(--spacing-xl);
   max-width: 600px;
   width: 90%;
-  max-height: 90vh;
+  max-height: 80vh;
   overflow-y: auto;
   position: relative;
   border: 4px solid var(--primary-border);
-  backdrop-filter: blur(5px);
-  color: var(--text-color);
-}
-.contact-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
   backdrop-filter: blur(5px);
   color: var(--text-color);
 }
 
-.contact-modal-content {
-  background: var(--solid-color);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  border: 4px solid var(--primary-border);
-  backdrop-filter: blur(5px);
+.experience-modal-timeline-header-wrapper{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: var(--spacing-md);
   color: var(--text-color);
 }
+
+.experience-modal-company-logo {
+  justify-content: center;
+  width: 165px;
+  height: 65px;
+  border-radius: var(--radius-sm);
+  background: var(--section-background);
+  /* background: var(--section-background); */
+  border: 2px solid var(--border-color);
+  object-fit: contain;
+  flex-shrink: 0;
+  color: var(--text-color);
+  transition: transform var(--transition-normal),
+              box-shadow var(--transition-normal);
+}
+.experience-modal-timeline-header {
+  display: column;
+  align-items: center;
+  margin-left: 100px;
+  justify-content: center;
+  height: 70px;
+  color: var(--text-color);
+}
+
+.experience-modal-timeline-header h3 {
+  margin-top: 2px;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  margin-bottom: 1.25px;
+  text-align: left;
+  border-bottom: var(--border-thickness) solid var(--underline-color);
+}
+
+.experience-modal-timeline-header h4 {
+  margin-top: 5px;
+  color: var(--text-color);
+  font-size: 1.0rem;
+  margin-bottom: 1px;
+  text-align: left;
+}
+
 
 .modal {
   background-color: var(--solid-color);
@@ -232,10 +426,7 @@
 .modal::-webkit-scrollbar-thumb:hover {
   background: var(--text-color);
 }
-.modal-body {
-  color: var(--text-color);
-  
-}
+
 
 
 /* Modal Styles */
@@ -307,11 +498,11 @@
   height: 80vh;
   max-width: 500px;
   width: 90%;
-  max-height: 70vh;
+  max-height: 80vh;
 }
 .skill-modal-content {
   width: 90%;
-  max-height: 70vh;
+  max-height: 80vh;
  
 }
 .modal-header {
@@ -332,8 +523,85 @@
   object-fit: contain;
   color: var(--text-color);
 }
-.modal-timeline-header-wrapper{
+
+
+
+.experience-modal-timeline-header-wrapper {
   margin-top: 35px;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  text-align: left;
 }
 
+.experience-modal-company-logo {
+  width: 100px;
+  height: 33px;
+  padding: 5px;
+  margin-top: 10px;
+  color: var(--text-color);
+  margin-left: -10px;
+}
+
+.experience-modal-logo-link {
+  width: 56px;
+  height: 56px;
+  margin-top: 0;
+  justify-content: center;
+}
+
+.experience-modal-timeline-header {
+  flex-grow: 1;
+  align-items: flex-start;
+  margin-left: 55px;
+  margin-right: -5px;
+  height: auto;
+  min-height: 50px;
+  text-align: left;
+  margin-top: -5px;
+}
+
+.experience-modal-timeline-header h3 {
+  font-size: 1rem;
+  text-align: left;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.experience-modal-timeline-header h4 {
+  font-size: 0.85rem;
+  text-align: left;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+
+
+
+.contact-contact-modal-content {
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md);
+  width: 95%;
+  max-height: 85vh;
+}
+
+.contact-modal-body {
+  max-width: 100%;
+}
+
+.contact-contact-details {
+  padding: var(--spacing-md);
+}
+
+.contact-form-group input,
+.contact-form-group textarea {
+  font-size: 16px;
+  padding: var(--spacing-sm);
+}
+
+.contact-submit-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
 }

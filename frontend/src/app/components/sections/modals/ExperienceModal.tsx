@@ -54,23 +54,23 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
       <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         <div className="experience-modal-wrapper"></div>
-        <div className="modal-timeline-header-wrapper">
+        <div className="experience-modal-timeline-header-wrapper">
           {experience.logoPath && (
             <a 
               href={experience.link}
               target="_blank" 
               rel="noopener noreferrer"
-              className="logo-link"
+              className="experience-modal-logo-link"
             >
               <CompanyLogo 
                 name={experience.logoPath || "github-logo.svg"}
                 size={64}
                 aria-label={`${experience.company} logo`}
-                className="company-logo"
+                className="experience-modal-company-logo"
               />
             </a>
           )}
-          <div className="timeline-header">
+          <div className="experience-modal-timeline-header">
             <h3>{experience.company}</h3>
             <h4>{experience.title}</h4>
             <div className="timeline-meta">
