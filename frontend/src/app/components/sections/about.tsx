@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../../components/error-boundary';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
+const ContactModal = lazy(() => import('./modals/ContactModal'));
 
 const LoadingSpinner = () => (
   <div className="section-loading">
@@ -18,7 +19,8 @@ const TLDRContent = memo(({
   aboutMeData, 
   contactData, 
   onResumeClick,
-  skillsData
+  skillsData,
+  onContactSelect
 }: { 
   aboutMeData: {
     greeting: string;
@@ -31,9 +33,13 @@ const TLDRContent = memo(({
     github: string;
     linkedin: string;
     email: string;
+    phone: string;
+    location: string;
+    country: string;
   };
   onResumeClick: () => void;
   skillsData: any;
+  onContactSelect: () => void;
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
@@ -62,6 +68,7 @@ const TLDRContent = memo(({
             linkedin={contactData.linkedin}
             email={contactData.email}
             onResumeClick={onResumeClick}
+            onContactSelect={onContactSelect}
           />
         </ErrorBoundary>
         <p>{aboutMeData.aidetails}</p>
@@ -81,6 +88,7 @@ const TLDRContent = memo(({
 
 const TLDR: React.FC = () => {
   const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
+  const [selectedContact, setSelectedContact] = useState<boolean>(false);
 
   const handleResumeClick = () => {
     scrollToSection('resume');
@@ -107,9 +115,22 @@ const TLDR: React.FC = () => {
             contactData={contactData}
             skillsData={skillsData}
             onResumeClick={handleResumeClick}
+            onContactSelect={() => setSelectedContact(true)}
           />
         </ErrorBoundary>
       </div>
+
+      {selectedContact && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ContactModal
+            email={contactData.email}
+            phone={contactData.phone}
+            location={contactData.location}
+            country={contactData.country}
+            onClose={() => setSelectedContact(false)}
+          />
+        </Suspense>
+      )}
     </section>
   );
 };

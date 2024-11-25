@@ -8,3 +8,5 @@ anthropic==0.39.0
 psutil==6.1.0
 pydantic==2.10.0
 email-validator==2.1.0
+functions-framework==3.5.0
+google-cloud-pubsub==2.18.4

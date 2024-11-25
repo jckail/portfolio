@@ -58,6 +58,15 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     DOCKERFILE="helpers/Dockerfile.prod"
     ALLOWED_ORIGINS="https://portfolio-292025398859.us-central1.run.app"
     PRODUCTION_URL="https://portfolio-292025398859.us-central1.run.app"
+    
+    echo "Enabling required Google Cloud APIs..."
+    gcloud services enable cloudfunctions.googleapis.com
+    gcloud services enable cloudbuild.googleapis.com
+    gcloud services enable run.googleapis.com
+    gcloud services enable pubsub.googleapis.com
+    gcloud services enable secretmanager.googleapis.com
+    gcloud services enable eventarc.googleapis.com
+    gcloud services enable cloudscheduler.googleapis.com
 else
     DOCKERFILE="helpers/Dockerfile.dev"
     ALLOWED_ORIGINS="http://localhost:5173"
@@ -72,6 +81,22 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     # Tag with git commit hash and push to GCR
     docker tag ${IMAGE_NAME} gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
     docker push gcr.io/portfolio-383615/quickresume:${GIT_COMMIT}
+
+    echo "Creating Pub/Sub topic if it doesn't exist..."
+    gcloud pubsub topics create portfolio-contact-emails --project=portfolio-383615 || true
+
+    echo "Deploying Email Cloud Function..."
+    gcloud functions deploy portfolio-contact \
+        --trigger-topic=portfolio-contact-emails \
+        --runtime=python39 \
+        --entry-point=send_email \
+        --source=backend/app/cloud_functions/email \
+        --region=us-central1 \
+        --set-env-vars "SMTP_SERVER=smtp.gmail.com" \
+        --set-env-vars "SMTP_PORT=587" \
+        --set-env-vars "SMTP_USERNAME=jckail13@gmail.com" \
+        --set-secrets "SMTP_PASSWORD=smtp-password:latest" \
+        --gen2
 
     echo "Deploying to Cloud Run..."
     gcloud run deploy quickresume \
@@ -105,6 +130,10 @@ if [ "$ENVIRONMENT" = "prod" ]; then
             echo "Health check response:"
             echo "$response" | jq .
             echo "Deployed version: $(echo "$response" | jq -r '.checks.version.hash')"
+            
+            echo -e "\nTesting email functionality..."
+            python helpers/test_email.py --prod
+            
             exit 0
         fi
         echo "Waiting for service to be ready... (attempt $i/12)"

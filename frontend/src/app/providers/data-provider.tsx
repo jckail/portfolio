@@ -91,7 +91,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             signal: controller.signal,
             headers: { 'Cache-Control': 'max-age=3600' }
           }),
-          fetch('/api/contact', { 
+          fetch('/api/contact/info', { 
             signal: controller.signal,
             headers: { 'Cache-Control': 'max-age=3600' }
           })
