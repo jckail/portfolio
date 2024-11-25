@@ -606,18 +606,20 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  gap: 20px;
+  gap: 10px;
   margin-top: var(--spacing-xs);
   margin-bottom: var(--spacing-sm);
   align-items: center;
   justify-content: left;
+  margin-top: 20px;
 }
 .contact-modal-header h5 {
   color: var(--text-color);
   font-size: 1.5rem;
   margin: 5px;
   border-bottom: var(--border-thickness) solid var(--underline-color);
-  margin-left:10px
+  margin-left:5px;
+  
 }
 
 
@@ -636,11 +638,12 @@
 
 .contact-details {
   padding: var(--spacing-sm);
+  font-size: 12px;
 }
 
 .contact-form-group input,
 .contact-form-group textarea {
-  font-size: 16px;
+  font-size: 14px;
   padding: var(--spacing-sm);
 }
 
