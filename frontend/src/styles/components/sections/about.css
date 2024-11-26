@@ -37,21 +37,23 @@
 .about-content {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-sm);
+  
+  gap: var(--spacing-xl);
   width: 100%;
   min-height: 250px;
   padding-top: var(--spacing-xs);
   margin-bottom: var(--spacing-xs);
+  
 }
 
 .about-content p {
   margin-top: 30px;
   color: var(--text-color);
   line-height: 1.5;
-  margin-bottom: var(--spacing-xs);
-  font-size: 1.5rem;
+  margin-bottom: 0px;
+  font-size: 1.65rem;
   font-weight: 400;
-  max-width: 55%;
+  max-width: 65%;
   flex: 1;
 }
 
@@ -148,6 +150,7 @@
 .brief-bio {
   
   clear: both;
+  
 }
 .brief-bio p {
   font-size: 1.2rem;
@@ -159,7 +162,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-xs);
+  margin-top: 0px;
   height: var(--icon-size-desktop);
   margin-bottom: var(--spacing-sm);
   
@@ -287,15 +290,18 @@
     font-size: 1rem;
     margin-top: 10px;
     font-weight: 400;
+    
   }
 
   .about-content {
     display: flex;
     flex-direction: row;
+    
     min-height: 125px;
     gap: var(--spacing-md);
     padding-top: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
+    align-items: center;
     
   }
   .about-content p {
@@ -303,29 +309,13 @@
     
     color: var(--text-color);
     line-height: 1.3;
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
     font-size: .9rem;
     font-weight: 400;
-    max-width: 85%;
-    flex: 1;
-  }
-  .about-skill-icons {
-    
-    gap: var(--spacing-lg);
-  }
-
-  .about-skill-item {
-    height: 40px;
-    width: 40px;
-  }
-
-  .about-skill-icon {
-    width: 30px;
-    height: 20px;
-  }
-
-  .about-skill-name {
-    font-size: 0.50rem;
+    max-width: 70%;
+    flex: 1; /* Ensures the paragraph takes up available space */
+    text-align: left; /* Ensures the text is left-aligned */
+    align-self: center; /* Centers the headshot-container vertically */
   }
 
   .headshot-container {
@@ -334,6 +324,7 @@
     max-height: 115px;
     margin-top: 5px;
     border: 1px solid transparent;
+    align-self: center; /* Centers the headshot-container vertically */
   }
   .headshot {
     width: 99%;
@@ -446,7 +437,7 @@
 
 
   .brief-bio p {
-    font-size: .95rem;
+    font-size: .8rem;
     line-height: 1.5;
     margin-top: 20px;
     
