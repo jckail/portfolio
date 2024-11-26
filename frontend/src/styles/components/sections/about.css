@@ -40,7 +40,7 @@
   
   gap: var(--spacing-xl);
   width: 100%;
-  min-height: 250px;
+  min-height: 225px;
   padding-top: var(--spacing-xs);
   margin-bottom: var(--spacing-xs);
   
@@ -123,12 +123,12 @@
   width: 185px;
   height: 185px;
   border-radius: var(--radius-sm);
-  background: black;
+  background: transparent;
   border-radius: 12%;
   display: flex;
   justify-content: left;
   align-items: center;
-  border: 3px solid transparent;
+  
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
 }
@@ -144,7 +144,8 @@
               box-shadow var(--transition-normal);
   object-position: top;
   align-items: center;
-  border: 4px solid transparent;
+  
+  border: 4px solid black;
 }
 
 .brief-bio {
@@ -154,7 +155,7 @@
 }
 .brief-bio p {
   font-size: 1.2rem;
-  margin-top: 30px;
+  margin-top: 15px;
   
 }
 
@@ -283,6 +284,21 @@
 }
 
 @media (max-width: 768px) {
+
+
+  .about-section {
+    margin-top: 20px;
+    background: var(--section-background);
+    backdrop-filter: blur(var(--section-background-blur));
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-lg);
+    border: var(--border-thickness) solid var(--primary-border);
+    transition: transform var(--transition-normal),
+                box-shadow var(--transition-normal);
+                
+  }
+
+
   .about-section h2 {
     font-size: 1.35rem;
   }
@@ -298,7 +314,7 @@
     display: flex;
     flex-direction: row;
     
-    min-height: 125px;
+    min-height: 105px;
     gap: var(--spacing-md);
     padding-top: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
@@ -324,12 +340,13 @@
     max-width: 115px;
     max-height: 115px;
     margin-top: 5px;
-    border: 1px solid transparent;
+    background-color:transparent;
     align-self: center; /* Centers the headshot-container vertically */
   }
   .headshot {
-    width: 99%;
+    width: 95%;
     height: 95%;
+    border: 4px solid black;
   }
   
   .social-links {
@@ -442,7 +459,7 @@
   .brief-bio p {
     font-size: .8rem;
     line-height: 1.5;
-    margin-top: 20px;
+    margin-top: 15px;
     
   }
   .ai-highlight {
