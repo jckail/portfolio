@@ -57,7 +57,7 @@
 
 /* Section Headers */
 .section h2,
-
+#about h2,
 #skills h2,
 #experience h2,
 #projects h2,
@@ -80,18 +80,18 @@
 
 
   .section h2,
-  
+  #about h2,
   #skills h2,
   #experience h2,
   #projects h2,
   #resume h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     margin-top: 0px;
   }
 
   .section-content {
     padding: var(--spacing-xs);
-    margin: 0 var(--spacing-xs);
+    margin: 0 0;
     margin-bottom: 15px;
   }
 

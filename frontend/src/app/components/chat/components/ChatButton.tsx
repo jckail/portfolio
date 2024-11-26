@@ -86,8 +86,8 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
           bgcolor: 'var(--ai-background-color);',
           
           color: 'white',
-          width: isMobile ? 60 : 80,
-          height: isMobile ? 60 : 80,
+          width: isMobile ? 60 : 70,
+          height: isMobile ? 60 : 70,
           transition: ' .5s ease-in-out',
           animation:  'glowPulse 10s infinite' ,
           '&:hover': {
@@ -95,7 +95,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
             color: 'white',
             transform: 'scale(1.5)',
           },
-          fontSize: isMobile ? '1.5rem' :'2.2rem',
+          fontSize: isMobile ? '2rem' :'2.5rem',
           fontFamily: 'Quantico, sans-serif !important',
           fontWeight: '700 !important',
           backdropFilter: '1px'
@@ -103,7 +103,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
         aria-label="Chat with AI"
         onClick={onClick}
       >
-        ✨AI
+        🤖
       </Fab>
     </Box>
   );

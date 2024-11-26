@@ -82,7 +82,7 @@ const TLDRContent = memo(({
             onContactSelect={onContactSelect}
           />
         </ErrorBoundary>
-        <p>Ask my <span className="ai-highlight" onClick={handleAIClick} style={{ cursor: 'pointer' }}>✨AI</span> assistant below for more details about me.</p>
+        <p>Ask my <span className="ai-highlight" onClick={handleAIClick} style={{ cursor: 'pointer' }}>AI Assistant 🤖</span> below for more details about me.</p>
       </div>
 
       {/* {selectedSkill && skillsData && skillsData[selectedSkill] && (

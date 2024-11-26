@@ -31,28 +31,28 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  border-bottom: var(--border-thickness) solid var(--primary-border);
 }
 
 .about-content {
-  display: grid;
-  grid-template-columns: 1fr 250px;
+  display: flex;
+  flex-direction: row;
   gap: var(--spacing-sm);
   width: 100%;
   min-height: 250px;
-  border-top: var(--border-thickness) solid var(--primary-border);
-  padding-top: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  padding-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
 }
 
 .about-content p {
   margin-top: 30px;
-  grid-column: 1;
   color: var(--text-color);
   line-height: 1.5;
   margin-bottom: var(--spacing-xs);
   font-size: 1.5rem;
   font-weight: 400;
-  max-width: 75%;
+  max-width: 55%;
+  flex: 1;
 }
 
 .about-skill-icons {
@@ -122,7 +122,7 @@
   height: 185px;
   border-radius: var(--radius-sm);
   background: black;
-  border-radius: 10%;
+  border-radius: 12%;
   display: flex;
   justify-content: left;
   align-items: center;
@@ -132,32 +132,34 @@
 }
 
 .headshot {
-  width: 99%;
+  width: 97%;
   height: 97%;
   object-fit: cover;
-  border-radius: 10%;
+  border-radius: 12%;
   display: block;
   padding: auto;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
   object-position: top;
   align-items: center;
-  border: 3px solid transparent;
+  border: 4px solid transparent;
 }
 
 .brief-bio {
-  border-top: var(--border-thickness) solid var(--primary-border);
+  
   clear: both;
 }
 .brief-bio p {
   font-size: 1.2rem;
+  margin-top: 30px;
+  
 }
 
 .social-links {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-xs);
   height: var(--icon-size-desktop);
   margin-bottom: var(--spacing-sm);
   
@@ -255,13 +257,14 @@
 }
 
 .ai-highlight {
-  color: white;
+  color: var(--text-color);
   font-weight: bold;
-  background: var(--ai-background-color);
+  /* background: var(--ai-background-color);
   border-radius: 50%;
-  padding: 0.3em 0.2em;
+  padding: 0.3em 0.2em; */
   display: inline-block;
   text-align: center;
+  font-size: 1.2rem;
 }
 
 @keyframes fadeInUp {
@@ -287,13 +290,25 @@
   }
 
   .about-content {
-    grid-template-columns: 1fr 125px;
+    display: flex;
+    flex-direction: row;
     min-height: 125px;
     gap: var(--spacing-md);
     padding-top: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
+    
   }
-
+  .about-content p {
+    
+    
+    color: var(--text-color);
+    line-height: 1.3;
+    margin-top: var(--spacing-md);
+    font-size: .9rem;
+    font-weight: 400;
+    max-width: 85%;
+    flex: 1;
+  }
   .about-skill-icons {
     
     gap: var(--spacing-lg);
@@ -314,17 +329,23 @@
   }
 
   .headshot-container {
-    margin-top:5px;
-    max-width: 125px;
-    max-height: 125px;
+    
+    max-width: 115px;
+    max-height: 115px;
+    margin-top: 5px;
+    border: 1px solid transparent;
   }
-
+  .headshot {
+    width: 99%;
+    height: 95%;
+  }
+  
   .social-links {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
     height: var(--icon-size-mobile);
   }
   
@@ -419,33 +440,26 @@
     cursor: pointer;
   }
   
+  .brief-bio {
+    margin-top: 20px;
+  }
 
-  .brief-bio p {
-    font-size: .7rem;
-  }
-  .about-content p {
-    
-    grid-column: 1;
-    color: var(--text-color);
-    line-height: 1.5;
-    margin-bottom: var(--spacing-xs);
-    font-size: 1rem;
-    font-weight: 400;
-    max-width: 95%;
-  }
+
   .brief-bio p {
     font-size: .95rem;
     line-height: 1.5;
+    margin-top: 20px;
+    
   }
   .ai-highlight {
-    color: white;
+    color: var(--text-color);
     font-weight: bold;
-    background: var(--ai-background-color);
+    /* background: var(--ai-background-color);
     border-radius: 50%;
-    padding: .9em .45em;
+    padding: .9em .45em; */
     display: inline-block;
     text-align: center;
-    font-size: .65rem;
+    font-size: .85rem;
     
   }
 }
