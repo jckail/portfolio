@@ -151,7 +151,7 @@
   color: white;
   padding: 1px var(--spacing-xs);
   border-radius: 5px;
-  font-size: 0.7rem;
+  font-size: .9rem;
   text-transform: capitalize;
   transition: all var(--transition-fast);
   font-weight: bold;
