@@ -149,8 +149,8 @@
 .skill-tag {
   background: var(--skill-tag-background);
   color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-full);
+  padding: 1px var(--spacing-xs);
+  border-radius: 5px;
   font-size: 0.7rem;
   text-transform: capitalize;
   transition: all var(--transition-fast);
@@ -264,8 +264,8 @@
   .skill-tag {
     background: var(--skill-tag-background);
     color: white;
-    padding: var(--spacing-xs) var(--spacing-xs);
-    border-radius: 8px;
+    padding: 1px var(--spacing-xs);
+    border-radius: 5px;
     font-size: 0.7rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);

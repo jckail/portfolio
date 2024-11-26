@@ -6,7 +6,7 @@ const generateRandomZuniUrls = (): string[] => {
   const usedNumbers: Set<number> = new Set();
   const urls: string[] = [];
 
-  while (urls.length < 4) {
+  while (urls.length < 3) {
     const randomNum: number = Math.floor(Math.random() * 19) + 1;
     if (!usedNumbers.has(randomNum)) {
       usedNumbers.add(randomNum);
@@ -152,10 +152,10 @@ export const getThemeConfig = (theme: Theme): ISourceOptions | ISourceOptions[] 
       lineColor: partyColors[index % partyColors.length],
       backgroundColor: 'transparent',
       particleCount: 5,
-      particleSize: 50,
-      lineDistance: 550,
+      particleSize: 60,
+      lineDistance: 450,
       lineWidth: 5,
-      moveSpeed: .5,
+      moveSpeed: .3,
       imageUrls: [url],
       imageSizeAnimation: {
         enable: true,

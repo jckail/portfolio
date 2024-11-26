@@ -52,14 +52,14 @@
   --image-background: #ffffff;
   --underline-color: #0403ff;
   --skill-tag-background: rgba(4, 3, 255, 0.4);
-  --ai-background-color: rgba(4, 3, 255, 0.6);
+  --ai-background-color: rgba(4, 3, 255, 0.5);
 }
 
 .theme-party {
   --background-color: transparent;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);
-  --section-background-blur: 0;
+  --section-background-blur: 2px;
   --text-color: #ff00ff;
   --text-secondary: #00ffff;
   --border-color: #ff00ff;
@@ -76,6 +76,8 @@
   --background-color-invert: #ffffff;
   --border-thickness: 3px;
   --image-background: #ffffff;
+  --skill-tag-background: #00ffff;
+  --ai-background-color: #ff00ff;
 }
 
 /* Base styles */
