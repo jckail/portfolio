@@ -47,7 +47,30 @@
         "general_category": "Data Engineering",
         "sub_category": "Workflow Orchestration"
     },
-
+    "azure": {
+        "display_name": "Azure",
+        "image": "azure.svg",
+        "professional_experience": true,
+        "years_of_experience": 4,
+        "tags": ["cloud", "infrastructure", "services", "microsoft", "iaas", "paas", "saas"],
+        "description": "A cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services.",
+        "weblink": "https://azure.microsoft.com/en-us/",
+        "examples": {},
+        "general_category": "Cloud Computing",
+        "sub_category": "Cloud Platform"
+    },
+    "aws": {
+        "display_name": "AWS",
+        "image": "aws.svg",
+        "professional_experience": true,
+        "years_of_experience": 10,
+        "tags": ["cloud", "infrastructure", "services", "amazon", "iaas", "paas", "saas"],
+        "description": "Amazon Web Services, a comprehensive cloud computing platform offering over 200 fully featured services.",
+        "weblink": "https://aws.amazon.com/",
+        "examples": {},
+        "general_category": "Cloud Computing",
+        "sub_category": "Cloud Platform"
+    },
     "cassandra": {
         "display_name": "Cassandra",
         "image": "cassandra.svg",
@@ -59,6 +82,18 @@
         "examples": {},
         "general_category": "Databases",
         "sub_category": "NoSQL Databases"
+    },
+    "cpp": {
+        "display_name": "C++",
+        "image": "cpp.svg",
+        "professional_experience": true,
+        "years_of_experience": 8,
+        "tags": ["language", "general-purpose", "systems", "object-oriented", "performance", "game-development"],
+        "description": "A general-purpose programming language created as an extension of the C programming language.",
+        "weblink": "https://en.wikipedia.org/wiki/C%2B%2B",
+        "examples": {},
+        "general_category": "Programming Languages",
+        "sub_category": "Systems Programming"
     },
     "hadoop": {
         "display_name": "Hadoop",
@@ -122,18 +157,7 @@
         "sub_category": "Data Processing"
     },
 
-    "aws": {
-        "display_name": "AWS",
-        "image": "aws.svg",
-        "professional_experience": true,
-        "years_of_experience": 10,
-        "tags": ["cloud", "infrastructure", "services", "amazon", "iaas", "paas", "saas"],
-        "description": "Amazon Web Services, a comprehensive cloud computing platform offering over 200 fully featured services.",
-        "weblink": "https://aws.amazon.com/",
-        "examples": {},
-        "general_category": "Cloud Computing",
-        "sub_category": "Cloud Platform"
-    },
+
     "bigquery": {
         "display_name": "BigQuery",
         "image": "bigquery.svg",
@@ -554,7 +578,7 @@
         "description": "An open-source project for interactive computing across dozens of programming languages.",
         "weblink": "https://jupyter.org/",
         "examples": {},
-        "general_category": "Development Tools",
+        "general_category": "Data Science",
         "sub_category": "Interactive Computing"
     },
     "keras": {
@@ -604,6 +628,18 @@
         "examples": {},
         "general_category": "Artificial Intelligence",
         "sub_category": "LLM Framework"
+    },
+    "linux": {
+        "display_name": "Linux",
+        "image": "linux.svg",
+        "professional_experience": true,
+        "years_of_experience": 14,
+        "tags": ["os", "kernel", "unix", "open-source", "operating-system", "server", "embedded"],
+        "description": "A family of open-source Unix-like operating systems based on the Linux kernel.",
+        "weblink": "https://www.linux.org/",
+        "examples": {},
+        "general_category": "Development Tools",
+        "sub_category": "Operating System"
     },
 
     "looker": {
@@ -784,6 +820,18 @@
         "tags": ["testing", "automation", "web", "e2e", "browser", "microsoft", "cross-browser"],
         "description": "A framework for web testing and automation that enables reliable end-to-end testing for modern web apps.",
         "weblink": "https://playwright.dev/",
+        "examples": {},
+        "general_category": "Development Tools",
+        "sub_category": "Testing Framework"
+    },
+    "selenium": {
+        "display_name": "Selenium",
+        "image": "selenium.svg",
+        "professional_experience": true,
+        "years_of_experience": 5,
+        "tags": ["testing", "automation", "web", "e2e", "browser", "microsoft", "cross-browser"],
+        "description": "A framework for web testing and automation that enables reliable end-to-end testing for modern web apps.",
+        "weblink": "https://www.selenium.dev/",
         "examples": {},
         "general_category": "Development Tools",
         "sub_category": "Testing Framework"

@@ -119,7 +119,7 @@
         "link": "https://www.commonspirit.org/",
         "logoPath": "commonspirit.svg",
         "company_description": "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states.",
-        "tech_stack": ["python", "sql", "javascript","java"],
+        "tech_stack": ["python", "sql", "javascript","java","azure"],
         "more_highlights": [
             "",
             "Architected and delivered new REST APIs and data lakes, reducing external partner data processing time from 7 days to 5 minutes. Enhanced data accessibility and scalability through efficient data structures.",
