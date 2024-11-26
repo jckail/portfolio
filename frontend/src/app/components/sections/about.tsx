@@ -4,7 +4,7 @@ import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
-import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+// import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { useContact } from './about/hooks/useContact';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -20,7 +20,7 @@ const TLDRContent = memo(({
   aboutMeData, 
   contactData, 
   onResumeClick,
-  skillsData,
+  // skillsData,
   onContactSelect
 }: { 
   aboutMeData: {
@@ -43,6 +43,16 @@ const TLDRContent = memo(({
   onContactSelect: () => void;
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+
+  const handleAIClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Find and click the chat button
+    const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
+    if (chatButton) {
+      chatButton.click();
+    }
+  };
 
   return (
     <div className="about-section">
@@ -72,17 +82,17 @@ const TLDRContent = memo(({
             onContactSelect={onContactSelect}
           />
         </ErrorBoundary>
-        <p>{aboutMeData.aidetails}</p>
+        <p>Ask my <span className="ai-highlight" onClick={handleAIClick} style={{ cursor: 'pointer' }}>✨AI</span> assistant below for more details about me.</p>
       </div>
 
-      {selectedSkill && skillsData && skillsData[selectedSkill] && (
+      {/* {selectedSkill && skillsData && skillsData[selectedSkill] && (
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
-            skill={skillsData[selectedSkill]}
+            skill={selectedSkill}
             onClose={() => setSelectedSkill(null)}
           />
         </Suspense>
-      )}
+      )} */}
     </div>
   );
 });

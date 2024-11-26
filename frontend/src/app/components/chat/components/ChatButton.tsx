@@ -83,16 +83,16 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
     >
       <Fab
         sx={{
-          bgcolor: 'var(--primary)',
-          border:'var(--border-thickness) solid var(--primary)', 
+          bgcolor: 'var(--ai-background-color);',
+          
           color: 'white',
           width: isMobile ? 60 : 80,
           height: isMobile ? 60 : 80,
           transition: ' .5s ease-in-out',
           animation:  'glowPulse 10s infinite' ,
           '&:hover': {
-            bgcolor: 'white',
-            color: 'var(--primary)',
+            bgcolor: 'var(--primary)',
+            color: 'white',
             transform: 'scale(1.5)',
           },
           fontSize: isMobile ? '1.5rem' :'2.2rem',

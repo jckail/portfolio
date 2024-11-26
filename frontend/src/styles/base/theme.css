@@ -25,6 +25,7 @@
   --image-background: #ffffff;
   --underline-color: #000000;
   --skill-tag-background:#000000;
+  --ai-background-color: #000000;;
 }
 
 .theme-dark {
@@ -50,7 +51,8 @@
   --border-thickness: 2px;
   --image-background: #ffffff;
   --underline-color: #0403ff;
-  --skill-tag-background:#0403ff;
+  --skill-tag-background: rgba(4, 3, 255, 0.4);
+  --ai-background-color: rgba(4, 3, 255, 0.6);
 }
 
 .theme-party {

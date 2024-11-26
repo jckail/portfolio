@@ -154,6 +154,7 @@
   font-size: 0.7rem;
   text-transform: capitalize;
   transition: all var(--transition-fast);
+  font-weight: bold;
 }
 
 .skill-tag:hover {
@@ -268,5 +269,6 @@
     font-size: 0.7rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);
+    font-weight: bold;
   }
 }

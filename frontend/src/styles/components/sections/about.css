@@ -126,14 +126,14 @@
   display: flex;
   justify-content: left;
   align-items: center;
-  border: 4px solid transparent;
+  border: 3px solid transparent;
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
 }
 
 .headshot {
-  width: 98%;
-  height: 99%;
+  width: 99%;
+  height: 97%;
   object-fit: cover;
   border-radius: 10%;
   display: block;
@@ -141,6 +141,8 @@
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
   object-position: top;
+  align-items: center;
+  border: 3px solid transparent;
 }
 
 .brief-bio {
@@ -252,7 +254,15 @@
   cursor: pointer;
 }
 
-
+.ai-highlight {
+  color: white;
+  font-weight: bold;
+  background: var(--ai-background-color);
+  border-radius: 50%;
+  padding: 0.3em 0.2em;
+  display: inline-block;
+  text-align: center;
+}
 
 @keyframes fadeInUp {
   from {
@@ -280,8 +290,8 @@
     grid-template-columns: 1fr 125px;
     min-height: 125px;
     gap: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
   }
 
   .about-skill-icons {
@@ -419,8 +429,23 @@
     color: var(--text-color);
     line-height: 1.5;
     margin-bottom: var(--spacing-xs);
-    font-size: .9rem;
+    font-size: 1rem;
     font-weight: 400;
     max-width: 95%;
+  }
+  .brief-bio p {
+    font-size: .95rem;
+    line-height: 1.5;
+  }
+  .ai-highlight {
+    color: white;
+    font-weight: bold;
+    background: var(--ai-background-color);
+    border-radius: 50%;
+    padding: .9em .45em;
+    display: inline-block;
+    text-align: center;
+    font-size: .65rem;
+    
   }
 }

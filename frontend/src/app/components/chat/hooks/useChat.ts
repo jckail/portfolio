@@ -19,6 +19,40 @@ export const useChat = () => {
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
 
+  // Listen for URL parameter changes
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const shouldBeOpen = params.get('ai_chat') === 'open';
+      if (shouldBeOpen !== open) {
+        setOpen(shouldBeOpen);
+      }
+    };
+
+    // Listen for popstate (browser back/forward)
+    window.addEventListener('popstate', handleUrlChange);
+
+    // Listen for pushstate/replacestate
+    const originalPushState = history.pushState.bind(history);
+    const originalReplaceState = history.replaceState.bind(history);
+
+    history.pushState = function(...args) {
+      originalPushState.apply(this, args);
+      handleUrlChange();
+    };
+
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(this, args);
+      handleUrlChange();
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, [open]);
+
   const getPageContext = () => {
     const mainContent = document.querySelector('#root') as HTMLElement;
     if (!mainContent) return '';
@@ -181,16 +215,12 @@ export const useChat = () => {
     window.history.pushState({}, '', finalUrl);
   }, [open]);
 
-  // Handle browser back/forward navigation
+  // Initialize chat when open changes
   useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      setOpen(params.get('ai_chat') === 'open');
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    if (open) {
+      initializeChat();
+    }
+  }, [open, initializeChat]);
 
   // Cleanup WebSocket on unmount
   useEffect(() => {

@@ -13,9 +13,7 @@ import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared
 import '../styles/base/app.css';
 
 // Lazy load ChatPortal since it's not immediately needed
-const ChatPortal = React.lazy(() => import('./components/chat').then(module => ({
-  default: module.ChatPortal
-})));
+const ChatPortal = React.lazy(() => import('./components/chat/chat-portal'));
 
 const App: React.FC = () => {
   const { theme } = useThemeStore();
