@@ -73,7 +73,7 @@
   margin: 0;
   padding: 0;
   align-items: center;
-  justify-content:center;
+  justify-content: center;
 }
 
 .skill-item {
@@ -86,8 +86,9 @@
   animation-delay: calc(var(--item-index) * 0.05s);
   height: 90px;
   width: 90px;
+  display: flex;
   align-items: center;
-  justify-content:center;
+  justify-content: center;
 }
 
 .skill-item:hover {
@@ -102,6 +103,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
   gap: 1px;
 }
 
@@ -223,7 +227,7 @@
   .skill-category {
     padding: var(--spacing-md);
     align-items: center;
-    justify-content:center;
+    justify-content: center;
   }
   
   .skill-category h3 {
@@ -235,7 +239,7 @@
     grid-template-columns: repeat(4, minmax(70px, 1fr));
     gap: var(--spacing-md);
     align-items: center;
-    justify-content:center;
+    justify-content: center;
   }
 
   .skill-icon {
@@ -250,8 +254,14 @@
   .skill-item {
     max-height: 65px;
     width: 65px;
+    display: flex;
     align-items: center;
-    justify-content:center;
+    justify-content: center;
+  }
+  
+  .skill-icon-container {
+    height: 100%;
+    width: 100%;
   }
   
   .skill-tags {

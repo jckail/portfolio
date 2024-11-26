@@ -198,7 +198,7 @@
 }
 
 .visit-website-btn:hover {
-  background: var(--primary-hover);
+  background: var(--primary);
 }
 
 @media (max-width: 768px) {

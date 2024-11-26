@@ -509,6 +509,14 @@
 .modal-close-button:hover {
   background-color: var(--primary);
 }
+.experience-modal-company-logo:hover {
+  background: var(--primary);
+  border: 2px solid var(--primary);
+  
+  box-shadow: var(--shadow-md);
+  
+  
+}
 
 @media (max-width: 768px) {
   .modal-body {
@@ -567,6 +575,15 @@
     height: 56px;
     margin-top: 0;
     justify-content: center;
+  }
+
+  .experience-modal-company-logo:hover {
+    background: var(--primary);
+    border: var(--border-thickness) solid var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    
+    
   }
 
   .experience-modal-timeline-header {
