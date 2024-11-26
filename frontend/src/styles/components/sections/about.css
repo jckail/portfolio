@@ -7,7 +7,7 @@
 }
 
 .about-section {
-  margin-top: 25px;
+  margin-top: 15px;
   background: var(--section-background);
   backdrop-filter: blur(var(--section-background-blur));
   border-radius: var(--radius-md);
@@ -26,6 +26,7 @@
 .about-section h2 {
   color: var(--text-color);
   font-size: 2rem;
+  margin-top: 0px;
   margin-bottom: var(--spacing-xs);
   display: flex;
   align-items: center;

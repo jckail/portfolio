@@ -24,9 +24,9 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
   return (
     <Box
       sx={{
-        position: 'fixed',
-        bottom: 20,
-        left: 20,
+        position: isMobile ?'fixed':'fixed',
+        bottom: isMobile ?15:20,
+        left: isMobile ?5:20,
         zIndex: 9999,
         pointerEvents: 'auto',
         fontSize: isMobile ? '1.5rem' :'2.2rem',

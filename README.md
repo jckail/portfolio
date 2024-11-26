@@ -1,68 +1,136 @@
-# Portfolio 🚀
+![Portfolio Banner](readMeBanner.png)
+
+# Professional Portfolio 🚀
 
 Welcome to my professional portfolio! Visit [jckail.com](https://www.jckail.com) to see it in action.
 
-## What's Inside 🎯
+## Overview 🎯
 
-This portfolio is a dynamic web application that brings my professional experience to life through an interactive and engaging interface. Here's what you'll find:
+This portfolio is a modern, full-stack react web application showcasing my professional experience through an interactive and engaging interface. Built with performance, scalability, and user experience in mind.
 
-### Resume Experience 📝
-- Professional journey and accomplishments
-- Detailed project showcases
-- Comprehensive skill breakdown
-- Downloadable PDF resume
+## Key Features ✨
 
-### Interactive Features ✨
-- 🤖 AI Assistant for smart interactions
-- 🌓 Light/Dark mode for comfortable viewing
+### Interactive Resume Experience
+- 📝 Dynamic professional timeline with detailed experiences
+- 🛠️ Comprehensive skills showcase with proficiency levels
+- 📊 Project portfolio with live demos and descriptions
+- 📄 Downloadable PDF resume
+
+### Smart Interactions
+- 🤖 AI-powered chat assistant for portfolio navigation
+- 🔍 Advanced search capabilities
 - 📱 Responsive design for all devices
-- 🔄 Real-time data updates
+- 🌓 Light/Dark mode with system preference detection
 
-### Connect With Me 🤝
-- [LinkedIn](https://www.linkedin.com/in/jordan-kail)
-- [GitHub](https://github.com/jkail-dev)
-- Direct contact options
-- Professional network links
+### Professional Network
+- 🔗 [LinkedIn](https://www.linkedin.com/in/jordan-kail)
+- 💻 [GitHub](https://github.com/jkail-dev)
+- 📧 Direct contact options
+- 🌐 Professional social links
 
 ## Technology Stack 💻
 
-Built with modern technologies for optimal performance:
-
 ### Frontend 🎨
-- React with TypeScript
-- React Router for navigation
-- Modern UI/UX design
-- Responsive CSS architecture
+- **React 18+** with TypeScript for robust UI development
+- **Vite** for optimized development and building
+- **React Router** for seamless navigation
+- **CSS Modules** for scoped styling
+- **Context API** for state management
+- **Custom Hooks** for shared logic
 
 ### Backend 🔧
-- FastAPI for high performance
-- Real-time data processing
-- Secure API endpoints
-- Comprehensive logging
+- **FastAPI** for high-performance API endpoints
+- **Python 3.12+** for modern language features
+- **Pydantic** for data validation
+- **Uvicorn** ASGI server
+- **Custom Middleware** for security and logging
 
-## Project Structure 📂
+## Architecture 📂
 
 ```
 portfolio/
-├── frontend/    # React application (see frontend/README.md for details)
-├── backend/     # FastAPI server (see backend/README.md for details)
-└── helpers/     # Deployment and utility scripts
+├── frontend/           # React application
+│   ├── src/
+│   │   ├── app/       # Core application
+│   │   ├── features/  # Feature modules
+│   │   └── shared/    # Shared utilities
+│   └── public/        # Static assets
+│
+├── backend/           # FastAPI server
+│   ├── app/
+│   │   ├── api/      # API routes
+│   │   ├── models/   # Data models
+│   │   └── utils/    # Helper functions
+│   └── logs/         # Application logs
+│
+└── helpers/          # Deployment and utility scripts
 ```
 
 ## Getting Started 🚀
 
-1. Clone the repository
-2. Run the local development script:
-```bash
-./local_test.sh
-```
+### Prerequisites
+- Node.js 18+ and npm
+- Python 3.12+
+- Git
 
-The application will be available at:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8080
+### Development Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/portfolio.git
+   cd portfolio
+   ```
 
-## Learn More 📚
+2. Start the development environment:
+   ```bash
+   ./helpers/local_test.sh
+   ```
 
-For detailed technical information, check out:
+3. Access the application:
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8080
+   - API Documentation: http://localhost:8080/docs
+
+## Security Features 🔒
+
+- CORS configuration
+- Rate limiting
+- Request validation
+- Secure file operations
+- Error handling
+
+## Performance Optimizations ⚡
+
+- Code splitting and lazy loading
+- Memoized components
+- Efficient data processing
+- Resource optimization
+- Proper caching strategies
+
+## Development Guidelines 📝
+
+### Code Quality
+- TypeScript for type safety
+- ESLint and Prettier for code formatting
+- Comprehensive testing suite
+- Documentation requirements
+
+### Best Practices
+- Component-based architecture
+- RESTful API design
+- Proper error handling
+- Performance monitoring
+
+## Documentation 📚
+
+For detailed technical information, refer to:
 - [Frontend Documentation](./frontend/README.md)
 - [Backend Documentation](./backend/README.md)
+- API Documentation (available at `/docs` when running locally)
+
+## Contributing 🤝
+
+1. Follow existing architecture patterns
+2. Maintain code quality standards
+3. Write tests for new features
+4. Update documentation
+5. Submit pull requests for review
