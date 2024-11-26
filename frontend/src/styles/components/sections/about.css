@@ -195,7 +195,7 @@
   min-height: var(--icon-size-desktop);
   background: var(--background-color);
   color: var(--text-color);
-  border: var(--border-thickness) solid var(--primary-border);
+  border: 2px solid var(--primary-border);
   border-radius: var(--radius-sm);
 }
 
@@ -212,7 +212,7 @@
   padding: 0px 0px 0px 15px;
   background: var(--background-color);
   color: var(--text-color);
-  border: var(--border-thickness) solid var(--primary-border);
+  border: 2px solid var(--primary-border);
   border-radius: var(--radius-sm);
   font-size: 25px;
   transition: all var(--transition-normal);
@@ -228,7 +228,7 @@
   padding: 0px 0px 0px 15px;
   background: var(--background-color);
   color: var(--text-color);
-  border: var(--border-thickness) solid var(--primary-border);
+  border: 2px solid var(--primary-border);
   border-radius: var(--radius-sm);
   font-size: 25px;
   transition: all var(--transition-normal);
