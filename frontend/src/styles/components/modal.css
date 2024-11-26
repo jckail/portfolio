@@ -508,6 +508,7 @@
 
 .modal-close-button:hover {
   background-color: var(--primary);
+  cursor: pointer;
 }
 .experience-modal-company-logo:hover {
   background: var(--primary);
