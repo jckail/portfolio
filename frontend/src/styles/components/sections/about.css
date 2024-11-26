@@ -165,6 +165,7 @@
   margin-top: 0px;
   height: var(--icon-size-desktop);
   margin-bottom: var(--spacing-sm);
+  align-items: center; /* Ensures proper vertical alignment */
   
 }
 
@@ -202,7 +203,7 @@
   margin-left: 100px;
 }
 
-.social-links .resume-button {
+ .resume-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -246,7 +247,7 @@
   cursor: pointer;
 }
 
-.social-links .resume-button svg {
+.icon-link, .contact-button, .resume-button svg {
   min-width: var(--icon-size-desktop);
   min-height: var(--icon-size-desktop);
 }
@@ -334,7 +335,7 @@
   .social-links {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     margin-top: var(--spacing-xs);
     margin-bottom: var(--spacing-xs);
     height: var(--icon-size-mobile);
@@ -374,12 +375,13 @@
     margin-left: 100px;
   }
   
-  .social-links .resume-button {
+  .resume-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
+    gap: 0px;
     padding: 0px 0px 0px 0px;
+    padding-left:5px;
     background: var(--background-color);
     color: var(--text-color);
     border: var(--border-thickness) solid var(--primary-border);
@@ -407,8 +409,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
+    gap: 0px;
     padding: 0px 0px 0px 0px;
+    padding-left:5px;
     background: var(--background-color);
     color: var(--text-color);
     border: var(--border-thickness) solid var(--primary-border);
