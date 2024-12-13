@@ -10,17 +10,22 @@ class ProjectDetail(BaseModel):
     description_detail: str = Field(..., description="Detailed project description")
     logoPath: str = Field(..., description="Path to project logo")
     tech_stack: List[str] = Field(..., description="List of technologies used in the project")
+    last_commit: str = Field(..., description="Date of last commit")
 
 class Projects(BaseModel):
     """Model for all projects."""
+    portfolio: ProjectDetail
     super_teacher: ProjectDetail
-    qr_for_groups: ProjectDetail
+    data_playground: ProjectDetail
+    go_pilot: ProjectDetail
     jobbr: ProjectDetail
     pointup: ProjectDetail
+    qr_for_groups: ProjectDetail
     lit_crypto: ProjectDetail
-    go_pilot: ProjectDetail
-    data_playground: ProjectDetail
-    portfolio: ProjectDetail
+    
+    
+    
+    
 
     class Config:
         json_schema_extra = {
@@ -32,7 +37,9 @@ class Projects(BaseModel):
                     "link2": "https://www.the-super-teacher.com/",
                     "description_detail": "Developed Super Teacher, an AI-powered web application...",
                     "logoPath": "super-teacher.svg",
-                    "tech_stack": ["Python", "FastAPI", "Pydantic", "SQLAlchemy", "PostgreSQL"]
+                    "tech_stack": ["Python", "FastAPI", "Pydantic", "SQLAlchemy", "PostgreSQL"],
+                    "last_commit": "November 2024"
+
                 }
             }
         }

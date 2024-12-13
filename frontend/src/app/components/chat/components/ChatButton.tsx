@@ -29,7 +29,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
         left: isMobile ? '52%':'52%',
         transform: 'translateX(-50%)',
         zIndex: 9999,
-        pointerEvents: 'auto',
+        pointerEvents: 'none',
         fontSize: isMobile ? '1.5rem' : '2.2rem',
         fontFamily: 'Quantico, sans-serif !important',
         fontWeight: '700 !important',
@@ -75,7 +75,8 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
           },
           fontSize: isMobile ? '2rem' : '2.5rem',
           fontFamily: 'Quantico, sans-serif !important',
-          fontWeight: '700 !important'
+          fontWeight: '700 !important',
+          pointerEvents: 'auto'
         }}
         aria-label="Chat with AI"
         onClick={onClick}
