@@ -23,6 +23,12 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
+  const setupPdfUrl = () => {
+    // Add timestamp to URL to prevent caching
+    const timestamp = new Date().getTime();
+    setPdfUrl(`/api/resume?t=${timestamp}`);
+  };
+
   const fetchResumeFileName = async () => {
     try {
       console.log('Fetching resume filename...');
@@ -98,7 +104,15 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     console.log('ResumeProvider mounted, fetching filename...');
     fetchResumeFileName();
+    setupPdfUrl(); // Initial setup of PDF URL
   }, []);
+
+  // Update PDF URL when resumeFileName changes
+  useEffect(() => {
+    if (resumeFileName) {
+      setupPdfUrl();
+    }
+  }, [resumeFileName]);
 
   useEffect(() => {
     return () => {

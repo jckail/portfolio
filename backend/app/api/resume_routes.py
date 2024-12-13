@@ -39,7 +39,12 @@ async def serve_resume():
     try:
         file_path = get_resume_file_path()
         logger.info("Resume file successfully served")
-        return FileResponse(file_path, media_type='application/pdf')
+        headers = {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+        return FileResponse(file_path, media_type='application/pdf', headers=headers)
     except Exception as e:
         logger.error(f"Error serving resume file: {str(e)}")
         raise
