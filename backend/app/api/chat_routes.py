@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 import json
 import asyncio
+from datetime import datetime
 from contextlib import asynccontextmanager
 from backend.app.models import get_all_models
 from backend.app.utils.supabase_client import supabase
@@ -79,17 +80,22 @@ class ConnectionManager:
                 prompt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
                                     'assets', 'portfoliosystemprompt.md')
                 with open(prompt_path, 'r') as file:
-                    self._system_prompt = file.read()
+                    base_prompt = file.read()
+                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    self._system_prompt = f"Current Date and Time: {current_time}\n\n{base_prompt}"
             except Exception as e:
                 print(f"Error loading system prompt: {e}")
-                self._system_prompt = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
-                1. Learn about Jordan's background, experience, and technical skills
-                2. Understand his projects and achievements
-                3. Discuss potential collaborations or opportunities
-                4. Answer questions about his work and expertise
-                
-                Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
-                You have access to the current page content to provide accurate, contextual responses."""
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self._system_prompt = f"""Current Date and Time: {current_time}
+
+You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
+1. Learn about Jordan's background, experience, and technical skills
+2. Understand his projects and achievements
+3. Discuss potential collaborations or opportunities
+4. Answer questions about his work and expertise
+
+Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
+You have access to the current page content to provide accurate, contextual responses."""
 
         try:
             stream = await self.client.messages.create(
