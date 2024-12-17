@@ -17,7 +17,7 @@ class AboutMe(BaseModel):
                 "greeting": "👋 Hi, I'm an engineer",
                 "description": "With over 12 years of experience specializing in AI, Analytics, and Machine Learning",
                 "aidetails": "Ask my ✨AI assistant below for more details about me.",
-                "brief_bio": "I'm a data engineer with a deep curiosity for technology...",
+                "brief_bio": "I'm a software engineer with a deep curiosity for technology...",
                 "full_portrait": "/images/headshot/headshot.png",
                 "resume_name": "JordanKailResume.pdf",
                 "primary_skills": ["Python","JavaScript","SQL"]
