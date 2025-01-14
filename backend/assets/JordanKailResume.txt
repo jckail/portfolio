@@ -34,7 +34,7 @@ Menlo Park, CA + Seattle, WA + Atlanta, GA
  - Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.
 
 Wide Open West
-Lead Data Scientist
+Lead Data Engineer
 11/2017 - 12/2018
 Denver, CO
  - Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.

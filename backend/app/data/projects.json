@@ -109,7 +109,7 @@
   },
   "lit_crypto": {
     "title": "Algo Crypto",
-    "description": "Algorithmic Crypto Trading Project-Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS, and SageMaker.",
+    "description": "Trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS, and SageMaker.",
     "link": "https://github.com/jckail/crypto_trader",
     "description_detail": "Developed a Python-based data analysis tool to collect, process, and analyze real-time cryptocurrency data from APIs (CryptoCompare, CoinMarketCap, Alpha Vantage). Engineered a multithreaded data ingestion system to efficiently handle multiple data sources and ensure low-latency processing. Leveraged AWS services (S3, Glue, Athena) to create a scalable cloud-native architecture capable of handling large datasets. Applied stepwise regression and K-means clustering to detect market trends and correlations between traditional assets and cryptocurrencies. Demonstrated advanced data engineering skills by building modular components focused on data acquisition and ML-powered reporting. Highlighted problem-solving and financial technology expertise, navigating API integration challenges and delivering actionable insights into cryptocurrency trends.",
     "logoPath": "litcrypto-icon.svg",
