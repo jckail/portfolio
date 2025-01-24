@@ -51,7 +51,7 @@ async def serve_resume(request: Request):
             file_path,
             media_type='application/pdf',
             headers=headers,
-            filename="jordankail_resume.pdf" if is_download else None,
+            filename="jordankail_resume.pdf",
             content_disposition_type='attachment' if is_download else 'inline'
         )
     except Exception as e:
