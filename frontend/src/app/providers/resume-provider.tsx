@@ -60,7 +60,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       setError(null);
       console.log('Fetching resume PDF...');
-      const response = await fetch('/api/resume', {
+      const response = await fetch('/api/resume?download=true', {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf',

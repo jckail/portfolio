@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
 from ..utils.logger import setup_logging
 import os
@@ -34,7 +34,7 @@ def get_resume_file_path():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/resume")
-async def serve_resume():
+async def serve_resume(request: Request):
     """Serve the resume file as a PDF if it exists."""
     try:
         file_path = get_resume_file_path()
@@ -44,7 +44,16 @@ async def serve_resume():
             'Pragma': 'no-cache',
             'Expires': '0'
         }
-        return FileResponse(file_path, media_type='application/pdf', headers=headers)
+        # Check if this is a download request
+        is_download = 'download' in request.query_params
+        
+        return FileResponse(
+            file_path,
+            media_type='application/pdf',
+            headers=headers,
+            filename="jordankail_resume.pdf" if is_download else None,
+            content_disposition_type='attachment' if is_download else 'inline'
+        )
     except Exception as e:
         logger.error(f"Error serving resume file: {str(e)}")
         raise
