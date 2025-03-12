@@ -14,6 +14,7 @@ class ProjectDetail(BaseModel):
 
 class Projects(BaseModel):
     """Model for all projects."""
+    ai_billing: ProjectDetail
     portfolio: ProjectDetail
     super_teacher: ProjectDetail
     data_playground: ProjectDetail

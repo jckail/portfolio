@@ -1,4 +1,21 @@
 {
+  "ai_billing": {
+    "title": "AI Billing System",
+    "description": "A proof-of-concept application for tracking and billing AI chat thread interactions with real-time cost metrics and analytics.",
+    "link": "https://github.com/jckail/ai_chat_billing_app",
+    "description_detail": "This application is designed to solve the challenge of monitoring and billing for AI model usage in chat-based applications. As organizations increasingly deploy AI assistants, understanding the costs associated with these interactions becomes critical for business planning and cost management.",
+    "logoPath": "ai_billing.svg",
+    "tech_stack": [
+      "FastAPI",
+      "React",
+      "Pydantic",
+      "SQLAlchemy",
+      "SupaBase",
+      "Docker"
+    ],
+
+    "last_commit": "February 2025"
+  },
   "super_teacher": {
     "title": "Super Teacher",
     "description": "AI assistant to help teachers manage their classroom and create personalized lesson plans for students. Made with Python, FastAPI, and Pydantic.",
