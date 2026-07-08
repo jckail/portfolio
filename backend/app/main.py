@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from .api import api_router, ws_router
 from .utils.logger import setup_logging, get_supabase_handler
@@ -108,6 +109,29 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Compress API/static responses larger than 1 KB
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+
+@app.middleware("http")
+async def add_cache_headers(request: Request, call_next):
+    """Set cache policies for static content.
+
+    Vite emits content-hashed filenames under /assets/, so those files can be
+    cached forever. Images are unhashed, so they get a shorter TTL. HTML must
+    always be revalidated so deploys take effect immediately.
+    """
+    response = await call_next(request)
+    if "cache-control" not in response.headers:
+        path = request.url.path
+        if path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        elif path.startswith(("/images/", "/api/assets/")):
+            response.headers["Cache-Control"] = "public, max-age=86400"
+        elif path == "/" or path.endswith(".html"):
+            response.headers["Cache-Control"] = "no-cache"
+    return response
 
 # Mount API routes first
 app.include_router(api_router)
