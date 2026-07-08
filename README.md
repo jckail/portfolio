@@ -113,6 +113,7 @@ See [helpers/README.md](./helpers/README.md) for the deploy script and
 
 - [Frontend documentation](./frontend/README.md)
 - [Backend documentation](./backend/README.md)
+- [Deployment checklist (secrets & CI/CD setup)](./DEPLOYMENT.md)
 - [Deployment tooling](./helpers/README.md)
 - [Infrastructure (Terraform)](./infra/README.md)
 - [Improvement roadmap](./ROADMAP.md)

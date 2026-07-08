@@ -58,7 +58,8 @@ terraform apply
 The repo ships a `Deploy` workflow (`.github/workflows/deploy.yml`) that
 builds the production image and deploys it to Cloud Run on every push to
 `main`, authenticating with Workload Identity Federation (no service-account
-keys stored in GitHub).
+keys stored in GitHub). The full owner checklist, including where every kind
+of secret lives, is in [`DEPLOYMENT.md`](../DEPLOYMENT.md).
 
 To enable it:
 
