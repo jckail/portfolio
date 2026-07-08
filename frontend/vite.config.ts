@@ -9,11 +9,6 @@ export default defineConfig({
     react({
       // Configure React plugin options
       include: "**/*.{jsx,tsx}",
-      babel: {
-        plugins: [
-          ["@babel/plugin-transform-react-jsx", { "runtime": "automatic" }]
-        ]
-      }
     }),
     svgr({
       svgrOptions: {
@@ -54,6 +49,12 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+      // Proxy the chat assistant WebSocket to the FastAPI backend
+      '/ws': {
+        target: 'ws://localhost:8080',
+        ws: true,
         changeOrigin: true,
       },
     },
