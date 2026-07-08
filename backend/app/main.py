@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .api import api_router, ws_router
-from .utils.logger import setup_logging
+from .utils.logger import setup_logging, get_supabase_handler
 from .models.data_loader import load_all
 from .utils.supabase_client import supabase
 import os
@@ -28,9 +28,8 @@ required_env_vars = [
     "PORT",
     "ADMIN_EMAIL",
     "RESUME_FILE",
-    "SUPABASE_JWT_SECRET",
-    "SUPABASE_PW",
-    "ANTHROPIC_API_KEY"
+    "ANTHROPIC_API_KEY",
+    "SENDGRID_API_KEY"
 ]
 
 # Check environment variables without excessive logging
@@ -46,16 +45,25 @@ logger.info("All required environment variables are present")
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown."""
     logger.info("Starting up the application...")
+
+    # Start shipping buffered logs to Supabase now that the event loop exists
+    supabase_handler = get_supabase_handler()
+    if supabase_handler is not None:
+        supabase_handler.start()
+
     try:
         # Initialize critical components first
         await initialize_supabase()
 
-        # Load data and initialize static files concurrently
-        await asyncio.gather(
+        # Load data and initialize static files concurrently; surface any failure
+        results = await asyncio.gather(
             preload_data(),
             initialize_static_files(),
             return_exceptions=True
         )
+        for result in results:
+            if isinstance(result, BaseException):
+                raise result
 
         # Ensure logs directory exists
         logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
@@ -72,6 +80,8 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("Shutting down the application...")
+    if supabase_handler is not None:
+        await supabase_handler.stop()
 
 
 # Initialize FastAPI
@@ -82,10 +92,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
+# Configure CORS. Starlette requires exact origin strings, so the default
+# lists the common local dev servers explicitly (wildcard ports never match).
 allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS", 
-    "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*"
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
 ).split(",")
 allowed_origins = [origin.strip() for origin in allowed_origins]
 

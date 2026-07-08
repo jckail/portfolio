@@ -29,6 +29,8 @@ def get_resume_file_path():
             )
 
         return file_path
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting resume file path: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

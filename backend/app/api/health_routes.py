@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
+import asyncio
 import os
 import subprocess
 from typing import Dict, Any
@@ -77,12 +78,16 @@ async def health_check():
     }
     
     try:
-        # Initialize Supabase client only when the route is called
+        # Initialize Supabase client only when the route is called.
+        # Use the admin client: the logs table is admin-only under RLS, so the
+        # anon client would report a false "unhealthy" even when the DB is fine.
         supabase = SupabaseClient()
-        client = supabase.get_client()
-        
-        # Try to fetch a single row from logs table with a limit
-        result = client.table('logs').select("*").limit(1).execute()
+        client = supabase.get_admin_client()
+
+        # Try to fetch a single row from logs table without blocking the loop
+        result = await asyncio.to_thread(
+            lambda: client.table('logs').select("*").limit(1).execute()
+        )
         
         # Update database check status
         status_info["checks"]["database"] = {

@@ -39,26 +39,35 @@ async def admin_login(credentials: LoginCredentials):
         # Attempt login with Supabase
         response = await supabase.sign_in_with_password(email, password)
         
-        if not response.user:
+        if not response.user or not response.session:
             raise HTTPException(status_code=401, detail="Invalid credentials")
-            
+
         return {
             "access_token": response.session.access_token,
             "token_type": "bearer"
         }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+    except HTTPException:
+        raise
+    except Exception:
+        # Don't leak auth provider internals to the client
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @router.post("/logout")
-async def admin_logout(user = Depends(verify_admin_token)):
+async def admin_logout(
+    user = Depends(verify_admin_token),
+    authorization: Optional[str] = Header(None)
+):
     """
-    Logout admin user
+    Logout admin user, invalidating the session token used for the request.
     """
     try:
         supabase = SupabaseClient()
-        await supabase.sign_out()
+        token = authorization.replace('Bearer ', '') if authorization else None
+        await supabase.sign_out(token)
         return {"message": "Successfully logged out"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -81,6 +90,8 @@ async def get_analytics(user = Depends(verify_admin_token)):
             "lastUpdated": datetime.now(timezone.utc).isoformat()
         }
         return analytics
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -98,6 +109,8 @@ async def get_admin_logs(user = Depends(verify_admin_token)):
                         logs.extend(f.readlines())
         
         return {"logs": logs}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -115,5 +128,7 @@ async def get_admin_health(user = Depends(verify_admin_token)):
             "activeUsers": 0
         }
         return health_info
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

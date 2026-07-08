@@ -15,9 +15,12 @@ ZUNI_DIR = Path(__file__).parent.parent.parent / "assets" / "zuni"
 async def get_random_zuni_image(subject_number: int | None = None):
     """Return a Zuni image file path. If subject_number is provided, returns that specific image,
     otherwise returns a random image."""
-    # Get list of all image files in the zuni directory
+    # Missing directory should be a clean 404, not an unhandled FileNotFoundError
+    if not ZUNI_DIR.is_dir():
+        raise HTTPException(status_code=404, detail="No Zuni images found")
+
     image_files = [f for f in os.listdir(ZUNI_DIR) if f.endswith('.png')]
-    
+
     if not image_files:
         raise HTTPException(status_code=404, detail="No Zuni images found")
     

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from datetime import datetime, timezone
 from typing import Dict, List
 
@@ -28,6 +29,10 @@ MAX_RESPONSE_TOKENS = int(os.getenv("CHAT_MAX_TOKENS", "1024"))
 MAX_HISTORY_MESSAGES = 20
 # Page context is scraped from the DOM and can be very large; keep a useful slice.
 MAX_PAGE_CONTEXT_CHARS = 4000
+# Guard the Anthropic API against abuse: cap message size and request rate.
+MAX_USER_MESSAGE_CHARS = 2000
+RATE_LIMIT_MAX_MESSAGES = 10
+RATE_LIMIT_WINDOW_SECONDS = 60
 
 FALLBACK_SYSTEM_PROMPT = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
 1. Learn about Jordan's background, experience, and technical skills
@@ -59,6 +64,8 @@ class ConnectionManager:
         self.page_contexts: Dict[str, str] = {}
         # Per-client conversation history so the assistant remembers prior turns.
         self.conversation_histories: Dict[str, List[dict]] = {}
+        # Per-client timestamps of recent messages, for rate limiting.
+        self.message_timestamps: Dict[str, List[float]] = {}
         # One client and one portfolio-data snapshot for the entire application.
         self.client = AsyncAnthropic(
             api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -77,6 +84,16 @@ class ConnectionManager:
         self.active_connections.pop(client_id, None)
         self.page_contexts.pop(client_id, None)
         self.conversation_histories.pop(client_id, None)
+        self.message_timestamps.pop(client_id, None)
+
+    def is_rate_limited(self, client_id: str) -> bool:
+        now = time.monotonic()
+        timestamps = self.message_timestamps.setdefault(client_id, [])
+        timestamps[:] = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW_SECONDS]
+        if len(timestamps) >= RATE_LIMIT_MAX_MESSAGES:
+            return True
+        timestamps.append(now)
+        return False
 
     def store_context(self, client_id: str, context: str):
         """Store the visitor's current page context, keeping only readable text."""
@@ -113,7 +130,13 @@ class ConnectionManager:
         if self._base_prompt is None:
             self._base_prompt = _load_base_prompt()
         if self._portfolio_data is None:
-            self._portfolio_data = json.dumps(get_all_models(), default=str)
+            # get_all_models() returns Pydantic models; dump them to plain data
+            # so Claude receives structured JSON, not Python reprs.
+            serializable = {
+                key: value.model_dump(mode="json") if hasattr(value, "model_dump") else value
+                for key, value in get_all_models().items()
+            }
+            self._portfolio_data = json.dumps(serializable, ensure_ascii=False)
 
         blocks = [
             {"type": "text", "text": self._base_prompt},
@@ -133,7 +156,7 @@ class ConnectionManager:
 
         return blocks
 
-    async def send_message(self, message: str, client_id: str, is_chunk: bool = False, ga_session_id: str = None):
+    async def send_message(self, message: str, client_id: str, is_chunk: bool = False):
         if client_id not in self.active_connections:
             return
         try:
@@ -143,14 +166,6 @@ class ConnectionManager:
                 "sender": "assistant",
                 "is_chunk": is_chunk
             })
-
-            # Store complete messages in Supabase
-            if not is_chunk and ga_session_id:
-                await supabase.store_chat_message(
-                    google_analytics_session_id=ga_session_id,
-                    message_type='received',
-                    message_detail=message
-                )
         except Exception as e:
             logger.error("Error sending message to client %s: %s", client_id, e)
 
@@ -186,7 +201,18 @@ class ConnectionManager:
         final_response = ''.join(complete_response)
         if final_response:
             self.append_to_history(client_id, "assistant", final_response)
-            await self.send_message(final_response, client_id, is_chunk=False, ga_session_id=ga_session_id)
+
+        # Completion frame: the client already has the full streamed text,
+        # so don't re-send it (empty message means "use accumulated chunks").
+        # Always send it so the client can clear its loading state.
+        await self.send_message("", client_id, is_chunk=False)
+
+        if final_response and ga_session_id:
+            await supabase.store_chat_message(
+                google_analytics_session_id=ga_session_id,
+                message_type='received',
+                message_detail=final_response
+            )
 
 
 manager = ConnectionManager()
@@ -199,6 +225,22 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             return
 
         if data.get("type") != "message" or not data.get("content"):
+            return
+
+        if len(data["content"]) > MAX_USER_MESSAGE_CHARS:
+            await manager.send_message(
+                "That message is a bit long for me — could you shorten it and try again?",
+                client_id,
+                is_chunk=False
+            )
+            return
+
+        if manager.is_rate_limited(client_id):
+            await manager.send_message(
+                "You're sending messages very quickly — please wait a moment and try again.",
+                client_id,
+                is_chunk=False
+            )
             return
 
         # Store user message in Supabase

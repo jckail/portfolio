@@ -3,6 +3,7 @@ from typing import Optional, List, Dict, Any
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 from ..middleware.auth_middleware import verify_admin_token
+import asyncio
 import os
 from datetime import datetime, timezone
 import ipaddress
@@ -13,23 +14,19 @@ router = APIRouter()
 logger = setup_logging()
 
 def is_local_dev_environment(request: Request) -> bool:
-    """Check if the request is coming from localhost/local network AND port 5173"""
+    """Allow the admin-auth bypass only when the server itself is explicitly
+    running in dev mode AND the request comes from a loopback address.
+
+    The Origin header is client-controlled and must never be used as a
+    security signal on its own.
+    """
+    if os.getenv("DEV_MODE", "").lower() not in ("1", "true", "yes"):
+        return False
+
     client_host = request.client.host
-    origin = request.headers.get('origin', '')
-    
     try:
-        # Check if it's a local IP
         ip = ipaddress.ip_address(client_host)
-        is_local = (
-            ip.is_loopback or  # localhost
-            ip.is_private or   # local network
-            str(ip) == '::1'   # IPv6 localhost
-        )
-        
-        # Check if it's coming from port 5173
-        is_dev_port = ':5173' in origin
-        
-        return is_local and is_dev_port
+        return ip.is_loopback
     except ValueError:
         return False
 
@@ -88,9 +85,9 @@ async def store_telemetry(request: Request):
         # Get Supabase client
         supabase = SupabaseClient()
         
-        # Store telemetry data in Supabase
+        # Store telemetry data in Supabase (off the event loop; the SDK is sync)
         try:
-            result = supabase.get_admin_client().table('telemetry').insert({
+            entry = {
                 'timestamp': timestamp.isoformat(),
                 'session_uuid': str(uuid_obj),
                 'browser_info': telemetry_data.get('browserInfo', {}),
@@ -98,7 +95,10 @@ async def store_telemetry(request: Request):
                 'device_info': telemetry_data.get('deviceInfo', {}),
                 'feature_support': telemetry_data.get('featureSupport', {}),
                 'ip_address': request.client.host
-            }).execute()
+            }
+            result = await asyncio.to_thread(
+                lambda: supabase.get_admin_client().table('telemetry').insert(entry).execute()
+            )
             
             return {"status": "success", "message": "Telemetry data stored successfully"}
             
@@ -132,23 +132,23 @@ async def get_logs(request: Request, session_uuid: str = None):
         query = supabase.get_admin_client().table('logs').select('*')
         
         # Handle multiple session UUIDs
+        session_uuids = []
         if session_uuid:
-            session_uuids = [uuid.strip() for uuid in session_uuid.split(',')]
-            if len(session_uuids) > 0:
+            session_uuids = [sid.strip() for sid in session_uuid.split(',') if sid.strip()]
+            if session_uuids:
                 query = query.in_('session_uuid', session_uuids)
         
         query = query.order('timestamp', desc=False)
         
-        result = query.execute()
+        result = await asyncio.to_thread(query.execute)
         if result.data:
             return {"logs": result.data}
             
         # Fall back to file system if no logs in Supabase
         logs = []
-        if session_uuid:
-            session_uuids = [uuid.strip() for uuid in session_uuid.split(',')]
-            for uuid in session_uuids:
-                log_file_path = get_log_file_path(uuid)
+        if session_uuids:
+            for sid in session_uuids:
+                log_file_path = get_log_file_path(sid)
                 if os.path.exists(log_file_path):
                     with open(log_file_path, "r", encoding='utf-8') as f:
                         file_logs = f.readlines()
@@ -235,30 +235,30 @@ async def store_log_message(message: str, session_uuid: str, client_ip: str):
         
         # Get Supabase client only when needed
         supabase = SupabaseClient()
-        
-        # Try to store in Supabase first
-        try:
-            await supabase.store_log(
-                level="INFO",
-                message=message,
-                session_uuid=session_uuid,
-                metadata={"raw_message": message},
-                source="frontend",
-                ip_address=client_ip
-            )
-        except Exception as e:
-            logger.error(f"Failed to store frontend log in Supabase: {str(e)}")
-            # If Supabase fails, fall back to file logging
+
+        # Try to store in Supabase first. store_log() swallows its own errors
+        # and returns None on failure, so check the result rather than
+        # relying on an exception that will never be raised.
+        result = await supabase.store_log(
+            level="INFO",
+            message=message,
+            session_uuid=session_uuid,
+            metadata={"raw_message": message},
+            source="frontend",
+            ip_address=client_ip
+        )
+        if result is None:
+            logger.error("Failed to store frontend log in Supabase; using file fallback")
             log_file_path = get_log_file_path(session_uuid)
-            
+
             # Ensure message ends with newline
             if not message.endswith('\n'):
                 message += '\n'
-                
+
             # Append message to log file
             with open(log_file_path, "a", encoding='utf-8') as f:
                 f.write(message)
-        
+
         return {"status": "success", "message": "Log written successfully"}
     except Exception as e:
         logger.error(f"Error storing log message: {str(e)}")
