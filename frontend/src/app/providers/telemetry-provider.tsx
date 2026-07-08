@@ -21,7 +21,9 @@ export function TelemetryProvider({ children }: TelemetryProviderProps) {
       const collectBasicInfo = () => {
         const userAgent = window.navigator.userAgent;
         const screenSize = `${window.innerWidth}x${window.innerHeight}`;
-        const connection = (navigator as any).connection?.effectiveType || 'unknown';
+        const connection =
+          (navigator as { connection?: { effectiveType?: string } }).connection
+            ?.effectiveType || 'unknown';
         
         const basicInfoLog: TelemetryLog = {
           id: crypto.randomUUID(),

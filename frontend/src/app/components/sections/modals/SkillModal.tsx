@@ -1,6 +1,7 @@
 import React from 'react';
 
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import '../../../../styles/components/modal.css';
 
 export interface Skill {
@@ -25,10 +26,23 @@ interface SkillModalProps {
 // display-name slug, which conflicted with useSkill's data key and broke
 // shared/bookmarked skill links.
 const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
+  useEscapeKey(onClose);
+
   return (
-    <div className="skill-modal-overlay" onClick={onClose}>
-      <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="skill-modal-overlay"
+      role="presentation"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="skill-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={skill.display_name}
+      >
+        <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="modal-header">
           <h5>{skill.display_name}</h5>
           <div className="modal-icon-wrapper">

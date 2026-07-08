@@ -1,7 +1,8 @@
-import React, { useRef, lazy, Suspense, memo } from 'react';
+import React, { lazy, Suspense, memo } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+import { buttonize } from '../../../shared/utils/a11y';
 import { useSkill } from './skills/hooks/useSkill';
 
 import type { Skill } from './modals/SkillModal';
@@ -38,10 +39,11 @@ const SkillItem = memo(({
   return (
     <div
       className="skill-item"
-      onClick={() => onSelect(skill.key)}
       onMouseEnter={handleMouseEnter}
       style={{ '--item-index': index } as React.CSSProperties}
       title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+      aria-label={`View ${skill.display_name} details`}
+      {...buttonize(() => onSelect(skill.key))}
     >
       <div className="skill-icon-container">
         <div className="icon-wrapper">

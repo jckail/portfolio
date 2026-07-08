@@ -1,6 +1,6 @@
 import type { ISourceOptions } from "@tsparticles/engine";
 
-import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
+import { PRIMARY } from '../../../config/constants';
 
 import type { Theme } from '../../../types/theme';
 

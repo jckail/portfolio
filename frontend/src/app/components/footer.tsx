@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { scrollToSection } from '../../shared/utils/scroll-utils';
+import { buttonize } from '../../shared/utils/a11y';
 import '../../styles/components/footer.css';
 
 interface FooterProps {
@@ -33,16 +34,10 @@ const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount, isPar
             OpenAPI Doc
           </a>
 
-          <span 
-            onClick={handleScrollToTop}
-            className="footer-link"
-          >
+          <span className="footer-link" {...buttonize(handleScrollToTop)}>
             Scroll to top
           </span>
-          <span 
-            onClick={onDoodleToggle}
-            className="footer-link-doodle"
-          >
+          <span className="footer-link-doodle" {...buttonize(onDoodleToggle)}>
             {getDoodleText()}
           </span>
         </div>

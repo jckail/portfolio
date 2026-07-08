@@ -1,7 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 
 import { Theme } from '../../../types/theme';
-import { Contact } from '../../../types/resume';
 import { SidePanel } from '../navigation';
 import { useData } from '../../../app/providers/data-provider';
 import {
@@ -16,9 +15,6 @@ import '../../../styles/components/header/header.css';
 interface HeaderProps {
   theme: Theme;
   toggleTheme: () => void;
-  handleResumeClick: () => void;
-  handleAdminClick: () => void;
-  isAdminLoggedIn: boolean;
   isToggleHidden: boolean;
 }
 
@@ -55,9 +51,6 @@ const HeaderSkeleton = () => (
 const Header: React.FC<HeaderProps> = memo(({
   theme,
   toggleTheme,
-  handleResumeClick,
-  handleAdminClick,
-  isAdminLoggedIn,
   isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);

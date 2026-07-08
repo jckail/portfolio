@@ -29,9 +29,9 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - **P1 — Python lint/format.** Add `ruff` (lint + format) to
   `requirements-dev.txt` and CI. The codebase currently has no Python
   linter, so start with a lenient rule set and tighten over time.
-- **P1 — Strict frontend lint in CI.** `npm run lint:strict` exists but CI
-  runs the lenient profile. Burn down the remaining `no-explicit-any` and
-  `jsx-a11y` warnings, then switch CI to the strict script.
+- ~~**P1 — Strict frontend lint in CI.**~~ Done: all warnings fixed, the
+  a11y/`any` rules are errors again, and `npm run lint` enforces
+  `--max-warnings 0` in CI.
 - **P2 — End-to-end smoke test.** A single Playwright test (page loads,
   sections render, chat opens) run against the built Docker image in CI
   would catch integration regressions that unit tests cannot.

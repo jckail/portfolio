@@ -2,6 +2,7 @@ import React, { lazy, Suspense, memo } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
+import { buttonize } from '../../../shared/utils/a11y';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
 
@@ -52,11 +53,12 @@ const ExperienceTimeline = memo(({
         <div key={key} className="timeline-item">
           <div className="timeline-header-wrapper">
             {item.logoPath && (
-              <div 
+              <div
                 className="logo-link"
-                onClick={() => onSelectExperience(key)}
+                aria-label={`View ${item.company} experience details`}
                 onMouseEnter={prefetchExperienceModal}
                 style={{ cursor: 'pointer' }}
+                {...buttonize(() => onSelectExperience(key))}
               >
                 <CompanyLogo 
                   name={item.logoPath || "github-logo.svg"}
@@ -79,14 +81,18 @@ const ExperienceTimeline = memo(({
             <div className="skill-tags">
               {item.tech_stack.map((tag: string, index: number) => {
                 const skillKey = findSkillKey(tag.replace(/-/g, ' '));
-                return (
-                  <span 
-                    key={index} 
+                return skillKey ? (
+                  <span
+                    key={index}
                     className="skill-tag"
-                    onClick={() => skillKey && onSelectSkill(skillKey)}
                     onMouseEnter={prefetchSkillModal}
-                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                    style={{ cursor: 'pointer' }}
+                    {...buttonize(() => onSelectSkill(skillKey))}
                   >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                ) : (
+                  <span key={index} className="skill-tag">
                     {tag.replace(/-/g, ' ')}
                   </span>
                 );

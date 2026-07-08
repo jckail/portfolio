@@ -89,7 +89,12 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div className={`side-panel-overlay ${isOpen ? 'active' : ''}`} onClick={onClose} />
+      {/* Backdrop: mouse-only dismiss affordance; keyboard users close via the nav buttons */}
+      <div
+        className={`side-panel-overlay ${isOpen ? 'active' : ''}`}
+        role="presentation"
+        onClick={onClose}
+      />
       <nav className={`side-panel ${isOpen ? 'open' : ''}`}>
         <div className="side-panel-content">
           {sections.map((section) => (

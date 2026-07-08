@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 
 interface ContactModalProps {
   email: string;
@@ -56,8 +57,10 @@ const ContactModal: React.FC<ContactModalProps> = ({
     };
   }, []);
 
+  useEscapeKey(onClose);
+
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
+    const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('contact')) {
         onClose();
@@ -112,9 +115,20 @@ const ContactModal: React.FC<ContactModalProps> = ({
   };
 
   return (
-    <div className="contact-modal-overlay" onClick={onClose}>
-      <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="contact-modal-overlay"
+      role="presentation"
+      onClick={(e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="contact-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Contact"
+      >
+      <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
 
         <div className="contact-modal-header">
 

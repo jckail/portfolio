@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+import { buttonize } from '../../../../shared/utils/a11y';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 
 import type { Skill } from './SkillModal';
 import '../../../../styles/components/modal.css';
@@ -31,9 +33,11 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   onClose,
   onSelectSkill 
 }) => {
+  useEscapeKey(onClose);
+
   useEffect(() => {
     // Handle browser back button
-    const handlePopState = (event: PopStateEvent) => {
+    const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       if (!params.has('company')) {
         onClose();
@@ -52,9 +56,20 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   };
 
   return (
-    <div className="experience-modal-overlay" onClick={onClose}>
-      <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="experience-modal-overlay"
+      role="presentation"
+      onClick={(e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="experience-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${experience.company} experience details`}
+      >
+        <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="experience-modal-wrapper"></div>
         <div className="experience-modal-timeline-header-wrapper">
           {experience.logoPath && (
@@ -90,13 +105,17 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             <div className="skill-tags">
               {experience.tech_stack.map((tag: string, index: number) => {
                 const skillKey = findSkillKey(tag.replace(/-/g, ' '));
-                return (
-                  <span 
-                    key={index} 
+                return skillKey ? (
+                  <span
+                    key={index}
                     className="skill-tag"
-                    onClick={() => skillKey && onSelectSkill(skillKey)}
-                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                    style={{ cursor: 'pointer' }}
+                    {...buttonize(() => onSelectSkill(skillKey))}
                   >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                ) : (
+                  <span key={index} className="skill-tag">
                     {tag.replace(/-/g, ' ')}
                   </span>
                 );

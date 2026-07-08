@@ -1,16 +1,18 @@
+type GtagParams = Record<string, unknown>;
+
 declare global {
   interface Window {
     gtag: (
       command: string,
       action: string,
-      params?: Record<string, any>
+      params?: GtagParams
     ) => void;
-    dataLayer: any[];
+    dataLayer: unknown[];
   }
 }
 
 const DEBUG = import.meta.env.DEV;
-const debugLog = (message: string, data?: any) => {
+const debugLog = (message: string, data?: unknown) => {
   if (DEBUG) {
     console.log(`[Analytics] ${message}`, data ? JSON.stringify(data) : '');
   }
@@ -64,7 +66,7 @@ export const getSessionId = (): string => {
 const safeGtagCall = (
   command: string,
   action: string,
-  params?: Record<string, any>
+  params?: GtagParams
 ): void => {
   try {
     if (!isGtagLoaded()) {

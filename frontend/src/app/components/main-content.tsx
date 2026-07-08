@@ -6,7 +6,6 @@ import TLDR from './sections/about';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
 import { useAppLogic } from '../providers/app-logic-provider';
-import { useAdminStore } from '../../shared/stores/admin-store';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { useThemeStore } from '../../shared/stores/theme-store';
@@ -104,12 +103,9 @@ const MainContentInner: React.FC<MainContentProps> = () => {
   useScrollSpy();
   const { theme, toggleTheme, isToggleHidden } = useAppLogic();
   const setTheme = useThemeStore(state => state.setTheme);
-  const { isLoggedIn: isAdminLoggedIn } = useAdminStore();
-  const [contentLoaded, setContentLoaded] = useState(false);
   const [showDoodle, setShowDoodle] = useState(false);
   const [doodleClickCount, setDoodleClickCount] = useState(0);
   const isPartyMode = theme === 'party';
-  const location = useLocation();
 
   // Handle initial hash navigation
   useEffect(() => {
@@ -121,10 +117,7 @@ const MainContentInner: React.FC<MainContentProps> = () => {
       setDoodleClickCount(1);
     }
 
-    // Set a flag when the component mounts
     const timer = setTimeout(() => {
-      setContentLoaded(true);
-      
       // Handle scrolling to section after content is loaded
       if (hash && hash !== '#doodle') {
         const sectionId = hash.substring(1);
@@ -137,17 +130,6 @@ const MainContentInner: React.FC<MainContentProps> = () => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const handleResumeClick = () => {
-    const resumeSection = document.getElementById('resume');
-    if (resumeSection) {
-      resumeSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleAdminClick = () => {
-    console.log('Admin click');
-  };
 
   const handleDoodleToggle = () => {
     if (isPartyMode) {
@@ -178,9 +160,6 @@ const MainContentInner: React.FC<MainContentProps> = () => {
       <Header 
         theme={theme}
         toggleTheme={toggleTheme}
-        handleResumeClick={handleResumeClick}
-        handleAdminClick={handleAdminClick}
-        isAdminLoggedIn={isAdminLoggedIn}
         isToggleHidden={isToggleHidden}
       />
       <main>

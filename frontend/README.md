@@ -69,7 +69,6 @@ npm run preview      # preview the production build
 npm test             # run unit tests once (CI mode)
 npm run test:watch   # watch mode
 npm run lint         # ESLint (errors block; warnings allowed)
-npm run lint:strict  # ESLint with --max-warnings 0
 npm run type-check   # tsc --noEmit
 npm run format       # Prettier
 ```

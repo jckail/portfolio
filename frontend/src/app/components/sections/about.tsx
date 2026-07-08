@@ -1,14 +1,13 @@
-import React, { useEffect, memo, useState, lazy, Suspense } from 'react';
+import React, { memo, lazy, Suspense } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
+import { buttonize } from '../../../shared/utils/a11y';
 import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
-// import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { useContact } from './about/hooks/useContact';
 
-const SkillModal = lazy(() => import('./modals/SkillModal'));
 const ContactModal = lazy(() => import('./modals/ContactModal'));
 
 const LoadingSpinner = () => (
@@ -21,7 +20,6 @@ const TLDRContent = memo(({
   aboutMeData, 
   contactData, 
   onResumeClick,
-  // skillsData,
   onContactSelect
 }: { 
   aboutMeData: {
@@ -40,14 +38,9 @@ const TLDRContent = memo(({
     country: string;
   };
   onResumeClick: () => void;
-  skillsData: any;
   onContactSelect: () => void;
 }) => {
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-
-  const handleAIClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAIClick = () => {
     // Find and click the chat button
     const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
     if (chatButton) {
@@ -83,17 +76,8 @@ const TLDRContent = memo(({
             onContactSelect={onContactSelect}
           />
         </ErrorBoundary>
-        <p>Ask my <span className="ai-highlight" onClick={handleAIClick} style={{ cursor: 'pointer' }}>AI Assistant 🤖</span> below for more details about me.</p>
+        <p>Ask my <span className="ai-highlight" style={{ cursor: 'pointer' }} {...buttonize(handleAIClick)}>AI Assistant 🤖</span> below for more details about me.</p>
       </div>
-
-      {/* {selectedSkill && skillsData && skillsData[selectedSkill] && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )} */}
     </div>
   );
 });
@@ -127,7 +111,6 @@ const TLDR: React.FC = () => {
           <TLDRContent
             aboutMeData={aboutMeData}
             contactData={contactData}
-            skillsData={skillsData}
             onResumeClick={handleResumeClick}
             onContactSelect={() => setSelectedContact(true)}
           />

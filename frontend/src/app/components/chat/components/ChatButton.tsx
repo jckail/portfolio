@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Fab } from '@mui/material';
-import {useMediaQuery,useTheme } from '@mui/material';
+import React from 'react';
+import { Box, Fab, useMediaQuery, useTheme } from '@mui/material';
 
 interface ChatButtonProps {
   onClick: (e: React.MouseEvent) => void;
@@ -9,17 +8,6 @@ interface ChatButtonProps {
 export const ChatButton: React.FC<ChatButtonProps> = ({ onClick }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <Box
