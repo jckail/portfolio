@@ -9,6 +9,7 @@ import { useAppLogic } from '../providers/app-logic-provider';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { useThemeStore } from '../../shared/stores/theme-store';
+import { LoadingSpinner } from '../../shared/components/loading-spinner';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
@@ -68,11 +69,7 @@ const AdminLogin = React.lazy(() =>
 );
 
 // Loading fallback component
-const LoadingFallback = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
+const LoadingFallback = LoadingSpinner;
 
 // Separate Admin components to reduce main content complexity
 const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void }> = ({ 

@@ -2,13 +2,8 @@ import React, { memo } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import '../../../styles/components/sections/projects.css';
-
-const LoadingSpinner = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
 
 const ProjectCard = memo(({ 
   project, 

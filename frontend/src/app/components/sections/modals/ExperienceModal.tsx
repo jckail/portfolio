@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../../shared/utils/a11y';
+import { findSkillKey } from '../../../../shared/utils/skills';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 
 import type { Skill } from './SkillModal';
@@ -33,27 +34,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   onClose,
   onSelectSkill 
 }) => {
+  // URL sync (?company= and back-button behavior) is owned by useExperience.
   useEscapeKey(onClose);
-
-  useEffect(() => {
-    // Handle browser back button
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('company')) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
-
-  // Function to find skill key by display name
-  const findSkillKey = (tagName: string): string | undefined => {
-    return Object.entries(skillsData).find(
-      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
-    )?.[0];
-  };
 
   return (
     <div
@@ -104,7 +86,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             <h4>Tech Stack:</h4>
             <div className="skill-tags">
               {experience.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
+                const skillKey = findSkillKey(skillsData, tag);
                 return skillKey ? (
                   <span
                     key={index}

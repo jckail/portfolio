@@ -3,6 +3,8 @@ import React, { lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { findSkillKey } from '../../../shared/utils/skills';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
 
@@ -23,12 +25,6 @@ const prefetchSkillModal = () => {
   return modalPromise;
 };
 
-const LoadingSpinner = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
-
 const ExperienceTimeline = memo(({ 
   experience, 
   skillsData,
@@ -40,13 +36,6 @@ const ExperienceTimeline = memo(({
   onSelectExperience: (key: string) => void;
   onSelectSkill: (skillName: string) => void;
 }) => {
-  // Function to find skill key by display name
-  const findSkillKey = (tagName: string): string | undefined => {
-    return Object.entries(skillsData).find(
-      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
-    )?.[0];
-  };
-
   return (
     <div className="timeline">
       {Object.entries(experience).map(([key, item]) => (
@@ -80,7 +69,7 @@ const ExperienceTimeline = memo(({
           <div className="experience-highlights">
             <div className="skill-tags">
               {item.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
+                const skillKey = findSkillKey(skillsData, tag);
                 return skillKey ? (
                   <span
                     key={index}
@@ -141,22 +130,8 @@ const Experience: React.FC = () => {
   };
 
   const handleSelectExperience = (key: string) => {
-    // Get the URL-friendly slug for this experience
-    const slug = keyCompanyMap[key] || key;
-    
-    // Update the URL with the company parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('company', slug);
-    
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
-    window.history.pushState({}, '', finalUrl);
-    
-    // Update the state
-    setSelectedExperience(slug);
+    // useExperience mirrors this state into the ?company= URL parameter
+    setSelectedExperience(keyCompanyMap[key] || key);
   };
 
   if (error) return <div>Error: {error}</div>;

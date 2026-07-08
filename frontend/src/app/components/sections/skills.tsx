@@ -3,6 +3,7 @@ import React, { lazy, Suspense, memo } from 'react';
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { buttonize } from '../../../shared/utils/a11y';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useSkill } from './skills/hooks/useSkill';
 
 import type { Skill } from './modals/SkillModal';
@@ -15,12 +16,6 @@ const prefetchModal = () => {
   const modalPromise = import('./modals/SkillModal');
   return modalPromise;
 };
-
-const LoadingSpinner = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
 
 const SkillItem = memo(({ 
   skill, 

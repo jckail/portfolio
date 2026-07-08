@@ -2,6 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 
 import { Theme } from '../../../types/theme';
 import { SidePanel } from '../navigation';
+import { getQueryParam, setQueryParam } from '../../utils/url-params';
 import { useData } from '../../../app/providers/data-provider';
 import {
   MoonIcon,
@@ -57,21 +58,11 @@ const Header: React.FC<HeaderProps> = memo(({
   const { contactData, isLoading, error } = useData();
 
   const updateURL = (isOpen: boolean) => {
-    const url = new URL(window.location.href);
-    if (isOpen) {
-      url.searchParams.set('sidepanel', 'open');
-    } else {
-      url.searchParams.delete('sidepanel');
-    }
-    window.history.replaceState({}, '', url.toString());
+    setQueryParam('sidepanel', isOpen ? 'open' : null, { replace: true });
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sidePanelState = params.get('sidepanel');
-    const shouldBeOpen = sidePanelState === 'open';
-    
-    setIsSidePanelOpen(shouldBeOpen);
+    setIsSidePanelOpen(getQueryParam('sidepanel') === 'open');
   }, []);
 
   const toggleSidePanel = () => {

@@ -7,14 +7,9 @@ import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { useContact } from './about/hooks/useContact';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 
 const ContactModal = lazy(() => import('./modals/ContactModal'));
-
-const LoadingSpinner = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
 
 const TLDRContent = memo(({ 
   aboutMeData, 

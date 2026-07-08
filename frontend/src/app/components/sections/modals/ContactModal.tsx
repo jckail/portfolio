@@ -29,48 +29,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // URL sync (?contact=open and back-button behavior) is owned entirely by
+  // the useContact hook; this modal only reports analytics.
   useEffect(() => {
-    // Track modal open
     trackContactOpened();
-
-    // Update URL with contact parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('contact', 'open');
-
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-
-    window.history.pushState({ contactModal: true }, '', finalUrl);
-
-    return () => {
-      // Remove contact parameter when modal closes
-      const closeUrl = new URL(window.location.href);
-      closeUrl.searchParams.delete('contact');
-
-      // Preserve the hash if it exists
-      const closeHash = window.location.hash;
-      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
-      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-
-      window.history.pushState({ contactModal: false }, '', closeFinalUrl);
-    };
   }, []);
 
   useEscapeKey(onClose);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('contact')) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

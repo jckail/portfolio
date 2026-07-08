@@ -2,13 +2,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 
 import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
+import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 
 export const useChat = () => {
-  const [open, setOpen] = useState(() => {
-    // Initialize state based on URL parameter
-    const params = new URLSearchParams(window.location.search);
-    return params.get('ai_chat') === 'open';
-  });
+  const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { type: 'agent', text: 'Welcome! \n I\'m Jordan\'s AI assistant, ask me a question: \n• Explain Jordan\'s professional experience at Meta, Deloitte, or other companies? \n• Explain Jordan\'s github projects?\n • What are Jordan\'s top skills?' }
@@ -23,8 +20,7 @@ export const useChat = () => {
   // Listen for URL parameter changes
   useEffect(() => {
     const handleUrlChange = () => {
-      const params = new URLSearchParams(window.location.search);
-      const shouldBeOpen = params.get('ai_chat') === 'open';
+      const shouldBeOpen = getQueryParam('ai_chat') === 'open';
       setOpen(prev => (shouldBeOpen !== prev ? shouldBeOpen : prev));
     };
 
@@ -213,24 +209,9 @@ export const useChat = () => {
 
   // Update URL when modal state changes
   useEffect(() => {
-    const currentUrl = new URL(window.location.href);
-    const isOpenInUrl = currentUrl.searchParams.get('ai_chat') === 'open';
+    const isOpenInUrl = getQueryParam('ai_chat') === 'open';
     if (isOpenInUrl === open) return;
-
-    if (open) {
-      currentUrl.searchParams.set('ai_chat', 'open');
-    } else {
-      currentUrl.searchParams.delete('ai_chat');
-    }
-
-    // Remove the hash from the URL object
-    const hash = window.location.hash;
-    const urlWithoutHash = currentUrl.toString().split('#')[0];
-
-    // Construct the final URL with at most one hash
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-
-    window.history.pushState({}, '', finalUrl);
+    setQueryParam('ai_chat', open ? 'open' : null);
   }, [open]);
 
   // Initialize chat when open changes
