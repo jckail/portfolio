@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
+import { getJson, endpoints } from '../../../shared/utils/api';
 import Chat from './chat';
 import { useChat } from './hooks/useChat';
 
@@ -15,10 +16,9 @@ const ChatPortal: React.FC = () => {
   const [available, setAvailable] = useState(true);
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/chat/status')
-      .then(response => (response.ok ? response.json() : null))
-      .then((data: { available?: boolean } | null) => {
-        if (!cancelled && data && data.available === false) {
+    getJson<{ available?: boolean }>(endpoints.chatStatus)
+      .then(data => {
+        if (!cancelled && data.available === false) {
           setAvailable(false);
         }
       })

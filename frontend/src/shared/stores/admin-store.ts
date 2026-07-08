@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 
 import { AdminState, AdminCredentials } from '../../types/admin';
-import { API_CONFIG } from '../../config/constants';
+import { postJson, getJson, endpoints } from '../utils/api';
 
 interface AdminStore extends AdminState {
   login: (credentials: AdminCredentials) => Promise<boolean>;
   logout: () => Promise<void>;
   verifyToken: (token: string) => Promise<boolean>;
 }
+
+const bearer = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 export const useAdminStore = create<AdminStore>((set) => ({
   isLoggedIn: false,
@@ -18,19 +20,10 @@ export const useAdminStore = create<AdminStore>((set) => ({
   login: async (credentials: AdminCredentials) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.admin.login}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'Login failed');
-      }
+      const data = await postJson<{ access_token?: string }>(
+        endpoints.admin.login,
+        credentials
+      );
 
       const token = data.access_token;
       if (!token) {
@@ -55,11 +48,8 @@ export const useAdminStore = create<AdminStore>((set) => ({
     const token = localStorage.getItem('adminToken');
     try {
       if (token) {
-        await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.admin.logout}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        await postJson(endpoints.admin.logout, undefined, {
+          headers: bearer(token),
         });
       }
     } catch (err) {
@@ -72,17 +62,7 @@ export const useAdminStore = create<AdminStore>((set) => ({
 
   verifyToken: async (token: string) => {
     try {
-      const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.admin.verify}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Token verification failed');
-      }
-
+      await getJson(endpoints.admin.verify, { headers: bearer(token) });
       set({ isLoggedIn: true, token });
       return true;
     } catch (err) {

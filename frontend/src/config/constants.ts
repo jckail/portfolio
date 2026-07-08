@@ -1,18 +1,4 @@
-// API Configuration
-export const API_CONFIG = {
-    baseUrl: window.location.origin,
-    endpoints: {
-        admin: {
-            login: '/api/admin/login',
-            verify: '/api/admin/verify',
-            logout: '/api/admin/logout',
-            logs: '/api/admin/logs',
-            skills: '/api/skills'
-
-        },
-        telemetry: '/api/telemetry'
-    }
-} as const;
+// API endpoint paths live in shared/utils/api/endpoints.ts
 
 // Define primary colors
 export const PRIMARY = "#0403ff";

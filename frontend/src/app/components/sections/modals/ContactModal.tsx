@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { postJson, endpoints } from '../../../../shared/utils/api';
 
 interface ContactModalProps {
   email: string;
@@ -85,18 +86,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setError(null);
 
     try {
-      const response = await fetch('/api/contact/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to send email');
-      }
+      await postJson(endpoints.sendEmail, formData);
 
       // Track successful message submission
       trackContactMessage(formData.message.length);

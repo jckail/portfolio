@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { getJson, endpoints } from '../../shared/utils/api';
+
 interface ResumeContextType {
   error: string | null;
   isLoading: boolean;
@@ -31,14 +33,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const fetchResumeFileName = async () => {
     try {
-      console.log('Fetching resume filename...');
-      const response = await fetch('/api/resume_file_name');
-      console.log('Resume filename response:', response);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch resume filename: ${response.statusText}`);
-      }
-      const data = await response.json();
-      console.log('Resume filename data:', data);
+      const data = await getJson<{ resumeFileName: string }>(endpoints.resumeFileName);
       setResumeFileName(data.resumeFileName);
       setIsLoading(false);
     } catch (err) {
@@ -59,15 +54,14 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     try {
       setError(null);
-      console.log('Fetching resume PDF...');
-      const response = await fetch('/api/resume?download=true', {
+      // Binary download: uses raw fetch because the payload is a PDF blob
+      const response = await fetch(endpoints.resumeDownload, {
         method: 'GET',
         headers: {
           'Accept': 'application/pdf',
         },
       });
 
-      console.log('Resume PDF response:', response);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to download resume: ${errorText}`);
