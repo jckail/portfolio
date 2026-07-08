@@ -41,7 +41,7 @@ echo "Starting development environment..."
 echo "Checking environment variables..."
 
 # List of required environment variables
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE ANTHROPIC_API_KEY SENDGRID_API_KEY"
 
 # Check each required variable
 for var in \$required_vars; do

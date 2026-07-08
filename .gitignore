@@ -53,6 +53,15 @@ samplefrontend/node_modules/*
 .env.*
 .venv/
 
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfvars
+!infra/terraform.tfvars.example
+infra/crash.log
+
 # Editor/IDE
 .vscode/
 .idea/

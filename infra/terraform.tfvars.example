@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars (git-ignored) and fill in real values,
+# or provide them via TF_VAR_* environment variables in CI.
+
+project_id          = "portfolio-383615"
+region              = "us-central1"
+service_name        = "quickresume"
+artifact_repository = "portfolio"
+image_tag           = "latest" # usually the git commit SHA
+
+admin_email     = "admin@example.com"
+resume_file     = "JordanKailResume.pdf"
+allowed_origins = "https://www.jckail.com"
+production_url  = "https://www.jckail.com"
+
+secrets = {
+  supabase_url          = "https://YOUR-PROJECT.supabase.co"
+  supabase_anon_key     = "..."
+  supabase_service_role = "..."
+  anthropic_api_key     = "sk-ant-..."
+  sendgrid_api_key      = "SG...."
+}
