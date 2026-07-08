@@ -17,8 +17,21 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Initialize router
+# Initialize routers: `router` carries the WebSocket (mounted under /ws),
+# `status_router` exposes REST status (mounted under /api).
 router = APIRouter()
+status_router = APIRouter(prefix="/chat")
+
+
+@status_router.get("/status")
+async def chat_status():
+    """Report whether the AI assistant is available.
+
+    The frontend hides the chat button when the assistant cannot work
+    (e.g. no Anthropic API key configured) instead of letting visitors
+    discover the failure through unanswered messages.
+    """
+    return {"available": bool(os.getenv("ANTHROPIC_API_KEY"))}
 
 # Claude Haiku 4.5: fastest model with near-frontier intelligence.
 # Can be overridden without a code change via the CHAT_MODEL env var.

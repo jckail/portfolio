@@ -12,7 +12,7 @@ from .project_routes import router as project_router
 from .contact_routes import router as contact_router
 from .aboutme_routes import router as aboutme_router
 from .zuni_routes import router as zuni_router
-from .chat_routes import router as chat_router
+from .chat_routes import router as chat_router, status_router as chat_status_router
 
 # Create api router
 api_router = APIRouter(prefix="/api")
@@ -30,6 +30,7 @@ api_router.include_router(project_router, tags=["projects"])  # Project routes
 api_router.include_router(contact_router, tags=["contact"])  # Contact routes
 api_router.include_router(aboutme_router, tags=["aboutme"])  # About me routes
 api_router.include_router(zuni_router, tags=["zuni"])  # About me routes
+api_router.include_router(chat_status_router, tags=["chat"])  # Chat availability
 
 
 # admin is special
