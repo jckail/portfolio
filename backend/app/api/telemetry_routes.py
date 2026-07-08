@@ -4,7 +4,7 @@ from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 from ..middleware.auth_middleware import verify_admin_token
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import ipaddress
 import json
 import uuid
@@ -46,7 +46,7 @@ async def verify_access(request: Request):
 
 def get_log_file_path(session_uuid=None):
     """Get the current log file path based on timestamp and session UUID"""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     base_log_dir = os.path.join(os.path.dirname(__file__), "../logs")
     frontend_log_dir = os.path.join(base_log_dir, "frontend", now.strftime('%Y_%m_%d'))
     
@@ -230,7 +230,7 @@ async def store_log_message(message: str, session_uuid: str, client_ip: str):
     try:
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
-            timestamp = datetime.utcnow().isoformat() + 'Z'
+            timestamp = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
             message = f'[{timestamp}] {message}'
         
         # Get Supabase client only when needed

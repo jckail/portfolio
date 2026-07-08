@@ -1,7 +1,8 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from .api import api_router, ws_router
 from .utils.logger import setup_logging
 from .models.data_loader import load_all
@@ -41,11 +42,44 @@ if missing_vars:
 
 logger.info("All required environment variables are present")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application startup and shutdown."""
+    logger.info("Starting up the application...")
+    try:
+        # Initialize critical components first
+        await initialize_supabase()
+
+        # Load data and initialize static files concurrently
+        await asyncio.gather(
+            preload_data(),
+            initialize_static_files(),
+            return_exceptions=True
+        )
+
+        # Ensure logs directory exists
+        logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+        os.makedirs(logs_dir, exist_ok=True)
+
+        # Log the port we're trying to use
+        port = os.getenv('PORT', '8080')
+        logger.info(f"Configured to run on port: {port}")
+
+    except Exception as e:
+        logger.error(f"Startup error: {str(e)}")
+        raise
+
+    yield
+
+    logger.info("Shutting down the application...")
+
+
 # Initialize FastAPI
 app = FastAPI(
     title="jordan-kail.com API",
     description="API for the Jordan-Kail.com application",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -114,34 +148,3 @@ async def initialize_static_files():
         logger.error(f"Error mounting static files: {str(e)}")
         raise
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize any necessary services on startup"""
-    logger.info("Starting up the application...")
-    try:
-        # Initialize critical components first
-        await initialize_supabase()
-        
-        # Load data and initialize static files concurrently
-        await asyncio.gather(
-            preload_data(),
-            initialize_static_files(),
-            return_exceptions=True
-        )
-        
-        # Ensure logs directory exists
-        logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
-        os.makedirs(logs_dir, exist_ok=True)
-        
-        # Log the port we're trying to use
-        port = os.getenv('PORT', '8080')
-        logger.info(f"Configured to run on port: {port}")
-        
-    except Exception as e:
-        logger.error(f"Startup error: {str(e)}")
-        raise
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up any resources on shutdown"""
-    logger.info("Shutting down the application...")

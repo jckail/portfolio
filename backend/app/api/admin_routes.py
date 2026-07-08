@@ -4,7 +4,7 @@ from backend.app.utils.supabase_client import SupabaseClient
 from backend.app.middleware.auth_middleware import verify_admin_token
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -78,7 +78,7 @@ async def get_analytics(user = Depends(verify_admin_token)):
             "uniqueVisitors": 0,
             "averageTimeOnSite": "0:00",
             "topReferrers": [],
-            "lastUpdated": datetime.utcnow().isoformat()
+            "lastUpdated": datetime.now(timezone.utc).isoformat()
         }
         return analytics
     except Exception as e:
@@ -109,7 +109,7 @@ async def get_admin_health(user = Depends(verify_admin_token)):
     try:
         health_info = {
             "status": "healthy",
-            "lastChecked": datetime.utcnow().isoformat(),
+            "lastChecked": datetime.now(timezone.utc).isoformat(),
             "diskSpace": "N/A",
             "memoryUsage": "N/A",
             "activeUsers": 0

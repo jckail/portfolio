@@ -3,7 +3,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -113,7 +113,7 @@ class SupabaseClient:
         try:
             admin_client = cls.get_admin_client()
             log_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(timezone.utc).isoformat(),
                 'level': level.upper(),
                 'message': message,
                 'session_uuid': session_uuid,
@@ -137,7 +137,7 @@ class SupabaseClient:
             
             for log in logs:
                 log_entry = {
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
                     'level': log['level'].upper(),
                     'message': log['message'],
                     'metadata': log['metadata'],
@@ -160,7 +160,7 @@ class SupabaseClient:
         try:
             admin_client = cls.get_admin_client()
             message_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(timezone.utc).isoformat(),
                 'google_analytics_session_id': google_analytics_session_id,
                 'type': message_type,  # 'sent' or 'received'
                 'message_detail': message_detail
