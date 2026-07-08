@@ -3,7 +3,7 @@ import copy
 import json
 from types import SimpleNamespace
 
-from backend.app.api import chat_routes
+from backend.app.services import chat_service
 
 
 class FakeStream:
@@ -56,7 +56,7 @@ def test_chat_status_reports_available(client):
 
 def test_websocket_streams_chunks_then_completion_frame(client, monkeypatch):
     fake_client, messages = make_fake_anthropic(["Hello", " from", " Claude"])
-    monkeypatch.setattr(chat_routes.manager, "client", fake_client)
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
 
     with client.websocket_connect("/ws/ws-test-stream") as ws:
         ws.send_text(json.dumps({
@@ -87,7 +87,7 @@ def test_websocket_streams_chunks_then_completion_frame(client, monkeypatch):
 
 def test_websocket_keeps_conversation_history(client, monkeypatch):
     fake_client, messages = make_fake_anthropic(["Answer"])
-    monkeypatch.setattr(chat_routes.manager, "client", fake_client)
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
 
     with client.websocket_connect("/ws/ws-test-history") as ws:
         for text in ("First question", "Second question"):
@@ -106,9 +106,9 @@ def test_websocket_keeps_conversation_history(client, monkeypatch):
 
 def test_websocket_rejects_oversized_message(client, monkeypatch):
     fake_client, messages = make_fake_anthropic(["should not be called"])
-    monkeypatch.setattr(chat_routes.manager, "client", fake_client)
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
 
-    huge = "x" * (chat_routes.MAX_USER_MESSAGE_CHARS + 1)
+    huge = "x" * (chat_service.MAX_USER_MESSAGE_CHARS + 1)
     with client.websocket_connect("/ws/ws-test-toolong") as ws:
         ws.send_text(json.dumps({"type": "message", "content": huge}))
         frame = ws.receive_json()
@@ -120,10 +120,10 @@ def test_websocket_rejects_oversized_message(client, monkeypatch):
 
 def test_websocket_rate_limits_rapid_messages(client, monkeypatch):
     fake_client, _ = make_fake_anthropic(["ok"])
-    monkeypatch.setattr(chat_routes.manager, "client", fake_client)
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
 
     with client.websocket_connect("/ws/ws-test-ratelimit") as ws:
-        for _ in range(chat_routes.RATE_LIMIT_MAX_MESSAGES):
+        for _ in range(chat_service.RATE_LIMIT_MAX_MESSAGES):
             ws.send_text(json.dumps({"type": "message", "content": "hi"}))
             while True:
                 if not ws.receive_json()["is_chunk"]:
@@ -142,7 +142,7 @@ def test_websocket_recovers_from_anthropic_error(client, monkeypatch):
             raise RuntimeError("api down")
 
     monkeypatch.setattr(
-        chat_routes.manager, "client", SimpleNamespace(messages=BrokenMessages())
+        chat_service.manager, "client", SimpleNamespace(messages=BrokenMessages())
     )
 
     with client.websocket_connect("/ws/ws-test-error") as ws:
@@ -152,4 +152,4 @@ def test_websocket_recovers_from_anthropic_error(client, monkeypatch):
     assert frame["is_chunk"] is False
     assert "problem" in frame["message"].lower() or "apologize" in frame["message"].lower()
     # The failed user turn was rolled back so a retry starts clean
-    assert chat_routes.manager.get_history("ws-test-error") == []
+    assert chat_service.manager.get_history("ws-test-error") == []

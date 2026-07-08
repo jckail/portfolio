@@ -108,7 +108,9 @@ GET /api/zuni                       # Random image endpoint
 ```
 backend/
 ├── app/
-│   ├── api/            # Route modules (one per feature)
+│   ├── api/            # Route modules (thin: parse/validate + delegate)
+│   ├── services/       # Business logic (chat_service: Claude streaming,
+│   │                   #   history, rate limits, prompt caching)
 │   ├── config.py       # Centralized typed settings (all env access lives here)
 │   ├── middleware/     # Auth dependency (Supabase token verification)
 │   ├── models/         # Pydantic models + JSON data loaders (cached)

@@ -1,7 +1,7 @@
 """Unit tests for the chat ConnectionManager (no network calls)."""
 import json
 
-from backend.app.api.chat_routes import (
+from backend.app.services.chat_service import (
     MAX_HISTORY_MESSAGES,
     MAX_PAGE_CONTEXT_CHARS,
     RATE_LIMIT_MAX_MESSAGES,
