@@ -1,17 +1,18 @@
+import asyncio
+import os
+import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
+
 from .api import api_router, ws_router
 from .config import get_settings, missing_required_vars
-from .utils.logger import setup_logging, get_supabase_handler
 from .models.data_loader import load_all
+from .utils.logger import get_supabase_handler, setup_logging
 from .utils.supabase_client import supabase
-import os
-import sys
-import asyncio
 
 # Configure logging
 logger = setup_logging()
@@ -150,7 +151,7 @@ async def initialize_static_files():
         # if not os.path.exists(images_dir):
         #     logger.warning(f"Images directory does not exist: {images_dir}")
         # app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
-        
+
         # Define the path to the assets directory
         assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
         if os.path.exists(assets_dir):

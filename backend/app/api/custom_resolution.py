@@ -1,9 +1,8 @@
 import html
 import re
 
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import HTMLResponse
-from typing import Optional, Tuple, Dict
 
 router = APIRouter()
 
@@ -11,7 +10,7 @@ router = APIRouter()
 _SAFE_PATH_RE = re.compile(r'^[A-Za-z0-9_\-./]*(\?[A-Za-z0-9_\-=&%.]*)?(#[A-Za-z0-9_\-]*)?$')
 
 # Grouped viewports by device types
-def get_known_viewports() -> Dict[str, Dict[str, Tuple[int, int]]]:
+def get_known_viewports() -> dict[str, dict[str, tuple[int, int]]]:
     return {
         "phones": {
             "iphone 16 pro": (402, 874),
@@ -50,7 +49,7 @@ def get_known_viewports() -> Dict[str, Dict[str, Tuple[int, int]]]:
         },
     }
 
-def get_default_for_device_type(device_type: str) -> Tuple[int, int]:
+def get_default_for_device_type(device_type: str) -> tuple[int, int]:
     """Return default width/height based on the first resolution in the given device type."""
     known_viewports = get_known_viewports()
     device_type = device_type.lower()
@@ -65,11 +64,11 @@ def get_default_for_device_type(device_type: str) -> Tuple[int, int]:
 
 @router.get("/custom_resolution", response_class=HTMLResponse)
 async def custom_resolution(
-    additional_path: Optional[str] = Query("", description="Render Other Paths on the site"),
-    width: Optional[int] = Query(None, description="Window width"),
-    height: Optional[int] = Query(None, description="Window height"),
-    device_name: Optional[str] = Query(None, description="Device name"),
-    device_type: Optional[str] = Query(None, description="Device type (e.g., phones, tablets, laptops, desktops)"),
+    additional_path: str | None = Query("", description="Render Other Paths on the site"),
+    width: int | None = Query(None, description="Window width"),
+    height: int | None = Query(None, description="Window height"),
+    device_name: str | None = Query(None, description="Device name"),
+    device_type: str | None = Query(None, description="Device type (e.g., phones, tablets, laptops, desktops)"),
 ):
     known_viewports = get_known_viewports()
 

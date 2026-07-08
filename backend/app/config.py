@@ -7,7 +7,6 @@ read once at first access and are immutable afterwards.
 import os
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import List, Tuple
 
 from dotenv import load_dotenv
 
@@ -15,7 +14,7 @@ load_dotenv()
 
 # Variables that must be present for the app to boot; validated in main.py
 # so a misconfigured deployment fails fast with a clear error.
-REQUIRED_ENV_VARS: Tuple[str, ...] = (
+REQUIRED_ENV_VARS: tuple[str, ...] = (
     "SUPABASE_URL",
     "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE",
@@ -55,7 +54,7 @@ class Settings:
     # Application
     admin_email: str
     resume_file: str
-    allowed_origins: Tuple[str, ...]
+    allowed_origins: tuple[str, ...]
     production_url: str
     port: int
     git_commit: str
@@ -67,7 +66,7 @@ class Settings:
         return bool(self.anthropic_api_key)
 
 
-def _parse_origins(raw: str) -> Tuple[str, ...]:
+def _parse_origins(raw: str) -> tuple[str, ...]:
     return tuple(origin.strip() for origin in raw.split(",") if origin.strip())
 
 
@@ -101,6 +100,6 @@ def get_settings() -> Settings:
     )
 
 
-def missing_required_vars() -> List[str]:
+def missing_required_vars() -> list[str]:
     """Return required environment variables that are unset or empty."""
     return [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]

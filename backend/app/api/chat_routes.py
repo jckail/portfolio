@@ -2,8 +2,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
-from typing import Dict, List
+from datetime import UTC, datetime
 
 from anthropic import AsyncAnthropic
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -62,7 +61,7 @@ def _load_base_prompt() -> str:
         'assets', 'portfoliosystemprompt.md'
     )
     try:
-        with open(prompt_path, 'r') as file:
+        with open(prompt_path) as file:
             return file.read()
     except Exception as e:
         logger.error("Error loading system prompt from %s: %s", prompt_path, e)
@@ -71,12 +70,12 @@ def _load_base_prompt() -> str:
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
-        self.page_contexts: Dict[str, str] = {}
+        self.active_connections: dict[str, WebSocket] = {}
+        self.page_contexts: dict[str, str] = {}
         # Per-client conversation history so the assistant remembers prior turns.
-        self.conversation_histories: Dict[str, List[dict]] = {}
+        self.conversation_histories: dict[str, list[dict]] = {}
         # Per-client timestamps of recent messages, for rate limiting.
-        self.message_timestamps: Dict[str, List[float]] = {}
+        self.message_timestamps: dict[str, list[float]] = {}
         # One client and one portfolio-data snapshot for the entire application.
         self.client = AsyncAnthropic(
             api_key=settings.anthropic_api_key or None,
@@ -118,7 +117,7 @@ class ConnectionManager:
     def get_context(self, client_id: str) -> str:
         return self.page_contexts.get(client_id, '')
 
-    def get_history(self, client_id: str) -> List[dict]:
+    def get_history(self, client_id: str) -> list[dict]:
         return self.conversation_histories.setdefault(client_id, [])
 
     def append_to_history(self, client_id: str, role: str, content: str):
@@ -131,7 +130,7 @@ class ConnectionManager:
             if history and history[0]["role"] == "assistant":
                 del history[0]
 
-    def _build_system_blocks(self, client_id: str) -> List[dict]:
+    def _build_system_blocks(self, client_id: str) -> list[dict]:
         """Build system prompt blocks with prompt caching for the static parts.
 
         The base prompt and portfolio data never change between requests, so they
@@ -158,7 +157,7 @@ class ConnectionManager:
             },
         ]
 
-        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        current_time = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
         volatile = f"Current Date and Time: {current_time}"
         page_context = self.get_context(client_id)
         if page_context:
@@ -184,7 +183,7 @@ class ConnectionManager:
         """Stream a Claude response to the client, maintaining conversation history."""
         self.append_to_history(client_id, "user", user_message)
 
-        complete_response: List[str] = []
+        complete_response: list[str] = []
         try:
             async with self.client.messages.stream(
                 model=CHAT_MODEL,

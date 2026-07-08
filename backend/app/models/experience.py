@@ -1,5 +1,6 @@
-from pydantic import BaseModel, HttpUrl, Field
-from typing import List, Dict, Optional
+
+from pydantic import BaseModel, Field, HttpUrl
+
 
 class ExperienceHighlight(BaseModel):
     """Model for experience highlights with detailed information."""
@@ -7,12 +8,12 @@ class ExperienceHighlight(BaseModel):
     title: str = Field(..., description="Job title")
     date: str = Field(..., description="Employment duration")
     location: str = Field(..., description="Job location")
-    highlights: List[str] = Field(..., description="Key achievements and responsibilities")
+    highlights: list[str] = Field(..., description="Key achievements and responsibilities")
     link: HttpUrl = Field(..., description="Company website URL")
     logoPath: str = Field(..., description="Path to company logo")
     company_description: str = Field(..., description="Brief description of the company")
-    tech_stack: List[str] = Field(..., description="Technologies used")
-    more_highlights: List[str] = Field(..., description="Detailed list of achievements and responsibilities")
+    tech_stack: list[str] = Field(..., description="Technologies used")
+    more_highlights: list[str] = Field(..., description="Detailed list of achievements and responsibilities")
 
 class Experience(BaseModel):
     """Model for all professional experiences."""

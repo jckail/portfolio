@@ -1,4 +1,5 @@
-from pydantic import BaseModel, HttpUrl, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
+
 
 class Contact(BaseModel):
     """Model for contact information."""

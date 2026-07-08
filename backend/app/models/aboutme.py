@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, Field
-from typing import  List, Optional
+
 
 class AboutMe(BaseModel):
     """Model for about me information."""
@@ -9,7 +10,7 @@ class AboutMe(BaseModel):
     brief_bio: str = Field(..., description="Detailed biography")
     full_portrait: str = Field(..., description="Path to portrait image")
     resume_name: str = Field(..., description="Name of Resume File")
-    primary_skills: List[str] = Field(..., description="Primary skills")
+    primary_skills: list[str] = Field(..., description="Primary skills")
 
     class Config:
         json_schema_extra = {

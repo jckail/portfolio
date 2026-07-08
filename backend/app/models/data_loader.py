@@ -6,36 +6,38 @@ and convert them into their corresponding Pydantic models.
 
 import json
 from pathlib import Path
-from typing import TypeVar, Type, Any, Dict
+from typing import Any
+
 from fastapi import HTTPException
+from pydantic import BaseModel
+
+from .aboutme import AboutMe
+from .contact import Contact
 from .experience import Experience
 from .projects import Projects
 from .skills import Skills
-from .aboutme import AboutMe
-from .contact import Contact
 
-T = TypeVar('T')
 
 class DataCache:
     _instance = None
-    _cache: Dict[str, Any] = {}
-    
+    _cache: dict[str, Any] = {}
+
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-    
+
     def get_or_load(self, key: str, loader_func):
         """Get data from cache or load it if not present"""
         if key not in self._cache:
             self._cache[key] = loader_func()
         return self._cache[key]
-    
+
     def clear(self):
         """Clear the cache"""
         self._cache.clear()
-    
+
     def invalidate(self, key: str):
         """Invalidate a specific cache entry"""
         if key in self._cache:
@@ -44,7 +46,7 @@ class DataCache:
 def load_json_data(file_path: str) -> dict:
     """Load data from a JSON file."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             return json.load(f)
     except Exception as e:
         raise HTTPException(
@@ -52,11 +54,11 @@ def load_json_data(file_path: str) -> dict:
             detail=f"Error loading JSON from {file_path}: {str(e)}"
         )
 
-def load_model(model_class: Type[T], json_file: str) -> T:
+def load_model[T: BaseModel](model_class: type[T], json_file: str) -> T:
     """Load JSON data into a specified Pydantic model."""
     data_dir = Path(__file__).parent.parent / 'data'
     file_path = data_dir / json_file
-    
+
     try:
         data = load_json_data(str(file_path))
         return model_class.model_validate(data)

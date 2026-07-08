@@ -1,8 +1,10 @@
 import os
 import random
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
-from pathlib import Path
+
 from ..utils.logger import setup_logging
 
 router = APIRouter()
@@ -23,7 +25,7 @@ async def get_random_zuni_image(subject_number: int | None = None):
 
     if not image_files:
         raise HTTPException(status_code=404, detail="No Zuni images found")
-    
+
     if subject_number is not None:
         # Try to get the specific image
         target_image = f"subject_{subject_number}.png"
@@ -32,9 +34,9 @@ async def get_random_zuni_image(subject_number: int | None = None):
             return FileResponse(image_path)
         else:
             raise HTTPException(status_code=404, detail=f"Image subject_{subject_number}.png not found")
-    
+
     # If no subject number provided or invalid, select a random image
     random_image = random.choice(image_files)
     image_path = ZUNI_DIR / random_image
-    
+
     return FileResponse(image_path)

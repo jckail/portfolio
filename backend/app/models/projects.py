@@ -1,15 +1,16 @@
-from pydantic import BaseModel, HttpUrl, Field
-from typing import Optional, List
+
+from pydantic import BaseModel, Field, HttpUrl
+
 
 class ProjectDetail(BaseModel):
     """Model for individual project details."""
     title: str = Field(..., description="Project title")
     description: str = Field(..., description="Brief project description")
     link: HttpUrl = Field(..., description="Primary project link")
-    link2: Optional[HttpUrl] = Field(None, description="Secondary project link (optional)")
+    link2: HttpUrl | None = Field(None, description="Secondary project link (optional)")
     description_detail: str = Field(..., description="Detailed project description")
     logoPath: str = Field(..., description="Path to project logo")
-    tech_stack: List[str] = Field(..., description="List of technologies used in the project")
+    tech_stack: list[str] = Field(..., description="List of technologies used in the project")
     last_commit: str = Field(..., description="Date of last commit")
 
 class Projects(BaseModel):
@@ -23,10 +24,10 @@ class Projects(BaseModel):
     pointup: ProjectDetail
     qr_for_groups: ProjectDetail
     lit_crypto: ProjectDetail
-    
-    
-    
-    
+
+
+
+
 
     class Config:
         json_schema_extra = {

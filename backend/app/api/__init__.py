@@ -1,18 +1,20 @@
 from fastapi import APIRouter
 
+from .aboutme_routes import router as aboutme_router
+from .admin_routes import router as admin_router
+from .chat_routes import router as chat_router
+from .chat_routes import status_router as chat_status_router
+from .contact_routes import router as contact_router
+from .custom_resolution import router as custom_resolution_router
+from .experience_routes import router as experience_router
+from .health_routes import router as health_router
+from .project_routes import router as project_router
+
 # Import route modules after router creation to avoid circular imports
 from .resume_routes import router as resume_router
-from .telemetry_routes import router as telemetry_router
-from .admin_routes import router as admin_router
-from .health_routes import router as health_router
-from .custom_resolution import router as custom_resolution_router
 from .skills_routes import router as skills_router
-from .experience_routes import router as experience_router
-from .project_routes import router as project_router
-from .contact_routes import router as contact_router
-from .aboutme_routes import router as aboutme_router
+from .telemetry_routes import router as telemetry_router
 from .zuni_routes import router as zuni_router
-from .chat_routes import router as chat_router, status_router as chat_status_router
 
 # Create api router
 api_router = APIRouter(prefix="/api")

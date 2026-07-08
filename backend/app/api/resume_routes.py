@@ -1,8 +1,10 @@
+import os
+
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse
-from ..utils.logger import setup_logging
-import os
+
 from ..models.data_loader import load_aboutme
+from ..utils.logger import setup_logging
 
 router = APIRouter()
 logger = setup_logging()
@@ -13,7 +15,7 @@ def get_resume_file_path():
     try:
         aboutme_data = load_aboutme()
         file_name = aboutme_data.resume_name
-            
+
         if not file_name:
             logger.error("resume_name not found in aboutme data")
             raise HTTPException(
@@ -48,7 +50,7 @@ async def serve_resume(request: Request):
         }
         # Check if this is a download request
         is_download = 'download' in request.query_params
-        
+
         return FileResponse(
             file_path,
             media_type='application/pdf',

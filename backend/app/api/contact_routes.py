@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException, Body
-from pydantic import BaseModel, EmailStr
 import logging
+
+from fastapi import APIRouter, Body, HTTPException
+from pydantic import BaseModel, EmailStr
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+
 from ..config import get_settings
 from ..models import Contact
 from ..models.data_loader import load_contact

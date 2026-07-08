@@ -1,8 +1,7 @@
 import asyncio
 import logging
-from typing import Optional
 
-from fastapi import HTTPException, Header
+from fastapi import Header, HTTPException
 
 from backend.app.config import get_settings
 from backend.app.utils.supabase_client import SupabaseClient
@@ -10,7 +9,7 @@ from backend.app.utils.supabase_client import SupabaseClient
 logger = logging.getLogger(__name__)
 
 
-async def verify_auth_token(authorization: Optional[str] = Header(None)):
+async def verify_auth_token(authorization: str | None = Header(None)):
     """
     Verify the authentication token from the request header.
     This function is used as a dependency in protected routes.
@@ -36,7 +35,7 @@ async def verify_auth_token(authorization: Optional[str] = Header(None)):
     return user_response
 
 
-async def verify_admin_token(authorization: Optional[str] = Header(None)):
+async def verify_admin_token(authorization: str | None = Header(None)):
     """
     Verify that the token belongs to an admin user.
     This function is used as a dependency in admin-protected routes.

@@ -1,8 +1,9 @@
-from supabase import create_client, Client
 import asyncio
 import sys
-from typing import Optional, Dict, Any, List
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
+
+from supabase import Client, create_client
 
 from backend.app.config import get_settings
 
@@ -76,7 +77,7 @@ class SupabaseClient:
             raise Exception(f"Failed to create admin user: {str(e)}")
 
     @classmethod
-    async def verify_token(cls, token: str) -> Optional[Dict[str, Any]]:
+    async def verify_token(cls, token: str) -> dict[str, Any] | None:
         """Verify a JWT token and return user data if valid."""
         try:
             admin_client = cls.get_admin_client()
@@ -115,12 +116,12 @@ class SupabaseClient:
             raise Exception(f"Sign out failed: {str(e)}")
 
     @classmethod
-    async def store_log(cls, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None, source: str = "backend", ip_address: str = None):
+    async def store_log(cls, level: str, message: str, session_uuid: str = None, metadata: dict[str, Any] = None, source: str = "backend", ip_address: str = None):
         """Store a log entry in Supabase. Returns None on failure."""
         try:
             admin_client = cls.get_admin_client()
             log_entry = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'level': level.upper(),
                 'message': message,
                 'session_uuid': session_uuid,
@@ -138,15 +139,15 @@ class SupabaseClient:
             return None
 
     @classmethod
-    async def store_logs_batch(cls, logs: List[Dict[str, Any]]):
+    async def store_logs_batch(cls, logs: list[dict[str, Any]]):
         """Store multiple log entries in Supabase at once. Returns None on failure."""
         try:
             admin_client = cls.get_admin_client()
             log_entries = []
-            
+
             for log in logs:
                 log_entry = {
-                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'level': log['level'].upper(),
                     'message': log['message'],
                     'metadata': log['metadata'],
@@ -154,7 +155,7 @@ class SupabaseClient:
                     'ip_address': log['ip_address']
                 }
                 log_entries.append(log_entry)
-            
+
             if log_entries:
                 result = await asyncio.to_thread(
                     lambda: admin_client.table('logs').insert(log_entries).execute()
@@ -171,7 +172,7 @@ class SupabaseClient:
         try:
             admin_client = cls.get_admin_client()
             message_entry = {
-                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'google_analytics_session_id': google_analytics_session_id,
                 'type': message_type,  # 'sent' or 'received'
                 'message_detail': message_detail

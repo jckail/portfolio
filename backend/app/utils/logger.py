@@ -73,7 +73,7 @@ class SupabaseHandler(logging.Handler):
                             timeout=self._flush_interval
                         )
                         batch.append(record)
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         break
 
                 await self._flush_batch(batch)
