@@ -15,15 +15,14 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 1. Testing & code quality
 
-- **P0 — Frontend test coverage.** Only `theme-store` has tests today. The
-  highest-value targets are `useChat` (WebSocket lifecycle, reconnect,
-  malformed frames), `useSkill` (deep-link URL handling, which has already
-  broken once), and `analytics` (page-view dedup). All are plain hooks/utils
-  and testable with the existing Vitest + jsdom setup.
-- **P0 — Chat WebSocket integration test.** The backend suite covers the
-  `ConnectionManager` in isolation; add a `TestClient.websocket_connect`
-  test that exercises the full frame protocol (context frame → user message
-  → streamed chunks → completion frame) with the Anthropic client mocked.
+- ~~**P0 — Frontend test coverage.**~~ Done: `useChat` (WebSocket lifecycle,
+  chunk streaming, queueing, malformed frames), `useSkill` (deep links,
+  back/forward), and `analytics` (session ids, page-view hash dedup) are
+  covered — 25 tests total.
+- ~~**P0 — Chat WebSocket integration test.**~~ Done: six
+  `TestClient.websocket_connect` tests exercise the full frame protocol
+  (context → message → streamed chunks → completion frame), history,
+  size/rate limits, and error recovery with a mocked Anthropic client.
 - **P1 — Coverage gates.** Wire `vitest --coverage` and `pytest --cov` into
   CI with modest thresholds that ratchet up as coverage grows.
 - **P1 — Python lint/format.** Add `ruff` (lint + format) to
@@ -38,10 +37,9 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 2. AI assistant
 
-- **P0 — Graceful degradation.** Hide the chat button when the backend
-  reports the assistant is unavailable (missing/invalid API key) instead of
-  letting users discover it via failed messages. Requires a small
-  capability flag on an existing endpoint plus a frontend check.
+- ~~**P0 — Graceful degradation.**~~ Done: `GET /api/chat/status` reports
+  availability and the frontend hides the chat button when the assistant
+  is not configured.
 - **P1 — Markdown rendering.** Assistant replies render as plain text;
   streaming markdown (bold, lists, links) would materially improve
   readability. Use a lightweight renderer to keep the lazily-loaded chat
@@ -62,10 +60,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 3. Frontend performance & UX
 
-- **P0 — Accessibility pass.** The `jsx-a11y` warnings that were downgraded
-  to unblock CI represent real issues: clickable `div`s without keyboard
-  handlers, missing roles. Fix them properly (buttons, `onKeyDown`,
-  focus management in modals) and re-enable the rules as errors.
+- ~~**P0 — Accessibility pass.**~~ Done: all interactive spans/divs are
+  keyboard-operable (`role`, `tabIndex`, Enter/Space), modals close on
+  Escape and carry `role="dialog"`/`aria-modal`, and the `jsx-a11y` rules
+  are errors again. Remaining follow-up: focus trapping inside open modals.
 - **P1 — Respect `prefers-reduced-motion`.** The tsparticles background
   animates unconditionally; disable or simplify it for users who request
   reduced motion, and consider pausing it when the tab is hidden (it
