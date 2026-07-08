@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request, Header, Depends
 from typing import Optional, List, Dict, Any
+from ..config import get_settings
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 from ..middleware.auth_middleware import verify_admin_token
@@ -20,7 +21,7 @@ def is_local_dev_environment(request: Request) -> bool:
     The Origin header is client-controlled and must never be used as a
     security signal on its own.
     """
-    if os.getenv("DEV_MODE", "").lower() not in ("1", "true", "yes"):
+    if not get_settings().dev_mode:
         return False
 
     client_host = request.client.host

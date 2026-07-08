@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
+from ..config import get_settings
 from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 import asyncio
-import os
 import subprocess
 from typing import Dict, Any
 
@@ -12,13 +12,13 @@ logger = setup_logging()
 def get_version() -> Dict[str, Any]:
     """
     Get the current version (git commit) of the application.
-    First tries environment variable, then git command.
+    First tries the GIT_COMMIT setting, then the git command.
     
     Returns:
         Dict containing version info and source
     """
     try:
-        git_commit = os.getenv('GIT_COMMIT')
+        git_commit = get_settings().git_commit
         if git_commit:
             return {
                 "hash": git_commit,

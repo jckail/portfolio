@@ -1,10 +1,10 @@
 import asyncio
 import logging
-import os
 from typing import Optional
 
 from fastapi import HTTPException, Header
 
+from backend.app.config import get_settings
 from backend.app.utils.supabase_client import SupabaseClient
 
 logger = logging.getLogger(__name__)
@@ -43,8 +43,7 @@ async def verify_admin_token(authorization: Optional[str] = Header(None)):
     """
     user_response = await verify_auth_token(authorization)
 
-    # Get admin email from environment variable
-    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_email = get_settings().admin_email
     if not admin_email:
         raise HTTPException(
             status_code=500,

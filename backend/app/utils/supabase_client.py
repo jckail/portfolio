@@ -1,23 +1,20 @@
 from supabase import create_client, Client
 import asyncio
-import os
 import sys
-from dotenv import load_dotenv
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone
 
-load_dotenv()
+from backend.app.config import get_settings
+
 
 def get_supabase_config():
-    """Get Supabase configuration from environment variables."""
-    url = os.getenv("SUPABASE_URL")
-    anon_key = os.getenv("SUPABASE_ANON_KEY")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE")
-    
-    if not url or not anon_key or not service_role_key:
+    """Get Supabase configuration from application settings."""
+    settings = get_settings()
+
+    if not settings.supabase_url or not settings.supabase_anon_key or not settings.supabase_service_role:
         raise ValueError("Supabase URL, anon key, and service role key must be set in environment variables")
-    
-    return url, anon_key, service_role_key
+
+    return settings.supabase_url, settings.supabase_anon_key, settings.supabase_service_role
 
 class SupabaseClient:
     _regular_client = None

@@ -5,42 +5,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from .api import api_router, ws_router
+from .config import get_settings, missing_required_vars
 from .utils.logger import setup_logging, get_supabase_handler
 from .models.data_loader import load_all
 from .utils.supabase_client import supabase
 import os
-from dotenv import load_dotenv
 import sys
 import asyncio
 
 # Configure logging
 logger = setup_logging()
 
-# Load environment variables
-load_dotenv()
-
-# Verify required environment variables
-required_env_vars = [
-    "SUPABASE_URL",
-    "SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE",
-    "ALLOWED_ORIGINS",
-    "PRODUCTION_URL",
-    "PORT",
-    "ADMIN_EMAIL",
-    "RESUME_FILE",
-    "ANTHROPIC_API_KEY",
-    "SENDGRID_API_KEY"
-]
-
-# Check environment variables without excessive logging
-missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+# Fail fast on misconfigured deployments
+missing_vars = missing_required_vars()
 if missing_vars:
     error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
     logger.error(error_msg)
     sys.exit(1)
 
 logger.info("All required environment variables are present")
+
+settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,9 +55,7 @@ async def lifespan(app: FastAPI):
         logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
         os.makedirs(logs_dir, exist_ok=True)
 
-        # Log the port we're trying to use
-        port = os.getenv('PORT', '8080')
-        logger.info(f"Configured to run on port: {port}")
+        logger.info(f"Configured to run on port: {settings.port}")
 
     except Exception as e:
         logger.error(f"Startup error: {str(e)}")
@@ -93,17 +76,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS. Starlette requires exact origin strings, so the default
-# lists the common local dev servers explicitly (wildcard ports never match).
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
-).split(",")
-allowed_origins = [origin.strip() for origin in allowed_origins]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=list(settings.allowed_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

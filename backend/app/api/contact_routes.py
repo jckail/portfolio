@@ -1,14 +1,12 @@
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel, EmailStr
-import os
 import logging
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from ..config import get_settings
 from ..models import Contact
 from ..models.data_loader import load_contact
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/contact")
@@ -38,25 +36,24 @@ async def handle_email(email_data: EmailMessage = Body(...)):
     Send an email using SendGrid API directly.
     """
     try:
-        admin_email = os.environ.get('ADMIN_EMAIL')
-        if not admin_email:
+        settings = get_settings()
+        if not settings.admin_email:
             raise ValueError("ADMIN_EMAIL environment variable is not set")
 
-        sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
-        if not sendgrid_api_key:
+        if not settings.sendgrid_api_key:
             raise ValueError("SENDGRID_API_KEY environment variable is not set")
 
         # Create the email message using the verified sender email
         message = Mail(
-            from_email='assistant@jordan-kail.com',  # Using verified sender email
-            to_emails=[email_data.from_email,admin_email],
+            from_email=settings.contact_sender_email,
+            to_emails=[email_data.from_email, settings.admin_email],
             subject=f"Jordan Kail: {email_data.subject}",
             plain_text_content=f"From: {email_data.from_email}\n\n{email_data.message}",
             html_content=f"<p><strong>From:</strong> {email_data.from_email}</p><p>{email_data.message}</p>"
         )
 
         # Send the email using SendGrid
-        sg = SendGridAPIClient(sendgrid_api_key)
+        sg = SendGridAPIClient(settings.sendgrid_api_key)
         response = sg.send(message)
 
         if response.status_code >= 200 and response.status_code < 300:

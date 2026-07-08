@@ -6,16 +6,15 @@ from datetime import datetime, timezone
 from typing import Dict, List
 
 from anthropic import AsyncAnthropic
-from dotenv import load_dotenv
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from backend.app.config import get_settings
 from backend.app.models import get_all_models
 from backend.app.utils.supabase_client import supabase
 
-# Load environment variables
-load_dotenv()
-
 logger = logging.getLogger(__name__)
+
+settings = get_settings()
 
 # Initialize routers: `router` carries the WebSocket (mounted under /ws),
 # `status_router` exposes REST status (mounted under /api).
@@ -31,12 +30,11 @@ async def chat_status():
     (e.g. no Anthropic API key configured) instead of letting visitors
     discover the failure through unanswered messages.
     """
-    return {"available": bool(os.getenv("ANTHROPIC_API_KEY"))}
+    return {"available": settings.chat_available}
 
-# Claude Haiku 4.5: fastest model with near-frontier intelligence.
-# Can be overridden without a code change via the CHAT_MODEL env var.
-CHAT_MODEL = os.getenv("CHAT_MODEL", "claude-haiku-4-5")
-MAX_RESPONSE_TOKENS = int(os.getenv("CHAT_MAX_TOKENS", "1024"))
+
+CHAT_MODEL = settings.chat_model
+MAX_RESPONSE_TOKENS = settings.chat_max_tokens
 
 # Keep conversations bounded so long sessions don't grow token usage unbounded.
 MAX_HISTORY_MESSAGES = 20
@@ -81,7 +79,7 @@ class ConnectionManager:
         self.message_timestamps: Dict[str, List[float]] = {}
         # One client and one portfolio-data snapshot for the entire application.
         self.client = AsyncAnthropic(
-            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            api_key=settings.anthropic_api_key or None,
             max_retries=3,
             timeout=60.0
         )

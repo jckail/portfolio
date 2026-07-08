@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Optional
+from backend.app.config import get_settings
 from backend.app.utils.supabase_client import SupabaseClient
 from backend.app.middleware.auth_middleware import verify_admin_token
-import os
 import json
 from datetime import datetime, timezone
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ async def admin_login(credentials: LoginCredentials):
         password = credentials.password
         
         # Verify against admin email
-        admin_email = os.getenv("ADMIN_EMAIL")
+        admin_email = get_settings().admin_email
         if not admin_email:
             raise HTTPException(
                 status_code=500, 
