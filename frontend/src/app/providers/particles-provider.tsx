@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 
-import type { Container, ISourceOptions } from "@tsparticles/engine";
+import type { ISourceOptions } from "@tsparticles/engine";
+
+import { useMediaQuery } from '../../shared/hooks/use-media-query';
 
 interface ParticlesProviderProps {
   children: React.ReactNode;
@@ -11,20 +13,20 @@ interface ParticlesProviderProps {
 
 export function ParticlesProvider({ children, config }: ParticlesProviderProps) {
   const [init, setInit] = useState(false);
+  // Skip the animated canvas entirely for users who prefer reduced motion;
+  // tsparticles itself pauses when the tab is hidden (pauseOnBlur default).
+  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     initParticlesEngine(async (engine) => {
       await loadSlim(engine);
     }).then(() => {
       setInit(true);
     });
-  }, []);
+  }, [prefersReducedMotion]);
 
-  const particlesLoaded = async (container?: Container) => {
-    console.log('Particles container loaded', container);
-  };
-
-  if (!init) {
+  if (prefersReducedMotion || !init) {
     return <>{children}</>;
   }
 
@@ -35,7 +37,6 @@ export function ParticlesProvider({ children, config }: ParticlesProviderProps) 
           <Particles
             key={`particles-${index}`}
             id={`tsparticles-${index}`}
-            particlesLoaded={particlesLoaded}
             options={conf}
           />
         ))}
@@ -50,7 +51,6 @@ export function ParticlesProvider({ children, config }: ParticlesProviderProps) 
     <>
       <Particles
         id="tsparticles"
-        particlesLoaded={particlesLoaded}
         options={config}
       />
       <div style={{ position: 'relative', zIndex: 2 }}>
