@@ -115,6 +115,7 @@ See [helpers/README.md](./helpers/README.md) for the deploy script and
 - [Backend documentation](./backend/README.md)
 - [Deployment tooling](./helpers/README.md)
 - [Infrastructure (Terraform)](./infra/README.md)
+- [Improvement roadmap](./ROADMAP.md)
 - API reference: `/docs` on a running backend
 
 ## Contributing 🤝
