@@ -37,14 +37,6 @@ export default defineConfig({
   server: {
     hmr: {
       overlay: true,
-      // Explicitly set HMR connection
-      protocol: 'ws',
-      host: 'localhost',
-    },
-    // Optimize server settings
-    watch: {
-      usePolling: true,
-      interval: 100,
     },
     proxy: {
       '/api': {
@@ -63,19 +55,23 @@ export default defineConfig({
   assetsInclude: ['**/*.svg'],
   optimizeDeps: {
     include: ['react', 'react-dom'],
-    // Force update on dependencies that might affect HMR
-    force: true,
   },
   build: {
-    // Improve build performance
-    sourcemap: true,
-    commonjsOptions: {
-      include: [/node_modules/],
-    },
+    // Skip sourcemaps in production builds: faster builds and a much
+    // smaller dist/ (which is baked into the Docker image).
+    sourcemap: false,
+    // Skip gzip-size reporting to speed up CI builds.
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          // MUI is only used by the lazily-loaded chat portal, so keep it
+          // out of the eagerly-loaded vendor chunk.
+          if (id.includes('@mui') || id.includes('@emotion')) return 'mui';
+          if (id.includes('tsparticles')) return 'particles';
+          if (id.includes('react-router')) return 'router';
+          return 'vendor';
         },
       },
     },
