@@ -45,7 +45,7 @@ jobs:
       run: npm run build
 
   backend:
-    name: Backend (install, import check)
+    name: Backend (compile, test)
     runs-on: ubuntu-latest
 
     steps:
@@ -58,19 +58,13 @@ jobs:
         cache: 'pip'
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements-dev.txt
 
     - name: Byte-compile backend
       run: python -m compileall -q backend
 
-    - name: Import check
-      env:
-        ANTHROPIC_API_KEY: ci-placeholder
-      run: |
-        python -c "import backend.app.api.chat_routes, backend.app.api.telemetry_routes, \
-        backend.app.api.admin_routes, backend.app.api.health_routes, \
-        backend.app.middleware.auth_middleware, backend.app.utils.logger, \
-        backend.app.utils.supabase_client"
+    - name: Test
+      run: python -m pytest backend/tests -q
 
   terraform:
     name: Terraform (fmt, validate)
