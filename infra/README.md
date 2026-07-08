@@ -6,11 +6,12 @@ Terraform configuration for running the portfolio app on Google Cloud.
 
 | Resource | Purpose |
 |----------|---------|
-| `google_project_service` | Enables the Cloud Run, Artifact Registry, and Secret Manager APIs |
+| `google_project_service` | Enables the Cloud Run, Artifact Registry, Secret Manager, and IAM APIs |
 | `google_artifact_registry_repository` | Docker repository for app images (keeps the 10 most recent) |
 | `google_service_account` | Dedicated least-privilege runtime identity for Cloud Run |
 | `google_secret_manager_secret*` | Supabase keys, Anthropic API key, SendGrid API key |
 | `google_cloud_run_v2_service` | The app itself (public, autoscaled, health-checked via `/api/health`) |
+| `google_iam_workload_identity_pool*` (optional) | Keyless GitHub Actions deployments, see below |
 
 Secrets are mounted into the container as environment variables from Secret
 Manager — they are never baked into the image or passed as plain `--set-env-vars`.
@@ -51,6 +52,37 @@ terraform apply
    ```bash
    terraform apply -var "image_tag=$GIT_COMMIT"
    ```
+
+### Continuous deployment from GitHub Actions
+
+The repo ships a `Deploy` workflow (`.github/workflows/deploy.yml`) that
+builds the production image and deploys it to Cloud Run on every push to
+`main`, authenticating with Workload Identity Federation (no service-account
+keys stored in GitHub).
+
+To enable it:
+
+1. Apply Terraform with the repository variable set:
+
+   ```bash
+   terraform apply -var "github_repository=<owner>/<repo>"
+   ```
+
+2. Add GitHub **repository secrets** from the Terraform outputs:
+
+   | Secret | Terraform output |
+   |--------|------------------|
+   | `GCP_WORKLOAD_IDENTITY_PROVIDER` | `workload_identity_provider` |
+   | `GCP_DEPLOYER_SERVICE_ACCOUNT` | `deployer_service_account` |
+
+3. Add GitHub **repository variables**: `GCP_PROJECT_ID` (required — the
+   workflow is skipped when unset), and optionally `GCP_REGION`,
+   `CLOUD_RUN_SERVICE`, and `AR_REPOSITORY` if they differ from the defaults
+   (`us-central1`, `quickresume`, `portfolio`).
+
+The deployer service account can only push images, deploy revisions, and act
+as the runtime service account; the OIDC provider only trusts tokens issued
+for the configured repository.
 
 ### Remote state
 

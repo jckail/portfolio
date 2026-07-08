@@ -75,6 +75,12 @@ variable "cpu" {
   default     = "1"
 }
 
+variable "github_repository" {
+  description = "GitHub repository (owner/repo) allowed to deploy via Workload Identity Federation. Leave empty to skip creating WIF resources."
+  type        = string
+  default     = ""
+}
+
 # Secret values are provided out-of-band (TF_VAR_..., tfvars file excluded
 # from git, or a CI secret store) and written to Secret Manager.
 variable "secrets" {
