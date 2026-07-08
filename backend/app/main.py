@@ -115,14 +115,15 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 
 @app.middleware("http")
-async def add_cache_headers(request: Request, call_next):
-    """Set cache policies for static content.
+async def add_response_headers(request: Request, call_next):
+    """Set cache policies and security headers.
 
     Vite emits content-hashed filenames under /assets/, so those files can be
     cached forever. Images are unhashed, so they get a shorter TTL. HTML must
     always be revalidated so deploys take effect immediately.
     """
     response = await call_next(request)
+
     if "cache-control" not in response.headers:
         path = request.url.path
         if path.startswith("/assets/"):
@@ -131,6 +132,13 @@ async def add_cache_headers(request: Request, call_next):
             response.headers["Cache-Control"] = "public, max-age=86400"
         elif path == "/" or path.endswith(".html"):
             response.headers["Cache-Control"] = "no-cache"
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 # Mount API routes first
