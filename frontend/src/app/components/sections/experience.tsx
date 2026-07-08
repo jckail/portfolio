@@ -1,10 +1,12 @@
 import React, { lazy, Suspense, memo } from 'react';
+
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import '../../../styles/components/sections/experience.css';
+import { useExperience } from './experience/hooks/useExperience';
+
 import type { ExperienceItem } from './modals/ExperienceModal';
 import type { Skill } from './modals/SkillModal';
-import { useExperience } from './experience/hooks/useExperience';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -104,6 +106,8 @@ const ExperienceTimeline = memo(({
     </div>
   );
 });
+ExperienceTimeline.displayName = 'ExperienceTimeline';
+
 
 const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();

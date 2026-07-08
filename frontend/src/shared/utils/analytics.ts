@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-const DEBUG = true;
+const DEBUG = import.meta.env.DEV;
 const debugLog = (message: string, data?: any) => {
   if (DEBUG) {
     console.log(`[Analytics] ${message}`, data ? JSON.stringify(data) : '');
@@ -199,8 +199,9 @@ export const trackModalClose = async (
 export const trackPageView = async (path: string): Promise<void> => {
   await waitForGtag();
   const sessionId = getSessionId();
-  const fullPath = path + window.location.hash;
-  
+  // Only append the hash if the caller didn't already include one
+  const fullPath = path.includes('#') ? path : path + window.location.hash;
+
   safeGtagCall('event', 'page_view', {
     page_path: fullPath,
     page_title: document.title,
@@ -362,20 +363,10 @@ export const trackContactMessage = async (messageLength: number): Promise<void> 
   });
 };
 
-// Initialize analytics with route tracking
+// Initialize analytics. The initial page view and anchor are tracked by the
+// router-aware effect in App, so tracking them here too would double-count.
 export const initializeAnalytics = async (): Promise<void> => {
   debugLog('Initializing analytics...');
   await waitForGtag();
-  
-  // Track initial page load with full path
-  const fullPath = getFullPagePath();
-  trackPageView(fullPath);
-
-  // Initial anchor if present
-  const initialAnchor = window.location.hash.slice(1);
-  if (initialAnchor) {
-    trackAnchorChange(initialAnchor);
-  }
-
   debugLog('Analytics initialized');
 };

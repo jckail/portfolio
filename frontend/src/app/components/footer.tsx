@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import '../../styles/components/footer.css';
 

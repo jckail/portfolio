@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+
 import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
 
@@ -13,9 +14,9 @@ export const useChat = () => {
     { type: 'agent', text: 'Welcome! \n I\'m Jordan\'s AI assistant, ask me a question: \n• Explain Jordan\'s professional experience at Meta, Deloitte, or other companies? \n• Explain Jordan\'s github projects?\n • What are Jordan\'s top skills?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
   const clientId = useRef(Date.now().toString());
-  const wsInitialized = useRef(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const isMounted = useRef(true);
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
 
@@ -24,9 +25,7 @@ export const useChat = () => {
     const handleUrlChange = () => {
       const params = new URLSearchParams(window.location.search);
       const shouldBeOpen = params.get('ai_chat') === 'open';
-      if (shouldBeOpen !== open) {
-        setOpen(shouldBeOpen);
-      }
+      setOpen(prev => (shouldBeOpen !== prev ? shouldBeOpen : prev));
     };
 
     // Listen for popstate (browser back/forward)
@@ -51,7 +50,7 @@ export const useChat = () => {
       history.pushState = originalPushState;
       history.replaceState = originalReplaceState;
     };
-  }, [open]);
+  }, []);
 
   const getPageContext = () => {
     const mainContent = document.querySelector('#root') as HTMLElement;
@@ -64,7 +63,6 @@ export const useChat = () => {
     }
 
     const context = {
-      html: clone.innerHTML,
       text: clone.textContent?.trim() || ''
     };
 
@@ -86,43 +84,55 @@ export const useChat = () => {
   };
 
   const initializeChat = useCallback(() => {
-    if (wsInitialized.current) return;
-    
-    console.log('Initializing chat and WebSocket connection...');
+    // Reuse an existing socket that is open or still connecting
+    const existing = wsRef.current;
+    if (existing && (existing.readyState === WebSocket.OPEN || existing.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws/${clientId.current}`;
-    
+
     const ws = new WebSocket(wsUrl);
-    
+    wsRef.current = ws;
+
     ws.onopen = () => {
-      console.log('WebSocket Connected');
-      wsInitialized.current = true;
-      setWebSocket(ws);
-      
+      if (!isMounted.current) {
+        ws.close();
+        return;
+      }
+
       // Send initial context immediately after connection
       const pageContext = getPageContext();
       ws.send(JSON.stringify({
         type: 'context',
         content: pageContext
       }));
-      
+
       // Send any queued messages
       sendQueuedMessages(ws);
     };
 
     ws.onmessage = (event) => {
-      console.log('WebSocket message received:', event.data);
-      const data = JSON.parse(event.data);
-      
+      if (!isMounted.current) return;
+
+      let data: { message?: string; is_chunk?: boolean };
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        console.error('Received malformed chat message:', event.data);
+        return;
+      }
+
       if (data.is_chunk) {
         // Accumulate streaming chunks
-        currentStreamingMessage.current += data.message;
-        
+        currentStreamingMessage.current += data.message ?? '';
+
         // Update messages with current accumulated chunk
         setMessages(prev => {
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
-          
+
           if (lastMessage?.isStreaming) {
             // Update existing streaming message
             newMessages[newMessages.length - 1] = {
@@ -138,58 +148,64 @@ export const useChat = () => {
               isStreaming: true
             });
           }
-          
+
           return newMessages;
         });
       } else {
-        // Final message received
+        // Final frame received. The server sends an empty message when the
+        // client already has the full streamed text.
         const finalMessage = data.message || currentStreamingMessage.current;
-        
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastMessage = newMessages[newMessages.length - 1];
-          
-          if (lastMessage?.isStreaming) {
-            // Update streaming message to final state
-            newMessages[newMessages.length - 1] = {
-              type: 'agent',
-              text: finalMessage,
-              isStreaming: false
-            };
-          } else {
-            // Add new complete message
-            newMessages.push({
-              type: 'agent',
-              text: finalMessage
-            });
-          }
-          
-          return newMessages;
-        });
-        
+
+        if (finalMessage) {
+          setMessages(prev => {
+            const newMessages = [...prev];
+            const lastMessage = newMessages[newMessages.length - 1];
+
+            if (lastMessage?.isStreaming) {
+              // Update streaming message to final state
+              newMessages[newMessages.length - 1] = {
+                type: 'agent',
+                text: finalMessage,
+                isStreaming: false
+              };
+            } else {
+              // Add new complete message
+              newMessages.push({
+                type: 'agent',
+                text: finalMessage
+              });
+            }
+
+            return newMessages;
+          });
+        }
+
         // Reset streaming state and loading
         currentStreamingMessage.current = '';
         setIsLoading(false);
-        
+
         // Track received message
-        trackChatMessage('received', finalMessage.length);
+        if (finalMessage) {
+          trackChatMessage('received', finalMessage.length);
+        }
       }
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket Error:', error);
+      if (!isMounted.current) return;
       setMessages(prev => [...prev, { 
         type: 'agent', 
         text: 'I apologize, but I encountered an error. Please try again.' 
       }]);
       setIsLoading(false);
-      wsInitialized.current = false;
     };
 
     ws.onclose = () => {
-      console.log('WebSocket Disconnected');
-      setWebSocket(null);
-      wsInitialized.current = false;
+      if (wsRef.current === ws) {
+        wsRef.current = null;
+      }
+      if (!isMounted.current) return;
       setIsLoading(false);
       currentStreamingMessage.current = '';
     };
@@ -198,7 +214,9 @@ export const useChat = () => {
   // Update URL when modal state changes
   useEffect(() => {
     const currentUrl = new URL(window.location.href);
-    
+    const isOpenInUrl = currentUrl.searchParams.get('ai_chat') === 'open';
+    if (isOpenInUrl === open) return;
+
     if (open) {
       currentUrl.searchParams.set('ai_chat', 'open');
     } else {
@@ -208,10 +226,10 @@ export const useChat = () => {
     // Remove the hash from the URL object
     const hash = window.location.hash;
     const urlWithoutHash = currentUrl.toString().split('#')[0];
-    
+
     // Construct the final URL with at most one hash
     const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
+
     window.history.pushState({}, '', finalUrl);
   }, [open]);
 
@@ -222,17 +240,18 @@ export const useChat = () => {
     }
   }, [open, initializeChat]);
 
-  // Cleanup WebSocket on unmount
+  // Close the WebSocket only on unmount
   useEffect(() => {
+    isMounted.current = true;
     return () => {
-      if (webSocket) {
-        console.log('Cleaning up WebSocket connection...');
-        webSocket.close();
-        wsInitialized.current = false;
-        currentStreamingMessage.current = '';
+      isMounted.current = false;
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
       }
+      currentStreamingMessage.current = '';
     };
-  }, [webSocket]);
+  }, []);
 
   const handleSendMessage = async () => {
     if (message.trim()) {
@@ -242,14 +261,16 @@ export const useChat = () => {
       // Track sent message
       await trackChatMessage('sent', message.trim().length);
 
-      // Ensure WebSocket is initialized
-      if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        // Queue the message; it is flushed when the connection opens
         messageQueue.current.push(message);
+        setIsLoading(true);
         initializeChat();
       } else {
         setIsLoading(true);
         // If WebSocket is connected, send immediately
-        webSocket.send(JSON.stringify({
+        ws.send(JSON.stringify({
           type: 'message',
           content: message,
           ga_session_id: getSessionId()
@@ -271,3 +292,5 @@ export const useChat = () => {
     initializeChat
   };
 };
+
+export type UseChatReturn = ReturnType<typeof useChat>;

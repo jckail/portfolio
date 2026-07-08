@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import '../../../styles/components/sections/projects.css';
@@ -65,6 +66,8 @@ const ProjectCard = memo(({
     </div>
   );
 });
+ProjectCard.displayName = 'ProjectCard';
+
 
 const Projects: React.FC = () => {
   const { projectsData, isLoading, error } = useData();

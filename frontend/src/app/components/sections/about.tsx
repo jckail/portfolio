@@ -1,4 +1,5 @@
 import React, { useEffect, memo, useState, lazy, Suspense } from 'react';
+
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import '../../../styles/components/sections/about.css';
@@ -96,6 +97,8 @@ const TLDRContent = memo(({
     </div>
   );
 });
+TLDRContent.displayName = 'TLDRContent';
+
 
 const TLDR: React.FC = () => {
   const { aboutMeData, contactData, skillsData, isLoading, error } = useData();

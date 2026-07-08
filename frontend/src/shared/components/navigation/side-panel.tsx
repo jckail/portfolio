@@ -1,5 +1,5 @@
 import React from 'react';
-import { useScrollSpy } from '../../hooks/use-scroll-spy';
+
 import { scrollToSection } from '../../utils/scroll-utils';
 import '../../../styles/components/navigation/side-panel.css';
 
@@ -8,12 +8,11 @@ interface SidePanelProps {
   onClose: () => void;
 }
 
-// Custom hook to get current section from URL and scroll position
+// Custom hook to get current section from URL and scroll position.
+// Note: the app-wide useScrollSpy (owned by MainContent) handles URL updates
+// and analytics; this hook only tracks the highlighted nav item locally.
 const useCurrentSection = () => {
   const [currentSection, setCurrentSection] = React.useState('');
-
-  // Use scroll spy to update URL on scroll
-  useScrollSpy();
 
   React.useEffect(() => {
     const updateSection = () => {

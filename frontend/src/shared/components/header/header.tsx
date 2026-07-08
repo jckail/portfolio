@@ -1,4 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
+
 import { Theme } from '../../../types/theme';
 import { Contact } from '../../../types/resume';
 import { SidePanel } from '../navigation';
@@ -34,6 +35,8 @@ const ThemeIcon = memo(({ theme }: { theme: Theme }) => {
       return <MoonIcon />;
   }
 });
+ThemeIcon.displayName = 'ThemeIcon';
+
 
 // Loading state component
 const HeaderSkeleton = () => (
@@ -129,5 +132,7 @@ const Header: React.FC<HeaderProps> = memo(({
     </>
   );
 });
+Header.displayName = 'Header';
+
 
 export default Header;

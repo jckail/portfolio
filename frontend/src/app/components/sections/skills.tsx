@@ -1,8 +1,10 @@
 import React, { useRef, lazy, Suspense, memo } from 'react';
+
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
-import type { Skill } from './modals/SkillModal';
 import { useSkill } from './skills/hooks/useSkill';
+
+import type { Skill } from './modals/SkillModal';
 import '../../../styles/components/sections/skills.css';
 
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -55,6 +57,8 @@ const SkillItem = memo(({
     </div>
   );
 });
+SkillItem.displayName = 'SkillItem';
+
 
 const SkillCategory = memo(({ 
   category, 
@@ -81,6 +85,8 @@ const SkillCategory = memo(({
     </div>
   );
 });
+SkillCategory.displayName = 'SkillCategory';
+
 
 const TechnicalSkills: React.FC = () => {
   const { skillsData, isLoading, error } = useData();

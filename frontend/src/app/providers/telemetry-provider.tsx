@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+
 import { useTelemetryStore } from '../../shared/stores/telemetry-store';
 import { useAdminStore } from '../../shared/stores/admin-store';
 import { TelemetryCollector } from '../../shared/utils/telemetry/telemetry-collector';

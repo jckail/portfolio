@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 
@@ -81,7 +82,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setError(null);
 
     try {
-      const response = await fetch('api/contact/send-email', {
+      const response = await fetch('/api/contact/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

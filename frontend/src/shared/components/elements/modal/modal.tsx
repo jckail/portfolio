@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+
 import { Icon } from '@/shared/components/elements/icon';
 import { Button } from '@/shared/components/elements/button';
 import './modal.css';

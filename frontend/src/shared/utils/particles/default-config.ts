@@ -1,4 +1,5 @@
 import type { ISourceOptions } from "@tsparticles/engine";
+
 import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
 
 export const defaultConfig: ISourceOptions = {

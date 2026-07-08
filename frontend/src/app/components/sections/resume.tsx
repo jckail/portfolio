@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+
 import { useResume } from '../../providers/resume-provider';
 import { trackResumeDownload } from '../../../shared/utils/analytics';
 import '../../../styles/components/sections/resume.css';

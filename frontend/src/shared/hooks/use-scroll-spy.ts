@@ -1,26 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { useSectionStore } from '../stores/section-store';
 import { trackSectionView, trackAnchorChange } from '../utils/analytics';
 
-const DEBUG = true;
-const debugLog = (message: string, data?: any) => {
+const DEBUG = import.meta.env.DEV;
+const debugLog = (message: string, data?: unknown) => {
   if (DEBUG) {
     console.log(`[ScrollSpy] ${message}`, data ? JSON.stringify(data) : '');
   }
 };
 
-// Debounce helper
-const debounce = (fn: Function, ms: number) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return function (...args: any[]) {
-    debugLog('Debounce called', { args });
+// Debounce helper with a cancel() so pending timers can be cleared on unmount
+const debounce = <Args extends unknown[]>(fn: (...args: Args) => void, ms: number) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const debounced = (...args: Args) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
-      debugLog('Debounce timeout fired', { args });
-      fn.apply(null, args);
+      fn(...args);
     }, ms);
   };
+  debounced.cancel = () => clearTimeout(timeoutId);
+  return debounced;
 };
 
 export const useScrollSpy = () => {
@@ -180,6 +181,8 @@ export const useScrollSpy = () => {
       debugLog('Cleaning up scroll spy');
       window.removeEventListener('scroll', scrollListener);
       window.removeEventListener('load', handleInitialScroll);
+      debouncedUpdateURL.cancel();
+      debouncedTrackSection.cancel();
     };
   }, [location, setCurrentSection]);
 };

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
+
 import { Message } from '../../../../types/chat';
 
 interface ChatMessagesProps {

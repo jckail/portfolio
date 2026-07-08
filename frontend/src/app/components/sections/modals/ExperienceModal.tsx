@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
+
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+
 import type { Skill } from './SkillModal';
 import '../../../../styles/components/modal.css';
 

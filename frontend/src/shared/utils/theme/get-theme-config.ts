@@ -1,6 +1,8 @@
-import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
-import type { Theme } from '../../../types/theme';
 import type { ISourceOptions } from "@tsparticles/engine";
+
+import { PRIMARY, WHITE, BLACK } from '../../../config/constants';
+
+import type { Theme } from '../../../types/theme';
 
 const generateRandomZuniUrls = (): string[] => {
   const usedNumbers: Set<number> = new Set();

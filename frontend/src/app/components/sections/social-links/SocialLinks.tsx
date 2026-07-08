@@ -1,4 +1,5 @@
 import React, { lazy, Suspense } from 'react';
+
 import { trackSocialClick, trackResumeView } from '../../../../shared/utils/analytics';
 
 const GitHubIcon = lazy(() => import('../../../../shared/components/icons/github-icon'));

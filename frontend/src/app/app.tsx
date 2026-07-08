@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, Suspense } from 'react';
 import { RouteObject, useLocation } from 'react-router-dom';
+
 import MainContent from './components/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
 import { DataProvider } from './providers/data-provider';
@@ -62,7 +63,7 @@ const App: React.FC = () => {
         <ResumeProvider>
           <ParticlesProvider 
             config={baseConfig} 
-            key={theme === 'party' ? Math.random() : theme}
+            key={theme}
           >
             <div style={{ isolation: 'isolate' }}>
               {/* Main content in its own error boundary */}

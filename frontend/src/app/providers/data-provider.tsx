@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
 import type { Skill } from '../components/sections/modals/SkillModal';
 import type { ExperienceItem } from '../components/sections/modals/ExperienceModal';
 import type { AboutMe, ProjectsData, Contact as ContactData } from '../../types/resume';
@@ -96,6 +97,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             headers: { 'Cache-Control': 'max-age=3600' }
           })
         ]);
+
+        // Fail fast if any endpoint returned an error status; otherwise we
+        // would parse an error body and render garbage
+        const responses = { experienceRes, skillsRes, projectsRes, aboutMeRes, contactRes };
+        for (const [name, res] of Object.entries(responses)) {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch ${name.replace('Res', '')} data (HTTP ${res.status})`);
+          }
+        }
 
         // Parse all responses in parallel
         const [experience, skills, projects, aboutMe, contact] = await Promise.all([

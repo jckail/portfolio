@@ -1,4 +1,5 @@
 import { API_CONFIG } from '@/config/constants';
+
 import { ApiResponse, ApiError } from './types';
 
 export async function fetchApi<T>(
