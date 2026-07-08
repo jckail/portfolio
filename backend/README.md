@@ -37,13 +37,14 @@ GET /api/resume                     # Serve the resume PDF (?download to force d
 GET /api/resume_file_name           # Resume file name
 ```
 
-### AI assistant (WebSocket)
+### AI assistant
 
 The assistant is powered by Anthropic's **Claude Haiku 4.5** and streams
 responses over a WebSocket connection:
 
 ```http
-WS /ws/{client_id}
+GET /api/chat/status                # {"available": bool} - frontend hides the chat button when false
+WS  /ws/{client_id}
 ```
 
 Client → server messages (JSON):
@@ -108,20 +109,25 @@ GET /api/zuni                       # Random image endpoint
 backend/
 ├── app/
 │   ├── api/            # Route modules (one per feature)
+│   ├── config.py       # Centralized typed settings (all env access lives here)
 │   ├── middleware/     # Auth dependency (Supabase token verification)
 │   ├── models/         # Pydantic models + JSON data loaders (cached)
 │   ├── data/           # Portfolio content as JSON (source of truth)
 │   ├── utils/          # Logging (Supabase batching handler), Supabase client
 │   └── main.py         # App entry: env validation, CORS, lifespan, static files
-└── assets/             # System prompt, resume, images
+├── assets/             # System prompt, resume, images
+└── tests/              # Pytest suite (offline; Anthropic/Supabase mocked)
 ```
 
 Key design points:
 
+- **Typed configuration** — `app/config.py` exposes a frozen `Settings`
+  object; no module reads `os.getenv` directly, and required variables are
+  validated once at startup.
 - **Lifespan management** — startup preloads all JSON data, mounts static
   files, and starts the async log-flush worker; shutdown drains it.
-- **Async-safe Supabase access** — the Supabase SDK is synchronous, so all
-  calls run via `asyncio.to_thread` to keep the event loop free.
+- **Async-safe I/O** — the Supabase SDK is synchronous and log files are on
+  disk, so those calls run via `asyncio.to_thread` to keep the event loop free.
 - **Logging** — the app logger ships batched logs to Supabase with a local
   file fallback (`app/logs/`).
 
@@ -137,18 +143,20 @@ pip install -r requirements.txt
 uvicorn backend.app.main:app --reload --port 8080
 ```
 
-### Tests
+### Tests & lint
 
 ```bash
 # From the repository root
 pip install -r requirements-dev.txt
-python -m pytest backend/tests
+python -m pytest backend/tests     # 28 tests
+python -m ruff check backend       # lint (config in pyproject.toml)
 ```
 
 The suite runs offline (no real Supabase/Anthropic credentials needed) and
 covers the response-header middleware, the `custom_resolution` XSS guards,
-the chat `ConnectionManager`, and portfolio-data integrity. CI runs it on
-every push and pull request.
+the chat `ConnectionManager`, the full chat WebSocket protocol (with a
+mocked Anthropic client), settings parsing, and portfolio-data integrity.
+CI runs ruff and the tests on every push and pull request.
 
 ### Environment Variables
 
@@ -172,8 +180,13 @@ Optional:
 ```env
 CHAT_MODEL=claude-haiku-4-5     # override the assistant model
 CHAT_MAX_TOKENS=1024            # cap assistant response length
+CONTACT_SENDER_EMAIL=...        # SendGrid verified sender (defaults to assistant@jordan-kail.com)
+GIT_COMMIT=...                  # reported by /api/health (set automatically by CI deploys)
 DEV_MODE=true                   # allow unauthenticated log reads from loopback
 ```
+
+All of these are read through `app/config.py` — add new configuration there
+rather than calling `os.getenv` in feature code.
 
 ## Security Notes 🔒
 

@@ -14,6 +14,10 @@ Build, run, and deployment tooling for the portfolio app.
 
 ## Deploying
 
+The primary deploy path is the GitHub Actions `Deploy` workflow, which
+ships every push to `main` automatically (setup in
+[`../DEPLOYMENT.md`](../DEPLOYMENT.md)). `deploy.sh` is the manual fallback:
+
 ```bash
 # Requires: docker, gcloud (authenticated), jq, and a filled-in .env at the repo root
 ./helpers/deploy.sh            # production deploy (default)

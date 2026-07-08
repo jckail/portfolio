@@ -24,6 +24,7 @@ assistant powered by Anthropic's Claude Haiku 4.5.
   conversation memory and page-aware context
 - 🔗 Deep-linkable sections, modals, and chat (`?ai_chat=open`)
 - 📱 Responsive design for all devices
+- ♿ Fully keyboard-operable: accessible dialogs, Escape-to-close, focusable controls
 - 🌓 Light/dark mode — and a hidden party mode 🎉
 
 ### Professional Network
@@ -49,8 +50,12 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 ### Infrastructure ☁️
 - **Docker** multi-stage builds (Node 22 → Python 3.12 slim)
 - **Google Cloud Run** behind **Artifact Registry**
-- **Terraform** for infrastructure as code (see [`infra/`](./infra/README.md))
-- **GitHub Actions** CI (lint, type-check, test, build for both stacks)
+- **Terraform** for infrastructure as code, including keyless GitHub → GCP
+  auth via Workload Identity Federation (see [`infra/`](./infra/README.md))
+- **GitHub Actions**: CI (lint, tests, Docker and Terraform checks for both
+  stacks) plus automatic deploys to Cloud Run on `main`
+  (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+- **Dependabot** for monthly grouped dependency updates
 
 ## Repository Layout 📂
 
@@ -59,19 +64,22 @@ portfolio/
 ├── frontend/          # React application (see frontend/README.md)
 │   └── src/
 │       ├── app/       # Feature components & providers
-│       ├── shared/    # Stores, hooks, utils, shared components
+│       ├── shared/    # Stores, hooks, typed API client, shared components
 │       └── styles/    # Global CSS
 │
 ├── backend/           # FastAPI server (see backend/README.md)
 │   ├── app/
 │   │   ├── api/       # API routes (REST + chat WebSocket)
+│   │   ├── config.py  # Centralized typed settings (all env access)
 │   │   ├── models/    # Pydantic models + data loaders
 │   │   ├── data/      # Portfolio content (JSON)
 │   │   └── utils/     # Logging, Supabase client
-│   └── assets/        # System prompt, resume
+│   ├── assets/        # System prompt, resume
+│   └── tests/         # Pytest suite (runs offline, no credentials needed)
 │
-├── infra/             # Terraform for GCP (Cloud Run, secrets, registry)
-└── helpers/           # Deploy script, Dockerfiles, local dev tooling
+├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
+├── helpers/           # Deploy script, Dockerfiles, local dev tooling
+└── .github/workflows/ # CI + automatic Cloud Run deploys
 ```
 
 ## Getting Started 🚀
@@ -88,7 +96,7 @@ portfolio/
 git clone https://github.com/jckail/portfolio.git
 cd portfolio
 
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # prod deps + pytest, ruff
 (cd frontend && npm install)
 
 ./helpers/local_test.sh
@@ -101,6 +109,10 @@ Then open:
 - API documentation: http://localhost:8080/docs
 
 ### Deployment
+
+Merges to `main` deploy automatically to Cloud Run via GitHub Actions once
+the one-time setup in [DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Manual
+fallback:
 
 ```bash
 ./helpers/deploy.sh          # build, push, deploy to Cloud Run, health-check
@@ -122,8 +134,9 @@ See [helpers/README.md](./helpers/README.md) for the deploy script and
 ## Contributing 🤝
 
 1. Follow the existing architecture patterns
-2. Run the checks locally: `npm run lint && npm run type-check && npm test`
-   (frontend) and `python -m compileall backend` (backend)
+2. Run the checks locally:
+   - Frontend: `npm run lint && npm run type-check && npm test`
+   - Backend: `python -m ruff check backend && python -m pytest backend/tests`
 3. Write tests for new features
 4. Update documentation
 5. Submit pull requests for review

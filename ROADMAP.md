@@ -25,9 +25,9 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   size/rate limits, and error recovery with a mocked Anthropic client.
 - **P1 — Coverage gates.** Wire `vitest --coverage` and `pytest --cov` into
   CI with modest thresholds that ratchet up as coverage grows.
-- **P1 — Python lint/format.** Add `ruff` (lint + format) to
-  `requirements-dev.txt` and CI. The codebase currently has no Python
-  linter, so start with a lenient rule set and tighten over time.
+- ~~**P1 — Python lint/format.**~~ Done: `ruff` runs in CI with
+  pycodestyle/pyflakes/bugbear/pyupgrade/async rules; its first pass caught
+  a latent `NameError` and blocking I/O in async handlers.
 - ~~**P1 — Strict frontend lint in CI.**~~ Done: all warnings fixed, the
   a11y/`any` rules are errors again, and `npm run lint` enforces
   `--max-warnings 0` in CI.
@@ -64,13 +64,13 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   keyboard-operable (`role`, `tabIndex`, Enter/Space), modals close on
   Escape and carry `role="dialog"`/`aria-modal`, and the `jsx-a11y` rules
   are errors again. Remaining follow-up: focus trapping inside open modals.
-- **P1 — Respect `prefers-reduced-motion`.** The tsparticles background
-  animates unconditionally; disable or simplify it for users who request
-  reduced motion, and consider pausing it when the tab is hidden (it
-  currently burns CPU in background tabs).
-- **P1 — LCP optimization.** Preload the headshot WebP (`<link rel="preload"
-  as="image">`) and add explicit `width`/`height` to prevent layout shift.
-  Audit with Lighthouse in CI (e.g. `lighthouse-ci` with budget assertions).
+- ~~**P1 — Respect `prefers-reduced-motion`.**~~ Done: the particle canvas
+  is skipped entirely for reduced-motion users and a global CSS rule
+  collapses animations/transitions; tsparticles pauses on hidden tabs by
+  default (`pauseOnBlur`).
+- **P1 — LCP optimization.** Headshot WebP is now preloaded with explicit
+  dimensions. Remaining: audit with Lighthouse in CI (e.g. `lighthouse-ci`
+  with budget assertions).
 - **P2 — Responsive images.** Serve the headshot and any future photos with
   `srcset` variants so small screens download smaller files.
 - **P2 — PWA.** Add a service worker for offline shell caching and an

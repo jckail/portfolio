@@ -27,12 +27,20 @@ src/
 ├── shared/                  # Cross-cutting code
 │   ├── components/          # Header, navigation, cookie banner, etc.
 │   ├── stores/              # Zustand stores
-│   ├── hooks/               # useScrollSpy, useMediaQuery, ...
-│   └── utils/               # Analytics (GA4), API helpers
+│   ├── hooks/               # useScrollSpy, useMediaQuery, useEscapeKey, ...
+│   └── utils/
+│       ├── api/             # Typed API client (getJson/postJson) + endpoint registry
+│       ├── analytics.ts     # GA4 events (page views, sections, chat, theme)
+│       └── a11y.ts          # buttonize(): keyboard support for styled elements
 │
 ├── styles/                  # Global CSS (variables, sections, components)
 └── types/                   # Shared TypeScript types
 ```
+
+All backend calls go through `shared/utils/api` — it throws a typed
+`ApiError` with the FastAPI `detail` message on failure, and
+`endpoints.ts` is the single registry of backend paths. The one exception
+is the resume PDF download, which needs a raw `fetch` for the blob.
 
 ## Key Features 🔑
 
@@ -43,6 +51,17 @@ src/
 - All chat state lives in a single `useChat()` instance owned by
   `ChatPortal`; the `Chat` component is purely presentational.
 - Deep-linkable via `?ai_chat=open`.
+- `ChatPortal` checks `GET /api/chat/status` on mount and hides the chat
+  button entirely when the backend reports the assistant unavailable.
+
+### Accessibility
+
+- Styled interactive elements (skill items, tags, footer links) use the
+  shared `buttonize()` helper: `role="button"`, `tabIndex`, and Enter/Space
+  activation.
+- Modals carry `role="dialog"` / `aria-modal`, close on Escape via
+  `useEscapeKey`, and use backdrop-click dismissal.
+- The `jsx-a11y` lint rules are errors; CI fails on violations.
 
 ### Theme Management
 
@@ -82,6 +101,15 @@ backend on `localhost:8080`, so run the backend first (see
 Unit tests live next to the code they cover (`*.test.ts[x]`) and run with
 Vitest + jsdom. `src/test/setup.ts` provides DOM API mocks
 (`matchMedia`, `IntersectionObserver`, `ResizeObserver`).
+
+Current coverage focuses on the riskiest client logic:
+
+- `useChat` — WebSocket lifecycle against a fake socket: single-connection
+  guarantee, context frame on open, queueing/flush, chunk streaming,
+  malformed frames, unmount cleanup, URL sync
+- `useSkill` — `?skill=` deep links, back/forward navigation
+- `analytics` — session ids, page-view hash de-duplication
+- `theme-store` — toggling, persistence, party mode
 
 ## Contributing 🤝
 
