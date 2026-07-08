@@ -17,7 +17,7 @@ This portfolio is a modern, full-stack react web application showcasing my profe
 - 📄 Downloadable PDF resume
 
 ### Smart Interactions
-- 🤖 AI-powered chat assistant for portfolio navigation
+- 🤖 AI-powered chat assistant (Claude Haiku 4.5) for portfolio navigation
 - 🔍 Advanced search capabilities
 - 📱 Responsive design for all devices
 - 🌓 Light/Dark mode with system preference detection
@@ -35,7 +35,7 @@ This portfolio is a modern, full-stack react web application showcasing my profe
 - **Vite** for optimized development and building
 - **React Router** for seamless navigation
 - **CSS Modules** for scoped styling
-- **Context API** for state management
+- **Zustand** for state management
 - **Custom Hooks** for shared logic
 
 ### Backend 🔧
@@ -43,6 +43,7 @@ This portfolio is a modern, full-stack react web application showcasing my profe
 - **Python 3.12+** for modern language features
 - **Pydantic** for data validation
 - **Uvicorn** ASGI server
+- **Anthropic Claude Haiku 4.5** for the streaming AI chat assistant
 - **Custom Middleware** for security and logging
 
 ## Architecture 📂
@@ -69,7 +70,7 @@ portfolio/
 ## Getting Started 🚀
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Python 3.12+
 - Git
 
