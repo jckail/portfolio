@@ -137,6 +137,19 @@ pip install -r requirements.txt
 uvicorn backend.app.main:app --reload --port 8080
 ```
 
+### Tests
+
+```bash
+# From the repository root
+pip install -r requirements-dev.txt
+python -m pytest backend/tests
+```
+
+The suite runs offline (no real Supabase/Anthropic credentials needed) and
+covers the response-header middleware, the `custom_resolution` XSS guards,
+the chat `ConnectionManager`, and portfolio-data integrity. CI runs it on
+every push and pull request.
+
 ### Environment Variables
 
 Required at startup (validated in `main.py`):
@@ -168,3 +181,7 @@ DEV_MODE=true                   # allow unauthenticated log reads from loopback
 - Admin routes require a Supabase bearer token matching `ADMIN_EMAIL`.
 - The chat WebSocket enforces message-size and rate limits.
 - `custom_resolution` validates and escapes its path input.
+- Every response carries security headers (`X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS).
+- Responses over 1 KB are gzip-compressed; hashed frontend assets are served
+  with immutable one-year cache headers, HTML with `no-cache`.
