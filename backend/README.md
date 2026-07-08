@@ -20,10 +20,22 @@ GET /api/resume_file_name # Get resume filename
 ```
 
 #### AI Assistant Integration
+
+The AI assistant is powered by Anthropic's **Claude Haiku 4.5** and streams
+responses over a WebSocket connection:
+
 ```http
-POST /api/chat           # AI chat interactions
-GET /api/chat/history    # Retrieve chat history
+WS /ws/{client_id}       # Streaming AI chat (Claude Haiku 4.5)
 ```
+
+Messages are JSON objects:
+- `{"type": "context", "content": "..."}` — page context for the assistant
+- `{"type": "message", "content": "...", "ga_session_id": "..."}` — a user message
+
+The model can be overridden with the `CHAT_MODEL` environment variable
+(defaults to `claude-haiku-4-5`). Conversation history is maintained
+per-connection, and the static system prompt + portfolio data use Anthropic
+prompt caching to reduce latency and cost.
 
 #### Analytics & Telemetry
 ```http

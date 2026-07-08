@@ -1,94 +1,35 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from typing import Dict
-from anthropic import AsyncAnthropic
-import os
-from dotenv import load_dotenv
 import json
-import asyncio
-from datetime import datetime
-from contextlib import asynccontextmanager
+import logging
+import os
+from datetime import datetime, timezone
+from typing import Dict, List
+
+from anthropic import AsyncAnthropic
+from dotenv import load_dotenv
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from backend.app.models import get_all_models
 from backend.app.utils.supabase_client import supabase
-
-all_data = get_all_models()
 
 # Load environment variables
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 # Initialize router
 router = APIRouter()
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
-        self.page_contexts: Dict[str, str] = {}
-        # Create one client for the entire application
-        self.client = AsyncAnthropic(
-            api_key=os.getenv("ANTHROPIC_API_KEY"),
-            max_retries=3,  # Add retry handling
-            timeout=30.0    # Increase timeout slightly
-        )
-        # Cache the system prompt
-        self._system_prompt: str | None = None
+# Claude Haiku 4.5: fastest model with near-frontier intelligence.
+# Can be overridden without a code change via the CHAT_MODEL env var.
+CHAT_MODEL = os.getenv("CHAT_MODEL", "claude-haiku-4-5")
+MAX_RESPONSE_TOKENS = int(os.getenv("CHAT_MAX_TOKENS", "1024"))
 
-    async def connect(self, client_id: str, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections[client_id] = websocket
+# Keep conversations bounded so long sessions don't grow token usage unbounded.
+MAX_HISTORY_MESSAGES = 20
+# Page context is scraped from the DOM and can be very large; keep a useful slice.
+MAX_PAGE_CONTEXT_CHARS = 4000
 
-    def disconnect(self, client_id: str):
-        if client_id in self.active_connections:
-            del self.active_connections[client_id]
-        if client_id in self.page_contexts:
-            del self.page_contexts[client_id]
-
-    def store_context(self, client_id: str, context: str):
-        self.page_contexts[client_id] = context
-
-    def get_context(self, client_id: str) -> str:
-        return self.page_contexts.get(client_id, '')
-
-    async def send_message(self, message: str, client_id: str, is_chunk: bool = False, ga_session_id: str = None):
-        if client_id in self.active_connections:
-            try:
-                # Prepare the message once
-                json_message = {
-                    "message": message,
-                    "sender": "assistant",
-                    "is_chunk": is_chunk
-                }
-                websocket = self.active_connections[client_id]
-                await websocket.send_json(json_message)
-
-                # Store complete messages in Supabase
-                if not is_chunk and ga_session_id:
-                    await supabase.store_chat_message(
-                        google_analytics_session_id=ga_session_id,
-                        message_type='received',
-                        message_detail=message
-                    )
-            except Exception as e:
-                print(f"Error sending message: {e}")
-
-    @asynccontextmanager
-    async def get_streaming_response(self, client_id: str, user_message: str):
-        """Context manager to handle Claude API streaming responses"""
-        context = self.get_context(client_id)
-        
-        # Load system prompt if not cached
-        if self._system_prompt is None:
-            try:
-                prompt_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                                    'assets', 'portfoliosystemprompt.md')
-                with open(prompt_path, 'r') as file:
-                    base_prompt = file.read()
-                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    self._system_prompt = f"Current Date and Time: {current_time}\n\n{base_prompt}"
-            except Exception as e:
-                print(f"Error loading system prompt: {e}")
-                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                self._system_prompt = f"""Current Date and Time: {current_time}
-
-You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
+FALLBACK_SYSTEM_PROMPT = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
 1. Learn about Jordan's background, experience, and technical skills
 2. Understand his projects and achievements
 3. Discuss potential collaborations or opportunities
@@ -97,72 +38,201 @@ You are an AI assistant for Jordan Kail's portfolio website. Your role is to hel
 Keep responses professional, informative, and focused on Jordan's professional background and capabilities.
 You have access to the current page content to provide accurate, contextual responses."""
 
+
+def _load_base_prompt() -> str:
+    """Load the system prompt from assets, falling back to a built-in prompt."""
+    prompt_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        'assets', 'portfoliosystemprompt.md'
+    )
+    try:
+        with open(prompt_path, 'r') as file:
+            return file.read()
+    except Exception as e:
+        logger.error("Error loading system prompt from %s: %s", prompt_path, e)
+        return FALLBACK_SYSTEM_PROMPT
+
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+        self.page_contexts: Dict[str, str] = {}
+        # Per-client conversation history so the assistant remembers prior turns.
+        self.conversation_histories: Dict[str, List[dict]] = {}
+        # One client and one portfolio-data snapshot for the entire application.
+        self.client = AsyncAnthropic(
+            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            max_retries=3,
+            timeout=60.0
+        )
+        self._base_prompt: str | None = None
+        self._portfolio_data: str | None = None
+
+    async def connect(self, client_id: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[client_id] = websocket
+        self.conversation_histories[client_id] = []
+
+    def disconnect(self, client_id: str):
+        self.active_connections.pop(client_id, None)
+        self.page_contexts.pop(client_id, None)
+        self.conversation_histories.pop(client_id, None)
+
+    def store_context(self, client_id: str, context: str):
+        """Store the visitor's current page context, keeping only readable text."""
         try:
-            stream = await self.client.messages.create(
-                model="claude-3-5-haiku-20241022",
-                max_tokens=1024,
-                system=self._system_prompt,
-                messages=[{
-                    "role": "user", 
-                    "content": f"Context: {all_data}\n\nUser Message: {user_message}"
-                }],
-                stream=True
-            )
-            yield stream
+            parsed = json.loads(context)
+            text = parsed.get('text', '') if isinstance(parsed, dict) else str(parsed)
+        except (json.JSONDecodeError, TypeError):
+            text = context or ''
+        self.page_contexts[client_id] = text[:MAX_PAGE_CONTEXT_CHARS]
+
+    def get_context(self, client_id: str) -> str:
+        return self.page_contexts.get(client_id, '')
+
+    def get_history(self, client_id: str) -> List[dict]:
+        return self.conversation_histories.setdefault(client_id, [])
+
+    def append_to_history(self, client_id: str, role: str, content: str):
+        history = self.get_history(client_id)
+        history.append({"role": role, "content": content})
+        # Trim from the front, always keeping an even number of turns so the
+        # transcript starts with a user message.
+        if len(history) > MAX_HISTORY_MESSAGES:
+            del history[:len(history) - MAX_HISTORY_MESSAGES]
+            if history and history[0]["role"] == "assistant":
+                del history[0]
+
+    def _build_system_blocks(self, client_id: str) -> List[dict]:
+        """Build system prompt blocks with prompt caching for the static parts.
+
+        The base prompt and portfolio data never change between requests, so they
+        are marked with a cache breakpoint. Volatile content (current time, page
+        context) goes after the breakpoint to keep the cache hit rate high.
+        """
+        if self._base_prompt is None:
+            self._base_prompt = _load_base_prompt()
+        if self._portfolio_data is None:
+            self._portfolio_data = json.dumps(get_all_models(), default=str)
+
+        blocks = [
+            {"type": "text", "text": self._base_prompt},
+            {
+                "type": "text",
+                "text": f"Portfolio data (source of truth for Jordan's background):\n{self._portfolio_data}",
+                "cache_control": {"type": "ephemeral"}
+            },
+        ]
+
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        volatile = f"Current Date and Time: {current_time}"
+        page_context = self.get_context(client_id)
+        if page_context:
+            volatile += f"\n\nThe visitor is currently viewing a page containing:\n{page_context}"
+        blocks.append({"type": "text", "text": volatile})
+
+        return blocks
+
+    async def send_message(self, message: str, client_id: str, is_chunk: bool = False, ga_session_id: str = None):
+        if client_id not in self.active_connections:
+            return
+        try:
+            websocket = self.active_connections[client_id]
+            await websocket.send_json({
+                "message": message,
+                "sender": "assistant",
+                "is_chunk": is_chunk
+            })
+
+            # Store complete messages in Supabase
+            if not is_chunk and ga_session_id:
+                await supabase.store_chat_message(
+                    google_analytics_session_id=ga_session_id,
+                    message_type='received',
+                    message_detail=message
+                )
         except Exception as e:
-            print(f"Error creating stream: {e}")
-            raise
+            logger.error("Error sending message to client %s: %s", client_id, e)
+
+    async def stream_response(self, client_id: str, user_message: str, ga_session_id: str = None):
+        """Stream a Claude response to the client, maintaining conversation history."""
+        self.append_to_history(client_id, "user", user_message)
+
+        complete_response: List[str] = []
+        try:
+            async with self.client.messages.stream(
+                model=CHAT_MODEL,
+                max_tokens=MAX_RESPONSE_TOKENS,
+                system=self._build_system_blocks(client_id),
+                messages=self.get_history(client_id),
+            ) as stream:
+                async for text in stream.text_stream:
+                    if text:
+                        await self.send_message(text, client_id, is_chunk=True)
+                        complete_response.append(text)
+        except Exception as e:
+            logger.error("Error streaming Claude response for client %s: %s", client_id, e)
+            # Drop the failed user turn so a retry starts clean.
+            history = self.get_history(client_id)
+            if history and history[-1]["role"] == "user":
+                history.pop()
+            await self.send_message(
+                "I apologize, but I ran into a problem generating a response. Please try again.",
+                client_id,
+                is_chunk=False
+            )
+            return
+
+        final_response = ''.join(complete_response)
+        if final_response:
+            self.append_to_history(client_id, "assistant", final_response)
+            await self.send_message(final_response, client_id, is_chunk=False, ga_session_id=ga_session_id)
+
 
 manager = ConnectionManager()
 
+
 async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict):
     try:
-        if data["type"] == "context":
-            manager.store_context(client_id, data["content"])
+        if data.get("type") == "context":
+            manager.store_context(client_id, data.get("content", ""))
+            return
+
+        if data.get("type") != "message" or not data.get("content"):
             return
 
         # Store user message in Supabase
         ga_session_id = data.get('ga_session_id')
-        if ga_session_id and data["type"] == "message":
+        if ga_session_id:
             await supabase.store_chat_message(
                 google_analytics_session_id=ga_session_id,
                 message_type='sent',
                 message_detail=data['content']
             )
 
-        complete_response = []  # Use list for efficient string building
-        
-        async with manager.get_streaming_response(client_id, data['content']) as stream:
-            async for chunk in stream:
-                if hasattr(chunk, 'type'):
-                    if chunk.type == "content_block_delta":
-                        if chunk.delta.text:
-                            # Immediately send chunk
-                            await manager.send_message(chunk.delta.text, client_id, is_chunk=True)
-                            complete_response.append(chunk.delta.text)
-                    elif chunk.type == "content_block_stop":
-                        # Send complete message
-                        if complete_response:
-                            final_response = ''.join(complete_response)
-                            await manager.send_message(final_response, client_id, is_chunk=False, ga_session_id=ga_session_id)
+        await manager.stream_response(client_id, data['content'], ga_session_id=ga_session_id)
 
     except Exception as e:
-        error_message = f"Error: {str(e)}"
-        await manager.send_message(error_message, client_id, is_chunk=False)
+        logger.error("Error handling websocket message for client %s: %s", client_id, e)
+        await manager.send_message(
+            "I apologize, but something went wrong. Please try again.",
+            client_id,
+            is_chunk=False
+        )
+
 
 @router.websocket("/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(client_id, websocket)
-    
+
     try:
         while True:
             data = await websocket.receive_text()
             parsed_data = json.loads(data)
             await handle_websocket_message(websocket, client_id, parsed_data)
-                
+
     except WebSocketDisconnect:
         manager.disconnect(client_id)
     except Exception as e:
-        error_message = f"Connection Error: {str(e)}"
-        await manager.send_message(error_message, client_id, is_chunk=False)
+        logger.error("Connection error for client %s: %s", client_id, e)
         manager.disconnect(client_id)
