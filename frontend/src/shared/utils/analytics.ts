@@ -218,6 +218,11 @@ export const trackPageView = async (path: string): Promise<void> => {
 };
 
 // Track section view
+//
+// Deliberately does NOT also send a page_view: this is always called
+// together with trackAnchorChange for the same section transition
+// (see useScrollSpy), which already sends one for the same page_path.
+// A duplicate here was inflating GA4 pageview counts.
 export const trackSectionView = async (sectionId: string): Promise<void> => {
   await waitForGtag();
   const sessionId = getSessionId();
@@ -226,21 +231,13 @@ export const trackSectionView = async (sectionId: string): Promise<void> => {
     category: 'Unknown Section',
     type: 'Custom Section'
   };
-  const fullPath = getFullPagePath();
-  
+
   safeGtagCall('event', 'section_view', {
     section_id: sectionId,
     section_title: metadata.title,
     section_category: metadata.category,
     section_type: metadata.type,
-    page_path: fullPath,
-    session_id: sessionId
-  });
-
-  // Also send a page_view event to ensure it shows up in GA realtime
-  safeGtagCall('event', 'page_view', {
-    page_path: fullPath,
-    page_title: metadata.title,
+    page_path: getFullPagePath(),
     session_id: sessionId
   });
 };

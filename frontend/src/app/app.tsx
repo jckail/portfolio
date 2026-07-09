@@ -60,17 +60,20 @@ const App: React.FC = () => {
     initAnalytics();
   }, []);
 
-  // Track both pathname and hash changes
+  // Track both pathname and hash changes.
+  //
+  // Exactly one of these fires per navigation, not both: trackAnchorChange
+  // already sends its own page_view (needed since useScrollSpy calls it
+  // directly, bypassing this effect), so also calling trackPageView for
+  // the same location would double-count the pageview in GA4.
   useEffect(() => {
     const trackNavigation = async () => {
       try {
-        // Track page view with full path
-        await trackPageView(location.pathname);
-        
-        // If there's a hash, track it as an anchor change
         if (location.hash) {
           const newAnchor = location.hash.slice(1); // Remove the # symbol
           await trackAnchorChange(newAnchor);
+        } else {
+          await trackPageView(location.pathname);
         }
       } catch (error) {
         console.error('Failed to track navigation:', error);
