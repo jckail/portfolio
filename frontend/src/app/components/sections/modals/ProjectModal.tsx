@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import ProjectIcon from '../../../../shared/components/project-icon/ProjectIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
 import { findSkillKey } from '../../../../shared/utils/skills';
+import { trackModalView } from '../../../../shared/utils/analytics';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
@@ -53,6 +54,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 }) => {
   useEscapeKey(onClose);
   const trapRef = useFocusTrap(true);
+
+  useEffect(() => {
+    trackModalView(projectKey, 'project', project.title);
+  }, [projectKey, project.title]);
 
   const story = buildStory(project);
   const detail =

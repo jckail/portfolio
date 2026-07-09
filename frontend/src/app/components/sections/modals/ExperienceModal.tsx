@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
 import { findSkillKey } from '../../../../shared/utils/skills';
+import { trackModalView } from '../../../../shared/utils/analytics';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
@@ -42,6 +43,10 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   // URL sync (?company= and back-button behavior) is owned by useExperience.
   useEscapeKey(onClose);
   const trapRef = useFocusTrap(true);
+
+  useEffect(() => {
+    trackModalView(experienceKey || experience.company, 'experience', experience.company);
+  }, [experienceKey, experience.company]);
 
   const shareUrl = experienceKey
     ? `${window.location.origin}${window.location.pathname}?company=${encodeURIComponent(experienceKey)}`
