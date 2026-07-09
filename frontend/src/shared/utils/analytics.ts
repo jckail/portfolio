@@ -1,3 +1,5 @@
+import { hasAnalyticsConsent } from './cookie-consent';
+
 type GtagParams = Record<string, unknown>;
 
 declare global {
@@ -62,13 +64,17 @@ export const getSessionId = (): string => {
   return sessionId;
 };
 
-// Safe wrapper for gtag calls
+// Safe wrapper for gtag calls — no-ops until the visitor accepts cookies
 const safeGtagCall = (
   command: string,
   action: string,
   params?: GtagParams
 ): void => {
   try {
+    if (!hasAnalyticsConsent()) {
+      debugLog('analytics consent not granted, skipping event:', action);
+      return;
+    }
     if (!isGtagLoaded()) {
       debugLog('gtag not available, skipping event:', action);
       return;

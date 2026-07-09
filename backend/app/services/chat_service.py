@@ -14,6 +14,7 @@ from fastapi import WebSocket
 
 from backend.app.config import get_settings
 from backend.app.models import get_all_models
+from backend.app.services.chat_actions import CHAT_TOOLS, normalize_tool_action
 from backend.app.utils.supabase_client import supabase
 
 logger = logging.getLogger(__name__)
@@ -202,22 +203,58 @@ class ConnectionManager:
         except Exception as e:
             logger.error("Error sending message to client %s: %s", client_id, e)
 
+    async def send_action(self, client_id: str, action: dict):
+        """Forward a validated UI action for the frontend to execute."""
+        if client_id not in self.active_connections:
+            return
+        try:
+            websocket = self.active_connections[client_id]
+            await websocket.send_json({"type": "action", **action})
+        except Exception as e:
+            logger.error("Error sending action to client %s: %s", client_id, e)
+
+    async def _dispatch_tool_actions(self, client_id: str, final_message) -> list[str]:
+        """Parse tool_use blocks, send action frames, return human labels."""
+        labels: list[str] = []
+        content = getattr(final_message, "content", None) or []
+        for block in content:
+            if getattr(block, "type", None) != "tool_use":
+                continue
+            name = getattr(block, "name", "") or ""
+            raw_input = getattr(block, "input", None)
+            action = normalize_tool_action(name, raw_input if isinstance(raw_input, dict) else {})
+            if not action:
+                continue
+            await self.send_action(client_id, action)
+            if action["action"] == "navigate":
+                labels.append(f"Opened the {action['target']} section")
+            elif action["action"] == "open_modal":
+                target = action.get("key") or action.get("kind")
+                labels.append(f"Opened {target}")
+            elif action["action"] == "download_resume":
+                labels.append("Started the resume download")
+        return labels
+
     async def stream_response(self, client_id: str, user_message: str, ga_session_id: str = None):
         """Stream a Claude response to the client, maintaining conversation history."""
         self.append_to_history(client_id, "user", user_message)
 
         complete_response: list[str] = []
+        final_message = None
         try:
             async with self.client.messages.stream(
                 model=CHAT_MODEL,
                 max_tokens=MAX_RESPONSE_TOKENS,
                 system=self._build_system_blocks(client_id),
                 messages=self.get_history(client_id),
+                tools=CHAT_TOOLS,
             ) as stream:
                 async for text in stream.text_stream:
                     if text:
                         await self.send_message(text, client_id, is_chunk=True)
                         complete_response.append(text)
+                # Final message includes any tool_use blocks the model requested
+                final_message = await stream.get_final_message()
         except Exception as e:
             logger.error("Error streaming Claude response for client %s: %s", client_id, e)
             # Drop the failed user turn so a retry starts clean.
@@ -231,7 +268,17 @@ class ConnectionManager:
             )
             return
 
+        action_labels: list[str] = []
+        if final_message is not None:
+            action_labels = await self._dispatch_tool_actions(client_id, final_message)
+
         final_response = ''.join(complete_response)
+        # If the model only called tools (no prose), narrate what happened so
+        # the UI and conversation history stay coherent.
+        if not final_response and action_labels:
+            final_response = "Done — " + "; ".join(action_labels) + "."
+            await self.send_message(final_response, client_id, is_chunk=True)
+
         if final_response:
             self.append_to_history(client_id, "assistant", final_response)
 

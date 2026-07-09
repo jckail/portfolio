@@ -7,9 +7,11 @@ import { DataProvider } from './providers/data-provider';
 import { ResumeProvider } from './providers/resume-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
+import { useKeyboardShortcuts } from '../shared/hooks/use-keyboard-shortcuts';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared/utils/analytics';
+import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
 
 import '../styles/base/app.css';
 
@@ -21,6 +23,8 @@ const App: React.FC = () => {
   const backgroundColor = useThemeBackground(theme);
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
   const location = useLocation();
+
+  useKeyboardShortcuts();
 
   useEffect(() => {
     // Initialize analytics on mount
@@ -75,6 +79,8 @@ const App: React.FC = () => {
               <Suspense fallback={null}>
                 <ChatPortal />
               </Suspense>
+
+              <CookieConsentPortal />
             </div>
           </ParticlesProvider>
         </ResumeProvider>

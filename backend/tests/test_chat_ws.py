@@ -7,8 +7,9 @@ from backend.app.services import chat_service
 
 
 class FakeStream:
-    def __init__(self, chunks):
+    def __init__(self, chunks, tool_uses=None):
         self._chunks = chunks
+        self._tool_uses = tool_uses or []
 
     @property
     def text_stream(self):
@@ -18,13 +19,18 @@ class FakeStream:
 
         return generate()
 
+    async def get_final_message(self):
+        content = list(self._tool_uses)
+        return SimpleNamespace(content=content)
+
 
 class FakeStreamContext:
-    def __init__(self, chunks):
+    def __init__(self, chunks, tool_uses=None):
         self._chunks = chunks
+        self._tool_uses = tool_uses
 
     async def __aenter__(self):
-        return FakeStream(self._chunks)
+        return FakeStream(self._chunks, self._tool_uses)
 
     async def __aexit__(self, exc_type, exc, tb):
         return False
@@ -33,18 +39,19 @@ class FakeStreamContext:
 class FakeMessages:
     """Stands in for AsyncAnthropic().messages, capturing call kwargs."""
 
-    def __init__(self, chunks):
+    def __init__(self, chunks, tool_uses=None):
         self._chunks = chunks
+        self._tool_uses = tool_uses or []
         self.calls = []
 
     def stream(self, **kwargs):
         # Deep-copy: the manager mutates the history list after this call
         self.calls.append(copy.deepcopy(kwargs))
-        return FakeStreamContext(self._chunks)
+        return FakeStreamContext(self._chunks, self._tool_uses)
 
 
-def make_fake_anthropic(chunks):
-    messages = FakeMessages(chunks)
+def make_fake_anthropic(chunks, tool_uses=None):
+    messages = FakeMessages(chunks, tool_uses=tool_uses)
     return SimpleNamespace(messages=messages), messages
 
 
@@ -181,3 +188,32 @@ def test_websocket_recovers_from_anthropic_error(client, monkeypatch):
     assert "problem" in frame["message"].lower() or "apologize" in frame["message"].lower()
     # The failed user turn was rolled back so a retry starts clean
     assert chat_service.manager.get_history("ws-test-error") == []
+
+
+def test_websocket_emits_action_frames_for_tool_use(client, monkeypatch):
+    tool = SimpleNamespace(
+        type="tool_use",
+        name="navigate_section",
+        input={"section": "projects"},
+    )
+    fake_client, messages = make_fake_anthropic(
+        ["Opening projects for you."], tool_uses=[tool]
+    )
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
+
+    with client.websocket_connect("/ws/ws-test-tools") as ws:
+        ws.send_text(json.dumps({"type": "message", "content": "Show me projects"}))
+        frames = []
+        while True:
+            frame = ws.receive_json()
+            frames.append(frame)
+            if frame.get("type") != "action" and not frame.get("is_chunk", True):
+                break
+
+    assert any(
+        f.get("type") == "action"
+        and f.get("action") == "navigate"
+        and f.get("target") == "projects"
+        for f in frames
+    )
+    assert messages.calls[0].get("tools")  # tools were offered to the model

@@ -5,6 +5,7 @@ import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
 import { findSkillKey } from '../../../../shared/utils/skills';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
 import type { Skill } from './SkillModal';
 import '../../../../styles/components/modal.css';
@@ -40,6 +41,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
 }) => {
   // URL sync (?company= and back-button behavior) is owned by useExperience.
   useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
   const shareUrl = experienceKey
     ? `${window.location.origin}${window.location.pathname}?company=${encodeURIComponent(experienceKey)}`
@@ -54,6 +56,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
       }}
     >
       <div
+        ref={trapRef}
         className="experience-modal-content"
         role="dialog"
         aria-modal="true"

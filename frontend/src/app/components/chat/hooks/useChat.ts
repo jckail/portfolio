@@ -4,6 +4,10 @@ import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 import {
+  executeChatAction,
+  type ChatAction,
+} from '../../../../shared/utils/chat-actions';
+import {
   WELCOME_MESSAGE,
   loadChatMessages,
   saveChatMessages,
@@ -164,11 +168,30 @@ export const useChat = () => {
     ws.onmessage = event => {
       if (!isMounted.current) return;
 
-      let data: { message?: string; is_chunk?: boolean };
+      let data: {
+        type?: string;
+        message?: string;
+        is_chunk?: boolean;
+        action?: string;
+        target?: string;
+        kind?: string;
+        key?: string | null;
+      };
       try {
         data = JSON.parse(event.data);
       } catch {
         console.error('Received malformed chat message:', event.data);
+        return;
+      }
+
+      // Assistant-requested UI action (navigate / open modal / download)
+      if (data.type === 'action' && data.action) {
+        const action = data as ChatAction;
+        try {
+          executeChatAction(action);
+        } catch (err) {
+          console.error('Failed to execute chat action:', err);
+        }
         return;
       }
 

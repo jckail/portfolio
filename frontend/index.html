@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2X0WFK46K5"></script>
+    <!-- Google Analytics: consent-mode defaults to denied until the visitor accepts -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    wait_for_update: 500
+  });
+  try {
+    if (localStorage.getItem('portfolio_cookie_consent') === 'accepted') {
+      gtag('consent', 'update', {
+        analytics_storage: 'granted',
+        ad_storage: 'denied'
+      });
+    }
+  } catch (e) {}
   gtag('js', new Date());
-
-  gtag('config', 'G-2X0WFK46K5');
+  gtag('config', 'G-2X0WFK46K5', { anonymize_ip: true });
 </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2X0WFK46K5"></script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/images/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

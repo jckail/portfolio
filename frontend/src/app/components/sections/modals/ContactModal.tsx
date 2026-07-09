@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import { postJson, endpoints } from '../../../../shared/utils/api';
 
 interface ContactModalProps {
@@ -36,6 +37,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
   }, []);
 
   useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -78,6 +80,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
       }}
     >
       <div
+        ref={trapRef}
         className="contact-modal-content"
         role="dialog"
         aria-modal="true"

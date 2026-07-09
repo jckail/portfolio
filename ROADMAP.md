@@ -120,8 +120,8 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 6. Content & documentation
 
-- **P1 — Architecture diagram.** A single diagram (frontend → FastAPI →
-  Supabase/Anthropic/SendGrid, plus the deploy pipeline) in the root README.
+- ~~**P1 — Architecture diagram.**~~ Done: mermaid diagram in the root README
+  covering SPA → FastAPI → Claude/Supabase/SendGrid and the deploy path.
 - **P2 — ADRs.** Record decisions (WebSockets vs SSE for chat, Supabase,
   Cloud Run) as lightweight Architecture Decision Records in `docs/`.
 - **P2 — Changelog.** Adopt a `CHANGELOG.md` maintained per release once
@@ -141,15 +141,17 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   modals expose a one-click shareable deep link.
 - ~~**P1 — Social preview + PWA manifest names.**~~ Done: `og:image` /
   Twitter card meta and filled `site.webmanifest` name fields.
-- **P1 — Chat site-navigation actions.** Let the assistant emit structured
-  actions (open Experience/Skills/Resume/Contact, download resume) that the
-  frontend executes — the differentiator for a portfolio bot.
-- **P2 — Interactive doodle canvas.** Footer promises a doodle section;
-  finish the empty `#doodle` surface so party mode has a real interaction.
-- **P2 — Cookie consent banner.** `CookieBanner` exists but is unmounted;
-  gate GA until accept on first visit.
-- **P2 — Focus trap in modals.** Keyboard users can still tab behind open
-  dialogs; trap focus while a modal/chat is open.
+- ~~**P1 — Chat site-navigation actions.**~~ Done: Claude can call
+  `navigate_section` / `open_modal` / `download_resume` tools; the backend
+  forwards validated `{type:"action"}` frames and the frontend executes them.
+- ~~**P1 — Focus trap in modals.**~~ Done: `useFocusTrap` on experience,
+  skill, project, and contact dialogs.
+- ~~**P1 — Interactive doodle canvas.**~~ Done: pointer-drawing canvas with
+  clear control; party mode adds colorful glow strokes.
+- ~~**P1 — Cookie consent banner.**~~ Done: consent-mode defaults to denied;
+  banner gates analytics until accept/deny; choice persisted in localStorage.
+- ~~**P2 — Keyboard shortcuts.**~~ Done: `?`/`/` opens chat; `g` then
+  `a/e/p/s/r` jumps to About/Experience/Projects/Skills/Resume.
 
 ---
 
@@ -157,10 +159,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 1. **Foundation:** Terraform remote state + PR plans, uptime alerting —
    these protect everything that follows (needs GCP owner setup).
-2. **User-facing polish:** ~~assistant markdown/persistence/prompts~~,
-   ~~project modals / skills search / About CTA / copy-link / OG meta~~ —
-   next: chat navigation actions, focus trap, doodle canvas.
+2. **User-facing polish:** assistant UX, project modals, skills search,
+   About CTA, chat navigation tools, doodle canvas, cookie consent, focus
+   trap, keyboard shortcuts — largely done on this branch.
 3. **Platform maturity:** lockfile builds, CSP, canary deploys,
-   vulnerability scanning, coverage gates.
+   vulnerability scanning, coverage gates, architecture diagram.
 4. **Bigger bets:** staging environment, CDN, OpenTelemetry, PWA offline
-   shell, assistant tool use beyond navigation.
+   shell, richer assistant tool use (e.g. fill contact form).

@@ -3,6 +3,7 @@ import React from 'react';
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import '../../../../styles/components/modal.css';
 
 export interface Skill {
@@ -30,6 +31,7 @@ interface SkillModalProps {
 // shared/bookmarked skill links.
 const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
   useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
   const shareUrl = skillKey
     ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
@@ -44,6 +46,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => 
       }}
     >
       <div
+        ref={trapRef}
         className="skill-modal-content"
         role="dialog"
         aria-modal="true"

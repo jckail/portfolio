@@ -5,6 +5,7 @@ import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
 import { findSkillKey } from '../../../../shared/utils/skills';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
 import type { Project } from '../../../../types/resume';
 import type { Skill } from './SkillModal';
@@ -26,6 +27,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   onSelectSkill,
 }) => {
   useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
   const detail =
     project.description_detail?.trim() || project.description;
@@ -39,6 +41,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       }}
     >
       <div
+        ref={trapRef}
         className="skill-modal-content project-modal-content"
         role="dialog"
         aria-modal="true"

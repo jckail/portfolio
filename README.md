@@ -21,10 +21,15 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 
 ### Smart Interactions
 - 🤖 AI chat assistant (Claude Haiku 4.5, streamed over WebSocket) with
-  conversation memory and page-aware context
-- 🔗 Deep-linkable sections, modals, and chat (`?ai_chat=open`)
+  conversation memory, page-aware context, and **site-navigation tools**
+  (open sections/modals, download resume)
+- 🔗 Deep-linkable sections, modals, projects, and chat (`?ai_chat=open`,
+  `?project=`, `?skill=`, `?company=`)
+- ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections
+- 🎨 Interactive doodle canvas (footer easter egg) + party mode
+- 🍪 Cookie consent with GA consent-mode defaults
 - 📱 Responsive design for all devices
-- ♿ Fully keyboard-operable: accessible dialogs, Escape-to-close, focusable controls
+- ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
 - 🌓 Light/dark mode — and a hidden party mode 🎉
 
 ### Professional Network
@@ -120,6 +125,27 @@ fallback:
 
 See [helpers/README.md](./helpers/README.md) for the deploy script and
 [infra/README.md](./infra/README.md) for Terraform-managed infrastructure.
+
+## Architecture 🏗️
+
+```mermaid
+flowchart LR
+  Visitor -->|HTTPS| CloudRun[Cloud Run]
+  CloudRun --> FastAPI
+  FastAPI -->|static| React[React SPA]
+  FastAPI -->|REST| Content[Portfolio JSON]
+  FastAPI -->|WebSocket + tools| Claude[Claude Haiku 4.5]
+  FastAPI --> Supabase[(Supabase)]
+  FastAPI --> SendGrid[SendGrid]
+  GH[GitHub Actions] -->|WIF| AR[Artifact Registry]
+  AR --> CloudRun
+  TF[Terraform] --> CloudRun
+```
+
+Visitor traffic hits Cloud Run, which serves the Vite-built SPA and the
+FastAPI API (including the streaming chat WebSocket). Claude can request
+validated UI actions that the SPA executes. Secrets live in Secret Manager;
+deploys are keyless via Workload Identity Federation.
 
 ## Documentation 📚
 

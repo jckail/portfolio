@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { getSessionId, trackPageView } from './analytics';
+import { COOKIE_CONSENT_KEY } from './cookie-consent';
 
 describe('analytics', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
     window.history.replaceState({}, '', '/');
     window.gtag = vi.fn();
   });
@@ -51,6 +53,12 @@ describe('analytics', () => {
         'page_view',
         expect.objectContaining({ page_path: '/#about' })
       );
+    });
+
+    it('skips events when cookie consent is denied', async () => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
+      await trackPageView('/');
+      expect(window.gtag).not.toHaveBeenCalled();
     });
 
     it('does not throw when gtag is unavailable', async () => {
