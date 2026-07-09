@@ -11,7 +11,9 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Backend setup
-FROM python:3.12.3-slim
+# Patch version intentionally unpinned so the base image tracks Debian's
+# latest security-patched slim build (python minor version stays pinned).
+FROM python:3.12-slim
 WORKDIR /app
 
 # Copy the frontend build
@@ -23,9 +25,13 @@ RUN mkdir -p /app/frontend/dist/public/
 # Copy favicon files (if they exist)
 COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/public/
 
-# Install backend dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install backend dependencies from the fully-pinned, hash-verified
+# lockfile (requirements.lock.txt, regenerated via
+# `helpers/compile-requirements.sh`) for reproducible builds. Also pins
+# setuptools/wheel: CVE-2024-6345, CVE-2025-47273, CVE-2026-24049.
+COPY requirements.lock.txt .
+RUN pip install --no-cache-dir --upgrade "pip>=25" "setuptools>=78.1.1" "wheel>=0.46.2" \
+    && pip install --no-cache-dir --require-hashes -r requirements.lock.txt
 
 # Copy the backend code
 COPY backend /app/backend/

@@ -36,3 +36,11 @@ extend-immutable-calls = [
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
+
+[tool.coverage.run]
+source = ["backend/app"]
+
+[tool.coverage.report]
+# Modest floor below the current ~63%; ratchet up as coverage grows.
+fail_under = 60
+show_missing = true
