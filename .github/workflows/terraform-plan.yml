@@ -47,12 +47,46 @@ jobs:
           TF_VAR_github_repository: ${{ github.repository }}
           # Runtime secret values aren't needed to see infra drift; plan
           # against placeholders so this read-only job never touches them.
+          # This makes every google_secret_manager_secret_version resource
+          # show as "must be replaced" on every run (placeholder != real
+          # value) — expected noise, filtered into its own section below so
+          # it never masks a real destroy/replace elsewhere in the plan.
           TF_VAR_secrets: '{"supabase_url":"unused","supabase_anon_key":"unused","supabase_service_role":"unused","anthropic_api_key":"unused","sendgrid_api_key":"unused"}'
         run: |
           terraform plan -no-color -input=false | tee plan.out
+
+          awk '
+            /^  # / { addr = $0 }
+            /must be replaced|will be destroyed/ {
+              if (addr ~ /google_secret_manager_secret_version\./) print addr > "/tmp/secret_noise.txt"
+              else print addr > "/tmp/real_changes.txt"
+            }
+          ' plan.out
+          touch /tmp/secret_noise.txt /tmp/real_changes.txt
+
           {
             echo "## Terraform Plan"
+            if [ -s /tmp/real_changes.txt ]; then
+              echo "### ⚠️ Destroy/replace outside secret versions — review carefully"
+              echo '```'
+              cat /tmp/real_changes.txt
+              echo '```'
+            else
+              echo "No destroy/replace outside secret versions."
+            fi
+            if [ -s /tmp/secret_noise.txt ]; then
+              echo "<details><summary>Expected secret-version noise (placeholder values, ignore)</summary>"
+              echo
+              echo '```'
+              cat /tmp/secret_noise.txt
+              echo '```'
+              echo "</details>"
+            fi
+            echo
+            echo "<details><summary>Full plan output</summary>"
+            echo
             echo '```'
             tail -c 60000 plan.out
             echo '```'
+            echo "</details>"
           } >> "$GITHUB_STEP_SUMMARY"
