@@ -1,0 +1,12 @@
+# Architecture Decision Records
+
+Lightweight records of decisions worth remembering the *why* behind, not
+just the *what* (the code already shows the what). New ADRs: copy the
+format below, number sequentially, keep it to half a page.
+
+| ADR | Title |
+|---|---|
+| [0001](0001-websockets-for-chat.md) | WebSockets (not SSE) for the chat assistant |
+| [0002](0002-supabase-for-data-and-auth.md) | Supabase for data, auth, and chat logging |
+| [0003](0003-cloud-run-for-hosting.md) | Cloud Run over GKE/App Engine for hosting |
+| [0004](0004-deploy-verify-before-promote.md) | Deploy with zero traffic, verify, then promote |

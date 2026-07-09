@@ -132,10 +132,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 - ~~**P1 — Architecture diagram.**~~ Done: mermaid diagram in the root README
   covering SPA → FastAPI → Claude/Supabase/SendGrid and the deploy path.
-- **P2 — ADRs.** Record decisions (WebSockets vs SSE for chat, Supabase,
-  Cloud Run) as lightweight Architecture Decision Records in `docs/`.
-- **P2 — Changelog.** Adopt a `CHANGELOG.md` maintained per release once
-  the deploy pipeline is in regular use.
+- ~~**P2 — ADRs.**~~ Done: `docs/adr/` covers WebSockets vs SSE for chat,
+  Supabase, Cloud Run, and the deploy-verify-promote pattern.
+- ~~**P2 — Changelog.**~~ Done: `CHANGELOG.md`, grouped by date rather
+  than version tags since this project doesn't cut releases.
 
 ## 7. Visitor-facing product features
 
@@ -181,8 +181,9 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 2. ~~**User-facing polish:** assistant UX, project modals, skills search,
    About CTA, chat navigation tools, doodle canvas, cookie consent, focus
    trap, keyboard shortcuts.~~ Done.
-3. **Platform maturity (current focus):** coverage gates, image
-   vulnerability scanning, reproducible Python builds, canary deploys.
-   CSP and architecture diagram already done.
-4. **Bigger bets:** staging environment, CDN, OpenTelemetry, PWA offline
-   shell, usage telemetry, E2E smoke test, Lighthouse CI budgets.
+3. ~~**Platform maturity:** coverage gates, image vulnerability scanning,
+   reproducible Python builds, canary deploys, E2E smoke test, ADRs,
+   changelog.~~ Done.
+4. **Bigger bets (current focus):** staging environment, CDN,
+   OpenTelemetry, PWA offline shell, usage telemetry, Lighthouse CI
+   budgets, responsive images, persisted chat transcripts per session.
