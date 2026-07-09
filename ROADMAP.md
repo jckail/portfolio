@@ -78,12 +78,12 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   logs via `JsonFormatter`, per-request `X-Request-ID` middleware
   (honors inbound header), and `request_id` attached to Supabase log
   metadata.
+- ~~**P1 — Content Security Policy.**~~ Done: CSP header allowlists self,
+  Google Fonts, and GA; inline GA bootstrap kept with `'unsafe-inline'`
+  (nonce migration left as a follow-up).
 - **P1 — Reproducible Python builds.** `requirements.txt` pins direct
   dependencies but not transitives. Adopt a lockfile (`uv` or `pip-tools`)
   so Docker builds are reproducible and Dependabot updates are reviewable.
-- **P1 — Content Security Policy.** The remaining major security header.
-  Needs care: the GA inline snippet requires a nonce or moving the config
-  to an external file, and Google Fonts/GA endpoints must be allowlisted.
 - **P2 — OpenTelemetry.** Export traces and latency metrics to Cloud
   Trace/Monitoring; the FastAPI + Cloud Run integration is well supported
   and would make chat latency and Supabase call times visible.
@@ -152,6 +152,16 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   banner gates analytics until accept/deny; choice persisted in localStorage.
 - ~~**P2 — Keyboard shortcuts.**~~ Done: `?`/`/` opens chat; `g` then
   `a/e/p/s/r` jumps to About/Experience/Projects/Skills/Resume.
+- ~~**P2 — Command palette.**~~ Done: `Ctrl/Cmd+K` fuzzy jump to sections,
+  chat, contact, resume download, and party mode.
+- ~~**P2 — Konami / party URL eggs.**~~ Done: ↑↑↓↓←→←→BA and `?party=1`
+  activate party mode with a burst animation.
+- ~~**P2 — Chat contact prefill.**~~ Done: `prefill_contact` tool drafts
+  the contact form from conversation context.
+- ~~**P2 — Project story timeline.**~~ Done: project modals show Snapshot /
+  Story / Stack / Updated steps when detail data exists.
+- ~~**P2 — Reading progress bar.**~~ Done: thin top-of-viewport scroll
+  indicator.
 
 ---
 

@@ -40,4 +40,23 @@ describe('executeChatAction', () => {
     expect(label).toBe('Opened jobbr');
     expect(new URLSearchParams(window.location.search).get('project')).toBe('jobbr');
   });
+
+  it('prefills contact and opens the modal', () => {
+    const label = executeChatAction({
+      action: 'prefill_contact',
+      draft: { subject: 'Hello Jordan', message: 'Loved the portfolio' },
+    });
+    expect(label).toMatch(/contact/i);
+    expect(new URLSearchParams(window.location.search).get('contact')).toBe('open');
+    expect(sessionStorage.getItem('portfolio_contact_draft_v1')).toContain('Loved the portfolio');
+  });
+
+  it('dispatches theme changes', () => {
+    const handler = vi.fn();
+    window.addEventListener('portfolio:set-theme', handler);
+    const label = executeChatAction({ action: 'set_theme', theme: 'party' });
+    expect(label).toMatch(/party/);
+    expect(handler).toHaveBeenCalled();
+    window.removeEventListener('portfolio:set-theme', handler);
+  });
 });

@@ -5,6 +5,12 @@ import { trackContactOpened, trackContactMessage } from '../../../../shared/util
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import { postJson, endpoints } from '../../../../shared/utils/api';
+import {
+  CONTACT_DRAFT_EVENT,
+  clearContactDraft,
+  loadContactDraft,
+  type ContactDraft,
+} from '../../../../shared/utils/contact-draft';
 
 interface ContactModalProps {
   email: string;
@@ -14,6 +20,21 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
+const DEFAULT_FORM = {
+  from_email: '',
+  subject: 'Connecting via your Portfolio',
+  message: 'Hi I wanted to connect ...',
+};
+
+function mergeDraft(draft: ContactDraft | null) {
+  if (!draft) return { ...DEFAULT_FORM };
+  return {
+    from_email: draft.from_email ?? DEFAULT_FORM.from_email,
+    subject: draft.subject ?? DEFAULT_FORM.subject,
+    message: draft.message ?? DEFAULT_FORM.message,
+  };
+}
+
 const ContactModal: React.FC<ContactModalProps> = ({
   email,
   phone,
@@ -21,19 +42,26 @@ const ContactModal: React.FC<ContactModalProps> = ({
   country,
   onClose
 }) => {
-  const [formData, setFormData] = useState({
-    from_email: '',
-    subject: 'Connecting via your Portfolio',
-    message: 'Hi I wanted to connect ...'
-  });
+  const [formData, setFormData] = useState(() => mergeDraft(loadContactDraft()));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [fromAssistant, setFromAssistant] = useState(() => Boolean(loadContactDraft()));
 
   // URL sync (?contact=open and back-button behavior) is owned entirely by
   // the useContact hook; this modal only reports analytics.
   useEffect(() => {
     trackContactOpened();
+  }, []);
+
+  useEffect(() => {
+    const onDraft = (event: Event) => {
+      const detail = (event as CustomEvent<ContactDraft>).detail;
+      setFormData(mergeDraft(detail ?? null));
+      setFromAssistant(true);
+    };
+    window.addEventListener(CONTACT_DRAFT_EVENT, onDraft);
+    return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
   }, []);
 
   useEscapeKey(onClose);
@@ -59,11 +87,9 @@ const ContactModal: React.FC<ContactModalProps> = ({
       trackContactMessage(formData.message.length);
 
       setSuccess(true);
-      setFormData({
-        from_email: '',
-        subject: 'Connecting via your Portfolio',
-        message: 'Hi I wanted to connect ...'
-      });
+      clearContactDraft();
+      setFromAssistant(false);
+      setFormData({ ...DEFAULT_FORM });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -111,6 +137,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
           </div>
 
           <div className="contact-form-container">
+            {fromAssistant && (
+              <p className="contact-draft-note" role="status">
+                Drafted by the AI assistant — edit anything before sending.
+              </p>
+            )}
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="contact-form-group">
                 <label htmlFor="from_email">Your Email:</label>

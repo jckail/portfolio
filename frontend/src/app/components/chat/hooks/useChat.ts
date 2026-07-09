@@ -176,6 +176,8 @@ export const useChat = () => {
         target?: string;
         kind?: string;
         key?: string | null;
+        theme?: string;
+        draft?: { from_email?: string; subject?: string; message?: string };
       };
       try {
         data = JSON.parse(event.data);

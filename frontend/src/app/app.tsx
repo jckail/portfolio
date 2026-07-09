@@ -8,10 +8,15 @@ import { ResumeProvider } from './providers/resume-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useThemeBackground } from '../shared/hooks';
 import { useKeyboardShortcuts } from '../shared/hooks/use-keyboard-shortcuts';
+import { useEasterEggs } from '../shared/hooks/use-easter-eggs';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared/utils/analytics';
 import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
+import { CommandPaletteHost } from '../shared/components/command-palette';
+import ReadingProgress from '../shared/components/reading-progress';
+
+import type { Theme } from '../types/theme';
 
 import '../styles/base/app.css';
 
@@ -19,12 +24,29 @@ import '../styles/base/app.css';
 const ChatPortal = React.lazy(() => import('./components/chat/chat-portal'));
 
 const App: React.FC = () => {
-  const { theme } = useThemeStore();
+  const { theme, setTheme } = useThemeStore();
   const backgroundColor = useThemeBackground(theme);
   const baseConfig = useMemo(() => getThemeConfig(theme), [theme]);
   const location = useLocation();
 
   useKeyboardShortcuts();
+  useEasterEggs();
+
+  useEffect(() => {
+    const onSetTheme = (event: Event) => {
+      const themeName = (event as CustomEvent<{ theme?: string }>).detail?.theme;
+      if (themeName === 'light' || themeName === 'dark' || themeName === 'party') {
+        setTheme(themeName as Theme);
+      }
+    };
+    const onParty = () => setTheme('party');
+    window.addEventListener('portfolio:set-theme', onSetTheme);
+    window.addEventListener('portfolio:party', onParty);
+    return () => {
+      window.removeEventListener('portfolio:set-theme', onSetTheme);
+      window.removeEventListener('portfolio:party', onParty);
+    };
+  }, [setTheme]);
 
   useEffect(() => {
     // Initialize analytics on mount
@@ -70,6 +92,8 @@ const App: React.FC = () => {
             key={theme}
           >
             <div style={{ isolation: 'isolate' }}>
+              <ReadingProgress />
+
               {/* Main content in its own error boundary */}
               <ErrorBoundary>
                 <MainContent />
@@ -81,6 +105,7 @@ const App: React.FC = () => {
               </Suspense>
 
               <CookieConsentPortal />
+              <CommandPaletteHost />
             </div>
           </ParticlesProvider>
         </ResumeProvider>

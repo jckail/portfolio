@@ -15,6 +15,10 @@ def test_security_headers_present(client):
     assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
     assert "Strict-Transport-Security" in response.headers
     assert "Permissions-Policy" in response.headers
+    csp = response.headers["Content-Security-Policy"]
+    assert "default-src 'self'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "googletagmanager.com" in csp
 
 
 @pytest.mark.skipif(

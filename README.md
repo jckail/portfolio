@@ -25,8 +25,10 @@ assistant powered by Anthropic's Claude Haiku 4.5.
   (open sections/modals, download resume)
 - 🔗 Deep-linkable sections, modals, projects, and chat (`?ai_chat=open`,
   `?project=`, `?skill=`, `?company=`)
-- ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections
-- 🎨 Interactive doodle canvas (footer easter egg) + party mode
+- ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections;
+  `Ctrl/Cmd+K` command palette
+- 🎨 Interactive doodle canvas (footer easter egg) + party mode (Konami /
+  `?party=1`)
 - 🍪 Cookie consent with GA consent-mode defaults
 - 📱 Responsive design for all devices
 - ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close

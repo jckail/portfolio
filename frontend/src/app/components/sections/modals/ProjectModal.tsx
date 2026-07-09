@@ -10,6 +10,7 @@ import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import type { Project } from '../../../../types/resume';
 import type { Skill } from './SkillModal';
 import '../../../../styles/components/modal.css';
+import '../../../../styles/components/reading-progress.css';
 
 interface ProjectModalProps {
   projectKey: string;
@@ -17,6 +18,30 @@ interface ProjectModalProps {
   skillsData: Record<string, Skill>;
   onClose: () => void;
   onSelectSkill: (skillKey: string) => void;
+}
+
+function buildStory(project: Project) {
+  const steps: { label: string; text: string }[] = [];
+  if (project.description?.trim()) {
+    steps.push({ label: 'Snapshot', text: project.description.trim() });
+  }
+  const detail = project.description_detail?.trim();
+  if (detail && detail !== project.description?.trim()) {
+    // Prefer a shorter "story" slice for the approach step
+    const approach =
+      detail.length > 420 ? `${detail.slice(0, 417).trimEnd()}…` : detail;
+    steps.push({ label: 'Story', text: approach });
+  }
+  if (project.tech_stack && project.tech_stack.length > 0) {
+    steps.push({
+      label: 'Stack',
+      text: project.tech_stack.slice(0, 8).join(' · '),
+    });
+  }
+  if (project.last_commit) {
+    steps.push({ label: 'Updated', text: project.last_commit });
+  }
+  return steps;
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
@@ -29,6 +54,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   useEscapeKey(onClose);
   const trapRef = useFocusTrap(true);
 
+  const story = buildStory(project);
   const detail =
     project.description_detail?.trim() || project.description;
 
@@ -64,12 +90,18 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
         </div>
         <div className="modal-body">
-          {project.last_commit && (
-            <p className="experience-info">
-              Last updated <strong>{project.last_commit}</strong>
-            </p>
+          {story.length > 1 ? (
+            <div className="project-story" aria-label="Project story">
+              {story.map(step => (
+                <div key={step.label} className="project-story-step">
+                  <span className="project-story-label">{step.label}</span>
+                  <p className="project-story-text">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="skill-description">{detail}</p>
           )}
-          <p className="skill-description">{detail}</p>
 
           {project.tech_stack && project.tech_stack.length > 0 && (
             <div className="skill-tags">

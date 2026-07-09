@@ -65,12 +65,55 @@ CHAT_TOOLS: list[dict] = [
             "properties": {},
         },
     },
+    {
+        "name": "prefill_contact",
+        "description": (
+            "Open the contact form and optionally prefill subject/message/"
+            "visitor email when the visitor wants to reach Jordan. Draft a "
+            "professional message from the conversation context."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "from_email": {
+                    "type": "string",
+                    "description": "Visitor email if they provided one",
+                },
+                "subject": {
+                    "type": "string",
+                    "description": "Suggested email subject",
+                },
+                "message": {
+                    "type": "string",
+                    "description": "Suggested message body the visitor can edit",
+                },
+            },
+        },
+    },
+    {
+        "name": "set_theme",
+        "description": (
+            "Switch the site theme. Use 'party' only for playful easter-egg "
+            "requests; otherwise prefer light or dark."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "theme": {
+                    "type": "string",
+                    "enum": ["light", "dark", "party"],
+                }
+            },
+            "required": ["theme"],
+        },
+    },
 ]
 
 ALLOWED_SECTIONS = frozenset(
     {"about", "experience", "projects", "skills", "resume", "doodle"}
 )
 ALLOWED_MODAL_KINDS = frozenset({"company", "skill", "project", "contact"})
+ALLOWED_THEMES = frozenset({"light", "dark", "party"})
 
 
 def normalize_tool_action(name: str, raw_input: dict | None) -> dict | None:
@@ -97,5 +140,19 @@ def normalize_tool_action(name: str, raw_input: dict | None) -> dict | None:
 
     if name == "download_resume":
         return {"action": "download_resume"}
+
+    if name == "prefill_contact":
+        draft: dict[str, str] = {}
+        for field, limit in (("from_email", 200), ("subject", 200), ("message", 4000)):
+            value = payload.get(field)
+            if isinstance(value, str) and value.strip():
+                draft[field] = value.strip()[:limit]
+        return {"action": "prefill_contact", "draft": draft}
+
+    if name == "set_theme":
+        theme = str(payload.get("theme", "")).strip().lower()
+        if theme not in ALLOWED_THEMES:
+            return None
+        return {"action": "set_theme", "theme": theme}
 
     return None

@@ -85,6 +85,16 @@
   min-width: 80px;
 }
 
+.contact-draft-note {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px dashed var(--primary-border);
+  background: var(--section-background);
+  color: var(--text-color);
+  font-size: 0.85rem;
+}
+
 .contact-form-container {
   max-width: 100%;
   padding-top: var(--spacing-sm);

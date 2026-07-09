@@ -13,6 +13,7 @@ const ACTION_PROMPTS = [
   'Show me his resume',
   'Open the Super Teacher project',
   'Take me to his experience at Meta',
+  'Help me draft an email to Jordan',
 ] as const;
 
 function pickPrompts(): string[] {

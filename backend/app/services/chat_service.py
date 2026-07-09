@@ -233,6 +233,10 @@ class ConnectionManager:
                 labels.append(f"Opened {target}")
             elif action["action"] == "download_resume":
                 labels.append("Started the resume download")
+            elif action["action"] == "prefill_contact":
+                labels.append("Opened the contact form with a draft")
+            elif action["action"] == "set_theme":
+                labels.append(f"Switched to {action.get('theme')} theme")
         return labels
 
     async def stream_response(self, client_id: str, user_message: str, ga_session_id: str = None):

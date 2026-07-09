@@ -123,6 +123,21 @@ async def add_response_headers(request: Request, call_next):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        # CSP: allow self + Google Fonts/GA; GA config is inline in index.html
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; "
+            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com wss: ws:; "
+            "frame-src 'self'; "
+            "worker-src 'self' blob:; "
+            "upgrade-insecure-requests"
+        )
         return response
     finally:
         clear_request_id()

@@ -1,10 +1,13 @@
 import { scrollToSection } from './scroll-utils';
 import { setQueryParam } from './url-params';
+import { saveContactDraft, type ContactDraft } from './contact-draft';
 
 export type ChatAction =
   | { action: 'navigate'; target: string }
   | { action: 'open_modal'; kind: string; key?: string | null }
-  | { action: 'download_resume' };
+  | { action: 'download_resume' }
+  | { action: 'prefill_contact'; draft?: ContactDraft }
+  | { action: 'set_theme'; theme: string };
 
 const SECTION_IDS = new Set([
   'about',
@@ -69,6 +72,23 @@ export function executeChatAction(payload: ChatAction): string | null {
     document.body.removeChild(link);
     scrollToSection('resume');
     return 'Downloading resume';
+  }
+
+  if (payload.action === 'prefill_contact') {
+    saveContactDraft(payload.draft ?? {});
+    setQueryParam('contact', 'open');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    return 'Opened contact with a draft';
+  }
+
+  if (payload.action === 'set_theme') {
+    const theme = payload.theme?.toLowerCase();
+    if (theme !== 'light' && theme !== 'dark' && theme !== 'party') return null;
+    setQueryParam('theme', theme, { replace: true });
+    window.dispatchEvent(
+      new CustomEvent('portfolio:set-theme', { detail: { theme } })
+    );
+    return `Switched to ${theme} theme`;
   }
 
   return null;
