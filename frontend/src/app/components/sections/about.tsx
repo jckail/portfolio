@@ -4,6 +4,7 @@ import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import { buttonize } from '../../../shared/utils/a11y';
 import { findSkillKey } from '../../../shared/utils/skills';
+import { buildHeadshotSrcSet } from '../../../shared/utils/responsive-image';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
@@ -53,6 +54,7 @@ const TLDRContent = memo(({
         <div className="headshot-container">
           <img
             src={aboutMeData.full_portrait}
+            srcSet={buildHeadshotSrcSet(aboutMeData.full_portrait)}
             alt="Profile headshot"
             className="headshot"
             loading="eager"

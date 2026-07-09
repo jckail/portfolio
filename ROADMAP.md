@@ -72,8 +72,11 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   above measured values rather than tight thresholds — timing-based
   Lighthouse metrics are too CI-noisy to gate on reliably, byte budgets
   aren't.
-- **P2 — Responsive images.** Serve the headshot and any future photos with
-  `srcset` variants so small screens download smaller files.
+- ~~**P2 — Responsive images.**~~ Done: headshot serves 1x/2x/3x density
+  variants (`buildHeadshotSrcSet`), 1x is 7.6KB vs 32KB for the original
+  — a real win since the display size is a fixed 200×200px, not
+  viewport-responsive, so density (not breakpoint) srcset is the right
+  fit. The `index.html` LCP preload mirrors the same variants.
 - **P2 — PWA.** Add a service worker for offline shell caching and an
   install prompt; the `site.webmanifest` already exists.
 
