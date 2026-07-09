@@ -33,9 +33,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P1 — Strict frontend lint in CI.**~~ Done: all warnings fixed, the
   a11y/`any` rules are errors again, and `npm run lint` enforces
   `--max-warnings 0` in CI.
-- **P2 — End-to-end smoke test.** A single Playwright test (page loads,
-  sections render, chat opens) run against the built Docker image in CI
-  would catch integration regressions that unit tests cannot.
+- ~~**P2 — End-to-end smoke test.**~~ Done: `e2e/` Playwright project
+  boots the CI-built image with dummy credentials and checks page load,
+  section rendering, and the chat panel opening — runs as steps in the
+  `docker` CI job so a failure already blocks merges.
 
 ## 2. AI assistant
 
@@ -105,10 +106,12 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P1 — Monitoring and alerting.**~~ Done: Cloud Monitoring uptime check
   on `/api/health` (5 min interval) + alert policy emailing `admin_email`,
   managed in `infra/monitoring.tf`.
-- **P1 — Canary/rollback strategy.** Cloud Run supports traffic splitting;
-  deploy new revisions at a small traffic percentage, promote on healthy
-  metrics, and document one-command rollback (`gcloud run services
-  update-traffic`).
+- ~~**P1 — Canary/rollback strategy.**~~ Done: `deploy.yml` deploys the new
+  revision with `--no-traffic --tag=gh-<sha>`, health-checks that
+  revision's own URL directly, and only then runs `update-traffic
+  --to-latest` — a broken image is never live. Verified end-to-end via
+  manual dispatch against the real service before merging. Rollback
+  documented in `HANDOFF.md`.
 - ~~**P1 — Image vulnerability scanning.**~~ Done: CI builds the production
   image and runs `aquasecurity/trivy-action`, failing on fixable
   CRITICAL/HIGH CVEs (`ignore-unfixed: true`). Required bumping the base
