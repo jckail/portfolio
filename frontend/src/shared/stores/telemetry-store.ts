@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import type { TelemetryState, TelemetryLog } from '../../types/telemetry';
 
 export const useTelemetryStore = create<TelemetryState & {

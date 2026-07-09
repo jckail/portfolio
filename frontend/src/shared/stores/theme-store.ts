@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+
 import { Theme } from '../../types/theme';
 import { trackThemeChange } from '../utils/analytics';
 
@@ -17,6 +18,10 @@ const THEME_STORAGE_KEY = 'portfolio-theme-preference';
 const CLICK_THRESHOLD = 10;
 const TIME_WINDOW = 5000; // 5 seconds in milliseconds
 const PARTY_HIDE_DURATION = 10000; // 10 seconds in milliseconds
+
+// Track the pending "show toggle again" timer so re-entering party mode
+// doesn't leave a stale timer that fires at the wrong time
+let partyHideTimer: ReturnType<typeof setTimeout> | null = null;
 
 const getThemeFromUrl = (): Theme | null => {
   try {
@@ -96,7 +101,11 @@ export const useThemeStore = create<ThemeState>()(
           trackThemeChange('party', previousTheme);
           
           // Show toggle again after PARTY_HIDE_DURATION
-          setTimeout(() => {
+          if (partyHideTimer !== null) {
+            clearTimeout(partyHideTimer);
+          }
+          partyHideTimer = setTimeout(() => {
+            partyHideTimer = null;
             set({ isToggleHidden: false });
           }, PARTY_HIDE_DURATION);
           

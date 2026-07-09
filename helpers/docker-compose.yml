@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   web:
-    build: 
+    build:
       context: ..
-      dockerfile: helpers/Dockerfile
+      dockerfile: helpers/Dockerfile.dev
     env_file:
       - ../.env
     ports:
@@ -13,10 +11,8 @@ services:
       - ../backend:/app/backend
       - ../frontend:/app/frontend
       - ../frontend/dist:/app/frontend/dist
-      - ../images:/app/images
     environment:
       - PYTHONPATH=/app
-      - FLASK_APP=${FLASK_APP}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - VITE_API_URL=${VITE_API_URL}
       - PRODUCTION_URL=${PRODUCTION_URL}

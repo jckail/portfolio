@@ -1,0 +1,102 @@
+.command-palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: min(18vh, 140px);
+}
+
+.command-palette {
+  width: min(560px, 92vw);
+  background: var(--solid-color, #111);
+  color: var(--text-color);
+  border: 2px solid var(--primary-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  animation: commandPaletteIn 0.18s ease-out;
+}
+
+@keyframes commandPaletteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.command-palette-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--primary-border);
+  background: transparent;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 1rem 1.1rem;
+  outline: none;
+}
+
+.command-palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.command-palette-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.command-palette-item.is-active,
+.command-palette-item:hover {
+  background: var(--section-background);
+}
+
+.command-palette-item kbd,
+.command-palette-footer kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  border: 1px solid var(--primary-border);
+  border-radius: 6px;
+  padding: 0.1rem 0.35rem;
+}
+
+.command-palette-empty {
+  padding: 1rem;
+  opacity: 0.7;
+}
+
+.command-palette-footer {
+  margin: 0;
+  padding: 0.65rem 1rem 0.85rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  border-top: 1px solid var(--primary-border);
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  align-items: center;
+}

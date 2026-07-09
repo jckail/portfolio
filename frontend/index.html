@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2X0WFK46K5"></script>
+    <!-- Google Analytics: consent-mode defaults to denied until the visitor accepts -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    wait_for_update: 500
+  });
+  try {
+    if (localStorage.getItem('portfolio_cookie_consent') === 'accepted') {
+      gtag('consent', 'update', {
+        analytics_storage: 'granted',
+        ad_storage: 'denied'
+      });
+    }
+  } catch (e) {}
   gtag('js', new Date());
-
-  gtag('config', 'G-2X0WFK46K5');
+  gtag('config', 'G-2X0WFK46K5', { anonymize_ip: true });
 </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2X0WFK46K5"></script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/images/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,6 +32,12 @@
     <meta property="og:description" content="Software Engineer with 12+ years experience in AI and Big Data. Expert in Python, AWS, GCP, and Apache Spark. Proven track record of delivering impactful data solutions for Fortune 50 companies." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jordan-kail.com" />
+    <meta property="og:image" content="https://jordan-kail.com/images/headshot/headshot.webp" />
+    <meta property="og:image:alt" content="Jordan Kail headshot" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jordan Kail - Software Engineer" />
+    <meta name="twitter:description" content="Software Engineer with 12+ years experience in AI and Big Data." />
+    <meta name="twitter:image" content="https://jordan-kail.com/images/headshot/headshot.webp" />
     <link rel="canonical" href="https://jordan-kail.com" />
     <link rel="alternate" href="https://www.jordan-kail.com" />
     <link rel="alternate" href="https://jckail.com" />
@@ -31,8 +49,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <!-- The About-section headshot is the LCP element; fetch it early -->
+    <link rel="preload" as="image" href="/images/headshot/headshot.webp" type="image/webp">
     <title>Jordan Kail - Engineer</title>
-    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Jordan Kail",
+      "url": "https://jordan-kail.com",
+      "jobTitle": "Software Engineer",
+      "description": "Software Engineer with 12+ years experience in AI and Big Data. Expert in Python, AWS, GCP, and Apache Spark.",
+      "knowsAbout": ["Python", "SQL", "Go", "AI", "Big Data", "Cloud Architecture", "AWS", "GCP", "Apache Spark", "Machine Learning"]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

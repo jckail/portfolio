@@ -1,0 +1,36 @@
+# Keep the Docker build context small: only frontend sources,
+# backend sources, and requirements.txt are needed for the build.
+.git
+.github
+.gitignore
+.dockerignore
+.vscode
+.idea
+
+# Frontend artifacts (rebuilt inside the image)
+frontend/node_modules
+frontend/dist
+frontend/coverage
+frontend/.eslintcache
+
+# Python artifacts
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.venv
+venv
+
+# Infra / docs / tooling not needed inside the image
+infra
+docs
+helpers/*.sh
+helpers/README.md
+helpers/.devcontainer
+
+# Local environment and logs
+.env
+.env.*
+**/*.log
+backend/app/logs

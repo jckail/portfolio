@@ -1,9 +1,9 @@
 # Production Dockerfile
-FROM node:18-alpine as frontend-build
+FROM node:22-alpine AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci
 COPY frontend/ ./
 
 # Build frontend with production configuration
@@ -25,14 +25,16 @@ COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/publ
 
 # Install backend dependencies
 COPY requirements.txt .
-RUN pip install  -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the backend code
 COPY backend /app/backend/
 
 # Set environment variables
-ENV PYTHONPATH=/app
-ENV NODE_ENV=production
+ENV PYTHONPATH=/app \
+    NODE_ENV=production \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 # Entry point script
 COPY <<EOF /app/start.sh
@@ -41,7 +43,7 @@ echo "Starting production environment..."
 echo "Checking environment variables..."
 
 # List of required environment variables
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE SUPABASE_JWT_SECRET SUPABASE_PW ANTHROPIC_API_KEY SENDGRID_API_KEY"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE ANTHROPIC_API_KEY SENDGRID_API_KEY"
 
 # Check each required variable
 for var in \$required_vars; do

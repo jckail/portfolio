@@ -6,7 +6,7 @@ export interface Skill {
   tags: string[];
   description: string;
   weblink: string;
-  examples: Record<string, any>;
+  examples: Record<string, string>;
   general_category: string;
   sub_category: string;
 }

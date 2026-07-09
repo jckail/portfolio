@@ -1,42 +1,30 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
-import { useChat } from './hooks/useChat';
+
 import { ChatButton } from './components/ChatButton';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessages } from './components/ChatMessages';
 import { ChatInput } from './components/ChatInput';
 import { trackChatOpen } from '../../../shared/utils/analytics';
 
-interface ChatProps {
-  externalOpen?: boolean;
-  externalSetOpen?: (open: boolean) => void;
-}
+import type { UseChatReturn } from './hooks/useChat';
 
-const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
-  const {
-    open: internalOpen,
-    setOpen: internalSetOpen,
-    message,
-    setMessage,
-    messages,
-    isLoading,
-    handleSendMessage,
-    initializeChat
-  } = useChat();
+// All chat state comes from the single useChat() instance in ChatPortal
+type ChatProps = UseChatReturn;
 
-  // Use external state if provided, otherwise use internal state
-  const open = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setOpen = externalSetOpen || internalSetOpen;
-
+const Chat: React.FC<ChatProps> = ({
+  open,
+  setOpen,
+  message,
+  setMessage,
+  messages,
+  isLoading,
+  handleSendMessage,
+  handleSuggestedPrompt,
+  showSuggestions,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  // Initialize chat when component mounts if it should be open
-  useEffect(() => {
-    if (open) {
-      initializeChat();
-    }
-  }, [open, initializeChat]);
 
   const handleClickOpen = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -110,9 +98,11 @@ const Chat: React.FC<ChatProps> = ({ externalOpen, externalSetOpen }) => {
             p: '16px !important'
           }}
         >
-          <ChatMessages 
+          <ChatMessages
             messages={messages}
             isLoading={isLoading}
+            showSuggestions={showSuggestions}
+            onSuggestedPrompt={handleSuggestedPrompt}
           />
 
           <ChatInput

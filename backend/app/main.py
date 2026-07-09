@@ -1,39 +1,25 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from .api import api_router, ws_router
-from .utils.logger import setup_logging
-from .models.data_loader import load_all
-from .utils.supabase_client import supabase
-import os
-from dotenv import load_dotenv
-import sys
 import asyncio
+import os
+import sys
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from .api import api_router, ws_router
+from .config import get_settings, missing_required_vars
+from .models.data_loader import load_all
+from .utils.logger import get_supabase_handler, setup_logging
+from .utils.request_context import clear_request_id, set_request_id
+from .utils.supabase_client import supabase
 
 # Configure logging
 logger = setup_logging()
 
-# Load environment variables
-load_dotenv()
-
-# Verify required environment variables
-required_env_vars = [
-    "SUPABASE_URL",
-    "SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE",
-    "ALLOWED_ORIGINS",
-    "PRODUCTION_URL",
-    "PORT",
-    "ADMIN_EMAIL",
-    "RESUME_FILE",
-    "SUPABASE_JWT_SECRET",
-    "SUPABASE_PW",
-    "ANTHROPIC_API_KEY"
-]
-
-# Check environment variables without excessive logging
-missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+# Fail fast on misconfigured deployments
+missing_vars = missing_required_vars()
 if missing_vars:
     error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
     logger.error(error_msg)
@@ -41,28 +27,120 @@ if missing_vars:
 
 logger.info("All required environment variables are present")
 
+settings = get_settings()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application startup and shutdown."""
+    logger.info("Starting up the application...")
+
+    # Start shipping buffered logs to Supabase now that the event loop exists
+    supabase_handler = get_supabase_handler()
+    if supabase_handler is not None:
+        supabase_handler.start()
+
+    try:
+        # Initialize critical components first
+        await initialize_supabase()
+
+        # Load data and initialize static files concurrently; surface any failure
+        results = await asyncio.gather(
+            preload_data(),
+            initialize_static_files(),
+            return_exceptions=True
+        )
+        for result in results:
+            if isinstance(result, BaseException):
+                raise result
+
+        # Ensure logs directory exists
+        logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+        os.makedirs(logs_dir, exist_ok=True)
+
+        logger.info(f"Configured to run on port: {settings.port}")
+
+    except Exception as e:
+        logger.error(f"Startup error: {str(e)}")
+        raise
+
+    yield
+
+    logger.info("Shutting down the application...")
+    if supabase_handler is not None:
+        await supabase_handler.stop()
+
+
 # Initialize FastAPI
 app = FastAPI(
     title="jordan-kail.com API",
     description="API for the Jordan-Kail.com application",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
-
-# Configure CORS
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS", 
-    "http://localhost:*,http://0.0.0.0:*,http://127.0.0.1:*"
-).split(",")
-allowed_origins = [origin.strip() for origin in allowed_origins]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=list(settings.allowed_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Compress API/static responses larger than 1 KB
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+
+@app.middleware("http")
+async def add_response_headers(request: Request, call_next):
+    """Attach request ID, cache policies, and security headers.
+
+    Vite emits content-hashed filenames under /assets/, so those files can be
+    cached forever. Images are unhashed, so they get a shorter TTL. HTML must
+    always be revalidated so deploys take effect immediately.
+    """
+    incoming = request.headers.get("x-request-id")
+    request_id = set_request_id(incoming if incoming else None)
+    request.state.request_id = request_id
+
+    try:
+        response = await call_next(request)
+
+        response.headers["X-Request-ID"] = request_id
+
+        if "cache-control" not in response.headers:
+            path = request.url.path
+            if path.startswith("/assets/"):
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            elif path.startswith(("/images/", "/api/assets/")):
+                response.headers["Cache-Control"] = "public, max-age=86400"
+            elif path == "/" or path.endswith(".html"):
+                response.headers["Cache-Control"] = "no-cache"
+
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        # CSP: allow self + Google Fonts/GA; GA config is inline in index.html
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; "
+            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com wss: ws:; "
+            "frame-src 'self'; "
+            "worker-src 'self' blob:; "
+            "upgrade-insecure-requests"
+        )
+        return response
+    finally:
+        clear_request_id()
 
 # Mount API routes first
 app.include_router(api_router)
@@ -98,7 +176,7 @@ async def initialize_static_files():
         # if not os.path.exists(images_dir):
         #     logger.warning(f"Images directory does not exist: {images_dir}")
         # app.mount("/api/images", StaticFiles(directory=images_dir), name="images")
-        
+
         # Define the path to the assets directory
         assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
         if os.path.exists(assets_dir):
@@ -114,34 +192,3 @@ async def initialize_static_files():
         logger.error(f"Error mounting static files: {str(e)}")
         raise
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize any necessary services on startup"""
-    logger.info("Starting up the application...")
-    try:
-        # Initialize critical components first
-        await initialize_supabase()
-        
-        # Load data and initialize static files concurrently
-        await asyncio.gather(
-            preload_data(),
-            initialize_static_files(),
-            return_exceptions=True
-        )
-        
-        # Ensure logs directory exists
-        logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
-        os.makedirs(logs_dir, exist_ok=True)
-        
-        # Log the port we're trying to use
-        port = os.getenv('PORT', '8080')
-        logger.info(f"Configured to run on port: {port}")
-        
-    except Exception as e:
-        logger.error(f"Startup error: {str(e)}")
-        raise
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up any resources on shutdown"""
-    logger.info("Shutting down the application...")

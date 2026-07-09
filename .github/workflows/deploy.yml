@@ -1,0 +1,94 @@
+name: Deploy
+
+# Deploys to Cloud Run on pushes to main (or manually via workflow_dispatch).
+#
+# Authentication uses Workload Identity Federation — no service-account keys.
+# Provision the WIF pool/provider and deployer service account with the
+# Terraform config in infra/ (set the github_repository variable), then add
+# these repository secrets from the Terraform outputs:
+#   GCP_WORKLOAD_IDENTITY_PROVIDER  projects/<number>/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
+#   GCP_DEPLOYER_SERVICE_ACCOUNT    <service>-deployer@<project>.iam.gserviceaccount.com
+# and these repository variables:
+#   GCP_PROJECT_ID, GCP_REGION, CLOUD_RUN_SERVICE, AR_REPOSITORY
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy to Cloud Run
+    runs-on: ubuntu-latest
+    # Skip gracefully on forks / repos where deployment is not configured
+    if: vars.GCP_PROJECT_ID != ''
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION || 'us-central1' }}
+      SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'quickresume' }}
+      REPOSITORY: ${{ vars.AR_REPOSITORY || 'portfolio' }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Build and push image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: helpers/Dockerfile.prod
+        push: true
+        tags: |
+          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy "$SERVICE" \
+          --project "$PROJECT_ID" \
+          --region "$REGION" \
+          --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}" \
+          --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
+          --quiet
+
+    - name: Verify deployment
+      run: |
+        URL=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" \
+          --format 'value(status.url)')
+        echo "Service URL: $URL"
+        for i in $(seq 1 12); do
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health" || true)
+          if [ "$STATUS" = "200" ]; then
+            echo "Health check passed"
+            exit 0
+          fi
+          echo "Attempt $i: health returned $STATUS; retrying in 5s..."
+          sleep 5
+        done
+        echo "Health check failed"
+        exit 1

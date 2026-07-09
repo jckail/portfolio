@@ -49,7 +49,7 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height)+ 75px);
+    scroll-margin-top: calc(var(--header-height) + 75px);
 }
   .main-content {
       padding-top: 55px;

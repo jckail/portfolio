@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+
 import { Icon } from '@/shared/components/elements/icon';
 import { Button } from '@/shared/components/elements/button';
 import './modal.css';
@@ -41,10 +42,20 @@ export function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div 
+    // Click-outside-to-close is a mouse-only affordance; keyboard users
+    // close via Escape (handled above) or the close button.
+    <div
+      className="modal-overlay"
+      role="presentation"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
         className={`modal modal-${size}`}
-        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title ?? 'Dialog'}
       >
         {showCloseButton && (
           <Button

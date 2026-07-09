@@ -1,0 +1,38 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["frontend", "helpers", "infra"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (undefined names, unused imports/vars)
+    "I",   # import sorting
+    "B",   # bugbear (likely bugs)
+    "UP",  # pyupgrade (modern syntax)
+    "ASYNC", # async pitfalls (blocking calls in async functions)
+]
+ignore = [
+    # Long lines are handled pragmatically; formatter-adjacent nits skipped
+    "E501",
+    # `raise ... from e` chaining: valuable but a large mechanical diff;
+    # revisit when touching the affected handlers
+    "B904",
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection idiom calls these in argument defaults
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Header",
+    "fastapi.Query",
+    "fastapi.Body",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests use fixtures/asserts patterns that trip bugbear's opinionated rules
+"backend/tests/*" = ["B008", "B011"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]

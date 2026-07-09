@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
+
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
+import { postJson, endpoints } from '../../../../shared/utils/api';
+import {
+  CONTACT_DRAFT_EVENT,
+  clearContactDraft,
+  loadContactDraft,
+  type ContactDraft,
+} from '../../../../shared/utils/contact-draft';
 
 interface ContactModalProps {
   email: string;
@@ -10,6 +20,21 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
+const DEFAULT_FORM = {
+  from_email: '',
+  subject: 'Connecting via your Portfolio',
+  message: 'Hi I wanted to connect ...',
+};
+
+function mergeDraft(draft: ContactDraft | null) {
+  if (!draft) return { ...DEFAULT_FORM };
+  return {
+    from_email: draft.from_email ?? DEFAULT_FORM.from_email,
+    subject: draft.subject ?? DEFAULT_FORM.subject,
+    message: draft.message ?? DEFAULT_FORM.message,
+  };
+}
+
 const ContactModal: React.FC<ContactModalProps> = ({
   email,
   phone,
@@ -17,55 +42,30 @@ const ContactModal: React.FC<ContactModalProps> = ({
   country,
   onClose
 }) => {
-  const [formData, setFormData] = useState({
-    from_email: '',
-    subject: 'Connecting via your Portfolio',
-    message: 'Hi I wanted to connect ...'
-  });
+  const [formData, setFormData] = useState(() => mergeDraft(loadContactDraft()));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [fromAssistant, setFromAssistant] = useState(() => Boolean(loadContactDraft()));
 
+  // URL sync (?contact=open and back-button behavior) is owned entirely by
+  // the useContact hook; this modal only reports analytics.
   useEffect(() => {
-    // Track modal open
     trackContactOpened();
-
-    // Update URL with contact parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('contact', 'open');
-
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-
-    window.history.pushState({ contactModal: true }, '', finalUrl);
-
-    return () => {
-      // Remove contact parameter when modal closes
-      const closeUrl = new URL(window.location.href);
-      closeUrl.searchParams.delete('contact');
-
-      // Preserve the hash if it exists
-      const closeHash = window.location.hash;
-      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
-      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-
-      window.history.pushState({ contactModal: false }, '', closeFinalUrl);
-    };
   }, []);
 
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('contact')) {
-        onClose();
-      }
+    const onDraft = (event: Event) => {
+      const detail = (event as CustomEvent<ContactDraft>).detail;
+      setFormData(mergeDraft(detail ?? null));
+      setFromAssistant(true);
     };
+    window.addEventListener(CONTACT_DRAFT_EVENT, onDraft);
+    return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
+  }, []);
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
+  useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -81,28 +81,15 @@ const ContactModal: React.FC<ContactModalProps> = ({
     setError(null);
 
     try {
-      const response = await fetch('api/contact/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to send email');
-      }
+      await postJson(endpoints.sendEmail, formData);
 
       // Track successful message submission
       trackContactMessage(formData.message.length);
 
       setSuccess(true);
-      setFormData({
-        from_email: '',
-        subject: 'Connecting via your Portfolio',
-        message: 'Hi I wanted to connect ...'
-      });
+      clearContactDraft();
+      setFromAssistant(false);
+      setFormData({ ...DEFAULT_FORM });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -111,9 +98,21 @@ const ContactModal: React.FC<ContactModalProps> = ({
   };
 
   return (
-    <div className="contact-modal-overlay" onClick={onClose}>
-      <div className="contact-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-      <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="contact-modal-overlay"
+      role="presentation"
+      onClick={(e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={trapRef}
+        className="contact-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Contact"
+      >
+      <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
 
         <div className="contact-modal-header">
 
@@ -138,6 +137,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
           </div>
 
           <div className="contact-form-container">
+            {fromAssistant && (
+              <p className="contact-draft-note" role="status">
+                Drafted by the AI assistant — edit anything before sending.
+              </p>
+            )}
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="contact-form-group">
                 <label htmlFor="from_email">Your Email:</label>

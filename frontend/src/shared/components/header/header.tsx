@@ -1,7 +1,8 @@
 import React, { useState, useEffect, memo } from 'react';
+
 import { Theme } from '../../../types/theme';
-import { Contact } from '../../../types/resume';
 import { SidePanel } from '../navigation';
+import { getQueryParam, setQueryParam } from '../../utils/url-params';
 import { useData } from '../../../app/providers/data-provider';
 import {
   MoonIcon,
@@ -15,9 +16,6 @@ import '../../../styles/components/header/header.css';
 interface HeaderProps {
   theme: Theme;
   toggleTheme: () => void;
-  handleResumeClick: () => void;
-  handleAdminClick: () => void;
-  isAdminLoggedIn: boolean;
   isToggleHidden: boolean;
 }
 
@@ -34,6 +32,8 @@ const ThemeIcon = memo(({ theme }: { theme: Theme }) => {
       return <MoonIcon />;
   }
 });
+ThemeIcon.displayName = 'ThemeIcon';
+
 
 // Loading state component
 const HeaderSkeleton = () => (
@@ -52,30 +52,17 @@ const HeaderSkeleton = () => (
 const Header: React.FC<HeaderProps> = memo(({
   theme,
   toggleTheme,
-  handleResumeClick,
-  handleAdminClick,
-  isAdminLoggedIn,
   isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const { contactData, isLoading, error } = useData();
 
   const updateURL = (isOpen: boolean) => {
-    const url = new URL(window.location.href);
-    if (isOpen) {
-      url.searchParams.set('sidepanel', 'open');
-    } else {
-      url.searchParams.delete('sidepanel');
-    }
-    window.history.replaceState({}, '', url.toString());
+    setQueryParam('sidepanel', isOpen ? 'open' : null, { replace: true });
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sidePanelState = params.get('sidepanel');
-    const shouldBeOpen = sidePanelState === 'open';
-    
-    setIsSidePanelOpen(shouldBeOpen);
+    setIsSidePanelOpen(getQueryParam('sidepanel') === 'open');
   }, []);
 
   const toggleSidePanel = () => {
@@ -129,5 +116,7 @@ const Header: React.FC<HeaderProps> = memo(({
     </>
   );
 });
+Header.displayName = 'Header';
+
 
 export default Header;

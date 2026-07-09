@@ -1,5 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
+import { buttonize } from '../../../../shared/utils/a11y';
+import { findSkillKey } from '../../../../shared/utils/skills';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
+
 import type { Skill } from './SkillModal';
 import '../../../../styles/components/modal.css';
 
@@ -18,41 +25,44 @@ export interface ExperienceItem {
 
 interface ExperienceModalProps {
   experience: ExperienceItem;
+  /** Data key used for the shareable ?company= deep link. */
+  experienceKey?: string;
   skillsData: Record<string, Skill>;
   onClose: () => void;
   onSelectSkill: (skillKey: string) => void;
 }
 
 const ExperienceModal: React.FC<ExperienceModalProps> = ({ 
-  experience, 
+  experience,
+  experienceKey,
   skillsData,
   onClose,
   onSelectSkill 
 }) => {
-  useEffect(() => {
-    // Handle browser back button
-    const handlePopState = (event: PopStateEvent) => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('company')) {
-        onClose();
-      }
-    };
+  // URL sync (?company= and back-button behavior) is owned by useExperience.
+  useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
-
-  // Function to find skill key by display name
-  const findSkillKey = (tagName: string): string | undefined => {
-    return Object.entries(skillsData).find(
-      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
-    )?.[0];
-  };
+  const shareUrl = experienceKey
+    ? `${window.location.origin}${window.location.pathname}?company=${encodeURIComponent(experienceKey)}`
+    : undefined;
 
   return (
-    <div className="experience-modal-overlay" onClick={onClose}>
-      <div className="experience-modal-content" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="experience-modal-overlay"
+      role="presentation"
+      onClick={(e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={trapRef}
+        className="experience-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${experience.company} experience details`}
+      >
+        <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="experience-modal-wrapper"></div>
         <div className="experience-modal-timeline-header-wrapper">
           {experience.logoPath && (
@@ -87,14 +97,18 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             <h4>Tech Stack:</h4>
             <div className="skill-tags">
               {experience.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
-                return (
-                  <span 
-                    key={index} 
+                const skillKey = findSkillKey(skillsData, tag);
+                return skillKey ? (
+                  <span
+                    key={index}
                     className="skill-tag"
-                    onClick={() => skillKey && onSelectSkill(skillKey)}
-                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                    style={{ cursor: 'pointer' }}
+                    {...buttonize(() => onSelectSkill(skillKey))}
                   >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                ) : (
+                  <span key={index} className="skill-tag">
                     {tag.replace(/-/g, ' ')}
                   </span>
                 );
@@ -107,6 +121,11 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
               ))}
             </ul>
           </div>
+          {shareUrl && (
+            <div className="project-modal-actions">
+              <CopyLinkButton url={shareUrl} />
+            </div>
+          )}
         </div>
         
       </div>

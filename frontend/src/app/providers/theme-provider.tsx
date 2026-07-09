@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+
 import { useThemeStore } from '../../shared/stores/theme-store';
 import { Theme } from '../../types/theme';
 

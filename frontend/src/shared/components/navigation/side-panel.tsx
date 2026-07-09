@@ -1,5 +1,5 @@
 import React from 'react';
-import { useScrollSpy } from '../../hooks/use-scroll-spy';
+
 import { scrollToSection } from '../../utils/scroll-utils';
 import '../../../styles/components/navigation/side-panel.css';
 
@@ -8,12 +8,11 @@ interface SidePanelProps {
   onClose: () => void;
 }
 
-// Custom hook to get current section from URL and scroll position
+// Custom hook to get current section from URL and scroll position.
+// Note: the app-wide useScrollSpy (owned by MainContent) handles URL updates
+// and analytics; this hook only tracks the highlighted nav item locally.
 const useCurrentSection = () => {
   const [currentSection, setCurrentSection] = React.useState('');
-
-  // Use scroll spy to update URL on scroll
-  useScrollSpy();
 
   React.useEffect(() => {
     const updateSection = () => {
@@ -90,7 +89,12 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div className={`side-panel-overlay ${isOpen ? 'active' : ''}`} onClick={onClose} />
+      {/* Backdrop: mouse-only dismiss affordance; keyboard users close via the nav buttons */}
+      <div
+        className={`side-panel-overlay ${isOpen ? 'active' : ''}`}
+        role="presentation"
+        onClick={onClose}
+      />
       <nav className={`side-panel ${isOpen ? 'open' : ''}`}>
         <div className="side-panel-content">
           {sections.map((section) => (

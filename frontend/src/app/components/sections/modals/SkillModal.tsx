@@ -1,5 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
+import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
+import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import '../../../../styles/components/modal.css';
 
 export interface Skill {
@@ -16,53 +20,39 @@ export interface Skill {
 
 interface SkillModalProps {
   skill: Skill;
+  /** Data key used for the shareable ?skill= deep link. */
+  skillKey?: string;
   onClose: () => void;
 }
 
-const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
-  useEffect(() => {
-    // Update URL with skill parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('skill', skill.display_name.toLowerCase().replace(/\s+/g, '-'));
-    
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
-    window.history.pushState({ skillModal: true }, '', finalUrl);
+// URL sync (the ?skill= param and back-button behavior) is owned entirely by
+// the useSkill hook. Previously this modal also pushed its own URL using a
+// display-name slug, which conflicted with useSkill's data key and broke
+// shared/bookmarked skill links.
+const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
+  useEscapeKey(onClose);
+  const trapRef = useFocusTrap(true);
 
-    return () => {
-      // Remove skill parameter when modal closes
-      const closeUrl = new URL(window.location.href);
-      closeUrl.searchParams.delete('skill');
-      
-      // Preserve the hash if it exists
-      const closeHash = window.location.hash;
-      const closeUrlWithoutHash = closeUrl.toString().split('#')[0];
-      const closeFinalUrl = closeHash ? `${closeUrlWithoutHash}${closeHash}` : closeUrlWithoutHash;
-      
-      window.history.pushState({ skillModal: false }, '', closeFinalUrl);
-    };
-  }, [skill.display_name]);
-
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('skill')) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [onClose]);
+  const shareUrl = skillKey
+    ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
+    : undefined;
 
   return (
-    <div className="skill-modal-overlay" onClick={onClose}>
-      <div className="skill-modal-content" onClick={e => e.stopPropagation()}>
-        <button className="modal-close-button" onClick={onClose}>&times;</button>
+    <div
+      className="skill-modal-overlay"
+      role="presentation"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={trapRef}
+        className="skill-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label={skill.display_name}
+      >
+        <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="modal-header">
           <h5>{skill.display_name}</h5>
           <div className="modal-icon-wrapper">
@@ -99,9 +89,12 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
               </ul>
             </div>
           )}
-          <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
-            Click to learn More about {skill.display_name}
-          </a>
+          <div className="project-modal-actions">
+            <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
+              Learn more about {skill.display_name}
+            </a>
+            {shareUrl && <CopyLinkButton url={shareUrl} />}
+          </div>
         </div>
       </div>
     </div>

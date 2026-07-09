@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+
 import { useAdminStore } from '../../../shared/stores/admin-store';
 import AdminLogin from './admin-login';
 import TelemetryBanner from '../../../shared/components/telemetry/telemetry-banner';
 
 const AdminHandler: React.FC = () => {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-  const { isLoggedIn, logout, verifyToken } = useAdminStore();
+  const { isLoggedIn, verifyToken } = useAdminStore();
 
   // Check for existing token on mount
   useEffect(() => {
@@ -13,7 +14,7 @@ const AdminHandler: React.FC = () => {
     if (storedToken && !isLoggedIn) {
       verifyToken(storedToken).catch(console.error);
     }
-  }, []);
+  }, [isLoggedIn, verifyToken]);
 
   // Handle keyboard shortcut
   useEffect(() => {
@@ -27,18 +28,6 @@ const AdminHandler: React.FC = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
-
-  const handleAdminClick = async () => {
-    if (isLoggedIn) {
-      try {
-        await logout();
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
-    } else {
-      setIsAdminLoginOpen(true);
-    }
-  };
 
   const handleLoginSuccess = () => {
     setIsAdminLoginOpen(false);

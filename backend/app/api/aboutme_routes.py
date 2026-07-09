@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import Response
+
 from ..models import AboutMe
 from ..models.data_loader import load_aboutme
 

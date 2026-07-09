@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useResume } from '../../providers/resume-provider';
 import '../../../styles/components/resume/resume-pdf.css';
 

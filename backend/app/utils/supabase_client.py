@@ -1,22 +1,21 @@
-from supabase import create_client, Client
-import os
+import asyncio
 import sys
-from dotenv import load_dotenv
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import Any
 
-load_dotenv()
+from supabase import Client, create_client
+
+from backend.app.config import get_settings
+
 
 def get_supabase_config():
-    """Get Supabase configuration from environment variables."""
-    url = os.getenv("SUPABASE_URL")
-    anon_key = os.getenv("SUPABASE_ANON_KEY")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE")
-    
-    if not url or not anon_key or not service_role_key:
+    """Get Supabase configuration from application settings."""
+    settings = get_settings()
+
+    if not settings.supabase_url or not settings.supabase_anon_key or not settings.supabase_service_role:
         raise ValueError("Supabase URL, anon key, and service role key must be set in environment variables")
-    
-    return url, anon_key, service_role_key
+
+    return settings.supabase_url, settings.supabase_anon_key, settings.supabase_service_role
 
 class SupabaseClient:
     _regular_client = None
@@ -52,31 +51,37 @@ class SupabaseClient:
         """Create a new admin user using the service role client."""
         try:
             admin_client = cls.get_admin_client()
-            response = admin_client.auth.admin.create_user({
-                "email": email,
-                "password": password,
-                "email_confirm": True
-            })
-            
+            response = await asyncio.to_thread(
+                admin_client.auth.admin.create_user,
+                {
+                    "email": email,
+                    "password": password,
+                    "email_confirm": True
+                }
+            )
+
             if response.user:
-                await admin_client.rpc(
-                    'set_claim',
-                    {
-                        'uid': response.user.id,
-                        'claim': 'role',
-                        'value': 'admin'
-                    }
+                # supabase-py rpc() is synchronous; run it off the event loop
+                await asyncio.to_thread(
+                    lambda: admin_client.rpc(
+                        'set_claim',
+                        {
+                            'uid': response.user.id,
+                            'claim': 'role',
+                            'value': 'admin'
+                        }
+                    ).execute()
                 )
             return response
         except Exception as e:
             raise Exception(f"Failed to create admin user: {str(e)}")
 
     @classmethod
-    async def verify_token(cls, token: str) -> Optional[Dict[str, Any]]:
+    async def verify_token(cls, token: str) -> dict[str, Any] | None:
         """Verify a JWT token and return user data if valid."""
         try:
             admin_client = cls.get_admin_client()
-            user = admin_client.auth.get_user(token)
+            user = await asyncio.to_thread(admin_client.auth.get_user, token)
             return user.user if user else None
         except Exception:
             return None
@@ -86,34 +91,37 @@ class SupabaseClient:
         """Sign in a user with email and password."""
         try:
             client = cls.get_client()
-            auth_response = client.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            auth_response = await asyncio.to_thread(
+                client.auth.sign_in_with_password,
+                {
+                    "email": email,
+                    "password": password
+                }
+            )
             return auth_response
         except Exception as e:
             raise Exception(f"Authentication failed: {str(e)}")
 
     @classmethod
     async def sign_out(cls, token: str = None):
-        """Sign out the current user or a specific session."""
+        """Sign out the current user or invalidate a specific session token."""
         try:
             if token:
                 admin_client = cls.get_admin_client()
-                admin_client.auth.admin.sign_out(token)
+                await asyncio.to_thread(admin_client.auth.admin.sign_out, token)
             else:
                 client = cls.get_client()
-                client.auth.sign_out()
+                await asyncio.to_thread(client.auth.sign_out)
         except Exception as e:
             raise Exception(f"Sign out failed: {str(e)}")
 
     @classmethod
-    async def store_log(cls, level: str, message: str, session_uuid: str = None, metadata: Dict[str, Any] = None, source: str = "backend", ip_address: str = None):
-        """Store a log entry in Supabase."""
+    async def store_log(cls, level: str, message: str, session_uuid: str = None, metadata: dict[str, Any] = None, source: str = "backend", ip_address: str = None):
+        """Store a log entry in Supabase. Returns None on failure."""
         try:
             admin_client = cls.get_admin_client()
             log_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'level': level.upper(),
                 'message': message,
                 'session_uuid': session_uuid,
@@ -121,23 +129,25 @@ class SupabaseClient:
                 'source': source,
                 'ip_address': ip_address
             }
-            
-            result = admin_client.table('logs').insert(log_entry).execute()
+
+            result = await asyncio.to_thread(
+                lambda: admin_client.table('logs').insert(log_entry).execute()
+            )
             return result
         except Exception as e:
             print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
             return None
 
     @classmethod
-    async def store_logs_batch(cls, logs: List[Dict[str, Any]]):
-        """Store multiple log entries in Supabase at once."""
+    async def store_logs_batch(cls, logs: list[dict[str, Any]]):
+        """Store multiple log entries in Supabase at once. Returns None on failure."""
         try:
             admin_client = cls.get_admin_client()
             log_entries = []
-            
+
             for log in logs:
                 log_entry = {
-                    'timestamp': datetime.utcnow().isoformat(),
+                    'timestamp': datetime.now(UTC).isoformat(),
                     'level': log['level'].upper(),
                     'message': log['message'],
                     'metadata': log['metadata'],
@@ -145,9 +155,11 @@ class SupabaseClient:
                     'ip_address': log['ip_address']
                 }
                 log_entries.append(log_entry)
-            
+
             if log_entries:
-                result = admin_client.table('logs').insert(log_entries).execute()
+                result = await asyncio.to_thread(
+                    lambda: admin_client.table('logs').insert(log_entries).execute()
+                )
                 return result
             return None
         except Exception as e:
@@ -156,17 +168,19 @@ class SupabaseClient:
 
     @classmethod
     async def store_chat_message(cls, google_analytics_session_id: str, message_type: str, message_detail: str):
-        """Store a chat message in Supabase."""
+        """Store a chat message in Supabase. Returns None on failure."""
         try:
             admin_client = cls.get_admin_client()
             message_entry = {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'google_analytics_session_id': google_analytics_session_id,
                 'type': message_type,  # 'sent' or 'received'
                 'message_detail': message_detail
             }
-            
-            result = admin_client.table('portfolio_assistant_messages').insert(message_entry).execute()
+
+            result = await asyncio.to_thread(
+                lambda: admin_client.table('portfolio_assistant_messages').insert(message_entry).execute()
+            )
             return result
         except Exception as e:
             print(f"Failed to store chat message in Supabase: {str(e)}", file=sys.stderr)

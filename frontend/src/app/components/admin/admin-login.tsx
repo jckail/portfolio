@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+
 import { useAdminStore } from '../../../shared/stores/admin-store';
-import { useTelemetryStore } from '../../../shared/stores/telemetry-store';
 import '../../../styles/components/admin/admin-login.css';
 
 interface AdminLoginProps {
@@ -23,15 +23,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ isOpen, onClose, onLoginSuccess
     try {
       const success = await login({ email, password });
       if (success) {
-        const token = localStorage.getItem('adminToken');
-        // if (token) {
-        //   try {
-        //     await fetchLogs(token);
-        //   } catch (err) {
-        //     console.error('Failed to fetch logs:', err);
-        //     // Don't block login success if logs fail
-        //   }
-        // }
         onLoginSuccess();
         onClose();
         setEmail('');

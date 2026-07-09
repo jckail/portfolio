@@ -27,7 +27,7 @@ const SVGIcon: React.FC<SVGIconProps> = ({ component: IconComponent, ...allProps
       acc[key] = value;
     }
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, unknown>);
 
   // Ensure basic accessibility and sizing props are set
   const finalProps: React.SVGProps<SVGSVGElement> = {

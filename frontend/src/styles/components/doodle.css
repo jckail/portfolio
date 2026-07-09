@@ -2,15 +2,76 @@
   @apply w-full relative;
   min-height: 0;
   transition: min-height 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
 }
 
 .doodle-section.visible {
   min-height: 100vh;
 }
 
+.doodle-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 1rem 1.25rem 0.5rem;
+  color: var(--text-color);
+}
+
+.doodle-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.doodle-hint {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.doodle-clear {
+  appearance: none;
+  border: 1px solid var(--primary-border);
+  background: var(--section-background);
+  color: var(--text-color);
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.doodle-clear:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
 .doodle-content {
-  @apply w-full border border-gray-800;
-  height: 100vh;
+  @apply w-full;
+  flex: 1;
+  min-height: 70vh;
+  border: var(--border-thickness) solid var(--primary-border);
+  border-radius: var(--radius-md);
+  margin: 0.5rem 1rem 1.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.1), transparent 45%),
+    var(--section-background);
+  touch-action: none;
+}
+
+.doodle-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
 }
 
 .doodle-container {
@@ -32,4 +93,8 @@
 
 .doodle-container.party-mode .doodle-section {
   min-height: 100vh;
+}
+
+.doodle-container.party-mode .doodle-content {
+  border-color: #f472b6;
 }

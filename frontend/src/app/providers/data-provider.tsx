@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import { getJson, endpoints } from '../../shared/utils/api';
+
 import type { Skill } from '../components/sections/modals/SkillModal';
 import type { ExperienceItem } from '../components/sections/modals/ExperienceModal';
 import type { AboutMe, ProjectsData, Contact as ContactData } from '../../types/resume';
@@ -73,37 +76,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        // Fetch all data in parallel
-        const [experienceRes, skillsRes, projectsRes, aboutMeRes, contactRes] = await Promise.all([
-          fetch('/api/experience', { 
-            signal: controller.signal,
-            headers: { 'Cache-Control': 'max-age=3600' }
-          }),
-          fetch('/api/skills', { 
-            signal: controller.signal,
-            headers: { 'Cache-Control': 'max-age=3600' }
-          }),
-          fetch('/api/projects', { 
-            signal: controller.signal,
-            headers: { 'Cache-Control': 'max-age=3600' }
-          }),
-          fetch('/api/aboutme', { 
-            signal: controller.signal,
-            headers: { 'Cache-Control': 'max-age=3600' }
-          }),
-          fetch('/api/contact/info', { 
-            signal: controller.signal,
-            headers: { 'Cache-Control': 'max-age=3600' }
-          })
-        ]);
-
-        // Parse all responses in parallel
+        // Fetch all data in parallel; getJson throws on any error status so
+        // we never parse an error body and render garbage
+        const init = { signal: controller.signal };
         const [experience, skills, projects, aboutMe, contact] = await Promise.all([
-          experienceRes.json() as Promise<ExperienceData>,
-          skillsRes.json() as Promise<SkillsData>,
-          projectsRes.json() as Promise<ProjectsData>,
-          aboutMeRes.json() as Promise<AboutMe>,
-          contactRes.json() as Promise<ContactData>
+          getJson<ExperienceData>(endpoints.experience, init),
+          getJson<SkillsData>(endpoints.skills, init),
+          getJson<ProjectsData>(endpoints.projects, init),
+          getJson<AboutMe>(endpoints.aboutMe, init),
+          getJson<ContactData>(endpoints.contactInfo, init)
         ]);
 
         // Update cache

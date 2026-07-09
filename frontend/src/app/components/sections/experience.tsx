@@ -1,10 +1,15 @@
 import React, { lazy, Suspense, memo } from 'react';
+
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
+import { buttonize } from '../../../shared/utils/a11y';
+import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { findSkillKey } from '../../../shared/utils/skills';
 import '../../../styles/components/sections/experience.css';
+import { useExperience } from './experience/hooks/useExperience';
+
 import type { ExperienceItem } from './modals/ExperienceModal';
 import type { Skill } from './modals/SkillModal';
-import { useExperience } from './experience/hooks/useExperience';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
 const SkillModal = lazy(() => import('./modals/SkillModal'));
@@ -20,12 +25,6 @@ const prefetchSkillModal = () => {
   return modalPromise;
 };
 
-const LoadingSpinner = () => (
-  <div className="section-loading">
-    <div className="loading-spinner"></div>
-  </div>
-);
-
 const ExperienceTimeline = memo(({ 
   experience, 
   skillsData,
@@ -37,24 +36,18 @@ const ExperienceTimeline = memo(({
   onSelectExperience: (key: string) => void;
   onSelectSkill: (skillName: string) => void;
 }) => {
-  // Function to find skill key by display name
-  const findSkillKey = (tagName: string): string | undefined => {
-    return Object.entries(skillsData).find(
-      ([_, skill]) => skill.display_name.toLowerCase() === tagName.toLowerCase()
-    )?.[0];
-  };
-
   return (
     <div className="timeline">
       {Object.entries(experience).map(([key, item]) => (
         <div key={key} className="timeline-item">
           <div className="timeline-header-wrapper">
             {item.logoPath && (
-              <div 
+              <div
                 className="logo-link"
-                onClick={() => onSelectExperience(key)}
+                aria-label={`View ${item.company} experience details`}
                 onMouseEnter={prefetchExperienceModal}
                 style={{ cursor: 'pointer' }}
+                {...buttonize(() => onSelectExperience(key))}
               >
                 <CompanyLogo 
                   name={item.logoPath || "github-logo.svg"}
@@ -76,15 +69,19 @@ const ExperienceTimeline = memo(({
           <div className="experience-highlights">
             <div className="skill-tags">
               {item.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(tag.replace(/-/g, ' '));
-                return (
-                  <span 
-                    key={index} 
+                const skillKey = findSkillKey(skillsData, tag);
+                return skillKey ? (
+                  <span
+                    key={index}
                     className="skill-tag"
-                    onClick={() => skillKey && onSelectSkill(skillKey)}
                     onMouseEnter={prefetchSkillModal}
-                    style={{ cursor: skillKey ? 'pointer' : 'default' }}
+                    style={{ cursor: 'pointer' }}
+                    {...buttonize(() => onSelectSkill(skillKey))}
                   >
+                    {tag.replace(/-/g, ' ')}
+                  </span>
+                ) : (
+                  <span key={index} className="skill-tag">
                     {tag.replace(/-/g, ' ')}
                   </span>
                 );
@@ -104,6 +101,8 @@ const ExperienceTimeline = memo(({
     </div>
   );
 });
+ExperienceTimeline.displayName = 'ExperienceTimeline';
+
 
 const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();
@@ -131,22 +130,8 @@ const Experience: React.FC = () => {
   };
 
   const handleSelectExperience = (key: string) => {
-    // Get the URL-friendly slug for this experience
-    const slug = keyCompanyMap[key] || key;
-    
-    // Update the URL with the company parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('company', slug);
-    
-    // Preserve the hash if it exists
-    const hash = window.location.hash;
-    const urlWithoutHash = url.toString().split('#')[0];
-    const finalUrl = hash ? `${urlWithoutHash}${hash}` : urlWithoutHash;
-    
-    window.history.pushState({}, '', finalUrl);
-    
-    // Update the state
-    setSelectedExperience(slug);
+    // useExperience mirrors this state into the ?company= URL parameter
+    setSelectedExperience(keyCompanyMap[key] || key);
   };
 
   if (error) return <div>Error: {error}</div>;
@@ -179,6 +164,7 @@ const Experience: React.FC = () => {
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
             experience={experienceData[companyKeyMap[selectedExperience] || selectedExperience]}
+            experienceKey={selectedExperience}
             skillsData={skillsData}
             onClose={() => setSelectedExperience(null)}
             onSelectSkill={setSelectedSkill}
@@ -190,6 +176,7 @@ const Experience: React.FC = () => {
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
             skill={skillsData[selectedSkill]}
+            skillKey={selectedSkill}
             onClose={() => setSelectedSkill(null)}
           />
         </Suspense>

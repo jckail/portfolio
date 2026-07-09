@@ -1,4 +1,5 @@
 import React, { Suspense, ReactNode } from 'react';
+
 import { Spinner } from '@/shared/components/elements';
 
 interface LoadingBoundaryProps {

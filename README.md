@@ -6,7 +6,10 @@ Welcome to my professional portfolio! Visit [jckail.com](https://www.jckail.com)
 
 ## Overview 🎯
 
-This portfolio is a modern, full-stack react web application showcasing my professional experience through an interactive and engaging interface. Built with performance, scalability, and user experience in mind.
+This portfolio is a modern, full-stack web application showcasing my
+professional experience through an interactive and engaging interface —
+React + TypeScript on the frontend, FastAPI on the backend, and an AI
+assistant powered by Anthropic's Claude Haiku 4.5.
 
 ## Key Features ✨
 
@@ -17,120 +20,151 @@ This portfolio is a modern, full-stack react web application showcasing my profe
 - 📄 Downloadable PDF resume
 
 ### Smart Interactions
-- 🤖 AI-powered chat assistant for portfolio navigation
-- 🔍 Advanced search capabilities
+- 🤖 AI chat assistant (Claude Haiku 4.5, streamed over WebSocket) with
+  conversation memory, page-aware context, and **site-navigation tools**
+  (open sections/modals, download resume)
+- 🔗 Deep-linkable sections, modals, projects, and chat (`?ai_chat=open`,
+  `?project=`, `?skill=`, `?company=`)
+- ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections;
+  `Ctrl/Cmd+K` command palette
+- 🎨 Interactive doodle canvas (footer easter egg) + party mode (Konami /
+  `?party=1`)
+- 🍪 Cookie consent with GA consent-mode defaults
 - 📱 Responsive design for all devices
-- 🌓 Light/Dark mode with system preference detection
+- ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
+- 🌓 Light/dark mode — and a hidden party mode 🎉
 
 ### Professional Network
 - 🔗 [LinkedIn](https://www.linkedin.com/in/jordan-kail)
 - 💻 [GitHub](https://github.com/jkail-dev)
-- 📧 Direct contact options
-- 🌐 Professional social links
+- 📧 Direct contact form (SendGrid)
 
 ## Technology Stack 💻
 
 ### Frontend 🎨
-- **React 18+** with TypeScript for robust UI development
-- **Vite** for optimized development and building
-- **React Router** for seamless navigation
-- **CSS Modules** for scoped styling
-- **Context API** for state management
-- **Custom Hooks** for shared logic
+- **React 18 + TypeScript** with **Vite** for fast dev and optimized builds
+- **React Router** for navigation
+- **Zustand** for state management
+- **MUI** + CSS custom properties for UI and theming
+- **Vitest** for unit tests
 
 ### Backend 🔧
-- **FastAPI** for high-performance API endpoints
-- **Python 3.12+** for modern language features
-- **Pydantic** for data validation
-- **Uvicorn** ASGI server
-- **Custom Middleware** for security and logging
+- **FastAPI** on **Python 3.12** with **Pydantic v2**
+- **Anthropic Claude Haiku 4.5** for the streaming AI chat assistant
+- **Supabase** for auth, telemetry, and log persistence
+- **SendGrid** for contact email
 
-## Architecture 📂
+### Infrastructure ☁️
+- **Docker** multi-stage builds (Node 22 → Python 3.12 slim)
+- **Google Cloud Run** behind **Artifact Registry**
+- **Terraform** for infrastructure as code, including keyless GitHub → GCP
+  auth via Workload Identity Federation (see [`infra/`](./infra/README.md))
+- **GitHub Actions**: CI (lint, tests, Docker and Terraform checks for both
+  stacks) plus automatic deploys to Cloud Run on `main`
+  (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+- **Dependabot** for monthly grouped dependency updates
+
+## Repository Layout 📂
 
 ```
 portfolio/
-├── frontend/           # React application
-│   ├── src/
-│   │   ├── app/       # Core application
-│   │   ├── features/  # Feature modules
-│   │   └── shared/    # Shared utilities
-│   └── public/        # Static assets
+├── frontend/          # React application (see frontend/README.md)
+│   └── src/
+│       ├── app/       # Feature components & providers
+│       ├── shared/    # Stores, hooks, typed API client, shared components
+│       └── styles/    # Global CSS
 │
-├── backend/           # FastAPI server
+├── backend/           # FastAPI server (see backend/README.md)
 │   ├── app/
-│   │   ├── api/      # API routes
-│   │   ├── models/   # Data models
-│   │   └── utils/    # Helper functions
-│   └── logs/         # Application logs
+│   │   ├── api/       # API routes (REST + chat WebSocket)
+│   │   ├── config.py  # Centralized typed settings (all env access)
+│   │   ├── models/    # Pydantic models + data loaders
+│   │   ├── data/      # Portfolio content (JSON)
+│   │   └── utils/     # Logging, Supabase client
+│   ├── assets/        # System prompt, resume
+│   └── tests/         # Pytest suite (runs offline, no credentials needed)
 │
-└── helpers/          # Deployment and utility scripts
+├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
+├── helpers/           # Deploy script, Dockerfiles, local dev tooling
+└── .github/workflows/ # CI + automatic Cloud Run deploys
 ```
 
 ## Getting Started 🚀
 
 ### Prerequisites
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Python 3.12+
-- Git
+- A `.env` file at the repo root (see [backend/README.md](./backend/README.md)
+  for the full variable list)
 
 ### Development Setup
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/portfolio.git
-   cd portfolio
-   ```
 
-2. Start the development environment:
-   ```bash
-   ./helpers/local_test.sh
-   ```
+```bash
+git clone https://github.com/jckail/portfolio.git
+cd portfolio
 
-3. Access the application:
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:8080
-   - API Documentation: http://localhost:8080/docs
+pip install -r requirements-dev.txt   # prod deps + pytest, ruff
+(cd frontend && npm install)
 
-## Security Features 🔒
+./helpers/local_test.sh
+```
 
-- CORS configuration
-- Rate limiting
-- Request validation
-- Secure file operations
-- Error handling
+Then open:
 
-## Performance Optimizations ⚡
+- Frontend (hot reload): http://localhost:5173
+- Backend API + built frontend: http://localhost:8080
+- API documentation: http://localhost:8080/docs
 
-- Code splitting and lazy loading
-- Memoized components
-- Efficient data processing
-- Resource optimization
-- Proper caching strategies
+### Deployment
 
-## Development Guidelines 📝
+Merges to `main` deploy automatically to Cloud Run via GitHub Actions once
+the one-time setup in [DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Manual
+fallback:
 
-### Code Quality
-- TypeScript for type safety
-- ESLint and Prettier for code formatting
-- Comprehensive testing suite
-- Documentation requirements
+```bash
+./helpers/deploy.sh          # build, push, deploy to Cloud Run, health-check
+```
 
-### Best Practices
-- Component-based architecture
-- RESTful API design
-- Proper error handling
-- Performance monitoring
+See [helpers/README.md](./helpers/README.md) for the deploy script and
+[infra/README.md](./infra/README.md) for Terraform-managed infrastructure.
+
+## Architecture 🏗️
+
+```mermaid
+flowchart LR
+  Visitor -->|HTTPS| CloudRun[Cloud Run]
+  CloudRun --> FastAPI
+  FastAPI -->|static| React[React SPA]
+  FastAPI -->|REST| Content[Portfolio JSON]
+  FastAPI -->|WebSocket + tools| Claude[Claude Haiku 4.5]
+  FastAPI --> Supabase[(Supabase)]
+  FastAPI --> SendGrid[SendGrid]
+  GH[GitHub Actions] -->|WIF| AR[Artifact Registry]
+  AR --> CloudRun
+  TF[Terraform] --> CloudRun
+```
+
+Visitor traffic hits Cloud Run, which serves the Vite-built SPA and the
+FastAPI API (including the streaming chat WebSocket). Claude can request
+validated UI actions that the SPA executes. Secrets live in Secret Manager;
+deploys are keyless via Workload Identity Federation.
 
 ## Documentation 📚
 
-For detailed technical information, refer to:
-- [Frontend Documentation](./frontend/README.md)
-- [Backend Documentation](./backend/README.md)
-- API Documentation (available at `/docs` when running locally)
+- [Frontend documentation](./frontend/README.md)
+- [Backend documentation](./backend/README.md)
+- [Deployment checklist (secrets & CI/CD setup)](./DEPLOYMENT.md)
+- [Deployment tooling](./helpers/README.md)
+- [Infrastructure (Terraform)](./infra/README.md)
+- [Improvement roadmap](./ROADMAP.md)
+- API reference: `/docs` on a running backend
 
 ## Contributing 🤝
 
-1. Follow existing architecture patterns
-2. Maintain code quality standards
+1. Follow the existing architecture patterns
+2. Run the checks locally:
+   - Frontend: `npm run lint && npm run type-check && npm test`
+   - Backend: `python -m ruff check backend && python -m pytest backend/tests`
 3. Write tests for new features
 4. Update documentation
 5. Submit pull requests for review
