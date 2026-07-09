@@ -11,10 +11,10 @@ terraform {
   # Recommended: store state in a GCS bucket instead of locally.
   # Create the bucket once, then uncomment:
   #
-  # backend "gcs" {
-  #   bucket = "portfolio-383615-terraform-state"
-  #   prefix = "portfolio"
-  # }
+  backend "gcs" {
+    bucket = "portfolio-383615-terraform-state"
+    prefix = "portfolio"
+  }
 }
 
 provider "google" {

@@ -61,6 +61,7 @@ infra/*.tfstate.*
 infra/*.tfvars
 !infra/terraform.tfvars.example
 infra/crash.log
+infra/tfplan*
 
 # Editor/IDE
 .vscode/
