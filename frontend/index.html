@@ -49,8 +49,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <!-- The About-section headshot is the LCP element; fetch it early -->
-    <link rel="preload" as="image" href="/images/headshot/headshot.webp" type="image/webp">
+    <!-- The About-section headshot is the LCP element; fetch it early.
+         imagesrcset mirrors the <img srcSet> in about.tsx so the browser
+         preloads the same density-appropriate variant it will render. -->
+    <link rel="preload" as="image" href="/images/headshot/headshot-1x.webp" type="image/webp"
+          imagesrcset="/images/headshot/headshot-1x.webp 1x, /images/headshot/headshot-2x.webp 2x, /images/headshot/headshot.webp 3x">
     <title>Jordan Kail - Engineer</title>
     <script type="application/ld+json">
     {
