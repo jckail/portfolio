@@ -156,6 +156,10 @@ jobs:
       working-directory: e2e
       run: npx playwright test
 
+    - name: Run Lighthouse CI budget assertions
+      working-directory: e2e
+      run: npx lhci autorun --config=./lighthouserc.json
+
     - name: Tear down E2E container
       if: always()
       run: docker rm -f portfolio-e2e || true

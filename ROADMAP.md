@@ -66,9 +66,12 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   is skipped entirely for reduced-motion users and a global CSS rule
   collapses animations/transitions; tsparticles pauses on hidden tabs by
   default (`pauseOnBlur`).
-- **P1 — LCP optimization.** Headshot WebP is now preloaded with explicit
-  dimensions. Remaining: audit with Lighthouse in CI (e.g. `lighthouse-ci`
-  with budget assertions).
+- ~~**P1 — LCP optimization.**~~ Done: headshot WebP preloaded with
+  explicit dimensions, plus `@lhci/cli` resource-size budget assertions
+  (script/stylesheet/image/total transfer size) in CI, set with headroom
+  above measured values rather than tight thresholds — timing-based
+  Lighthouse metrics are too CI-noisy to gate on reliably, byte budgets
+  aren't.
 - **P2 — Responsive images.** Serve the headshot and any future photos with
   `srcset` variants so small screens download smaller files.
 - **P2 — PWA.** Add a service worker for offline shell caching and an
