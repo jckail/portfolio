@@ -7,9 +7,10 @@ from backend.app.services import chat_service
 
 
 class FakeStream:
-    def __init__(self, chunks, tool_uses=None):
+    def __init__(self, chunks, tool_uses=None, usage=None):
         self._chunks = chunks
         self._tool_uses = tool_uses or []
+        self._usage = usage
 
     @property
     def text_stream(self):
@@ -21,16 +22,17 @@ class FakeStream:
 
     async def get_final_message(self):
         content = list(self._tool_uses)
-        return SimpleNamespace(content=content)
+        return SimpleNamespace(content=content, usage=self._usage)
 
 
 class FakeStreamContext:
-    def __init__(self, chunks, tool_uses=None):
+    def __init__(self, chunks, tool_uses=None, usage=None):
         self._chunks = chunks
         self._tool_uses = tool_uses
+        self._usage = usage
 
     async def __aenter__(self):
-        return FakeStream(self._chunks, self._tool_uses)
+        return FakeStream(self._chunks, self._tool_uses, self._usage)
 
     async def __aexit__(self, exc_type, exc, tb):
         return False
@@ -39,19 +41,20 @@ class FakeStreamContext:
 class FakeMessages:
     """Stands in for AsyncAnthropic().messages, capturing call kwargs."""
 
-    def __init__(self, chunks, tool_uses=None):
+    def __init__(self, chunks, tool_uses=None, usage=None):
         self._chunks = chunks
         self._tool_uses = tool_uses or []
+        self._usage = usage
         self.calls = []
 
     def stream(self, **kwargs):
         # Deep-copy: the manager mutates the history list after this call
         self.calls.append(copy.deepcopy(kwargs))
-        return FakeStreamContext(self._chunks, self._tool_uses)
+        return FakeStreamContext(self._chunks, self._tool_uses, self._usage)
 
 
-def make_fake_anthropic(chunks, tool_uses=None):
-    messages = FakeMessages(chunks, tool_uses=tool_uses)
+def make_fake_anthropic(chunks, tool_uses=None, usage=None):
+    messages = FakeMessages(chunks, tool_uses=tool_uses, usage=usage)
     return SimpleNamespace(messages=messages), messages
 
 
@@ -217,3 +220,61 @@ def test_websocket_emits_action_frames_for_tool_use(client, monkeypatch):
         for f in frames
     )
     assert messages.calls[0].get("tools")  # tools were offered to the model
+
+
+def test_websocket_logs_token_usage_after_response(client, monkeypatch):
+    usage = SimpleNamespace(
+        input_tokens=120,
+        output_tokens=45,
+        cache_creation_input_tokens=0,
+        cache_read_input_tokens=80,
+    )
+    fake_client, _ = make_fake_anthropic(["Hi there!"], usage=usage)
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
+
+    logged_calls = []
+
+    async def fake_store_log(**kwargs):
+        logged_calls.append(kwargs)
+        return None
+
+    monkeypatch.setattr(chat_service.supabase, "store_log", fake_store_log)
+
+    with client.websocket_connect("/ws/ws-test-usage") as ws:
+        ws.send_text(json.dumps({"type": "message", "content": "Hello"}))
+        while True:
+            frame = ws.receive_json()
+            if not frame.get("is_chunk", True):
+                break
+
+    assert len(logged_calls) == 1
+    call = logged_calls[0]
+    assert call["session_uuid"] == "ws-test-usage"
+    assert call["source"] == "chat"
+    assert call["metadata"]["input_tokens"] == 120
+    assert call["metadata"]["output_tokens"] == 45
+    assert call["metadata"]["cache_read_input_tokens"] == 80
+    assert call["metadata"]["cache_creation_input_tokens"] == 0
+
+
+def test_websocket_skips_usage_log_when_usage_absent(client, monkeypatch):
+    """Existing FakeStream default (usage=None) must not raise or log."""
+    fake_client, _ = make_fake_anthropic(["No usage data."])
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
+
+    logged_calls = []
+
+    async def fake_store_log(**kwargs):
+        logged_calls.append(kwargs)
+        return None
+
+    monkeypatch.setattr(chat_service.supabase, "store_log", fake_store_log)
+
+    with client.websocket_connect("/ws/ws-test-no-usage") as ws:
+        ws.send_text(json.dumps({"type": "message", "content": "Hello"}))
+        while True:
+            frame = ws.receive_json()
+            if not frame.get("is_chunk", True):
+                break
+
+    assert logged_calls == []

@@ -50,9 +50,11 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   to `sessionStorage` and restored on reload within the same tab session.
 - ~~**P1 — Suggested prompts.**~~ Done: four clickable starter questions
   appear until the visitor sends their first message.
-- **P2 — Usage telemetry.** Log token counts and cache-hit rates from the
-  Anthropic responses (already available in the stream events) to Supabase
-  so cost and cache effectiveness are observable.
+- ~~**P2 — Usage telemetry.**~~ Done: token counts and cache hit/creation
+  counts logged to Supabase's existing `logs` table (`session_uuid` =
+  `client_id`, `source="chat"`, counts in `metadata`) after each response
+  — no schema change needed, reused the flexible metadata column instead
+  of a new table.
 - ~~**P2 — Tool use.**~~ Done, see §7 "Chat site-navigation actions."
 
 ## 3. Frontend performance & UX

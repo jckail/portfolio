@@ -213,6 +213,28 @@ class ConnectionManager:
         except Exception as e:
             logger.error("Error sending action to client %s: %s", client_id, e)
 
+    async def _log_usage(self, client_id: str, usage) -> None:
+        """Log token counts and cache-hit rates for cost/cache observability.
+
+        Uses the existing flexible `logs` table (via `session_uuid` +
+        `metadata`) rather than a new table/columns — `client_id` is used
+        as the session key instead of the GA session id since it's always
+        present, unlike GA (gated behind cookie consent).
+        """
+        await supabase.store_log(
+            level="INFO",
+            message="chat_completion_usage",
+            session_uuid=client_id,
+            source="chat",
+            metadata={
+                "model": CHAT_MODEL,
+                "input_tokens": getattr(usage, "input_tokens", None),
+                "output_tokens": getattr(usage, "output_tokens", None),
+                "cache_creation_input_tokens": getattr(usage, "cache_creation_input_tokens", None),
+                "cache_read_input_tokens": getattr(usage, "cache_read_input_tokens", None),
+            },
+        )
+
     async def _dispatch_tool_actions(self, client_id: str, final_message) -> list[str]:
         """Parse tool_use blocks, send action frames, return human labels."""
         labels: list[str] = []
@@ -271,6 +293,10 @@ class ConnectionManager:
                 is_chunk=False
             )
             return
+
+        usage = getattr(final_message, "usage", None)
+        if usage is not None:
+            await self._log_usage(client_id, usage)
 
         action_labels: list[str] = []
         if final_message is not None:
