@@ -113,7 +113,7 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Scan image for critical/high CVEs
-      uses: aquasecurity/trivy-action@0.36.0
+      uses: aquasecurity/trivy-action@v0.36.0
       with:
         image-ref: portfolio-ci:latest
         severity: CRITICAL,HIGH
