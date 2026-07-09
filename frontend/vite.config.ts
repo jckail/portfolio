@@ -66,9 +66,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          // MUI is only used by the lazily-loaded chat portal, so keep it
-          // out of the eagerly-loaded vendor chunk.
-          if (id.includes('@mui') || id.includes('@emotion')) return 'mui';
           if (id.includes('tsparticles')) return 'particles';
           if (id.includes('react-router')) return 'router';
           return 'vendor';
