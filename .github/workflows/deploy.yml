@@ -66,23 +66,38 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Deploy to Cloud Run
+    # Deploy the new revision with zero live traffic, verify it directly
+    # via its own tagged URL, and only then promote to 100%. This closes
+    # the previous gap where `gcloud run deploy` routed all production
+    # traffic to the new revision *before* the health check ran — a
+    # broken image was briefly live. If verification fails here, no
+    # traffic is ever shifted and the prior revision keeps serving
+    # unaffected; rollback is documented in HANDOFF.md.
+    - name: Deploy new revision (no traffic yet)
       run: |
+        TAG="gh-${GITHUB_SHA::7}"
+        echo "TAG=$TAG" >> "$GITHUB_ENV"
         gcloud run deploy "$SERVICE" \
           --project "$PROJECT_ID" \
           --region "$REGION" \
           --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}" \
           --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
+          --no-traffic \
+          --tag="$TAG" \
           --quiet
 
-    - name: Verify deployment
+    - name: Verify new revision before promoting
       run: |
-        URL=$(gcloud run services describe "$SERVICE" \
-          --project "$PROJECT_ID" --region "$REGION" \
-          --format 'value(status.url)')
-        echo "Service URL: $URL"
+        CANARY_URL=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" --format=json \
+          | jq -r --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .url')
+        if [ -z "$CANARY_URL" ]; then
+          echo "Could not resolve the tagged revision URL for $TAG"
+          exit 1
+        fi
+        echo "Verifying new revision at: $CANARY_URL"
         for i in $(seq 1 12); do
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health" || true)
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$CANARY_URL/api/health" || true)
           if [ "$STATUS" = "200" ]; then
             echo "Health check passed"
             exit 0
@@ -90,5 +105,23 @@ jobs:
           echo "Attempt $i: health returned $STATUS; retrying in 5s..."
           sleep 5
         done
-        echo "Health check failed"
+        echo "Health check failed — leaving traffic on the previous revision"
         exit 1
+
+    - name: Promote new revision to 100% traffic
+      run: |
+        gcloud run services update-traffic "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" \
+          --to-latest --quiet
+
+    - name: Verify production traffic
+      run: |
+        URL=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" \
+          --format 'value(status.url)')
+        STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health" || true)
+        if [ "$STATUS" != "200" ]; then
+          echo "Production health check failed after promotion ($STATUS)"
+          exit 1
+        fi
+        echo "Production healthy at $URL"
