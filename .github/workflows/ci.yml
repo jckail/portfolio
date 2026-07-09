@@ -38,8 +38,8 @@ jobs:
     - name: Type check
       run: npm run type-check
 
-    - name: Test
-      run: npm test
+    - name: Test (with coverage gate)
+      run: npm run test:coverage
 
     - name: Build
       run: npm run build
@@ -66,8 +66,8 @@ jobs:
     - name: Byte-compile backend
       run: python -m compileall -q backend
 
-    - name: Test
-      run: python -m pytest backend/tests -q
+    - name: Test (with coverage gate)
+      run: python -m pytest backend/tests -q --cov --cov-report=term-missing
 
   terraform:
     name: Terraform (fmt, validate)
@@ -107,5 +107,15 @@ jobs:
         context: .
         file: helpers/Dockerfile.prod
         push: false
+        load: true
+        tags: portfolio-ci:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Scan image for critical/high CVEs
+      uses: aquasecurity/trivy-action@0.36.0
+      with:
+        image-ref: portfolio-ci:latest
+        severity: CRITICAL,HIGH
+        exit-code: '1'
+        ignore-unfixed: true

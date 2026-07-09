@@ -35,14 +35,14 @@ def test_html_is_not_cached(client):
     reason="frontend not built",
 )
 def test_hashed_assets_are_immutable_and_gzipped(client):
-    js_files = [
-        f
-        for f in os.listdir(os.path.join(FRONTEND_DIST, "assets"))
-        if f.endswith(".js")
-    ]
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    js_files = [f for f in os.listdir(assets_dir) if f.endswith(".js")]
     assert js_files, "expected at least one built JS asset"
+    # Pick the largest chunk: GZipMiddleware only compresses responses over
+    # its minimum_size threshold, and some vendor-split chunks are tiny.
+    largest = max(js_files, key=lambda f: os.path.getsize(os.path.join(assets_dir, f)))
     response = client.get(
-        f"/assets/{js_files[0]}", headers={"accept-encoding": "gzip"}
+        f"/assets/{largest}", headers={"accept-encoding": "gzip"}
     )
     assert response.status_code == 200
     assert response.headers["Cache-Control"] == "public, max-age=31536000, immutable"
