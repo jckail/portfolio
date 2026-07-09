@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
+import { trackModalView } from '../../../../shared/utils/analytics';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import '../../../../styles/components/modal.css';
@@ -32,6 +33,10 @@ interface SkillModalProps {
 const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
   useEscapeKey(onClose);
   const trapRef = useFocusTrap(true);
+
+  useEffect(() => {
+    trackModalView(skillKey || skill.display_name, 'skill', skill.display_name);
+  }, [skillKey, skill.display_name]);
 
   const shareUrl = skillKey
     ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
