@@ -83,3 +83,46 @@ resource "google_service_account_iam_member" "deployer_act_as_runtime" {
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:${google_service_account.deployer[0].email}"
 }
+
+# ---------------------------------------------------------------------------
+# Read-only planner identity for `terraform plan` on pull requests.
+#
+# Scoped to project Viewer (no write access to any resource) plus just
+# enough Storage access to read/lock the remote state object — it can never
+# create, modify, or destroy infrastructure.
+# ---------------------------------------------------------------------------
+
+resource "google_service_account" "planner" {
+  count = local.github_enabled
+
+  account_id   = "${var.service_name}-planner"
+  display_name = "Read-only Terraform planner for ${var.service_name} PRs"
+}
+
+resource "google_service_account_iam_member" "planner_wif" {
+  count = local.github_enabled
+
+  service_account_id = google_service_account.planner[0].name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github[0].name}/attribute.repository/${var.github_repository}"
+}
+
+resource "google_project_iam_member" "planner_viewer" {
+  count = local.github_enabled
+
+  project = var.project_id
+  role    = "roles/viewer"
+  member  = "serviceAccount:${google_service_account.planner[0].email}"
+}
+
+resource "google_storage_bucket_iam_member" "planner_state" {
+  count = local.github_enabled
+
+  # storage.admin (not objectAdmin) because `terraform plan` needs to read
+  # this binding's own IAM policy on the bucket (storage.buckets.getIamPolicy),
+  # which objectAdmin doesn't grant. Scoped to only this one state bucket,
+  # not project-wide.
+  bucket = "${var.project_id}-terraform-state"
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${google_service_account.planner[0].email}"
+}
