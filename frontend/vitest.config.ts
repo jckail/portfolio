@@ -12,16 +12,20 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      // `all: true` so untested files count as 0% instead of being
-      // excluded from the denominator (otherwise "coverage" only ever
-      // measures the files tests already happen to import).
-      all: true,
-      // Modest floor below current (~14% stmts/lines, ~51% branches,
-      // ~26% funcs); ratchet up as coverage grows.
-      statements: 12,
-      lines: 12,
-      branches: 45,
-      functions: 20,
+      // Include all source files so untested ones count as 0% instead of
+      // being excluded from the denominator (otherwise "coverage" only
+      // ever measures the files tests already happen to import). This is
+      // Vitest 4's replacement for the removed `all: true` option.
+      include: ['src/**'],
+      // Modest floor below current numbers; ratchet up as coverage grows.
+      // Values recalibrated for Vitest 4 — the denominator changed with
+      // the all->include migration, so these differ from the old config.
+      thresholds: {
+        statements: 18,
+        lines: 18,
+        branches: 15,
+        functions: 12,
+      },
     },
   },
   resolve: {
