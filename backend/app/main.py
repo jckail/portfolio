@@ -12,6 +12,7 @@ from .api import api_router, ws_router
 from .config import get_settings, missing_required_vars
 from .models.data_loader import load_all
 from .utils.logger import get_supabase_handler, setup_logging
+from .utils.request_context import clear_request_id, set_request_id
 from .utils.supabase_client import supabase
 
 # Configure logging
@@ -92,30 +93,39 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 @app.middleware("http")
 async def add_response_headers(request: Request, call_next):
-    """Set cache policies and security headers.
+    """Attach request ID, cache policies, and security headers.
 
     Vite emits content-hashed filenames under /assets/, so those files can be
     cached forever. Images are unhashed, so they get a shorter TTL. HTML must
     always be revalidated so deploys take effect immediately.
     """
-    response = await call_next(request)
+    incoming = request.headers.get("x-request-id")
+    request_id = set_request_id(incoming if incoming else None)
+    request.state.request_id = request_id
 
-    if "cache-control" not in response.headers:
-        path = request.url.path
-        if path.startswith("/assets/"):
-            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
-        elif path.startswith(("/images/", "/api/assets/")):
-            response.headers["Cache-Control"] = "public, max-age=86400"
-        elif path == "/" or path.endswith(".html"):
-            response.headers["Cache-Control"] = "no-cache"
+    try:
+        response = await call_next(request)
 
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-    # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    return response
+        response.headers["X-Request-ID"] = request_id
+
+        if "cache-control" not in response.headers:
+            path = request.url.path
+            if path.startswith("/assets/"):
+                response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            elif path.startswith(("/images/", "/api/assets/")):
+                response.headers["Cache-Control"] = "public, max-age=86400"
+            elif path == "/" or path.endswith(".html"):
+                response.headers["Cache-Control"] = "no-cache"
+
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+    finally:
+        clear_request_id()
 
 # Mount API routes first
 app.include_router(api_router)

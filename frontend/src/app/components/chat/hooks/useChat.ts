@@ -3,19 +3,33 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
+import {
+  WELCOME_MESSAGE,
+  loadChatMessages,
+  saveChatMessages,
+} from '../chat-storage';
+
+function initialMessages(): Message[] {
+  return loadChatMessages() ?? [WELCOME_MESSAGE];
+}
 
 export const useChat = () => {
   const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    { type: 'agent', text: 'Welcome! \n I\'m Jordan\'s AI assistant, ask me a question: \n• Explain Jordan\'s professional experience at Meta, Deloitte, or other companies? \n• Explain Jordan\'s github projects?\n • What are Jordan\'s top skills?' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const clientId = useRef(Date.now().toString());
   const wsRef = useRef<WebSocket | null>(null);
   const isMounted = useRef(true);
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
+  // Persist completed transcript across reloads within the tab session
+  useEffect(() => {
+    saveChatMessages(messages);
+  }, [messages]);
 
   // Listen for URL parameter changes
   useEffect(() => {
@@ -24,19 +38,17 @@ export const useChat = () => {
       setOpen(prev => (shouldBeOpen !== prev ? shouldBeOpen : prev));
     };
 
-    // Listen for popstate (browser back/forward)
     window.addEventListener('popstate', handleUrlChange);
 
-    // Listen for pushstate/replacestate
     const originalPushState = history.pushState.bind(history);
     const originalReplaceState = history.replaceState.bind(history);
 
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(this, args);
       handleUrlChange();
     };
 
-    history.replaceState = function(...args) {
+    history.replaceState = function (...args) {
       originalReplaceState.apply(this, args);
       handleUrlChange();
     };
@@ -59,7 +71,7 @@ export const useChat = () => {
     }
 
     const context = {
-      text: clone.textContent?.trim() || ''
+      text: clone.textContent?.trim() || '',
     };
 
     return JSON.stringify(context);
@@ -70,19 +82,24 @@ export const useChat = () => {
       const queuedMessage = messageQueue.current.shift();
       if (queuedMessage) {
         setIsLoading(true);
-        ws.send(JSON.stringify({
-          type: 'message',
-          content: queuedMessage,
-          ga_session_id: getSessionId()
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'message',
+            content: queuedMessage,
+            ga_session_id: getSessionId(),
+          })
+        );
       }
     }
   };
 
   const initializeChat = useCallback(() => {
-    // Reuse an existing socket that is open or still connecting
     const existing = wsRef.current;
-    if (existing && (existing.readyState === WebSocket.OPEN || existing.readyState === WebSocket.CONNECTING)) {
+    if (
+      existing &&
+      (existing.readyState === WebSocket.OPEN ||
+        existing.readyState === WebSocket.CONNECTING)
+    ) {
       return;
     }
 
@@ -98,18 +115,53 @@ export const useChat = () => {
         return;
       }
 
-      // Send initial context immediately after connection
       const pageContext = getPageContext();
-      ws.send(JSON.stringify({
-        type: 'context',
-        content: pageContext
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'context',
+          content: pageContext,
+        })
+      );
 
-      // Send any queued messages
+      // Replay persisted turns so the server keeps conversation context
+      // after a page reload. Exclude messages still sitting in the outbound
+      // queue — those will be sent as normal `message` frames next and must
+      // not be double-counted in history.
+      const queued = messageQueue.current;
+      let source = messagesRef.current.filter(
+        m =>
+          !m.isStreaming &&
+          !(m.type === 'agent' && m.text === WELCOME_MESSAGE.text)
+      );
+      if (queued.length > 0) {
+        let toDrop = queued.length;
+        const kept: typeof source = [];
+        for (let i = source.length - 1; i >= 0; i -= 1) {
+          if (toDrop > 0 && source[i].type === 'user') {
+            toDrop -= 1;
+            continue;
+          }
+          kept.unshift(source[i]);
+        }
+        source = kept;
+      }
+      const priorTurns = source.map(m => ({
+        role: m.type === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      }));
+      if (priorTurns.some(t => t.role === 'user')) {
+        ws.send(
+          JSON.stringify({
+            type: 'history',
+            messages: priorTurns,
+          })
+        );
+      }
+
       sendQueuedMessages(ws);
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = event => {
       if (!isMounted.current) return;
 
       let data: { message?: string; is_chunk?: boolean };
@@ -121,35 +173,29 @@ export const useChat = () => {
       }
 
       if (data.is_chunk) {
-        // Accumulate streaming chunks
         currentStreamingMessage.current += data.message ?? '';
 
-        // Update messages with current accumulated chunk
         setMessages(prev => {
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
 
           if (lastMessage?.isStreaming) {
-            // Update existing streaming message
             newMessages[newMessages.length - 1] = {
               type: 'agent',
               text: currentStreamingMessage.current,
-              isStreaming: true
+              isStreaming: true,
             };
           } else {
-            // Create new streaming message
             newMessages.push({
               type: 'agent',
               text: currentStreamingMessage.current,
-              isStreaming: true
+              isStreaming: true,
             });
           }
 
           return newMessages;
         });
       } else {
-        // Final frame received. The server sends an empty message when the
-        // client already has the full streamed text.
         const finalMessage = data.message || currentStreamingMessage.current;
 
         if (finalMessage) {
@@ -158,17 +204,15 @@ export const useChat = () => {
             const lastMessage = newMessages[newMessages.length - 1];
 
             if (lastMessage?.isStreaming) {
-              // Update streaming message to final state
               newMessages[newMessages.length - 1] = {
                 type: 'agent',
                 text: finalMessage,
-                isStreaming: false
+                isStreaming: false,
               };
             } else {
-              // Add new complete message
               newMessages.push({
                 type: 'agent',
-                text: finalMessage
+                text: finalMessage,
               });
             }
 
@@ -176,24 +220,25 @@ export const useChat = () => {
           });
         }
 
-        // Reset streaming state and loading
         currentStreamingMessage.current = '';
         setIsLoading(false);
 
-        // Track received message
         if (finalMessage) {
           trackChatMessage('received', finalMessage.length);
         }
       }
     };
 
-    ws.onerror = (error) => {
+    ws.onerror = error => {
       console.error('WebSocket Error:', error);
       if (!isMounted.current) return;
-      setMessages(prev => [...prev, { 
-        type: 'agent', 
-        text: 'I apologize, but I encountered an error. Please try again.' 
-      }]);
+      setMessages(prev => [
+        ...prev,
+        {
+          type: 'agent',
+          text: 'I apologize, but I encountered an error. Please try again.',
+        },
+      ]);
       setIsLoading(false);
     };
 
@@ -207,21 +252,18 @@ export const useChat = () => {
     };
   }, []);
 
-  // Update URL when modal state changes
   useEffect(() => {
     const isOpenInUrl = getQueryParam('ai_chat') === 'open';
     if (isOpenInUrl === open) return;
     setQueryParam('ai_chat', open ? 'open' : null);
   }, [open]);
 
-  // Initialize chat when open changes
   useEffect(() => {
     if (open) {
       initializeChat();
     }
   }, [open, initializeChat]);
 
-  // Close the WebSocket only on unmount
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -234,33 +276,47 @@ export const useChat = () => {
     };
   }, []);
 
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      // Add user message to UI immediately
-      setMessages(prev => [...prev, { type: 'user', text: message }]);
-      
-      // Track sent message
-      await trackChatMessage('sent', message.trim().length);
+  const sendUserText = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      setMessages(prev => [...prev, { type: 'user', text: trimmed }]);
+      await trackChatMessage('sent', trimmed.length);
 
       const ws = wsRef.current;
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        // Queue the message; it is flushed when the connection opens
-        messageQueue.current.push(message);
+        messageQueue.current.push(trimmed);
         setIsLoading(true);
         initializeChat();
       } else {
         setIsLoading(true);
-        // If WebSocket is connected, send immediately
-        ws.send(JSON.stringify({
-          type: 'message',
-          content: message,
-          ga_session_id: getSessionId()
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'message',
+            content: trimmed,
+            ga_session_id: getSessionId(),
+          })
+        );
       }
-      
-      setMessage('');
-    }
+    },
+    [initializeChat]
+  );
+
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
+    const toSend = message;
+    setMessage('');
+    await sendUserText(toSend);
   };
+
+  const handleSuggestedPrompt = async (prompt: string) => {
+    setMessage('');
+    await sendUserText(prompt);
+  };
+
+  const hasUserMessage = messages.some(m => m.type === 'user');
+  const showSuggestions = !hasUserMessage && !isLoading;
 
   return {
     open,
@@ -270,7 +326,9 @@ export const useChat = () => {
     messages,
     isLoading,
     handleSendMessage,
-    initializeChat
+    handleSuggestedPrompt,
+    showSuggestions,
+    initializeChat,
   };
 };
 

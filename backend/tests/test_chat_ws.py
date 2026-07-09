@@ -104,6 +104,34 @@ def test_websocket_keeps_conversation_history(client, monkeypatch):
     assert second_call["messages"][2]["content"] == "Second question"
 
 
+def test_websocket_seeds_history_from_client_replay(client, monkeypatch):
+    fake_client, messages = make_fake_anthropic(["Follow-up answer"])
+    monkeypatch.setattr(chat_service.manager, "client", fake_client)
+
+    with client.websocket_connect("/ws/ws-test-seed") as ws:
+        ws.send_text(json.dumps({
+            "type": "history",
+            "messages": [
+                {"role": "user", "content": "Earlier question"},
+                {"role": "assistant", "content": "Earlier answer"},
+            ],
+        }))
+        ws.send_text(json.dumps({
+            "type": "message",
+            "content": "Follow up",
+        }))
+        while True:
+            if not ws.receive_json()["is_chunk"]:
+                break
+
+    (call,) = messages.calls
+    assert call["messages"] == [
+        {"role": "user", "content": "Earlier question"},
+        {"role": "assistant", "content": "Earlier answer"},
+        {"role": "user", "content": "Follow up"},
+    ]
+
+
 def test_websocket_rejects_oversized_message(client, monkeypatch):
     fake_client, messages = make_fake_anthropic(["should not be called"])
     monkeypatch.setattr(chat_service.manager, "client", fake_client)

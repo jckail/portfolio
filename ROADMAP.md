@@ -40,17 +40,13 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P0 — Graceful degradation.**~~ Done: `GET /api/chat/status` reports
   availability and the frontend hides the chat button when the assistant
   is not configured.
-- **P1 — Markdown rendering.** Assistant replies render as plain text;
-  streaming markdown (bold, lists, links) would materially improve
-  readability. Use a lightweight renderer to keep the lazily-loaded chat
-  chunk small, and sanitize output.
-- **P1 — Conversation persistence.** History currently lives on the
-  WebSocket connection and dies with it. Persist the transcript in
-  `sessionStorage` and replay it on reconnect so page reloads don't reset
-  the conversation.
-- **P1 — Suggested prompts.** Seed the empty chat state with 3–4 clickable
-  questions ("What did Jordan do at Meta?", "Summarize his AI experience")
-  to reduce the blank-page problem.
+- ~~**P1 — Markdown rendering.**~~ Done: lightweight `ChatMarkdown` renderer
+  (bold, italic, lists, links, fenced code) with React-escaped text and
+  http(s)/mailto-only links — no `dangerouslySetInnerHTML`, no extra deps.
+- ~~**P1 — Conversation persistence.**~~ Done: completed messages are saved
+  to `sessionStorage` and restored on reload within the same tab session.
+- ~~**P1 — Suggested prompts.**~~ Done: four clickable starter questions
+  appear until the visitor sends their first message.
 - **P2 — Usage telemetry.** Log token counts and cache-hit rates from the
   Anthropic responses (already available in the stream events) to Supabase
   so cost and cache effectiveness are observable.
@@ -78,10 +74,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 4. Backend & platform
 
-- **P1 — Structured logging with request IDs.** Logs are plain strings
-  today. Emit JSON logs with a per-request correlation ID (middleware) so
-  Cloud Logging can filter by request; keep the Supabase sink for the
-  admin dashboard.
+- ~~**P1 — Structured logging with request IDs.**~~ Done: JSON stdout/file
+  logs via `JsonFormatter`, per-request `X-Request-ID` middleware
+  (honors inbound header), and `request_id` attached to Supabase log
+  metadata.
 - **P1 — Reproducible Python builds.** `requirements.txt` pins direct
   dependencies but not transitives. Adopt a lockfile (`uv` or `pip-tools`)
   so Docker builds are reproducible and Dependabot updates are reviewable.

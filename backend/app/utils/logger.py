@@ -2,9 +2,12 @@ import asyncio
 import logging
 import os
 import socket
+import sys
 import threading
 
 from ..utils.supabase_client import supabase
+from .json_log import JsonFormatter
+from .request_context import get_request_id
 
 LOGGER_NAME = 'quickresume'
 
@@ -95,6 +98,9 @@ class SupabaseHandler(logging.Handler):
                 'lineno': record.lineno,
                 'hostname': self._hostname
             }
+            request_id = get_request_id()
+            if request_id:
+                metadata['request_id'] = request_id
             if record.exc_info:
                 metadata['exception'] = self.formatException(record.exc_info)
 
@@ -149,28 +155,41 @@ def get_supabase_handler() -> SupabaseHandler | None:
 
 
 def setup_logging():
-    """Setup logging configuration with Supabase handler. Idempotent."""
+    """Setup logging with JSON stdout + Supabase sink. Idempotent."""
     logger = logging.getLogger(LOGGER_NAME)
     if logger.handlers:
         return logger
 
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # Human-readable message for the Supabase admin dashboard
+    plain_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    json_formatter = JsonFormatter()
 
     try:
         supabase_handler = SupabaseHandler()
         supabase_handler.setLevel(logging.INFO)
-        supabase_handler.setFormatter(formatter)
+        supabase_handler.setFormatter(plain_formatter)
         logger.addHandler(supabase_handler)
     except Exception as e:
         print(f"Failed to setup Supabase handler: {str(e)}")
 
-    # Also add a file handler as backup
+    # Structured JSON to stdout for Cloud Logging
+    try:
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.INFO)
+        stream_handler.setFormatter(json_formatter)
+        logger.addHandler(stream_handler)
+    except Exception as e:
+        print(f"Failed to setup stream handler: {str(e)}")
+
+    # File handler as backup (also JSON for local grep/jq)
     try:
         log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
         os.makedirs(log_dir, exist_ok=True)
         file_handler = logging.FileHandler(os.path.join(log_dir, 'app.log'))
-        file_handler.setFormatter(formatter)
+        file_handler.setFormatter(json_formatter)
         logger.addHandler(file_handler)
     except Exception as e:
         print(f"Failed to setup file handler: {str(e)}")

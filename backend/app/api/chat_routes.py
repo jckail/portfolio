@@ -40,6 +40,11 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             manager.store_context(client_id, data.get("content", ""))
             return
 
+        if data.get("type") == "history":
+            # Client replaying a sessionStorage transcript after reconnect
+            manager.seed_history(client_id, data.get("messages", []))
+            return
+
         if data.get("type") != "message" or not data.get("content"):
             return
 

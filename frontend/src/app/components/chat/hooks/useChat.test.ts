@@ -2,6 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { useChat } from './useChat';
+import { CHAT_STORAGE_KEY, WELCOME_MESSAGE } from '../chat-storage';
 
 vi.mock('../../../../shared/utils/analytics', () => ({
   trackChatMessage: vi.fn().mockResolvedValue(undefined),
@@ -50,6 +51,7 @@ class FakeWebSocket {
 describe('useChat', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/');
+    sessionStorage.clear();
     FakeWebSocket.instances = [];
     vi.stubGlobal('WebSocket', FakeWebSocket);
   });
@@ -63,6 +65,36 @@ describe('useChat', () => {
     expect(result.current.open).toBe(false);
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0].type).toBe('agent');
+    expect(result.current.showSuggestions).toBe(true);
+  });
+
+  it('restores messages from sessionStorage', () => {
+    sessionStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify([
+        WELCOME_MESSAGE,
+        { type: 'user', text: 'prior question' },
+        { type: 'agent', text: 'prior answer' },
+      ])
+    );
+    const { result } = renderHook(() => useChat());
+    expect(result.current.messages).toHaveLength(3);
+    expect(result.current.messages[1].text).toBe('prior question');
+    expect(result.current.showSuggestions).toBe(false);
+  });
+
+  it('sends a suggested prompt as a user message', async () => {
+    const { result } = renderHook(() => useChat());
+
+    await act(async () => {
+      await result.current.handleSuggestedPrompt('What did Jordan do at Meta?');
+    });
+
+    expect(result.current.messages.at(-1)).toMatchObject({
+      type: 'user',
+      text: 'What did Jordan do at Meta?',
+    });
+    expect(result.current.showSuggestions).toBe(false);
   });
 
   it('opens when the URL contains ?ai_chat=open', () => {
@@ -106,6 +138,33 @@ describe('useChat', () => {
 
     const first = JSON.parse(FakeWebSocket.instances[0].sent[0]);
     expect(first.type).toBe('context');
+  });
+
+  it('replays persisted history to the server on reconnect', () => {
+    sessionStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify([
+        WELCOME_MESSAGE,
+        { type: 'user', text: 'prior question' },
+        { type: 'agent', text: 'prior answer' },
+      ])
+    );
+    const { result } = renderHook(() => useChat());
+
+    act(() => {
+      result.current.initializeChat();
+      FakeWebSocket.instances[0].simulateOpen();
+    });
+
+    const frames = FakeWebSocket.instances[0].sent.map(raw => JSON.parse(raw));
+    expect(frames[0].type).toBe('context');
+    expect(frames[1]).toMatchObject({
+      type: 'history',
+      messages: [
+        { role: 'user', content: 'prior question' },
+        { role: 'assistant', content: 'prior answer' },
+      ],
+    });
   });
 
   it('queues a message sent before the socket opens, then flushes it', async () => {

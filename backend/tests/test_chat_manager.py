@@ -53,3 +53,33 @@ def test_disconnect_clears_client_state():
     manager.disconnect("c1")
     assert manager.get_history("c1") == []
     assert manager.get_context("c1") == ""
+
+
+def test_seed_history_accepts_valid_turns_and_skips_leading_assistant():
+    manager = make_manager()
+    manager.seed_history(
+        "c1",
+        [
+            {"role": "assistant", "content": "welcome"},
+            {"role": "user", "content": "hi"},
+            {"role": "assistant", "content": "hello"},
+            {"role": "hacker", "content": "nope"},
+            {"role": "user", "content": "  "},
+        ],
+    )
+    assert manager.get_history("c1") == [
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "hello"},
+    ]
+
+
+def test_seed_history_is_noop_when_history_already_exists():
+    manager = make_manager()
+    manager.append_to_history("c1", "user", "existing")
+    manager.seed_history(
+        "c1",
+        [{"role": "user", "content": "should not replace"}],
+    )
+    assert manager.get_history("c1") == [
+        {"role": "user", "content": "existing"},
+    ]

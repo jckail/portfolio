@@ -19,7 +19,9 @@ const Chat: React.FC<ChatProps> = ({
   setMessage,
   messages,
   isLoading,
-  handleSendMessage
+  handleSendMessage,
+  handleSuggestedPrompt,
+  showSuggestions,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -96,9 +98,11 @@ const Chat: React.FC<ChatProps> = ({
             p: '16px !important'
           }}
         >
-          <ChatMessages 
+          <ChatMessages
             messages={messages}
             isLoading={isLoading}
+            showSuggestions={showSuggestions}
+            onSuggestedPrompt={handleSuggestedPrompt}
           />
 
           <ChatInput

@@ -118,6 +118,41 @@ class ConnectionManager:
             if history and history[0]["role"] == "assistant":
                 del history[0]
 
+    def seed_history(self, client_id: str, turns: list) -> None:
+        """Replace empty server history with a client-persisted transcript.
+
+        Used after a page reload so follow-up questions keep prior context.
+        Only accepted when the server has no history yet (fresh connection).
+        """
+        if self.get_history(client_id):
+            return
+        if not isinstance(turns, list):
+            return
+
+        seeded: list[dict] = []
+        for turn in turns:
+            if not isinstance(turn, dict):
+                continue
+            role = turn.get("role")
+            content = turn.get("content")
+            if role not in ("user", "assistant") or not isinstance(content, str):
+                continue
+            text = content.strip()
+            if not text or len(text) > MAX_USER_MESSAGE_CHARS * 4:
+                continue
+            seeded.append({"role": role, "content": text})
+
+        if not seeded:
+            return
+        # Anthropic requires the first message to be from the user
+        while seeded and seeded[0]["role"] == "assistant":
+            seeded.pop(0)
+        if len(seeded) > MAX_HISTORY_MESSAGES:
+            seeded = seeded[-MAX_HISTORY_MESSAGES:]
+            if seeded and seeded[0]["role"] == "assistant":
+                seeded.pop(0)
+        self.conversation_histories[client_id] = seeded
+
     def _build_system_blocks(self, client_id: str) -> list[dict]:
         """Build system prompt blocks with prompt caching for the static parts.
 
