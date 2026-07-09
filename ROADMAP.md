@@ -37,16 +37,16 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   boots the CI-built image with dummy credentials and checks page load,
   section rendering, and the chat panel opening — runs as steps in the
   `docker` CI job so a failure already blocks merges.
-- **P1 — Vite 5→8 / Vitest 0.34→4.x major upgrade.** 5 remaining
-  Dependabot alerts (1 critical) all require this jump. Deferred
-  deliberately, not skipped: vitest's coverage config API already
-  changed shape once between these versions (the `thresholds` nested
-  object vs. flat fields — see the Lighthouse CI PR), so a blind
-  `--force` bump risks silently breaking coverage/test config again.
-  Needs a dedicated pass with time to verify config compatibility, not
-  a drive-by dependency bump. The "critical" alert is specifically
-  about `vitest --ui`'s dev server allowing arbitrary file reads — not
-  exploitable here since this project never runs that command.
+- ~~**P1 — Vite 5→8 / Vitest 0.34→4.x major upgrade.**~~ Done: vite 8.1,
+  vitest 4.1 (+ matching coverage-v8), plugin-react 5.2, svgr 5.2,
+  jsdom 26, TypeScript 5.9. Coverage config migrated to the v4 API
+  (`all` → `include` globs, nested `thresholds`) and thresholds
+  recalibrated — v4's AST-aware remapping changed the numbers
+  (branches 52%→19%, statements 15%→22%). Verified beyond CI: built
+  image loaded in a real browser (no chunk-ordering regression — the
+  vendor/particles/router manualChunks layout survived the bundler
+  swap), E2E + Lighthouse budgets pass, bundle slightly smaller.
+  Frontend `npm audit`: **0 vulnerabilities**.
 
 ## 2. AI assistant
 
