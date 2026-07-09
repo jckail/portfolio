@@ -53,6 +53,7 @@ jobs:
           # it never masks a real destroy/replace elsewhere in the plan.
           TF_VAR_secrets: '{"supabase_url":"unused","supabase_anon_key":"unused","supabase_service_role":"unused","anthropic_api_key":"unused","sendgrid_api_key":"unused"}'
         run: |
+          set -o pipefail
           terraform plan -no-color -input=false | tee plan.out
 
           awk '

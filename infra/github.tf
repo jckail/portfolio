@@ -118,7 +118,11 @@ resource "google_project_iam_member" "planner_viewer" {
 resource "google_storage_bucket_iam_member" "planner_state" {
   count = local.github_enabled
 
+  # storage.admin (not objectAdmin) because `terraform plan` needs to read
+  # this binding's own IAM policy on the bucket (storage.buckets.getIamPolicy),
+  # which objectAdmin doesn't grant. Scoped to only this one state bucket,
+  # not project-wide.
   bucket = "${var.project_id}-terraform-state"
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.planner[0].email}"
 }
