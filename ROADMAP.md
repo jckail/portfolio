@@ -37,6 +37,16 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   boots the CI-built image with dummy credentials and checks page load,
   section rendering, and the chat panel opening — runs as steps in the
   `docker` CI job so a failure already blocks merges.
+- **P1 — Vite 5→8 / Vitest 0.34→4.x major upgrade.** 5 remaining
+  Dependabot alerts (1 critical) all require this jump. Deferred
+  deliberately, not skipped: vitest's coverage config API already
+  changed shape once between these versions (the `thresholds` nested
+  object vs. flat fields — see the Lighthouse CI PR), so a blind
+  `--force` bump risks silently breaking coverage/test config again.
+  Needs a dedicated pass with time to verify config compatibility, not
+  a drive-by dependency bump. The "critical" alert is specifically
+  about `vitest --ui`'s dev server allowing arbitrary file reads — not
+  exploitable here since this project never runs that command.
 
 ## 2. AI assistant
 
@@ -192,6 +202,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 3. ~~**Platform maturity:** coverage gates, image vulnerability scanning,
    reproducible Python builds, canary deploys, E2E smoke test, ADRs,
    changelog.~~ Done.
-4. **Bigger bets (current focus):** staging environment, CDN,
-   OpenTelemetry, PWA offline shell, usage telemetry, Lighthouse CI
-   budgets, responsive images, persisted chat transcripts per session.
+4. ~~**Polish pass:** usage telemetry, Lighthouse CI budgets, responsive
+   images, GA4 double-pageview fix, modal-view tracking, dependency
+   security fixes (33 → 5 frontend Dependabot alerts).~~ Done.
+5. **Bigger bets (current focus):** staging environment, CDN,
+   OpenTelemetry, PWA offline shell, persisted chat transcripts per
+   session (needs a Supabase schema change — see §4), Vite/Vitest
+   major upgrade (see §1).
