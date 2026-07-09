@@ -1,6 +1,7 @@
 import React from 'react';
 
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
 import { findSkillKey } from '../../../../shared/utils/skills';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
@@ -23,19 +24,26 @@ export interface ExperienceItem {
 
 interface ExperienceModalProps {
   experience: ExperienceItem;
+  /** Data key used for the shareable ?company= deep link. */
+  experienceKey?: string;
   skillsData: Record<string, Skill>;
   onClose: () => void;
   onSelectSkill: (skillKey: string) => void;
 }
 
 const ExperienceModal: React.FC<ExperienceModalProps> = ({ 
-  experience, 
+  experience,
+  experienceKey,
   skillsData,
   onClose,
   onSelectSkill 
 }) => {
   // URL sync (?company= and back-button behavior) is owned by useExperience.
   useEscapeKey(onClose);
+
+  const shareUrl = experienceKey
+    ? `${window.location.origin}${window.location.pathname}?company=${encodeURIComponent(experienceKey)}`
+    : undefined;
 
   return (
     <div
@@ -110,6 +118,11 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
               ))}
             </ul>
           </div>
+          {shareUrl && (
+            <div className="project-modal-actions">
+              <CopyLinkButton url={shareUrl} />
+            </div>
+          )}
         </div>
         
       </div>

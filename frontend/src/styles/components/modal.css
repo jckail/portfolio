@@ -510,6 +510,44 @@
   background-color: var(--primary);
   cursor: pointer;
 }
+
+.project-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: var(--spacing-md);
+}
+
+.project-modal-actions .visit-website-btn {
+  margin: 0;
+}
+
+.project-modal-secondary {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  border: 2px solid var(--primary-border);
+}
+
+.copy-link-button {
+  appearance: none;
+  border: 1px solid var(--primary-border);
+  background: var(--section-background);
+  color: var(--text-color);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.copy-link-button:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
 .experience-modal-company-logo:hover {
   background: var(--primary);
   border: 2px solid var(--primary);

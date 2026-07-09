@@ -1,6 +1,8 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Jordan Kail — Portfolio",
+    "short_name": "Jordan Kail",
+    "description": "Software engineer specializing in AI, analytics, and machine learning.",
+    "start_url": "/",
     "icons": [
         {
             "src": "/images/android-chrome-192x192.png",
@@ -13,7 +15,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#0f172a",
+    "background_color": "#0f172a",
     "display": "standalone"
 }

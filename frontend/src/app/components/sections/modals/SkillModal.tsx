@@ -1,6 +1,7 @@
 import React from 'react';
 
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
+import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import '../../../../styles/components/modal.css';
 
@@ -18,6 +19,8 @@ export interface Skill {
 
 interface SkillModalProps {
   skill: Skill;
+  /** Data key used for the shareable ?skill= deep link. */
+  skillKey?: string;
   onClose: () => void;
 }
 
@@ -25,8 +28,12 @@ interface SkillModalProps {
 // the useSkill hook. Previously this modal also pushed its own URL using a
 // display-name slug, which conflicted with useSkill's data key and broke
 // shared/bookmarked skill links.
-const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
+const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
   useEscapeKey(onClose);
+
+  const shareUrl = skillKey
+    ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
+    : undefined;
 
   return (
     <div
@@ -79,9 +86,12 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, onClose }) => {
               </ul>
             </div>
           )}
-          <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
-            Click to learn More about {skill.display_name}
-          </a>
+          <div className="project-modal-actions">
+            <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
+              Learn more about {skill.display_name}
+            </a>
+            {shareUrl && <CopyLinkButton url={shareUrl} />}
+          </div>
         </div>
       </div>
     </div>

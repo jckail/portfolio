@@ -149,14 +149,81 @@
 }
 
 .brief-bio {
-  
   clear: both;
-  
 }
+
 .brief-bio p {
   font-size: 1.2rem;
   margin-top: 15px;
-  
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+.about-skill-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.about-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: var(--border-thickness) solid var(--primary-border);
+  background: var(--background-color);
+}
+
+.about-cta-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--text-color);
+  min-width: 0;
+}
+
+.about-cta-copy strong {
+  font-size: 1.05rem;
+}
+
+.about-cta-copy span {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.about-cta-location {
+  font-size: 0.85rem !important;
+  opacity: 0.75 !important;
+}
+
+.about-cta-button {
+  appearance: none;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.7rem 1.2rem;
+  background: var(--primary-border);
+  color: white;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.about-cta-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
 }
 
 .social-links {

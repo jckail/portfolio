@@ -164,6 +164,7 @@ const Experience: React.FC = () => {
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
             experience={experienceData[companyKeyMap[selectedExperience] || selectedExperience]}
+            experienceKey={selectedExperience}
             skillsData={skillsData}
             onClose={() => setSelectedExperience(null)}
             onSelectSkill={setSelectedSkill}
@@ -175,6 +176,7 @@ const Experience: React.FC = () => {
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
             skill={skillsData[selectedSkill]}
+            skillKey={selectedSkill}
             onClose={() => setSelectedSkill(null)}
           />
         </Suspense>

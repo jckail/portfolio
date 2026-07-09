@@ -31,6 +31,19 @@
   width: 100%;
 }
 
+.project-card-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.project-card-main:focus-visible {
+  outline: 2px solid var(--primary-border);
+  outline-offset: -2px;
+}
+
 .project-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
@@ -72,6 +85,7 @@
   gap: var(--spacing-sm);
 }
 
+.project-card h3,
 .project-card h3 a {
   font-size: 1.1rem;
   color: var(--text-color);
@@ -82,9 +96,11 @@
   display: inline-block;
   width: 100%;
   text-align: center;
-  text-decoration: underline;
 }
 
+.project-card h3 a {
+  text-decoration: underline;
+}
 
 .project-card h3 a:hover {
   text-decoration: underline;
@@ -117,10 +133,16 @@
   border-radius: var(--radius-full);
   text-decoration: none;
   font-size: 0.75rem;
+  font-family: inherit;
   transition: all var(--transition-fast);
   text-align: center;
   flex: 1;
   max-width: 95%;
+  cursor: pointer;
+}
+
+button.project-link {
+  appearance: none;
 }
 
 .project-link.primary {

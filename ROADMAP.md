@@ -127,15 +127,40 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - **P2 — Changelog.** Adopt a `CHANGELOG.md` maintained per release once
   the deploy pipeline is in regular use.
 
+## 7. Visitor-facing product features
+
+- ~~**P1 — Project detail modals + deep links.**~~ Done: cards open a modal
+  with `description_detail`, tech stack, and last-updated date; shareable
+  via `?project=`.
+- ~~**P1 — Skills search & category filter.**~~ Done: search input +
+  category chips above the skills grid.
+- ~~**P1 — Richer About hero + recruiter CTA.**~~ Done: brief bio,
+  primary-skill icons, and an "Open to … / Get in touch" strip driven by
+  `aboutme.json` → `open_to`.
+- ~~**P1 — Copy-link on modals.**~~ Done: experience, skill, and project
+  modals expose a one-click shareable deep link.
+- ~~**P1 — Social preview + PWA manifest names.**~~ Done: `og:image` /
+  Twitter card meta and filled `site.webmanifest` name fields.
+- **P1 — Chat site-navigation actions.** Let the assistant emit structured
+  actions (open Experience/Skills/Resume/Contact, download resume) that the
+  frontend executes — the differentiator for a portfolio bot.
+- **P2 — Interactive doodle canvas.** Footer promises a doodle section;
+  finish the empty `#doodle` surface so party mode has a real interaction.
+- **P2 — Cookie consent banner.** `CookieBanner` exists but is unmounted;
+  gate GA until accept on first visit.
+- **P2 — Focus trap in modals.** Keyboard users can still tab behind open
+  dialogs; trap focus while a modal/chat is open.
+
 ---
 
 ## Suggested sequencing
 
-1. **Foundation:** Terraform remote state + PR plans, uptime alerting, and
-   the frontend/WebSocket tests — these protect everything that follows.
-2. **User-facing polish:** accessibility fixes, assistant markdown +
-   persistence + suggested prompts, LCP/reduced-motion work.
-3. **Platform maturity:** structured logging, lockfile builds, CSP, canary
-   deploys, vulnerability scanning.
-4. **Bigger bets:** staging environment, CDN, OpenTelemetry, PWA, assistant
-   tool use.
+1. **Foundation:** Terraform remote state + PR plans, uptime alerting —
+   these protect everything that follows (needs GCP owner setup).
+2. **User-facing polish:** ~~assistant markdown/persistence/prompts~~,
+   ~~project modals / skills search / About CTA / copy-link / OG meta~~ —
+   next: chat navigation actions, focus trap, doodle canvas.
+3. **Platform maturity:** lockfile builds, CSP, canary deploys,
+   vulnerability scanning, coverage gates.
+4. **Bigger bets:** staging environment, CDN, OpenTelemetry, PWA offline
+   shell, assistant tool use beyond navigation.
