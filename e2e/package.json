@@ -1,0 +1,12 @@
+{
+  "name": "portfolio-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Single smoke test run against the built production Docker image in CI.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1"
+  }
+}

@@ -119,3 +119,43 @@ jobs:
         severity: CRITICAL,HIGH
         exit-code: '1'
         ignore-unfixed: true
+
+    - name: Run container for E2E smoke test
+      run: |
+        docker run -d --name portfolio-e2e -p 18080:8080 \
+          -e PORT=8080 \
+          -e SUPABASE_URL=https://example.supabase.co \
+          -e SUPABASE_ANON_KEY=x -e SUPABASE_SERVICE_ROLE=x \
+          -e ALLOWED_ORIGINS=http://localhost:18080 -e PRODUCTION_URL=http://localhost:18080 \
+          -e ADMIN_EMAIL=test@example.com -e RESUME_FILE=JordanKailResume.pdf \
+          -e ANTHROPIC_API_KEY=x -e SENDGRID_API_KEY=x \
+          portfolio-ci:latest
+        for i in $(seq 1 20); do
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/ || true)
+          [ "$STATUS" = "200" ] && exit 0
+          sleep 1
+        done
+        echo "Container never became ready"
+        docker logs portfolio-e2e
+        exit 1
+
+    - name: Use Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: e2e/package-lock.json
+
+    - name: Install Playwright
+      working-directory: e2e
+      run: |
+        npm ci
+        npx playwright install --with-deps chromium
+
+    - name: Run E2E smoke test
+      working-directory: e2e
+      run: npx playwright test
+
+    - name: Tear down E2E container
+      if: always()
+      run: docker rm -f portfolio-e2e || true
