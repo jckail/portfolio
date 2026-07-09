@@ -1,0 +1,23 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:18080/"],
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--no-sandbox --headless=new"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "resource-summary:script:size": ["error", { "maxNumericValue": 650000 }],
+        "resource-summary:stylesheet:size": ["error", { "maxNumericValue": 60000 }],
+        "resource-summary:image:size": ["error", { "maxNumericValue": 500000 }],
+        "resource-summary:total:size": ["error", { "maxNumericValue": 1200000 }]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "./lhci-results"
+    }
+  }
+}
