@@ -42,6 +42,7 @@ resource "google_project_service" "services" {
     "iam.googleapis.com",
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
+    "monitoring.googleapis.com",
   ])
 
   service            = each.value

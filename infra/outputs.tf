@@ -27,3 +27,8 @@ output "deployer_service_account" {
   description = "Service account GitHub Actions deploys as (set as the GCP_DEPLOYER_SERVICE_ACCOUNT GitHub secret)"
   value       = var.github_repository != "" ? google_service_account.deployer[0].email : null
 }
+
+output "planner_service_account" {
+  description = "Read-only service account for terraform plan on PRs (set as the GCP_PLANNER_SERVICE_ACCOUNT GitHub secret)"
+  value       = var.github_repository != "" ? google_service_account.planner[0].email : null
+}

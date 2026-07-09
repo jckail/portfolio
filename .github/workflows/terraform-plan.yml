@@ -1,0 +1,58 @@
+name: Terraform Plan
+
+# Read-only `terraform plan` on PRs touching infra/, posted to the job
+# summary for review. Uses a dedicated read-only WIF-bound service account
+# (roles/viewer + state-bucket access only) — it cannot modify GCP resources.
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    if: vars.GCP_PROJECT_ID != ''
+
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_PLANNER_SERVICE_ACCOUNT }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          TF_VAR_admin_email: ${{ vars.ADMIN_EMAIL || 'jckail13@gmail.com' }}
+          TF_VAR_production_url: ${{ vars.PRODUCTION_URL || 'https://www.jckail.com' }}
+          TF_VAR_allowed_origins: ${{ vars.PRODUCTION_URL || 'https://www.jckail.com' }}
+          TF_VAR_github_repository: ${{ github.repository }}
+          # Runtime secret values aren't needed to see infra drift; plan
+          # against placeholders so this read-only job never touches them.
+          TF_VAR_secrets: '{"supabase_url":"unused","supabase_anon_key":"unused","supabase_service_role":"unused","anthropic_api_key":"unused","sendgrid_api_key":"unused"}'
+        run: |
+          terraform plan -no-color -input=false | tee plan.out
+          {
+            echo "## Terraform Plan"
+            echo '```'
+            tail -c 60000 plan.out
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
