@@ -42,11 +42,11 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 ## Technology Stack 💻
 
 ### Frontend 🎨
-- **React 18 + TypeScript** with **Vite** for fast dev and optimized builds
+- **React 18 + TypeScript** with **Vite 8** for fast dev and optimized builds
 - **React Router** for navigation
 - **Zustand** for state management
 - **MUI** + CSS custom properties for UI and theming
-- **Vitest** for unit tests
+- **Vitest 4** for unit tests; **Playwright** for containerized E2E smoke tests
 
 ### Backend 🔧
 - **FastAPI** on **Python 3.12** with **Pydantic v2**
@@ -55,13 +55,14 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 - **SendGrid** for contact email
 
 ### Infrastructure ☁️
-- **Docker** multi-stage builds (Node 22 → Python 3.12 slim)
+- **Docker** multi-stage builds (Node 22 → Python 3.12 slim) with
+  hash-pinned Python deps (`requirements.lock.txt`)
 - **Google Cloud Run** behind **Artifact Registry**
 - **Terraform** for infrastructure as code, including keyless GitHub → GCP
   auth via Workload Identity Federation (see [`infra/`](./infra/README.md))
-- **GitHub Actions**: CI (lint, tests, Docker and Terraform checks for both
-  stacks) plus automatic deploys to Cloud Run on `main`
-  (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+- **GitHub Actions**: CI (lint, coverage-gated tests, Trivy image scan,
+  Docker + Terraform checks) plus verify-before-promote deploys to Cloud Run
+  on `main` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
 - **Dependabot** for monthly grouped dependency updates
 
 ## Repository Layout 📂
@@ -84,6 +85,8 @@ portfolio/
 │   ├── assets/        # System prompt, resume
 │   └── tests/         # Pytest suite (runs offline, no credentials needed)
 │
+├── e2e/               # Playwright smoke tests against the built image
+├── docs/adr/          # Architecture decision records
 ├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
 ├── helpers/           # Deploy script, Dockerfiles, local dev tooling
 └── .github/workflows/ # CI + automatic Cloud Run deploys
@@ -92,7 +95,7 @@ portfolio/
 ## Getting Started 🚀
 
 ### Prerequisites
-- Node.js 20+ and npm
+- Node.js 22+ and npm (matches the production frontend build image)
 - Python 3.12+
 - A `.env` file at the repo root (see [backend/README.md](./backend/README.md)
   for the full variable list)
@@ -147,7 +150,8 @@ flowchart LR
 Visitor traffic hits Cloud Run, which serves the Vite-built SPA and the
 FastAPI API (including the streaming chat WebSocket). Claude can request
 validated UI actions that the SPA executes. Secrets live in Secret Manager;
-deploys are keyless via Workload Identity Federation.
+deploys are keyless via Workload Identity Federation and only promote a
+revision to 100% traffic after a health check against the new revision.
 
 ## Documentation 📚
 
