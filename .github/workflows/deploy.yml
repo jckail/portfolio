@@ -43,6 +43,13 @@ jobs:
         push: false
         tags: portfolio-deploy:${{ github.sha }}
         outputs: type=docker,dest=${{ runner.temp }}/portfolio.tar
+    - name: Scan image before publishing or authenticating
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        input: ${{ runner.temp }}/portfolio.tar
+        severity: CRITICAL,HIGH
+        exit-code: '1'
+        ignore-unfixed: true
     - name: Upload this run's build
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:

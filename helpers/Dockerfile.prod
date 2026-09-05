@@ -31,7 +31,12 @@ COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/publ
 # setuptools/wheel: CVE-2024-6345, CVE-2025-47273, CVE-2026-24049.
 COPY requirements.lock.txt .
 RUN pip install --no-cache-dir --upgrade "pip>=25" "setuptools>=78.1.1" "wheel>=0.46.2" \
-    && pip install --no-cache-dir --require-hashes -r requirements.lock.txt
+    && pip install --no-cache-dir --require-hashes -r requirements.lock.txt \
+    && pip check \
+    # Installers are build-only dependencies. Remove their vendored packages
+    # (including pip's msgpack) and ensurepip's bundled installer from runtime.
+    && pip uninstall --yes pip setuptools wheel \
+    && rm -rf /usr/local/lib/python3.12/ensurepip
 
 # Copy the backend code
 COPY backend /app/backend/

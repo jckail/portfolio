@@ -116,7 +116,12 @@ Updated compatible npm dependencies; upgraded React Router to patched 7.18.3
 (the existing BrowserRouter/useLocation usage passes type checking and tests).
 Frontend npm audit now reports zero vulnerabilities. Removed unused `python-jose`
 and its unpatched `ecdsa` dependency; upgraded locked cryptography and h2, retaining
-hash-verified installation. E2E overrides update tmp, uuid, and qs to patched
+hash-verified installation. Image scanning additionally found vulnerable vendored
+packages inside pip itself; upgrading standalone setuptools did not remove those
+findings. The final runtime image now checks dependency consistency and removes
+pip, setuptools, wheel, and ensurepip after installation. No scan exclusions were
+added. The deployment build now scans the image before upload/authentication.
+E2E overrides update tmp, uuid, and qs to patched
 versions while preserving Lighthouse functionality.
 
 E2E audit still reports six high dependency entries, all caused by one upstream
