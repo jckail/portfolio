@@ -94,3 +94,14 @@ variable "secrets" {
   })
   sensitive = true
 }
+
+variable "github_repository_id" {
+  description = "Immutable GitHub repository ID for WIF trust. Override when deploying a different repository."
+  type        = string
+  default     = "866788248"
+
+  validation {
+    condition     = can(regex("^[0-9]+$", var.github_repository_id))
+    error_message = "github_repository_id must be the numeric GitHub repository ID."
+  }
+}

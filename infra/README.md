@@ -66,7 +66,7 @@ To enable it:
 1. Apply Terraform with the repository variable set:
 
    ```bash
-   terraform apply -var "github_repository=<owner>/<repo>"
+   terraform apply -var "github_repository=<owner>/<repo>" -var "github_repository_id=<numeric-id>"
    ```
 
 2. Add GitHub **repository secrets** from the Terraform outputs:
@@ -83,7 +83,25 @@ To enable it:
 
 The deployer service account can only push images, deploy revisions, and act
 as the runtime service account; the OIDC provider only trusts tokens issued
-for the configured repository.
+for the configured repository name and immutable ID, from `main` and
+`.github/workflows/deploy.yml` on push or manual dispatch. The repository ID
+default is for `jckail/portfolio`; obtain another repository's ID with
+`gh api repos/OWNER/REPO --jq .id`.
+
+Create a GitHub environment named `production` with a deployment branch rule
+allowing only the `main` branch. Builds run in a separate job without cloud
+credentials or OIDC permission. Deployment downloads only that run's artifact.
+
+Credentialed Terraform planning on pull requests has been removed. Terraform
+providers and data sources can execute code during init/plan, and state contains
+runtime secrets even when input variables use placeholders. Run cloud-connected
+plans only from a trusted operator checkout. PR CI still runs backend-free
+Terraform validation without cloud credentials.
+
+Apply these Terraform changes from an authenticated operator session to restrict
+the existing WIF provider and disable the former planner service account and remove its
+IAM grants. A Git push does **not** apply Terraform. See
+[`docs/security-review-2026-09-05.md`](../docs/security-review-2026-09-05.md).
 
 ### Remote state
 

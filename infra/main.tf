@@ -135,7 +135,8 @@ resource "google_cloud_run_v2_service" "app" {
           memory = var.memory
           cpu    = var.cpu
         }
-        cpu_idle = true
+        cpu_idle          = true
+        startup_cpu_boost = true
       }
 
       dynamic "env" {
@@ -165,7 +166,9 @@ resource "google_cloud_run_v2_service" "app" {
         }
         initial_delay_seconds = 5
         period_seconds        = 5
-        failure_threshold     = 6
+        # Observed cold starts approached the old 30-second budget.
+        failure_threshold = 24
+        timeout_seconds   = 3
       }
     }
   }

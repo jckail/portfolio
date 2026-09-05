@@ -43,13 +43,14 @@ resource "google_monitoring_alert_policy" "health_down" {
     display_name = "Uptime check failure"
 
     condition_threshold {
-      filter          = <<-EOT
+      filter = <<-EOT
         resource.type = "uptime_url"
         AND metric.type = "monitoring.googleapis.com/uptime_check/check_passed"
         AND metric.label.check_id = "${google_monitoring_uptime_check_config.health.uptime_check_id}"
       EOT
-      comparison      = "COMPARISON_LT"
-      threshold_value = 1
+      # The reducer counts failed probes. Alert when failures exist, not at zero.
+      comparison      = "COMPARISON_GT"
+      threshold_value = 0
       duration        = "300s"
 
       aggregations {

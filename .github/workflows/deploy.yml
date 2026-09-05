@@ -16,16 +16,48 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-production
   cancel-in-progress: false
 
 jobs:
+  build:
+    name: Build production image without cloud credentials
+    runs-on: ubuntu-latest
+    if: github.repository == 'jckail/portfolio' && github.ref == 'refs/heads/main' && vars.GCP_PROJECT_ID != ''
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      with:
+        persist-credentials: false
+    - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+    - name: Build image
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      with:
+        context: .
+        file: helpers/Dockerfile.prod
+        push: false
+        tags: portfolio-deploy:${{ github.sha }}
+        outputs: type=docker,dest=${{ runner.temp }}/portfolio.tar
+    - name: Upload this run's build
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: production-image
+        path: ${{ runner.temp }}/portfolio.tar
+        retention-days: 1
+        compression-level: 0
+
   deploy:
-    name: Build and deploy to Cloud Run
+    name: Deploy to Cloud Run
     runs-on: ubuntu-latest
     # Skip gracefully on forks / repos where deployment is not configured
-    if: vars.GCP_PROJECT_ID != ''
+    if: github.repository == 'jckail/portfolio' && github.ref == 'refs/heads/main' && vars.GCP_PROJECT_ID != ''
+    needs: build
+    environment: production
 
     permissions:
       contents: read
@@ -38,33 +70,36 @@ jobs:
       REPOSITORY: ${{ vars.AR_REPOSITORY || 'portfolio' }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      with:
+        persist-credentials: false
+
+    - name: Download this run's build
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      with:
+        name: production-image
+        path: ${{ runner.temp }}/image
 
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
       with:
         workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
 
     - name: Set up gcloud
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
 
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
-    - uses: docker/setup-buildx-action@v3
-
-    - name: Build and push image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: helpers/Dockerfile.prod
-        push: true
-        tags: |
-          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
-          ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+    - name: Load and push this run's build
+      run: |
+        docker load --input "$RUNNER_TEMP/image/portfolio.tar"
+        IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
+        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:${GITHUB_SHA}"
+        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
+        docker push "${IMAGE}:${GITHUB_SHA}"
+        docker push "${IMAGE}:latest"
 
     # Deploy the new revision with zero live traffic, verify it directly
     # via its own tagged URL, and only then promote to 100%. This closes
@@ -82,15 +117,19 @@ jobs:
           --region "$REGION" \
           --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}" \
           --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
+          --cpu-boost \
+          --startup-probe="httpGet.path=/api/health,httpGet.port=8080,initialDelaySeconds=5,periodSeconds=5,failureThreshold=24,timeoutSeconds=3" \
           --no-traffic \
           --tag="$TAG" \
           --quiet
 
     - name: Verify new revision before promoting
       run: |
-        CANARY_URL=$(gcloud run services describe "$SERVICE" \
-          --project "$PROJECT_ID" --region "$REGION" --format=json \
-          | jq -r --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .url')
+        SERVICE_JSON=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" --format=json)
+        CANARY_URL=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .url' <<< "$SERVICE_JSON")
+        REVISION=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .revisionName' <<< "$SERVICE_JSON")
+        echo "REVISION=$REVISION" >> "$GITHUB_ENV"
         if [ -z "$CANARY_URL" ]; then
           echo "Could not resolve the tagged revision URL for $TAG"
           exit 1
@@ -112,7 +151,7 @@ jobs:
       run: |
         gcloud run services update-traffic "$SERVICE" \
           --project "$PROJECT_ID" --region "$REGION" \
-          --to-latest --quiet
+          --to-revisions="${REVISION}=100" --quiet
 
     - name: Verify production traffic
       run: |

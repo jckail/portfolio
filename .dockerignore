@@ -34,3 +34,8 @@ helpers/.devcontainer
 .env.*
 **/*.log
 backend/app/logs
+
+# Ephemeral Google Actions credentials must never enter git or a build context.
+**/gha-creds-*.json
+**/.env
+**/.env.*
