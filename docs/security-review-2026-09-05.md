@@ -82,7 +82,9 @@ The repo's Actions usage began after the March incident. No advisory C2/domain o
 fallback-repository markers were identified. A tag name alone was not treated as
 proof of safety.
 
-GitHub secret scanning and push protection were enabled and verified; the initial
+Repository policy now requires full Action commit pins, and the retired planner
+repository secret was removed. GitHub secret scanning and push protection were
+enabled and verified; the initial
 scan reported no open alerts. These controls were previously disabled.
 
 ### September 1 uptime incident
@@ -148,8 +150,9 @@ inputs together, then roll a verified revision and revoke old credentials.
 Supabase rotation must account for its JWT/signing-key setup and any existing
 clients. Do not copy secrets into Git, logs, or this report.
 
-Forward Data Access logging is being enabled for Secret Manager, STS, IAM
-Credentials, and Cloud Storage; matching audit settings are in `infra/audit.tf`.
+Forward Data Access logging was enabled and verified for Secret Manager, STS, IAM
+Credentials (under `iam.googleapis.com`), and Cloud Storage; STS also records
+`ADMIN_READ` token exchanges. Matching audit settings are in `infra/audit.tf`.
 Cloud audit logs can contain sensitive metadata and incur normal logging charges. No secret values were printed or
 committed, and no blanket credential rotation or history rewrite was performed.
 
