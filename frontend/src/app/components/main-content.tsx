@@ -159,7 +159,7 @@ const MainContentInner: React.FC<MainContentProps> = () => {
         toggleTheme={toggleTheme}
         isToggleHidden={isToggleHidden}
       />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <div className="main-content">
           {/* About section is eagerly loaded */}
           <ErrorBoundary>

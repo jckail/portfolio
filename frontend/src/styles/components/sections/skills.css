@@ -224,7 +224,7 @@
 
 .skill-tag {
   background: var(--skill-tag-background);
-  color: white;
+  color: var(--skill-tag-text, #ffffff);
   padding: 1px var(--spacing-xs);
   border-radius: 5px;
   font-size: .9rem;

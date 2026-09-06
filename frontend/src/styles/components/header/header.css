@@ -56,7 +56,7 @@
 
 .menu-toggle.active {
   background: var(--primary-light);
-  color: var(--primary);
+  color: var(--accent-text);
   transform: rotate(90deg);
 }
 
@@ -106,7 +106,9 @@
 }
 
 .nav-right .icon-link:hover {
-  color: var(--primary-hover);
+  /* Foreground and background were both accent shades (1.24:1 in dark mode).
+     White on --primary measures 8.53:1. */
+  color: #ffffff;
   background: var(--primary);
   border-color: var(--primary-hover);
 }

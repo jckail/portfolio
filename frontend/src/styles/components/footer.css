@@ -40,7 +40,7 @@
 
 .footer-link-doodle:hover {
   @apply cursor-pointer;
-  color: var(--primary) !important;
+  color: var(--accent-text) !important;
   transition: opacity 0.3s ease;
   text-decoration: none;
   font-size: 1.75;

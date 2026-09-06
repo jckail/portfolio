@@ -41,7 +41,7 @@
   font: inherit;
   font-size: 1.05rem;
   padding: 1rem 1.1rem;
-  outline: none;
+  /* focus ring supplied by the global :focus-visible rule in base/app.css */
 }
 
 .command-palette-list {

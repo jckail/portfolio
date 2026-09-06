@@ -40,6 +40,6 @@
 }
 
 .contact-item a:hover {
-  color: var(--primary-hover);
+  color: var(--accent-text);
   text-decoration: underline;
 }
