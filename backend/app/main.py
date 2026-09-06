@@ -116,6 +116,16 @@ async def add_response_headers(request: Request, call_next):
                 response.headers["Cache-Control"] = "public, max-age=86400"
             elif path == "/" or path.endswith(".html"):
                 response.headers["Cache-Control"] = "no-cache"
+            elif path.startswith("/api/") and request.method == "GET":
+                # Portfolio content is static JSON loaded from disk, but five
+                # of these gate the first render. A short TTL with a longer
+                # stale window keeps repeat visits and refreshes off the
+                # critical path without making edits slow to appear.
+                # Authenticated/mutating routes are excluded below.
+                if not path.startswith(("/api/admin", "/api/logs")):
+                    response.headers["Cache-Control"] = (
+                        "public, max-age=60, stale-while-revalidate=300"
+                    )
 
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
