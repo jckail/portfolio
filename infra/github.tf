@@ -68,22 +68,26 @@ resource "google_service_account_iam_member" "deployer_wif" {
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github[0].name}/attribute.repository/${var.github_repository}"
 }
 
-# Push images to Artifact Registry
-resource "google_project_iam_member" "deployer_ar" {
+# CI only publishes to this application's existing image repository.
+resource "google_artifact_registry_repository_iam_member" "deployer_ar" {
   count = local.github_enabled
 
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.deployer[0].email}"
+  project    = var.project_id
+  location   = google_artifact_registry_repository.images.location
+  repository = google_artifact_registry_repository.images.name
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.deployer[0].email}"
 }
 
-# Deploy new Cloud Run revisions
-resource "google_project_iam_member" "deployer_run" {
+# CI updates this existing service; bootstrap and IAM changes remain administrative.
+resource "google_cloud_run_v2_service_iam_member" "deployer_run" {
   count = local.github_enabled
 
-  project = var.project_id
-  role    = "roles/run.admin"
-  member  = "serviceAccount:${google_service_account.deployer[0].email}"
+  project  = var.project_id
+  location = google_cloud_run_v2_service.app.location
+  name     = google_cloud_run_v2_service.app.name
+  role     = "roles/run.developer"
+  member   = "serviceAccount:${google_service_account.deployer[0].email}"
 }
 
 # Deploying requires acting as the Cloud Run runtime service account

@@ -205,3 +205,18 @@ before its health check and promotion. Mutable SHA/latest tags are not deploymen
 identifiers. The final GitHub check and cloud promotion are separate operations:
 a main push in that short interval cannot be ruled out atomically. These checks
 also do not establish the safety of code an authorized maintainer puts on main.
+
+### Restrict the deployment identity to this application
+
+The deployer now has Cloud Run Developer on the existing `quickresume` service
+and Artifact Registry Writer on the `portfolio` image repository. Its former
+project-wide Cloud Run Admin and Artifact Registry Writer memberships were
+removed after the narrower grants were added and read back. Public invocation
+and Service Account User on the exact runtime identity are preserved. Terraform
+uses resource-scoped IAM members and documents migration from the old bindings.
+
+This removes deployment reach to unrelated services/repositories and service IAM
+administration. It does not remove the authority to deploy application code with
+the runtime identity or revoke application credentials. Cloud Run Developer also
+retains powerful operations on the target service; it is not a custom minimal
+permission set.

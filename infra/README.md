@@ -114,7 +114,31 @@ create a GCS bucket and uncomment the `backend "gcs"` block in `versions.tf`.
 Artifact Registry, and deploys a Cloud Run revision with `gcloud`, passing
 configuration as plain environment variables.
 
-Terraform is the source of truth for the infrastructure itself (APIs,
-repository, service account, secrets, scaling policy). If you use both, run
-`terraform apply` after `deploy.sh` deployments so drift (e.g. env var
-changes) is reconciled.
+Terraform describes the infrastructure itself (APIs, repository, service account,
+secrets, scaling policy). When using multiple deployment paths, reconcile drift
+with the authoritative state and a reviewed plan. Do not run a blanket apply
+merely to synchronize a deployment; review image and secret changes explicitly.
+
+
+### Migrating existing CI deployment permissions
+
+The CI deployer uses Cloud Run Developer on this service and Artifact Registry
+Writer on this repository, plus Service Account User on the exact runtime
+identity. Creating the service/repository and changing their IAM policies remain
+administrative operations. Deployment still runs application code with the
+runtime identity's permissions; this narrowing does not revoke application keys.
+
+Existing installations must migrate the former project-level `deployer_run`
+and `deployer_ar` IAM memberships deliberately. After any active rollout ends,
+add and verify the resource-scoped grants, then remove the deployer's old
+project-level Cloud Run Admin and Artifact Registry Writer memberships. Verify a
+fresh deployment after propagation. Do not leave the broad grants as a permanent
+fallback. Preserve other principals and the runtime service-account binding.
+
+These are different resource types and remote IAM objects, not resource renames:
+do not use `terraform state mv` or a `moved` block between the old and new types.
+Use the authoritative backend/state and a reviewed migration plan. If the new
+memberships were applied through the cloud API first, import them into their new
+Terraform addresses; reconcile the removed old memberships by refresh/plan.
+Do not run a blanket apply against an empty or stale state, and do not apply a
+whole service update merely to change these IAM memberships.
