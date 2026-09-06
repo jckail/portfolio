@@ -29,6 +29,13 @@ logger.info("All required environment variables are present")
 
 settings = get_settings()
 
+# Routes that must never carry a public cache directive. `/api/admin` and
+# `/api/logs` are admin-authenticated and per-user; `/api/health*` backs the
+# container probe and the external uptime check, where a cached result is
+# actively harmful.
+PRIVATE_API_PREFIXES = ("/api/admin", "/api/logs")
+NEVER_CACHE_PREFIXES = ("/api/health",)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown."""
@@ -116,16 +123,28 @@ async def add_response_headers(request: Request, call_next):
                 response.headers["Cache-Control"] = "public, max-age=86400"
             elif path == "/" or path.endswith(".html"):
                 response.headers["Cache-Control"] = "no-cache"
-            elif path.startswith("/api/") and request.method == "GET":
+            elif path.startswith(NEVER_CACHE_PREFIXES):
+                # Health must never be served from a cache. A stale "healthy"
+                # 200 held by any intermediary would hide a real outage from
+                # the external uptime check for the life of the entry.
+                response.headers["Cache-Control"] = "no-store"
+            elif (
+                path.startswith("/api/")
+                and request.method == "GET"
+                and response.status_code == 200
+                and not path.startswith(PRIVATE_API_PREFIXES)
+            ):
                 # Portfolio content is static JSON loaded from disk, but five
                 # of these gate the first render. A short TTL with a longer
                 # stale window keeps repeat visits and refreshes off the
                 # critical path without making edits slow to appear.
-                # Authenticated/mutating routes are excluded below.
-                if not path.startswith(("/api/admin", "/api/logs")):
-                    response.headers["Cache-Control"] = (
-                        "public, max-age=60, stale-while-revalidate=300"
-                    )
+                #
+                # Restricted to 200s so 4xx/5xx are never cached, and to the
+                # public content routes: anything requiring authentication is
+                # per-user and must not land in a shared cache.
+                response.headers["Cache-Control"] = (
+                    "public, max-age=60, stale-while-revalidate=300"
+                )
 
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
