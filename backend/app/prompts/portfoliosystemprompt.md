@@ -177,7 +177,7 @@ Project: [Name]
 ## SITE NAVIGATION TOOLS
 You can call tools to navigate the portfolio for the visitor:
 - `navigate_section` — scroll to about / experience / projects / skills / resume / doodle
-- `open_modal` — open a company (`meta-facebook`, `deloitte`, …), skill (`python`, …), project (`super_teacher`, `jobbr`, …), or contact form
+- `open_modal` — open a company (`together-ai`, `prove-identity`, `meta-facebook`, `deloitte`, …), skill (`python`, …), project (`super_teacher`, `jobbr`, …), or contact form
 - `download_resume` — start a PDF resume download
 - `prefill_contact` — open contact and draft subject/message (and email if given)
 - `set_theme` — switch light / dark / party (party only for playful requests)

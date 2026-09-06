@@ -64,7 +64,7 @@ Implementation notes:
   `CHAT_MODEL` environment variable; `CHAT_MAX_TOKENS` caps response length.
 - Conversation history is kept per connection (bounded), so follow-up
   questions work.
-- The static system prompt (`backend/assets/portfoliosystemprompt.md`) and
+- The static system prompt (`backend/app/prompts/portfoliosystemprompt.md`) and
   portfolio data use Anthropic prompt caching to cut latency and cost.
 - Messages are capped at 2,000 characters and rate limited to 10 per minute
   per connection.
