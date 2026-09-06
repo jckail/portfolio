@@ -187,3 +187,20 @@ fresh main push. It is not evidence that a malicious rerun occurred.
 
 References: [GitHub OIDC claims](https://docs.github.com/en/actions/reference/security/oidc)
 and [rerun semantics](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs).
+
+### Require tested, current source and verify the deployed image
+
+Deployment now checks the active `ci.yml` workflow's latest push run for the exact
+main commit before cloud authentication and again immediately before promotion.
+The run and all four expected jobs must succeed; an older successful run cannot
+hide a newer failed or pending run. Missing/incomplete API results, a changed CI
+attempt, or a moved main branch prevent promotion. A fresh manual deployment may
+reuse successful CI for its unchanged main commit. The guard's failure-case tests
+run in backend CI.
+
+The registry digest returned by pushing this run's image is validated and passed
+to Cloud Run as `image@sha256:...`. The new revision must resolve that exact image
+before its health check and promotion. Mutable SHA/latest tags are not deployment
+identifiers. The final GitHub check and cloud promotion are separate operations:
+a main push in that short interval cannot be ruled out atomically. These checks
+also do not establish the safety of code an authorized maintainer puts on main.

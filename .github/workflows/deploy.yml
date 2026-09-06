@@ -75,6 +75,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      actions: read
 
     env:
       PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
@@ -99,6 +100,11 @@ jobs:
         name: production-image
         path: ${{ runner.temp }}/image
 
+    - name: Require successful CI for current main
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 helpers/verify_deployment.py --wait-seconds 1200
+
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
       with:
@@ -117,7 +123,12 @@ jobs:
         IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
         docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:${GITHUB_SHA}"
         docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
-        docker push "${IMAGE}:${GITHUB_SHA}"
+        DIGEST=$(docker push --quiet "${IMAGE}:${GITHUB_SHA}")
+        if [[ ! "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+          echo "::error::Push did not return one valid image digest"
+          exit 1
+        fi
+        echo "DEPLOY_IMAGE=${IMAGE}@${DIGEST}" >> "$GITHUB_ENV"
         docker push "${IMAGE}:latest"
 
     # Deploy the new revision with zero live traffic, verify it directly
@@ -134,7 +145,7 @@ jobs:
         gcloud run deploy "$SERVICE" \
           --project "$PROJECT_ID" \
           --region "$REGION" \
-          --image "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}:${GITHUB_SHA}" \
+          --image "$DEPLOY_IMAGE" \
           --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
           --cpu-boost \
           --startup-probe="httpGet.path=/api/health,httpGet.port=8080,initialDelaySeconds=5,periodSeconds=5,failureThreshold=24,timeoutSeconds=3" \
@@ -149,6 +160,12 @@ jobs:
         CANARY_URL=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .url' <<< "$SERVICE_JSON")
         REVISION=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .revisionName' <<< "$SERVICE_JSON")
         echo "REVISION=$REVISION" >> "$GITHUB_ENV"
+        RESOLVED_IMAGE=$(gcloud run revisions describe "$REVISION" \
+          --project "$PROJECT_ID" --region "$REGION" --format='value(status.imageDigest)')
+        if [ "$RESOLVED_IMAGE" != "$DEPLOY_IMAGE" ]; then
+          echo "::error::New revision does not match the pushed image digest"
+          exit 1
+        fi
         if [ -z "$CANARY_URL" ]; then
           echo "Could not resolve the tagged revision URL for $TAG"
           exit 1
@@ -165,6 +182,11 @@ jobs:
         done
         echo "Health check failed — leaving traffic on the previous revision"
         exit 1
+
+    - name: Recheck current main and CI immediately before promotion
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 helpers/verify_deployment.py
 
     - name: Promote new revision to 100% traffic
       run: |
