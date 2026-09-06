@@ -69,4 +69,13 @@ exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080}
 EOF
 
 RUN chmod +x /app/start.sh
+
+# Drop root. Cloud Run honours the image user, so an RCE in FastAPI/uvicorn or
+# any dependency would otherwise land as UID 0 with write access to /app.
+# Numeric form so the runtime never needs /etc/passwd resolution.
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid app --no-create-home app \
+    && chown -R app:app /app
+USER 10001:10001
+
 CMD ["/app/start.sh"]

@@ -1,6 +1,11 @@
 # Python backend
 .venv/
 venv/
+# Any local virtualenv. .security-venv/ was previously excluded only by
+# .git/info/exclude, which is local-only: on a fresh clone a `git add -A`
+# would have committed ~100 MB of virtualenv.
+*venv/
+.security-venv/
 .streamlit/secrets.toml
 .streamlit/
 __pycache__/
@@ -62,7 +67,9 @@ e2e/.lighthouseci/
 
 # Terraform
 infra/.terraform/
-infra/.terraform.lock.hcl
+# infra/.terraform.lock.hcl is intentionally COMMITTED: it pins provider
+# versions and their hashes, so `terraform init` is reproducible and a
+# tampered provider release is caught. Same rationale as package-lock.json.
 infra/*.tfstate
 infra/*.tfstate.*
 infra/*.tfvars
@@ -105,3 +112,8 @@ openai-chatgpt-latest.vsix
 
 # Ephemeral Google Actions credentials must never enter git or a build context.
 **/gha-creds-*.json
+
+# Local agent/editor scratch directories
+.claude/
+.codex/
+.cursor/
