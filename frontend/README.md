@@ -6,8 +6,8 @@ party mode), and analytics.
 
 ## Technology Stack
 
-- **React 18** + **TypeScript** on **Vite 5**
-- **React Router 6** for routing
+- **React 18** + **TypeScript** on **Vite 8**
+- **React Router 7** for routing
 - **Zustand** for global state (theme, section, admin, telemetry)
 - **MUI 6** (chat dialog) + plain CSS with custom properties for theming
 - **Vitest** + Testing Library for unit tests

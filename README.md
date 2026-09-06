@@ -35,8 +35,8 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 - 🌓 Light/dark mode — and a hidden party mode 🎉
 
 ### Professional Network
-- 🔗 [LinkedIn](https://www.linkedin.com/in/jordan-kail)
-- 💻 [GitHub](https://github.com/jkail-dev)
+- 🔗 [LinkedIn](https://www.linkedin.com/in/jckail/)
+- 💻 [GitHub](https://github.com/jckail)
 - 📧 Direct contact form (SendGrid)
 
 ## Technology Stack 💻

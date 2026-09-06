@@ -28,7 +28,6 @@ infra
 docs
 helpers/*.sh
 helpers/*.py
-helpers/todo.md
 helpers/README.md
 helpers/.devcontainer
 .devcontainer

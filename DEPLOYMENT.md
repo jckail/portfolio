@@ -81,10 +81,19 @@ to Cloud Run, and polls `/api/health` until it returns 200.
 
 ## Optional but recommended (from ROADMAP.md)
 
-- [ ] **Terraform remote state**: create a GCS bucket, uncomment the
+- [x] **Terraform remote state**: done — the `backend "gcs"` block in
+      `infra/versions.tf` is live (`portfolio-383615-terraform-state`).
+      ⚠ The bucket itself is not managed by Terraform and has no explicit
+      IAM, so any project Viewer can read the state — which holds all five
+      secrets in plaintext. See `docs/audit-2026-09-06.md` §3 O1.
+- [ ] ~~create a GCS bucket, uncomment the~~
   `backend "gcs"` block in `infra/versions.tf`, and run `terraform init
   -migrate-state`. Required before Terraform can run in CI.
-- [ ] **Uptime alerting**: a Cloud Monitoring uptime check on `/api/health`
+- [x] **Uptime alerting**: done — `infra/monitoring.tf` provisions the check
+      (now against `/api/health/ready`) and an alert policy.
+      ⚠ The notification channel has never been verified, so it delivers
+      nothing. See `docs/audit-2026-09-06.md` §3 O2.
+- [ ] ~~a Cloud Monitoring uptime check on `/api/health`~~
   with a notification channel, managed in Terraform.
 
 ## Everyday deploys after setup
