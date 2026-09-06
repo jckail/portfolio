@@ -332,3 +332,27 @@ def test_concurrent_connect_does_not_leak_a_connection_slot():
 
     assert manager.ip_conn_counts.get(ip, 0) == 0, manager.ip_conn_counts
     assert manager.active_connections == {}
+
+
+# --- WebSocket origin policy ---------------------------------------------
+
+def test_websocket_allows_same_origin_on_any_served_host(client):
+    """The site is served on four hostnames but ALLOWED_ORIGINS named one, so
+    the chat 403'd on the other three - including the declared canonical.
+    Same-origin is never cross-site forgery and must always be accepted."""
+    with client.websocket_connect(
+        "/ws/same-origin-client",
+        headers={"origin": "https://jordan-kail.com", "host": "jordan-kail.com"},
+    ) as ws:
+        ws.send_json({"type": "context", "content": "ok"})
+
+
+def test_websocket_still_rejects_a_cross_site_origin(client):
+    """A forged page sends its own Origin with the target's Host; the mismatch
+    is exactly what identifies it."""
+    with pytest.raises(WebSocketDisconnect):
+        with client.websocket_connect(
+            "/ws/cross-site-client",
+            headers={"origin": "https://evil.tld", "host": "jordan-kail.com"},
+        ) as ws:
+            ws.receive_text()
