@@ -70,6 +70,9 @@ jobs:
     - name: Test deployment authorization guard
       run: python3 -m unittest discover -s helpers -p test_verify_deployment.py -v
 
+    - name: Test stale revision tag cleanup
+      run: python3 -m unittest discover -s helpers -p test_cleanup_revision_tags.py -v
+
     - name: Lint (ruff)
       run: python -m ruff check backend
 

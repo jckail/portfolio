@@ -210,3 +210,10 @@ jobs:
           exit 1
         fi
         echo "Production healthy at $URL"
+
+    - name: Remove stale automated revision tags after verified promotion
+      run: python3 helpers/cleanup_revision_tags.py
+
+    - name: Remove this failed canary tag when its identity is known
+      if: failure() && env.TAG != '' && env.REVISION != ''
+      run: python3 helpers/cleanup_revision_tags.py --failed-canary
