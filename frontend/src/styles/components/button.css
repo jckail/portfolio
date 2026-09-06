@@ -6,7 +6,7 @@
   font-weight: 500;
   transition: all 0.2s ease;
   border: none;
-  outline: none;
+  /* focus ring supplied by the global :focus-visible rule in base/app.css */
 }
 
 .button:disabled {

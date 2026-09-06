@@ -111,6 +111,7 @@ const Experience: React.FC = () => {
 
   // Map company slugs to experience keys
   const companyKeyMap: { [key: string]: string } = {
+    'together-ai': 'together_ai',
     'prove-identity': 'prove',
     'meta-facebook': 'meta',
     'deloitte': 'deloitte',
@@ -121,6 +122,7 @@ const Experience: React.FC = () => {
 
   // Map experience keys to company slugs
   const keyCompanyMap: { [key: string]: string } = {
+    'together_ai': 'together-ai',
     'prove': 'prove-identity',
     'meta': 'meta-facebook',
     'deloitte': 'deloitte',

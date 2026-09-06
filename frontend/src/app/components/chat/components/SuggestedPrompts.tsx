@@ -3,7 +3,7 @@ import { Box, Button } from '@mui/material';
 
 /** Base prompts plus a couple that exercise chat navigation tools. */
 const BASE_PROMPTS = [
-  'What did Jordan do at Meta?',
+  'What is Jordan working on at Together AI?',
   'Summarize his AI and ML experience',
   'What are his strongest technical skills?',
   'Tell me about his open-source projects',
@@ -12,7 +12,7 @@ const BASE_PROMPTS = [
 const ACTION_PROMPTS = [
   'Show me his resume',
   'Open the Super Teacher project',
-  'Take me to his experience at Meta',
+  'Take me to his experience at Together AI',
   'Help me draft an email to Jordan',
 ] as const;
 

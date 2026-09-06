@@ -74,6 +74,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         variant="contained"
         onClick={handleSendMessage}
         disabled={!message.trim() || isLoading}
+        // Icon-only control: without this it announces as an unnamed button.
+        aria-label="Send message"
         sx={{ 
           minWidth: 'auto', 
           p: 1,

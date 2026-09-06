@@ -49,6 +49,27 @@ describe('ChatMarkdown', () => {
     expect(container.querySelector('script')).toBeNull();
   });
 
+  // A fence whose info string isn't plain \w used to match the paragraph
+  // loop's "don't consume" guard but not the fence pattern, so the parser
+  // spun forever and froze the tab. Asking the assistant for a C++ snippet
+  // was enough to trigger it.
+  it.each([
+    ['c++', '```c++\nint x = 1;\n```'],
+    ['c#', '```c#\nvar x = 1;\n```'],
+    ['leading space', '``` python\nx = 1\n```'],
+    ['attributes', '```js title="a.js"\nconst x = 1;\n```'],
+    ['braces', '```{r}\nx <- 1\n```'],
+    ['four backticks', '````\nliteral\n````'],
+  ])('renders a %s fence without hanging', (_label, text) => {
+    const { container } = render(<ChatMarkdown text={text} />);
+    expect(container.querySelector('pre code')).not.toBeNull();
+  });
+
+  it('renders an unterminated fence without hanging', () => {
+    const { container } = render(<ChatMarkdown text={'```rust\nfn main() {}'} />);
+    expect(container.querySelector('pre code')?.textContent).toContain('fn main');
+  });
+
   it('shows a streaming cursor when isStreaming', () => {
     const { container } = render(
       <ChatMarkdown text="Partial" isStreaming />

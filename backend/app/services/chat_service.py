@@ -15,6 +15,7 @@ from fastapi import WebSocket
 from backend.app.config import get_settings
 from backend.app.models import get_all_models
 from backend.app.services.chat_actions import CHAT_TOOLS, normalize_tool_action
+from backend.app.utils.rate_limit import SlidingWindowLimiter
 from backend.app.utils.supabase_client import supabase
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,15 @@ MAX_PAGE_CONTEXT_CHARS = 4000
 MAX_USER_MESSAGE_CHARS = 2000
 RATE_LIMIT_MAX_MESSAGES = 10
 RATE_LIMIT_WINDOW_SECONDS = 60
+# A per-connection limit alone is bypassable: the client picks its own id and
+# reconnecting mints a fresh one. These caps are keyed on the network peer and
+# survive disconnects, so churning connections gains an abuser nothing.
+IP_RATE_LIMIT_MAX_MESSAGES = 30
+MAX_CONNECTIONS_TOTAL = 200
+MAX_CONNECTIONS_PER_IP = 5
+# Sockets that go quiet are dropped so an abuser cannot simply hold thousands
+# of idle connections open against a 512 MiB instance.
+IDLE_TIMEOUT_SECONDS = 300
 
 FALLBACK_SYSTEM_PROMPT = """You are an AI assistant for Jordan Kail's portfolio website. Your role is to help visitors:
 1. Learn about Jordan's background, experience, and technical skills
@@ -45,9 +55,11 @@ You have access to the current page content to provide accurate, contextual resp
 
 def _load_base_prompt() -> str:
     """Load the system prompt from assets, falling back to a built-in prompt."""
+    # Deliberately NOT under backend/assets/: that directory is mounted at
+    # /api/assets, which made the whole system prompt publicly downloadable.
     prompt_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        'assets', 'portfoliosystemprompt.md'
+        os.path.dirname(os.path.dirname(__file__)),
+        'prompts', 'portfoliosystemprompt.md'
     )
     try:
         with open(prompt_path) as file:
@@ -65,6 +77,14 @@ class ConnectionManager:
         self.conversation_histories: dict[str, list[dict]] = {}
         # Per-client timestamps of recent messages, for rate limiting.
         self.message_timestamps: dict[str, list[float]] = {}
+        # Peer-keyed limits. Unlike the per-client counters above, these are not
+        # cleared on disconnect, so they cannot be reset by reconnecting.
+        self.ip_limiter = SlidingWindowLimiter(
+            max_events=IP_RATE_LIMIT_MAX_MESSAGES,
+            window_seconds=RATE_LIMIT_WINDOW_SECONDS,
+        )
+        self.connection_ips: dict[str, str] = {}
+        self.ip_conn_counts: dict[str, int] = {}
         # One client and one portfolio-data snapshot for the entire application.
         self.client = AsyncAnthropic(
             api_key=settings.anthropic_api_key or None,
@@ -74,16 +94,53 @@ class ConnectionManager:
         self._base_prompt: str | None = None
         self._portfolio_data: str | None = None
 
-    async def connect(self, client_id: str, websocket: WebSocket):
+    async def connect(self, client_id: str, websocket: WebSocket, ip: str = "unknown") -> bool:
+        """Accept a socket, or refuse it and return False.
+
+        A client id already in use is rejected rather than allowed to displace
+        the existing socket: overwriting would hand the new connection the
+        previous visitor's reply stream and page context.
+        """
+        if client_id in self.active_connections:
+            await websocket.close(code=1008)  # policy violation
+            return False
+        if len(self.active_connections) >= MAX_CONNECTIONS_TOTAL:
+            await websocket.close(code=1013)  # try again later
+            return False
+        if self.ip_conn_counts.get(ip, 0) >= MAX_CONNECTIONS_PER_IP:
+            await websocket.close(code=1013)
+            return False
+
         await websocket.accept()
         self.active_connections[client_id] = websocket
         self.conversation_histories[client_id] = []
+        # A recycled id must not inherit the previous session's page context.
+        self.page_contexts.pop(client_id, None)
+        self.connection_ips[client_id] = ip
+        self.ip_conn_counts[ip] = self.ip_conn_counts.get(ip, 0) + 1
+        return True
 
     def disconnect(self, client_id: str):
         self.active_connections.pop(client_id, None)
         self.page_contexts.pop(client_id, None)
         self.conversation_histories.pop(client_id, None)
         self.message_timestamps.pop(client_id, None)
+        ip = self.connection_ips.pop(client_id, None)
+        if ip is not None:
+            remaining = self.ip_conn_counts.get(ip, 0) - 1
+            if remaining > 0:
+                self.ip_conn_counts[ip] = remaining
+            else:
+                self.ip_conn_counts.pop(ip, None)
+
+    def is_ip_rate_limited(self, ip: str) -> bool:
+        """Peer-keyed message limit; survives reconnects by design."""
+        return not self.ip_limiter.allow(ip)
+
+    def reset_limits(self) -> None:
+        """Clear rate-limit state (used by tests)."""
+        self.message_timestamps.clear()
+        self.ip_limiter.reset()
 
     def is_rate_limited(self, client_id: str) -> bool:
         now = time.monotonic()

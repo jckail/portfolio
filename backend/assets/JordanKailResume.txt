@@ -1,5 +1,5 @@
 JORDAN KAIL
-Data Engineer
+Staff Software Engineer
 
 jckail13@gmail.com
 571-218-5000
@@ -8,11 +8,19 @@ Denver, CO
 
 Experience
 ======
+Together AI
+Staff Software Engineer
+02/2025 - Ongoing
+San Francisco, CA
+ - Staff engineer on the data platform behind Together's AI acceleration cloud - the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signal.
+ - Build internal agent tooling and evaluation harnesses so engineering teams can develop, test, and ship LLM-powered agents against Together's own inference stack.
+ - Design data infrastructure for large-scale training and inference workloads, spanning dataset curation, lineage, and quality controls for open-model work.
+
 Prove Identity
-Staff Data Engineer
-06/2023 - Ongoing
+Staff Software Engineer - Data
+06/2023 - 01/2025
 Denver, CO
- - Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product API response time to 120ms and operational expenses by 95%.
+ - Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product API response time to 12ms and operational expenses by 95%.
  - Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.
  - Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes.
 
@@ -34,14 +42,14 @@ Menlo Park, CA + Seattle, WA + Atlanta, GA
  - Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.
 
 Wide Open West
-Lead Data Engineer
+Senior Data Engineer
 11/2017 - 12/2018
 Denver, CO
  - Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.
  - Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.
 
 Common Spirit Health (Formerly CHI)
-Data Engineer - Business Intelligence
+Data Engineer
 09/2016 - 11/2017
 Denver, CO
  - Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.

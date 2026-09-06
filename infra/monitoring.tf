@@ -17,7 +17,11 @@ resource "google_monitoring_uptime_check_config" "health" {
   period       = "300s"
 
   http_check {
-    path         = "/api/health"
+    # Readiness, not liveness: /api/health returns 200 while degraded so the
+    # container probe won't restart a serving instance over a database blip.
+    # External uptime alerting still wants to know about that, so it probes
+    # the endpoint that fails closed.
+    path         = "/api/health/ready"
     port         = 443
     use_ssl      = true
     validate_ssl = true

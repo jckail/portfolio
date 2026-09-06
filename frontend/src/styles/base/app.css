@@ -74,3 +74,33 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Keyboard focus indicator.
+   The buttonize() helper makes 10 non-button elements focusable, and several
+   inputs previously set `outline: none` with no replacement, so keyboard
+   users had no visible focus at all (WCAG 2.4.7). Scoped to :focus-visible
+   so pointer users never see a ring. */
+:focus-visible {
+  outline: 2px solid var(--primary-border, currentColor);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip link: first tab stop, visually hidden until focused. */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10000;
+  padding: 0.75rem 1.25rem;
+  background: var(--section-background, #000);
+  color: var(--text-color, #fff);
+  border: 2px solid var(--primary-border, currentColor);
+  border-radius: 0 0 var(--radius-sm, 4px) 0;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  left: 0;
+}

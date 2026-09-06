@@ -52,33 +52,8 @@ def get_version() -> dict[str, Any]:
             "error": str(e)
         }
 
-@router.get("/health")
-async def health_check():
-    """
-    Comprehensive health check endpoint that verifies:
-    - Service status
-    - Supabase database connectivity
-    - Application version (git commit)
-
-    Returns:
-        JSON object containing health status, database connection status,
-        and version information
-
-    Raises:
-        HTTPException: If health check fails, with detailed error information
-    """
-    status_info = {
-        "status": "unhealthy",
-        "message": "Service is running",
-        "checks": {
-            "database": {
-                "status": "unchecked",
-                "details": None
-            },
-            "version": get_version()
-        }
-    }
-
+async def _check_database() -> tuple[bool, dict[str, Any]]:
+    """Probe Supabase connectivity. Returns (ok, detail) and never raises."""
     try:
         # Initialize Supabase client only when the route is called.
         # Use the admin client: the logs table is admin-only under RLS, so the
@@ -90,29 +65,63 @@ async def health_check():
         await asyncio.to_thread(
             lambda: client.table('logs').select("*").limit(1).execute()
         )
-
-        # Update database check status
-        status_info["checks"]["database"] = {
+        return True, {
             "status": "operational",
             "connection": "connected",
-            "details": "Successfully queried logs table"
+            "details": "Successfully queried logs table",
         }
-
-        # Update overall status
-        status_info["status"] = "healthy"
-        return status_info
-
     except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-
-        # Update database check status with error
-        status_info["checks"]["database"] = {
+        # Logged with detail server-side; the response stays generic because
+        # this endpoint is unauthenticated.
+        logger.error(f"Health check database probe failed: {str(e)}")
+        return False, {
             "status": "failed",
             "connection": "disconnected",
-            "error": str(e)
         }
 
-        raise HTTPException(
-            status_code=503,
-            detail=status_info
-        )
+
+@router.get("/health")
+async def health_check():
+    """Liveness check: is this process able to serve requests?
+
+    Deliberately returns 200 even when Supabase is unreachable. This path
+    backs the Cloud Run startup/liveness probe, so failing it on a dependency
+    outage would have the platform kill and restart containers that are
+    serving the site perfectly well — the portfolio itself renders from local
+    JSON and needs no database. Database state is reported as `degraded` for
+    observability; use /api/health/ready for a gate that fails closed.
+    """
+    db_ok, db_detail = await _check_database()
+
+    return {
+        "status": "healthy" if db_ok else "degraded",
+        "message": "Service is running",
+        "checks": {
+            "database": db_detail,
+            "version": get_version(),
+        },
+    }
+
+
+@router.get("/health/ready")
+async def readiness_check():
+    """Readiness check: is every dependency actually working?
+
+    Fails closed with 503 so uptime monitoring and deploy verification can
+    distinguish "the site is up but the database is down" from "the site is
+    up". Not wired to the container probe on purpose — see health_check.
+    """
+    db_ok, db_detail = await _check_database()
+    status_info = {
+        "status": "healthy" if db_ok else "unhealthy",
+        "message": "Service is running",
+        "checks": {
+            "database": db_detail,
+            "version": get_version(),
+        },
+    }
+
+    if not db_ok:
+        raise HTTPException(status_code=503, detail=status_info)
+
+    return status_info

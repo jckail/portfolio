@@ -66,8 +66,18 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
-          if (id.includes('tsparticles')) return 'particles';
+          // Same reasoning as MUI below: naming a chunk here forces it into
+          // the initial graph. The engine is only reached through the lazy
+          // particles-canvas boundary, so leave placement to the splitter.
+          if (id.includes('tsparticles')) return undefined;
           if (id.includes('react-router')) return 'router';
+          // MUI + Emotion are reachable only through the lazily-loaded chat.
+          // Returning undefined leaves them to the automatic splitter, which
+          // places them in the chat's own async chunk. The catch-all below
+          // would otherwise force them into `vendor` — a chunk the entry
+          // statically depends on, so they'd be modulepreloaded on first
+          // paint and the chat's lazy boundary would buy nothing.
+          if (id.includes('@mui') || id.includes('@emotion')) return undefined;
           return 'vendor';
         },
       },

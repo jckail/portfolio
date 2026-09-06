@@ -95,6 +95,11 @@ const App: React.FC = () => {
             key={theme}
           >
             <div style={{ isolation: 'isolate' }}>
+              {/* First tab stop: lets keyboard users bypass the header and
+                  the whole side-panel nav on every page load. */}
+              <a className="skip-to-content" href="#main-content">
+                Skip to main content
+              </a>
               <ReadingProgress />
 
               {/* Main content in its own error boundary */}

@@ -25,6 +25,10 @@
   --image-background: #ffffff;
   --underline-color: #000000;
   --skill-tag-background:#000000;
+  --skill-tag-text: #ffffff;
+  /* Accent used as *text*. Must clear 4.5:1 against the page background,
+     which --primary does not always do (see .theme-dark below). */
+  --accent-text: #0403ff;
   --ai-background-color: #000000;;
 }
 
@@ -52,6 +56,10 @@
   --image-background: #ffffff;
   --underline-color: #0403ff;
   --skill-tag-background: rgba(4, 3, 255, 0.4);
+  --skill-tag-text: #ffffff;
+  /* #0403ff on black measures 2.46:1 (WCAG AA needs 4.5:1), so accent text
+     uses a lightened tint (~7.4:1) while --primary stays for backgrounds. */
+  --accent-text: #8b8aff;
   --ai-background-color: rgba(4, 3, 255, 0.5);
 }
 
@@ -77,6 +85,9 @@
   --border-thickness: 3px;
   --image-background: #ffffff;
   --skill-tag-background: #00ffff;
+  /* White on cyan measures 1.25:1; black on cyan is 16.7:1. */
+  --skill-tag-text: #000000;
+  --accent-text: #ff00ff;
   --ai-background-color: #ff00ff;
 }
 

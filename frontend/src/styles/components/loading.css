@@ -22,7 +22,7 @@
 
 .loading-item.pending {
   background-color: transparent;
-  color: var(--primary);
+  color: var(--accent-text);
 }
 
 .loading-item.pending::before {

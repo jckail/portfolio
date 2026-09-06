@@ -24,9 +24,19 @@ const isGtagLoaded = (): boolean => {
   return typeof window.gtag === 'function';
 };
 
-// Wait for gtag to be available
+// Wait for gtag to be available.
+//
+// Memoized deliberately: every track* call awaits this, and section changes
+// fire one on each scroll-spy transition. Building a fresh Promise per call
+// spun up a new 100ms interval plus a 5s timeout each time — with an ad
+// blocker (gtag never loads) that meant dozens of concurrent timers during
+// ordinary scrolling.
+let gtagReady: Promise<void> | null = null;
+
 const waitForGtag = (): Promise<void> => {
-  return new Promise((resolve) => {
+  if (gtagReady) return gtagReady;
+
+  gtagReady = new Promise((resolve) => {
     if (isGtagLoaded()) {
       resolve();
       return;
@@ -35,17 +45,20 @@ const waitForGtag = (): Promise<void> => {
     const checkInterval = setInterval(() => {
       if (isGtagLoaded()) {
         clearInterval(checkInterval);
+        clearTimeout(timeoutId);
         resolve();
       }
     }, 100);
 
     // Timeout after 5 seconds
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       clearInterval(checkInterval);
       debugLog('Warning: gtag not loaded after 5 seconds');
       resolve();
     }, 5000);
   });
+
+  return gtagReady;
 };
 
 // Generate a unique session ID

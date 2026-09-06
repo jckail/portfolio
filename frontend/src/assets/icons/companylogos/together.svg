@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 260"
+     role="img" aria-label="Together AI">
+  <title>Together AI</title>
+  <!-- Node-triad mark: three connected points, drawn in currentColor so the
+       logo tracks the active theme the way the other company logos do. -->
+  <g fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round">
+    <path d="M78 176 L130 84 L182 176 Z" stroke-linejoin="round" opacity="0.45"/>
+  </g>
+  <g fill="currentColor">
+    <circle cx="130" cy="84" r="24"/>
+    <circle cx="78" cy="176" r="24"/>
+    <circle cx="182" cy="176" r="24"/>
+  </g>
+  <text x="232" y="158"
+        font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+        font-size="88" font-weight="700" letter-spacing="-2" fill="currentColor"
+        >together<tspan font-weight="400" opacity="0.65">.ai</tspan></text>
+</svg>

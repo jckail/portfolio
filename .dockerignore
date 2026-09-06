@@ -19,15 +19,30 @@ frontend/.eslintcache
 **/.pytest_cache
 **/.mypy_cache
 **/.ruff_cache
-.venv
-venv
+**/.venv
+**/venv
+**/*venv/
 
 # Infra / docs / tooling not needed inside the image
 infra
 docs
 helpers/*.sh
+helpers/*.py
+helpers/todo.md
 helpers/README.md
 helpers/.devcontainer
+.devcontainer
+
+# E2E harness and test/coverage artifacts never belong in the runtime image
+e2e
+backend/tests
+.coverage
+.coverage.*
+
+# Agent/editor scratch directories
+.claude
+.codex
+.cursor
 
 # Local environment and logs
 .env
