@@ -323,6 +323,10 @@
 .social-links .icon-link:hover svg,
 .social-links .resume-button:hover {
   background: var(--primary);
+  /* The glyph is fill="currentColor" and a non-hover rule sets `color` on this
+     same element, so the colour has to be restated here or the icon keeps
+     --text-color on a --primary background: 2.46:1 in light, 1:1 in party. */
+  color: #ffffff;
   transform: scale(1.1);
   border: var(--border-thickness) solid var(--primary);
   cursor: pointer;

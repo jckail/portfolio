@@ -313,6 +313,14 @@ async def log_messages_batch(request: Request):
 async def store_log_message(message: str, session_uuid: str, client_ip: str):
     """Store a single log message"""
     try:
+        # MAX_LOG_MESSAGE_CHARS existed but was never applied, so `message` was
+        # bounded only by the 64 KB body cap - and was then stored twice, once
+        # as the log line and again in metadata.
+        if not isinstance(message, str):
+            return {"status": "error", "message": "Invalid log message"}
+        # Newlines would let a caller forge extra entries in the file fallback,
+        # which /api/logs parses back one line per record.
+        message = message.replace("\r", " ").replace("\n", " ")[:MAX_LOG_MESSAGE_CHARS]
         # Add timestamp if not present
         if not message.startswith('[20'):  # Check if timestamp is already present
             timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
@@ -328,7 +336,6 @@ async def store_log_message(message: str, session_uuid: str, client_ip: str):
             level="INFO",
             message=message,
             session_uuid=session_uuid,
-            metadata={"raw_message": message},
             source="frontend",
             ip_address=client_ip
         )
@@ -344,6 +351,6 @@ async def store_log_message(message: str, session_uuid: str, client_ip: str):
             await asyncio.to_thread(_append_line, log_file_path, message)
 
         return {"status": "success", "message": "Log written successfully"}
-    except Exception as e:
-        logger.error(f"Error storing log message: {str(e)}")
-        return {"status": "error", "message": str(e)}
+    except Exception:
+        logger.exception("Error storing log message")
+        return {"status": "error", "message": "Unable to store log"}

@@ -253,3 +253,82 @@ def test_ip_rate_limit_survives_reconnect():
 
     manager.disconnect("whatever")
     assert manager.is_ip_rate_limited(peer) is True
+
+
+# --- Rate-limit key derivation -------------------------------------------
+
+class _FakeReq:
+    def __init__(self, xff=None, host="10.0.0.1"):
+        self.headers = {"x-forwarded-for": xff} if xff else {}
+        self.client = type("C", (), {"host": host})()
+
+
+def test_client_ip_reads_the_rightmost_forwarded_hop():
+    """X-Forwarded-For is appended to by each hop, so the LEFTMOST entry is
+    whatever the caller sent. Reading it let anyone mint a fresh rate-limit
+    bucket per request by rotating the header."""
+    from backend.app.utils.rate_limit import client_ip
+
+    spoofed = _FakeReq(xff="1.2.3.4, 9.9.9.9")
+    assert client_ip(spoofed) == "9.9.9.9"
+
+    # Rotating the client-supplied portion must not change the bucket.
+    a = client_ip(_FakeReq(xff="10.0.0.1, 203.0.113.5"))
+    b = client_ip(_FakeReq(xff="10.0.0.2, 203.0.113.5"))
+    assert a == b == "203.0.113.5"
+
+    assert client_ip(_FakeReq(host="127.0.0.1")) == "127.0.0.1"
+
+
+def test_limiter_does_not_reset_a_window_longer_than_the_idle_cutoff():
+    """Pruning evicted buckets after a fixed 900s, discarding timestamps that
+    were still inside a 1-hour window - so the contact form's 3/hour cap was
+    really 3 per 15 minutes."""
+    from backend.app.utils import rate_limit
+
+    limiter = rate_limit.SlidingWindowLimiter(max_events=3, window_seconds=3600)
+    key = "203.0.113.10"
+    assert [limiter.allow(key) for _ in range(4)] == [True, True, True, False]
+
+    # Jump past the old idle cutoff but stay inside the window.
+    for bucket in limiter._buckets.values():
+        for i in range(len(bucket)):
+            bucket[i] -= 1000
+    limiter._last_prune = 0.0
+
+    assert limiter.allow(key) is False, "window was reset by pruning"
+
+
+def test_concurrent_connect_does_not_leak_a_connection_slot():
+    """connect() checked for a duplicate id, then awaited accept() before
+    recording it. Two concurrent handshakes for one id both passed, each
+    incrementing the per-IP count while only one entry was tracked - so
+    disconnect under-decremented and the slot leaked permanently."""
+    import asyncio
+
+    manager = chat_service.ConnectionManager()
+    ip = "203.0.113.11"
+
+    class SlowSocket:
+        def __init__(self):
+            self.closed = None
+
+        async def accept(self):
+            await asyncio.sleep(0)  # yield, as the real handshake does
+
+        async def close(self, code=None):
+            self.closed = code
+
+    async def race():
+        for _ in range(5):
+            a, b = SlowSocket(), SlowSocket()
+            await asyncio.gather(
+                manager.connect("shared-client-id", a, ip),
+                manager.connect("shared-client-id", b, ip),
+            )
+            manager.disconnect("shared-client-id")
+
+    asyncio.run(race())
+
+    assert manager.ip_conn_counts.get(ip, 0) == 0, manager.ip_conn_counts
+    assert manager.active_connections == {}
