@@ -1,8 +1,37 @@
 {
+    "together_ai": {
+        "company": "Together AI",
+        "title": "Staff Software Engineer",
+        "date": "02/2025 - Present",
+        "location": "San Francisco, CA",
+        "highlights": [
+            "Staff engineer on the data platform behind Together's AI acceleration cloud — the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signal.",
+            "Build internal agent tooling and evaluation harnesses so engineering teams can develop, test, and ship LLM-powered agents against Together's own inference stack.",
+            "Design data infrastructure for large-scale training and inference workloads, spanning dataset curation, lineage, and quality controls for open-model work."
+        ],
+        "link": "https://www.together.ai/",
+        "logoPath": "together.svg",
+        "company_description": "Together AI is an AI acceleration cloud that provides fast inference, fine-tuning, and dedicated GPU clusters for open-source and custom models, alongside a research team that builds and open-sources frontier models and systems optimizations used across the industry.",
+        "tech_stack": [
+            "python",
+            "sql",
+            "go",
+            "typescript",
+            "kubernetes",
+            "pytorch"
+        ],
+        "more_highlights": [
+            "Own core data platform services for an AI cloud serving inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
+            "Build agent tooling and evaluation harnesses — tracing, replay, and regression testing for LLM agents — so internal teams can ship agentic features with confidence rather than vibes.",
+            "Develop streaming and batch pipelines that make model-serving and GPU-fleet telemetry queryable in near-real time, supporting capacity planning and reliability engineering.",
+            "Partner across research, infrastructure, and product teams to standardize data contracts and lineage for training-data and evaluation workflows.",
+            "Mentor engineers and set technical direction for data platform architecture in a fast-moving AI infrastructure environment."
+        ]
+    },
     "prove": {
         "company": "Prove Identity",
         "title": "Staff Software Engineer - Data",
-        "date": "06/2023 - Present",
+        "date": "06/2023 - 01/2025",
         "location": "Denver, CO",
         "highlights": [
             "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
@@ -12,7 +41,15 @@
         "link": "https://www.prove.com/",
         "logoPath": "prove.svg",
         "company_description": "Prove is the modern platform for consumer identity verification. We enable businesses to securely verify customer identities in real-time, with the highest level of compliance and user experience.",
-        "tech_stack": ["python", "sql", "go", "javascript","typescript","java","aws"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "go",
+            "javascript",
+            "typescript",
+            "java",
+            "aws"
+        ],
         "more_highlights": [
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
@@ -39,7 +76,14 @@
         "link": "https://about.fb.com/",
         "logoPath": "meta.svg",
         "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.",
-        "tech_stack": ["python", "sql","javascript","typescript","php","scala"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "javascript",
+            "typescript",
+            "php",
+            "scala"
+        ],
         "more_highlights": [
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers. Collaborated with data science, ML, and hardware teams to align product goals, resulting in a 20% faster delivery of cross-platform features.",
             "Designed exabyte scale data models for Community Messenger to handle multi-platform data streams, increasing user engagement by 35% across Instagram, WhatsApp, Facebook, and Quest despite complex cross-platform dependencies.",
@@ -66,7 +110,16 @@
         "link": "https://www2.deloitte.com/ch/en/pages/strategy-operations/solutions/analytics-and-cognitive.html",
         "logoPath": "deloitte.svg",
         "company_description": "Deloitte Touche Tohmatsu Limited, commonly referred to as Deloitte, is a multinational professional services network. Deloitte is one of the Big Four accounting organizations and the largest professional services network in the world by revenue and number of professionals, with headquarters in London, United Kingdom",
-        "tech_stack": ["python", "sql", "javascript","typescript","php","rust","aws","gcp"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "javascript",
+            "typescript",
+            "php",
+            "rust",
+            "aws",
+            "gcp"
+        ],
         "more_highlights": [
             "Automated 31% of healthcare claims processing with transformer-based ML models, addressing data inconsistencies and regulatory constraints. Saved 250,000+ human-hours annually and improved claim accuracy by 20%",
             "Optimized exabyte-scale video reliability metrics using distributed data processing frameworks. Cut daily processing time by 90% and expanded metric coverage across multiple product lines, improving monitoring precision.",
@@ -93,7 +146,12 @@
         "link": "https://www.wowway.com/",
         "logoPath": "wow.svg",
         "company_description": "Wide Open West is the sixth largest cable operator in the United States. The company offers landline telephone, Cable Television, and broadband Internet services",
-        "tech_stack": ["python", "sql", "javascript", "aws"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "javascript",
+            "aws"
+        ],
         "more_highlights": [
             "Built machine learning models, including custom classification and churn prediction algorithms (e.g., logistic regression, K-means clustering). Increased customer package upgrades by 22% YoY and reduced churn by 15%.",
             "Managed a team of 5 data practitioners, providing BI and insights to sales, product, and engineering teams. Established KPIs and standardized reporting through governance committees, driving a 10% increase in sales performance.",
@@ -119,7 +177,13 @@
         "link": "https://www.commonspirit.org/",
         "logoPath": "commonspirit.svg",
         "company_description": "CommonSpirit Health is a nonprofit, Catholic health system dedicated to advancing health for all people. It was created in February 2019 through the alignment of Catholic Health Initiatives and Dignity Health. CommonSpirit Health is the largest nonprofit health system in the U.S. with more than 1,000 care sites in 21 states.",
-        "tech_stack": ["python", "sql", "javascript","java","azure"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "javascript",
+            "java",
+            "azure"
+        ],
         "more_highlights": [
             "",
             "Architected and delivered new REST APIs and data lakes, reducing external partner data processing time from 7 days to 5 minutes. Enhanced data accessibility and scalability through efficient data structures.",
@@ -148,7 +212,13 @@
         "link": "https://www.r1rcm.com/",
         "logoPath": "r1.svg",
         "company_description": "R1 RCM is an American healthcare revenue cycle management company servicing hospitals, health systems and physician groups across the United States. Headquartered in Chicago, Illinois, R1 RCM is publicly traded on the NASDAQ.",
-        "tech_stack": ["python", "sql", "javascript", "java","aws"],
+        "tech_stack": [
+            "python",
+            "sql",
+            "javascript",
+            "java",
+            "aws"
+        ],
         "more_highlights": [
             "Developed a custom invoicing system using Python and rule-based algorithms with ML components, generating $300M+ in annual revenue. Improved invoice accuracy by 35% and automated processes to reduce manual effort by 60%.",
             "Partnered with executives on high-impact initiatives, driving a 200% increase in revenue and boosting client retention by 25%. Optimized operational strategies, improving profit margins from 41% to 78%.",

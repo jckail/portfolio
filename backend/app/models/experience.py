@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, RootModel
 
 
 class ExperienceHighlight(BaseModel):
@@ -15,32 +15,32 @@ class ExperienceHighlight(BaseModel):
     tech_stack: list[str] = Field(..., description="Technologies used")
     more_highlights: list[str] = Field(..., description="Detailed list of achievements and responsibilities")
 
-class Experience(BaseModel):
-    """Model for all professional experiences."""
-    prove: ExperienceHighlight
-    meta: ExperienceHighlight
-    deloitte: ExperienceHighlight
-    wide_open_west: ExperienceHighlight
-    common_spirit_health: ExperienceHighlight
-    acustream: ExperienceHighlight
+class Experience(RootModel[dict[str, ExperienceHighlight]]):
+    """All professional experiences, keyed by company slug.
+
+    Keyed dynamically (like `Skills`) rather than with one field per employer,
+    so adding or removing a job is a pure `experience.json` data change. JSON
+    object order is preserved, and the frontend timeline renders in that order
+    — newest role first.
+    """
 
     class Config:
         json_schema_extra = {
             "example": {
-                "prove": {
-                    "company": "Prove Identity",
-                    "title": "Staff Data Engineer",
-                    "date": "06/2023 - Present",
-                    "location": "Denver, CO",
+                "together_ai": {
+                    "company": "Together AI",
+                    "title": "Staff Software Engineer",
+                    "date": "02/2025 - Present",
+                    "location": "San Francisco, CA",
                     "highlights": [
-                        "Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres"
+                        "Building the data platform and agent tooling behind an AI acceleration cloud"
                     ],
-                    "link": "https://www.prove.com/",
-                    "logoPath": "prove.svg",
-                    "company_description": "Prove is the modern platform for consumer identity verification.",
-                    "tech_stack": ["Airflow", "Spark", "PyTorch", "NLP", "Computer Vision"],
+                    "link": "https://www.together.ai/",
+                    "logoPath": "together.svg",
+                    "company_description": "Together AI is an AI acceleration cloud.",
+                    "tech_stack": ["python", "sql", "go", "kubernetes"],
                     "more_highlights": [
-                        "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure"
+                        "Own core data platform services for inference, fine-tuning, and GPU cluster workloads"
                     ]
                 }
             }

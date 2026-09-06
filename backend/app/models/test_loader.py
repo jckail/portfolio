@@ -44,7 +44,7 @@ def test_bulk_loader():
 
         # Print model counts for verification
         print("\nVerification counts:")
-        print(f"Experience entries: {len(all_data['experience'].__dict__)}")
+        print(f"Experience entries: {len(all_data['experience'].root)}")
         print(f"Projects entries: {len(all_data['projects'].__dict__)}")
         print(f"Skills entries: {len(all_data['skills'].root)}")
         print(f"About me fields: {len(all_data['aboutme'].__dict__)}")
