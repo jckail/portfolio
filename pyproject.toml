@@ -41,6 +41,8 @@ testpaths = ["backend/tests"]
 source = ["backend/app"]
 
 [tool.coverage.report]
-# Modest floor below the current ~63%; ratchet up as coverage grows.
-fail_under = 60
+# The floor must sit just under actual coverage or it can never fail. It was
+# left at 60 while the suite reached ~70, so it could only have fired if
+# someone deleted a sixth of the tests. Ratchet upward only.
+fail_under = 72
 show_missing = true

@@ -82,6 +82,16 @@ jobs:
     - name: Test (with coverage gate)
       run: python -m pytest backend/tests -q --cov --cov-report=term-missing
 
+    # A single global floor cannot notice a poorly-covered auth layer inside a
+    # well-covered codebase: the auth surface sat at 39.8% while the total was
+    # 69.8%, and a mutation probe confirmed the whole admin auth layer could be
+    # deleted with every test still passing. This gate watches that surface on
+    # its own. Ratchet upward only.
+    - name: Auth-surface coverage gate
+      run: |
+        python -m coverage report --fail-under=60 \
+          --include='backend/app/middleware/*,backend/app/api/admin_routes.py'
+
   terraform:
     name: Terraform (fmt, validate)
     runs-on: ubuntu-latest

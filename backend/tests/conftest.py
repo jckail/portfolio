@@ -17,8 +17,20 @@ _TEST_ENV = {
     "SENDGRID_API_KEY": "test-sendgrid-key",
 }
 
+# Assign unconditionally, never setdefault: a developer with real
+# SUPABASE_URL / SUPABASE_SERVICE_ROLE / SENDGRID_API_KEY exported in their
+# shell would otherwise run the whole suite against production - the health
+# probe SELECTs the real logs table, and any uncovered path reaching
+# store_log() would INSERT into it.
 for key, value in _TEST_ENV.items():
-    os.environ.setdefault(key, value)
+    os.environ[key] = value
+
+# Belt and braces: fail loudly rather than touch a real backend.
+if not os.environ["SUPABASE_URL"].startswith("https://example."):
+    raise RuntimeError(
+        "Test environment is not isolated: SUPABASE_URL points at "
+        f"{os.environ['SUPABASE_URL']!r}. Refusing to run against a real project."
+    )
 
 
 @pytest.fixture(scope="session")
