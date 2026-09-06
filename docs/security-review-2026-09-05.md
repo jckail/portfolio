@@ -198,7 +198,8 @@ attempt, or a moved main branch prevent promotion. A fresh manual deployment may
 reuse successful CI for its unchanged main commit. The guard's failure-case tests
 run in backend CI.
 
-The registry digest returned by pushing this run's image is validated and passed
+The registry digest recorded by the local Docker engine after pushing this run's
+image is validated and passed
 to Cloud Run as `image@sha256:...`. The new revision must resolve that exact image
 before its health check and promotion. Mutable SHA/latest tags are not deployment
 identifiers. The final GitHub check and cloud promotion are separate operations:

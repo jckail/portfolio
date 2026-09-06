@@ -118,12 +118,17 @@ jobs:
       run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
     - name: Load and push this run's build
+      shell: bash
       run: |
         docker load --input "$RUNNER_TEMP/image/portfolio.tar"
         IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
         docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:${GITHUB_SHA}"
         docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
-        DIGEST=$(docker push --quiet "${IMAGE}:${GITHUB_SHA}")
+        docker push "${IMAGE}:${GITHUB_SHA}"
+        # --quiet prints the pushed tag, not its digest. Read the local engine's
+        # registry manifest identity recorded by the successful push instead.
+        DIGEST=$(docker image inspect --format '{{json .RepoDigests}}' "portfolio-deploy:${GITHUB_SHA}" | \
+          jq -er --arg image "$IMAGE" '[.[] | select(startswith($image + "@"))] | unique | if length == 1 then .[0] | split("@")[1] else error("Expected one pushed repository digest") end')
         if [[ ! "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
           echo "::error::Push did not return one valid image digest"
           exit 1
