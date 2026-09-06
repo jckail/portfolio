@@ -199,14 +199,40 @@ def test_telemetry_rejects_oversized_bodies(client):
 
 # --- Chat WebSocket: origin, session id, collisions -------------------------
 
+def _assert_rejected(client, path, headers=None):
+    """Assert the handshake itself is refused.
+
+    Deliberately does NOT call receive() after connecting. The earlier form
+    wrapped `receive_text()` in `pytest.raises(WebSocketDisconnect)`, which
+    passes either way: if the guard is removed the socket is accepted,
+    receive blocks, and the server's 300s idle timeout closes it - so the
+    test still went green, just five minutes slower. That is how an
+    Origin-check regression reached production unnoticed.
+
+    The server closes with 1008 *before* accepting, so entering the context
+    manager raises. If it does not raise, the handshake was accepted and the
+    guard is gone - fail immediately.
+    """
+    try:
+        from starlette.testclient import WebSocketDenialResponse
+        refusals = (WebSocketDisconnect, WebSocketDenialResponse)
+    except ImportError:  # older starlette
+        refusals = (WebSocketDisconnect,)
+
+    try:
+        with client.websocket_connect(path, headers=headers or {}):
+            pass
+    except refusals as exc:
+        code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+        assert code in (1008, 403), f"refused, but with {code!r}"
+        return
+    raise AssertionError(f"handshake to {path} was ACCEPTED; the guard is not enforcing")
+
+
 def test_websocket_rejects_a_foreign_origin(client):
     """CORSMiddleware never runs for WebSocket scopes, so the handshake has
     to check Origin itself or any site can spend our Anthropic budget."""
-    with pytest.raises(WebSocketDisconnect):
-        with client.websocket_connect(
-            "/ws/origin-test-client", headers={"origin": "https://evil.tld"}
-        ) as ws:
-            ws.receive_text()
+    _assert_rejected(client, "/ws/origin-test-client", {"origin": "https://evil.tld"})
 
 
 def test_websocket_accepts_an_allowed_origin(client):
@@ -218,9 +244,7 @@ def test_websocket_accepts_an_allowed_origin(client):
 
 
 def test_websocket_rejects_a_malformed_client_id(client):
-    with pytest.raises(WebSocketDisconnect):
-        with client.websocket_connect("/ws/short") as ws:
-            ws.receive_text()
+    _assert_rejected(client, "/ws/short")
 
 
 def test_websocket_refuses_to_displace_a_live_session(client):
@@ -228,9 +252,7 @@ def test_websocket_refuses_to_displace_a_live_session(client):
     first one's reply stream and page context."""
     with client.websocket_connect("/ws/dup-test-client") as first:
         first.send_json({"type": "context", "content": "original"})
-        with pytest.raises(WebSocketDisconnect):
-            with client.websocket_connect("/ws/dup-test-client") as second:
-                second.receive_text()
+        _assert_rejected(client, "/ws/dup-test-client")
 
 
 def test_websocket_does_not_inherit_a_previous_page_context(client):
@@ -253,3 +275,104 @@ def test_ip_rate_limit_survives_reconnect():
 
     manager.disconnect("whatever")
     assert manager.is_ip_rate_limited(peer) is True
+
+
+# --- Rate-limit key derivation -------------------------------------------
+
+class _FakeReq:
+    def __init__(self, xff=None, host="10.0.0.1"):
+        self.headers = {"x-forwarded-for": xff} if xff else {}
+        self.client = type("C", (), {"host": host})()
+
+
+def test_client_ip_reads_the_rightmost_forwarded_hop():
+    """X-Forwarded-For is appended to by each hop, so the LEFTMOST entry is
+    whatever the caller sent. Reading it let anyone mint a fresh rate-limit
+    bucket per request by rotating the header."""
+    from backend.app.utils.rate_limit import client_ip
+
+    spoofed = _FakeReq(xff="1.2.3.4, 9.9.9.9")
+    assert client_ip(spoofed) == "9.9.9.9"
+
+    # Rotating the client-supplied portion must not change the bucket.
+    a = client_ip(_FakeReq(xff="10.0.0.1, 203.0.113.5"))
+    b = client_ip(_FakeReq(xff="10.0.0.2, 203.0.113.5"))
+    assert a == b == "203.0.113.5"
+
+    assert client_ip(_FakeReq(host="127.0.0.1")) == "127.0.0.1"
+
+
+def test_limiter_does_not_reset_a_window_longer_than_the_idle_cutoff():
+    """Pruning evicted buckets after a fixed 900s, discarding timestamps that
+    were still inside a 1-hour window - so the contact form's 3/hour cap was
+    really 3 per 15 minutes."""
+    from backend.app.utils import rate_limit
+
+    limiter = rate_limit.SlidingWindowLimiter(max_events=3, window_seconds=3600)
+    key = "203.0.113.10"
+    assert [limiter.allow(key) for _ in range(4)] == [True, True, True, False]
+
+    # Jump past the old idle cutoff but stay inside the window.
+    for bucket in limiter._buckets.values():
+        for i in range(len(bucket)):
+            bucket[i] -= 1000
+    limiter._last_prune = 0.0
+
+    assert limiter.allow(key) is False, "window was reset by pruning"
+
+
+def test_concurrent_connect_does_not_leak_a_connection_slot():
+    """connect() checked for a duplicate id, then awaited accept() before
+    recording it. Two concurrent handshakes for one id both passed, each
+    incrementing the per-IP count while only one entry was tracked - so
+    disconnect under-decremented and the slot leaked permanently."""
+    import asyncio
+
+    manager = chat_service.ConnectionManager()
+    ip = "203.0.113.11"
+
+    class SlowSocket:
+        def __init__(self):
+            self.closed = None
+
+        async def accept(self):
+            await asyncio.sleep(0)  # yield, as the real handshake does
+
+        async def close(self, code=None):
+            self.closed = code
+
+    async def race():
+        for _ in range(5):
+            a, b = SlowSocket(), SlowSocket()
+            await asyncio.gather(
+                manager.connect("shared-client-id", a, ip),
+                manager.connect("shared-client-id", b, ip),
+            )
+            manager.disconnect("shared-client-id")
+
+    asyncio.run(race())
+
+    assert manager.ip_conn_counts.get(ip, 0) == 0, manager.ip_conn_counts
+    assert manager.active_connections == {}
+
+
+# --- WebSocket origin policy ---------------------------------------------
+
+def test_websocket_allows_same_origin_on_any_served_host(client):
+    """The site is served on four hostnames but ALLOWED_ORIGINS named one, so
+    the chat 403'd on the other three - including the declared canonical.
+    Same-origin is never cross-site forgery and must always be accepted."""
+    with client.websocket_connect(
+        "/ws/same-origin-client",
+        headers={"origin": "https://jordan-kail.com", "host": "jordan-kail.com"},
+    ) as ws:
+        ws.send_json({"type": "context", "content": "ok"})
+
+
+def test_websocket_still_rejects_a_cross_site_origin(client):
+    """A forged page sends its own Origin with the target's Host; the mismatch
+    is exactly what identifies it."""
+    _assert_rejected(client,
+        "/ws/cross-site-client",
+        {"origin": "https://evil.tld", "host": "jordan-kail.com"},
+    )

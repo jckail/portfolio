@@ -65,7 +65,7 @@ async def admin_logout(
     """
     try:
         supabase = SupabaseClient()
-        token = authorization.replace('Bearer ', '') if authorization else None
+        token = authorization.removeprefix('Bearer ').strip() if authorization else None
         await supabase.sign_out(token)
         return {"message": "Successfully logged out"}
     except HTTPException:

@@ -37,6 +37,10 @@ RATE_LIMIT_WINDOW_SECONDS = 60
 # reconnecting mints a fresh one. These caps are keyed on the network peer and
 # survive disconnects, so churning connections gains an abuser nothing.
 IP_RATE_LIMIT_MAX_MESSAGES = 30
+# Instance-wide ceiling on completions. This is the limit that actually bounds
+# the Anthropic bill if the per-IP key is ever wrong, so it is set explicitly
+# against budget rather than inheriting the limiter's max_events * 20 default.
+GLOBAL_RATE_LIMIT_MAX_MESSAGES = 120
 MAX_CONNECTIONS_TOTAL = 200
 MAX_CONNECTIONS_PER_IP = 5
 # Sockets that go quiet are dropped so an abuser cannot simply hold thousands
@@ -82,6 +86,7 @@ class ConnectionManager:
         self.ip_limiter = SlidingWindowLimiter(
             max_events=IP_RATE_LIMIT_MAX_MESSAGES,
             window_seconds=RATE_LIMIT_WINDOW_SECONDS,
+            global_max_events=GLOBAL_RATE_LIMIT_MAX_MESSAGES,
         )
         self.connection_ips: dict[str, str] = {}
         self.ip_conn_counts: dict[str, int] = {}
@@ -101,9 +106,6 @@ class ConnectionManager:
         the existing socket: overwriting would hand the new connection the
         previous visitor's reply stream and page context.
         """
-        if client_id in self.active_connections:
-            await websocket.close(code=1008)  # policy violation
-            return False
         if len(self.active_connections) >= MAX_CONNECTIONS_TOTAL:
             await websocket.close(code=1013)  # try again later
             return False
@@ -111,13 +113,30 @@ class ConnectionManager:
             await websocket.close(code=1013)
             return False
 
-        await websocket.accept()
+        # Claim the id BEFORE the first await. `accept()` yields to the event
+        # loop, so a check-then-assign around it let two concurrent handshakes
+        # for the same id both pass: each incremented ip_conn_counts while only
+        # one entry existed in connection_ips, so disconnect under-decremented
+        # and leaked a connection slot permanently. Enough races against a
+        # chosen ip pinned it at the per-IP cap with no live sockets, locking
+        # that visitor out until the instance restarted.
+        if client_id in self.active_connections:
+            await websocket.close(code=1008)  # policy violation
+            return False
         self.active_connections[client_id] = websocket
+        self.connection_ips[client_id] = ip
+        self.ip_conn_counts[ip] = self.ip_conn_counts.get(ip, 0) + 1
+
+        try:
+            await websocket.accept()
+        except Exception:
+            # Never leave the reservation behind if the handshake fails.
+            self.disconnect(client_id)
+            raise
+
         self.conversation_histories[client_id] = []
         # A recycled id must not inherit the previous session's page context.
         self.page_contexts.pop(client_id, None)
-        self.connection_ips[client_id] = ip
-        self.ip_conn_counts[ip] = self.ip_conn_counts.get(ip, 0) + 1
         return True
 
     def disconnect(self, client_id: str):

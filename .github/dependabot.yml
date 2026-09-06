@@ -8,6 +8,17 @@ updates:
       npm-dependencies:
         patterns: ["*"]
 
+  # e2e/package-lock.json is installed by CI (Playwright + Lighthouse) but had
+  # no coverage here, so advisories against it - including the currently open
+  # extract-zip one - would never produce an automated bump.
+  - package-ecosystem: npm
+    directory: /e2e
+    schedule:
+      interval: monthly
+    groups:
+      e2e-dependencies:
+        patterns: ["*"]
+
   - package-ecosystem: pip
     directory: /
     schedule:

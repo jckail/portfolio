@@ -17,8 +17,10 @@ async def verify_auth_token(authorization: str | None = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="No authorization token provided")
 
-    # Remove 'Bearer ' prefix if present
-    token = authorization.replace('Bearer ', '')
+    # removeprefix, not replace: `.replace('Bearer ', '')` strips EVERY
+    # occurrence, so a token whose body contains that literal text would be
+    # silently corrupted before verification.
+    token = authorization.removeprefix('Bearer ').strip()
 
     try:
         supabase = SupabaseClient()

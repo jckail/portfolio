@@ -1,11 +1,14 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 
 import { trackSocialClick, trackResumeView } from '../../../../shared/utils/analytics';
-
-const GitHubIcon = lazy(() => import('../../../../shared/components/icons/github-icon'));
-const LinkedInIcon = lazy(() => import('../../../../shared/components/icons/linkedin-icon'));
-const EmailIcon = lazy(() => import('../../../../shared/components/icons/email-icon'));
-const ResumeIcon = lazy(() => import('../../../../shared/components/icons/resume-icon'));
+// Imported directly, not lazily: header.tsx pulls the whole icon barrel into
+// the eager graph, so these four are already loaded. Wrapping them in lazy()
+// produced INEFFECTIVE_DYNAMIC_IMPORT build warnings and bought nothing but
+// Suspense boundaries and a skeleton flash on a handful of inline SVGs.
+import GitHubIcon from '../../../../shared/components/icons/github-icon';
+import LinkedInIcon from '../../../../shared/components/icons/linkedin-icon';
+import EmailIcon from '../../../../shared/components/icons/email-icon';
+import ResumeIcon from '../../../../shared/components/icons/resume-icon';
 
 interface SocialLinksProps {
   github?: string;
@@ -14,8 +17,6 @@ interface SocialLinksProps {
   onResumeClick: () => void;
   onContactSelect: () => void;
 }
-
-const IconFallback = () => <div className="icon-skeleton" style={{ width: 24, height: 24 }} />;
 
 const SocialLinks: React.FC<SocialLinksProps> = ({
   github,
@@ -52,9 +53,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           data-action="visit"
           data-category="Social Link"
         >
-          <Suspense fallback={<IconFallback />}>
-            <GitHubIcon />
-          </Suspense>
+          <GitHubIcon />
         </a>
       )}
       {linkedin && (
@@ -69,9 +68,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           data-action="visit"
           data-category="Social Link"
         >
-          <Suspense fallback={<IconFallback />}>
-            <LinkedInIcon />
-          </Suspense>
+          <LinkedInIcon />
         </a>
       )}
       {email && (
@@ -85,9 +82,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
             type="button"
           >
             <strong>Contact</strong>
-            <Suspense fallback={<IconFallback />}>
-                <EmailIcon />
-              </Suspense>
+            <EmailIcon />
           </button>
       )}
 
@@ -101,9 +96,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
         type="button"
       >
         <strong>Resume</strong>
-        <Suspense fallback={<IconFallback />}>
-          <ResumeIcon />
-        </Suspense>
+        <ResumeIcon />
       </button>
     </div>
   );

@@ -29,6 +29,9 @@
   /* Accent used as *text*. Must clear 4.5:1 against the page background,
      which --primary does not always do (see .theme-dark below). */
   --accent-text: #0403ff;
+  /* Opaque, page-contrasting focus indicator (WCAG 2.4.11 needs 3:1).
+     Deliberately NOT --primary-border, which is translucent by design. */
+  --focus-ring: #0403ff;  /* 8.6:1 on white */
   --ai-background-color: #000000;;
 }
 
@@ -60,6 +63,7 @@
   /* #0403ff on black measures 2.46:1 (WCAG AA needs 4.5:1), so accent text
      uses a lightened tint (~7.4:1) while --primary stays for backgrounds. */
   --accent-text: #8b8aff;
+  --focus-ring: #8b8aff;  /* 7.4:1 on black */
   --ai-background-color: rgba(4, 3, 255, 0.5);
 }
 
@@ -88,6 +92,7 @@
   /* White on cyan measures 1.25:1; black on cyan is 16.7:1. */
   --skill-tag-text: #000000;
   --accent-text: #ff00ff;
+  --focus-ring: #ffff00;  /* 19.5:1 on black */
   --ai-background-color: #ff00ff;
 }
 

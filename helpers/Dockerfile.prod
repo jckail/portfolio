@@ -65,7 +65,11 @@ for var in \$required_vars; do
 done
 
 echo "Environment check passed"
-exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080}
+# --ws-max-size bounds a WebSocket frame before receive_text() buffers it;
+# the default is 16 MiB, which a handful of sockets can turn into an OOM on
+# a 512Mi instance. Application-level caps only apply after parsing.
+exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080} \\
+    --ws-max-size 65536 --h11-max-incomplete-event-size 16384
 EOF
 
 RUN chmod +x /app/start.sh

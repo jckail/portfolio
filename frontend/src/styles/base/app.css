@@ -81,7 +81,7 @@
    users had no visible focus at all (WCAG 2.4.7). Scoped to :focus-visible
    so pointer users never see a ring. */
 :focus-visible {
-  outline: 2px solid var(--primary-border, currentColor);
+  outline: 2px solid var(--focus-ring, currentColor);
   outline-offset: 2px;
   border-radius: 2px;
 }

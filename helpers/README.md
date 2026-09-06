@@ -11,6 +11,10 @@ Build, run, and deployment tooling for the portfolio app.
 | `Dockerfile.prod` | Multi-stage production image (Node 22 frontend build → Python 3.12 runtime) |
 | `Dockerfile.dev` | Same as prod but with `--reload` and dev config |
 | `test_email.py` | Post-deploy smoke test for the SendGrid contact endpoint |
+| `build_resume_pdf.py` | Regenerate `backend/assets/JordanKailResume.pdf` from declared content |
+| `verify_deployment.py` | Deploy authorization gate — re-checks CI on current `main` before promoting traffic |
+| `compile-requirements.sh` | Regenerate the hash-pinned `requirements.lock.txt` |
+| `assets/resumeicons.ttf` | Icon subset font used by the resume generator |
 
 ## Deploying
 
@@ -80,3 +84,29 @@ external tag reassignment between check and removal can race cleanup. Keep
 external traffic/tag changes serialized with deployment; investigate readback
 mismatches without automatic retries. Removing tags closes tagged URLs, not every
 possible revision access path, and does not revoke credentials or delete images.
+
+
+## Regenerating the resume PDF
+
+`backend/assets/JordanKailResume.pdf` used to be a third-party (Enhancv)
+export that could only be updated by hand. It drifted: it advertised a stale
+employer for months, and nothing caught it because the only test asserted the
+file existed.
+
+It is now generated from content declared in `build_resume_pdf.py`, so a role
+change is a reviewable diff:
+
+```bash
+pip install reportlab                 # not a runtime dependency
+python helpers/build_resume_pdf.py    # writes the PDF + a .meta.json manifest
+```
+
+The script prints where each column ends and warns if content would overflow
+the single page. It also writes `JordanKailResume.meta.json`, which
+`backend/tests/test_data.py` compares against the first entry in
+`backend/app/data/experience.json` — so if you change your current role and
+forget to regenerate, the test suite fails. **Regenerate the PDF; never hand-edit
+the manifest.**
+
+Layout, colours and the icon glyphs were lifted from the original export, so
+the output is visually consistent with previous versions.
