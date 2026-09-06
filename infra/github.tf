@@ -35,12 +35,16 @@ resource "google_iam_workload_identity_pool_provider" "github" {
 
   # Names can be reused after deletion; also bind the immutable repository ID.
   # PRs, other branches, and other workflow files cannot exchange OIDC tokens.
+  # Enforce attempt 1 at the cloud trust boundary: reruns execute historical YAML.
+  # Retry via a fresh dispatch on main, not Re-run jobs on an older execution.
   attribute_condition = join(" && ", [
     "assertion.repository == '${var.github_repository}'",
     "assertion.repository_id == '${var.github_repository_id}'",
     "assertion.ref == 'refs/heads/main'",
     "assertion.workflow_ref == '${var.github_repository}/.github/workflows/deploy.yml@refs/heads/main'",
     "assertion.event_name in ['push', 'workflow_dispatch']",
+    "assertion.environment == 'production'",
+    "assertion.run_attempt == '1'",
   ])
 
   oidc {

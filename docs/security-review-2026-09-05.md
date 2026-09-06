@@ -169,3 +169,21 @@ committed, and no blanket credential rotation or history rewrite was performed.
 - [Trivy incident advisory](https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23)
 - [Cloud Monitoring reducer/comparison semantics](https://docs.cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.alertPolicies)
 - [extract-zip advisory](https://github.com/advisories/GHSA-jmr9-qjv8-65gv)
+
+## September 6 follow-up: deny deployment reruns at the cloud boundary
+
+A main-branch/workflow restriction alone does not reject an older execution's
+rerun. GitHub keeps the original SHA and ref when rerunning a workflow, and the
+old workflow does not acquire guards added later. The provider condition now also
+requires the production environment and `run_attempt == '1'`. Terraform and the
+workflow retry instructions match this policy. Both build and deploy jobs reject
+reruns early; the GCP condition also applies to historical workflows.
+
+To retry a failed deployment, start a **new** Deploy workflow dispatch on main.
+Do not use **Re-run jobs**. CI-only reruns remain available. This restriction
+prevents new WIF exchanges for deployment reruns; it does not revoke issued
+access tokens, stop use of an already stolen application key, or authorize every
+fresh main push. It is not evidence that a malicious rerun occurred.
+
+References: [GitHub OIDC claims](https://docs.github.com/en/actions/reference/security/oidc)
+and [rerun semantics](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs).
