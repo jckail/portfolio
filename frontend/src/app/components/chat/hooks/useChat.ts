@@ -17,18 +17,48 @@ function initialMessages(): Message[] {
   return loadChatMessages() ?? [WELCOME_MESSAGE];
 }
 
+/** 128 bits of entropy for the chat session id, with a non-crypto fallback. */
+function createClientId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
 export const useChat = () => {
   const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
-  const clientId = useRef(Date.now().toString());
+  // Keys the server's per-connection chat state, so it must be unguessable:
+  // a timestamp here would let anyone sweep recent values and land on a live
+  // visitor's session. Falls back only where randomUUID is unavailable.
+  const clientId = useRef(createClientId());
   const wsRef = useRef<WebSocket | null>(null);
   const isMounted = useRef(true);
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+
+  /**
+   * Clear the streaming flag on a partially-streamed reply.
+   *
+   * If the socket drops mid-stream the last message keeps `isStreaming: true`,
+   * which leaves the blinking cursor running forever and makes
+   * `saveChatMessages` filter the message out of the persisted transcript.
+   */
+  const finalizeStreamingMessage = useCallback(() => {
+    setMessages(prev =>
+      prev.map((m, i) =>
+        i === prev.length - 1 && m.isStreaming ? { ...m, isStreaming: false } : m
+      )
+    );
+  }, []);
 
   // Persist completed transcript across reloads within the tab session
   useEffect(() => {
@@ -257,6 +287,7 @@ export const useChat = () => {
     ws.onerror = error => {
       console.error('WebSocket Error:', error);
       if (!isMounted.current) return;
+      finalizeStreamingMessage();
       setMessages(prev => [
         ...prev,
         {
@@ -272,10 +303,11 @@ export const useChat = () => {
         wsRef.current = null;
       }
       if (!isMounted.current) return;
+      finalizeStreamingMessage();
       setIsLoading(false);
       currentStreamingMessage.current = '';
     };
-  }, []);
+  }, [finalizeStreamingMessage]);
 
   useEffect(() => {
     const isOpenInUrl = getQueryParam('ai_chat') === 'open';

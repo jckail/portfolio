@@ -6,6 +6,7 @@ const SVG_COMPONENTS: Record<string, React.LazyExoticComponent<React.FC<React.SV
   'deloitte.svg': lazy(() => import('../../../assets/icons/companylogos/deloitte.svg?react')),
   'meta.svg': lazy(() => import('../../../assets/icons/companylogos/meta.svg?react')),
   'prove.svg': lazy(() => import('../../../assets/icons/companylogos/prove.svg?react')),
+  'together.svg': lazy(() => import('../../../assets/icons/companylogos/together.svg?react')),
   'wow.svg': lazy(() => import('../../../assets/icons/companylogos/wow.svg?react')),
   'r1.svg': lazy(() => import('../../../assets/icons/companylogos/r1.svg?react')),
 };
@@ -35,7 +36,7 @@ const CompanyLogo: React.FC<IconProps> = ({ name, className = 'company-logo', si
 
   return (
     <img 
-      src={`/images/projects/${name}`}
+      src={`/images/companylogos/${name}`}
       alt={name.replace('.svg', '')}
       width={size}
       height={size}

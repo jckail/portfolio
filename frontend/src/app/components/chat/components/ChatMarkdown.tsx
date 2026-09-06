@@ -85,7 +85,11 @@ function parseBlocks(markdown: string): Block[] {
   while (i < lines.length) {
     const line = lines[i];
 
-    const fence = /^```(\w*)\s*$/.exec(line);
+    // Must match exactly what the paragraph loop below refuses to consume
+    // (`/^```/`). A stricter pattern here — e.g. requiring a \w-only info
+    // string — leaves fences like ```c++ or ```js title="x" matching neither
+    // branch, so `i` never advances and the outer loop spins forever.
+    const fence = /^```\s*([^\s`]*)/.exec(line);
     if (fence) {
       const lang = fence[1];
       const body: string[] = [];
@@ -134,6 +138,12 @@ function parseBlocks(markdown: string): Block[] {
     ) {
       para.push(lines[i]);
       i += 1;
+    }
+    // Belt and braces: if no branch consumed this line, step over it anyway so
+    // the loop is provably terminating whatever the patterns above do.
+    if (para.length === 0) {
+      i += 1;
+      continue;
     }
     blocks.push({ type: 'paragraph', lines: para });
   }
