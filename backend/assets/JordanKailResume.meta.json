@@ -1,0 +1,16 @@
+{
+  "generated_by": "helpers/build_resume_pdf.py",
+  "pdf": "JordanKailResume.pdf",
+  "current_company": "Together AI",
+  "current_title": "Staff Software Engineer",
+  "current_dates": "02/2025 - Present",
+  "companies": [
+    "Together AI",
+    "Prove Identity",
+    "Meta | Facebook",
+    "Deloitte",
+    "Wide Open West",
+    "Common Spirit Health",
+    "AcuStream (acquired by R1)"
+  ]
+}

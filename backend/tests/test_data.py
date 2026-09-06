@@ -46,3 +46,33 @@ def test_zuni_subject_parameter_is_honoured(client):
 
 def test_zuni_unknown_subject_is_404(client):
     assert client.get("/api/zuni?subject=9999").status_code == 404
+
+
+def test_resume_pdf_matches_the_current_role():
+    """The PDF must not drift from experience.json.
+
+    The previous resume was a third-party export updated by hand, so it
+    advertised a stale employer for months while the only test here asserted
+    the file existed. helpers/build_resume_pdf.py now emits a manifest beside
+    the PDF describing what it says; this compares that to the source of
+    truth. Regenerate the PDF when this fails - do not edit the manifest.
+    """
+    import json
+    from pathlib import Path
+
+    assets = Path(__file__).resolve().parent.parent / "assets"
+    data = Path(__file__).resolve().parent.parent / "app" / "data"
+
+    manifest = json.loads((assets / "JordanKailResume.meta.json").read_text())
+    experience = json.loads((data / "experience.json").read_text())
+
+    current_key = next(iter(experience))
+    current = experience[current_key]
+
+    assert manifest["current_company"] == current["company"]
+    assert manifest["current_title"] == current["title"]
+    assert manifest["current_dates"] == current["date"]
+    assert current["date"].endswith("Present"), (
+        "the first experience entry should be the current role"
+    )
+    assert (assets / manifest["pdf"]).is_file()
