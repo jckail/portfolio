@@ -77,6 +77,15 @@ export default defineConfig({
           // would otherwise force them into `vendor` — a chunk the entry
           // statically depends on, so they'd be modulepreloaded on first
           // paint and the chat's lazy boundary would buy nothing.
+          //
+          // DO NOT return a chunk NAME here (e.g. 'mui'). A previous attempt to
+          // do exactly that produced a circular chunk dependency and a
+          // production white screen — "Cannot access 'qt' before
+          // initialization" — for every visitor (see CHANGELOG, Unreleased →
+          // Fixed). Returning undefined is what makes this safe: Rollup keeps
+          // the modules with their async importer instead of hoisting them into
+          // a shared chunk that the entry then has to initialise. Verified with
+          // a headless load of the built app in dark/light/chat/party modes.
           if (id.includes('@mui') || id.includes('@emotion')) return undefined;
           return 'vendor';
         },

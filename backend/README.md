@@ -150,7 +150,7 @@ uvicorn backend.app.main:app --reload --port 8080
 ```bash
 # From the repository root
 pip install -r requirements-dev.txt
-python -m pytest backend/tests     # 28 tests
+python -m pytest backend/tests     # 105 tests
 python -m ruff check backend       # lint (config in pyproject.toml)
 ```
 
