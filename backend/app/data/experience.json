@@ -5,13 +5,13 @@
         "date": "02/2025 - Present",
         "location": "San Francisco, CA",
         "highlights": [
-            "Staff engineer on the data platform behind Together's AI acceleration cloud — the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signal.",
-            "Build internal agent tooling and evaluation harnesses so engineering teams can develop, test, and ship LLM-powered agents against Together's own inference stack.",
-            "Design data infrastructure for large-scale training and inference workloads, spanning dataset curation, lineage, and quality controls for open-model work."
+            "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
+            "Build internal agent tooling and evaluation harnesses that let engineering teams develop, test, and ship LLM-powered agents on Together's inference stack.",
+            "Design data infrastructure for large-scale training and inference workloads, covering dataset curation, lineage, and quality controls for open-model work."
         ],
         "link": "https://www.together.ai/",
         "logoPath": "together.svg",
-        "company_description": "Together AI is an AI acceleration cloud that provides fast inference, fine-tuning, and dedicated GPU clusters for open-source and custom models, alongside a research team that builds and open-sources frontier models and systems optimizations used across the industry.",
+        "company_description": "Together AI is an AI acceleration cloud offering fast inference, fine-tuning, and dedicated GPU clusters for open-source and custom models, backed by a research team that builds and open-sources frontier models and systems optimizations.",
         "tech_stack": [
             "python",
             "sql",
@@ -21,11 +21,11 @@
             "pytorch"
         ],
         "more_highlights": [
-            "Own core data platform services for an AI cloud serving inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
-            "Build agent tooling and evaluation harnesses — tracing, replay, and regression testing for LLM agents — so internal teams can ship agentic features with confidence rather than vibes.",
-            "Develop streaming and batch pipelines that make model-serving and GPU-fleet telemetry queryable in near-real time, supporting capacity planning and reliability engineering.",
-            "Partner across research, infrastructure, and product teams to standardize data contracts and lineage for training-data and evaluation workflows.",
-            "Mentor engineers and set technical direction for data platform architecture in a fast-moving AI infrastructure environment."
+            "Own core data platform services for inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
+            "Build tracing, replay, and regression-testing harnesses for LLM agents, giving internal teams a repeatable way to evaluate agentic features before they ship.",
+            "Develop streaming and batch pipelines that make model-serving and GPU-fleet telemetry queryable in near real time for capacity planning and reliability engineering.",
+            "Partner with research, infrastructure, and product teams to standardize data contracts and lineage for training-data and evaluation workflows.",
+            "Mentor engineers and set technical direction for the data platform architecture."
         ]
     },
     "prove": {

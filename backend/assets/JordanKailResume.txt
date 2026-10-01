@@ -10,11 +10,11 @@ Experience
 ======
 Together AI
 Staff Software Engineer
-02/2025 - Ongoing
+02/2025 - Present
 San Francisco, CA
- - Staff engineer on the data platform behind Together's AI acceleration cloud - the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signal.
- - Build internal agent tooling and evaluation harnesses so engineering teams can develop, test, and ship LLM-powered agents against Together's own inference stack.
- - Design data infrastructure for large-scale training and inference workloads, spanning dataset curation, lineage, and quality controls for open-model work.
+ - Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.
+ - Build internal agent tooling and evaluation harnesses that let engineering teams develop, test, and ship LLM-powered agents on Together's inference stack.
+ - Design data infrastructure for large-scale training and inference workloads, covering dataset curation, lineage, and quality controls for open-model work.
 
 Prove Identity
 Staff Software Engineer - Data

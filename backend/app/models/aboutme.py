@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OpenTo(BaseModel):
@@ -22,11 +22,11 @@ class AboutMe(BaseModel):
     primary_skills: list[str] = Field(..., description="Primary skills")
     open_to: OpenTo | None = Field(None, description="Optional availability CTA")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "greeting": "👋 Hi, I'm an engineer",
-                "description": "With over 12 years of experience specializing in AI, Analytics, and Machine Learning",
+                "description": "With over 13 years of experience specializing in AI, Analytics, and Machine Learning",
                 "aidetails": "Ask my ✨AI assistant below for more details about me.",
                 "brief_bio": "I'm a software engineer with a deep curiosity for technology...",
                 "full_portrait": "/images/headshot/headshot.webp",
@@ -41,3 +41,4 @@ class AboutMe(BaseModel):
                 },
             }
         }
+    )
