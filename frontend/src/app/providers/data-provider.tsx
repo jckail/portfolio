@@ -1,18 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { getJson, endpoints } from '../../shared/utils/api';
+import { toLookup } from '../../shared/utils/lookup';
 
-import type { Skill } from '../components/sections/modals/SkillModal';
-import type { ExperienceItem } from '../components/sections/modals/ExperienceModal';
-import type { AboutMe, ProjectsData, Contact as ContactData } from '../../types/resume';
-
-interface SkillsData {
-  [key: string]: Skill;
-}
-
-interface ExperienceData {
-  [key: string]: ExperienceItem;
-}
+import type {
+  AboutMe,
+  Contact as ContactData,
+  ExperienceData,
+  ProjectsData,
+} from '../../types/resume';
+import type { SkillsData } from '../../types/skills';
 
 interface DataContextType {
   experienceData: ExperienceData | null;
@@ -44,19 +41,6 @@ const cache: {
 };
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-/**
- * Copy a JSON dictionary onto a null-prototype object.
- *
- * Sections index these maps with untrusted URL params (?skill=, ?project=,
- * ?company=). On a plain object `data['constructor']` or `data['__proto__']`
- * resolves through Object.prototype to something truthy, which mounted an
- * empty modal (or crashed the section). With no prototype, only keys the API
- * actually returned can match.
- */
-export function toLookup<T extends object>(data: T): T {
-  return Object.assign(Object.create(null) as T, data);
-}
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<DataContextType>({
@@ -101,7 +85,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ]);
 
         // Update cache. The dictionaries looked up by URL params get no
-        // prototype (see toLookup); aboutMe/contact are only read by field.
+        // prototype (see shared/utils/lookup); aboutMe/contact are only read by field.
         cache.experience = toLookup(experience);
         cache.skills = toLookup(skills);
         cache.projects = toLookup(projects);

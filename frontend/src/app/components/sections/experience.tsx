@@ -1,29 +1,22 @@
-import React, { lazy, Suspense, memo } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
-import { findSkillKey, formatTag } from '../../../shared/utils/skills';
+import { getOwn } from '../../../shared/utils/lookup';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
+import { SkillModalHost, prefetchSkillModal } from './modals/SkillModalHost';
+import { SectionPlaceholder } from './section-placeholder';
+import { TechStackTags } from './tech-stack-tags';
 
-import type { ExperienceItem } from './modals/ExperienceModal';
-import type { Skill } from './modals/SkillModal';
+import type { ExperienceData } from '../../../types/resume';
+import type { SkillsData } from '../../../types/skills';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
-const SkillModal = lazy(() => import('./modals/SkillModal'));
 
-// Prefetch functions for the modals
-const prefetchExperienceModal = () => {
-  const modalPromise = import('./modals/ExperienceModal');
-  return modalPromise;
-};
-
-const prefetchSkillModal = () => {
-  const modalPromise = import('./modals/SkillModal');
-  return modalPromise;
-};
+const prefetchExperienceModal = () => import('./modals/ExperienceModal');
 
 // Company slug (the shareable ?company= value) <-> experience data key.
 // Maps, not object literals: the slug comes from the URL, and a plain object
@@ -41,21 +34,21 @@ const KEY_TO_SLUG = new Map(Array.from(SLUG_TO_KEY, ([slug, key]) => [key, slug]
 
 /** Resolve a ?company= value to an own key of the experience data, if any. */
 export function resolveExperienceKey(
-  experienceData: Record<string, ExperienceItem>,
+  experienceData: ExperienceData,
   slug: string
 ): string | undefined {
   const key = SLUG_TO_KEY.get(slug) ?? slug;
   return Object.hasOwn(experienceData, key) ? key : undefined;
 }
 
-const ExperienceTimeline = memo(({ 
-  experience, 
+const ExperienceTimeline = memo(({
+  experience,
   skillsData,
   onSelectExperience,
-  onSelectSkill 
-}: { 
-  experience: Record<string, ExperienceItem>;
-  skillsData: Record<string, Skill>;
+  onSelectSkill,
+}: {
+  experience: ExperienceData;
+  skillsData: SkillsData;
   onSelectExperience: (key: string) => void;
   onSelectSkill: (skillName: string) => void;
 }) => {
@@ -75,7 +68,7 @@ const ExperienceTimeline = memo(({
                     name comes from the hidden text so it never contradicts what
                     is drawn (Lighthouse label-content-name-mismatch). */}
                 <CompanyLogo
-                  name={item.logoPath || "github-logo.svg"}
+                  name={item.logoPath}
                   size={64}
                   aria-hidden
                   className="company-logo"
@@ -93,27 +86,13 @@ const ExperienceTimeline = memo(({
             </div>
           </div>
           <div className="experience-highlights">
-            <div className="skill-tags">
-              {item.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(skillsData, tag);
-                return skillKey ? (
-                  <span
-                    key={index}
-                    className="skill-tag"
-                    onMouseEnter={prefetchSkillModal}
-                    style={{ cursor: 'pointer' }}
-                    {...buttonize(() => onSelectSkill(skillKey))}
-                  >
-                    {formatTag(tag, skillsData, skillKey)}
-                  </span>
-                ) : (
-                  <span key={index} className="skill-tag">
-                    {formatTag(tag, skillsData, skillKey)}
-                  </span>
-                );
-              })}
-            </div>
-            
+            <TechStackTags
+              tags={item.tech_stack}
+              skillsData={skillsData}
+              onSelectSkill={onSelectSkill}
+              onSkillHover={prefetchSkillModal}
+            />
+
             {item.highlights && (
               <ul className="highlights">
                 {item.highlights.map((highlight, idx) => (
@@ -133,28 +112,28 @@ ExperienceTimeline.displayName = 'ExperienceTimeline';
 const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();
   const { selectedExperience, setSelectedExperience } = useExperience();
-  const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  const handleSelectExperience = (key: string) => {
+  // Stable callbacks keep the memoised timeline from re-rendering whenever a
+  // modal opens or closes.
+  const handleSelectExperience = useCallback(
     // useExperience mirrors this state into the ?company= URL parameter
-    setSelectedExperience(KEY_TO_SLUG.get(key) ?? key);
-  };
+    (key: string) => setSelectedExperience(KEY_TO_SLUG.get(key) ?? key),
+    [setSelectedExperience]
+  );
+  const closeExperience = useCallback(() => setSelectedExperience(null), [setSelectedExperience]);
+  const closeSkill = useCallback(() => setSelectedSkill(null), []);
 
   if (error) return <div>Error: {error}</div>;
 
   if (isLoading || !experienceData || !skillsData) {
-    return (
-      <section id="experience" className="section-container">
-        <div className="section-content">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
+    return <SectionPlaceholder id="experience" />;
   }
 
   const experienceKey = selectedExperience
     ? resolveExperienceKey(experienceData, selectedExperience)
     : undefined;
+  const selected = getOwn(experienceData, experienceKey);
 
   return (
     <section id="experience" className="section-container">
@@ -162,7 +141,7 @@ const Experience: React.FC = () => {
         <h2>Experience</h2>
       </div>
       <div className="section-content">
-        <ExperienceTimeline 
+        <ExperienceTimeline
           experience={experienceData}
           skillsData={skillsData}
           onSelectExperience={handleSelectExperience}
@@ -170,27 +149,19 @@ const Experience: React.FC = () => {
         />
       </div>
 
-      {experienceKey && (
+      {selected && (
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
-            experience={experienceData[experienceKey]}
+            experience={selected}
             experienceKey={selectedExperience ?? undefined}
             skillsData={skillsData}
-            onClose={() => setSelectedExperience(null)}
+            onClose={closeExperience}
             onSelectSkill={setSelectedSkill}
           />
         </Suspense>
       )}
 
-      {selectedSkill && Object.hasOwn(skillsData, selectedSkill) && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
     </section>
   );
 };

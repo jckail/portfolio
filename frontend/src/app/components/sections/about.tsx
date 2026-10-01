@@ -1,10 +1,11 @@
-import React, { memo, lazy, Suspense } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import { buttonize } from '../../../shared/utils/a11y';
 import { useChatAvailable } from '../../../shared/hooks/use-chat-available';
 import { findSkillKey } from '../../../shared/utils/skills';
+import { getOwn } from '../../../shared/utils/lookup';
 import { buildHeadshotSrcSet } from '../../../shared/utils/responsive-image';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import '../../../styles/components/sections/about.css';
@@ -12,13 +13,12 @@ import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { useContact } from './about/hooks/useContact';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { SkillModalHost } from './modals/SkillModalHost';
 
-import type { AboutMe, Contact } from '../../../types/resume';
-import type { Skill } from './modals/SkillModal';
-import type { ExperienceItem } from './modals/ExperienceModal';
+import type { AboutMe, Contact, ExperienceData } from '../../../types/resume';
+import type { SkillsData } from '../../../types/skills';
 
 const ContactModal = lazy(() => import('./modals/ContactModal'));
-const SkillModal = lazy(() => import('./modals/SkillModal'));
 
 export interface CurrentRole {
   title: string;
@@ -30,7 +30,7 @@ export interface CurrentRole {
  * "Present", falling back to the contact title when no entry is current.
  */
 export function findCurrentRole(
-  experienceData: Record<string, ExperienceItem> | null | undefined,
+  experienceData: ExperienceData | null | undefined,
   fallbackTitle?: string
 ): CurrentRole | null {
   const current = Object.values(experienceData ?? {}).find(item =>
@@ -64,7 +64,7 @@ const TLDRContent = memo(({
   aboutMeData: AboutMe;
   contactData: Contact;
   currentRole: CurrentRole | null;
-  skillsData: Record<string, Skill>;
+  skillsData: SkillsData;
   onResumeClick: () => void;
   onContactSelect: () => void;
   onSkillSelect: (key: string) => void;
@@ -78,10 +78,14 @@ const TLDRContent = memo(({
     }
   };
 
-  const bioParagraphs = aboutMeData.brief_bio
-    .split(/\n\n+/)
-    .map(p => p.trim())
-    .filter(Boolean);
+  const bioParagraphs = useMemo(
+    () =>
+      aboutMeData.brief_bio
+        .split(/\n\n+/)
+        .map(p => p.trim())
+        .filter(Boolean),
+    [aboutMeData.brief_bio]
+  );
 
   const fullName = [contactData.firstName, contactData.lastName].filter(Boolean).join(' ');
   const shortcutModifier = isApplePlatform() ? '⌘' : 'Ctrl';
@@ -146,7 +150,7 @@ const TLDRContent = memo(({
         <div className="about-skill-icons" aria-label="Primary skills">
           {aboutMeData.primary_skills.map((name, index) => {
             const skillKey = findSkillKey(skillsData, name);
-            const skill = skillKey ? skillsData[skillKey] : undefined;
+            const skill = getOwn(skillsData, skillKey);
             return (
               <div
                 key={name}
@@ -196,14 +200,21 @@ const TLDRContent = memo(({
 });
 TLDRContent.displayName = 'TLDRContent';
 
+const handleResumeClick = () => scrollToSection('resume');
+
 const TLDR: React.FC = () => {
   const { aboutMeData, contactData, experienceData, skillsData, isLoading, error } = useData();
   const { selectedContact, setSelectedContact } = useContact();
-  const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  const handleResumeClick = () => {
-    scrollToSection('resume');
-  };
+  // Stable props so the memoised hero does not re-render when a modal opens
+  const openContact = useCallback(() => setSelectedContact(true), [setSelectedContact]);
+  const closeContact = useCallback(() => setSelectedContact(false), [setSelectedContact]);
+  const closeSkill = useCallback(() => setSelectedSkill(null), []);
+  const currentRole = useMemo(
+    () => findCurrentRole(experienceData, contactData?.title),
+    [experienceData, contactData?.title]
+  );
 
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
@@ -220,8 +231,6 @@ const TLDR: React.FC = () => {
     );
   }
 
-  const currentRole = findCurrentRole(experienceData, contactData.title);
-
   return (
     <section id="about" className="section-container">
       <div className="section-content">
@@ -232,7 +241,7 @@ const TLDR: React.FC = () => {
             currentRole={currentRole}
             skillsData={skillsData}
             onResumeClick={handleResumeClick}
-            onContactSelect={() => setSelectedContact(true)}
+            onContactSelect={openContact}
             onSkillSelect={setSelectedSkill}
           />
         </ErrorBoundary>
@@ -244,20 +253,12 @@ const TLDR: React.FC = () => {
             email={contactData.email}
             location={contactData.location}
             country={contactData.country}
-            onClose={() => setSelectedContact(false)}
+            onClose={closeContact}
           />
         </Suspense>
       )}
 
-      {selectedSkill && skillsData[selectedSkill] && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
     </section>
   );
 };

@@ -1,18 +1,23 @@
-import React, { lazy, Suspense, memo } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import { buttonize } from '../../../shared/utils/a11y';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { getOwn } from '../../../shared/utils/lookup';
 import { useProject } from './projects/hooks/useProject';
+import { SkillModalHost } from './modals/SkillModalHost';
+import { SectionPlaceholder } from './section-placeholder';
 
 import type { Project } from '../../../types/resume';
+import type { SkillsData } from '../../../types/skills';
 import '../../../styles/components/sections/projects.css';
 
 const ProjectModal = lazy(() => import('./modals/ProjectModal'));
-const SkillModal = lazy(() => import('./modals/SkillModal'));
 
 const prefetchProjectModal = () => import('./modals/ProjectModal');
+
+const EMPTY_SKILLS: SkillsData = Object.freeze(Object.create(null));
 
 const ProjectCard = memo(({
   projectKey,
@@ -79,24 +84,26 @@ const Projects: React.FC = () => {
   const { selectedProject, setSelectedProject } = useProject();
   // Local skill state (same pattern as Experience) so we don't fight the
   // Skills section's useSkill() owner of the ?skill= URL param.
-  const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+
+  const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
+  const closeSkill = useCallback(() => setSelectedSkill(null), []);
+  // Close the project first: one dialog at a time (audit F-3)
+  const openSkillFromProject = useCallback(
+    (skillKey: string) => {
+      setSelectedProject(null);
+      setSelectedSkill(skillKey);
+    },
+    [setSelectedProject]
+  );
 
   if (error) return <div className="error-message">Error: {error}</div>;
 
   if (isLoading || !projectsData) {
-    return (
-      <section id="projects" className="section-container">
-        <div className="section-content">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
+    return <SectionPlaceholder id="projects" />;
   }
 
-  const projectsArray = Object.entries(projectsData).map(([key, project]) => ({
-    ...project,
-    key,
-  }));
+  const project = getOwn(projectsData, selectedProject);
 
   return (
     <section id="projects" className="section-container">
@@ -105,11 +112,13 @@ const Projects: React.FC = () => {
       </div>
       <div className="section-content">
         <div className="projects-grid">
-          {projectsArray.map((project, index) => (
+          {/* The data objects themselves, not per-render copies, so the
+              memoised cards skip re-rendering when a modal opens. */}
+          {Object.entries(projectsData).map(([key, item], index) => (
             <ProjectCard
-              key={project.key}
-              projectKey={project.key}
-              project={project}
+              key={key}
+              projectKey={key}
+              project={item}
               index={index}
               onSelect={setSelectedProject}
             />
@@ -117,30 +126,19 @@ const Projects: React.FC = () => {
         </div>
       </div>
 
-      {selectedProject && Object.hasOwn(projectsData, selectedProject) && (
+      {project && selectedProject && (
         <Suspense fallback={<LoadingSpinner />}>
           <ProjectModal
             projectKey={selectedProject}
-            project={projectsData[selectedProject]}
-            skillsData={skillsData ?? {}}
-            onClose={() => setSelectedProject(null)}
-            onSelectSkill={skillKey => {
-              setSelectedProject(null);
-              setSelectedSkill(skillKey);
-            }}
+            project={project}
+            skillsData={skillsData ?? EMPTY_SKILLS}
+            onClose={closeProject}
+            onSelectSkill={openSkillFromProject}
           />
         </Suspense>
       )}
 
-      {selectedSkill && skillsData && Object.hasOwn(skillsData, selectedSkill) && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
     </section>
   );
 };

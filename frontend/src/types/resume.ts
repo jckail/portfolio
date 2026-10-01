@@ -9,9 +9,7 @@ export interface Project {
   last_commit?: string;
 }
 
-export interface ProjectsData {
-  [key: string]: Project;
-}
+export type ProjectsData = Record<string, Project>;
 
 export interface Contact {
   firstName: string;
@@ -25,14 +23,6 @@ export interface Contact {
   linkedin: string;
 }
 
-export interface ResumeData {
-  name: string;
-  title: string;
-  contact: Contact;
-  projects: Project[];
-  // ... other resume data types if needed
-}
-
 export interface AboutMe {
   greeting: string;
   description: string;
@@ -41,3 +31,19 @@ export interface AboutMe {
   full_portrait: string;
   primary_skills: string[];
 }
+
+/** One entry of GET /api/experience (backend/app/models/experience.py). */
+export interface ExperienceItem {
+  company: string;
+  title: string;
+  date: string;
+  location: string;
+  highlights: string[];
+  link: string;
+  logoPath: string;
+  company_description: string;
+  tech_stack: string[];
+  more_highlights: string[];
+}
+
+export type ExperienceData = Record<string, ExperienceItem>;

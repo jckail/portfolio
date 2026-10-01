@@ -1,9 +1,8 @@
 import React, { useEffect, useId, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import '../../../../styles/components/modal.css';
+import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
-import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import { postJson, endpoints } from '../../../../shared/utils/api';
 import {
   CONTACT_DRAFT_EVENT,
@@ -71,7 +70,6 @@ const ContactModal: React.FC<ContactModalProps> = ({
     return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
   }, []);
 
-  const trapRef = useFocusTrap(true, onClose);
   const titleId = useId();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -104,108 +102,94 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
   };
 
-  // Portaled to <body>: see ExperienceModal
-  return createPortal(
-    <div
-      className="contact-modal-overlay"
-      role="presentation"
-      onClick={(e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+  return (
+    <DialogShell
+      overlayClassName="contact-modal-overlay"
+      className="contact-modal-content"
+      labelledBy={titleId}
+      onClose={onClose}
+      closeButton
     >
-      <div
-        ref={trapRef}
-        className="contact-modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
-      <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
+      <div className="contact-modal-header">
+        <h2 id={titleId}>Contact</h2>
+      </div>
 
-        <div className="contact-modal-header">
-
-          <h2 id={titleId}>Contact</h2>
-
+      <div className="contact-modal-body">
+        <div className="contact-details">
+          <p className="contact-info">
+            🏔️<strong>{location}</strong>
+          </p>
+          <p className="contact-info">
+            📧<strong>{email}</strong>
+          </p>
+          <p className="contact-info">
+            🇺🇸<strong>{country}</strong>
+          </p>
+          <PhoneReveal />
         </div>
 
-        <div className="contact-modal-body">
-          <div className="contact-details">
-            <p className="contact-info">
-              🏔️<strong>{location}</strong>
+        <div className="contact-form-container">
+          {fromAssistant && (
+            <p className="contact-draft-note" role="status">
+              Drafted by the AI assistant — edit anything before sending.
             </p>
-            <p className="contact-info">
-              📧<strong>{email}</strong>
-            </p>
-            <p className="contact-info">
-              🇺🇸<strong>{country}</strong>
-            </p>
-            <PhoneReveal />
-          </div>
+          )}
+          <form onSubmit={handleSubmit} className="contact-form">
+            <div className="contact-form-group">
+              <label htmlFor="from_email">Your Email:</label>
+              <input
+                type="email"
+                id="from_email"
+                name="from_email"
+                value={formData.from_email}
+                onChange={handleInputChange}
+                required
+                maxLength={CONTACT_LIMITS.from_email}
+                autoComplete="email"
+                placeholder="your.email@example.com"
+              />
+            </div>
 
-          <div className="contact-form-container">
-            {fromAssistant && (
-              <p className="contact-draft-note" role="status">
-                Drafted by the AI assistant — edit anything before sending.
-              </p>
-            )}
-            <form onSubmit={handleSubmit} className="contact-form">
-              <div className="contact-form-group">
-                <label htmlFor="from_email">Your Email:</label>
-                <input
-                  type="email"
-                  id="from_email"
-                  name="from_email"
-                  value={formData.from_email}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={CONTACT_LIMITS.from_email}
-                  autoComplete="email"
-                  placeholder="your.email@example.com"
-                />
-              </div>
+            <div className="contact-form-group">
+              <label htmlFor="subject">Subject:</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData.subject}
+                onChange={handleInputChange}
+                required
+                maxLength={CONTACT_LIMITS.subject}
+              />
+            </div>
 
-              <div className="contact-form-group">
-                <label htmlFor="subject">Subject:</label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={CONTACT_LIMITS.subject}
-                />
-              </div>
+            <div className="contact-form-group">
+              <label htmlFor="message">Send me a message:</label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleInputChange}
+                required
+                maxLength={CONTACT_LIMITS.message}
+                rows={5}
+              />
+            </div>
 
-              <div className="contact-form-group">
-                <label htmlFor="message">Send me a message:</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  maxLength={CONTACT_LIMITS.message}
-                  rows={5}
-                />
-              </div>
+            {error && <div className="contact-error-message">{error}</div>}
+            {success && <div className="contact-success-message">Message sent successfully!</div>}
 
-              {error && <div className="contact-error-message">{error}</div>}
-              {success && <div className="contact-success-message">Message sent successfully!</div>}
-
-              <button
-                type="submit"
-                className="contact-submit-button"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-          </div>
+            <button
+              type="submit"
+              className="contact-submit-button"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Sending...' : 'Send Message'}
+            </button>
+          </form>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogShell>
   );
 };
 

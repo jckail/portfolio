@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 
 import { findCurrentRole } from './about';
 
-import type { ExperienceItem } from './modals/ExperienceModal';
+import type { ExperienceItem } from '../../../types/resume';
 
 const item = (company: string, title: string, date: string) =>
   ({ company, title, date }) as ExperienceItem;

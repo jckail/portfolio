@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 
-import { Theme } from '../../types/theme';
+import { isTheme, type Theme } from '../../types/theme';
 import { trackThemeChange } from '../utils/analytics';
 
 interface ThemeState {
@@ -28,7 +28,7 @@ const getThemeFromUrl = (): Theme | null => {
     if (typeof window === 'undefined') return null;
     const urlParams = new URLSearchParams(window.location.search);
     const themeParam = urlParams.get('theme');
-    return (themeParam === 'light' || themeParam === 'dark' || themeParam === 'party') ? themeParam as Theme : null;
+    return isTheme(themeParam) ? themeParam : null;
   } catch (error) {
     console.error('[Theme Store] Error reading theme from URL:', error);
     return null;
@@ -39,7 +39,7 @@ const getStoredTheme = (): Theme | null => {
   try {
     if (typeof window === 'undefined') return null;
     const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    return (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'party') ? storedTheme as Theme : null;
+    return isTheme(storedTheme) ? storedTheme : null;
   } catch (error) {
     console.error('[Theme Store] Error reading from localStorage:', error);
     return null;

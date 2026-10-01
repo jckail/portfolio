@@ -62,13 +62,14 @@
       {
         "zones": [
           {
-            "target": "./src/features",
-            "from": "./src/features",
-            "except": ["./current-feature-directory"]
+            "target": "./src/shared",
+            "from": "./src/app",
+            "message": "shared/ is cross-cutting and must not import from app/ (features). Move the code to app/ or pass the data in as props."
           },
           {
-            "target": "./src/shared",
-            "from": "./src/features"
+            "target": "./src/types",
+            "from": ["./src/app", "./src/shared"],
+            "message": "types/ holds plain types and must not depend on app/ or shared/."
           }
         ]
       }

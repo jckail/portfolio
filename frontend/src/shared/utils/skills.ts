@@ -1,17 +1,32 @@
-import type { Skill } from '../../app/components/sections/modals/SkillModal';
+import { getOwn } from './lookup';
+
+import type { SkillsData } from '../../types/skills';
+
+// display name (lower-cased) -> skill key, built once per skills payload.
+// Tags are resolved for every chip on every render of Experience, Projects
+// and About, so a linear scan per tag added up.
+const displayNameIndex = new WeakMap<SkillsData, Map<string, string>>();
+
+function indexFor(skillsData: SkillsData): Map<string, string> {
+  let index = displayNameIndex.get(skillsData);
+  if (!index) {
+    index = new Map();
+    for (const [key, skill] of Object.entries(skillsData)) {
+      const name = skill.display_name.toLowerCase();
+      // First entry wins, matching the old Array.find order
+      if (!index.has(name)) index.set(name, key);
+    }
+    displayNameIndex.set(skillsData, index);
+  }
+  return index;
+}
 
 /**
  * Resolve a tech-stack tag (display name, possibly hyphenated) to its skill
  * data key, e.g. "apache-spark" -> "apache_spark".
  */
-export function findSkillKey(
-  skillsData: Record<string, Skill>,
-  tagName: string
-): string | undefined {
-  const normalized = tagName.replace(/-/g, ' ').toLowerCase();
-  return Object.entries(skillsData).find(
-    ([, skill]) => skill.display_name.toLowerCase() === normalized
-  )?.[0];
+export function findSkillKey(skillsData: SkillsData, tagName: string): string | undefined {
+  return indexFor(skillsData).get(tagName.replace(/-/g, ' ').toLowerCase());
 }
 
 // Tag words whose casing CSS `text-transform: capitalize` cannot produce.
@@ -32,17 +47,14 @@ const TAG_PHRASES: Record<string, string> = { 'ci-cd': 'CI/CD', 'ui-ux': 'UI/UX'
  * else has hyphens spaced out and known acronyms upper-cased, leaving the
  * remaining words to CSS capitalisation.
  */
-export function formatTag(
-  tag: string,
-  skillsData?: Record<string, Skill>,
-  skillKey?: string
-): string {
+export function formatTag(tag: string, skillsData?: SkillsData, skillKey?: string): string {
   const key = skillKey ?? (skillsData ? findSkillKey(skillsData, tag) : undefined);
-  if (key && skillsData?.[key]) return skillsData[key].display_name;
-  const lower = tag.toLowerCase();
-  if (TAG_PHRASES[lower]) return TAG_PHRASES[lower];
+  const skill = getOwn(skillsData, key);
+  if (skill) return skill.display_name;
+  const phrase = getOwn(TAG_PHRASES, tag.toLowerCase());
+  if (phrase) return phrase;
   return tag
     .split('-')
-    .map(word => TAG_WORDS[word.toLowerCase()] ?? word)
+    .map(word => getOwn(TAG_WORDS, word.toLowerCase()) ?? word)
     .join(' ');
 }

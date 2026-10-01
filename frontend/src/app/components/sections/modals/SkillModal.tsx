@@ -1,24 +1,14 @@
 import React, { useEffect, useId } from 'react';
-import { createPortal } from 'react-dom';
 
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
+import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackModalView } from '../../../../shared/utils/analytics';
 import { formatTag } from '../../../../shared/utils/skills';
-import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
-import '../../../../styles/components/modal.css';
+import { shareUrl } from '../../../../shared/utils/url-params';
 
-export interface Skill {
-  display_name: string;
-  description: string;
-  years_of_experience: number;
-  professional_experience: boolean;
-  image: string;
-  tags: string[];
-  examples: Record<string, string>;
-  weblink: string;
-  general_category: string;
-}
+import type { Skill } from '../../../../types/skills';
+import '../../../../styles/components/modal.css';
 
 interface SkillModalProps {
   skill: Skill;
@@ -27,85 +17,70 @@ interface SkillModalProps {
   onClose: () => void;
 }
 
-// URL sync (the ?skill= param and back-button behavior) is owned entirely by
-// the useSkill hook. Previously this modal also pushed its own URL using a
-// display-name slug, which conflicted with useSkill's data key and broke
-// shared/bookmarked skill links.
+// URL sync (the ?skill= param and back-button behavior) belongs to whichever
+// section owns the selection (useSkill in Skills, local state elsewhere). This
+// modal used to push its own display-name slug, which broke shared links.
 const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
-  const trapRef = useFocusTrap(true, onClose);
   const titleId = useId();
 
   useEffect(() => {
     trackModalView(skillKey || skill.display_name, 'skill', skill.display_name);
   }, [skillKey, skill.display_name]);
 
-  const shareUrl = skillKey
-    ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
-    : undefined;
+  const examples = Object.entries(skill.examples);
 
-  // Portaled to <body>: see ExperienceModal
-  return createPortal(
-    <div
-      className="skill-modal-overlay"
-      role="presentation"
-      onClick={e => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+  return (
+    <DialogShell
+      overlayClassName="skill-modal-overlay"
+      className="skill-modal-content"
+      labelledBy={titleId}
+      onClose={onClose}
+      closeButton
     >
-      <div
-        ref={trapRef}
-        className="skill-modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-      >
-        <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
-        <div className="modal-header">
-          <h2 id={titleId}>{skill.display_name}</h2>
-          <div className="modal-icon-wrapper">
-            <div className="icon-wrapper">
-              <SkillIcon
-                name={skill.image}
-                className="modal-skill-icon"
-                size={32}
-                aria-label={skill.display_name}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="modal-body">
-          <p className="experience-info">
-            <strong>{skill.years_of_experience} years</strong> of experience
-            {skill.professional_experience && " (Professional)"}
-          </p>
-          <p className="skill-description">{skill.description}</p>
-          <div className="skill-tags">
-            {skill.tags.map((tag: string, index: number) => (
-              <span key={index} className="skill-tag">
-                {formatTag(tag)}
-              </span>
-            ))}
-          </div>
-          {Object.keys(skill.examples).length > 0 && (
-            <div className="examples-section">
-              <h3>Examples:</h3>
-              <ul>
-                {Object.entries(skill.examples).map(([key, value]: [string, string]) => (
-                  <li key={key}>{value}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <div className="project-modal-actions">
-            <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
-              Learn more about {skill.display_name}
-            </a>
-            {shareUrl && <CopyLinkButton url={shareUrl} />}
+      <div className="modal-header">
+        <h2 id={titleId}>{skill.display_name}</h2>
+        <div className="modal-icon-wrapper">
+          <div className="icon-wrapper">
+            <SkillIcon
+              name={skill.image}
+              className="modal-skill-icon"
+              size={32}
+              aria-label={skill.display_name}
+            />
           </div>
         </div>
       </div>
-    </div>,
-    document.body
+      <div className="modal-body">
+        <p className="experience-info">
+          <strong>{skill.years_of_experience} years</strong> of experience
+          {skill.professional_experience && ' (Professional)'}
+        </p>
+        <p className="skill-description">{skill.description}</p>
+        <div className="skill-tags">
+          {skill.tags.map((tag, index) => (
+            <span key={index} className="skill-tag">
+              {formatTag(tag)}
+            </span>
+          ))}
+        </div>
+        {examples.length > 0 && (
+          <div className="examples-section">
+            <h3>Examples:</h3>
+            <ul>
+              {examples.map(([key, value]) => (
+                <li key={key}>{value}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="project-modal-actions">
+          <a href={skill.weblink} target="_blank" rel="noopener noreferrer" className="visit-website-btn">
+            Learn more about {skill.display_name}
+          </a>
+          {skillKey && <CopyLinkButton url={shareUrl('skill', skillKey)} />}
+        </div>
+      </div>
+    </DialogShell>
   );
 };
 

@@ -1,23 +1,30 @@
-import React, { lazy, Suspense, memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { buttonize } from '../../../shared/utils/a11y';
-import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useSkill } from './skills/hooks/useSkill';
+import { SkillModalHost, prefetchSkillModal as prefetchModal } from './modals/SkillModalHost';
+import { SectionPlaceholder } from './section-placeholder';
 
-import type { Skill } from './modals/SkillModal';
+import type { Skill } from '../../../types/skills';
 import '../../../styles/components/sections/skills.css';
-
-const SkillModal = lazy(() => import('./modals/SkillModal'));
-
-const prefetchModal = () => import('./modals/SkillModal');
 
 const CATEGORY_ORDER = [
   'Programming Languages',
   'Artificial Intelligence',
   'Data Engineering',
 ];
+
+/** Pinned categories first in CATEGORY_ORDER order, the rest alphabetically. */
+function compareCategories(a: string, b: string): number {
+  const aIndex = CATEGORY_ORDER.indexOf(a);
+  const bIndex = CATEGORY_ORDER.indexOf(b);
+  if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+  if (aIndex !== -1) return -1;
+  if (bIndex !== -1) return 1;
+  return a.localeCompare(b);
+}
 
 const SkillItem = memo(({
   skill,
@@ -94,6 +101,7 @@ const TechnicalSkills: React.FC = () => {
   const { selectedSkill, setSelectedSkill } = useSkill();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const closeSkill = useCallback(() => setSelectedSkill(null), [setSelectedSkill]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -122,25 +130,11 @@ const TechnicalSkills: React.FC = () => {
         visible += 1;
       }
 
-      const categories = Object.keys(categorized).sort((a, b) => {
-        const aIndex = CATEGORY_ORDER.indexOf(a);
-        const bIndex = CATEGORY_ORDER.indexOf(b);
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        if (aIndex !== -1) return -1;
-        if (bIndex !== -1) return 1;
-        return a.localeCompare(b);
-      });
+      const categories = Object.keys(categorized).sort(compareCategories);
 
       const all = Array.from(
         new Set(Object.values(skillsData).map(s => s.general_category))
-      ).sort((a, b) => {
-        const aIndex = CATEGORY_ORDER.indexOf(a);
-        const bIndex = CATEGORY_ORDER.indexOf(b);
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        if (aIndex !== -1) return -1;
-        if (bIndex !== -1) return 1;
-        return a.localeCompare(b);
-      });
+      ).sort(compareCategories);
 
       return {
         sortedCategories: categories,
@@ -153,13 +147,7 @@ const TechnicalSkills: React.FC = () => {
   if (error) return <div className="error-message">Error: {error}</div>;
 
   if (isLoading || !skillsData) {
-    return (
-      <section id="skills" className="section-container">
-        <div className="section-content">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
+    return <SectionPlaceholder id="skills" />;
   }
 
   return (
@@ -226,15 +214,7 @@ const TechnicalSkills: React.FC = () => {
         )}
       </div>
 
-      {selectedSkill && Object.hasOwn(skillsData, selectedSkill) && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
     </section>
   );
 };

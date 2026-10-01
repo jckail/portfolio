@@ -6,7 +6,8 @@ import TelemetryBanner from '../../../shared/components/telemetry/telemetry-bann
 
 const AdminHandler: React.FC = () => {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-  const { isLoggedIn, verifyToken } = useAdminStore();
+  const isLoggedIn = useAdminStore(state => state.isLoggedIn);
+  const verifyToken = useAdminStore(state => state.verifyToken);
 
   // Check for existing token on mount
   useEffect(() => {

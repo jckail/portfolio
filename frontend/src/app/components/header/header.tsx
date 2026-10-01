@@ -1,23 +1,18 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 
-import { Theme } from '../../../types/theme';
-import { SidePanel } from '../navigation';
-import { getQueryParam, setQueryParam } from '../../utils/url-params';
-import { useData } from '../../../app/providers/data-provider';
+import { SidePanel } from '../../../shared/components/navigation';
+import { getQueryParam, setQueryParam } from '../../../shared/utils/url-params';
+import { useThemeStore } from '../../../shared/stores/theme-store';
+import { useData } from '../../providers/data-provider';
 import {
   MoonIcon,
   SunIcon,
   PartyIcon,
   SandwichIcon
-} from '../icons';
+} from '../../../shared/components/icons';
 
+import type { Theme } from '../../../types/theme';
 import '../../../styles/components/header/header.css';
-
-interface HeaderProps {
-  theme: Theme;
-  toggleTheme: () => void;
-  isToggleHidden: boolean;
-}
 
 // Memoize icons to prevent unnecessary re-renders
 const ThemeIcon = memo(({ theme }: { theme: Theme }) => {
@@ -49,11 +44,16 @@ const HeaderSkeleton = () => (
   </header>
 );
 
-const Header: React.FC<HeaderProps> = memo(({
-  theme,
-  toggleTheme,
-  isToggleHidden
-}) => {
+/**
+ * Fixed top bar: menu toggle for the side panel, name, and the theme toggle.
+ * Lives in app/ (not shared/) because it reads the resume data provider.
+ * It subscribes to the theme store itself, so a theme toggle re-renders the
+ * header rather than the whole page.
+ */
+const Header: React.FC = memo(() => {
+  const theme = useThemeStore(state => state.theme);
+  const toggleTheme = useThemeStore(state => state.toggleTheme);
+  const isToggleHidden = useThemeStore(state => state.isToggleHidden);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const { contactData, isLoading, error } = useData();
@@ -108,7 +108,7 @@ const Header: React.FC<HeaderProps> = memo(({
               <button 
                 onClick={toggleTheme}
                 className="theme-toggle"
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'light' : 'light'} mode`}
+                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               >
                 <ThemeIcon theme={theme} />
               </button>
@@ -127,4 +127,5 @@ const Header: React.FC<HeaderProps> = memo(({
 Header.displayName = 'Header';
 
 
+export { Header };
 export default Header;

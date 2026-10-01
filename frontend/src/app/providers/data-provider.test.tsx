@@ -2,7 +2,8 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 
-import { DataProvider, toLookup, useData } from './data-provider';
+import { toLookup } from '../../shared/utils/lookup';
+import { DataProvider, useData } from './data-provider';
 
 vi.mock('../../shared/utils/api', async importOriginal => {
   const actual = await importOriginal<typeof import('../../shared/utils/api')>();

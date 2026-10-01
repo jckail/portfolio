@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import { scrollToSection } from '../utils/scroll-utils';
 import { setQueryParam } from '../utils/url-params';
-import { useFocusTrap } from '../hooks/use-focus-trap';
 import { useChatAvailable } from '../hooks/use-chat-available';
+import { DialogShell } from './dialog-shell';
 import '../../styles/components/command-palette.css';
 
 interface Command {
@@ -93,7 +92,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const trapRef = useFocusTrap(open, onClose);
 
   const chatAvailable = useChatAvailable();
   const commands = useMemo(
@@ -140,90 +138,55 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
     }
   };
 
-  return createPortal(
-    <div
-      className="command-palette-overlay"
-      role="presentation"
-      onClick={e => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+  return (
+    <DialogShell
+      overlayClassName="command-palette-overlay"
+      className="command-palette"
+      ariaLabel="Command palette"
+      onClose={onClose}
     >
-      <div
-        ref={trapRef}
-        className="command-palette"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Command palette"
-      >
-        <input
-          ref={inputRef}
-          className="command-palette-input"
-          type="search"
-          id="command-palette-search"
-          name="command-palette-search"
-          aria-label="Search commands"
-          autoComplete="off"
-          placeholder={
-            chatAvailable
-              ? 'Jump to a section, open chat, download resume…'
-              : 'Jump to a section, download resume…'
-          }
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          aria-autocomplete="list"
-          aria-controls="command-palette-list"
-        />
-        <ul id="command-palette-list" className="command-palette-list" role="listbox">
-          {filtered.length === 0 && (
-            <li className="command-palette-empty">No matches</li>
-          )}
-          {filtered.map((cmd, index) => (
-            <li key={cmd.id} role="option" aria-selected={index === active}>
-              <button
-                type="button"
-                className={`command-palette-item${index === active ? ' is-active' : ''}`}
-                onClick={cmd.run}
-                onMouseEnter={() => setActive(index)}
-              >
-                <span>{cmd.label}</span>
-                {cmd.hint && <kbd>{cmd.hint}</kbd>}
-              </button>
-            </li>
-          ))}
-        </ul>
-        <p className="command-palette-footer">
-          <kbd>↑↓</kbd> navigate · <kbd>Enter</kbd> run · <kbd>Esc</kbd> close
-        </p>
-      </div>
-    </div>,
-    document.body
+      <input
+        ref={inputRef}
+        className="command-palette-input"
+        type="search"
+        id="command-palette-search"
+        name="command-palette-search"
+        aria-label="Search commands"
+        autoComplete="off"
+        placeholder={
+          chatAvailable
+            ? 'Jump to a section, open chat, download resume…'
+            : 'Jump to a section, download resume…'
+        }
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onKeyDown={onKeyDown}
+        aria-autocomplete="list"
+        aria-controls="command-palette-list"
+      />
+      <ul id="command-palette-list" className="command-palette-list" role="listbox">
+        {filtered.length === 0 && (
+          <li className="command-palette-empty">No matches</li>
+        )}
+        {filtered.map((cmd, index) => (
+          <li key={cmd.id} role="option" aria-selected={index === active}>
+            <button
+              type="button"
+              className={`command-palette-item${index === active ? ' is-active' : ''}`}
+              onClick={cmd.run}
+              onMouseEnter={() => setActive(index)}
+            >
+              <span>{cmd.label}</span>
+              {cmd.hint && <kbd>{cmd.hint}</kbd>}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="command-palette-footer">
+        <kbd>↑↓</kbd> navigate · <kbd>Enter</kbd> run · <kbd>Esc</kbd> close
+      </p>
+    </DialogShell>
   );
 };
 
-/** Global Ctrl/Cmd+K listener that owns palette open state. */
-export const CommandPaletteHost: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setOpen(prev => !prev);
-      }
-    };
-    const onParty = () => {
-      // Handled by easter-egg / theme listeners elsewhere; keep host lean
-    };
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('portfolio:party', onParty);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('portfolio:party', onParty);
-    };
-  }, []);
-
-  return <CommandPalette open={open} onClose={() => setOpen(false)} />;
-};
-
-export default CommandPaletteHost;
+export default CommandPalette;

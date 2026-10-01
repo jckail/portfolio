@@ -2,18 +2,23 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
+import { useThemeStore } from '../../../shared/stores/theme-store';
 import Header from './header';
 
 const contactData = { firstName: 'Jordan', lastName: 'Kail' };
 
-vi.mock('../../../app/providers/data-provider', () => ({
+vi.mock('../../providers/data-provider', () => ({
   useData: () => ({ contactData, isLoading: false, error: null }),
 }));
-vi.mock('../../utils/scroll-utils', () => ({ scrollToSection: vi.fn() }));
+vi.mock('../../../shared/utils/scroll-utils', () => ({ scrollToSection: vi.fn() }));
+vi.mock('../../../shared/utils/analytics', () => ({ trackThemeChange: vi.fn() }));
 
-const renderHeader = () => render(<Header theme="dark" toggleTheme={() => {}} isToggleHidden={false} />);
+const renderHeader = () => render(<Header />);
 
-beforeEach(() => window.history.replaceState({}, '', '/'));
+beforeEach(() => {
+  window.history.replaceState({}, '', '/');
+  useThemeStore.setState({ theme: 'dark', isToggleHidden: false, clickCount: 0, lastClickTime: 0 });
+});
 afterEach(() => cleanup());
 
 describe('Header headings', () => {
@@ -63,5 +68,21 @@ describe('Side panel focus', () => {
   it('does not steal focus on first render', () => {
     renderHeader();
     expect(document.activeElement).toBe(document.body);
+  });
+});
+
+describe('Theme toggle', () => {
+  it('reads the theme from the store and toggles it', () => {
+    renderHeader();
+    const toggle = screen.getByRole('button', { name: 'Switch to light mode' });
+    fireEvent.click(toggle);
+    expect(useThemeStore.getState().theme).toBe('light');
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
+  });
+
+  it('hides the toggle while party mode holds it', () => {
+    useThemeStore.setState({ theme: 'party', isToggleHidden: true });
+    renderHeader();
+    expect(screen.queryByRole('button', { name: /^Switch to/ })).toBeNull();
   });
 });
