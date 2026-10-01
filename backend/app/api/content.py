@@ -51,7 +51,11 @@ def _render(data: Any) -> bytes:
 
 
 def build_payload(data: Any) -> JsonPayload:
-    body = _render(data)
+    return build_bytes_payload(_render(data))
+
+
+def build_bytes_payload(body: bytes) -> JsonPayload:
+    """Hash and (above the gzip floor) compress an already-rendered body once."""
     digest = hashlib.sha256(body).hexdigest()[:32]
     if len(body) < GZIP_MINIMUM_SIZE:
         return JsonPayload(body=body, etag=f'"{digest}"')
@@ -94,9 +98,12 @@ def warm() -> None:
     for name in ("experience", "projects", "skills"):
         item_payloads(name)
     bootstrap_json()
+    from . import discovery  # deferred: discovery imports this module
+
+    discovery.warm()
 
 
-def _etag_matches(if_none_match: str, *etags: str | None) -> bool:
+def etag_matches(if_none_match: str, *etags: str | None) -> bool:
     """Weak comparison, as RFC 9110 requires for If-None-Match."""
     candidates = {tag for tag in etags if tag}
     for raw in if_none_match.split(","):
@@ -108,22 +115,27 @@ def _etag_matches(if_none_match: str, *etags: str | None) -> bool:
     return False
 
 
-def payload_response(request: Request, payload: JsonPayload) -> Response:
+def payload_response(
+    request: Request,
+    payload: JsonPayload,
+    media_type: str = "application/json",
+    extra_headers: Mapping[str, str] | None = None,
+) -> Response:
     """200 with the best encoding the client accepts, or 304 if it is current."""
     wants_gzip = payload.gzip_body is not None and "gzip" in request.headers.get("accept-encoding", "")
     etag = payload.gzip_etag if wants_gzip else payload.etag
-    headers = {"ETag": etag}
+    headers = {**(extra_headers or {}), "ETag": etag}
     if payload.gzip_body is not None:
         headers["Vary"] = "Accept-Encoding"
 
     if_none_match = request.headers.get("if-none-match")
-    if if_none_match and _etag_matches(if_none_match, payload.etag, payload.gzip_etag):
+    if if_none_match and etag_matches(if_none_match, payload.etag, payload.gzip_etag):
         return Response(status_code=304, headers=headers)
 
     if wants_gzip:
         headers["Content-Encoding"] = "gzip"
-        return Response(payload.gzip_body, media_type="application/json", headers=headers)
-    return Response(payload.body, media_type="application/json", headers=headers)
+        return Response(payload.gzip_body, media_type=media_type, headers=headers)
+    return Response(payload.body, media_type=media_type, headers=headers)
 
 
 # Keys of the bootstrap document, mapped to the collection each one carries.

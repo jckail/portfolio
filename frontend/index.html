@@ -12,24 +12,35 @@
     <link rel="icon" sizes="any" href="/images/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Staff Software Engineer at Together AI with 13+ years in AI, data platforms, and machine learning. Python, Go, SQL, and cloud infrastructure at Fortune 50 scale." />
-    <meta name="keywords" content="Data, AI, Software,Software Engineer, Python, SQL, GO, AI, Big Data, Cloud Architecture, AWS, GCP, Apache Spark, Big Data, Machine Learning, Portfolio, Python, SQL, GO " />
+    <meta name="keywords" content="Data Engineering, AI Agents, Machine Learning, LLM, Python, SQL, Go, Cloud Architecture, AWS, GCP, Apache Spark, Software Engineer, Portfolio" />
     <meta name="author" content="Jordan Kail" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+    <meta property="og:site_name" content="Jordan Kail" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content="Jordan Kail - Staff Software Engineer" />
     <meta property="og:description" content="Staff Software Engineer at Together AI with 13+ years in AI, data platforms, and machine learning. Python, Go, SQL, and cloud infrastructure at Fortune 50 scale." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://jordan-kail.com" />
-    <meta property="og:image" content="https://jordan-kail.com/images/headshot/headshot.webp" />
-    <meta property="og:image:alt" content="Jordan Kail headshot" />
+    <meta property="og:type" content="profile" />
+    <meta property="profile:first_name" content="Jordan" />
+    <meta property="profile:last_name" content="Kail" />
+    <meta property="og:url" content="https://www.jckail.com/" />
+    <meta property="og:image" content="https://www.jckail.com/images/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Jordan Kail, Staff Software Engineer at Together AI" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Jordan Kail - Staff Software Engineer" />
     <meta name="twitter:description" content="Staff Software Engineer at Together AI. 13+ years in AI, data platforms, and machine learning." />
-    <meta name="twitter:image" content="https://jordan-kail.com/images/headshot/headshot.webp" />
-    <link rel="canonical" href="https://jordan-kail.com" />
-    <link rel="alternate" href="https://www.jordan-kail.com" />
-    <link rel="alternate" href="https://jckail.com" />
-    <link rel="alternate" href="https://www.jckail.com" />
+    <meta name="twitter:image" content="https://www.jckail.com/images/og-image.png" />
+    <meta name="twitter:image:alt" content="Jordan Kail, Staff Software Engineer at Together AI" />
+    <link rel="canonical" href="https://www.jckail.com/" />
+    <!-- Machine-readable renditions of the same content (generated from the
+         site's JSON by the server; see backend/app/api/discovery.py). -->
+    <link rel="alternate" type="text/plain" href="https://www.jckail.com/llms.txt" title="Summary for language models (llms.txt)" />
+    <link rel="alternate" type="application/json" href="https://www.jckail.com/resume.json" title="Resume (JSON Resume)" />
+    <link rel="alternate" type="application/pdf" href="https://www.jckail.com/api/resume" title="Resume (PDF)" />
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png" />
@@ -41,6 +52,14 @@
     <link rel="preload" as="font" type="font/woff2" href="/fonts/montserrat-v31-latin-wght-normal.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/fonts/quantico-v19-latin-700-normal.woff2" crossorigin>
     <style>
+      /* Server-rendered snapshot of the portfolio (see spa.py). It exists for
+         readers that do not run JavaScript, and React replaces it on mount, so
+         it is visually hidden (still in the accessibility tree) to avoid a
+         flash or layout shift. <noscript> below shows it to no-JS visitors. */
+      #seo-snapshot {
+        position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+        overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+      }
       @font-face {
         font-family: 'Montserrat';
         font-style: normal;
@@ -82,16 +101,23 @@
          preload instead of fetching a fixed variant it may not render. -->
     <link rel="preload" as="image" type="image/webp" fetchpriority="high"
           imagesrcset="/images/headshot/headshot-1x.webp 1x, /images/headshot/headshot-2x.webp 2x, /images/headshot/headshot.webp 3x">
+    <noscript>
+      <style>
+        #seo-snapshot { position: static; width: auto; height: auto; margin: 0 auto; padding: 24px 16px; overflow: visible; clip: auto; white-space: normal; max-width: 52rem; font: 16px/1.6 system-ui, sans-serif; color: #e2e8f0; }
+        #seo-snapshot a { color: #93c5fd; }
+        body { background: #0f172a; }
+      </style>
+    </noscript>
     <title>Jordan Kail - Staff Software Engineer</title>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Jordan Kail",
-      "url": "https://jordan-kail.com",
+      "url": "https://www.jckail.com/",
       "jobTitle": "Staff Software Engineer",
       "description": "Staff Software Engineer at Together AI with 13+ years in AI, data platforms, and machine learning.",
-      "image": "https://jordan-kail.com/images/headshot/headshot.webp",
+      "image": "https://www.jckail.com/images/headshot/headshot.webp",
       "email": "mailto:jckail13@gmail.com",
       "worksFor": {
         "@type": "Organization",

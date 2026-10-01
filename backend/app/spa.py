@@ -15,6 +15,7 @@ import hashlib
 import logging
 import mimetypes
 import os
+import re
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -145,6 +146,55 @@ def inject_bootstrap(html: bytes, data: bytes) -> bytes:
     return html[:at] + block + html[at:]
 
 
+_ROOT_EMPTY = re.compile(rb'<div id="root">\s*</div>')
+_JSONLD = re.compile(rb'<script type="application/ld\+json">.*?</script>', re.S)
+
+
+def inject_root_content(html: bytes, fragment: bytes) -> bytes:
+    """Put ``fragment`` (server-rendered HTML) inside the empty ``#root``.
+
+    React's ``createRoot`` discards a container's children on first render, so
+    the fragment only serves readers that never run the app. It is not
+    hydrated, so it need not match React's markup, only the site's content.
+    """
+    match = _ROOT_EMPTY.search(html)
+    if match is None:
+        return html
+    return html[: match.start()] + b'<div id="root">' + fragment + b"</div>" + html[match.end():]
+
+
+def inject_jsonld(html: bytes, data: bytes) -> bytes:
+    """Replace the static JSON-LD block with ``data`` (script-safe JSON)."""
+    if b"<" in data:
+        raise ValueError("JSON-LD data must not contain '<'")
+    block = b'<script type="application/ld+json">\n' + data + b"\n</script>"
+    match = _JSONLD.search(html)
+    if match is None:
+        return html
+    return html[: match.start()] + block + html[match.end():]
+
+
+# Alternates and the canonical URL, also sent as a Link header so agents that
+# only read headers (HEAD requests) find them. Absolute URLs on the canonical
+# host, matching <link rel="canonical"> in index.html.
+def _link_header() -> str:
+    from .api.discovery import CANONICAL_ORIGIN, RESUME_PDF_PATH
+
+    return ", ".join(
+        (
+            f'<{CANONICAL_ORIGIN}/>; rel="canonical"',
+            f'<{CANONICAL_ORIGIN}/llms.txt>; rel="alternate"; type="text/plain"',
+            f'<{CANONICAL_ORIGIN}/resume.json>; rel="alternate"; type="application/json"',
+            f'<{CANONICAL_ORIGIN}{RESUME_PDF_PATH}>; rel="alternate"; type="application/pdf"',
+        )
+    )
+
+
+# Only the home page is the document of record. Everything else that falls
+# back to index.html (the admin login, unknown URLs) must stay out of indexes.
+HOME_PATHS = frozenset({"/", "/index.html"})
+
+
 @dataclass(frozen=True, slots=True)
 class IndexEntry:
     mtime_ns: int
@@ -178,13 +228,32 @@ class SPAStaticFiles(StaticFiles):
     """StaticFiles that serves index.html for unmatched HTML navigations and
     gzip-encoded text files from a per-process cache."""
 
-    def __init__(self, *args, bootstrap: Callable[[], bytes] | None = None, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        bootstrap: Callable[[], bytes] | None = None,
+        snapshot: Callable[[], bytes] | None = None,
+        jsonld: Callable[[], bytes] | None = None,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.gzip_cache = GzipCache()
         # Returns the JSON inlined into every index.html response, so the SPA
         # can render the hero without first fetching the content API.
         self._bootstrap = bootstrap
-        self._index: IndexEntry | None = None
+        # With a bootstrap, the home page also carries a server-rendered HTML
+        # snapshot of the portfolio and a richer JSON-LD graph, both built from
+        # the same data. Callers may override either.
+        if bootstrap is not None:
+            from .api import discovery
+
+            snapshot = snapshot or discovery.snapshot_html
+            jsonld = jsonld or discovery.jsonld_json
+        self._snapshot = snapshot
+        self._jsonld = jsonld
+        # One entry per variant: the home page (with the snapshot) and the
+        # bare shell served for /admin and unknown URLs.
+        self._index: dict[bool, IndexEntry] = {}
         self._index_lock = threading.Lock()
 
     @property
@@ -198,13 +267,15 @@ class SPAStaticFiles(StaticFiles):
             logger.info("Pre-compressed %d static files", count)
             if self._bootstrap is not None:
                 try:
-                    self._index_entry(os.stat(self.index_path))
+                    stat_result = os.stat(self.index_path)
+                    self._index_entry(stat_result, home=True)
+                    self._index_entry(stat_result, home=False)
                 except OSError:
                     pass
 
-    def _index_entry(self, stat_result: os.stat_result) -> IndexEntry | None:
+    def _index_entry(self, stat_result: os.stat_result, home: bool = False) -> IndexEntry | None:
         """index.html with the bootstrap block, rebuilt only when the file changes."""
-        entry = self._index
+        entry = self._index.get(home)
         if entry is not None and (entry.mtime_ns, entry.size) == (stat_result.st_mtime_ns, stat_result.st_size):
             return entry
         try:
@@ -214,6 +285,10 @@ class SPAStaticFiles(StaticFiles):
             return None
         if len(raw) != stat_result.st_size:
             return None  # rewritten mid-read (local rebuild)
+        if self._jsonld is not None:
+            raw = inject_jsonld(raw, self._jsonld())
+        if home and self._snapshot is not None:
+            raw = inject_root_content(raw, self._snapshot())
         body = inject_bootstrap(raw, self._bootstrap())
         # A content hash, not mtime: the body depends on the data as well as
         # the file, and must not keep an old tag across a content-only deploy.
@@ -227,7 +302,7 @@ class SPAStaticFiles(StaticFiles):
             gzip_etag=f'"{digest}-gz"',
         )
         with self._index_lock:
-            self._index = entry
+            self._index[home] = entry
         return entry
 
     def _index_response(self, scope: Scope, status_code: int) -> Response | None:
@@ -235,7 +310,8 @@ class SPAStaticFiles(StaticFiles):
             stat_result = os.stat(self.index_path)
         except OSError:
             return None
-        entry = self._index_entry(stat_result)
+        home = status_code == 200 and get_route_path(scope) in HOME_PATHS
+        entry = self._index_entry(stat_result, home=home)
         if entry is None:
             return None
         wants_gzip = _accepts_gzip(scope)
@@ -245,6 +321,10 @@ class SPAStaticFiles(StaticFiles):
             # 304. Revalidation goes through the content-hash ETag only.
             "etag": entry.gzip_etag if wants_gzip else entry.etag,
         }
+        if home:
+            headers["link"] = _link_header()
+        else:
+            headers["x-robots-tag"] = "noindex"
         if status_code == 200 and self.is_not_modified(Headers(headers), Headers(scope=scope)):
             return NotModifiedResponse(Headers(headers))
         if wants_gzip:
