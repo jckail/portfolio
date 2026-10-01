@@ -245,6 +245,8 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
               variant="outlined"
               disabled={!editable}
               onClick={() => onCancel(id)}
+              data-track-event="chat_action_cancelled"
+              data-track-tool={action.tool}
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
