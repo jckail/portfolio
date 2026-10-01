@@ -7,7 +7,6 @@ class Contact(BaseModel):
     lastName: str = Field(..., description="Last name")
     title: str = Field(..., description="Professional title")
     email: EmailStr = Field(..., description="Email address")
-    phone: str = Field(..., description="Phone number")
     website: HttpUrl = Field(..., description="Personal website URL")
     location: str = Field(..., description="City and state/region")
     country: str = Field(..., description="Country of residence")
@@ -21,7 +20,6 @@ class Contact(BaseModel):
                 "lastName": "Kail",
                 "title": "AI/Data Engineer",
                 "email": "jckail13@gmail.com",
-                "phone": "571-218-5000",
                 "website": "https://jordan-kail.com/",
                 "location": "Denver, CO",
                 "country": "United States",
@@ -30,3 +28,10 @@ class Contact(BaseModel):
             }
         }
     )
+
+
+class PhoneNumber(BaseModel):
+    """Response for POST /api/contact/phone: the number, revealed on request."""
+    phone: str = Field(..., description="Phone number, shown only after the visitor leaves an email")
+
+    model_config = ConfigDict(json_schema_extra={"example": {"phone": "555-0100"}})

@@ -191,18 +191,6 @@ const TLDRContent = memo(({
         )}
       </div>
 
-      {aboutMeData.open_to && (
-        <div className="about-cta" role="region" aria-label="Availability">
-          <div className="about-cta-copy">
-            <strong>Open to {aboutMeData.open_to.roles}</strong>
-            <span>{aboutMeData.open_to.note}</span>
-            <span className="about-cta-location">Based in {aboutMeData.open_to.location}</span>
-          </div>
-          <button type="button" className="about-cta-button" onClick={onContactSelect}>
-            Get in touch
-          </button>
-        </div>
-      )}
     </div>
   );
 });
@@ -254,7 +242,6 @@ const TLDR: React.FC = () => {
         <Suspense fallback={<LoadingSpinner />}>
           <ContactModal
             email={contactData.email}
-            phone={contactData.phone}
             location={contactData.location}
             country={contactData.country}
             onClose={() => setSelectedContact(false)}

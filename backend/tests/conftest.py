@@ -15,6 +15,9 @@ _TEST_ENV = {
     "RESUME_FILE": "JordanKailResume.pdf",
     "ANTHROPIC_API_KEY": "test-anthropic-key",
     "SENDGRID_API_KEY": "test-sendgrid-key",
+    # Forced empty so a real number in a developer's shell or .env never
+    # reaches a test; tests that need one patch a dummy value into Settings.
+    "CONTACT_PHONE": "",
 }
 
 # Assign unconditionally, never setdefault: a developer with real

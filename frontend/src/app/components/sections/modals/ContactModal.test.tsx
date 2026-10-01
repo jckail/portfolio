@@ -13,7 +13,7 @@ afterEach(() => cleanup());
 
 const renderModal = () =>
   render(
-    <ContactModal email="a@example.com" phone="555" location="Denver" country="USA" onClose={() => {}} />
+    <ContactModal email="a@example.com" location="Denver" country="USA" onClose={() => {}} />
   );
 
 describe('ContactModal fields', () => {
@@ -29,10 +29,21 @@ describe('ContactModal fields', () => {
   it('gives every field an id and a name', () => {
     renderModal();
     const fields = screen.getByRole('dialog').querySelectorAll('input, textarea, select');
-    expect(fields.length).toBe(3);
+    // from_email, subject, message, plus the phone-request email.
+    expect(fields.length).toBe(4);
     fields.forEach(field => {
       expect(field.id).not.toBe('');
       expect(field.getAttribute('name')).toBeTruthy();
     });
+  });
+});
+
+describe('ContactModal phone', () => {
+  it('does not render a phone number; it offers the on-request control', () => {
+    renderModal();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.querySelector('a[href^="tel:"]')).toBeNull();
+    expect(screen.getByText(/Phone: available on request/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show phone number' })).toBeInTheDocument();
   });
 });

@@ -51,6 +51,10 @@ class Settings:
     # Email
     sendgrid_api_key: str
     contact_sender_email: str
+    # Optional. Revealed only through POST /api/contact/phone after a visitor
+    # leaves an email address, so the number never ships in git-tracked JSON
+    # or the public contact payload. Empty means the endpoint answers 503.
+    contact_phone: str
 
     # Application
     admin_email: str
@@ -113,6 +117,7 @@ def get_settings() -> Settings:
         contact_sender_email=os.getenv(
             "CONTACT_SENDER_EMAIL", "assistant@jordan-kail.com"
         ),
+        contact_phone=os.getenv("CONTACT_PHONE", "").strip(),
         admin_email=os.getenv("ADMIN_EMAIL", ""),
         resume_file=os.getenv("RESUME_FILE", ""),
         allowed_origins=_parse_origins(

@@ -163,8 +163,8 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P1 — Skills search & category filter.**~~ Done: search input +
   category chips above the skills grid.
 - ~~**P1 — Richer About hero + recruiter CTA.**~~ Done: brief bio,
-  primary-skill icons, and an "Open to … / Get in touch" strip driven by
-  `aboutme.json` → `open_to`.
+  primary-skill icons. The "Open to … / Get in touch" availability strip
+  (`aboutme.json` → `open_to`) was later removed at the owner's request.
 - ~~**P1 — Copy-link on modals.**~~ Done: experience, skill, and project
   modals expose a one-click shareable deep link.
 - ~~**P1 — Social preview + PWA manifest names.**~~ Done: `og:image` /

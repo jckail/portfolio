@@ -18,7 +18,6 @@ export interface Contact {
   lastName: string;
   title: string;
   email: string;
-  phone: string;
   website: string;
   location: string;
   country: string;
@@ -34,14 +33,6 @@ export interface ResumeData {
   // ... other resume data types if needed
 }
 
-export interface OpenTo {
-  roles: string;
-  relocation: boolean;
-  travel: boolean;
-  location: string;
-  note: string;
-}
-
 export interface AboutMe {
   greeting: string;
   description: string;
@@ -49,5 +40,4 @@ export interface AboutMe {
   brief_bio: string;
   full_portrait: string;
   primary_skills: string[];
-  open_to?: OpenTo;
 }

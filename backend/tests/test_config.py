@@ -38,3 +38,17 @@ def test_parse_bool_variants():
     assert _parse_bool("") is False
     assert _parse_bool("false") is False
     assert _parse_bool("0") is False
+
+
+def test_contact_phone_is_optional_and_read_from_env(monkeypatch):
+    assert "CONTACT_PHONE" not in REQUIRED_ENV_VARS
+    get_settings.cache_clear()
+    try:
+        monkeypatch.setenv("CONTACT_PHONE", "  555-0100 ")
+        assert get_settings().contact_phone == "555-0100"
+        get_settings.cache_clear()
+        monkeypatch.delenv("CONTACT_PHONE")
+        assert get_settings().contact_phone == ""
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()

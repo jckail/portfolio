@@ -5,12 +5,5 @@
     "brief_bio": "I'm a software engineer with a deep curiosity for technology — always exploring AI, machine learning, and data systems. I've helped build efficient, scalable platforms, complex pipelines, and production transformer-model workflows.\n\nI love collaborating with others to create technology that makes a real impact. When I'm not working, you'll likely find me building computers, hiking with my dog in the mountains, or experimenting with new ML tools.",
     "full_portrait": "/images/headshot/headshot.webp",
     "resume_name": "JordanKailResume.pdf",
-    "primary_skills": ["Python", "JavaScript", "Go", "SQL"],
-    "open_to": {
-        "roles": "AI / data engineering roles",
-        "relocation": true,
-        "travel": true,
-        "location": "Denver, CO",
-        "note": "Open to remote, travel, or relocation."
-    }
+    "primary_skills": ["Python", "JavaScript", "Go", "SQL"]
 }

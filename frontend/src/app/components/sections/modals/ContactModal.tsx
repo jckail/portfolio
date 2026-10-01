@@ -11,10 +11,10 @@ import {
   loadContactDraft,
   type ContactDraft,
 } from '../../../../shared/utils/contact-draft';
+import PhoneReveal from './PhoneReveal';
 
 interface ContactModalProps {
   email: string;
-  phone: string;
   location: string;
   country: string;
   onClose: () => void;
@@ -45,7 +45,6 @@ function mergeDraft(draft: ContactDraft | null) {
 
 const ContactModal: React.FC<ContactModalProps> = ({
   email,
-  phone,
   location,
   country,
   onClose
@@ -140,9 +139,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
             <p className="contact-info">
               🇺🇸<strong>{country}</strong>
             </p>
-            <p className="contact-info">
-              ☎️<strong>{phone}</strong>
-            </p>
+            <PhoneReveal />
           </div>
 
           <div className="contact-form-container">

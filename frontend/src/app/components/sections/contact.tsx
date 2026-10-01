@@ -4,7 +4,6 @@ import '../../../styles/components/sections/contact.css';
 interface ContactProps {
   contact: {
     email: string;
-    phone: string;
     website: string;
     location: string;
     github: string;
@@ -20,10 +19,6 @@ const Contact: React.FC<ContactProps> = ({ contact }) => {
         <div className="contact-item">
           <h3>Email</h3>
           <a href={`mailto:${contact.email}`}>{contact.email}</a>
-        </div>
-        <div className="contact-item">
-          <h3>Phone</h3>
-          <a href={`tel:${contact.phone}`}>{contact.phone}</a>
         </div>
         <div className="contact-item">
           <h3>Website</h3>

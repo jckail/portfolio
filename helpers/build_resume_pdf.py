@@ -19,7 +19,7 @@ Geometry, colours and the icon font are taken from the original export:
 
 Arial is substituted with Helvetica, which is metrically equivalent and built
 into reportlab. The `resumeicons` glyphs are the subset font extracted from
-the original PDF, so the phone/email/location/link/project marks are the
+the original PDF, so the email/location/link/project marks are the
 originals rather than lookalikes.
 
 Usage:
@@ -52,11 +52,13 @@ F_REG, F_BOLD, F_ITAL = "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
 F_ICON = "ResumeIcons"
 
 # Glyphs in the extracted icon font, named for what they draw.
-ICON_PHONE, ICON_EMAIL, ICON_PIN, ICON_LINK = "E", "", "", "q"
+# The phone glyph ("E") is unused: the number is not printed on the public
+# resume; the site reveals it after a visitor leaves an email address.
+ICON_EMAIL, ICON_PIN, ICON_LINK = "", "", "q"
 
 NAME = "Jordan Kail"
 TAGLINE = "AI | Data | Machine Learning"
-PHONE, EMAIL, LOCATION = "571-218-5000", "jckail13@gmail.com", "Denver, CO"
+EMAIL, LOCATION = "jckail13@gmail.com", "Denver, CO"
 LINKS = ["github.com/jckail", "linkedin.com/in/jckail"]
 SITE = "jordan-kail.com"
 
@@ -253,10 +255,6 @@ class Resume:
 
         y = 76
         x = LEFT_X
-        self.icon(ICON_PHONE, x, y, 7.6)
-        x += 11
-        self.text(PHONE, x, y, F_BOLD, 8, BODY)
-        x += pdfmetrics.stringWidth(PHONE, F_BOLD, 8) + 10
         self.icon(ICON_EMAIL, x, y, 8)
         x += 11
         self.text(EMAIL, x, y, F_BOLD, 8, BODY)

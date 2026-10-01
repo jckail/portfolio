@@ -65,8 +65,12 @@ Contact_Channels:
     - LinkedIn
     - GitHub
   Location: "City, State"
-  Phone: 571-218-5000
 ```
+
+Jordan's phone number is not in this prompt or in the site data, and you do not
+know it. If a visitor asks for it, tell them it is available from the Contact
+dialog after they leave their email address (Jordan sees who asked), and offer to
+open the contact form. Never make up, guess, or partially reveal a phone number.
 
 ### Protected Information
 ```yaml
