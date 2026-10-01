@@ -25,6 +25,8 @@ LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')
 LOG_FILE_MAX_BYTES = 5 * 1024 * 1024
 LOG_FILE_BACKUPS = 3
 
+SINK_LOGGER_NAME = 'backend.app.utils.supabase_client'
+
 _fallback_lock = threading.Lock()
 _EXCEPTION_FORMATTER = logging.Formatter()
 
@@ -159,13 +161,16 @@ class SupabaseHandler(logging.Handler):
                 'ip_address': self._ip_address
             })
 
-        result = await supabase.store_logs_batch(formatted_logs)
-        if result is None:
-            self._fallback_log("Failed to store log batch in Supabase")
-            for log in formatted_logs:
-                self._fallback_log(f"Failed log: {log}")
+        await supabase.store_logs_batch(formatted_logs)
+        # store_logs_batch already warns (rate-limited). The records are not
+        # replayed to the fallback sink: stdout carries every one as JSON.
 
     def emit(self, record):
+        # Access lines and business events belong in Cloud Logging (they feed
+        # log-based metrics); one Supabase row per request would only add writes.
+        # The sink's own failure warnings stay out so they cannot feed back.
+        if getattr(record, 'event', None) or record.name == SINK_LOGGER_NAME:
+            return
         if getattr(record, 'request_id', None) is None:
             record.request_id = get_request_id()
         try:

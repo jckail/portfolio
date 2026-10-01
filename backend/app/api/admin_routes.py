@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from backend.app.config import get_settings
 from backend.app.middleware.auth_middleware import verify_admin_token
+from backend.app.utils.events import log_event
 from backend.app.utils.rate_limit import SlidingWindowLimiter, client_ip
 from backend.app.utils.supabase_client import SupabaseClient
 
@@ -27,8 +28,8 @@ router = APIRouter()
 # drains. The admin dashboard is a convenience, not an operational dependency,
 # so that lockout is preferred over unbounded guessing. Successful logins are
 # refunded, so only failures count toward either ceiling.
-_login_ip_limiter = SlidingWindowLimiter(max_events=5, window_seconds=900, global_max_events=10_000)
-_login_global_limiter = SlidingWindowLimiter(max_events=20, window_seconds=3600)
+_login_ip_limiter = SlidingWindowLimiter(max_events=5, window_seconds=900, global_max_events=10_000, name="admin_login_ip")
+_login_global_limiter = SlidingWindowLimiter(max_events=20, window_seconds=3600, name="admin_login_global")
 
 # Every failed login takes at least this long, so a wrong email (rejected
 # locally) and a wrong password (rejected after a Supabase round trip) are not
@@ -88,7 +89,11 @@ async def admin_login(request: Request, credentials: LoginCredentials) -> LoginT
     # leaves the other untouched. Charging happens before the attempt (not on
     # failure) because the attempt awaits: concurrent guesses would otherwise
     # all pass the check before any of them was recorded.
-    if not _login_ip_limiter.check(ip) or not _login_global_limiter.check("*"):
+    if not _login_ip_limiter.check(ip):
+        _login_ip_limiter.report_blocked()
+        raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
+    if not _login_global_limiter.check("*"):
+        _login_global_limiter.report_blocked()
         raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
     _login_ip_limiter.record(ip)
     _login_global_limiter.record("*")
@@ -97,9 +102,11 @@ async def admin_login(request: Request, credentials: LoginCredentials) -> LoginT
     try:
         result = await _attempt_login(credentials)
     except HTTPException as exc:
+        log_event("auth.login_failed", status=exc.status_code)
         if exc.status_code == 401:
             await _pad_failure(started)
         raise
+    log_event("auth.login_succeeded")
     _login_ip_limiter.refund(ip)
     _login_global_limiter.refund("*")
     return result

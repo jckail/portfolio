@@ -9,6 +9,7 @@ from ..config import get_settings
 from ..models import Contact
 from ..models.contact import PhoneNumber
 from ..services.owner_mail import OwnerMailFailed, OwnerMailNotConfigured, owner_mail_configured, send_owner_mail
+from ..utils.events import log_event
 from ..utils.rate_limit import SlidingWindowLimiter, enforce_rate_limit
 from .content import collection_payload, payload_response
 
@@ -19,11 +20,11 @@ router = APIRouter(prefix="/contact")
 # The contact form is unauthenticated and spends real SendGrid quota, so it is
 # limited far more tightly than a read endpoint. A person filling in the form
 # sends one message; anything past a handful an hour is abuse.
-_email_limiter = SlidingWindowLimiter(max_events=3, window_seconds=3600, global_max_events=60)
+_email_limiter = SlidingWindowLimiter(max_events=3, window_seconds=3600, global_max_events=60, name="contact_email")
 # Revealing the phone number also sends Jordan a notification through SendGrid,
 # and the number itself is what a scraper wants, so it gets its own budget at
 # the same tight rate rather than sharing (and draining) the contact form's.
-_phone_limiter = SlidingWindowLimiter(max_events=3, window_seconds=3600, global_max_events=60)
+_phone_limiter = SlidingWindowLimiter(max_events=3, window_seconds=3600, global_max_events=60, name="contact_phone")
 
 EMAIL_SEND_FAILED_DETAIL = "Unable to send message right now"
 PHONE_UNAVAILABLE_DETAIL = "Phone number is not available right now; please use the contact form."
@@ -89,10 +90,13 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
         )
     except OwnerMailNotConfigured:
         logger.error("Contact form submitted but ADMIN_EMAIL or SENDGRID_API_KEY is not set")
+        log_event("contact.failed", reason="not_configured")
         raise HTTPException(status_code=500, detail="Email is not configured on this server")
     except OwnerMailFailed:
+        log_event("contact.failed", reason="send_failed")
         raise HTTPException(status_code=502, detail=EMAIL_SEND_FAILED_DETAIL)
 
+    log_event("contact.sent")
     return EmailSent(message="Email sent successfully", status_code=status_code)
 
 
@@ -116,13 +120,16 @@ async def request_phone(
         headers=_NO_STORE,
     )
 
+    log_event("phone.requested")
     settings = get_settings()
     # Checked before anything is sent: no notification for a number we
     # cannot hand out.
     if not settings.contact_phone:
+        log_event("phone.failed", reason="unavailable")
         raise HTTPException(status_code=503, detail=PHONE_UNAVAILABLE_DETAIL, headers=_NO_STORE)
     if not owner_mail_configured():
         logger.error("Phone reveal requested but email notification is not configured")
+        log_event("phone.failed", reason="not_configured")
         raise HTTPException(status_code=503, detail=PHONE_UNAVAILABLE_DETAIL, headers=_NO_STORE)
 
     requester = str(body.email)
@@ -144,6 +151,8 @@ async def request_phone(
             purpose="phone request notification",
         )
     except (OwnerMailNotConfigured, OwnerMailFailed):
+        log_event("phone.failed", reason="send_failed")
         raise HTTPException(status_code=502, detail=PHONE_SEND_FAILED_DETAIL, headers=_NO_STORE)
 
+    log_event("phone.revealed")
     return PhoneNumber(phone=settings.contact_phone)

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import sys
 from contextlib import asynccontextmanager
@@ -9,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .api import api_router, content, ws_router
 from .config import get_settings, missing_required_vars
+from .middleware.access_log import AccessLogMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
 from .middleware.response_headers import ResponseHeadersMiddleware
 from .spa import SPAStaticFiles
@@ -17,6 +19,9 @@ from .utils.supabase_client import supabase
 
 # Configure logging
 logger = setup_logging()
+# Uvicorn's plain-text access lines duplicate Cloud Run's request log and the
+# structured access line below, and carry no severity or trace.
+logging.getLogger("uvicorn.access").disabled = True
 
 # Fail fast on misconfigured deployments
 missing_vars = missing_required_vars()
@@ -76,8 +81,8 @@ app = FastAPI(
     openapi_url="/openapi.json" if settings.dev_mode else None,
 )
 
-# Starlette runs the last-added middleware outermost: response headers wrap
-# compression, which wraps CORS.
+# Starlette runs the last-added middleware outermost: the access log wraps
+# response headers, which wrap compression, which wraps CORS.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
@@ -90,6 +95,9 @@ app.add_middleware(
 )
 app.add_middleware(SelectiveGZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 app.add_middleware(ResponseHeadersMiddleware, settings=settings)
+# Outermost: sets the Cloud Trace context for every log line the request
+# produces and writes the one structured access-log line.
+app.add_middleware(AccessLogMiddleware, settings=settings)
 
 # Mount API routes first; the SPA mount at "/" is added at startup.
 app.include_router(api_router)

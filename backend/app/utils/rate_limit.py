@@ -33,6 +33,8 @@ from fastapi import HTTPException
 
 from backend.app.config import get_settings
 
+from .events import log_event
+
 logger = logging.getLogger(__name__)
 _trust_mode_logged = False
 
@@ -96,7 +98,15 @@ def client_ip(request_or_ws) -> str:
 class SlidingWindowLimiter:
     """Fixed-capacity sliding window over a rolling time period."""
 
-    def __init__(self, max_events: int, window_seconds: float, global_max_events: int | None = None):
+    def __init__(
+        self,
+        max_events: int,
+        window_seconds: float,
+        global_max_events: int | None = None,
+        name: str = "unnamed",
+    ):
+        # Labels the rate_limit.blocked event; a short fixed identifier, never input.
+        self.name = name
         self.max_events = max_events
         self.window_seconds = window_seconds
         # Defaults to a generous multiple of the per-client allowance.
@@ -166,6 +176,10 @@ class SlidingWindowLimiter:
             times.pop()
             self._global.pop()
 
+    def report_blocked(self) -> None:
+        """Emit the rate_limit.blocked event for this limiter."""
+        log_event("rate_limit.blocked", limiter=self.name)
+
     def allow(self, key: str, cost: int = 1) -> bool:
         """Record ``cost`` events for ``key``; return False when it should be rejected.
 
@@ -195,4 +209,5 @@ def enforce_rate_limit(
 ) -> None:
     """Charge ``cost`` to the caller's bucket, or raise 429 with ``detail``."""
     if not limiter.allow(client_ip(request), cost=cost):
+        limiter.report_blocked()
         raise HTTPException(status_code=429, detail=detail, headers=dict(headers) if headers else None)

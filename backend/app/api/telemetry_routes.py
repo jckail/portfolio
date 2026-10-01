@@ -26,7 +26,7 @@ MAX_LOG_MESSAGE_CHARS = 2000
 
 # The limiter counts stored entries, not requests: a batch is charged one unit
 # per log line, so batching cannot multiply the allowance by MAX_BATCH_LOGS.
-_ingest_limiter = SlidingWindowLimiter(max_events=120, window_seconds=60, global_max_events=1200)
+_ingest_limiter = SlidingWindowLimiter(max_events=120, window_seconds=60, global_max_events=1200, name="telemetry_ingest")
 
 # The file fallback only exists for local debugging. Cloud Run's writable
 # filesystem is backed by instance memory, so on the platform it is disabled

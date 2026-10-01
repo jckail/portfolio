@@ -1,11 +1,32 @@
 import asyncio
-import sys
+import logging
+import time
 from datetime import UTC, datetime
 from typing import Any
 
 from supabase import Client, create_client
 
 from backend.app.config import get_settings
+
+logger = logging.getLogger(__name__)
+
+# A Supabase outage fails every log batch (every 5 seconds) and chat write.
+# One line per window, with a count, instead of one per failure; the exception
+# text is left out because provider errors can carry project URLs.
+_WARN_INTERVAL_SECONDS = 60.0
+_last_warned: dict[str, float] = {}
+_suppressed: dict[str, int] = {}
+
+
+def _warn_sink_failure(what: str) -> None:
+    now = time.monotonic()
+    last = _last_warned.get(what)
+    if last is not None and now - last < _WARN_INTERVAL_SECONDS:
+        _suppressed[what] = _suppressed.get(what, 0) + 1
+        return
+    _last_warned[what] = now
+    skipped = _suppressed.pop(what, 0)
+    logger.warning("Failed to store %s in Supabase (%d similar failures suppressed)", what, skipped)
 
 
 def get_supabase_config():
@@ -94,8 +115,8 @@ class SupabaseClient:
                 lambda: admin_client.table('logs').insert(log_entry).execute()
             )
             return result
-        except Exception as e:
-            print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("log entry")
             return None
 
     @classmethod
@@ -123,8 +144,8 @@ class SupabaseClient:
                 )
                 return result
             return None
-        except Exception as e:
-            print(f"Failed to store log batch in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("log batch")
             return None
 
     @classmethod
@@ -143,8 +164,8 @@ class SupabaseClient:
                 lambda: admin_client.table('portfolio_assistant_messages').insert(message_entry).execute()
             )
             return result
-        except Exception as e:
-            print(f"Failed to store chat message in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("chat message")
             return None
 
 # Create a module-level interface
