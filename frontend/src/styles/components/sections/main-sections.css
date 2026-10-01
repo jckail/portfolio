@@ -1,110 +1,78 @@
-/* Unified Resume Sections Styling */
+/* Section frame shared by About, Experience, Projects, Skills and Resume.
+   Imported eagerly through about.css, so lazy sections can rely on it. */
 
-/* Base Section Styles */
-.section {
-  margin-bottom: var(--spacing-sm);
+.section-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0;
 }
 
+/* Lazy sections sit in a .section-slot (main-content.tsx); the slot owns
+   the gap so a pending skeleton and the rendered section space alike. */
+.section-slot {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: var(--section-gap) auto 0;
+}
+
+/* Heading on the left, a hairline running out to the right edge */
 .section-header {
-  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  margin: 0 0 var(--spacing-lg);
   color: var(--text-color);
-  
+}
+
+.section-header::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.section-container .section-header h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  color: var(--text-color);
+}
+
+/* Short accent bar in front of each heading: the one repeated mark */
+.section-header h2::before {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.12em;
+  margin-right: 0.4em;
+  vertical-align: 0.3em;
+  border-radius: var(--radius-full);
+  background: var(--primary);
 }
 
 .section-content {
-  text-align: left;
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  box-sizing: border-box;
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-}
-
-.section-content:hover {
-  transform: translateY(-4px);
-  
-  border-color: var(--primary-hover);
-  
+  margin: 0;
+  padding: 0;
+  text-align: left;
 }
 
 .section-content p {
   color: var(--text-color);
-  line-height: 1.8;
-  margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-base);
+  line-height: var(--leading-body);
   font-weight: 400;
 }
 
-.section-content p:last-child {
-  margin-bottom: 0;
+/* Lede under a heading, e.g. the skills count */
+.section-lede {
+  max-width: var(--measure);
+  margin: calc(var(--spacing-md) * -0.5) 0 var(--spacing-lg);
+  color: var(--text-secondary);
+  font-size: var(--text-md);
 }
-
-/* Specific Section Variations */
-.section-container {
-  border-radius: var(--radius-lg);
-  padding: 2px;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1080px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Section Headers */
-.section h2,
-#about h2,
-#skills h2,
-#experience h2,
-#projects h2,
-#resume h2 {
-  color: var(--text-color);
-  margin-top: 5px;
-  font-size: 2rem;
-  margin-bottom: var(--spacing-xs);
-  padding-bottom: var(--spacing-xs);
-  text-align: left;
-  width: 100%;
-  max-width: 1080px;
-  border-bottom: var(--border-thickness) solid var(--primary-border);
-  font-weight: bold;
-}
-
-
-
-@media (max-width: 768px) {
-
-
-  .section h2,
-  #about h2,
-  #skills h2,
-  #experience h2,
-  #projects h2,
-  #resume h2 {
-    font-size: 1.5rem;
-    margin-top: 0px;
-  }
-
-  .section-content {
-    padding: var(--spacing-xs);
-    margin: 0 0;
-    margin-bottom: 15px;
-  }
-
-  .section-content p {
-    color: var(--text-color);
-    line-height: 1.3;
-    margin-bottom: var(--spacing-sm);
-    font-size: var(--font-size-mobile-base);
-    max-width: 95%;
-    font-weight: 400;
-  }
-
-  
-}
-
-
