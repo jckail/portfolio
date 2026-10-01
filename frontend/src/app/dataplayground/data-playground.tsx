@@ -21,29 +21,32 @@ const controls: {
   label: string;
   min: number;
   max: number;
-  step: number;
+  step: number | 'any';
 }[] = [
   { key: 'seed', label: 'Random seed', min: 0, max: 2147483647, step: 1 },
   { key: 'days', label: 'Days to simulate', min: 7, max: 90, step: 1 },
   { key: 'daily_signups', label: 'Daily signups', min: 5, max: 100, step: 1 },
-  { key: 'activation_rate', label: 'Activation probability', min: 0, max: 1, step: 0.01 },
-  { key: 'payment_rate', label: 'Payment probability', min: 0, max: 1, step: 0.01 },
-  { key: 'churn_rate', label: 'Daily churn probability', min: 0, max: 0.2, step: 0.01 },
-  { key: 'duplicate_rate', label: 'Duplicate probability', min: 0, max: 0.2, step: 0.01 },
-  { key: 'invalid_rate', label: 'Invalid record probability', min: 0, max: 0.2, step: 0.01 },
+  { key: 'activation_rate', label: 'Activation probability', min: 0, max: 1, step: 'any' },
+  { key: 'payment_rate', label: 'Payment probability', min: 0, max: 1, step: 'any' },
+  { key: 'churn_rate', label: 'Daily churn probability', min: 0, max: 0.2, step: 'any' },
+  { key: 'duplicate_rate', label: 'Duplicate probability', min: 0, max: 0.2, step: 'any' },
+  { key: 'invalid_rate', label: 'Invalid record probability', min: 0, max: 0.2, step: 'any' },
 ];
 
 function Revenue({ run, baseline }: { run: RunResult; baseline: RunResult }) {
+  const selectedDates = run.daily.map((day) => day.date);
+  const baselineWindow = baseline.daily.filter((day) => selectedDates.includes(day.date));
   const ceiling = Math.max(
     1,
     ...run.daily.map((day) => day.revenue_cents),
-    ...baseline.daily.map((day) => day.revenue_cents)
+    ...baselineWindow.map((day) => day.revenue_cents)
   );
-  const days = Math.max(run.daily.length, baseline.daily.length, 2);
+  const days = Math.max(run.daily.length, 2);
   const points = (data: RunResult['daily']) =>
     data
       .map(
-        (day, i) => `${60 + (i / (days - 1)) * 660},${200 - (day.revenue_cents / ceiling) * 170}`
+        (day) =>
+          `${60 + (selectedDates.indexOf(day.date) / (days - 1)) * 660},${200 - (day.revenue_cents / ceiling) * 170}`
       )
       .join(' ');
   return (
@@ -68,7 +71,7 @@ function Revenue({ run, baseline }: { run: RunResult; baseline: RunResult }) {
           <title id="revenue-chart-title">Daily revenue compared with baseline</title>
           <desc id="revenue-chart-desc">
             Solid line is the selected run; dashed line is baseline. Exact daily amounts are in the
-            expandable table below.
+            expandable table below. Baseline is limited to the selected run’s observation dates.
           </desc>
           {[0, 0.5, 1].map((fraction) => (
             <g key={fraction}>
@@ -84,7 +87,7 @@ function Revenue({ run, baseline }: { run: RunResult; baseline: RunResult }) {
               </text>
             </g>
           ))}
-          <polyline points={points(baseline.daily)} className="lab-line-baseline" />
+          <polyline points={points(baselineWindow)} className="lab-line-baseline" />
           <polyline points={points(run.daily)} className="lab-line" />
           <text x="60" y="232">
             {run.daily[0].date}
@@ -285,6 +288,12 @@ function Workspace({ catalog }: { catalog: Catalog }) {
         )}
       </section>
       <section className="lab-metrics" aria-label="Run metrics compared to baseline">
+        {run.config.days !== baseline.config.days && (
+          <p className="lab-comparison-note">
+            Selected totals cover {run.config.days} days; baseline totals cover{' '}
+            {baseline.config.days} days. These are different observation windows.
+          </p>
+        )}
         {[
           {
             label: 'Collected revenue',
@@ -310,7 +319,10 @@ function Workspace({ catalog }: { catalog: Catalog }) {
           <div key={metric.label}>
             <span>{metric.label}</span>
             <strong>{metric.value}</strong>
-            <small>Baseline {metric.base}</small>
+            <small>
+              Baseline {metric.base}
+              {run.config.days !== baseline.config.days ? ` (${baseline.config.days} days)` : ''}
+            </small>
           </div>
         ))}
       </section>
@@ -344,7 +356,7 @@ function Workspace({ catalog }: { catalog: Catalog }) {
             <h2 id="cohorts-title">Do customers stay?</h2>
             <p>First-payment cohorts. Retention after each elapsed week.</p>
           </div>
-          <span className="lab-note">Darker cells = higher retention</span>
+          <span className="lab-note">Stronger color = higher retention</span>
         </div>
         {run.cohorts.length ? (
           <div
@@ -381,8 +393,8 @@ function Workspace({ catalog }: { catalog: Catalog }) {
                           rate === null
                             ? undefined
                             : {
-                                backgroundColor: `color-mix(in srgb, var(--primary) ${Math.round(rate * 75 + 15)}%, var(--page-bg))`,
-                                color: rate >= 0.45 ? '#ffffff' : 'var(--text-color)',
+                                backgroundColor: `color-mix(in srgb, var(--accent-text) ${Math.round(rate * 35 + 5)}%, var(--page-bg))`,
+                                color: 'var(--text-color)',
                               }
                         }
                         title={rate === null ? 'Not yet observed' : undefined}
@@ -478,15 +490,19 @@ function Workspace({ catalog }: { catalog: Catalog }) {
               placeholder="User, event, channel, plan…"
             />
           </label>
-          <label>
-            Event type
-            <select value={eventType} onChange={(event) => setEventType(event.target.value)}>
+          <div className="lab-filter-field">
+            <label htmlFor="lab-event-type">Event type</label>
+            <select
+              id="lab-event-type"
+              value={eventType}
+              onChange={(event) => setEventType(event.target.value)}
+            >
               <option value="all">All event types</option>
               {['signup', 'activation', 'payment', 'churn'].map((type) => (
                 <option key={type}>{type}</option>
               ))}
             </select>
-          </label>
+          </div>
         </div>
         {events.length ? (
           <div
@@ -566,10 +582,20 @@ function Workspace({ catalog }: { catalog: Catalog }) {
           </a>
         </div>
         <div>
-          <h3>Reproduce the curated catalog</h3>
+          <h3>Reproduce this run</h3>
           <pre>
-            <code>{catalog.source.command}</code>
+            <code>{`python -m playground simulate ${controls.map(({ key }) => `--${key.replaceAll('_', '-')} ${run.config[key]}`).join(' ')} --output run.json`}</code>
           </pre>
+          <p className="lab-note">
+            The JSON includes metrics, lineage, and bounded event samples, not the complete raw
+            event stream.
+          </p>
+          <details>
+            <summary>Reproduce the curated catalog</summary>
+            <pre>
+              <code>{catalog.source.command}</code>
+            </pre>
+          </details>
           <p className="lab-note">
             Run from the source repository. Run ID: <code>{run.id}</code>
           </p>

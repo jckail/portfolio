@@ -677,3 +677,14 @@
     scroll-behavior: auto !important;
   }
 }
+
+.data-lab .lab-comparison-note {
+  grid-column: 1 / -1;
+  font-size: 13px;
+}
+
+.lab-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getJson, postJson } from '../../shared/utils/api';
@@ -145,7 +145,9 @@ describe('Data Playground', () => {
   it('filters the accepted sample and clears an empty result', async () => {
     render(<DataPlayground />);
     const search = await screen.findByRole('searchbox');
-    fireEvent.change(screen.getByLabelText('Event type'), { target: { value: 'payment' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Event type' }), {
+      target: { value: 'payment' },
+    });
     expect(screen.getByText('1 of 2 sampled events')).toBeInTheDocument();
     fireEvent.change(search, { target: { value: 'no-such-user' } });
     expect(screen.getByText('No sampled events match these filters.')).toBeInTheDocument();
@@ -186,5 +188,85 @@ describe('Data Playground', () => {
     vi.mocked(getJson).mockResolvedValue({ ...catalog, runs: [] });
     render(<DataPlayground />);
     expect(await screen.findByText('No experiments are available yet.')).toBeInTheDocument();
+  });
+  it('limits the baseline chart to a shorter run and identifies different total windows', async () => {
+    const daily = Array.from({ length: 30 }, (_, index) => ({
+      ...baseline.daily[0],
+      date: `2025-01-${String(index + 1).padStart(2, '0')}`,
+    }));
+    const complete = { ...baseline, daily };
+    const short = {
+      ...acquisition,
+      config: { ...baseline.config, days: 7 },
+      daily: daily.slice(0, 7),
+    };
+    vi.mocked(getJson).mockResolvedValue({ ...catalog, runs: [complete, short] });
+    render(<DataPlayground />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Acquisition' }));
+    const chart = screen.getByRole('img', { name: /Daily revenue compared with baseline/ });
+    expect(within(chart).getByText('2025-01-07')).toBeInTheDocument();
+    expect(within(chart).queryByText('2025-01-30')).not.toBeInTheDocument();
+    const baselinePoints = chart
+      .querySelector('.lab-line-baseline')!
+      .getAttribute('points')!
+      .split(' ');
+    expect(baselinePoints).toHaveLength(7);
+    expect(baselinePoints[6].split(',')[0]).toBe('720');
+    expect(
+      screen.getByText(/Selected totals cover 7 days; baseline totals cover 30 days/)
+    ).toBeInTheDocument();
+  });
+  it('prevents scenario changes during a custom request, then allows a new selection', async () => {
+    vi.mocked(getJson).mockResolvedValue({ ...catalog, live_simulation: true });
+    let finish!: (result: RunResult) => void;
+    vi.mocked(postJson).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    render(<DataPlayground />);
+    await screen.findByText('A balanced business.');
+    fireEvent.click(screen.getByText('Inspect parameters & run your own'));
+    fireEvent.click(screen.getByRole('button', { name: 'Run simulation' }));
+    expect(screen.getByRole('button', { name: 'Acquisition' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Acquisition' }));
+    expect(screen.getByText('A balanced business.')).toBeInTheDocument();
+    await act(async () => finish(acquisition));
+    fireEvent.click(screen.getByRole('button', { name: 'Baseline' }));
+    expect(screen.getByText('A balanced business.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Baseline' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+  it('accepts fractional preset rates without native step mismatches', async () => {
+    const retention = {
+      ...baseline,
+      id: 'retention',
+      scenario: { id: 'retention', name: 'Stronger retention', description: 'Lower daily churn.' },
+      config: { ...baseline.config, churn_rate: 0.005, activation_rate: 0.6525 },
+    };
+    vi.mocked(getJson).mockResolvedValue({
+      ...catalog,
+      live_simulation: true,
+      runs: [...catalog.runs, retention],
+    });
+    render(<DataPlayground />);
+    await screen.findByText('A balanced business.');
+    fireEvent.click(screen.getByText('Inspect parameters & run your own'));
+    for (const name of ['Baseline', 'Acquisition', 'Stronger retention']) {
+      fireEvent.click(screen.getByRole('button', { name }));
+      const churn = screen.getByLabelText('Daily churn probability') as HTMLInputElement;
+      expect(churn.validity.stepMismatch).toBe(false);
+      expect(churn.closest('form')!.checkValidity()).toBe(true);
+    }
+    expect(screen.getByLabelText('Daily churn probability')).toHaveValue(0.005);
+    expect(screen.getByText(/^python -m playground simulate/)).toHaveTextContent(
+      '--churn-rate 0.005'
+    );
+    expect(screen.getByText(/^python -m playground simulate/)).toHaveTextContent(
+      '--output run.json'
+    );
   });
 });
