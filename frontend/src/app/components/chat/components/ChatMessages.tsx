@@ -139,7 +139,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           />
         ))}
 
-      {showSuggestions && onSuggestedPrompt && (
+      {showSuggestions && pendingActions.length === 0 && onSuggestedPrompt && (
         <SuggestedPrompts onSelect={onSuggestedPrompt} disabled={isLoading} />
       )}
 
