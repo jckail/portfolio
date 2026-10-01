@@ -99,16 +99,35 @@ def _headline() -> str:
     return f"{title} at {company}" if company else title
 
 
-def _all_highlights(job: ExperienceHighlight) -> list[str]:
-    """Card bullets first, then the modal's extra bullets, without repeats."""
+# Mirrors OLDER_ROLE_HIGHLIGHTS in frontend/.../experience.tsx (a test keeps
+# them equal): older roles show this many bullets on the timeline card.
+OLDER_ROLE_HIGHLIGHTS = 2
+
+
+def _visible_highlights(index: int, job: ExperienceHighlight) -> list[str]:
+    """The bullets a visitor can read: the timeline card's, then the dialog's.
+
+    The current role (and the first entry) shows every ``highlights`` bullet on
+    its card; older roles show the first few and the dialog lists
+    ``more_highlights``. A ``highlights`` bullet cut from the card and absent
+    from the dialog is displayed nowhere, so it is left out here too.
+    """
+    current = index == 0 or parse_date_range(job.date).current
+    shown = job.highlights if current else job.highlights[:OLDER_ROLE_HIGHLIGHTS]
     seen: set[str] = set()
     out: list[str] = []
-    for line in [*job.highlights, *job.more_highlights]:
+    for line in [*shown, *job.more_highlights]:
         line = line.strip()
         if line and line not in seen:
             seen.add(line)
             out.append(line)
     return out
+
+
+def _tech_labels(keys: list[str]) -> str:
+    """Experience stacks hold skill keys; show each skill's display name."""
+    skills = load_skills().root
+    return ", ".join(skills[k].display_name if k in skills else k for k in keys)
 
 
 def _skills_by_category() -> dict[str, list[SkillDetail]]:
@@ -193,14 +212,14 @@ def snapshot_html() -> bytes:
     parts.append("</header>")
 
     parts.append('<section id="seo-experience"><h2>Experience</h2>')
-    for _, job in _experience():
+    for index, (_, job) in enumerate(_experience()):
         parts.append("<article>")
         parts.append(f"<h3>{escape(job.title)}, {_a(str(job.link), job.company)}</h3>")
         parts.append(f"<p>{_date_range_html(job)} &middot; {escape(job.location)}</p>")
         parts.append(f"<p>{escape(job.company_description)}</p>")
-        parts.append("<ul>" + "".join(f"<li>{escape(h)}</li>" for h in _all_highlights(job)) + "</ul>")
+        parts.append("<ul>" + "".join(f"<li>{escape(h)}</li>" for h in _visible_highlights(index, job)) + "</ul>")
         if job.tech_stack:
-            parts.append(f"<p>Technologies: {escape(', '.join(job.tech_stack))}</p>")
+            parts.append(f"<p>Technologies: {escape(_tech_labels(job.tech_stack))}</p>")
         parts.append("</article>")
     parts.append("</section>")
 
@@ -376,7 +395,7 @@ def llms_full_txt() -> bytes:
     lines += ["## About", ""]
     lines += [p + "\n" for p in _bio_paragraphs()]
     lines += ["## Experience", ""]
-    for _, job in _experience():
+    for index, (_, job) in enumerate(_experience()):
         lines += [
             f"### {job.title}, {job.company}",
             "",
@@ -385,9 +404,9 @@ def llms_full_txt() -> bytes:
             job.company_description,
             "",
         ]
-        lines += [f"- {h}" for h in _all_highlights(job)]
+        lines += [f"- {h}" for h in _visible_highlights(index, job)]
         if job.tech_stack:
-            lines += ["", f"Technologies: {', '.join(job.tech_stack)}"]
+            lines += ["", f"Technologies: {_tech_labels(job.tech_stack)}"]
         lines.append("")
     lines += ["## Projects", ""]
     for project in load_projects().root.values():
@@ -424,14 +443,14 @@ def resume_json() -> bytes:
     about = load_aboutme()
     city, region = _city_region()
     work = []
-    for _, job in _experience():
+    for index, (_, job) in enumerate(_experience()):
         rng = parse_date_range(job.date)
         item: dict = {
             "name": job.company,
             "location": job.location,
             "position": job.title,
             "url": str(job.link),
-            "highlights": _all_highlights(job),
+            "highlights": _visible_highlights(index, job),
         }
         if rng.start:
             item["startDate"] = rng.start

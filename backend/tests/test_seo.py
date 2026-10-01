@@ -129,10 +129,10 @@ def test_the_snapshot_has_the_current_role_and_every_job_and_bullet(home):
     page = parse(home.text)
     assert "Staff Software Engineer at Together AI" in home.text
     headings = [text for tag, text in page.headings if tag == "h3"]
-    for job in load_experience().root.values():
+    for index, job in enumerate(load_experience().root.values()):
         assert f"{job.title}, {job.company}" in headings
-        for bullet in job.highlights:
-            assert bullet.strip() in page.items
+        for bullet in discovery._visible_highlights(index, job):
+            assert bullet in page.items
     for project in load_projects().root.values():
         assert project.title.strip() in headings
     for skill in load_skills().root.values():
@@ -268,3 +268,15 @@ def test_share_image_is_a_1200x630_png_under_100kb():
     assert head[:8] == b"\x89PNG\r\n\x1a\n"
     assert (int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")) == (1200, 630)
     assert os.path.getsize(path) < 100_000
+
+
+def test_visible_bullet_rule_matches_the_timeline_component():
+    """The snapshot must list what experience.tsx shows, so the constant stays in step."""
+    with open(os.path.join(ROOT, "frontend", "src", "app", "components", "sections", "experience.tsx")) as f:
+        source = f.read()
+    assert re.search(rf"OLDER_ROLE_HIGHLIGHTS = {discovery.OLDER_ROLE_HIGHLIGHTS};", source)
+    jobs = list(load_experience().root.values())
+    current, older = jobs[0], jobs[-1]
+    assert discovery._visible_highlights(0, current)[: len(current.highlights)] == [h.strip() for h in current.highlights if h.strip()]
+    shown = discovery._visible_highlights(len(jobs) - 1, older)
+    assert all(h in shown for h in older.highlights[: discovery.OLDER_ROLE_HIGHLIGHTS])

@@ -95,10 +95,10 @@ def test_llms_txt_follows_the_convention(client):
 
 def test_llms_full_txt_carries_the_whole_portfolio(client):
     text = client.get("/llms-full.txt").text
-    for job in load_experience().root.values():
+    for index, job in enumerate(load_experience().root.values()):
         assert f"### {job.title}, {job.company}" in text
-        for bullet in job.highlights:
-            assert bullet.strip() in text
+        for bullet in discovery._visible_highlights(index, job):
+            assert bullet in text
     for skill in load_skills().root.values():
         assert skill.display_name in text
     assert load_aboutme().description in text
