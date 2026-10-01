@@ -28,10 +28,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         display: 'flex', 
         gap: 1, 
         alignItems: 'flex-end',
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        // In flow (not absolutely positioned) so a growing multiline field
+        // pushes the transcript up instead of covering it. The negative
+        // margins cancel DialogContent's 16px padding to span the panel.
+        flexShrink: 0,
+        mx: '-16px',
+        mb: '-16px',
+        mt: 1,
         bgcolor: 'var(--surface-color)',
         p: 2,
         pb: '20px',

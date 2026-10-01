@@ -13,14 +13,16 @@ const ACTION_PROMPTS = [
   'Show me his resume',
   'Open the Super Teacher project',
   'Take me to his experience at Together AI',
-  'Help me draft an email to Jordan',
+  "Request Jordan's phone number",
+  'Set up a call with Jordan',
 ] as const;
 
 function pickPrompts(): string[] {
   // Rotate action prompts so the empty state feels fresh across visits
   const hour = new Date().getHours();
   const action = ACTION_PROMPTS[hour % ACTION_PROMPTS.length];
-  return [...BASE_PROMPTS.slice(0, 3), action];
+  // 'Contact Jordan for me' is always offered so the email-gated tools are discoverable.
+  return [...BASE_PROMPTS.slice(0, 2), 'Contact Jordan for me', action];
 }
 
 interface SuggestedPromptsProps {

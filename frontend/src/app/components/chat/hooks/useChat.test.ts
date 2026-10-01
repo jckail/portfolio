@@ -316,4 +316,141 @@ describe('useChat', () => {
     unmount();
     expect(FakeWebSocket.instances[0].readyState).toBe(3);
   });
+
+  describe('confirm_action frames', () => {
+    const frame = {
+      type: 'confirm_action',
+      id: 'act_1',
+      tool: 'contact_jordan',
+      args: { subject: 'Hello', message: 'Hi Jordan' },
+      needs: ['email'],
+    };
+
+    function openWithCard() {
+      const hook = renderHook(() => useChat());
+      act(() => {
+        hook.result.current.initializeChat();
+        FakeWebSocket.instances[0].simulateOpen();
+      });
+      const ws = FakeWebSocket.instances[0];
+      act(() => ws.simulateMessage(frame));
+      return { ...hook, ws };
+    }
+
+    const sentTypes = (ws: FakeWebSocket) => ws.sent.map(s => JSON.parse(s).type);
+
+    it('shows a pending card and sends nothing', () => {
+      const { result, ws } = openWithCard();
+      expect(result.current.pendingActions).toHaveLength(1);
+      expect(result.current.pendingActions[0]).toMatchObject({ id: 'act_1', status: 'pending' });
+      expect(sentTypes(ws)).not.toContain('confirm_action');
+      expect(sentTypes(ws)).not.toContain('cancel_action');
+    });
+
+    it('ignores duplicate frames, unknown tools and missing ids', () => {
+      const { result, ws } = openWithCard();
+      act(() => {
+        ws.simulateMessage(frame);
+        ws.simulateMessage({ ...frame, id: 'x', tool: 'drop_tables' });
+        ws.simulateMessage({ ...frame, id: undefined });
+      });
+      expect(result.current.pendingActions).toHaveLength(1);
+    });
+
+    it('rejects an invalid email without sending', () => {
+      const { result, ws } = openWithCard();
+      let errors: Record<string, string> | null = null;
+      act(() => {
+        errors = result.current.confirmAction('act_1', 'not-an-email', frame.args);
+      });
+      expect(errors).toHaveProperty('email');
+      expect(sentTypes(ws)).not.toContain('confirm_action');
+      expect(result.current.pendingActions[0].status).toBe('pending');
+    });
+
+    it('rejects an empty subject or message', () => {
+      const { result } = openWithCard();
+      let errors: Record<string, string> | null = null;
+      act(() => {
+        errors = result.current.confirmAction('act_1', 'a@b.co', { subject: ' ', message: '' });
+      });
+      expect(errors).toHaveProperty('subject');
+      expect(errors).toHaveProperty('message');
+    });
+
+    it('sends the visitor email and edited args only on confirm', () => {
+      const { result, ws } = openWithCard();
+      let errors: Record<string, string> | null = {};
+      act(() => {
+        errors = result.current.confirmAction('act_1', ' me@example.com ', { subject: 'S', message: 'Edited' });
+      });
+      expect(errors).toBeNull();
+      const sent = JSON.parse(ws.sent.at(-1) as string);
+      expect(sent).toEqual({
+        type: 'confirm_action',
+        id: 'act_1',
+        email: 'me@example.com',
+        args: { subject: 'S', message: 'Edited' },
+      });
+      expect(result.current.pendingActions[0].status).toBe('submitting');
+
+      // A second press while submitting sends nothing more.
+      const count = ws.sent.length;
+      act(() => {
+        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+      });
+      expect(ws.sent).toHaveLength(count);
+    });
+
+    it('sends cancel_action once and marks the card cancelled', () => {
+      const { result, ws } = openWithCard();
+      act(() => result.current.cancelAction('act_1'));
+      act(() => result.current.cancelAction('act_1'));
+      expect(ws.sent.filter(s => JSON.parse(s).type === 'cancel_action')).toHaveLength(1);
+      expect(result.current.pendingActions[0].status).toBe('cancelled');
+    });
+
+    it('renders a success result and keeps the phone in memory only', () => {
+      const { result, ws } = openWithCard();
+      act(() => {
+        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+      });
+      act(() =>
+        ws.simulateMessage({ type: 'action_result', id: 'act_1', ok: true, tool: 'request_phone', message: 'Sent.', phone: '+1 555 0100' })
+      );
+      expect(result.current.pendingActions[0]).toMatchObject({ status: 'done', resultMessage: 'Sent.', phone: '+1 555 0100' });
+      expect(sessionStorage.getItem(CHAT_STORAGE_KEY) ?? '').not.toContain('555');
+    });
+
+    it('does not take a phone number from a failed result', () => {
+      const { result, ws } = openWithCard();
+      act(() => {
+        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+      });
+      act(() =>
+        ws.simulateMessage({ type: 'action_result', id: 'act_1', ok: false, message: 'Try later.', phone: '+1 555 0100' })
+      );
+      expect(result.current.pendingActions[0].status).toBe('failed');
+      expect(result.current.pendingActions[0].phone).toBeUndefined();
+    });
+
+    it('expires pending cards when the socket closes', () => {
+      const { result, ws } = openWithCard();
+      act(() => ws.close());
+      expect(result.current.pendingActions[0].status).toBe('expired');
+    });
+
+    it('expires a card after the ten minute window', () => {
+      vi.useFakeTimers();
+      try {
+        const { result } = openWithCard();
+        act(() => {
+          vi.advanceTimersByTime(10 * 60 * 1000 + 100);
+        });
+        expect(result.current.pendingActions[0].status).toBe('expired');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
 });
