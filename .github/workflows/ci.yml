@@ -37,6 +37,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    # Production dependencies only: dev tooling advisories are surfaced by
+    # Dependabot, but a high in what ships fails the build.
+    - name: Audit npm dependencies
+      run: npm audit --omit=dev --audit-level=high
+
     - name: Lint
       run: npm run lint
 
@@ -63,9 +68,20 @@ jobs:
       with:
         python-version: '3.12'
         cache: 'pip'
+        cache-dependency-path: requirements-dev.lock.txt
 
+    # Same hash-verified pins the production image installs, plus the test
+    # tools (requirements-dev.lock.txt is constrained by the production lock,
+    # so every shared package resolves to the same version).
     - name: Install dependencies
-      run: pip install -r requirements-dev.txt
+      run: |
+        pip install --require-hashes -r requirements.lock.txt
+        pip install --require-hashes -r requirements-dev.lock.txt
+
+    - name: Audit Python dependencies (pip-audit)
+      run: |
+        pipx run pip-audit --disable-pip -r requirements.lock.txt
+        pipx run pip-audit --disable-pip -r requirements-dev.lock.txt
 
     - name: Test deployment authorization guard
       run: python3 -m unittest discover -s helpers -p test_verify_deployment.py -v
@@ -106,7 +122,7 @@ jobs:
 
     - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
       with:
-        terraform_version: '~1.9'
+        terraform_version: '1.9.8'
 
     - name: Format check
       run: terraform fmt -check -recursive

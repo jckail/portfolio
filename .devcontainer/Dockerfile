@@ -38,20 +38,10 @@ ENV NODE_ENV=development
 COPY <<EOF /app/start.sh
 #!/bin/sh
 echo "Starting development environment..."
-echo "Checking environment variables..."
-
-# List of required environment variables
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE ANTHROPIC_API_KEY SENDGRID_API_KEY"
-
-# Check each required variable
-for var in \$required_vars; do
-    if [ -z "\$(eval echo \\\$\${var})" ]; then
-        echo "Error: Required environment variable \$var is not set"
-        exit 1
-    fi
-done
-
-echo "Environment check passed"
+# Required variables are validated by backend/app/main.py against
+# config.REQUIRED_ENV_VARS, the single source of truth. A second list here
+# drifted from it and refused to boot without optional settings.
+export PORT=\${PORT:-8080}
 exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080} --reload
 EOF
 

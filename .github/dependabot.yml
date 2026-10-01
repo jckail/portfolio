@@ -36,3 +36,13 @@ updates:
     directory: /infra
     schedule:
       interval: monthly
+
+  # Bumps the digest-pinned base images in helpers/Dockerfile.* (tag kept for
+  # tracking), so pinning does not freeze out OS security patches.
+  - package-ecosystem: docker
+    directory: /helpers
+    schedule:
+      interval: monthly
+    groups:
+      docker-base-images:
+        patterns: ["*"]
