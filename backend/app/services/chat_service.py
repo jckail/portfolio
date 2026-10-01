@@ -17,7 +17,18 @@ from fastapi import WebSocket
 
 from backend.app.config import get_settings
 from backend.app.models import get_all_models
-from backend.app.services.chat_actions import CHAT_TOOLS, normalize_tool_action
+from backend.app.services.chat_actions import normalize_tool_action
+from backend.app.services.chat_tools import (
+    ALL_TOOLS,
+    EXECUTE_TOOL_NAMES,
+    EXPIRED_ACTION,
+    UNKNOWN_ACTION,
+    PendingActions,
+    execute_confirmed,
+    pending_tool_result,
+    search_portfolio,
+    validate_execute_args,
+)
 from backend.app.services.llm import (
     Finish,
     LLMRequest,
@@ -71,6 +82,13 @@ IDLE_TIMEOUT_SECONDS = 300
 # failure the assistant reports itself unavailable for this long instead of
 # making (and failing) one provider call per visitor message.
 AUTH_FAILURE_COOLDOWN_SECONDS = 600
+# One reply may take several model rounds (search, then answer). Bounded so a
+# looping model cannot run up the bill, and per round so one reply cannot
+# spawn a pile of confirmation cards.
+MAX_TOOL_ROUNDS = 4
+MAX_TOOL_CALLS_PER_ROUND = 3
+# Replies to unknown/forged confirm ids per connection before they are ignored.
+MAX_INVALID_CONFIRMS = 20
 
 UNAVAILABLE_MESSAGE = (
     "The AI assistant is temporarily unavailable. Please try again later, "
@@ -133,6 +151,10 @@ class ConnectionManager:
             global_max_events=GLOBAL_RATE_LIMIT_MAX_MESSAGES,
         )
         self.connection_ips: dict[str, str] = {}
+        # Pending execute-type tool actions, one store per connection. Dropping
+        # the store on disconnect is what binds an action id to its socket.
+        self.pending_actions: dict[str, PendingActions] = {}
+        self.invalid_confirms: dict[str, int] = {}
         self.ip_conn_counts: dict[str, int] = {}
         # One provider client and one portfolio-data snapshot for the application.
         self.provider = build_provider(settings)
@@ -185,6 +207,8 @@ class ConnectionManager:
             raise
 
         self.conversation_histories[client_id] = []
+        self.pending_actions[client_id] = PendingActions()
+        log_event("chat.session_open")
         # A recycled id must not inherit the previous session's page context.
         self.page_contexts.pop(client_id, None)
         return True
@@ -194,6 +218,8 @@ class ConnectionManager:
         self.page_contexts.pop(client_id, None)
         self.conversation_histories.pop(client_id, None)
         self.message_timestamps.pop(client_id, None)
+        self.pending_actions.pop(client_id, None)
+        self.invalid_confirms.pop(client_id, None)
         ip = self.connection_ips.pop(client_id, None)
         if ip is not None:
             remaining = self.ip_conn_counts.get(ip, 0) - 1
@@ -374,8 +400,16 @@ class ConnectionManager:
             )
         return "<visitor_context>\n" + "\n".join(parts) + "\n</visitor_context>"
 
-    def _build_request(self, client_id: str, model: str | None = None) -> LLMRequest:
-        """Assemble one provider-neutral request from stored history."""
+    def _build_request(
+        self, client_id: str, model: str | None = None, extra: list[dict] | None = None,
+        tools: list[dict] | None = None,
+    ) -> LLMRequest:
+        """Assemble one provider-neutral request from stored history.
+
+        ``extra`` holds this turn's tool round trips (assistant tool calls and
+        their results). They live only for the duration of one reply and are
+        never stored in history, which stays plain text.
+        """
         return LLMRequest(
             model=model or self._model,
             max_tokens=MAX_RESPONSE_TOKENS,
@@ -383,9 +417,9 @@ class ConnectionManager:
             messages=[
                 {"role": turn["role"], "text": turn["content"]}
                 for turn in self.get_history(client_id)
-            ],
+            ] + list(extra or []),
             visitor_context=self._visitor_context(client_id),
-            tools=CHAT_TOOLS,
+            tools=ALL_TOOLS if tools is None else tools,
         )
 
     def _drop_pending_user_turn(self, client_id: str) -> None:
@@ -443,29 +477,138 @@ class ConnectionManager:
             },
         )
 
-    async def _dispatch_tool_actions(self, client_id: str, tool_calls: list[ToolCall]) -> list[str]:
-        """Validate tool calls, send action frames, return human labels."""
-        labels: list[str] = []
-        for call in tool_calls:
-            action = normalize_tool_action(call.name, call.args)
-            if not action:
-                continue
-            log_event("chat.tool_call", tool=call.name)
-            await self.send_action(client_id, action)
-            if action["action"] == "navigate":
-                labels.append(f"Opened the {action['target']} section")
-            elif action["action"] == "open_modal":
-                target = action.get("key") or action.get("kind")
-                labels.append(f"Opened {target}")
-            elif action["action"] == "download_resume":
-                labels.append("Started the resume download")
-            elif action["action"] == "prefill_contact":
-                labels.append("Opened the contact form with a draft")
-            elif action["action"] == "set_theme":
-                labels.append(f"Switched to {action.get('theme')} theme")
-        return labels
+    async def send_frame(self, client_id: str, frame: dict) -> None:
+        """Send one typed (non-message) frame; failures are logged and swallowed."""
+        websocket = self.active_connections.get(client_id)
+        if websocket is None:
+            return
+        try:
+            await websocket.send_json(frame)
+        except Exception as e:
+            logger.error("Error sending %s frame to client %s: %s", frame.get("type"), client_id, type(e).__name__)
 
-    async def _stream_with_failover(self, client_id: str, state: "_RoundState") -> None:
+    async def _run_tool_calls(self, client_id: str, tool_calls: list[ToolCall]) -> tuple[list[dict], list[str], bool]:
+        """Run one round of tool calls.
+
+        Returns (results for the model, human labels, whether the model needs
+        another round to see results). Browser tools are validated by
+        normalize_tool_action and forwarded as action frames. search_portfolio
+        runs here. Execute-type tools only ever create a pending action and a
+        confirm_action frame: the model cannot make them happen.
+        """
+        results: list[dict] = []
+        labels: list[str] = []
+        needs_followup = False
+        for call in tool_calls:
+            if call.name == "search_portfolio":
+                log_event("chat.tool_call", tool=call.name)
+                output = search_portfolio(call.args.get("query"))
+                needs_followup = True
+            elif call.name in EXECUTE_TOOL_NAMES:
+                log_event("chat.tool_call", tool=call.name)
+                output = await self._propose_action(client_id, call)
+                needs_followup = True
+            else:
+                action = normalize_tool_action(call.name, call.args)
+                if not action:
+                    output = {"status": "rejected", "note": "That tool call was invalid and was ignored."}
+                else:
+                    log_event("chat.tool_call", tool=call.name)
+                    await self.send_action(client_id, action)
+                    output = {"status": "done"}
+                    labels.append(self._action_label(action))
+            results.append({"call_id": call.id, "name": call.name, "output": output})
+        return results, [label for label in labels if label], needs_followup
+
+    @staticmethod
+    def _action_label(action: dict) -> str:
+        kind = action["action"]
+        if kind == "navigate":
+            return f"Opened the {action['target']} section"
+        if kind == "open_modal":
+            return f"Opened {action.get('key') or action.get('kind')}"
+        if kind == "download_resume":
+            return "Started the resume download"
+        if kind == "prefill_contact":
+            return "Opened the contact form with a draft"
+        if kind == "set_theme":
+            return f"Switched to {action.get('theme')} theme"
+        return ""
+
+    async def _propose_action(self, client_id: str, call: ToolCall) -> dict:
+        """Create a pending action and ask the browser to confirm it."""
+        args = validate_execute_args(call.name, call.args, truncate=True)
+        if args is None:
+            return {"status": "invalid_arguments", "note": "Required details were missing or invalid. Nothing was sent."}
+        store = self.pending_actions.setdefault(client_id, PendingActions())
+        action = store.create(call.name, args)
+        if action is not None:
+            log_event("chat.confirm_requested", tool=call.name)
+            await self.send_frame(client_id, {
+                "type": "confirm_action",
+                "id": action.id,
+                "tool": action.tool,
+                "args": action.args,
+                "needs": ["email"],
+            })
+        return pending_tool_result(action)
+
+    def _note_outcome(self, client_id: str, note: str) -> None:
+        """Tell the model what happened to a pending action (trusted server text).
+
+        Appended to the latest assistant turn so roles keep alternating; it is
+        never shown to the visitor and never contains personal data.
+        """
+        history = self.get_history(client_id)
+        text = f"[Site note: {note}.]"
+        if history and history[-1]["role"] == "assistant":
+            history[-1]["content"] = f"{history[-1]['content']}\n\n{text}"
+        elif history:
+            history.append({"role": "assistant", "content": text})
+
+    async def handle_confirm(self, client_id: str, data: dict, ip: str) -> None:
+        """Visitor pressed Confirm on a card: validate, execute, report the result."""
+        raw_id = data.get("id")
+        action, reason = self.pending_actions.get(client_id, PendingActions()).take(raw_id)
+        frame_id = raw_id if isinstance(raw_id, str) and 0 < len(raw_id) <= 64 else None
+        if action is None:
+            if frame_id is None:
+                return
+            # Forged, replayed, foreign or expired ids: bounded so a socket cannot spam us.
+            self.invalid_confirms[client_id] = self.invalid_confirms.get(client_id, 0) + 1
+            if self.invalid_confirms[client_id] > MAX_INVALID_CONFIRMS:
+                return
+            message = EXPIRED_ACTION if reason == "expired" else UNKNOWN_ACTION
+            await self.send_frame(client_id, {"type": "action_result", "id": frame_id, "ok": False, "message": message})
+            return
+
+        args = action.args
+        if action.tool != "request_phone" and isinstance(data.get("args"), dict):
+            args = data["args"]  # the visitor may have edited the draft
+        log_event("chat.confirm_accepted", tool=action.tool)
+        outcome = await execute_confirmed(action.tool, args, data.get("email"), ip)
+        frame = {
+            "type": "action_result",
+            "id": action.id,
+            "ok": outcome.ok,
+            "tool": action.tool,
+            "message": outcome.message,
+        }
+        if outcome.ok and outcome.phone:
+            frame["phone"] = outcome.phone
+        await self.send_frame(client_id, frame)
+        self._note_outcome(client_id, f"the visitor confirmed {action.tool}; {outcome.note}")
+
+    async def handle_cancel(self, client_id: str, data: dict) -> None:
+        action, _ = self.pending_actions.get(client_id, PendingActions()).take(data.get("id"))
+        if action is None:
+            return
+        log_event("chat.confirm_cancelled", tool=action.tool)
+        self._note_outcome(client_id, f"the visitor cancelled the {action.tool} request; nothing was sent")
+
+    async def _stream_with_failover(
+        self, client_id: str, state: "_RoundState", extra: list[dict], tools: list[dict] | None = None
+    ) -> None:
         """Run one model round, streaming text to the socket as it arrives.
 
         Transient failures (5xx, timeout, dropped connection) are retried per
@@ -480,8 +623,10 @@ class ConnectionManager:
                 await asyncio.sleep(self._retry_delay)
             state.model = model
             try:
-                async for event in self.provider.stream(self._build_request(client_id, model)):
+                async for event in self.provider.stream(self._build_request(client_id, model, extra, tools)):
                     if isinstance(event, TextDelta):
+                        if state.leading_break and not state.text:
+                            await self.send_message("\n\n", client_id, is_chunk=True)
                         await self.send_message(event.text, client_id, is_chunk=True)
                         state.text.append(event.text)
                     elif isinstance(event, ToolCall):
@@ -505,53 +650,81 @@ class ConnectionManager:
         raise last_error
 
     async def stream_response(self, client_id: str, user_message: str, ga_session_id: str = None):
-        """Stream the model's response to the client, maintaining conversation history."""
+        """Stream the model's response to the client, maintaining conversation history.
+
+        A reply may take several model rounds: when the model calls
+        search_portfolio (or proposes an execute-type tool) it is shown the
+        result and continues, up to MAX_TOOL_ROUNDS.
+        """
         if not self.is_available():
             await self.send_message(UNAVAILABLE_MESSAGE, client_id, is_chunk=False)
             return
 
+        log_event("chat.message", len_bucket=_len_bucket(len(user_message)))
         self.append_to_history(client_id, "user", user_message)
 
-        state = _RoundState(model=self._model)
-        try:
-            await self._stream_with_failover(client_id, state)
-        except ProviderAuthError as e:
-            log_event("chat.provider_error", kind=e.kind)
-            self._trip_auth_breaker(e)
-            self._drop_pending_user_turn(client_id)
-            await self.send_message(UNAVAILABLE_MESSAGE, client_id, is_chunk=False)
-            return
-        except ProviderRateLimited as e:
-            log_event("chat.provider_error", kind=e.kind)
-            logger.warning("Chat provider rate-limited a request for client %s", client_id)
-            self._drop_pending_user_turn(client_id)
-            await self.send_message(BUSY_MESSAGE, client_id, is_chunk=False)
-            return
-        except Exception as e:
-            # Only the exception class is logged: provider errors can echo
-            # request or credential material.
-            logger.error(
-                "Error streaming chat response for client %s: %s (%s)",
-                client_id, type(e).__name__, getattr(e, "kind", "unknown"),
-            )
-            self._drop_pending_user_turn(client_id)
-            await self.send_message(PROBLEM_MESSAGE, client_id, is_chunk=False)
-            return
+        extra: list[dict] = []
+        all_text: list[str] = []
+        action_labels: list[str] = []
+        proposed = False
+        stop_reason: str | None = None
 
-        stop_reason = state.stop_reason
-        if state.usage is not None:
-            self._record_tokens(state.usage)
-            await self._log_usage(client_id, state.usage, stop_reason, state.model)
+        for round_number in range(MAX_TOOL_ROUNDS):
+            state = _RoundState(model=self._model, leading_break=bool(all_text))
+            try:
+                # The last allowed round offers no tools, so it must answer in text.
+                tools = [] if round_number == MAX_TOOL_ROUNDS - 1 else None
+                await self._stream_with_failover(client_id, state, extra, tools)
+            except ProviderAuthError as e:
+                log_event("chat.provider_error", kind=e.kind)
+                self._trip_auth_breaker(e)
+                self._drop_pending_user_turn(client_id)
+                await self.send_message(UNAVAILABLE_MESSAGE, client_id, is_chunk=False)
+                return
+            except ProviderRateLimited as e:
+                log_event("chat.provider_error", kind=e.kind)
+                logger.warning("Chat provider rate-limited a request for client %s", client_id)
+                self._drop_pending_user_turn(client_id)
+                await self.send_message(BUSY_MESSAGE, client_id, is_chunk=False)
+                return
+            except Exception as e:
+                # Only the exception class is logged: provider errors can echo
+                # request or credential material.
+                logger.error(
+                    "Error streaming chat response for client %s: %s (%s)",
+                    client_id, type(e).__name__, getattr(e, "kind", "unknown"),
+                )
+                self._drop_pending_user_turn(client_id)
+                await self.send_message(PROBLEM_MESSAGE, client_id, is_chunk=False)
+                return
 
-        action_labels = await self._dispatch_tool_actions(client_id, state.tool_calls)
+            stop_reason = state.stop_reason
+            if state.usage is not None:
+                self._record_tokens(state.usage)
+                await self._log_usage(client_id, state.usage, stop_reason, state.model)
 
-        final_response = ''.join(state.text)
+            round_text = "".join(state.text)
+            if round_text:
+                all_text.append(round_text)
+
+            calls = state.tool_calls[:MAX_TOOL_CALLS_PER_ROUND]
+            results, labels, needs_followup = await self._run_tool_calls(client_id, calls)
+            action_labels.extend(labels)
+            proposed = proposed or any(c.name in EXECUTE_TOOL_NAMES for c in calls)
+
+            last_round = round_number == MAX_TOOL_ROUNDS - 1
+            if not (needs_followup and not last_round and self.is_available()):
+                break
+            extra.append({"role": "assistant", "text": round_text, "tool_calls": calls})
+            extra.append({"role": "tool", "results": results})
+
+        final_response = "".join(all_text)
 
         if stop_reason == STOP_BLOCKED and not final_response and not action_labels:
             self._drop_pending_user_turn(client_id)
             await self.send_message(BLOCKED_MESSAGE, client_id, is_chunk=False)
             return
-        if not final_response and not action_labels:
+        if not final_response and not action_labels and not proposed:
             # Empty reply with no tool call: nothing to show, so say so rather
             # than leave the visitor staring at a silent completion.
             logger.warning("Chat provider returned an empty response for client %s", client_id)
@@ -561,7 +734,10 @@ class ConnectionManager:
 
         # If the model only called tools (no prose), narrate what happened so
         # the UI and conversation history stay coherent.
-        if not final_response and action_labels:
+        if not final_response and proposed:
+            final_response = "Please review the card above and press Confirm if you'd like me to go ahead."
+            await self.send_message(final_response, client_id, is_chunk=True)
+        elif not final_response and action_labels:
             final_response = "Done — " + "; ".join(action_labels) + "."
             await self.send_message(final_response, client_id, is_chunk=True)
 
@@ -588,11 +764,21 @@ class ConnectionManager:
             )
 
 
+def _len_bucket(length: int) -> str:
+    if length <= 50:
+        return "1-50"
+    if length <= 300:
+        return "51-300"
+    return "301+"
+
+
 @dataclass
 class _RoundState:
     """Accumulates one model round's output."""
 
     model: str
+    # True when earlier rounds already streamed text: separate this round's.
+    leading_break: bool = False
     text: list[str] = field(default_factory=list)
     tool_calls: list[ToolCall] = field(default_factory=list)
     usage: Usage | None = None

@@ -1,4 +1,8 @@
-"""Client-executable actions the assistant can request.
+"""Client-executable (browser) actions the assistant can request.
+
+The execute-type tools (contact, phone, meeting) and search_portfolio live in
+chat_tools.py; `prefill_contact` is no longer offered to the model but its
+validator stays for older clients.
 
 The model emits these via Anthropic tool_use; the WebSocket layer forwards
 them as `{type: "action", ...}` frames so the frontend can navigate the site.
@@ -67,32 +71,6 @@ CHAT_TOOLS: list[dict] = [
         "input_schema": {
             "type": "object",
             "properties": {},
-            "additionalProperties": False,
-        },
-    },
-    {
-        "name": "prefill_contact",
-        "description": (
-            "Open the contact form and optionally prefill subject/message/"
-            "visitor email when the visitor wants to reach Jordan. Draft a "
-            "professional message from the conversation context."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "from_email": {
-                    "type": "string",
-                    "description": "Visitor email if they provided one",
-                },
-                "subject": {
-                    "type": "string",
-                    "description": "Suggested email subject",
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Suggested message body the visitor can edit",
-                },
-            },
             "additionalProperties": False,
         },
     },

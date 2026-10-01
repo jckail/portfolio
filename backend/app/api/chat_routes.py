@@ -113,6 +113,14 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             manager.seed_history(client_id, turns)
             return
 
+        if data.get("type") == "confirm_action":
+            await manager.handle_confirm(client_id, data, ip)
+            return
+
+        if data.get("type") == "cancel_action":
+            await manager.handle_cancel(client_id, data)
+            return
+
         if data.get("type") != "message" or not data.get("content"):
             return
 
