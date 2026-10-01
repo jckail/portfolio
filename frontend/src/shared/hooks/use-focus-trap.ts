@@ -1,15 +1,25 @@
 import { useEffect, useRef } from 'react';
 
+import { isTopDialog, pushDialog, removeDialog } from './dialog-stack';
+import { useScrollLock } from './use-scroll-lock';
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * Trap Tab focus inside a container while active, and restore focus on cleanup.
- * Pair with useEscapeKey for modal dialogs.
+ * Modal dialog behaviour for a container while `active`:
+ * - traps Tab focus inside it and restores focus on cleanup,
+ * - locks page scroll (reference-counted, see useScrollLock),
+ * - calls `onEscape` on Escape,
+ * all only while it is the top dialog, so stacked dialogs close one at a time.
  */
-export function useFocusTrap(active: boolean) {
+export function useFocusTrap(active: boolean, onEscape?: () => void) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const onEscapeRef = useRef(onEscape);
+  onEscapeRef.current = onEscape;
+
+  useScrollLock(active);
 
   useEffect(() => {
     if (!active) return;
@@ -17,6 +27,9 @@ export function useFocusTrap(active: boolean) {
     previouslyFocused.current = document.activeElement as HTMLElement | null;
     const node = containerRef.current;
     if (!node) return;
+
+    const id = Symbol('dialog');
+    pushDialog(id, node);
 
     const focusables = () =>
       Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
@@ -31,6 +44,17 @@ export function useFocusTrap(active: boolean) {
     initial.focus({ preventScroll: true });
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (!isTopDialog(id)) return;
+
+      if (event.key === 'Escape') {
+        if (onEscapeRef.current) {
+          // Mark it handled so plain useEscapeKey listeners ignore it
+          event.preventDefault();
+          onEscapeRef.current();
+        }
+        return;
+      }
+
       if (event.key !== 'Tab') return;
       const items = focusables();
       if (items.length === 0) {
@@ -40,18 +64,24 @@ export function useFocusTrap(active: boolean) {
       }
       const first = items[0];
       const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const current = document.activeElement;
+      if (!node.contains(current)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && current === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && current === last) {
         event.preventDefault();
         first.focus();
       }
     };
 
-    document.addEventListener('keydown', onKeyDown);
+    // Capture phase: runs before any bubble-phase document listener
+    document.addEventListener('keydown', onKeyDown, true);
     return () => {
-      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keydown', onKeyDown, true);
+      removeDialog(id);
       previouslyFocused.current?.focus?.({ preventScroll: true });
     };
   }, [active]);

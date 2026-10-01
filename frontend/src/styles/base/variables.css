@@ -1,65 +1,77 @@
+/* Design tokens shared by every theme. Colours live per theme in theme.css;
+   everything here is theme-independent: rhythm, type, shape and motion.
+   Prefer these over one-off values so components stay in one system. */
 :root {
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  /* Spacing: a 4px base. xs-xl keep their historical values. */
+  --spacing-2xs: 0.125rem; /*  2px */
+  --spacing-xs: 0.25rem;   /*  4px */
+  --spacing-sm: 0.5rem;    /*  8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
 
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Vertical rhythm between page sections, and inside a panel */
+  --section-gap: clamp(3rem, 6vw, 5rem);
+  --panel-padding: clamp(1rem, 2.5vw, 1.75rem);
+
+  /* Mobile side gutter so cards never touch the screen edge */
+  --page-gutter: 16px;
+
+  /* Radius: small controls, cards/panels, large surfaces, pills */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  /* Control sizes: one height for every button, chips are a step smaller */
+  --control-height: 2.75rem;    /* 44px: comfortable touch target */
+  --control-height-sm: 2rem;    /* 32px */
 
-  /* Z-index */
-  --z-base: 1;
-  --z-above: 10;
-  --z-modal: 100;
+  /* Z-index. Dialogs are portaled to <body> and sit above every other
+     body-level layer: the cookie/telemetry banners (--z-overlay) and the chat
+     button and window (9999, set inline in the chat components). The command
+     palette (12000) and reading progress bar (11000) stay above dialogs. */
   --z-overlay: 1000;
+  --z-header: 1000;
+  --z-dialog: 10500;
 
   /* Layout */
-  --header-height: 80px;
+  /* The header's full border-box height */
+  --header-height: 72px;
   --max-width: 1080px;
+  --measure: 65ch;
 
-  /* Transitions */
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-fast: 0.15s var(--ease-out);
+  --transition-normal: 0.25s var(--ease-out);
 
-  /* Font Family */
-  /* --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; */
-  --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Quantico', Arial, sans-serif;
+  /* Typefaces: Quantico for display and UI labels, Montserrat for reading */
+  --font-display: 'Quantico', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
 
-  /* Font Sizes - increased for better readability */
-  --font-size-base: 1.0rem;  /* Increased base size for better readability */
-  --font-size-mobile-base: .75rem;
+  /* Type scale (fluid between ~390px and ~1440px viewports) */
+  --text-2xs: 0.75rem;                                   /* 12px */
+  --text-xs: 0.8125rem;                                  /* 13px */
+  --text-sm: 0.875rem;                                   /* 14px */
+  --text-base: 1rem;                                     /* 16px */
+  --text-md: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);    /* 16-18px */
+  --text-lg: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);    /* 18-22px */
+  --text-xl: clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem); /* 22-30px */
+  --text-2xl: clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem);  /* 26-36px */
+  --text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem); /* 40-72px */
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-body: 1.6;
+
+  /* Kept for older stylesheets; equal to --text-base / --text-xs */
+  --font-size-base: var(--text-base);
 }
-
 
 @media (max-width: 768px) {
   :root {
-      --header-height: 50px;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height) + 75px);
-}
-  .main-content {
-      padding-top: 55px;
-  }
-  
-  .main-content-inner {
-      padding: 0px;
-  }
-
-  .section {
-      padding: 0px 0;
+    --header-height: 60px;
   }
 }

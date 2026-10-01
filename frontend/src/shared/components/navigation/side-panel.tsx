@@ -1,11 +1,14 @@
 import React from 'react';
 
 import { scrollToSection } from '../../utils/scroll-utils';
+import { useEscapeKey } from '../../hooks/use-escape-key';
 import '../../../styles/components/navigation/side-panel.css';
 
 interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
+  /** The control that opens the panel (the hamburger); focus returns to it on close. */
+  returnFocusRef?: React.RefObject<HTMLElement>;
 }
 
 // Custom hook to get current section from URL and scroll position.
@@ -71,8 +74,35 @@ const useCurrentSection = () => {
   return currentSection;
 };
 
-const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
+const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }) => {
   const currentSection = useCurrentSection();
+  const navRef = React.useRef<HTMLElement | null>(null);
+  const wasOpenRef = React.useRef(isOpen);
+
+  // Closed, the drawer only slides off-screen; inert keeps its buttons out
+  // of the tab order and the accessibility tree. (React 18 has no inert prop.)
+  // On open, focus moves to the first item; on close, back to the opener,
+  // unless the visitor has already moved focus somewhere else on the page.
+  React.useEffect(() => {
+    const nav = navRef.current;
+    nav?.toggleAttribute('inert', !isOpen);
+    const wasOpen = wasOpenRef.current;
+    wasOpenRef.current = isOpen;
+    if (!nav || wasOpen === isOpen) return;
+    if (isOpen) {
+      nav.querySelector<HTMLElement>('.nav-item')?.focus();
+      return;
+    }
+    const active = document.activeElement;
+    if (!active || active === document.body || nav.contains(active)) {
+      returnFocusRef?.current?.focus();
+    }
+  }, [isOpen, returnFocusRef]);
+
+  const closeOnEscape = React.useCallback(() => {
+    if (isOpen) onClose();
+  }, [isOpen, onClose]);
+  useEscapeKey(closeOnEscape);
 
   const sections = [
     { id: 'about', label: 'About' },
@@ -95,7 +125,12 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
         role="presentation"
         onClick={onClose}
       />
-      <nav className={`side-panel ${isOpen ? 'open' : ''}`}>
+      <nav
+        ref={navRef}
+        id="side-panel"
+        aria-label="Sections"
+        className={`side-panel ${isOpen ? 'open' : ''}`}
+      >
         <div className="side-panel-content">
           {sections.map((section) => (
             <button

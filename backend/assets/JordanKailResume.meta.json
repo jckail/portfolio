@@ -1,0 +1,83 @@
+{
+  "generated_by": "helpers/build_resume_pdf.py",
+  "pdf": "JordanKailResume.pdf",
+  "current_company": "Together AI",
+  "current_title": "Staff Software Engineer",
+  "current_dates": "02/2025 - Present",
+  "companies": [
+    "Together AI",
+    "Prove Identity",
+    "Meta | Facebook",
+    "Deloitte",
+    "Wide Open West",
+    "Common Spirit Health",
+    "AcuStream | R1"
+  ],
+  "roles": [
+    {
+      "company": "Together AI",
+      "bullets": [
+        "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
+        "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
+        "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
+        "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
+        "Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship."
+      ]
+    },
+    {
+      "company": "Prove Identity",
+      "bullets": [
+        "Built agents and harnesses that govern the statistical models used for identity and fraud resolution; these became core frameworks.",
+        "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
+        "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
+        "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
+      ]
+    },
+    {
+      "company": "Meta | Facebook",
+      "bullets": [
+        "Built AI/ML classifiers and the data, feature and evaluation pipelines around them.",
+        "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
+        "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.",
+        "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.",
+        "Re-architected petabyte-scale data models, reducing storage costs by 25%."
+      ]
+    },
+    {
+      "company": "Deloitte",
+      "bullets": [
+        "Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.",
+        "Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.",
+        "Led teams of 20+ consultants on high-profile Fortune 50 engagements, delivering advanced technical solutions aligned with client needs."
+      ]
+    },
+    {
+      "company": "Wide Open West",
+      "bullets": [
+        "Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.",
+        "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide."
+      ]
+    },
+    {
+      "company": "Common Spirit Health",
+      "bullets": [
+        "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.",
+        "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days."
+      ]
+    },
+    {
+      "company": "AcuStream | R1",
+      "bullets": [
+        "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual revenue.",
+        "Migrated clients from SFTP to real-time APIs with Flask and Apache Kafka, reducing data delivery times by 50%."
+      ]
+    }
+  ],
+  "sections": [
+    "Summary",
+    "Experience",
+    "Skills",
+    "Projects"
+  ],
+  "text_sha256": "2006804215f61f18a1f1debc2492806456e5af68ad6176743b4e0f43270fe834"
+}

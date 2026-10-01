@@ -15,10 +15,30 @@ _TEST_ENV = {
     "RESUME_FILE": "JordanKailResume.pdf",
     "ANTHROPIC_API_KEY": "test-anthropic-key",
     "SENDGRID_API_KEY": "test-sendgrid-key",
+    # Pin the provider so a developer's real Vertex key or CHAT_PROVIDER never
+    # reaches a test; Vertex tests build their own provider on a mock transport.
+    "VERTEX_API_KEY": "",
+    "CHAT_PROVIDER": "anthropic",
+    "CHAT_MODEL": "claude-haiku-4-5",
+    # Forced empty so a real number in a developer's shell or .env never
+    # reaches a test; tests that need one patch a dummy value into Settings.
+    "CONTACT_PHONE": "",
 }
 
+# Assign unconditionally, never setdefault: a developer with real
+# SUPABASE_URL / SUPABASE_SERVICE_ROLE / SENDGRID_API_KEY exported in their
+# shell would otherwise run the whole suite against production - the health
+# probe SELECTs the real logs table, and any uncovered path reaching
+# store_log() would INSERT into it.
 for key, value in _TEST_ENV.items():
-    os.environ.setdefault(key, value)
+    os.environ[key] = value
+
+# Belt and braces: fail loudly rather than touch a real backend.
+if not os.environ["SUPABASE_URL"].startswith("https://example."):
+    raise RuntimeError(
+        "Test environment is not isolated: SUPABASE_URL points at "
+        f"{os.environ['SUPABASE_URL']!r}. Refusing to run against a real project."
+    )
 
 
 @pytest.fixture(scope="session")

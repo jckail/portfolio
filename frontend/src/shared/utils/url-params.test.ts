@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { getQueryParam, setQueryParam } from './url-params';
+import { getQueryParam, setQueryParam, shareUrl } from './url-params';
 
 describe('url-params', () => {
   beforeEach(() => {
@@ -40,5 +40,13 @@ describe('url-params', () => {
     setQueryParam('sidepanel', 'open', { replace: true });
     expect(window.history.length).toBe(initialLength);
     expect(getQueryParam('sidepanel')).toBe('open');
+  });
+});
+
+describe('shareUrl', () => {
+  beforeEach(() => window.history.replaceState({}, '', '/?theme=dark&skill=x#projects'));
+
+  it('builds a link with only the given param, encoded, and no hash', () => {
+    expect(shareUrl('project', 'a b&c')).toBe(`${window.location.origin}/?project=a%20b%26c`);
   });
 });

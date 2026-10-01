@@ -1,53 +1,59 @@
-import React, { lazy, Suspense, memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
+import { skillSearchText } from '../../../shared/utils/skills';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
-import { buttonize } from '../../../shared/utils/a11y';
-import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useSkill } from './skills/hooks/useSkill';
+import { SkillModalHost, prefetchSkillModal as prefetchModal } from './modals/SkillModalHost';
+import { SectionPlaceholder } from './section-placeholder';
 
-import type { Skill } from './modals/SkillModal';
+import type { Skill, SkillsData } from '../../../types/skills';
 import '../../../styles/components/sections/skills.css';
 
-const SkillModal = lazy(() => import('./modals/SkillModal'));
-
-const prefetchModal = () => import('./modals/SkillModal');
-
+// AI leads: it is the focus area, so it is listed and styled first.
 const CATEGORY_ORDER = [
-  'Programming Languages',
   'Artificial Intelligence',
+  'Programming Languages',
   'Data Engineering',
 ];
+const FEATURED_CATEGORY = 'Artificial Intelligence';
+
+/** Pinned categories first in CATEGORY_ORDER order, the rest alphabetically. */
+function compareCategories(a: string, b: string): number {
+  const aIndex = CATEGORY_ORDER.indexOf(a);
+  const bIndex = CATEGORY_ORDER.indexOf(b);
+  if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+  if (aIndex !== -1) return -1;
+  if (bIndex !== -1) return 1;
+  return a.localeCompare(b);
+}
 
 const SkillItem = memo(({
   skill,
-  index,
   onSelect,
 }: {
   skill: Skill & { key: string };
-  index: number;
   onSelect: (key: string) => void;
 }) => (
-  <div
-    className="skill-item"
-    onMouseEnter={prefetchModal}
-    style={{ '--item-index': index } as React.CSSProperties}
-    title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
-    aria-label={`View ${skill.display_name} details`}
-    {...buttonize(() => onSelect(skill.key))}
-  >
-    <div className="skill-icon-container">
-      <div className="icon-wrapper">
-        <SkillIcon
-          name={skill.image}
-          className="skill-icon"
-          size={32}
-          aria-label={skill.display_name}
-        />
-      </div>
+  <li>
+    <button
+      type="button"
+      className="skill-chip"
+      onMouseEnter={prefetchModal}
+      onFocus={prefetchModal}
+      title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+      aria-label={`View ${skill.display_name} details`}
+      onClick={() => onSelect(skill.key)}
+    >
+      <SkillIcon
+        name={skill.image}
+        className="skill-chip-icon"
+        size={20}
+        aria-label={skill.display_name}
+      />
       <span className="skill-name">{skill.display_name}</span>
-    </div>
-  </div>
+    </button>
+  </li>
 ));
 SkillItem.displayName = 'SkillItem';
 
@@ -60,33 +66,29 @@ const SkillCategory = memo(({
   skillList: (Skill & { key: string })[];
   onSkillSelect: (key: string) => void;
 }) => (
-  <div className="skill-category">
-    <h3>{category}</h3>
-    <div className="skill-list">
-      {skillList.map((skill, index) => (
-        <SkillItem
-          key={skill.key}
-          skill={skill}
-          index={index}
-          onSelect={onSkillSelect}
-        />
+  <div className={`skill-category${category === FEATURED_CATEGORY ? ' is-featured' : ''}`}>
+    <h3>
+      {category}
+      <span className="skill-category-count">
+        <span className="sr-only">, </span>
+        {skillList.length}
+        <span className="sr-only"> skills</span>
+      </span>
+    </h3>
+    <ul className="skill-list">
+      {skillList.map(skill => (
+        <SkillItem key={skill.key} skill={skill} onSelect={onSkillSelect} />
       ))}
-    </div>
+    </ul>
   </div>
 ));
 SkillCategory.displayName = 'SkillCategory';
 
-function matchesQuery(skill: Skill, query: string): boolean {
+// Name, description, category, tags and the names of related skills.
+function matchesQuery(skillsData: SkillsData, skill: Skill, query: string): boolean {
   if (!query) return true;
-  const haystack = [
-    skill.display_name,
-    skill.description,
-    skill.general_category,
-    ...skill.tags,
-  ]
-    .join(' ')
-    .toLowerCase();
-  return haystack.includes(query);
+  const text = skillSearchText(skillsData, skill);
+  return query.split(/\s+/).every(word => text.includes(word));
 }
 
 const TechnicalSkills: React.FC = () => {
@@ -94,6 +96,7 @@ const TechnicalSkills: React.FC = () => {
   const { selectedSkill, setSelectedSkill } = useSkill();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const closeSkill = useCallback(() => setSelectedSkill(null), [setSelectedSkill]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -115,32 +118,18 @@ const TechnicalSkills: React.FC = () => {
         if (activeCategory && skill.general_category !== activeCategory) {
           continue;
         }
-        if (!matchesQuery(skill, normalizedQuery)) continue;
+        if (!matchesQuery(skillsData, skill, normalizedQuery)) continue;
         const category = skill.general_category;
         if (!categorized[category]) categorized[category] = [];
         categorized[category].push({ key, ...skill });
         visible += 1;
       }
 
-      const categories = Object.keys(categorized).sort((a, b) => {
-        const aIndex = CATEGORY_ORDER.indexOf(a);
-        const bIndex = CATEGORY_ORDER.indexOf(b);
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        if (aIndex !== -1) return -1;
-        if (bIndex !== -1) return 1;
-        return a.localeCompare(b);
-      });
+      const categories = Object.keys(categorized).sort(compareCategories);
 
       const all = Array.from(
         new Set(Object.values(skillsData).map(s => s.general_category))
-      ).sort((a, b) => {
-        const aIndex = CATEGORY_ORDER.indexOf(a);
-        const bIndex = CATEGORY_ORDER.indexOf(b);
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        if (aIndex !== -1) return -1;
-        if (bIndex !== -1) return 1;
-        return a.localeCompare(b);
-      });
+      ).sort(compareCategories);
 
       return {
         sortedCategories: categories,
@@ -153,13 +142,7 @@ const TechnicalSkills: React.FC = () => {
   if (error) return <div className="error-message">Error: {error}</div>;
 
   if (isLoading || !skillsData) {
-    return (
-      <section id="skills" className="section-container">
-        <div className="section-content">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
+    return <SectionPlaceholder id="skills" />;
   }
 
   return (
@@ -176,7 +159,7 @@ const TechnicalSkills: React.FC = () => {
             id="skills-search"
             type="search"
             className="skills-search-input"
-            placeholder="Search by name, tag, or category…"
+            placeholder="Search by name, tag, related skill or category…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoComplete="off"
@@ -185,6 +168,7 @@ const TechnicalSkills: React.FC = () => {
             <button
               type="button"
               className={`skills-filter-chip${activeCategory === null ? ' is-active' : ''}`}
+              aria-pressed={activeCategory === null}
               onClick={() => setActiveCategory(null)}
             >
               All
@@ -194,6 +178,7 @@ const TechnicalSkills: React.FC = () => {
                 key={category}
                 type="button"
                 className={`skills-filter-chip${activeCategory === category ? ' is-active' : ''}`}
+                aria-pressed={activeCategory === category}
                 onClick={() =>
                   setActiveCategory(prev => (prev === category ? null : category))
                 }
@@ -202,12 +187,14 @@ const TechnicalSkills: React.FC = () => {
               </button>
             ))}
           </div>
-          {(normalizedQuery || activeCategory) && (
-            <p className="skills-filter-status" aria-live="polite">
-              {totalVisible} skill{totalVisible === 1 ? '' : 's'} shown
-              {normalizedQuery ? ` for “${query.trim()}”` : ''}
-            </p>
-          )}
+          {/* Always mounted: a live region inserted together with its text
+              is often not announced. */}
+          <p className="skills-filter-status" aria-live="polite">
+            {(normalizedQuery || activeCategory) &&
+              `${totalVisible} skill${totalVisible === 1 ? '' : 's'} shown${
+                normalizedQuery ? ` for “${query.trim()}”` : ''
+              }`}
+          </p>
         </div>
 
         {totalVisible === 0 ? (
@@ -226,15 +213,12 @@ const TechnicalSkills: React.FC = () => {
         )}
       </div>
 
-      {selectedSkill && skillsData[selectedSkill] && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost
+        skillsData={skillsData}
+        skillKey={selectedSkill}
+        onClose={closeSkill}
+        onNavigate={setSelectedSkill}
+      />
     </section>
   );
 };

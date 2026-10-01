@@ -1,179 +1,202 @@
-/* Experience Section */
-.experience-item {
-  background: var(--surface-color);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-}
+/* Experience: one compact row per role on a vertical rail.
+   Logo · company and title · dates, then highlights, then tags. */
 
 .timeline {
   position: relative;
-  padding: var(--spacing-sm) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin: 0;
+  padding: 0 0 0 var(--spacing-xl);
+  list-style: none;
   color: var(--text-color);
 }
 
-/* this is the actual line for the time line*/
+/* The rail */
 .timeline::before {
   content: '';
   position: absolute;
-  left: 24px;
-  top: 0;
+  top: var(--spacing-lg);
+  bottom: var(--spacing-lg);
+  left: 7px;
   width: 2px;
-  height: 100%;
-  background: transparent; 
-  color: var(--text-color);
+  border-radius: var(--radius-full);
+  background: linear-gradient(to bottom, var(--primary), var(--rail-color) 30%, var(--rail-color));
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 3rem;
-  background: var(--section-background);
-  backdrop-filter: blur(var(--section-background-blur));
-  border-radius: var(--radius-md);
   padding: var(--spacing-lg);
-  border: var(--border-thickness) solid var(--primary-border);
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-  color: var(--text-color);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-1);
+  backdrop-filter: blur(var(--panel-blur));
+  -webkit-backdrop-filter: blur(var(--panel-blur));
+  transition: border-color var(--transition-normal);
 }
 
-.timeline-item:last-child {
-  margin-bottom: 0;
-  color: var(--text-color);
+/* Node on the rail, level with the role row */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--spacing-lg) + 14px);
+  left: calc(-1 * var(--spacing-xl) + 2px);
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--rail-color);
+  border-radius: 50%;
+  background: var(--page-bg);
+}
+
+.timeline-item.is-current::before {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-light);
 }
 
 .timeline-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-  border-color: var(--primary-hover);
-  color: var(--text-color);
+  border-color: var(--panel-border-hover);
 }
 
+/* Role row */
 .timeline-header-wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: flex-start;
-  margin-bottom: var(--spacing-md);
-  color: var(--text-color);
-}
-
-.company-logo {
-  justify-content: center;
-  width: 165px;
-  height: 65px;
-  border-radius: var(--radius-sm);
-  background: var(--section-background);
-  /* background: var(--section-background); */
-  border: 2px solid var(--border-color);
-  object-fit: contain;
-  flex-shrink: 0;
-  color: var(--text-color);
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-}
-
-.company-logo:hover {
-  background: var(--primary);
-  border: var(--border-thickness) solid var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  
-  
+  gap: var(--spacing-md);
 }
 
 .logo-link {
-  margin-top: 2px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  width: 128px;
+  height: 44px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg-strong);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.logo-link--mark {
+  /* A symbol-only logo (Together AI) needs a tile fitted to it, not the
+     128px one the wordmark logos use. */
+  width: 56px;
+}
+
+.logo-link:hover {
+  border-color: var(--panel-border-hover);
+  background: var(--btn-secondary-hover-bg);
+}
+
+.logo-link .company-logo {
   display: block;
-  width: 90px;
-  height: 60px;
-  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   color: var(--text-color);
 }
 
 .timeline-header {
-  display: column;
-  align-items: center;
-  margin-left: 100px;
-  justify-content: center;
-  height: 70px;
-  color: var(--text-color);
+  min-width: 0;
 }
 
 .timeline-header h3 {
-  margin-top: 2px;
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
   color: var(--text-color);
-  font-size: 1.5rem;
-  margin-bottom: 1.25px;
-  text-align: left;
-  border-bottom: var(--border-thickness) solid var(--underline-color);
 }
 
-.timeline-header h4 {
-  margin-top: 5px;
-  color: var(--text-color);
-  font-size: 1.0rem;
-  margin-bottom: 1px;
-  text-align: left;
+.timeline-header .timeline-title {
+  margin: 0.125rem 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-snug);
+  color: var(--text-secondary);
 }
 
 .timeline-meta {
-  flex-direction: row;
   display: flex;
-  gap: var(--spacing-xs);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
   color: var(--text-secondary);
-  font-size: 0.8rem;
-  margin-top: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.timeline-meta .date,
-.timeline-meta .location {
-  flex-direction: row;
-  color: var(--text-secondary);
-  text-align: left;
-}
-
-.timeline-meta .location {
-  margin-left: var(--spacing-sm);
-  text-align: left;
-}
-
-.experience-highlights {
-  margin-top: 35px;
-}
-
-.highlights {
-  list-style: none;
-  margin: var(--spacing-md) 0 0 0;
-  padding: 0;
-  
+.timeline-meta .date {
   color: var(--text-color);
-  
+  font-weight: 700;
+}
+
+/* Highlights */
+.highlights {
+  margin: var(--spacing-md) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-color);
 }
 
 .highlights li {
-  font-family: 'Montserrat', sans-serif !important;
   position: relative;
-  padding-left: 1.5rem;
-  margin-bottom: var(--spacing-sm);
-  color: var(--text-color);
-  line-height: 1.6;
+  max-width: 80ch;
+  margin-bottom: var(--spacing-xs);
+  padding-left: 1.125rem;
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
   font-weight: 400;
 }
 
+.highlights li:last-child {
+  margin-bottom: 0;
+}
+
 .highlights li::before {
-  content: '•';
+  content: '';
   position: absolute;
-  left: 0;
-  color: var(--text-color);
-  font-size: 1.2em;
+  top: 0.7em;
+  left: 0.125rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--accent-text);
+}
+
+/* Tags and the details link share the last row */
+.timeline-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.timeline-more {
+  margin-left: auto;
+}
+
+/* Modal content shared with ExperienceModal */
+.experience-modal-timeline-header .timeline-meta {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--spacing-md);
+  white-space: normal;
 }
 
 .company-description {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-body);
   margin-bottom: var(--spacing-md);
 }
 
@@ -181,122 +204,72 @@
   margin-top: var(--spacing-lg);
 }
 
-.highlights-section h4 {
+.highlights-section h3 {
   color: var(--text-color);
   margin-bottom: var(--spacing-sm);
 }
 
-.visit-website-btn {
-  display: inline-block;
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--primary);
-  color: var(--text-color);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-normal);
-}
-
-.visit-website-btn:hover {
-  background: var(--primary);
-}
-
 @media (max-width: 768px) {
-  .timeline::before {
-    left: 18px;
-  }
-
-  .timeline-header-wrapper {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
+  /* No rail on phones: the width goes to the text instead */
+  .timeline {
+    padding-left: 0;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-    text-align: left;
   }
 
-  .company-logo {
-    width: 100px;
-    height: 33px;
-    padding: 5px;
-    margin-top: 10px;
-    color: var(--text-color);
-    margin-left: -10px;
+  .timeline::before,
+  .timeline-item::before {
+    display: none;
+  }
+
+  .timeline-item.is-current {
+    border-left: 3px solid var(--primary);
+  }
+
+  .timeline-item {
+    padding: var(--spacing-md);
+  }
+
+  /* Logo and company on one line, the dates under the title */
+  .timeline-header-wrapper {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'logo header'
+      'logo meta';
+    column-gap: var(--spacing-sm);
+    row-gap: var(--spacing-2xs);
+    align-items: start;
   }
 
   .logo-link {
-    width: 56px;
-    height: 56px;
-    margin-top: 0;
-    justify-content: center;
+    grid-area: logo;
+    width: 88px;
+    height: 36px;
   }
 
   .timeline-header {
-    flex-grow: 1;
-    align-items: flex-start;
-    margin-left: 55px;
-    margin-right: -5px;
-    height: auto;
-    min-height: 50px;
-    text-align: left;
-    margin-top: -5px;
+    grid-area: header;
   }
 
-  .timeline-header h3 {
-    font-size: 1rem;
-    text-align: left;
-    margin-bottom: 4px;
-    line-height: 1.2;
-  }
-
-  .timeline-header h4 {
-    font-size: 0.85rem;
-    text-align: left;
-    margin-top: 2px;
-    line-height: 1.2;
+  .timeline-header .timeline-title {
+    font-size: var(--text-sm);
   }
 
   .timeline-meta {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    margin-top: 5px;
-  }
-  
-  .timeline-meta .date,
-  .timeline-meta .location {
-    color: var(--text-secondary);
-    text-align: left;
-  }
-  
-  .timeline-meta .location {
-    margin-left: 0;
-    margin-top: 2px;
-    text-align: left;
+    grid-area: meta;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--spacing-sm);
+    font-size: var(--text-xs);
+    white-space: normal;
   }
 
-  .experience-highlights {
-    margin-top: 20px;
-  }
-
-  .highlights {
-    margin-top: var(--spacing-xs);
-    padding-top: var(--spacing-xs);
-    clear: both;
-  }
-  
   .highlights li {
-    font-size: 0.85rem;
-    line-height: 1.4;
-    margin-bottom: 8px;
-    font-weight: 400;
-  }
-  
-  .highlights li::before {
-    font-size: 1em;
-    top: 0;
+    font-size: var(--text-sm);
+    line-height: 1.55;
   }
 
+  .timeline-footer {
+    margin-top: var(--spacing-sm);
+  }
 }

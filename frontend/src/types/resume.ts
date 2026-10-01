@@ -7,39 +7,21 @@ export interface Project {
   logoPath?: string;
   tech_stack?: string[];
   last_commit?: string;
+  link_label?: string;
 }
 
-export interface ProjectsData {
-  [key: string]: Project;
-}
+export type ProjectsData = Record<string, Project>;
 
 export interface Contact {
   firstName: string;
   lastName: string;
   title: string;
   email: string;
-  phone: string;
   website: string;
   location: string;
   country: string;
   github: string;
   linkedin: string;
-}
-
-export interface ResumeData {
-  name: string;
-  title: string;
-  contact: Contact;
-  projects: Project[];
-  // ... other resume data types if needed
-}
-
-export interface OpenTo {
-  roles: string;
-  relocation: boolean;
-  travel: boolean;
-  location: string;
-  note: string;
 }
 
 export interface AboutMe {
@@ -49,5 +31,20 @@ export interface AboutMe {
   brief_bio: string;
   full_portrait: string;
   primary_skills: string[];
-  open_to?: OpenTo;
 }
+
+/** One entry of GET /api/experience (backend/app/models/experience.py). */
+export interface ExperienceItem {
+  company: string;
+  title: string;
+  date: string;
+  location: string;
+  highlights: string[];
+  link: string;
+  logoPath: string;
+  company_description: string;
+  tech_stack: string[];
+  more_highlights: string[];
+}
+
+export type ExperienceData = Record<string, ExperienceItem>;

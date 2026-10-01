@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
 class ProjectDetail(BaseModel):
@@ -7,30 +7,31 @@ class ProjectDetail(BaseModel):
     title: str = Field(..., description="Project title")
     description: str = Field(..., description="Brief project description")
     link: HttpUrl = Field(..., description="Primary project link")
+    link_label: str = Field("View project", description="Label for the primary link button")
     link2: HttpUrl | None = Field(None, description="Secondary project link (optional)")
     description_detail: str = Field(..., description="Detailed project description")
     logoPath: str = Field(..., description="Path to project logo")
-    tech_stack: list[str] = Field(..., description="List of technologies used in the project")
+    # Optional: not every project has a publishable stack (the Facebook QR
+    # feature is a shipped product, not an open repo).
+    tech_stack: list[str] = Field(default_factory=list, description="List of technologies used in the project")
     last_commit: str = Field(..., description="Date of last commit")
 
-class Projects(BaseModel):
-    """Model for all projects."""
-    ai_billing: ProjectDetail
-    portfolio: ProjectDetail
-    super_teacher: ProjectDetail
-    data_playground: ProjectDetail
-    go_pilot: ProjectDetail
-    jobbr: ProjectDetail
-    pointup: ProjectDetail
-    qr_for_groups: ProjectDetail
-    lit_crypto: ProjectDetail
+class Projects(RootModel[dict[str, ProjectDetail]]):
+    """All projects, keyed by project slug.
+
+    Keyed dynamically (like `Skills` and `Experience`) rather than with one
+    field per project, so adding or removing a project is a pure
+    `projects.json` change. This also makes display order follow JSON order:
+    with one field per project, `model_dump()` emitted them in *field
+    declaration* order, so the JSON file's ordering was silently ignored.
+    """
 
 
 
 
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "super_teacher": {
                     "title": "Super Teacher",
@@ -45,3 +46,4 @@ class Projects(BaseModel):
                 }
             }
         }
+    )

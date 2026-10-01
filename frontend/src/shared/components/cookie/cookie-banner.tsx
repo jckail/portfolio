@@ -24,17 +24,22 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onDeny }) => {
   };
 
   return (
-    <div className="cookie-banner" ref={bannerRef}>
+    <div className="cookie-banner" ref={bannerRef} role="region" aria-label="Cookie consent">
       <div className="cookie-content">
         <p>
-          We use cookies to enhance your browsing experience and analyze our traffic.
-          By clicking &quot;Accept All&quot;, you consent to our use of cookies.
+          With your consent, this site uses Google Analytics cookies to understand
+          traffic. Nothing is loaded unless you click &quot;Accept All&quot;
+          <span className="cookie-detail">
+            , and you can change your choice anytime under &quot;Cookie settings&quot; in
+            the footer
+          </span>
+          .
         </p>
         <div className="cookie-buttons">
-          <button onClick={handleDenyAll} className="cookie-button deny">
+          <button onClick={handleDenyAll} type="button" className="cookie-button deny btn">
             Deny All
           </button>
-          <button onClick={handleAcceptAll} className="cookie-button accept">
+          <button onClick={handleAcceptAll} type="button" className="cookie-button accept btn btn-primary">
             Accept All
           </button>
         </div>

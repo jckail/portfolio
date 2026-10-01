@@ -1,11 +1,12 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 
-import { Header } from '../../shared/components/header';
+import { Header } from './header/header';
+import { NotFound, isKnownPath } from './not-found';
 import TLDR from './sections/about';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
-import { useAppLogic } from '../providers/app-logic-provider';
+import { useLocation } from '../../shared/hooks/use-location';
+import { useData } from '../providers/data-provider';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { useThemeStore } from '../../shared/stores/theme-store';
@@ -13,81 +14,60 @@ import { LoadingSpinner } from '../../shared/components/loading-spinner';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
-interface MainContentProps {
-  isAdminModalOpen?: boolean;
-}
-
 // Lazy load components below the fold
-const TechnicalSkills = React.lazy(() => 
-  import('./sections/skills').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
+const TechnicalSkills = React.lazy(() => import('./sections/skills'));
+const Experience = React.lazy(() => import('./sections/experience'));
+const Projects = React.lazy(() => import('./sections/projects'));
+const MyResume = React.lazy(() => import('./sections/resume'));
+const Doodle = React.lazy(() => import('./sections/doodle'));
 
-const Experience = React.lazy(() => 
-  import('./sections/experience').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
+// Admin: the Ctrl+Shift+A handler, and the dialog the /admin route opens
+const AdminHandler = React.lazy(() => import('./admin/admin-handler'));
+const AdminLogin = React.lazy(() => import('./admin/admin-login'));
 
-const Projects = React.lazy(() => 
-  import('./sections/projects').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
+type SlotName = 'experience' | 'projects' | 'skills' | 'resume';
 
-const MyResume = React.lazy(() => 
-  import('./sections/resume').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
-
-const Doodle = React.lazy(() => 
-  import('./sections/doodle').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
-
-// Admin components
-const AdminHandler = React.lazy(() => 
-  import('./admin/admin-handler').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
-
-const AdminLogin = React.lazy(() => 
-  import('./admin/admin-login').then(module => ({
-    default: module.default,
-    __esModule: true,
-  }))
-);
-
-// Loading fallback component
-const LoadingFallback = LoadingSpinner;
+/**
+ * Reserves roughly a section's rendered height until both its chunk and the
+ * shared resume data have arrived. Without this each section starts as a 48px
+ * spinner and then grows to thousands of pixels, shoving everything below it
+ * (the main source of layout shift on load). Heights live in main-content.css.
+ */
+const SectionSlot: React.FC<{ name: SlotName; children: React.ReactNode }> = ({ name, children }) => {
+  const { isLoading } = useData();
+  return (
+    <div className={`section-slot section-slot--${name}${isLoading ? ' is-pending' : ''}`}>
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <div className="section-skeleton" aria-hidden="true">
+              <LoadingSpinner />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
+      </ErrorBoundary>
+    </div>
+  );
+};
 
 // Separate Admin components to reduce main content complexity
-const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void }> = ({ 
-  isAdminModalOpen, 
-  onClose 
+const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void }> = ({
+  isAdminModalOpen,
+  onClose
 }) => {
-  const handleLoginSuccess = () => {
-    onClose();
-  };
-
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingFallback />}>
+      {/* No spinner: AdminHandler renders nothing visible, and a fallback here
+          sat above the page for a moment on every load, then vanished and
+          pulled the whole page up (a layout shift). */}
+      <Suspense fallback={null}>
         {isAdminModalOpen && (
           <AdminLogin 
             isOpen={isAdminModalOpen} 
             onClose={onClose}
-            onLoginSuccess={handleLoginSuccess}
+            onLoginSuccess={onClose}
           />
         )}
         <AdminHandler />
@@ -96,13 +76,14 @@ const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void
   );
 };
 
-const MainContentInner: React.FC<MainContentProps> = () => {
+const MainContentInner: React.FC = () => {
   useScrollSpy();
-  const { theme, toggleTheme, isToggleHidden } = useAppLogic();
+  // A boolean selector: the page body re-renders only when party mode starts
+  // or ends, not on every light/dark toggle (the header handles those).
+  const isPartyMode = useThemeStore(state => state.theme === 'party');
   const setTheme = useThemeStore(state => state.setTheme);
   const [showDoodle, setShowDoodle] = useState(false);
   const [doodleClickCount, setDoodleClickCount] = useState(0);
-  const isPartyMode = theme === 'party';
 
   // Handle initial hash navigation
   useEffect(() => {
@@ -114,21 +95,16 @@ const MainContentInner: React.FC<MainContentProps> = () => {
       setDoodleClickCount(1);
     }
 
-    const timer = setTimeout(() => {
-      // Handle scrolling to section after content is loaded
-      if (hash && hash !== '#doodle') {
-        const sectionId = hash.substring(1);
-        // Add a longer delay to ensure all lazy-loaded components are rendered
-        setTimeout(() => {
-          scrollToSection(sectionId);
-        }, 500); // Increased delay to ensure components are mounted
-      }
-    }, 100);
+    if (!hash || hash === '#doodle') return;
 
+    // Scroll once the lazy sections have had time to mount. One timer (it
+    // used to be a 500ms timer nested in a 100ms one, and only the outer one
+    // was cleared on unmount).
+    const timer = setTimeout(() => scrollToSection(hash.substring(1)), 600);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleDoodleToggle = () => {
+  const handleDoodleToggle = useCallback(() => {
     if (isPartyMode) {
       // End party mode
       setTheme('dark');
@@ -150,15 +126,11 @@ const MainContentInner: React.FC<MainContentProps> = () => {
       setTheme('party');
       setDoodleClickCount(2);
     }
-  };
+  }, [isPartyMode, doodleClickCount, setTheme]);
 
   return (
     <div className="main">
-      <Header 
-        theme={theme}
-        toggleTheme={toggleTheme}
-        isToggleHidden={isToggleHidden}
-      />
+      <Header />
       <main id="main-content" tabIndex={-1}>
         <div className="main-content">
           {/* About section is eagerly loaded */}
@@ -167,42 +139,35 @@ const MainContentInner: React.FC<MainContentProps> = () => {
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <Experience />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="experience">
+            <Experience />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <Projects />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="projects">
+            <Projects />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <TechnicalSkills />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="skills">
+            <TechnicalSkills />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <MyResume />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="resume">
+            <MyResume />
+          </SectionSlot>
 
           {/* Doodle section with smooth transition */}
+          {/* No spinner fallback: the doodle is collapsed until opened, so a
+              48px placeholder would only appear and then vanish (a shift). */}
           <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={null}>
               <Doodle isVisible={showDoodle} isPartyMode={isPartyMode} />
             </Suspense>
           </ErrorBoundary>
 
           {/* Footer with doodle toggle handler and theme toggle */}
-          <Footer 
-            onDoodleToggle={handleDoodleToggle} 
+          <Footer
+            onDoodleToggle={handleDoodleToggle}
             doodleClickCount={doodleClickCount}
-            toggleTheme={toggleTheme}
             isPartyMode={isPartyMode}
           />
         </div>
@@ -211,23 +176,33 @@ const MainContentInner: React.FC<MainContentProps> = () => {
   );
 };
 
-const MainContent: React.FC<MainContentProps> = (props) => {
+const MemoMainContentInner = React.memo(MainContentInner);
+
+const MainContent: React.FC = () => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const location = useLocation();
-  
+  const { pathname } = useLocation();
+
   useEffect(() => {
-    if (location.pathname === '/admin') {
+    if (pathname === '/admin') {
       setIsAdminModalOpen(true);
     }
-  }, [location]);
+  }, [pathname]);
+
+  const closeAdmin = useCallback(() => setIsAdminModalOpen(false), []);
+
+  if (!isKnownPath(pathname)) {
+    return (
+      <ErrorBoundary>
+        <NotFound pathname={pathname} />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
-      <AdminComponents 
-        isAdminModalOpen={isAdminModalOpen} 
-        onClose={() => setIsAdminModalOpen(false)} 
-      />
-      <MainContentInner {...props} />
+      <AdminComponents isAdminModalOpen={isAdminModalOpen} onClose={closeAdmin} />
+      {/* Memoised: a route or admin-dialog change must not re-render the page */}
+      <MemoMainContentInner />
     </ErrorBoundary>
   );
 };

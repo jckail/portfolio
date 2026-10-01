@@ -1,4 +1,37 @@
-"""XSS/path-injection guards on the /api/custom_resolution preview page."""
+"""XSS/path-injection guards on the /api/custom_resolution preview page.
+
+The page only exists in dev mode (it frames the SPA, which is unframeable once
+deployed), so these tests turn dev mode on.
+"""
+import dataclasses
+
+import pytest
+
+from backend.app import config
+from backend.app.api import custom_resolution
+
+
+@pytest.fixture(autouse=True)
+def _dev_mode(monkeypatch):
+    settings = dataclasses.replace(config.get_settings(), dev_mode=True)
+    monkeypatch.setattr(custom_resolution, "get_settings", lambda: settings)
+
+
+def test_not_served_outside_dev_mode(client, monkeypatch):
+    settings = dataclasses.replace(config.get_settings(), dev_mode=False)
+    monkeypatch.setattr(custom_resolution, "get_settings", lambda: settings)
+    assert client.get("/api/custom_resolution").status_code == 404
+    assert client.get("/api/custom_resolution", params={"device_name": "iphone 14"}).status_code == 404
+
+
+@pytest.mark.parametrize("width,height", [(99999, 1), (-5, 3), (0, 100), (100, 4097), (4097, 4097)])
+def test_out_of_range_dimensions_are_rejected(client, width, height):
+    response = client.get("/api/custom_resolution", params={"width": width, "height": height})
+    assert response.status_code == 422
+
+
+def test_dimension_bounds_are_inclusive(client):
+    assert client.get("/api/custom_resolution", params={"width": 1, "height": 4096}).status_code == 200
 
 
 def test_default_render(client):

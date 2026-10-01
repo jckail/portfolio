@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
+import { Dialog, DialogContent, Typography, useTheme, useMediaQuery } from '@mui/material';
 
 import { ChatButton } from './components/ChatButton';
 import { ChatHeader } from './components/ChatHeader';
@@ -22,6 +22,9 @@ const Chat: React.FC<ChatProps> = ({
   handleSendMessage,
   handleSuggestedPrompt,
   showSuggestions,
+  pendingActions,
+  confirmAction,
+  cancelAction,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -55,8 +58,8 @@ const Chat: React.FC<ChatProps> = ({
         PaperProps={{
           sx: {
             width: isMobile ? '100%' : '500px',
-            height: isMobile ? '100%' : '100vh',
-            maxHeight: isMobile ? '100%' : '100vh',
+            height: isMobile ? '100dvh' : '100vh',
+            maxHeight: isMobile ? '100dvh' : '100vh',
             borderRadius: isMobile ? 0 : 5,
             margin: isMobile ? 0 : '1vh 0 15vh 0',
             display: 'flex',
@@ -98,11 +101,29 @@ const Chat: React.FC<ChatProps> = ({
             p: '16px !important'
           }}
         >
+          <Typography
+            variant="caption"
+            component="p"
+            sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
+          >
+            Conversations are logged to improve the assistant. Please don&apos;t share sensitive info.
+          </Typography>
+          <Typography
+            variant="caption"
+            component="p"
+            sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
+          >
+            I can also contact Jordan for you once you give me an email. Nothing is sent until you confirm.
+          </Typography>
+
           <ChatMessages
             messages={messages}
             isLoading={isLoading}
             showSuggestions={showSuggestions}
             onSuggestedPrompt={handleSuggestedPrompt}
+            pendingActions={pendingActions}
+            onConfirmAction={confirmAction}
+            onCancelAction={cancelAction}
           />
 
           <ChatInput
@@ -123,6 +144,10 @@ const Chat: React.FC<ChatProps> = ({
           .cursor {
             animation: blink 1s step-end infinite;
             margin-left: 2px;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .cursor { animation: none; }
+            .chat-confirm-card, .chat-confirm-card * { transition: none !important; }
           }
         `}
       </style>

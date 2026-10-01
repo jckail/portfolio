@@ -1,5 +1,9 @@
 # Production Dockerfile
-FROM node:22-alpine AS frontend-build
+# Base images are pinned by digest (multi-arch index) so a rebuild of the same
+# commit gets the same bytes; Dependabot's docker ecosystem (dependabot.yml)
+# bumps the digests monthly to pick up Debian/Alpine security patches. The tag
+# stays alongside for readability and so Dependabot knows which line to track.
+FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -11,19 +15,22 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Backend setup
-# Patch version intentionally unpinned so the base image tracks Debian's
-# latest security-patched slim build (python minor version stays pinned).
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+
+# The pinned base digest predates the Debian security fixes for these four
+# packages (Trivy HIGH: CVE-2026-103111 pcre2, CVE-2026-75804 and
+# CVE-2026-84782 openssl; fixed in 3.5.7-1~deb13u3 / 10.46-1~deb13u3). Upgrade
+# only them. Drop this once Dependabot bumps the digest to an image that
+# already carries the fixes.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade \
+        libssl3t64 openssl openssl-provider-legacy libpcre2-8-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copy the frontend build
+# Copy the frontend build (Vite already copies public/, favicons included)
 COPY --from=frontend-build /app/frontend/dist/ /app/frontend/dist/
-
-# Create directory for favicon files
-RUN mkdir -p /app/frontend/dist/public/
-
-# Copy favicon files (if they exist)
-COPY --from=frontend-build /app/frontend/public/favicon* /app/frontend/dist/public/
 
 # Install backend dependencies from the fully-pinned, hash-verified
 # lockfile (requirements.lock.txt, regenerated via
@@ -51,31 +58,34 @@ ENV PYTHONPATH=/app \
 COPY <<EOF /app/start.sh
 #!/bin/sh
 echo "Starting production environment..."
-echo "Checking environment variables..."
-
-# List of required environment variables
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ALLOWED_ORIGINS PRODUCTION_URL ADMIN_EMAIL RESUME_FILE ANTHROPIC_API_KEY SENDGRID_API_KEY"
-
-# Check each required variable
-for var in \$required_vars; do
-    if [ -z "\$(eval echo \\\$\${var})" ]; then
-        echo "Error: Required environment variable \$var is not set"
-        exit 1
-    fi
-done
-
-echo "Environment check passed"
-exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080}
+# Required variables are validated by backend/app/main.py against
+# config.REQUIRED_ENV_VARS, the single source of truth. A second list here
+# drifted from it and refused to boot without optional settings.
+export PORT=\${PORT:-8080}
+# --ws-max-size bounds a WebSocket frame before receive_text() buffers it;
+# the default is 16 MiB, which a handful of sockets can turn into an OOM on
+# a 512Mi instance. Application-level caps only apply after parsing.
+exec uvicorn backend.app.main:app --host 0.0.0.0 --port \${PORT:-8080} \\
+    --ws-max-size 65536 --h11-max-incomplete-event-size 16384
 EOF
 
 RUN chmod +x /app/start.sh
 
 # Drop root. Cloud Run honours the image user, so an RCE in FastAPI/uvicorn or
-# any dependency would otherwise land as UID 0 with write access to /app.
-# Numeric form so the runtime never needs /etc/passwd resolution.
+# any dependency would otherwise land as UID 0. /app (code, frontend dist)
+# stays root-owned and read-only to that user; the only writable path is
+# backend/app/logs, which startup creates and which the rotating local log
+# files use off Cloud Run (e.g. `docker run` in CI). On Cloud Run logging is
+# stdout/stderr only. Numeric form so the runtime never needs /etc/passwd.
 RUN groupadd --system --gid 10001 app \
     && useradd --system --uid 10001 --gid app --no-create-home app \
-    && chown -R app:app /app
+    && mkdir -p /app/backend/app/logs \
+    && chown app:app /app/backend/app/logs
 USER 10001:10001
+
+# Ignored by Cloud Run (it uses its own startup probe); useful for local
+# `docker run` and compose.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD python -c "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/api/health' % os.environ.get('PORT', '8080'), timeout=4)"
 
 CMD ["/app/start.sh"]

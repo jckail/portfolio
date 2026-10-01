@@ -1,15 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 
-import { Message } from '../../../../types/chat';
+import { ConfirmActionCard } from './ConfirmActionCard';
 import { ChatMarkdown } from './ChatMarkdown';
 import { SuggestedPrompts } from './SuggestedPrompts';
+
+import type { ConfirmArgs, Message, PendingAction } from '../../../../types/chat';
 
 interface ChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   showSuggestions?: boolean;
   onSuggestedPrompt?: (prompt: string) => void;
+  pendingActions?: PendingAction[];
+  onConfirmAction?: (id: string, email: string, args: ConfirmArgs) => Record<string, string> | null;
+  onCancelAction?: (id: string) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -17,6 +22,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isLoading,
   showSuggestions = false,
   onSuggestedPrompt,
+  pendingActions = [],
+  onConfirmAction,
+  onCancelAction,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +37,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, showSuggestions]);
+  }, [messages, showSuggestions, pendingActions.length]);
 
   return (
     <Box
@@ -40,7 +48,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
-        pb: '130px',
+        pb: 1,
+        minHeight: 0,
         WebkitOverflowScrolling: 'touch',
         '& .chat-md': {
           fontSize: '0.9rem',
@@ -119,7 +128,18 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         </Box>
       ))}
 
-      {showSuggestions && onSuggestedPrompt && (
+      {onConfirmAction &&
+        onCancelAction &&
+        pendingActions.map(action => (
+          <ConfirmActionCard
+            key={action.id}
+            action={action}
+            onConfirm={onConfirmAction}
+            onCancel={onCancelAction}
+          />
+        ))}
+
+      {showSuggestions && pendingActions.length === 0 && onSuggestedPrompt && (
         <SuggestedPrompts onSelect={onSuggestedPrompt} disabled={isLoading} />
       )}
 

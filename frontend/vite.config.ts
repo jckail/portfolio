@@ -63,6 +63,14 @@ export default defineConfig({
     // Skip gzip-size reporting to speed up CI builds.
     reportCompressedSize: false,
     rollupOptions: {
+      // Production builds drop debug logging: console.log / console.debug
+      // calls are treated as side-effect free, so the minifier removes them
+      // (their arguments are still evaluated if those have side effects).
+      // console.info / warn / error are kept. This covers debug calls in
+      // section components as well as the providers.
+      treeshake: {
+        manualPureFunctions: ['console.log', 'console.debug'],
+      },
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
@@ -70,13 +78,21 @@ export default defineConfig({
           // the initial graph. The engine is only reached through the lazy
           // particles-canvas boundary, so leave placement to the splitter.
           if (id.includes('tsparticles')) return undefined;
-          if (id.includes('react-router')) return 'router';
           // MUI + Emotion are reachable only through the lazily-loaded chat.
           // Returning undefined leaves them to the automatic splitter, which
           // places them in the chat's own async chunk. The catch-all below
           // would otherwise force them into `vendor` — a chunk the entry
           // statically depends on, so they'd be modulepreloaded on first
           // paint and the chat's lazy boundary would buy nothing.
+          //
+          // DO NOT return a chunk NAME here (e.g. 'mui'). A previous attempt to
+          // do exactly that produced a circular chunk dependency and a
+          // production white screen — "Cannot access 'qt' before
+          // initialization" — for every visitor (see CHANGELOG, Unreleased →
+          // Fixed). Returning undefined is what makes this safe: Rollup keeps
+          // the modules with their async importer instead of hoisting them into
+          // a shared chunk that the entry then has to initialise. Verified with
+          // a headless load of the built app in dark/light/chat/party modes.
           if (id.includes('@mui') || id.includes('@emotion')) return undefined;
           return 'vendor';
         },

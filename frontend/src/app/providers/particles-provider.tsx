@@ -1,8 +1,9 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 
 import type { ISourceOptions } from "@tsparticles/engine";
 
 import { useMediaQuery } from '../../shared/hooks/use-media-query';
+import { runWhenIdle } from '../utils/run-when-idle';
 
 // Engine + canvas live in a separate chunk; nothing here pulls tsparticles
 // into the initial bundle.
@@ -35,16 +36,26 @@ export function ParticlesProvider({ children, config }: ParticlesProviderProps) 
   const shouldRender =
     !prefersReducedMotion && !isSmallViewport && hasVisibleParticles(config);
 
-  if (!shouldRender) {
-    return <>{children}</>;
-  }
+  // Decorative only: wait for the browser to go idle after load so the engine
+  // chunk never competes with the content for bandwidth or main-thread time.
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    if (!shouldRender || idle) return;
+    return runWhenIdle(() => setIdle(true));
+  }, [shouldRender, idle]);
 
+  // The wrapper is rendered unconditionally so the element tree around
+  // `children` never changes shape. Toggling the theme (which can flip
+  // shouldRender, e.g. light has no particles) therefore re-renders the page
+  // instead of remounting it.
   return (
     <>
-      <Suspense fallback={null}>
-        <ParticlesCanvas config={config} />
-      </Suspense>
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      {shouldRender && idle && (
+        <Suspense fallback={null}>
+          <ParticlesCanvas config={config} />
+        </Suspense>
+      )}
+      <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
         {children}
       </div>
     </>

@@ -1,3 +1,6 @@
+import { track } from '../analytics/core';
+import { lengthBucket } from '../analytics/events';
+import { TRACKABLE_ANCHORS } from './analytics-anchors';
 import { hasAnalyticsConsent } from './cookie-consent';
 
 type GtagParams = Record<string, unknown>;
@@ -77,6 +80,12 @@ export const getSessionId = (): string => {
   return sessionId;
 };
 
+// Session ID for event params, created only once the visitor has consented.
+// Without consent every event is dropped by safeGtagCall anyway, so this
+// avoids writing a tracking-style ID to sessionStorage for nothing.
+const analyticsSessionId = (): string =>
+  hasAnalyticsConsent() ? getSessionId() : '';
+
 // Safe wrapper for gtag calls — no-ops until the visitor accepts cookies
 const safeGtagCall = (
   command: string,
@@ -128,17 +137,27 @@ const sectionMetadata: Record<string, Record<string, string>> = {
   }
 };
 
-// Get full page path including hash
+export { TRACKABLE_ANCHORS };
+
+const trackableAnchor = (anchor: string | null | undefined): string | null => {
+  const id = (anchor ?? '').replace(/^#/, '');
+  return TRACKABLE_ANCHORS.has(id) ? id : null;
+};
+
+// Get full page path including hash, keeping only allowlisted anchors
 const getFullPagePath = (): string => {
   const pathname = window.location.pathname;
-  const hash = window.location.hash;
-  return hash ? `${pathname}${hash}` : pathname;
+  const anchor = trackableAnchor(window.location.hash);
+  return anchor ? `${pathname}#${anchor}` : pathname;
 };
 
 // Track theme change
 export const trackThemeChange = async (newTheme: string, previousTheme: string): Promise<void> => {
+  // First-party stream only: GA gets its own theme_change_<name> event below.
+  track('theme_change', { theme: newTheme, from: previousTheme });
+  if (newTheme === 'party') track('party_mode');
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', `theme_change_${newTheme}`, {
     event_category: 'Theme',
     event_action: 'Change',
@@ -154,13 +173,18 @@ export const trackAnchorChange = async (
   newAnchor: string,
   oldAnchor: string | null = null
 ): Promise<void> => {
+  const anchor = trackableAnchor(newAnchor);
+  if (!anchor) {
+    debugLog('anchor not in allowlist, skipping');
+    return;
+  }
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   const fullPath = getFullPagePath();
   
   safeGtagCall('event', 'anchor_change', {
-    new_anchor: newAnchor,
-    previous_anchor: oldAnchor,
+    new_anchor: anchor,
+    previous_anchor: trackableAnchor(oldAnchor),
     page_path: fullPath,
     session_id: sessionId
   });
@@ -180,7 +204,7 @@ export const trackModalView = async (
   modalTitle: string
 ): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   const fullPath = getFullPagePath();
   
   safeGtagCall('event', 'modal_view', {
@@ -206,7 +230,7 @@ export const trackModalClose = async (
   duration: number
 ): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'modal_close', {
     modal_id: modalId,
     modal_type: modalType,
@@ -219,9 +243,14 @@ export const trackModalClose = async (
 // Track page view
 export const trackPageView = async (path: string): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
-  // Only append the hash if the caller didn't already include one
-  const fullPath = path.includes('#') ? path : path + window.location.hash;
+  const sessionId = analyticsSessionId();
+  // Use the caller's hash if it has one, else the current one; either way
+  // only an allowlisted anchor survives.
+  const [base, hash] = path.includes('#')
+    ? [path.slice(0, path.indexOf('#')), path.slice(path.indexOf('#'))]
+    : [path, window.location.hash];
+  const anchor = trackableAnchor(hash);
+  const fullPath = anchor ? `${base}#${anchor}` : base;
 
   safeGtagCall('event', 'page_view', {
     page_path: fullPath,
@@ -237,8 +266,10 @@ export const trackPageView = async (path: string): Promise<void> => {
 // (see useScrollSpy), which already sends one for the same page_path.
 // A duplicate here was inflating GA4 pageview counts.
 export const trackSectionView = async (sectionId: string): Promise<void> => {
+  if (!trackableAnchor(sectionId)) return;
+  track('section_view', { section: sectionId });
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   const metadata = sectionMetadata[sectionId] || {
     title: sectionId,
     category: 'Unknown Section',
@@ -262,7 +293,7 @@ export const trackSocialClick = async (
   url: string
 ): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   
   // Send platform-specific event
   const eventName = `${platform}_clicked`;
@@ -290,8 +321,9 @@ export const trackResumeDownload = async (
   version: string,
   source: string
 ): Promise<void> => {
+  if (!source.endsWith('_error')) track('resume_download', { source });
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'resume_download', {
     format: format,
     version: version,
@@ -306,8 +338,9 @@ export const trackResumeView = async (
   format: string,
   source: string
 ): Promise<void> => {
+  track('resume_preview', { source });
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   
   // Send specific clicked_resume event
   safeGtagCall('event', 'clicked_resume', {
@@ -330,7 +363,7 @@ export const trackResumeView = async (
 // Track chat open
 export const trackChatOpen = async (): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'chat_open', {
     event_category: 'Chat',
     event_action: 'Open',
@@ -344,8 +377,9 @@ export const trackChatMessage = async (
   messageType: 'sent' | 'received',
   messageLength: number
 ): Promise<void> => {
+  if (messageType === 'sent') track('chat_message_sent', { len: lengthBucket(messageLength) });
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'chat_message', {
     event_category: 'Chat',
     event_action: 'Message',
@@ -359,7 +393,7 @@ export const trackChatMessage = async (
 // Track contact modal opened
 export const trackContactOpened = async (): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'contact_opened', {
     event_category: 'Contact',
     event_action: 'Open',
@@ -371,7 +405,7 @@ export const trackContactOpened = async (): Promise<void> => {
 // Track contact message submitted
 export const trackContactMessage = async (messageLength: number): Promise<void> => {
   await waitForGtag();
-  const sessionId = getSessionId();
+  const sessionId = analyticsSessionId();
   safeGtagCall('event', 'contact_message', {
     event_category: 'Contact',
     event_action: 'Submit',

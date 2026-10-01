@@ -1,101 +1,87 @@
 JORDAN KAIL
-Staff Software Engineer
+Staff Software Engineer — AI, Agents, Data & Machine Learning
+Denver, CO | jckail13@gmail.com | linkedin.com/in/jckail | github.com/jckail | jordan-kail.com
 
-jckail13@gmail.com
-571-218-5000
-https://jordan-kail.com/
-Denver, CO
+SUMMARY
+With over 13 years of experience in AI, analytics and machine learning, I now lead the agents platform and data engineering at Together AI, building the agent harness, internal agents factory and proprietary IP behind them. Before that I built AI classifiers at Meta and model-governance frameworks at Prove, and turned data into impact for startups and Fortune 50 companies alike.
 
-Experience
-======
-Together AI
-Staff Software Engineer
-02/2025 - Ongoing
-San Francisco, CA
- - Staff engineer on the data platform behind Together's AI acceleration cloud - the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signal.
- - Build internal agent tooling and evaluation harnesses so engineering teams can develop, test, and ship LLM-powered agents against Together's own inference stack.
- - Design data infrastructure for large-scale training and inference workloads, spanning dataset curation, lineage, and quality controls for open-model work.
+EXPERIENCE
 
-Prove Identity
-Staff Software Engineer - Data
-06/2023 - 01/2025
-Denver, CO
- - Spearheading company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, reducing core product API response time to 12ms and operational expenses by 95%.
- - Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.
- - Deployed an event-driven data streaming platform using Go, Flink, and Kafka, migrating 1,200+ batch jobs to real-time processing, enhancing data availability from days to minutes.
+Together AI — Staff Software Engineer — San Francisco, CA
+02/2025 – Present
+• Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.
+• Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.
+• Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.
+• Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.
+• Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship.
 
-Meta (Facebook)
-Senior Data Engineer
-01/2021 - 09/2022
-Menlo Park, CA + Seattle, WA + Remote, USA
- - Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team of 10+ engineers.
- - Developed and deployed 100+ ML pipelines with Airflow, Spark, and PyTorch, leveraging NLP, computer vision, and user segmentation to optimize ad targeting and notifications for billions of users.
- - Designed an automated framework to generate thousands of Spark data pipelines, increasing compute efficiency by 66%.
- - Re-architected petabyte-scale data models, reducing storage costs by 25%.
+Prove Identity — Staff Software Engineer - Data — Denver, CO
+06/2023 – 01/2025
+• Built agents and harnesses that govern the statistical models used for identity and fraud resolution; these became core frameworks.
+• Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.
+• Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.
+• Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds.
 
-Deloitte
-Consultant - AI & Advanced Analytics
-12/2018 - 12/2020
-Menlo Park, CA + Seattle, WA + Atlanta, GA
- - Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.
- - Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.
- - Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable requirements and ensuring timely delivery of technical solutions.
+Meta (Facebook) — Senior Data Engineer — Seattle, WA; Menlo Park, CA; Remote, USA
+01/2021 – 09/2022
+• Built AI/ML classifiers and the data, feature and evaluation pipelines around them.
+• Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.
+• Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.
+• Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.
+• Re-architected petabyte-scale data models, reducing storage costs by 25%.
 
-Wide Open West
-Senior Data Engineer
-11/2017 - 12/2018
-Denver, CO
- - Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.
- - Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.
+Deloitte — Consultant - AI & Advanced Analytics — Atlanta, GA; Menlo Park, CA
+12/2018 – 12/2020
+• Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.
+• Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.
+• Led teams of 20+ consultants on high-profile Fortune 50 engagements, delivering advanced technical solutions aligned with client needs.
 
-Common Spirit Health (Formerly CHI)
-Data Engineer
-09/2016 - 11/2017
-Denver, CO
- - Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.
+Wide Open West — Senior Data Engineer — Denver, CO
+11/2017 – 12/2018
+• Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.
+• Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide.
 
-AcuStream (Acquired by R1 RCM)
-Software Engineer - Data
-04/2013 - 09/2016
-Boulder, CO
- - Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual recurring revenue.
+Common Spirit Health — Data Engineer — Denver, CO
+09/2016 – 11/2017
+• Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.
+• Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days.
 
+AcuStream (R1) — Software Engineer - Data — Boulder, CO
+04/2013 – 09/2016
+• Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual revenue.
+• Migrated clients from SFTP to real-time APIs with Flask and Apache Kafka, reducing data delivery times by 50%.
 
-TECHNICAL SKILLS
-======
-Programming
-Python, SQL, GO, JavaScript, Rust, PHP, Java, Scala
-
-Big Data
-Airflow, Kafka, Spark, Flink, DBT, Snowflake, Redis, Databricks, Iceberg, NoSQL, ProtoBuff, Neo4J, MongoDB, PostgreSQL, Tableau, ReDash, Streamlit
-
-AI & ML
-OpenAI, LangChain, Llama.cpp, Ollama, Llama Index, PyTorch, TensorFlow, Hugging Face, Vector Databases, Embeddings, Agents, CuPy, Keras, Caffe, Scikit-Learn
-
-Amazon Web Services (AWS)
-EMR, SageMaker, S3, Redshift, Glue, MWAA, RDS, Kinesis, Firehose, DynamoDB, Bedrock, SNS
-
-Google Cloud Platform (GCP)
-BigQuery, Compute Engine, Dataflow, AutoML, Vertex AI Studio, PubSub, Cloud Run, Looker, Firebase
-
-Web Development
-Docker, Kubernetes, FastAPI, Flask, Django, Svelte, React, Node.js, HTML, GraphQL, Gin, Retool, Json
-
+SKILLS
+AI & Machine Learning: Amazon Bedrock, Chroma, Claude AI, Google Gemini, Hugging Face, Keras, LangChain, Mistral AI, OpenAI, PyTorch, TensorFlow, Vertex AI, Agent Platforms, Agent Harnesses, Agent Evaluation, LLM Evaluation, AI Classifiers, Model Governance, RAG
+Programming Languages: C++, Go, Java, JavaScript, PHP, Python, Rust, Scala, SQL, TypeScript
+Data Engineering: Airflow, Kafka, Pulsar, Cloud Composer, Cloud Data Fusion, Dataprep, Dataproc, DBT, Flink, Kinesis Firehose, PubSub
+Big Data: Hadoop, Iceberg, Spark, BigQuery, Databricks, Presto, Snowflake, Trino
+Data Science: Jupyter, Looker, NumPy, Pandas, Scikit-learn, Streamlit, Tableau
+Databases: Cassandra, DuckDB, DynamoDB, Elasticsearch, Firestore, MongoDB, MySQL, Neo4j, Pinecone, PostgreSQL, Redis, RocksDB, Supabase
+Cloud Computing: Azure, AWS, Google Cloud
+DevOps: Docker, Git, GitHub Actions, Grafana, Jaeger, Kubernetes, NGINX, OpenTelemetry, Prometheus, Splunk, Terraform
+Web Development: CSS3, Django, FastAPI, Flask, Gin, GraphQL, HTML5, Material UI, Node.js, React, Redux, SQLAlchemy, Tailwind CSS, Vite, WebAssembly
+Development Tools: Figma, Linux, Playwright, Selenium, Retool
 
 PROJECTS
-======
-TechCrunch - "Join Group via QR"
-Created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.Tech Crunch - https://tny.app/lybucwkc
 
-AI Agent Job Matching - Jobbr
-Created a custom AI agent that matches a resume to available jobs at tech companies. Using Python, Langchain, FastAPI and OpenAI. https://github.com/jckail/Jobbr
+Super Teacher — github.com/jckail/superteacher, the-super-teacher.com
+AI assistant to help teachers manage their classroom and create personalized lesson plans for students.
 
-Loyalty Management App - Pointup.io
-An AI web app for "All of your loyalty points in one place". https://www.pointup.io/https://github.com/jckail/point_bot
+Jobbr — github.com/jckail/Jobbr
+Agentic AI job matching a resume to available jobs at tech companies.
 
-Algorithmic Crypto Trading Project
-Created crypto trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS and SageMaker. https://github.com/jckail/crypto_trader
+goPilot — github.com/jckail/goPilot
+Agentic AI developer assistant and cli tool to help debug, develop, and compile apps written in GO.
 
-AI Developer Assistant - goPilot
-A custom AI CLI tool to help debug, develop, and compile apps written in GO. https://github.com/jckail/goPilot
+AI Billing System — github.com/jckail/ai_chat_billing_app
+A proof-of-concept application for tracking and billing AI chat thread interactions with real-time cost metrics and analytics.
 
+Portfolio Website — github.com/jckail/portfolio
+A fully custom-built portfolio site showcasing my skills and work.
+
+Pointup.io — github.com/jckail/point_bot, pointup.io
+An AI web app to manage 'All of your loyalty points in one place,' powered by a Selenium-WebDriver agent in AWS via elastic beanstalk, lambda, and s3.
+
+Join Group via QR — techcrunch.com
+Featured on TechCrunch - Won internal hackathon and created the ability for Facebook group admins to invite users to their groups by generating a QR Code.

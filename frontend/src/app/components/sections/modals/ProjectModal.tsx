@@ -1,22 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useMemo } from 'react';
 
 import ProjectIcon from '../../../../shared/components/project-icon/ProjectIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
-import { buttonize } from '../../../../shared/utils/a11y';
-import { findSkillKey } from '../../../../shared/utils/skills';
+import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackModalView } from '../../../../shared/utils/analytics';
-import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
-import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
+import { shareUrl } from '../../../../shared/utils/url-params';
+import { TechStackTags } from '../tech-stack-tags';
 
 import type { Project } from '../../../../types/resume';
-import type { Skill } from './SkillModal';
+import type { SkillsData } from '../../../../types/skills';
 import '../../../../styles/components/modal.css';
 import '../../../../styles/components/reading-progress.css';
 
 interface ProjectModalProps {
   projectKey: string;
   project: Project;
-  skillsData: Record<string, Skill>;
+  skillsData: SkillsData;
   onClose: () => void;
   onSelectSkill: (skillKey: string) => void;
 }
@@ -52,110 +51,82 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   onClose,
   onSelectSkill,
 }) => {
-  useEscapeKey(onClose);
-  const trapRef = useFocusTrap(true);
+  const titleId = useId();
 
   useEffect(() => {
     trackModalView(projectKey, 'project', project.title);
   }, [projectKey, project.title]);
 
-  const story = buildStory(project);
+  const story = useMemo(() => buildStory(project), [project]);
   const detail =
     project.description_detail?.trim() || project.description;
 
   return (
-    <div
-      className="skill-modal-overlay"
-      role="presentation"
-      onClick={e => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <DialogShell
+      overlayClassName="skill-modal-overlay"
+      className="skill-modal-content project-modal-content"
+      labelledBy={titleId}
+      onClose={onClose}
+      closeButton
     >
-      <div
-        ref={trapRef}
-        className="skill-modal-content project-modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-label={project.title}
-      >
-        <button className="modal-close-button" onClick={onClose} aria-label="Close">
-          &times;
-        </button>
-        <div className="modal-header">
-          <h5>{project.title}</h5>
-          <div className="modal-icon-wrapper">
-            <div className="icon-wrapper">
-              <ProjectIcon
-                name={project.logoPath || 'github-logo.svg'}
-                className="modal-skill-icon"
-                size={48}
-                aria-label={project.title}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="modal-body">
-          {story.length > 1 ? (
-            <div className="project-story" aria-label="Project story">
-              {story.map(step => (
-                <div key={step.label} className="project-story-step">
-                  <span className="project-story-label">{step.label}</span>
-                  <p className="project-story-text">{step.text}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="skill-description">{detail}</p>
-          )}
-
-          {project.tech_stack && project.tech_stack.length > 0 && (
-            <div className="skill-tags">
-              {project.tech_stack.map((tag, index) => {
-                const skillKey = findSkillKey(skillsData, tag);
-                return skillKey ? (
-                  <span
-                    key={index}
-                    className="skill-tag"
-                    style={{ cursor: 'pointer' }}
-                    {...buttonize(() => onSelectSkill(skillKey))}
-                  >
-                    {tag.replace(/-/g, ' ')}
-                  </span>
-                ) : (
-                  <span key={index} className="skill-tag">
-                    {tag.replace(/-/g, ' ')}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="project-modal-actions">
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="visit-website-btn"
-            >
-              View project
-            </a>
-            {project.link2 && (
-              <a
-                href={project.link2}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="visit-website-btn project-modal-secondary"
-              >
-                Live demo
-              </a>
-            )}
-            <CopyLinkButton
-              url={`${window.location.origin}${window.location.pathname}?project=${encodeURIComponent(projectKey)}`}
+      <div className="modal-header">
+        <h2 id={titleId}>{project.title}</h2>
+        <div className="modal-icon-wrapper">
+          <div className="icon-wrapper">
+            <ProjectIcon
+              name={project.logoPath || 'github-logo.svg'}
+              className="modal-skill-icon"
+              size={48}
+              aria-label={project.title}
             />
           </div>
         </div>
       </div>
-    </div>
+      <div className="modal-body">
+        {story.length > 1 ? (
+          <div className="project-story" aria-label="Project story">
+            {story.map(step => (
+              <div key={step.label} className="project-story-step">
+                <span className="project-story-label">{step.label}</span>
+                <p className="project-story-text">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="skill-description">{detail}</p>
+        )}
+
+        {project.tech_stack && project.tech_stack.length > 0 && (
+          <TechStackTags
+            tags={project.tech_stack}
+            skillsData={skillsData}
+            onSelectSkill={onSelectSkill}
+          />
+        )}
+
+        <div className="project-modal-actions">
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="visit-website-btn"
+          >
+            {project.link_label || 'View project'}
+          </a>
+          {project.link2 && (
+            <a
+              href={project.link2}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="visit-website-btn project-modal-secondary"
+            >
+              Live demo
+            </a>
+          )}
+          <CopyLinkButton url={shareUrl('project', projectKey)} />
+        </div>
+      </div>
+    </DialogShell>
   );
 };
 

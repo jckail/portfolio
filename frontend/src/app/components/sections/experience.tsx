@@ -1,104 +1,131 @@
-import React, { lazy, Suspense, memo } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
-import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
+import CompanyLogo, { isMarkOnlyLogo } from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
+import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
-import { findSkillKey } from '../../../shared/utils/skills';
+import { useDeepLink } from '../../../shared/hooks/use-deep-link';
+import { getOwn } from '../../../shared/utils/lookup';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
+import { SkillModalHost, prefetchSkillModal } from './modals/SkillModalHost';
+import { SectionPlaceholder } from './section-placeholder';
+import { TechStackTags } from './tech-stack-tags';
 
-import type { ExperienceItem } from './modals/ExperienceModal';
-import type { Skill } from './modals/SkillModal';
+import type { ExperienceData } from '../../../types/resume';
+import type { SkillsData } from '../../../types/skills';
 
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
-const SkillModal = lazy(() => import('./modals/SkillModal'));
 
-// Prefetch functions for the modals
-const prefetchExperienceModal = () => {
-  const modalPromise = import('./modals/ExperienceModal');
-  return modalPromise;
-};
+const prefetchExperienceModal = () => import('./modals/ExperienceModal');
 
-const prefetchSkillModal = () => {
-  const modalPromise = import('./modals/SkillModal');
-  return modalPromise;
-};
+// Company slug (the shareable ?company= value) <-> experience data key.
+// Maps, not object literals: the slug comes from the URL, and a plain object
+// would answer `constructor`/`__proto__` from Object.prototype.
+const SLUG_TO_KEY = new Map<string, string>([
+  ['together-ai', 'together_ai'],
+  ['prove-identity', 'prove'],
+  ['meta-facebook', 'meta'],
+  ['deloitte', 'deloitte'],
+  ['wide-open-west', 'wide_open_west'],
+  ['common-spirit-health', 'common_spirit_health'],
+  ['acustream-r1', 'acustream'],
+]);
+const KEY_TO_SLUG = new Map(Array.from(SLUG_TO_KEY, ([slug, key]) => [key, slug]));
 
-const ExperienceTimeline = memo(({ 
-  experience, 
+/** Resolve a ?company= value to an own key of the experience data, if any. */
+export function resolveExperienceKey(
+  experienceData: ExperienceData,
+  slug: string
+): string | undefined {
+  const key = SLUG_TO_KEY.get(slug) ?? slug;
+  return Object.hasOwn(experienceData, key) ? key : undefined;
+}
+
+/** Older roles show this many highlights inline; the rest are in the modal. */
+const OLDER_ROLE_HIGHLIGHTS = 2;
+
+/** Slug (or data key) from the URL to the data key used by the timeline. */
+const resolveKey = (slugOrKey: string): string => SLUG_TO_KEY.get(slugOrKey) ?? slugOrKey;
+
+const ExperienceTimeline = memo(({
+  experience,
   skillsData,
   onSelectExperience,
-  onSelectSkill 
-}: { 
-  experience: Record<string, ExperienceItem>;
-  skillsData: Record<string, Skill>;
+  onSelectSkill,
+}: {
+  experience: ExperienceData;
+  skillsData: SkillsData;
   onSelectExperience: (key: string) => void;
   onSelectSkill: (skillName: string) => void;
 }) => {
   return (
-    <div className="timeline">
-      {Object.entries(experience).map(([key, item]) => (
-        <div key={key} className="timeline-item">
-          <div className="timeline-header-wrapper">
-            {item.logoPath && (
-              <div
-                className="logo-link"
-                aria-label={`View ${item.company} experience details`}
-                onMouseEnter={prefetchExperienceModal}
-                style={{ cursor: 'pointer' }}
-                {...buttonize(() => onSelectExperience(key))}
-              >
-                <CompanyLogo 
-                  name={item.logoPath || "github-logo.svg"}
-                  size={64}
-                  aria-label={`${item.company} logo`}
-                  className="company-logo"
-                />
+    <ol className="timeline">
+      {Object.entries(experience).map(([key, item], index) => {
+        const isCurrent = index === 0 || /\bpresent\b/i.test(item.date ?? '');
+        const highlights = item.highlights ?? [];
+        const shown = isCurrent ? highlights : highlights.slice(0, OLDER_ROLE_HIGHLIGHTS);
+        return (
+          <li key={key} className={`timeline-item${isCurrent ? ' is-current' : ''}`}>
+            <div className="timeline-header-wrapper">
+              {item.logoPath && (
+                <div
+                  className={`logo-link${isMarkOnlyLogo(item.logoPath) ? ' logo-link--mark' : ''}`}
+                  onMouseEnter={prefetchExperienceModal}
+                  {...buttonize(() => onSelectExperience(key))}
+                >
+                  {/* The logo is decorative; the name comes from the hidden text so it
+                      never contradicts what is drawn (Lighthouse
+                      label-content-name-mismatch). */}
+                  <CompanyLogo
+                    name={item.logoPath}
+                    size={64}
+                    aria-hidden
+                    className="company-logo"
+                  />
+                  <span className="sr-only">{`View ${item.company} experience details`}</span>
+                </div>
+              )}
+              <div className="timeline-header">
+                <h3>{item.company}</h3>
+                <p className="timeline-title">{item.title}</p>
               </div>
-            )}
-            <div className="timeline-header">
-              <h3>{item.company}</h3>
-              <h4>{item.title}</h4>
               <div className="timeline-meta">
                 <span className="date">{item.date}</span>
                 <span className="location">{item.location}</span>
               </div>
             </div>
-          </div>
-          <div className="experience-highlights">
-            <div className="skill-tags">
-              {item.tech_stack.map((tag: string, index: number) => {
-                const skillKey = findSkillKey(skillsData, tag);
-                return skillKey ? (
-                  <span
-                    key={index}
-                    className="skill-tag"
-                    onMouseEnter={prefetchSkillModal}
-                    style={{ cursor: 'pointer' }}
-                    {...buttonize(() => onSelectSkill(skillKey))}
-                  >
-                    {tag.replace(/-/g, ' ')}
-                  </span>
-                ) : (
-                  <span key={index} className="skill-tag">
-                    {tag.replace(/-/g, ' ')}
-                  </span>
-                );
-              })}
-            </div>
-            
-            {item.highlights && (
+
+            {shown.length > 0 && (
               <ul className="highlights">
-                {item.highlights.map((highlight, idx) => (
+                {shown.map((highlight, idx) => (
                   <li key={idx}>{highlight}</li>
                 ))}
               </ul>
             )}
-          </div>
-        </div>
-      ))}
-    </div>
+
+            <div className="timeline-footer">
+              <TechStackTags
+                tags={item.tech_stack}
+                skillsData={skillsData}
+                onSelectSkill={onSelectSkill}
+                onSkillHover={prefetchSkillModal}
+              />
+              <button
+                type="button"
+                className="btn-link timeline-more"
+                data-experience-key={key}
+                onClick={() => onSelectExperience(key)}
+                onMouseEnter={prefetchExperienceModal}
+              >
+                Role details<span className="sr-only">{` for ${item.company}`}</span>
+              </button>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 });
 ExperienceTimeline.displayName = 'ExperienceTimeline';
@@ -107,46 +134,69 @@ ExperienceTimeline.displayName = 'ExperienceTimeline';
 const Experience: React.FC = () => {
   const { experienceData, skillsData, isLoading, error } = useData();
   const { selectedExperience, setSelectedExperience } = useExperience();
-  const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
-  // Map company slugs to experience keys
-  const companyKeyMap: { [key: string]: string } = {
-    'together-ai': 'together_ai',
-    'prove-identity': 'prove',
-    'meta-facebook': 'meta',
-    'deloitte': 'deloitte',
-    'wide-open-west': 'wide_open_west',
-    'common-spirit-health': 'common_spirit_health',
-    'acustream-r1': 'acustream'
-  };
-
-  // Map experience keys to company slugs
-  const keyCompanyMap: { [key: string]: string } = {
-    'together_ai': 'together-ai',
-    'prove': 'prove-identity',
-    'meta': 'meta-facebook',
-    'deloitte': 'deloitte',
-    'wide_open_west': 'wide-open-west',
-    'common_spirit_health': 'common-spirit-health',
-    'acustream': 'acustream-r1'
-  };
-
-  const handleSelectExperience = (key: string) => {
+  // Stable callbacks keep the memoised timeline from re-rendering whenever a
+  // modal opens or closes.
+  const handleSelectExperience = useCallback(
     // useExperience mirrors this state into the ?company= URL parameter
-    setSelectedExperience(keyCompanyMap[key] || key);
-  };
+    (key: string) => setSelectedExperience(KEY_TO_SLUG.get(key) ?? key),
+    [setSelectedExperience]
+  );
+  const closeExperience = useCallback(() => setSelectedExperience(null), [setSelectedExperience]);
+  // The role dialog the skill was opened from, so focus can go back to its
+  // "Role details" button when the skill dialog closes (the role dialog is
+  // unmounted by then, so there is nothing else to return to).
+  const skillOpenedFromRef = useRef<string | null>(null);
+  const selectedExperienceRef = useRef(selectedExperience);
+  selectedExperienceRef.current = selectedExperience;
+  const closeSkill = useCallback(() => {
+    setSelectedSkill(null);
+    const from = skillOpenedFromRef.current;
+    skillOpenedFromRef.current = null;
+    if (!from) return;
+    requestAnimationFrame(() => {
+      const buttons = document.querySelectorAll<HTMLElement>('[data-experience-key]');
+      Array.from(buttons)
+        .find(button => button.dataset.experienceKey === from)
+        ?.focus({ preventScroll: true });
+    });
+  }, []);
+  // One dialog at a time: close the role dialog before the skill opens on top
+  // of it (audit F-3), as projects.tsx does.
+  const openSkillFromTimeline = useCallback((skillKey: string) => {
+    skillOpenedFromRef.current = null;
+    setSelectedSkill(skillKey);
+  }, []);
+  const openSkillFromRole = useCallback(
+    (skillKey: string) => {
+      const current = selectedExperienceRef.current;
+      skillOpenedFromRef.current = current ? resolveKey(current) : null;
+      setSelectedExperience(null);
+      setSelectedSkill(skillKey);
+    },
+    [setSelectedExperience]
+  );
 
-  if (error) return <div>Error: {error}</div>;
+  useDeepLink({
+    param: 'company',
+    value: selectedExperience,
+    ready: !!experienceData,
+    valid: !!experienceData && !!selectedExperience && !!resolveExperienceKey(experienceData, selectedExperience),
+    sectionId: 'experience',
+    clear: closeExperience,
+  });
+
+  if (error) return <DataError what="the experience section" />;
 
   if (isLoading || !experienceData || !skillsData) {
-    return (
-      <section id="experience" className="section-container">
-        <div className="section-content">
-          <LoadingSpinner />
-        </div>
-      </section>
-    );
+    return <SectionPlaceholder id="experience" />;
   }
+
+  const experienceKey = selectedExperience
+    ? resolveExperienceKey(experienceData, selectedExperience)
+    : undefined;
+  const selected = getOwn(experienceData, experienceKey);
 
   return (
     <section id="experience" className="section-container">
@@ -154,35 +204,27 @@ const Experience: React.FC = () => {
         <h2>Experience</h2>
       </div>
       <div className="section-content">
-        <ExperienceTimeline 
+        <ExperienceTimeline
           experience={experienceData}
           skillsData={skillsData}
           onSelectExperience={handleSelectExperience}
-          onSelectSkill={setSelectedSkill}
+          onSelectSkill={openSkillFromTimeline}
         />
       </div>
 
-      {selectedExperience && experienceData[companyKeyMap[selectedExperience] || selectedExperience] && (
+      {selected && (
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
-            experience={experienceData[companyKeyMap[selectedExperience] || selectedExperience]}
-            experienceKey={selectedExperience}
+            experience={selected}
+            experienceKey={selectedExperience ?? undefined}
             skillsData={skillsData}
-            onClose={() => setSelectedExperience(null)}
-            onSelectSkill={setSelectedSkill}
+            onClose={closeExperience}
+            onSelectSkill={openSkillFromRole}
           />
         </Suspense>
       )}
 
-      {selectedSkill && skillsData[selectedSkill] && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <SkillModal
-            skill={skillsData[selectedSkill]}
-            skillKey={selectedSkill}
-            onClose={() => setSelectedSkill(null)}
-          />
-        </Suspense>
-      )}
+      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
     </section>
   );
 };

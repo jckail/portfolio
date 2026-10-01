@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { getSessionId, trackPageView, trackAnchorChange, trackSectionView } from './analytics';
+import {
+  getSessionId,
+  trackPageView,
+  trackAnchorChange,
+  trackSectionView,
+  trackChatOpen,
+} from './analytics';
 import { COOKIE_CONSENT_KEY } from './cookie-consent';
 
 describe('analytics', () => {
@@ -102,6 +108,61 @@ describe('analytics', () => {
         (call) => call[1] === 'page_view'
       );
       expect(pageViewCalls).toHaveLength(1);
+    });
+  });
+
+  describe('consent gating of the session id', () => {
+    it('does not create a session id when consent is denied', async () => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
+      await trackChatOpen();
+      expect(sessionStorage.getItem('ga_session_id')).toBeNull();
+      expect(window.gtag).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('anchor allowlist', () => {
+    // URL fragments are attacker-controlled; only known section ids may
+    // reach GA, so a crafted link cannot plant arbitrary strings (or PII)
+    // in reports.
+    const calls = () => (window.gtag as ReturnType<typeof vi.fn>).mock.calls;
+
+    it('drops an unknown anchor from page_path', async () => {
+      window.history.replaceState({}, '', '/#someone@example.com');
+      await trackPageView('/');
+      expect(window.gtag).toHaveBeenCalledWith(
+        'event',
+        'page_view',
+        expect.objectContaining({ page_path: '/' })
+      );
+      expect(JSON.stringify(calls())).not.toContain('example.com');
+    });
+
+    it('drops an unknown anchor passed in the path', async () => {
+      await trackPageView('/#evil-payload');
+      expect(window.gtag).toHaveBeenCalledWith(
+        'event',
+        'page_view',
+        expect.objectContaining({ page_path: '/' })
+      );
+    });
+
+    it('skips anchor_change for an unknown anchor', async () => {
+      await trackAnchorChange('someone@example.com', 'about');
+      expect(window.gtag).not.toHaveBeenCalled();
+    });
+
+    it('nulls an unknown previous anchor', async () => {
+      await trackAnchorChange('projects', 'junk-value');
+      expect(window.gtag).toHaveBeenCalledWith(
+        'event',
+        'anchor_change',
+        expect.objectContaining({ new_anchor: 'projects', previous_anchor: null })
+      );
+    });
+
+    it('skips section_view for an unknown section', async () => {
+      await trackSectionView('not-a-section');
+      expect(window.gtag).not.toHaveBeenCalled();
     });
   });
 });

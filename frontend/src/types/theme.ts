@@ -1,41 +1,8 @@
-export type Theme = 'light' | 'dark' | 'party';
+export const THEMES = ['light', 'dark', 'party'] as const;
 
-export interface ThemeState {
-  theme: Theme;
-}
+export type Theme = (typeof THEMES)[number];
 
-export interface ThemeColors {
-  primary: string;
-  secondary: string;
-  background: string;
-  surface: string;
-  text: string;
-  textSecondary: string;
-  border: string;
-  error: string;
-  success: string;
-  warning: string;
-}
-
-export interface ThemeConfig {
-  defaultTheme: Theme;
-  particles: {
-    dark: ThemeParticleConfig;
-    light: ThemeParticleConfig;
-  };
-}
-
-export interface ThemePreferences {
-  theme: Theme;
-  useSystemTheme: boolean;
-  autoSwitchTime?: {
-    darkStart: string; // HH:mm format
-    darkEnd: string; // HH:mm format
-  };
-}
-
-export interface ThemeParticleConfig {
-  background_color: string;
-  particle_color: string;
-  line_color: string;
+/** Narrows an untrusted string (URL param, storage, event detail) to a Theme. */
+export function isTheme(value: unknown): value is Theme {
+  return typeof value === 'string' && (THEMES as readonly string[]).includes(value);
 }

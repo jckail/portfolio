@@ -5,109 +5,218 @@
   --background-color: transparent;
   --surface-color: transparent;
   --section-background: transparent;
-  --section-background-blur: 9px;
   --text-color: #000000;
   --text-secondary: #535353;
   --border-color: #000000;
   --primary: #0403ff;
   --primary-hover: #000000;
   --primary-light: rgba(43, 43, 79, 0.1);
-  --primary-light-hover: rgba(4, 3, 255, 0.2);
   --primary-border: #000000;
-  --subsection-primary: #0303ff32;
-  --subsection-border: rgba(4, 3, 255, 0.4);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --background-color-invert: #000000;
   --solid-color: #ffffff;
-  --border-thickness: 3px;
-  --image-background: #ffffff;
+  --border-thickness: 1px;
   --underline-color: #000000;
-  --skill-tag-background:#000000;
-  --skill-tag-text: #ffffff;
+  /* Text on --primary / --primary-border fills (resume buttons).
+     White on #000 21:1, on #0403ff 8.6:1. */
+  --on-primary-text: #ffffff;
   /* Accent used as *text*. Must clear 4.5:1 against the page background,
      which --primary does not always do (see .theme-dark below). */
   --accent-text: #0403ff;
-  --ai-background-color: #000000;;
+  /* Opaque, page-contrasting focus indicator (WCAG 2.4.11 needs 3:1).
+     Deliberately NOT --primary-border, which is translucent by design. */
+  --focus-ring: #0403ff;  /* 8.6:1 on white */
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-opaque: #ffffff;
+  --border: rgba(0, 0, 0, 0.15);
+  --input-background: #f3f3f7;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: #0302b3;
+  /* Component tokens (see variables.css for the theme-independent scale) */
+  --page-bg: #ffffff;
+  --panel-bg: rgba(255, 255, 255, 0.88);
+  --panel-bg-strong: rgba(255, 255, 255, 0.96);
+  /* Together AI mark (assets/icons/companylogos/together.svg). The brand
+     lavender is 1.9:1 on white, under the 3:1 minimum for a graphic, so light
+     mode uses the same hue at 3.4:1; magenta and orange already pass. */
+  --together-magenta: #ef2cc1;
+  --together-lavender: #a271ed;
+  --together-orange: #fc4c02;
+  --panel-border: rgba(10, 10, 40, 0.12);
+  --panel-border-hover: rgba(4, 3, 255, 0.45);
+  --panel-blur: 8px;
+  --hairline: rgba(10, 10, 40, 0.1);
+  --rail-color: rgba(4, 3, 255, 0.25);
+  --chip-bg: #f0f0ff;
+  --chip-border: rgba(4, 3, 255, 0.16);
+  --chip-text: #0302b3;
+  --chip-hover-bg: #0403ff;
+  --chip-hover-text: #ffffff;
+  --btn-primary-bg: #0403ff;
+  --btn-primary-hover: #0302b3;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.7);
+  --btn-secondary-border: rgba(10, 10, 40, 0.22);
+  --btn-secondary-hover-bg: #f0f0ff;
+  --btn-secondary-text: #0a0a28;
+  --elevation-1: 0 1px 2px rgba(10, 10, 40, 0.06), 0 2px 8px -4px rgba(10, 10, 40, 0.08);
+  --elevation-2: 0 0 0 1px rgba(4, 3, 255, 0.18), 0 14px 32px -16px rgba(4, 3, 255, 0.35);
+  --particles-opacity: 0.55;
 }
 
 .theme-dark {
   --background-color: transparent;
   --surface-color: #0303ff11;
   --section-background: #0303ff1d;
-  --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #d4d4d4;
   --border-color: #0303ff11;
   --primary: #0403ff;
   --primary-hover: #3332ff;
   --primary-light: rgba(4, 3, 255, 0.2);
-  --primary-light-hover: rgba(4, 3, 255, 0.3);
   --primary-border: rgba(4, 3, 255, 0.4);
-  --subsection-primary: #0303ff56;
-  --subsection-border: rgba(4, 3, 255, 0.4);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
   --solid-color: #000000be;
-  --background-color-invert: #ffffff;
-  --border-thickness: 2px;
-  --image-background: #ffffff;
+  --border-thickness: 1px;
   --underline-color: #0403ff;
-  --skill-tag-background: rgba(4, 3, 255, 0.4);
-  --skill-tag-text: #ffffff;
+  /* White on #020166 (40% #0403ff over black) ~15:1, on #0403ff 8.6:1. */
+  --on-primary-text: #ffffff;
   /* #0403ff on black measures 2.46:1 (WCAG AA needs 4.5:1), so accent text
      uses a lightened tint (~7.4:1) while --primary stays for backgrounds. */
   --accent-text: #8b8aff;
-  --ai-background-color: rgba(4, 3, 255, 0.5);
+  --focus-ring: #8b8aff;  /* 7.4:1 on black */
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(6, 6, 20, 0.9);
+  --surface-opaque: #08081a;
+  --border: rgba(139, 138, 255, 0.25);
+  --input-background: #14142b;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: var(--primary-hover);
+  /* Component tokens (see variables.css for the theme-independent scale) */
+  --page-bg: #000000;
+  --panel-bg: rgba(9, 9, 36, 0.62);
+  --panel-bg-strong: rgba(9, 9, 36, 0.88);
+  --together-magenta: #ef2cc1;
+  --together-lavender: #caaef5;
+  --together-orange: #fc4c02;
+  --panel-border: rgba(139, 138, 255, 0.18);
+  --panel-border-hover: rgba(139, 138, 255, 0.5);
+  --panel-blur: 10px;
+  --hairline: rgba(139, 138, 255, 0.14);
+  --rail-color: rgba(139, 138, 255, 0.28);
+  --chip-bg: rgba(4, 3, 255, 0.24);
+  --chip-border: rgba(139, 138, 255, 0.28);
+  --chip-text: #e4e4ff;
+  --chip-hover-bg: #0403ff;
+  --chip-hover-text: #ffffff;
+  --btn-primary-bg: #0403ff;
+  --btn-primary-hover: #2524ff;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: rgba(9, 9, 36, 0.5);
+  --btn-secondary-border: rgba(139, 138, 255, 0.4);
+  --btn-secondary-hover-bg: rgba(4, 3, 255, 0.3);
+  --btn-secondary-text: #ffffff;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --elevation-2: 0 0 0 1px rgba(139, 138, 255, 0.28), 0 16px 40px -18px rgba(4, 3, 255, 0.7);
+  --particles-opacity: 0.6;
 }
 
 .theme-party {
   --background-color: transparent;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);
-  --section-background-blur: 2px;
   --text-color: #ff00ff;
   --text-secondary: #00ffff;
   --border-color: #ff00ff;
   --primary: #ff00ff;
   --primary-hover: #00ffff;
   --primary-light: rgba(255, 0, 255, 0.2);
-  --primary-light-hover: rgba(0, 255, 255, 0.3);
   --primary-border: #ff00ff;
-  --subsection-primary: rgba(255, 0, 255, 0.3);
-  --subsection-border: #00ffff;
-  --shadow-sm: 0 1px 2px rgba(255, 0, 255, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 255, 255, 0.3);
   --shadow-lg: 0 10px 15px rgba(255, 0, 255, 0.3);
-  --background-color-invert: #ffffff;
-  --border-thickness: 3px;
-  --image-background: #ffffff;
-  --skill-tag-background: #00ffff;
+  --border-thickness: 2px;
   /* White on cyan measures 1.25:1; black on cyan is 16.7:1. */
-  --skill-tag-text: #000000;
+  /* White on #ff00ff is 3.1:1; black is 6.7:1. */
+  --on-primary-text: #000000;
   --accent-text: #ff00ff;
-  --ai-background-color: #ff00ff;
+  --focus-ring: #ffff00;  /* 19.5:1 on black */
+  /* Were missing here, so modals had no fill and links no underline in party mode */
+  --solid-color: #000000e6;
+  --underline-color: #00ffff;
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(20, 0, 30, 0.9);
+  --surface-opaque: #14001e;
+  --border: rgba(255, 0, 255, 0.4);
+  --input-background: #22002e;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: var(--primary-hover);
+  /* Component tokens (see variables.css for the theme-independent scale) */
+  --page-bg: #000000;
+  --panel-bg: rgba(20, 0, 30, 0.6);
+  --panel-bg-strong: rgba(20, 0, 30, 0.9);
+  --together-magenta: #ef2cc1;
+  --together-lavender: #caaef5;
+  --together-orange: #fc4c02;
+  --panel-border: rgba(255, 0, 255, 0.5);
+  --panel-border-hover: #00ffff;
+  --panel-blur: 4px;
+  --hairline: rgba(255, 0, 255, 0.35);
+  --rail-color: #00ffff;
+  --chip-bg: #00ffff;
+  --chip-border: #00ffff;
+  --chip-text: #000000;
+  --chip-hover-bg: #ff00ff;
+  --chip-hover-text: #000000;
+  --btn-primary-bg: #ff00ff;
+  --btn-primary-hover: #00ffff;
+  --btn-primary-text: #000000;
+  --btn-secondary-bg: rgba(20, 0, 30, 0.6);
+  --btn-secondary-border: #ff00ff;
+  --btn-secondary-hover-bg: rgba(255, 0, 255, 0.25);
+  --btn-secondary-text: #ff00ff;
+  --elevation-1: 0 4px 12px rgba(255, 0, 255, 0.25);
+  --elevation-2: 0 0 0 1px #00ffff, 0 0 28px rgba(0, 255, 255, 0.45);
+  --particles-opacity: 1;
 }
 
 /* Base styles */
+/* border-box everywhere: width:100% plus padding was pushing .main-content,
+   the footer and the doodle board 5-22px past a 390px viewport */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 600;
+  font-family: var(--font-body);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Quantico', sans-serif !important;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-body);
+  color: var(--text-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   position: relative;
 }
 
@@ -119,27 +228,111 @@ body * {
   transition-timing-function: ease;
 }
 
-/* Font styles */
-p {
-  font-family: 'Montserrat', sans-serif !important;
-  font-weight: 400;
-}
-
+/* Reading text is Montserrat (inherited from body); headings and UI labels
+   (buttons, chips, kbd) use the Quantico display face. */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Quantico', sans-serif !important;
+  font-family: var(--font-display);
   font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: 0.005em;
+  text-wrap: balance;
 }
 
-/* Party mode animations */
-.theme-party * {
-  animation: party-colors 5s infinite;
+p {
+  text-wrap: pretty;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+kbd {
+  font-family: var(--font-display);
+}
+
+a {
+  color: var(--accent-text);
+  text-underline-offset: 0.18em;
+}
+
+::selection {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* Party mode: ONE animation on <body> drives the colour cycle. Every other
+   element takes `color: inherit`, so the cycle is a single animated node
+   instead of one infinite animation per element (about 800 of them, which
+   cost roughly 4s of style recalculation per 5s and made Lighthouse time out).
+   Controls with their own fill are excluded so they keep their static,
+   contrast-checked foreground (e.g. #e6ff19 text on a #00ffff tag measured
+   1.11:1). prefers-reduced-motion collapses the animation to one frame.
+   steps(6) per colour leg: each colour change re-resolves style for the whole
+   page (~50ms in a throttled headless run), so it runs at about 5Hz, not 60.
+   It sits on body, not <html>: the same animation on <html> forced a full
+   style recalculation of the whole tree every frame (about 40ms each). */
+.theme-party body {
+  animation: party-colors 5s steps(6, end) infinite;
+}
+
+/* Controls that keep their own foreground: no transitions either, or each
+   one would start a colour transition on every cycle step. */
+.theme-party :is(
+    .skill-tag,
+    .skill-tag *,
+    .skill-chip,
+    .skill-chip *,
+    .btn-primary,
+    .btn-primary *,
+    .btn:hover,
+    .btn:hover *,
+    .btn-icon:hover,
+    .btn-icon:hover *,
+    .download-button,
+    .download-button *,
+    .contact-phone-button,
+    .skills-filter-chip:hover,
+    .skills-filter-chip.is-active
+  ) {
+  transition: none;
+}
+
+.theme-party
+  :not(
+    body,
+    .skill-tag,
+    .skill-tag *,
+    .skill-chip,
+    .skill-chip *,
+    .btn-primary,
+    .btn-primary *,
+    .btn:hover,
+    .btn:hover *,
+    .btn-icon:hover,
+    .btn-icon:hover *,
+    .download-button,
+    .download-button *,
+    .contact-phone-button,
+    .skills-filter-chip:hover,
+    .skills-filter-chip.is-active
+  ) {
+  color: inherit !important;
+  transition-property: border-color !important;
+}
+
+/* The 87.5% stop keeps the green -> magenta leg bright: interpolated
+   straight through sRGB it dipped to about #a15ea1, 4.4:1 on the party
+   background, and Lighthouse failed contrast whenever it sampled that phase. */
 @keyframes party-colors {
   0% { color: #ff00ff; }
   25% { color: #00ffff; }
   50% { color: #ffff00; }
   75% { color: #00ff00; }
+  87.5% { color: #a0a0ff; }
   100% { color: #ff00ff; }
 }
 
@@ -161,7 +354,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: none !important;
 }
 
-/* Particles layer */
+/* Particles layer: kept, but quieter than the content in front of it */
 #multi-particles {
   position: fixed !important;
   top: 0;
@@ -169,6 +362,13 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   height: 100%;
   z-index: 1;
+}
+
+/* tsparticles paints its own full-screen canvas (#tsparticles-N). Its fill
+   matches the <html> background, so fading it only quietens the dots and
+   lines, never the page colour. */
+[id^='tsparticles-'] canvas {
+  opacity: var(--particles-opacity, 1);
 }
 
 /* Content layer */

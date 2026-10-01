@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 
 import { useAdminStore } from '../../../shared/stores/admin-store';
-import AdminLogin from './admin-login';
 import TelemetryBanner from '../../../shared/components/telemetry/telemetry-banner';
+
+// Loaded on demand: the login dialog (and its CSS) is only needed once someone
+// opens it, so a normal visit does not pay for it on first load.
+const AdminLogin = lazy(() => import('./admin-login'));
 
 const AdminHandler: React.FC = () => {
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-  const { isLoggedIn, verifyToken } = useAdminStore();
+  const isLoggedIn = useAdminStore(state => state.isLoggedIn);
+  const verifyToken = useAdminStore(state => state.verifyToken);
 
   // Check for existing token on mount
   useEffect(() => {
@@ -36,11 +40,15 @@ const AdminHandler: React.FC = () => {
   return (
     <>
       {isLoggedIn && <TelemetryBanner isAdminLoggedIn={isLoggedIn} />}
-      <AdminLogin 
-        isOpen={isAdminLoginOpen} 
-        onClose={() => setIsAdminLoginOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
+      {isAdminLoginOpen && (
+        <Suspense fallback={null}>
+          <AdminLogin
+            isOpen={isAdminLoginOpen}
+            onClose={() => setIsAdminLoginOpen(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

@@ -5,11 +5,33 @@ import React, { useMemo } from 'react';
  *
  * Supports: paragraphs, line breaks, **bold**, *italic*, `code`,
  * [links](https://...), unordered/ordered lists, and fenced ```code``` blocks.
- * Rendered as React elements (no dangerouslySetInnerHTML). Only http(s) and
- * mailto links are allowed.
+ * Rendered as React elements (no dangerouslySetInnerHTML). Only https links
+ * become anchors; anything else renders as its label. Model output can be
+ * steered by prompt injection, so a link to a host outside TRUSTED_LINK_HOSTS
+ * shows its real hostname next to the label instead of hiding it.
  */
 
-const SAFE_URL = /^(https?:|mailto:)/i;
+const TRUSTED_LINK_HOSTS: ReadonlySet<string> = new Set([
+  'jordan-kail.com',
+  'www.jordan-kail.com',
+  'jckail.com',
+  'www.jckail.com',
+  'github.com',
+  'linkedin.com',
+  'www.linkedin.com',
+  'together.ai',
+  'www.together.ai',
+]);
+
+/** Parse an https URL; null for any other scheme or an unparseable href. */
+function parseSafeUrl(href: string): URL | null {
+  try {
+    const url = new URL(href);
+    return url.protocol === 'https:' ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
@@ -36,11 +58,13 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
       const linkMatch = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(link);
       if (linkMatch) {
         const [, label, href] = linkMatch;
-        if (SAFE_URL.test(href)) {
+        const url = parseSafeUrl(href);
+        if (url) {
+          const host = url.hostname.toLowerCase();
           nodes.push(
             <a
               key={key}
-              href={href}
+              href={url.href}
               target="_blank"
               rel="noopener noreferrer"
               className="chat-md-link"
@@ -48,6 +72,13 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
               {label}
             </a>
           );
+          if (!TRUSTED_LINK_HOSTS.has(host)) {
+            nodes.push(
+              <span key={`${key}-host`} className="chat-md-link-host">
+                {` (${host})`}
+              </span>
+            );
+          }
         } else {
           nodes.push(label);
         }

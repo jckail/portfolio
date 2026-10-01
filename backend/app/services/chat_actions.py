@@ -1,9 +1,15 @@
-"""Client-executable actions the assistant can request.
+"""Client-executable (browser) actions the assistant can request.
+
+The execute-type tools (contact, phone, meeting) and search_portfolio live in
+chat_tools.py; `prefill_contact` is no longer offered to the model but its
+validator stays for older clients.
 
 The model emits these via Anthropic tool_use; the WebSocket layer forwards
 them as `{type: "action", ...}` frames so the frontend can navigate the site.
 """
 from __future__ import annotations
+
+import re
 
 # Tools Claude may call. Keep schemas tight so the model can't invent targets.
 CHAT_TOOLS: list[dict] = [
@@ -30,6 +36,7 @@ CHAT_TOOLS: list[dict] = [
                 }
             },
             "required": ["section"],
+            "additionalProperties": False,
         },
     },
     {
@@ -55,6 +62,7 @@ CHAT_TOOLS: list[dict] = [
                 },
             },
             "required": ["kind"],
+            "additionalProperties": False,
         },
     },
     {
@@ -63,31 +71,7 @@ CHAT_TOOLS: list[dict] = [
         "input_schema": {
             "type": "object",
             "properties": {},
-        },
-    },
-    {
-        "name": "prefill_contact",
-        "description": (
-            "Open the contact form and optionally prefill subject/message/"
-            "visitor email when the visitor wants to reach Jordan. Draft a "
-            "professional message from the conversation context."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "from_email": {
-                    "type": "string",
-                    "description": "Visitor email if they provided one",
-                },
-                "subject": {
-                    "type": "string",
-                    "description": "Suggested email subject",
-                },
-                "message": {
-                    "type": "string",
-                    "description": "Suggested message body the visitor can edit",
-                },
-            },
+            "additionalProperties": False,
         },
     },
     {
@@ -105,6 +89,7 @@ CHAT_TOOLS: list[dict] = [
                 }
             },
             "required": ["theme"],
+            "additionalProperties": False,
         },
     },
 ]
@@ -114,6 +99,40 @@ ALLOWED_SECTIONS = frozenset(
 )
 ALLOWED_MODAL_KINDS = frozenset({"company", "skill", "project", "contact"})
 ALLOWED_THEMES = frozenset({"light", "dark", "party"})
+
+# Modal keys end up as URL params the frontend looks up in plain JS objects.
+# Requiring a leading alphanumeric rules out `__proto__`-style names; the
+# reserved set covers the one lowercase name that still resolves through the
+# prototype chain. Skill keys contain dots (`node.js`), hence the `.`.
+_MODAL_KEY_RE = re.compile(r"[a-z0-9][a-z0-9._-]{0,63}")
+_RESERVED_MODAL_KEYS = frozenset({"constructor"})
+
+
+def _known_modal_keys(kind: str) -> frozenset[str] | None:
+    """Data keys for kinds whose deep links use them verbatim.
+
+    Companies are excluded: their deep links accept frontend aliases (e.g.
+    `meta-facebook`) that do not appear in experience.json. Returns None when
+    the data cannot be loaded, leaving the charset check as the only guard.
+    """
+    try:
+        # Imported lazily: the models package pulls in FastAPI and the data files.
+        from backend.app.models import load_projects, load_skills
+
+        if kind == "skill":
+            return frozenset(load_skills().root)
+        if kind == "project":
+            return frozenset(load_projects().root)
+    except Exception:
+        return None
+    return None
+
+
+def _valid_modal_key(kind: str, key: str) -> bool:
+    if not _MODAL_KEY_RE.fullmatch(key) or key in _RESERVED_MODAL_KEYS:
+        return False
+    known = _known_modal_keys(kind)
+    return known is None or key in known
 
 
 def normalize_tool_action(name: str, raw_input: dict | None) -> dict | None:
@@ -130,13 +149,12 @@ def normalize_tool_action(name: str, raw_input: dict | None) -> dict | None:
         kind = str(payload.get("kind", "")).strip().lower()
         if kind not in ALLOWED_MODAL_KINDS:
             return None
-        key = str(payload.get("key", "")).strip()
-        if kind != "contact" and not key:
+        if kind == "contact":
+            return {"action": "open_modal", "kind": kind, "key": None}
+        key = str(payload.get("key", "")).strip().lower()
+        if not _valid_modal_key(kind, key):
             return None
-        # Bound key length to avoid absurd URL params
-        if len(key) > 64:
-            return None
-        return {"action": "open_modal", "kind": kind, "key": key or None}
+        return {"action": "open_modal", "kind": kind, "key": key}
 
     if name == "download_resume":
         return {"action": "download_resume"}

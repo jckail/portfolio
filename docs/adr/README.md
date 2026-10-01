@@ -10,3 +10,18 @@ format below, number sequentially, keep it to half a page.
 | [0002](0002-supabase-for-data-and-auth.md) | Supabase for data, auth, and chat logging |
 | [0003](0003-cloud-run-for-hosting.md) | Cloud Run over GKE/App Engine for hosting |
 | [0004](0004-deploy-verify-before-promote.md) | Deploy with zero traffic, verify, then promote |
+| [0005](0005-vertex-provider-service-account-bound-key.md) | Vertex AI behind a provider layer, with a service-account-bound key |
+| [0006](0006-execute-tools-need-visitor-confirmation.md) | Execute tools are never run by the model |
+| [0007](0007-content-truthfulness-guard.md) | Published content states only sourced facts; placeholders fail the build |
+
+
+## Related reviews
+
+Not ADRs, but the reasoning behind several recent changes lives here:
+
+- [`../audit-2026-09-06.md`](../audit-2026-09-06.md) — two multi-agent audit
+  rounds; regressions the first round introduced, and why the tests missed them.
+- [`../audit-2026-09-06-open-findings.md`](../audit-2026-09-06-open-findings.md)
+  — the open backlog from those rounds.
+- [`../security-review-2026-09-05.md`](../security-review-2026-09-05.md) —
+  cloud/CI trust boundary review.

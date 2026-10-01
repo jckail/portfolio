@@ -1,11 +1,32 @@
 import asyncio
-import sys
+import logging
+import time
 from datetime import UTC, datetime
 from typing import Any
 
 from supabase import Client, create_client
 
 from backend.app.config import get_settings
+
+logger = logging.getLogger(__name__)
+
+# A Supabase outage fails every log batch (every 5 seconds) and chat write.
+# One line per window, with a count, instead of one per failure; the exception
+# text is left out because provider errors can carry project URLs.
+_WARN_INTERVAL_SECONDS = 60.0
+_last_warned: dict[str, float] = {}
+_suppressed: dict[str, int] = {}
+
+
+def _warn_sink_failure(what: str) -> None:
+    now = time.monotonic()
+    last = _last_warned.get(what)
+    if last is not None and now - last < _WARN_INTERVAL_SECONDS:
+        _suppressed[what] = _suppressed.get(what, 0) + 1
+        return
+    _last_warned[what] = now
+    skipped = _suppressed.pop(what, 0)
+    logger.warning("Failed to store %s in Supabase (%d similar failures suppressed)", what, skipped)
 
 
 def get_supabase_config():
@@ -45,46 +66,6 @@ class SupabaseClient:
             cls.initialize_config()
             cls._admin_client = create_client(cls._url, cls._service_role_key)
         return cls._admin_client
-
-    @classmethod
-    async def create_admin_user(cls, email: str, password: str):
-        """Create a new admin user using the service role client."""
-        try:
-            admin_client = cls.get_admin_client()
-            response = await asyncio.to_thread(
-                admin_client.auth.admin.create_user,
-                {
-                    "email": email,
-                    "password": password,
-                    "email_confirm": True
-                }
-            )
-
-            if response.user:
-                # supabase-py rpc() is synchronous; run it off the event loop
-                await asyncio.to_thread(
-                    lambda: admin_client.rpc(
-                        'set_claim',
-                        {
-                            'uid': response.user.id,
-                            'claim': 'role',
-                            'value': 'admin'
-                        }
-                    ).execute()
-                )
-            return response
-        except Exception as e:
-            raise Exception(f"Failed to create admin user: {str(e)}")
-
-    @classmethod
-    async def verify_token(cls, token: str) -> dict[str, Any] | None:
-        """Verify a JWT token and return user data if valid."""
-        try:
-            admin_client = cls.get_admin_client()
-            user = await asyncio.to_thread(admin_client.auth.get_user, token)
-            return user.user if user else None
-        except Exception:
-            return None
 
     @classmethod
     async def sign_in_with_password(cls, email: str, password: str):
@@ -134,8 +115,8 @@ class SupabaseClient:
                 lambda: admin_client.table('logs').insert(log_entry).execute()
             )
             return result
-        except Exception as e:
-            print(f"Failed to store log in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("log entry")
             return None
 
     @classmethod
@@ -150,6 +131,7 @@ class SupabaseClient:
                     'timestamp': datetime.now(UTC).isoformat(),
                     'level': log['level'].upper(),
                     'message': log['message'],
+                    'session_uuid': log.get('session_uuid'),
                     'metadata': log['metadata'],
                     'source': log['source'],
                     'ip_address': log['ip_address']
@@ -162,8 +144,8 @@ class SupabaseClient:
                 )
                 return result
             return None
-        except Exception as e:
-            print(f"Failed to store log batch in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("log batch")
             return None
 
     @classmethod
@@ -182,8 +164,8 @@ class SupabaseClient:
                 lambda: admin_client.table('portfolio_assistant_messages').insert(message_entry).execute()
             )
             return result
-        except Exception as e:
-            print(f"Failed to store chat message in Supabase: {str(e)}", file=sys.stderr)
+        except Exception:
+            _warn_sink_failure("chat message")
             return None
 
 # Create a module-level interface

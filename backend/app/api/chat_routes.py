@@ -8,8 +8,10 @@ import asyncio
 import json
 import logging
 import re
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 
 from backend.app.config import get_settings
 from backend.app.services.chat_service import (
@@ -17,6 +19,7 @@ from backend.app.services.chat_service import (
     MAX_USER_MESSAGE_CHARS,
     manager,
 )
+from backend.app.utils.events import log_event
 from backend.app.utils.rate_limit import client_ip
 from backend.app.utils.supabase_client import supabase
 
@@ -32,21 +35,31 @@ status_router = APIRouter(prefix="/chat")
 # Session ids are opaque to the server, but they key per-connection state, so
 # bound the shape to keep the key space sane and the value log-safe.
 _CLIENT_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
+# The GA session id is client-supplied and written to Supabase, so it gets the
+# same bounded, boring shape or is ignored.
+_GA_SESSION_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 # Client-persisted transcripts are replayed on reconnect; cap the frame before
 # it is walked so a huge array cannot be allocated on our behalf.
 MAX_SEEDED_TURNS = 100
 
 
-@status_router.get("/status")
-async def chat_status():
+class ChatStatus(BaseModel):
+    available: bool
+
+
+@status_router.get("/status", response_model=ChatStatus)
+async def chat_status() -> ChatStatus:
     """Report whether the AI assistant is available.
 
     The frontend hides the chat button when the assistant cannot work
     (e.g. no Anthropic API key configured) instead of letting visitors
     discover the failure through unanswered messages.
+
+    Also false while the auth circuit breaker is open, so a rejected API key
+    hides the button instead of failing every visitor message.
     """
-    return {"available": settings.chat_available}
+    return ChatStatus(available=manager.is_available())
 
 
 def _origin_allowed(websocket: WebSocket) -> bool:
@@ -56,6 +69,17 @@ def _origin_allowed(websocket: WebSocket) -> bool:
     never applies here and any page on the internet could otherwise open a
     socket and spend our Anthropic budget from a visitor's browser.
 
+    Same-origin is always allowed. Cross-site request forgery requires, by
+    definition, an Origin that differs from the host being addressed: a page on
+    evil.tld sends `Origin: https://evil.tld` with `Host: jordan-kail.com`, and
+    the mismatch is what identifies it. Checking only ALLOWED_ORIGINS meant the
+    chat died on every hostname that served the site but wasn't in that
+    variable — in production that was three of the four live domains, including
+    the one declared canonical.
+
+    The configured allow-list still applies on top, for genuinely cross-origin
+    callers such as the Vite dev server on :5173 talking to the API on :8080.
+
     A *missing* Origin is allowed: browsers always send one on a WS handshake,
     so absence means a non-browser client, which can spoof any value anyway.
     Those callers are bounded by the peer-keyed rate limits instead.
@@ -63,7 +87,20 @@ def _origin_allowed(websocket: WebSocket) -> bool:
     origin = websocket.headers.get("origin")
     if origin is None:
         return True
-    return origin in settings.allowed_origins
+    if origin in settings.allowed_origins:
+        return True
+
+    # Same-origin: the Origin's host:port must equal the Host we were addressed
+    # by. Both are browser-controlled in the sense that a non-browser client can
+    # set either, but a browser will never let a cross-site page forge Origin.
+    host = websocket.headers.get("host")
+    if not host:
+        return False
+    try:
+        origin_netloc = urlparse(origin).netloc
+    except ValueError:
+        return False
+    return bool(origin_netloc) and origin_netloc.lower() == host.lower()
 
 
 async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict, ip: str):
@@ -78,6 +115,14 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             if isinstance(turns, list):
                 turns = turns[:MAX_SEEDED_TURNS]
             manager.seed_history(client_id, turns)
+            return
+
+        if data.get("type") == "confirm_action":
+            await manager.handle_confirm(client_id, data, ip)
+            return
+
+        if data.get("type") == "cancel_action":
+            await manager.handle_cancel(client_id, data)
             return
 
         if data.get("type") != "message" or not data.get("content"):
@@ -106,6 +151,8 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
 
         # Store user message in Supabase
         ga_session_id = data.get('ga_session_id')
+        if not (isinstance(ga_session_id, str) and _GA_SESSION_RE.fullmatch(ga_session_id)):
+            ga_session_id = None
         if ga_session_id:
             await supabase.store_chat_message(
                 google_analytics_session_id=ga_session_id,
@@ -127,10 +174,13 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
 @router.websocket("/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     if not _origin_allowed(websocket):
+        log_event("ws.rejected_origin")
         await websocket.close(code=1008)
         return
 
-    if not _CLIENT_ID_RE.match(client_id):
+    # fullmatch, not match: `$` also matches before a trailing newline, so
+    # /ws/AAAAAAAA%0A would pass and land a stray newline in the logs.
+    if not _CLIENT_ID_RE.fullmatch(client_id):
         await websocket.close(code=1008)
         return
 

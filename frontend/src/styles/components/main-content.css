@@ -1,120 +1,121 @@
-
 .main {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow-x: hidden;
-    position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
 }
-  
+
 .main main {
-    flex: 1;
-    width: 90%;
-    margin: 0 auto;
-    padding: var(--header-height) 0 var(--spacing-lg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  padding: calc(var(--header-height) + var(--spacing-xl)) 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .main-content {
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.main-content-inner {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* Add styles for sections */
-.section {
-    min-height: calc(100vh - var(--header-height));
-    padding: 60px 0;
-    scroll-margin-top: calc(var(--header-height) + 20px);
-    position: relative;
-}
-
-/* First section should start at the top */
-.section:first-child {
-    padding-top: 0;
+  width: 100%;
+  max-width: calc(var(--max-width) + 2 * var(--spacing-xl));
+  margin: 0 auto;
+  /* Padding inside the width: on phones a content-box 95% + 30px padding
+     came out ~10px wider than the viewport and clipped the hero. */
+  padding: 0 var(--spacing-xl);
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* Loading and error states */
 .loading,
 .error-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 50vh;
-    text-align: center;
-    padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  padding: 20px;
 }
 
 .loading-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: #000;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #000;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Ensure smooth scrolling behavior */
 html {
-    scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height) + 20px);
+  scroll-behavior: smooth;
+}
+
+/* Hash links, nav jumps and scrollToSection() all land a section's heading
+   just below the fixed header. (scroll-margin on <html> did nothing.) */
+section[id] {
+  scroll-margin-top: calc(var(--header-height) + 16px);
 }
 
 @media (max-width: 768px) {
-    
-    .main {
-        overflow-x: hidden;
-        width: 100vw;
-    }
+  .main main {
+    padding-top: calc(var(--header-height) + var(--spacing-md));
+  }
 
-    .main main {
-        width: 100%;
-        
-        padding: 25px 0 var(--spacing-lg);
-        margin: 0;
-    }
-
-    .main-content {
-        padding: 15px;
-        width: 95%;
-        overflow-x: hidden;
-    }
-    
-    .main-content-inner {
-        padding: 10px;
-        width: 100%;
-    }
-
-    .section {
-        padding: 40px 0;
-        width: 100%;
-    }
+  .main-content {
+    padding: 0 var(--page-gutter);
+  }
 }
 
-@media (max-width: 480px) {
-    .main main {
-        width: 100%;
-        padding: 0px 0 var(--spacing-lg);
-        margin: 0;
-    }
+/* Space reserved for lazy sections while their chunk or data is in flight
+   (see SectionSlot in main-content.tsx). Approximations of each section's
+   rendered height, measured at 1440px and 390px; under- rather than
+   over-estimate so a fast load never leaves a gap that then collapses. */
+.section-slot--experience { --slot-min-height: 2000px; }
+.section-slot--projects { --slot-min-height: 1000px; }
+.section-slot--skills { --slot-min-height: 1200px; }
+.section-slot--resume { --slot-min-height: 1350px; }
+
+.section-slot.is-pending,
+.section-skeleton {
+  min-height: var(--slot-min-height, 400px);
+}
+
+.section-skeleton {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .section-slot--experience { --slot-min-height: 2850px; }
+  .section-slot--projects { --slot-min-height: 2350px; }
+  .section-slot--skills { --slot-min-height: 2250px; }
+  .section-slot--resume { --slot-min-height: 950px; }
+}
+
+/* Content failed to load: a message and a retry, not a blank gap */
+.data-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl) var(--page-gutter);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.data-error p {
+  margin: 0;
+  max-width: var(--measure);
 }

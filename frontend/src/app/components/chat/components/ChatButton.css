@@ -1,0 +1,54 @@
+/* Mirrors the previous MUI <Fab> layout: a full-width, 1440px-capped dock
+   pinned to the bottom so the button lines up with the content column. */
+.chat-fab-dock {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: 100%;
+  max-width: 1440px;
+  padding: 0 24px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.chat-fab {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: var(--btn-primary-bg);
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--elevation-2), 0 10px 24px -8px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-normal), background-color var(--transition-normal);
+}
+
+.chat-fab:hover,
+.chat-fab:focus-visible {
+  background: var(--btn-primary-hover);
+  transform: scale(1.08);
+}
+
+.chat-fab:focus-visible {
+  outline: 3px solid var(--focus-ring, #ffffff);
+  outline-offset: 3px;
+}
+
+@media (max-width: 599.95px) {
+  .chat-fab {
+    width: 52px;
+    height: 52px;
+    font-size: 1.75rem;
+  }
+}

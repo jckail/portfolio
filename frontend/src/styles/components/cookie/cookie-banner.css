@@ -3,11 +3,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 1rem;
+  /* Opaque: page text scrolling underneath must not show through */
+  background: var(--surface-opaque);
+  color: var(--text-color);
+  border-top: 1px solid var(--panel-border);
+  box-shadow: 0 -12px 32px -20px rgba(0, 0, 0, 0.6);
+  padding: var(--spacing-md);
   z-index: var(--z-overlay);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .cookie-content {
@@ -22,7 +26,8 @@
 
 .cookie-content p {
   margin: 0;
-  font-size: 0.9rem;
+  max-width: var(--measure);
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
 
@@ -32,31 +37,10 @@
   flex-shrink: 0;
 }
 
+/* Deny and Accept are the same size: refusing is as easy as accepting.
+   Visuals come from .btn / .btn-primary (app.css). */
 .cookie-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.cookie-button.accept {
-  background: #0403ff;
-  color: white;
-}
-
-.cookie-button.accept:hover {
-  background: #0302cc;
-}
-
-.cookie-button.deny {
-  background: transparent;
-  border: 1px solid #ffffff;
-  color: white;
-}
-
-.cookie-button.deny:hover {
-  background: rgba(255, 255, 255, 0.1);
+  min-width: 7.5rem;
 }
 
 @media (max-width: 768px) {
@@ -68,5 +52,45 @@
   .cookie-buttons {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Phones: a compact bottom bar instead of a centred stacked card that
+   covered a quarter of the viewport. Deny and Accept share one row at equal
+   width and height so refusing is exactly as easy as accepting. */
+@media (max-width: 480px) {
+  .cookie-banner {
+    /* The chat button dock (z 9999, fixed bottom) otherwise sits on top of
+       Deny at this width. Stay below dialogs (--z-dialog). */
+    z-index: calc(var(--z-dialog) - 1);
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cookie-content {
+    gap: var(--spacing-sm);
+    padding: 0;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .cookie-content p {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  /* The footer "Cookie settings" link still exists; only the hint is cut. */
+  .cookie-detail {
+    display: none;
+  }
+
+  .cookie-buttons {
+    gap: var(--spacing-sm);
+    justify-content: stretch;
+  }
+
+  .cookie-button {
+    flex: 1 1 0;
+    min-width: 0;
   }
 }

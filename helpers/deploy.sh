@@ -70,7 +70,7 @@ AR_REPOSITORY="${AR_REPOSITORY:-portfolio}"
 IMAGE_URI="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${AR_REPOSITORY}/${SERVICE_NAME}:${GIT_COMMIT}"
 
 # Check if required environment variables are set
-required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL RESUME_FILE ANTHROPIC_API_KEY SENDGRID_API_KEY"
+required_vars="SUPABASE_URL SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE ADMIN_EMAIL ANTHROPIC_API_KEY SENDGRID_API_KEY"
 for var in $required_vars; do
     if [ -z "${!var:-}" ]; then
         echo "Error: Required environment variable $var is not set in .env file"

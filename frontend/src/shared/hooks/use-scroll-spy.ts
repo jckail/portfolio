@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useSectionStore } from '../stores/section-store';
 import { trackSectionView, trackAnchorChange } from '../utils/analytics';
+import { scrollToSection } from '../utils/scroll-utils';
+import { isScrollLocked } from './use-scroll-lock';
+import { useLocation } from './use-location';
 
 const DEBUG = import.meta.env.DEV;
 const debugLog = (message: string, data?: unknown) => {
@@ -73,6 +75,10 @@ export const useScrollSpy = () => {
 
     // Function to handle scroll events with rate limiting
     const handleScroll = () => {
+      // A modal holds the scroll lock: the page behind it is not what the
+      // visitor is reading, so don't rewrite the hash or log section views.
+      if (isScrollLocked()) return;
+
       const now = Date.now();
       // Limit updates to once every 50ms
       if (now - lastUpdateTime.current < 50) {
@@ -130,33 +136,16 @@ export const useScrollSpy = () => {
         lastAnchor.current = targetId;
         
         // Only scroll if it's a page load/refresh or resume button click
-        const isInitialLoad = !window.performance.getEntriesByType('navigation')[0].toJSON().type.includes('navigate');
-        const isResumeClick = location.state?.fromResumeButton;
-        
-        if (targetSection && (isInitialLoad || isResumeClick)) {
-          debugLog('Scrolling to target section', { id: targetId });
-          // Get the header height from CSS variable
-          const headerHeight = parseInt(getComputedStyle(document.documentElement)
-            .getPropertyValue('--header-height')
-            .trim()
-            .replace('px', '')) + 5;
+        const navEntry = window.performance.getEntriesByType('navigation')[0] as
+          | PerformanceNavigationTiming
+          | undefined;
+        const isInitialLoad = !(navEntry?.type ?? 'navigate').includes('navigate');
 
-          // First scroll to bring the element into view
-          targetSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-          
-          // Then adjust for header height
-          setTimeout(() => {
-            const elementPosition = targetSection.getBoundingClientRect().top;
-            const offsetPosition = window.scrollY + elementPosition - headerHeight;
-            
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: 'smooth'
-            });
-          }, 200); // Small delay to ensure scrollIntoView has completed
+        if (targetSection && isInitialLoad) {
+          debugLog('Scrolling to target section', { id: targetId });
+          // section[id] carries scroll-margin-top for the fixed header, so a
+          // single scrollIntoView lands the heading below it
+          scrollToSection(targetId);
         } else if (targetSection) {
           // Just update the URL and store without scrolling
           debugLog('Updating URL without scrolling', { id: targetId });

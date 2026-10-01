@@ -1,17 +1,26 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
+import { hasAnalyticsConsent } from '../../../../shared/utils/cookie-consent';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 import {
   executeChatAction,
   type ChatAction,
 } from '../../../../shared/utils/chat-actions';
 import {
+  CONFIRM_TTL_MS,
+  isConfirmTool,
+  sanitizeArgs,
+  validateArgs,
+  validateEmail,
+} from '../chat-confirm';
+import {
   WELCOME_MESSAGE,
   loadChatMessages,
   saveChatMessages,
 } from '../chat-storage';
+
+import type { Message, PendingAction, ConfirmArgs } from '../../../../types/chat';
 
 function initialMessages(): Message[] {
   return loadChatMessages() ?? [WELCOME_MESSAGE];
@@ -29,11 +38,48 @@ function createClientId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
 
+const CHAT_SESSION_KEY = 'chat_session_id';
+
+/**
+ * ID the backend stores chat turns under (sent as `ga_session_id`, the
+ * field name the server expects). It is only joined to the analytics session
+ * when the visitor has accepted analytics cookies; otherwise it is a random
+ * per-tab ID with no link to GA.
+ */
+export function getChatSessionId(): string {
+  if (hasAnalyticsConsent()) return getSessionId();
+  try {
+    let id = sessionStorage.getItem(CHAT_SESSION_KEY);
+    if (!id) {
+      id = `chat_${createClientId()}`;
+      sessionStorage.setItem(CHAT_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return `chat_${createClientId()}`;
+  }
+}
+
+// Subtrees never sent to the model as page context: the chat itself, the
+// cookie banner, and admin-only UI (telemetry shows console output and
+// errors). Mark any other element with data-no-chat-context to exclude it.
+const CONTEXT_EXCLUDE_SELECTOR = [
+  '[role="dialog"]',
+  '.MuiDialog-root',
+  '.telemetry-banner',
+  '.admin-login-overlay',
+  '.cookie-banner',
+  '[data-no-chat-context]',
+].join(', ');
+
 export const useChat = () => {
   const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  // Confirmation cards for execute-type tools. Held in memory only: never
+  // persisted, so an email or phone number cannot outlive the tab.
+  const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
   // Keys the server's per-connection chat state, so it must be unguessable:
   // a timestamp here would let anyone sweep recent values and land on a live
   // visitor's session. Falls back only where randomUUID is unavailable.
@@ -42,8 +88,10 @@ export const useChat = () => {
   const isMounted = useRef(true);
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
+  const pendingRef = useRef<PendingAction[]>([]);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  pendingRef.current = pendingActions;
 
   /**
    * Clear the streaming flag on a partially-streamed reply.
@@ -99,10 +147,7 @@ export const useChat = () => {
     if (!mainContent) return '';
 
     const clone = mainContent.cloneNode(true) as HTMLElement;
-    const chatDialog = clone.querySelector('[role="dialog"]');
-    if (chatDialog) {
-      chatDialog.remove();
-    }
+    clone.querySelectorAll(CONTEXT_EXCLUDE_SELECTOR).forEach(el => el.remove());
 
     const context = {
       text: clone.textContent?.trim() || '',
@@ -120,7 +165,7 @@ export const useChat = () => {
           JSON.stringify({
             type: 'message',
             content: queuedMessage,
-            ga_session_id: getSessionId(),
+            ga_session_id: getChatSessionId(),
           })
         );
       }
@@ -208,6 +253,11 @@ export const useChat = () => {
         key?: string | null;
         theme?: string;
         draft?: { from_email?: string; subject?: string; message?: string };
+        id?: string;
+        tool?: string;
+        args?: unknown;
+        ok?: boolean;
+        phone?: string;
       };
       try {
         data = JSON.parse(event.data);
@@ -224,6 +274,49 @@ export const useChat = () => {
         } catch (err) {
           console.error('Failed to execute chat action:', err);
         }
+        return;
+      }
+
+      // An execute-type tool is waiting for the visitor. Nothing is sent
+      // until they press Confirm on the card.
+      if (data.type === 'confirm_action') {
+        const id = typeof data.id === 'string' ? data.id : '';
+        if (!id || !isConfirmTool(data.tool)) return;
+        const tool = data.tool;
+        setPendingActions(prev => {
+          if (prev.some(p => p.id === id)) return prev; // duplicate frame
+          return [
+            ...prev.slice(-4),
+            {
+              id,
+              tool,
+              args: sanitizeArgs(data.args),
+              status: 'pending',
+              expiresAt: Date.now() + CONFIRM_TTL_MS,
+            },
+          ];
+        });
+        return;
+      }
+
+      if (data.type === 'action_result') {
+        const id = typeof data.id === 'string' ? data.id : '';
+        if (!id) return;
+        const ok = data.ok === true;
+        const text =
+          typeof data.message === 'string' && data.message
+            ? data.message.slice(0, 500)
+            : ok
+              ? 'Done.'
+              : 'That did not go through. Please try again.';
+        const phone = ok && typeof data.phone === 'string' ? data.phone.slice(0, 40) : undefined;
+        setPendingActions(prev =>
+          prev.map(p =>
+            p.id === id && (p.status === 'pending' || p.status === 'submitting')
+              ? { ...p, status: ok ? 'done' : 'failed', resultMessage: text, phone }
+              : p
+          )
+        );
         return;
       }
 
@@ -306,8 +399,32 @@ export const useChat = () => {
       finalizeStreamingMessage();
       setIsLoading(false);
       currentStreamingMessage.current = '';
+      // Pending ids are bound to this connection, so they die with it.
+      setPendingActions(prev =>
+        prev.map(p =>
+          p.status === 'pending'
+            ? { ...p, status: 'expired' }
+            : p.status === 'submitting'
+              ? { ...p, status: 'failed', resultMessage: 'The connection closed before this finished. Please try again.' }
+              : p
+        )
+      );
     };
   }, [finalizeStreamingMessage]);
+
+  // Expire cards locally when the server's 10 minute window passes.
+  useEffect(() => {
+    const live = pendingActions.filter(p => p.status === 'pending');
+    if (live.length === 0) return;
+    const next = Math.min(...live.map(p => p.expiresAt));
+    const timer = setTimeout(() => {
+      const now = Date.now();
+      setPendingActions(prev =>
+        prev.map(p => (p.status === 'pending' && p.expiresAt <= now ? { ...p, status: 'expired' } : p))
+      );
+    }, Math.max(0, next - Date.now()) + 50);
+    return () => clearTimeout(timer);
+  }, [pendingActions]);
 
   useEffect(() => {
     const isOpenInUrl = getQueryParam('ai_chat') === 'open';
@@ -352,7 +469,7 @@ export const useChat = () => {
           JSON.stringify({
             type: 'message',
             content: trimmed,
-            ga_session_id: getSessionId(),
+            ga_session_id: getChatSessionId(),
           })
         );
       }
@@ -372,6 +489,50 @@ export const useChat = () => {
     await sendUserText(prompt);
   };
 
+  /** Send the visitor's confirmation. Returns field errors, or null when sent. */
+  const confirmAction = useCallback(
+    (id: string, email: string, args: ConfirmArgs): Record<string, string> | null => {
+      const card = pendingActions.find(p => p.id === id);
+      if (!card || card.status !== 'pending') return {};
+      const errors = validateArgs(card.tool, args);
+      const emailError = validateEmail(email);
+      if (emailError) errors.email = emailError;
+      if (Object.keys(errors).length > 0) return errors;
+
+      if (Date.now() >= card.expiresAt) {
+        setPendingActions(prev => prev.map(p => (p.id === id ? { ...p, status: 'expired' } : p)));
+        return {};
+      }
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setPendingActions(prev =>
+          prev.map(p =>
+            p.id === id
+              ? { ...p, status: 'expired', resultMessage: 'The connection was lost. Ask the assistant again.' }
+              : p
+          )
+        );
+        return {};
+      }
+      const frame: Record<string, unknown> = { type: 'confirm_action', id, email: email.trim() };
+      if (card.tool !== 'request_phone') frame.args = args;
+      ws.send(JSON.stringify(frame));
+      setPendingActions(prev => prev.map(p => (p.id === id ? { ...p, status: 'submitting' } : p)));
+      return null;
+    },
+    [pendingActions]
+  );
+
+  const cancelAction = useCallback((id: string) => {
+    const card = pendingRef.current.find(p => p.id === id);
+    if (!card || card.status !== 'pending') return;
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'cancel_action', id }));
+    }
+    setPendingActions(prev => prev.map(p => (p.id === id ? { ...p, status: 'cancelled' } : p)));
+  }, []);
+
   const hasUserMessage = messages.some(m => m.type === 'user');
   const showSuggestions = !hasUserMessage && !isLoading;
 
@@ -386,6 +547,9 @@ export const useChat = () => {
     handleSuggestedPrompt,
     showSuggestions,
     initializeChat,
+    pendingActions,
+    confirmAction,
+    cancelAction,
   };
 };
 

@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl, RootModel
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
 class SkillDetail(BaseModel):
@@ -14,12 +14,13 @@ class SkillDetail(BaseModel):
     examples: dict = Field(default_factory=dict, description="Examples of skill usage")
     general_category: str = Field(..., description="Primary category of the skill")
     sub_category: str = Field(..., description="Sub-category of the skill")
+    related: list[str] = Field(default_factory=list, description="Keys of related skills, shown as links in the skill modal")
 
 class Skills(RootModel[dict[str, SkillDetail]]):
     """Model for all skills."""
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "python": {
                     "display_name": "Python",
@@ -31,7 +32,9 @@ class Skills(RootModel[dict[str, SkillDetail]]):
                     "weblink": "https://www.python.org/",
                     "examples": {},
                     "general_category": "Programming Languages",
-                    "sub_category": "General Purpose"
+                    "sub_category": "General Purpose",
+                    "related": ["pandas", "pytorch"]
                 }
             }
         }
+    )

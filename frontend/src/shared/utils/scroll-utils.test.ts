@@ -5,16 +5,16 @@ import { scrollToSection } from './scroll-utils';
 describe('scrollToSection', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    document.documentElement.style.setProperty('--header-height', '80px');
     document.body.innerHTML = '<section id="about"></section>';
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
 
-  it('scrolls the element into view immediately, then adjusts for header height after a delay', () => {
+  it('scrolls once with scrollIntoView and never issues a second correcting scroll', () => {
     const element = document.getElementById('about')!;
     const scrollIntoView = vi.fn();
     const scrollTo = vi.fn();
@@ -22,26 +22,25 @@ describe('scrollToSection', () => {
     window.scrollTo = scrollTo;
 
     scrollToSection('about');
+    vi.advanceTimersByTime(1000);
 
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
     expect(scrollTo).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(100);
-
-    expect(scrollTo).toHaveBeenCalledTimes(1);
   });
 
-  it('does not throw or call scrollTo if the element is removed before the delayed adjustment fires', () => {
+  it('jumps instead of animating when the visitor prefers reduced motion', () => {
     const element = document.getElementById('about')!;
-    element.scrollIntoView = vi.fn();
-    const scrollTo = vi.fn();
-    window.scrollTo = scrollTo;
+    const scrollIntoView = vi.fn();
+    element.scrollIntoView = scrollIntoView;
+    vi.spyOn(window, 'matchMedia').mockImplementation(
+      (query: string) =>
+        ({ matches: query.includes('reduce'), media: query }) as MediaQueryList
+    );
 
     scrollToSection('about');
-    element.remove();
 
-    expect(() => vi.advanceTimersByTime(100)).not.toThrow();
-    expect(scrollTo).not.toHaveBeenCalled();
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' });
   });
 
   it('does nothing when the target section does not exist', () => {

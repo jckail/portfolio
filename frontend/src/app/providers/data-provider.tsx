@@ -1,18 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { getJson, endpoints } from '../../shared/utils/api';
+import { readBootstrapData } from '../../shared/utils/bootstrap-data';
+import { toLookup } from '../../shared/utils/lookup';
 
-import type { Skill } from '../components/sections/modals/SkillModal';
-import type { ExperienceItem } from '../components/sections/modals/ExperienceModal';
-import type { AboutMe, ProjectsData, Contact as ContactData } from '../../types/resume';
-
-interface SkillsData {
-  [key: string]: Skill;
-}
-
-interface ExperienceData {
-  [key: string]: ExperienceItem;
-}
+import type {
+  AboutMe,
+  Contact as ContactData,
+  ExperienceData,
+  ProjectsData,
+} from '../../types/resume';
+import type { SkillsData } from '../../types/skills';
 
 interface DataContextType {
   experienceData: ExperienceData | null;
@@ -45,18 +43,50 @@ const cache: {
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<DataContextType>({
-    experienceData: null,
-    skillsData: null,
-    projectsData: null,
-    aboutMeData: null,
-    contactData: null,
-    isLoading: true,
+const LOADING_STATE: DataContextType = {
+  experienceData: null,
+  skillsData: null,
+  projectsData: null,
+  aboutMeData: null,
+  contactData: null,
+  isLoading: true,
+  error: null,
+};
+
+/**
+ * Ready state from the data the server inlined into index.html, or null.
+ * Read once, synchronously, before the first render: the hero then paints in
+ * the same frame the bundle runs instead of after the content API answers.
+ */
+function initialState(): DataContextType | null {
+  const boot = readBootstrapData();
+  if (!boot) return null;
+  // The dictionaries looked up by URL params get no prototype (see
+  // shared/utils/lookup); aboutMe/contact are only read by field.
+  const experience = toLookup(boot.experience as unknown as ExperienceData);
+  const skills = toLookup(boot.skills as unknown as SkillsData);
+  const projects = toLookup(boot.projects as unknown as ProjectsData);
+  const aboutMe = boot.aboutMe as unknown as AboutMe;
+  const contact = boot.contact as unknown as ContactData;
+  Object.assign(cache, { experience, skills, projects, aboutMe, contact, lastFetchTime: Date.now() });
+  return {
+    experienceData: experience,
+    skillsData: skills,
+    projectsData: projects,
+    aboutMeData: aboutMe,
+    contactData: contact,
+    isLoading: false,
     error: null,
-  });
+  };
+}
+
+export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<DataContextType>(() => initialState() ?? LOADING_STATE);
+  // Already populated from the inlined bootstrap block: nothing to fetch.
+  const needsFetch = useRef(state.isLoading);
 
   useEffect(() => {
+    if (!needsFetch.current) return;
     const controller = new AbortController();
 
     const fetchAllData = async () => {
@@ -87,31 +117,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           getJson<ContactData>(endpoints.contactInfo, init)
         ]);
 
-        // Update cache
-        cache.experience = experience;
-        cache.skills = skills;
-        cache.projects = projects;
+        // Update cache. The dictionaries looked up by URL params get no
+        // prototype (see shared/utils/lookup); aboutMe/contact are only read by field.
+        cache.experience = toLookup(experience);
+        cache.skills = toLookup(skills);
+        cache.projects = toLookup(projects);
         cache.aboutMe = aboutMe;
         cache.contact = contact;
         cache.lastFetchTime = now;
 
         setState({
-          experienceData: experience,
-          skillsData: skills,
-          projectsData: projects,
+          experienceData: cache.experience,
+          skillsData: cache.skills,
+          projectsData: cache.projects,
           aboutMeData: aboutMe,
           contactData: contact,
           isLoading: false,
           error: null,
         });
       } catch (err: unknown) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-          setState(prev => ({
-            ...prev,
-            error: err instanceof Error ? err.message : 'Failed to fetch data',
-            isLoading: false,
-          }));
-        }
+        // An abort is the effect cleanup, not a failure. Anything else (even a
+        // thrown non-Error) must end the loading state, or the page spins forever.
+        if (err instanceof Error && err.name === 'AbortError') return;
+        setState(prev => ({
+          ...prev,
+          error: err instanceof Error ? err.message : 'Failed to fetch data',
+          isLoading: false,
+        }));
       }
     };
 

@@ -1,11 +1,14 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 
 import { trackSocialClick, trackResumeView } from '../../../../shared/utils/analytics';
-
-const GitHubIcon = lazy(() => import('../../../../shared/components/icons/github-icon'));
-const LinkedInIcon = lazy(() => import('../../../../shared/components/icons/linkedin-icon'));
-const EmailIcon = lazy(() => import('../../../../shared/components/icons/email-icon'));
-const ResumeIcon = lazy(() => import('../../../../shared/components/icons/resume-icon'));
+// Imported directly, not lazily: header.tsx pulls the whole icon barrel into
+// the eager graph, so these four are already loaded. Wrapping them in lazy()
+// produced INEFFECTIVE_DYNAMIC_IMPORT build warnings and bought nothing but
+// Suspense boundaries and a skeleton flash on a handful of inline SVGs.
+import GitHubIcon from '../../../../shared/components/icons/github-icon';
+import LinkedInIcon from '../../../../shared/components/icons/linkedin-icon';
+import EmailIcon from '../../../../shared/components/icons/email-icon';
+import ResumeIcon from '../../../../shared/components/icons/resume-icon';
 
 interface SocialLinksProps {
   github?: string;
@@ -14,8 +17,6 @@ interface SocialLinksProps {
   onResumeClick: () => void;
   onContactSelect: () => void;
 }
-
-const IconFallback = () => <div className="icon-skeleton" style={{ width: 24, height: 24 }} />;
 
 const SocialLinks: React.FC<SocialLinksProps> = ({
   github,
@@ -38,73 +39,67 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
     onContactSelect();
   };
 
+  // Primary action first (Contact), then the resume, then the profile links
   return (
     <div className="social-links">
-      {github && (
-        <a 
-          href={github} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="icon-link"
-          aria-label="GitHub Profile"
-          onClick={() => handleSocialClick('github', github)}
-          data-social="github"
-          data-action="visit"
-          data-category="Social Link"
-        >
-          <Suspense fallback={<IconFallback />}>
-            <GitHubIcon />
-          </Suspense>
-        </a>
-      )}
-      {linkedin && (
-        <a 
-          href={linkedin} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="icon-link"
-          aria-label="LinkedIn Profile"
-          onClick={() => handleSocialClick('linkedin', linkedin)}
-          data-social="linkedin"
-          data-action="visit"
-          data-category="Social Link"
-        >
-          <Suspense fallback={<IconFallback />}>
-            <LinkedInIcon />
-          </Suspense>
-        </a>
-      )}
       {email && (
-            <button 
-            onClick={handleContactClick}
-            className="contact-button"
-            aria-label="View Contact"
-            data-action="view"
-            data-label="Contact modal"
-            id="contact-button"
-            type="button"
-          >
-            <strong>Contact</strong>
-            <Suspense fallback={<IconFallback />}>
-                <EmailIcon />
-              </Suspense>
-          </button>
+        <button
+          onClick={handleContactClick}
+          className="contact-button btn btn-primary"
+          aria-label="View Contact"
+          data-action="view"
+          data-label="Contact modal"
+          id="contact-button"
+          type="button"
+        >
+          <EmailIcon />
+          <strong>Contact</strong>
+        </button>
       )}
 
-      <button 
+      <button
         onClick={handleResumeClick}
-        className="resume-button"
+        className="resume-button btn"
         aria-label="View Resume"
         data-action="view"
         data-label="Resume Section"
         id="resume-button"
         type="button"
       >
+        <ResumeIcon />
         <strong>Resume</strong>
-        <Suspense fallback={<IconFallback />}>
-          <ResumeIcon />
-        </Suspense>
       </button>
+
+      {github && (
+        <a
+          href={github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="icon-link btn-icon"
+          aria-label="GitHub Profile"
+          onClick={() => handleSocialClick('github', github)}
+          data-social="github"
+          data-action="visit"
+          data-category="Social Link"
+        >
+          <GitHubIcon />
+        </a>
+      )}
+      {linkedin && (
+        <a
+          href={linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="icon-link btn-icon"
+          aria-label="LinkedIn Profile"
+          onClick={() => handleSocialClick('linkedin', linkedin)}
+          data-social="linkedin"
+          data-action="visit"
+          data-category="Social Link"
+        >
+          <LinkedInIcon />
+        </a>
+      )}
     </div>
   );
 };

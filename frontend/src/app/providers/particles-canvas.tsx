@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 
 import type { ISourceOptions } from '@tsparticles/engine';
@@ -14,7 +14,7 @@ interface ParticlesCanvasProps {
  * chunk instead of the eagerly preloaded graph. Only mounted once the caller
  * has decided particles should actually run.
  */
-export default function ParticlesCanvas({ config }: ParticlesCanvasProps) {
+function ParticlesCanvas({ config }: ParticlesCanvasProps) {
   const [init, setInit] = useState(false);
 
   useEffect(() => {
@@ -48,3 +48,8 @@ export default function ParticlesCanvas({ config }: ParticlesCanvasProps) {
     </>
   );
 }
+
+// @tsparticles/react lists its whole props object as an effect dependency, so
+// every re-render of <Particles> destroys and reloads the canvas. Memoising on
+// `config` (itself memoised per theme by App) limits that to theme changes.
+export default memo(ParticlesCanvas);

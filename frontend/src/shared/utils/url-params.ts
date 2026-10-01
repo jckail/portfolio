@@ -33,3 +33,8 @@ export function setQueryParam(
     window.history.pushState({}, '', finalUrl);
   }
 }
+
+/** Absolute deep link to this page with only `?key=value` set, e.g. ?skill=python. */
+export function shareUrl(key: string, value: string): string {
+  return `${window.location.origin}${window.location.pathname}?${key}=${encodeURIComponent(value)}`;
+}

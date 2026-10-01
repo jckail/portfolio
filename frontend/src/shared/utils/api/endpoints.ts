@@ -6,6 +6,7 @@ export const endpoints = {
   projects: '/api/projects',
   contactInfo: '/api/contact/info',
   sendEmail: '/api/contact/send-email',
+  contactPhone: '/api/contact/phone',
   chatStatus: '/api/chat/status',
   resumeFileName: '/api/resume_file_name',
   resumeDownload: '/api/resume?download=true',
@@ -16,4 +17,6 @@ export const endpoints = {
     logs: '/api/admin/logs',
   },
   telemetry: '/api/telemetry',
+  /** First-party product events (anonymous, 204, consent-gated by the sender). */
+  events: '/api/events',
 } as const;

@@ -23,11 +23,47 @@ describe('ChatMarkdown', () => {
     );
     const link = container.querySelector('a');
     expect(link).not.toBeNull();
-    expect(link?.getAttribute('href')).toBe('https://example.com');
+    expect(link?.getAttribute('href')).toBe('https://example.com/');
     expect(link?.getAttribute('rel')).toContain('noopener');
     // Rejected protocol rendered as plain text, not an anchor
     expect(container.querySelectorAll('a')).toHaveLength(1);
     expect(container.textContent).toContain('bad');
+  });
+
+  it.each([
+    ['http', '[x](http://example.com)'],
+    ['mailto', '[x](mailto:a@example.com?subject=hi)'],
+    ['data', '[x](data:text/html,hi)'],
+    ['relative', '[x](/admin)'],
+  ])('renders a %s link as plain text', (_label, text) => {
+    const { container } = render(<ChatMarkdown text={text} />);
+    expect(container.querySelector('a')).toBeNull();
+    expect(container.textContent).toBe('x');
+  });
+
+  it('shows the real hostname next to an off-site link', () => {
+    const { container } = render(
+      <ChatMarkdown text={'[GitHub profile](https://github.com.evil.example/login)'} />
+    );
+    expect(container.querySelector('a')?.getAttribute('href')).toBe(
+      'https://github.com.evil.example/login'
+    );
+    expect(container.textContent).toContain('(github.com.evil.example)');
+  });
+
+  it('shows the real host when userinfo disguises it', () => {
+    const { container } = render(
+      <ChatMarkdown text={'[repo](https://github.com@evil.example/x)'} />
+    );
+    expect(container.textContent).toContain('(evil.example)');
+  });
+
+  it('does not annotate links to trusted hosts', () => {
+    const { container } = render(
+      <ChatMarkdown text={'[GitHub](https://github.com/jckail)'} />
+    );
+    expect(container.querySelector('a')).not.toBeNull();
+    expect(container.textContent).toBe('GitHub');
   });
 
   it('renders unordered lists', () => {

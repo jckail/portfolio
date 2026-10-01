@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import { useUrlParamState } from '../../../../../shared/hooks/use-url-param-state';
 
 /** Contact-modal visibility, mirrored into the ?contact=open URL parameter. */
@@ -6,6 +8,6 @@ export const useContact = () => {
 
   return {
     selectedContact: value === 'open',
-    setSelectedContact: (open: boolean) => setValue(open ? 'open' : null)
+    setSelectedContact: useCallback((open: boolean) => setValue(open ? 'open' : null), [setValue]),
   };
 };

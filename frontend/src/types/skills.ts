@@ -1,3 +1,4 @@
+/** One entry of GET /api/skills (backend/app/models/skills.py SkillDetail). */
 export interface Skill {
   display_name: string;
   image: string;
@@ -8,21 +9,9 @@ export interface Skill {
   weblink: string;
   examples: Record<string, string>;
   general_category: string;
-  sub_category: string;
+  sub_category?: string;
+  /** Keys of related skills (backend SkillDetail.related). */
+  related?: string[];
 }
 
-export interface SkillsData {
-  [key: string]: Skill;
-}
-
-export interface SkillModalProps {
-  skill: Skill;
-  onClose: () => void;
-}
-
-export interface IconProps {
-  name: string;
-  className?: string;
-  size?: number;
-  'aria-label'?: string;
-}
+export type SkillsData = Record<string, Skill>;

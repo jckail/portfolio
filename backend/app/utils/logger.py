@@ -1,15 +1,93 @@
 import asyncio
 import logging
 import os
+import re
 import socket
 import sys
 import threading
+from logging.handlers import RotatingFileHandler
 
 from ..utils.supabase_client import supabase
 from .json_log import JsonFormatter
 from .request_context import get_request_id
 
-LOGGER_NAME = 'quickresume'
+# Handlers live on the package root so every `logging.getLogger(__name__)`
+# under backend.* emits through them. Anything outside the package (httpx,
+# uvicorn, supabase) stays out, which also keeps the Supabase sink from
+# logging its own HTTP calls into an endless loop.
+LOGGER_NAME = 'backend'
+# What setup_logging() hands back to modules that call it for a logger.
+APP_LOGGER_NAME = 'backend.app'
+
+# Cloud Run sets K_SERVICE. Its filesystem is in-memory, so local log files
+# there only eat the instance's RAM; stdout already goes to Cloud Logging.
+ON_CLOUD_RUN = bool(os.getenv('K_SERVICE'))
+LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')
+LOG_FILE_MAX_BYTES = 5 * 1024 * 1024
+LOG_FILE_BACKUPS = 3
+
+SINK_LOGGER_NAME = 'backend.app.utils.supabase_client'
+
+# uvicorn's WebSocket handshake lines read `127.0.0.1:41884 - "WebSocket
+# /ws/<client id>" 403`: plain text on stdout with the peer address and the raw
+# request path. The HTTP access logger is disabled in main.py and the app's own
+# access line carries neither, so these are the one place a raw address (and a
+# client-chosen path) could reach Cloud Logging.
+_PEER_ADDRESS_LINE = re.compile(r'^\[?[0-9a-fA-F.:]+\]?:\d+ - "')
+_UVICORN_LOGGERS = ('uvicorn', 'uvicorn.error', 'uvicorn.access', 'websockets', 'websockets.server')
+
+
+class DropPeerAddressLines(logging.Filter):
+    """Drop server log lines that start with the client's ``host:port``."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            return not _PEER_ADDRESS_LINE.match(record.getMessage())
+        except Exception:
+            return True
+
+
+def _scrub_server_loggers() -> None:
+    drop = DropPeerAddressLines()
+    seen = []
+    for name in _UVICORN_LOGGERS:
+        target = logging.getLogger(name)
+        if not any(isinstance(f, DropPeerAddressLines) for f in target.filters):
+            target.addFilter(drop)
+        for handler in target.handlers:
+            if handler not in seen:
+                seen.append(handler)
+                if not any(isinstance(f, DropPeerAddressLines) for f in handler.filters):
+                    handler.addFilter(drop)
+
+_fallback_lock = threading.Lock()
+_EXCEPTION_FORMATTER = logging.Formatter()
+
+
+def _fallback_logger() -> logging.Logger:
+    """Last-resort sink for records the Supabase handler could not deliver.
+
+    Deliberately outside the `backend` tree (and non-propagating) so writing
+    here can never re-enter the Supabase handler. Bounded either way: stderr
+    on Cloud Run, a rotating file locally.
+    """
+    fallback = logging.getLogger('portfolio_log_fallback')
+    with _fallback_lock:
+        if not fallback.handlers:
+            fallback.propagate = False
+            fallback.setLevel(logging.INFO)
+            if ON_CLOUD_RUN:
+                handler: logging.Handler = logging.StreamHandler(sys.stderr)
+            else:
+                os.makedirs(LOG_DIR, exist_ok=True)
+                handler = RotatingFileHandler(
+                    os.path.join(LOG_DIR, 'fallback.log'),
+                    maxBytes=LOG_FILE_MAX_BYTES,
+                    backupCount=LOG_FILE_BACKUPS,
+                    encoding='utf-8',
+                )
+            fallback.addHandler(handler)
+    return fallback
 
 
 class SupabaseHandler(logging.Handler):
@@ -98,11 +176,15 @@ class SupabaseHandler(logging.Handler):
                 'lineno': record.lineno,
                 'hostname': self._hostname
             }
-            request_id = get_request_id()
+            # Captured in emit(): this runs in the flush task, whose context
+            # never carries the originating request's id.
+            request_id = getattr(record, 'request_id', None)
             if request_id:
                 metadata['request_id'] = request_id
             if record.exc_info:
-                metadata['exception'] = self.formatException(record.exc_info)
+                # A Handler has no formatException (only Formatters do), so
+                # this raised for every record that carried exc_info.
+                metadata['exception'] = _EXCEPTION_FORMATTER.formatException(record.exc_info)
 
             formatted_logs.append({
                 'level': record.levelname,
@@ -112,13 +194,18 @@ class SupabaseHandler(logging.Handler):
                 'ip_address': self._ip_address
             })
 
-        result = await supabase.store_logs_batch(formatted_logs)
-        if result is None:
-            self._fallback_log("Failed to store log batch in Supabase")
-            for log in formatted_logs:
-                self._fallback_log(f"Failed log: {log}")
+        await supabase.store_logs_batch(formatted_logs)
+        # store_logs_batch already warns (rate-limited). The records are not
+        # replayed to the fallback sink: stdout carries every one as JSON.
 
     def emit(self, record):
+        # Access lines and business events belong in Cloud Logging (they feed
+        # log-based metrics); one Supabase row per request would only add writes.
+        # The sink's own failure warnings stay out so they cannot feed back.
+        if getattr(record, 'event', None) or record.name == SINK_LOGGER_NAME:
+            return
+        if getattr(record, 'request_id', None) is None:
+            record.request_id = get_request_id()
         try:
             if self._loop is not None and self._loop.is_running():
                 # Thread-safe handoff to the event loop's queue.
@@ -135,13 +222,10 @@ class SupabaseHandler(logging.Handler):
             self._fallback_log(f"Log queue full, dropping record: {record.getMessage()}")
 
     def _fallback_log(self, message: str):
-        """Write to fallback log file when Supabase logging fails"""
+        """Record a delivery failure without going through Supabase again."""
         try:
-            fallback_log_path = os.path.join(os.path.dirname(__file__), '..', 'logs', 'fallback.log')
-            os.makedirs(os.path.dirname(fallback_log_path), exist_ok=True)
-            with open(fallback_log_path, 'a') as f:
-                f.write(f"{message}\n")
-        except OSError:
+            _fallback_logger().warning(message)
+        except Exception:
             pass
 
 
@@ -154,13 +238,19 @@ def get_supabase_handler() -> SupabaseHandler | None:
     return None
 
 
-def setup_logging():
-    """Setup logging with JSON stdout + Supabase sink. Idempotent."""
-    logger = logging.getLogger(LOGGER_NAME)
-    if logger.handlers:
-        return logger
+def setup_logging(name: str = APP_LOGGER_NAME) -> logging.Logger:
+    """Attach JSON stdout + Supabase sinks to the `backend` logger. Idempotent.
 
-    logger.setLevel(logging.INFO)
+    Returns the logger called `name` (default `backend.app`) for callers that
+    use it directly; modules may equally use `logging.getLogger(__name__)`.
+    """
+    root = logging.getLogger(LOGGER_NAME)
+    if root.handlers:
+        return logging.getLogger(name)
+
+    _scrub_server_loggers()
+
+    root.setLevel(logging.INFO)
     # Human-readable message for the Supabase admin dashboard
     plain_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -171,7 +261,7 @@ def setup_logging():
         supabase_handler = SupabaseHandler()
         supabase_handler.setLevel(logging.INFO)
         supabase_handler.setFormatter(plain_formatter)
-        logger.addHandler(supabase_handler)
+        root.addHandler(supabase_handler)
     except Exception as e:
         print(f"Failed to setup Supabase handler: {str(e)}")
 
@@ -180,18 +270,23 @@ def setup_logging():
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setLevel(logging.INFO)
         stream_handler.setFormatter(json_formatter)
-        logger.addHandler(stream_handler)
+        root.addHandler(stream_handler)
     except Exception as e:
         print(f"Failed to setup stream handler: {str(e)}")
 
-    # File handler as backup (also JSON for local grep/jq)
-    try:
-        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
-        os.makedirs(log_dir, exist_ok=True)
-        file_handler = logging.FileHandler(os.path.join(log_dir, 'app.log'))
-        file_handler.setFormatter(json_formatter)
-        logger.addHandler(file_handler)
-    except Exception as e:
-        print(f"Failed to setup file handler: {str(e)}")
+    # Local-only JSON file for grep/jq, rotated so it cannot grow unbounded.
+    if not ON_CLOUD_RUN:
+        try:
+            os.makedirs(LOG_DIR, exist_ok=True)
+            file_handler = RotatingFileHandler(
+                os.path.join(LOG_DIR, 'app.log'),
+                maxBytes=LOG_FILE_MAX_BYTES,
+                backupCount=LOG_FILE_BACKUPS,
+                encoding='utf-8',
+            )
+            file_handler.setFormatter(json_formatter)
+            root.addHandler(file_handler)
+        except Exception as e:
+            print(f"Failed to setup file handler: {str(e)}")
 
-    return logger
+    return logging.getLogger(name)

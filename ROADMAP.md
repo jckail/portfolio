@@ -5,11 +5,14 @@ priority within each section. Items marked **P0** are the highest-leverage
 next steps; **P1** items are valuable but less urgent; **P2** items are
 nice-to-haves or larger explorations.
 
-For context, the current baseline (see the modernization PR) already includes:
-Claude Haiku 4.5 assistant with conversation memory and prompt caching, a
-backend pytest suite, gzip + cache + security headers, optimized images
-(11 MB → 1.1 MB), Terraform IaC with Workload Identity Federation, and a
-CI/CD pipeline that deploys to Cloud Run on merge to `main`.
+For context, the current baseline already includes: an assistant behind a
+provider layer (Vertex Gemini, Anthropic as the alternative) with
+conversation memory, portfolio search and visitor-confirmed actions, a backend
+pytest suite, gzip + cache + security headers, optimized images,
+Terraform IaC with Workload Identity Federation, structured logging and a
+first-party event stream, crawler-readable discovery documents, a resume
+generated from the site data, and a CI/CD pipeline that deploys to Cloud Run
+on merge to `main`.
 
 ---
 
@@ -18,15 +21,16 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P0 — Frontend test coverage.**~~ Done: `useChat` (WebSocket lifecycle,
   chunk streaming, queueing, malformed frames), `useSkill` (deep links,
   back/forward), and `analytics` (session ids, page-view hash dedup) are
-  covered — 25 tests total.
+  covered.
 - ~~**P0 — Chat WebSocket integration test.**~~ Done: six
   `TestClient.websocket_connect` tests exercise the full frame protocol
   (context → message → streamed chunks → completion frame), history,
   size/rate limits, and error recovery with a mocked Anthropic client.
 - ~~**P1 — Coverage gates.**~~ Done: CI runs `vitest run --coverage`
-  (12%/45%/20%/12% stmts/branches/funcs/lines, `all: true` so untested
-  files count as 0%) and `pytest --cov` (60% floor); both are modest
-  floors below current numbers meant to ratchet up over time.
+  (`include: ['src/**']` so untested files count as 0%) and `pytest --cov`,
+  plus a separate floor for the auth surface. The floors are in
+  `frontend/vitest.config.ts`, `pyproject.toml` and `.github/workflows/ci.yml`;
+  they only move up.
 - ~~**P1 — Python lint/format.**~~ Done: `ruff` runs in CI with
   pycodestyle/pyflakes/bugbear/pyupgrade/async rules; its first pass caught
   a latent `NameError` and blocking I/O in async handlers.
@@ -36,13 +40,15 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P2 — End-to-end smoke test.**~~ Done: `e2e/` Playwright project
   boots the CI-built image with dummy credentials and checks page load,
   section rendering, and the chat panel opening — runs as steps in the
-  `docker` CI job so a failure already blocks merges.
+  `docker` CI job so a failure already blocks merges. `helpers/e2e-docker.sh`
+  runs the same suite in the pinned Playwright container against any local
+  server, with no host browser libraries needed.
 - ~~**P1 — Vite 5→8 / Vitest 0.34→4.x major upgrade.**~~ Done: vite 8.1,
   vitest 4.1 (+ matching coverage-v8), plugin-react 5.2, svgr 5.2,
   jsdom 26, TypeScript 5.9. Coverage config migrated to the v4 API
   (`all` → `include` globs, nested `thresholds`) and thresholds
   recalibrated — v4's AST-aware remapping changed the numbers
-  (branches 52%→19%, statements 15%→22%). Verified beyond CI: built
+  (the numbers moved, so the floors were recalibrated). Verified beyond CI: built
   image loaded in a real browser (no chunk-ordering regression — the
   vendor/particles/router manualChunks layout survived the bundler
   swap), E2E + Lighthouse budgets pass, bundle slightly smaller.
@@ -65,7 +71,15 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   `client_id`, `source="chat"`, counts in `metadata`) after each response
   — no schema change needed, reused the flexible metadata column instead
   of a new table.
-- ~~**P2 — Tool use.**~~ Done, see §7 "Chat site-navigation actions."
+- ~~**P2 — Tool use.**~~ Done, see §7 "Chat site-navigation actions" and
+  "Chat tools".
+- ~~**P1 — Provider layer and Vertex AI.**~~ Done: the model sits behind
+  `backend/app/services/llm/`; Vertex Gemini is the default when
+  `VERTEX_API_KEY` is set, Anthropic is the alternative, with a fallback
+  model, a daily token budget and an auth circuit breaker (ADR 0005).
+- ~~**P1 — Visitor-confirmed actions.**~~ Done: `contact_jordan`,
+  `request_phone` and `request_meeting` only create a pending action; the
+  visitor confirms with their own email (ADR 0006).
 
 ## 3. Frontend performance & UX
 
@@ -94,6 +108,14 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 
 ## 4. Backend & platform
 
+- ~~**P1 — Structured events and access log.**~~ Done: `log_event` with a
+  closed event list, one `http.request` line per API request, Cloud Logging
+  trace and severity fields, process-local admin counters, and the
+  anonymous `POST /api/events` sink.
+- ~~**P1 — Discovery surfaces.**~~ Done: HTML snapshot, JSON-LD, `/llms.txt`,
+  `/llms-full.txt`, `/resume.json`, `/sitemap.xml`, all generated from the data.
+- ~~**P1 — Resume from data.**~~ Done: `helpers/build_resume_pdf.py` generates
+  an ATS-shaped PDF, text and manifest; tests fail on drift (ADR 0007).
 - ~~**P1 — Structured logging with request IDs.**~~ Done: JSON stdout/file
   logs via `JsonFormatter`, per-request `X-Request-ID` middleware
   (honors inbound header), and `request_id` attached to Supabase log
@@ -102,9 +124,11 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
   Google Fonts, and GA; inline GA bootstrap kept with `'unsafe-inline'`
   (nonce migration left as a follow-up).
 - ~~**P1 — Reproducible Python builds.**~~ Done: `requirements.lock.txt`
-  (hash-pinned, `pip-tools`) is what the production Docker image actually
-  installs (`pip install --require-hashes`); regenerate with
-  `helpers/compile-requirements.sh` after editing `requirements.txt`.
+  (hash-pinned) is what the production Docker image actually installs
+  (`pip install --require-hashes`). Regenerate it after editing
+  `requirements.txt` with the tool that produced it (the audit notes
+  `uv pip compile --universal`); do not assume
+  `helpers/compile-requirements.sh` reproduces it.
 - **P2 — OpenTelemetry.** Export traces and latency metrics to Cloud
   Trace/Monitoring; the FastAPI + Cloud Run integration is well supported
   and would make chat latency and Supabase call times visible.
@@ -117,13 +141,19 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P0 — Terraform remote state.**~~ Done: state lives in
   `gs://portfolio-383615-terraform-state`, `backend "gcs"` enabled in
   `versions.tf`.
-- ~~**P0 — Terraform plan on PRs.**~~ Done: `.github/workflows/terraform-plan.yml`
-  runs a read-only `terraform plan` (dedicated `quickresume-planner`
-  service account, `roles/viewer` + state-bucket access only) on PRs
-  touching `infra/**` and posts the plan to the job summary.
+- ~~**P0 — Terraform plan on PRs.**~~ Removed on purpose: the planner
+  workflow could read the state bucket, so it was deleted (`HANDOFF.md`).
+  CI runs `terraform fmt` and `validate` only. Do not restore it until the
+  state bucket is locked down.
 - ~~**P1 — Monitoring and alerting.**~~ Done: Cloud Monitoring uptime check
-  on `/api/health` (5 min interval) + alert policy emailing `admin_email`,
-  managed in `infra/monitoring.tf`.
+  (now on `/api/health/ready`, 5 min interval) + alert policy emailing
+  `admin_email`, managed in `infra/monitoring.tf`. The notification channel
+  has never been verified.
+- **P1 — Apply the observability, Vertex and budget Terraform.** Written in
+  `infra/` (`vertex.tf`, `observability.tf`, `dashboard.tf`, `audit.tf`,
+  `budget.tf`) but not planned or applied against production. Owner decision;
+  follow the targeted-plan order in `infra/README.md` and read the "terraform
+  apply reverts production" section of `HANDOFF.md` first.
 - ~~**P1 — Canary/rollback strategy.**~~ Done: `deploy.yml` deploys the new
   revision with `--no-traffic --tag=gh-<sha>`, health-checks that
   revision's own URL directly, and only then runs `update-traffic
@@ -149,9 +179,10 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 ## 6. Content & documentation
 
 - ~~**P1 — Architecture diagram.**~~ Done: mermaid diagram in the root README
-  covering SPA → FastAPI → Claude/Supabase/SendGrid and the deploy path.
+  covering SPA → FastAPI → model provider/Supabase/SendGrid and the deploy path.
 - ~~**P2 — ADRs.**~~ Done: `docs/adr/` covers WebSockets vs SSE for chat,
-  Supabase, Cloud Run, and the deploy-verify-promote pattern.
+  Supabase, Cloud Run, the deploy-verify-promote pattern, the Vertex
+  provider, visitor-confirmed execute tools and the content truthfulness guard.
 - ~~**P2 — Changelog.**~~ Done: `CHANGELOG.md`, grouped by date rather
   than version tags since this project doesn't cut releases.
 
@@ -163,29 +194,35 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 - ~~**P1 — Skills search & category filter.**~~ Done: search input +
   category chips above the skills grid.
 - ~~**P1 — Richer About hero + recruiter CTA.**~~ Done: brief bio,
-  primary-skill icons, and an "Open to … / Get in touch" strip driven by
-  `aboutme.json` → `open_to`.
+  primary-skill icons. The "Open to … / Get in touch" availability strip
+  (`aboutme.json` → `open_to`) was later removed at the owner's request.
 - ~~**P1 — Copy-link on modals.**~~ Done: experience, skill, and project
   modals expose a one-click shareable deep link.
 - ~~**P1 — Social preview + PWA manifest names.**~~ Done: `og:image` /
   Twitter card meta and filled `site.webmanifest` name fields.
-- ~~**P1 — Chat site-navigation actions.**~~ Done: Claude can call
-  `navigate_section` / `open_modal` / `download_resume` tools; the backend
-  forwards validated `{type:"action"}` frames and the frontend executes them.
+- ~~**P1 — Chat site-navigation actions.**~~ Done: the model can call
+  `navigate_section` / `open_modal` / `download_resume` / `set_theme`; the
+  backend forwards validated `{type:"action"}` frames and the frontend
+  executes them.
+- ~~**P1 — Chat tools.**~~ Done: `search_portfolio` grounds answers in the
+  data; `contact_jordan`, `request_phone` and `request_meeting` show a
+  confirmation card (see ADR 0006).
 - ~~**P1 — Focus trap in modals.**~~ Done: `useFocusTrap` on experience,
   skill, project, and contact dialogs.
 - ~~**P1 — Interactive doodle canvas.**~~ Done: pointer-drawing canvas with
   clear control; party mode adds colorful glow strokes.
 - ~~**P1 — Cookie consent banner.**~~ Done: consent-mode defaults to denied;
-  banner gates analytics until accept/deny; choice persisted in localStorage.
+  banner gates analytics until accept/deny; choice persisted in localStorage;
+  the footer's "Cookie settings" reopens it. Consent Mode v2 signals are
+  still an open audit item.
 - ~~**P2 — Keyboard shortcuts.**~~ Done: `?`/`/` opens chat; `g` then
   `a/e/p/s/r` jumps to About/Experience/Projects/Skills/Resume.
 - ~~**P2 — Command palette.**~~ Done: `Ctrl/Cmd+K` fuzzy jump to sections,
   chat, contact, resume download, and party mode.
 - ~~**P2 — Konami / party URL eggs.**~~ Done: ↑↑↓↓←→←→BA and `?party=1`
   activate party mode with a burst animation.
-- ~~**P2 — Chat contact prefill.**~~ Done: `prefill_contact` tool drafts
-  the contact form from conversation context.
+- ~~**P2 — Chat contact prefill.**~~ Superseded: `prefill_contact` is no longer
+  offered to the model; `contact_jordan` with a confirmation card replaced it.
 - ~~**P2 — Project story timeline.**~~ Done: project modals show Snapshot /
   Story / Stack / Updated steps when detail data exists.
 - ~~**P2 — Reading progress bar.**~~ Done: thin top-of-viewport scroll
@@ -205,7 +242,9 @@ CI/CD pipeline that deploys to Cloud Run on merge to `main`.
 4. ~~**Polish pass:** usage telemetry, Lighthouse CI budgets, responsive
    images, GA4 double-pageview fix, modal-view tracking, dependency
    security fixes (33 → 5 frontend Dependabot alerts).~~ Done.
-5. **Bigger bets (current focus):** staging environment, CDN,
+5. **Bigger bets (not started; ask first):** staging environment, CDN,
    OpenTelemetry, PWA offline shell, persisted chat transcripts per
-   session (needs a Supabase schema change — see §4), Vite/Vitest
-   major upgrade (see §1).
+   session (needs a Supabase schema change — see §4). The Vite/Vitest
+   upgrade is done (see §1).
+6. **Owner decisions:** applying the new Terraform, rotating the secrets in
+   the open audit findings, locking down the state bucket.
