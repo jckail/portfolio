@@ -17,6 +17,10 @@ locals {
     ANTHROPIC_API_KEY     = google_secret_manager_secret.secrets["anthropic_api_key"].secret_id
     SENDGRID_API_KEY      = google_secret_manager_secret.secrets["sendgrid_api_key"].secret_id
     CONTACT_PHONE         = google_secret_manager_secret.contact_phone.secret_id
+    # Optional in the app (chat falls back to Anthropic without it). The
+    # container and its binding live in vertex.tf; the value is written out of
+    # band, never through Terraform.
+    VERTEX_API_KEY = google_secret_manager_secret.vertex_api_key.secret_id
   }
 
   # Plain (non-secret) environment variables
@@ -44,6 +48,7 @@ resource "google_project_service" "services" {
     "iamcredentials.googleapis.com",
     "sts.googleapis.com",
     "monitoring.googleapis.com",
+    "logging.googleapis.com",
   ])
 
   service            = each.value
@@ -60,11 +65,37 @@ resource "google_artifact_registry_repository" "images" {
   description   = "Container images for the portfolio app"
   format        = "DOCKER"
 
+  # Policy semantics: KEEP always wins over DELETE. A version is deleted only
+  # when it is older than the threshold AND is not one of the newest versions
+  # AND does not carry the `latest` tag. Cloud Run keeps its own copy of a
+  # deployed revision's image, and the serving and previous revisions are
+  # always among the newest versions, so rollback by traffic shift is
+  # unaffected. Dry-run first: see var.artifact_cleanup_dry_run.
+  cleanup_policy_dry_run = var.artifact_cleanup_dry_run
+
   cleanup_policies {
     id     = "keep-recent"
     action = "KEEP"
     most_recent_versions {
-      keep_count = 10
+      keep_count = var.artifact_keep_count
+    }
+  }
+
+  cleanup_policies {
+    id     = "keep-latest-tag"
+    action = "KEEP"
+    condition {
+      tag_state    = "TAGGED"
+      tag_prefixes = ["latest"]
+    }
+  }
+
+  cleanup_policies {
+    id     = "delete-old-images"
+    action = "DELETE"
+    condition {
+      tag_state  = "ANY"
+      older_than = "${var.artifact_delete_after_days * 86400}s"
     }
   }
 
@@ -130,6 +161,11 @@ resource "google_secret_manager_secret" "contact_phone" {
   }
 
   depends_on = [google_project_service.services]
+}
+
+import {
+  to = google_secret_manager_secret_iam_member.contact_phone_run_access
+  id = "projects/${var.project_id}/secrets/contact-phone roles/secretmanager.secretAccessor serviceAccount:${var.service_name}-run@${var.project_id}.iam.gserviceaccount.com"
 }
 
 resource "google_secret_manager_secret_iam_member" "contact_phone_run_access" {
@@ -205,7 +241,20 @@ resource "google_cloud_run_v2_service" "app" {
     google_project_service.services,
     google_secret_manager_secret_version.secret_versions,
     google_secret_manager_secret_iam_member.contact_phone_run_access,
+    google_secret_manager_secret_iam_member.vertex_api_key_run_access,
   ]
+
+  # Production is deployed by .github/workflows/deploy.yml, which ships a
+  # digest and pins traffic. Terraform must never be the thing that moves the
+  # image (see HANDOFF.md "terraform apply will revert production"), and the
+  # client fields are rewritten by every gcloud deploy.
+  lifecycle {
+    ignore_changes = [
+      template[0].containers[0].image,
+      client,
+      client_version,
+    ]
+  }
 }
 
 # Public website: allow unauthenticated invocations

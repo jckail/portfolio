@@ -48,6 +48,21 @@ jobs:
     - name: Type check
       run: npm run type-check
 
+    # Both are also enforced inside the lint and test steps above (the ESLint
+    # import/no-restricted-paths zone, and src/styles/css-vars.test.ts). They
+    # are repeated here as their own named steps so a failure says what broke,
+    # and so someone loosening the ESLint zone or skipping the test does not
+    # silently drop the invariant.
+    - name: Boundary check (shared/ and types/ must not import app/)
+      run: |
+        if grep -rEn "from ['\"](\.\./)+app/|from ['\"]@/app/" src/shared src/types; then
+          echo "::error::shared/ and types/ must not import from app/"
+          exit 1
+        fi
+
+    - name: Undefined CSS custom property check
+      run: npx vitest run src/styles/css-vars.test.ts
+
     - name: Test (with coverage gate)
       run: npm run test:coverage
 
@@ -124,6 +139,28 @@ jobs:
       with:
         terraform_version: '1.9.8'
 
+    # Provider downloads dominate this job. The lock file pins versions, so it
+    # is a sound cache key.
+    - name: Cache Terraform providers
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ~/.terraform.d/plugin-cache
+        key: tf-plugins-${{ runner.os }}-${{ hashFiles('infra/.terraform.lock.hcl', 'infra/versions.tf') }}
+
+    - name: Prepare plugin cache directory
+      run: |
+        mkdir -p "$HOME/.terraform.d/plugin-cache"
+        echo "TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache" >> "$GITHUB_ENV"
+
+    # A google_apikeys_key resource writes the key string into state. Keys are
+    # created and rotated with gcloud (infra/README.md), never by Terraform.
+    - name: Guard against Terraform-managed API keys and secret values
+      run: |
+        if grep -nE 'resource +"google_apikeys_key"|google_service_account_key' *.tf; then
+          echo "::error::API keys and service-account keys must not be managed by Terraform (they land in state)"
+          exit 1
+        fi
+
     - name: Format check
       run: terraform fmt -check -recursive
 
@@ -189,11 +226,23 @@ jobs:
         cache: 'npm'
         cache-dependency-path: e2e/package-lock.json
 
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
     - name: Install Playwright
       working-directory: e2e
       run: |
         npm ci
-        npx playwright install --with-deps chromium
+        if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+          # Browser binaries are cached; system libraries are not.
+          npx playwright install-deps chromium
+        else
+          npx playwright install --with-deps chromium
+        fi
 
     - name: Run E2E smoke test
       working-directory: e2e
@@ -202,6 +251,18 @@ jobs:
     - name: Run Lighthouse CI budget assertions
       working-directory: e2e
       run: npx lhci autorun --config=./lighthouserc.json
+
+    - name: Upload Lighthouse and Playwright results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: e2e-results
+        path: |
+          e2e/lhci-results
+          e2e/test-results
+          e2e/playwright-report
+        if-no-files-found: ignore
+        retention-days: 7
 
     - name: Tear down E2E container
       if: always()

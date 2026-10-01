@@ -114,6 +114,18 @@ terraform show -json tfplan | jq -r '
 Require **no** change to `google_cloud_run_v2_service.app` and **no**
 delete/replace on `google_secret_manager_secret_version.*`.
 
+### Terraform now describes more than production has applied
+
+As of 2026-10-01 `infra/` also defines the Vertex service account and secret,
+log-based metrics, alert policies, a dashboard, extra uptime checks, a log
+exclusion, an Artifact Registry delete policy and optional budgets. None of it
+is planned or applied. The safe order (targeted plans, imports first, never
+`google_cloud_run_v2_service.app`, dry-run image cleanup before deleting) is in
+[`infra/README.md`](infra/README.md#observability-vertex-and-spend-guardrails-2026-10).
+The `lifecycle.ignore_changes` on the service now covers `image`, `client` and
+`client_version`; traffic and `GIT_COMMIT` are still exposed to an apply, so
+the require-no-change check above stands.
+
 ### The state bucket is unprotected
 
 `gs://portfolio-383615-terraform-state` has no explicit IAM — access is

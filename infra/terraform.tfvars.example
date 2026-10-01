@@ -22,3 +22,9 @@ secrets = {
   anthropic_api_key     = "sk-ant-..."
   sendgrid_api_key      = "SG...."
 }
+
+# Optional: observability and spend guardrails (see infra/README.md)
+# artifact_cleanup_dry_run  = true   # set false only after reviewing the dry-run log
+# extra_uptime_hosts        = ["jckail.com", "jordan-kail.com", "www.jordan-kail.com"]
+# billing_account_id        = ""     # set to create budgets; needs billing.budgets.create
+# vertex_budget_service_ids = []     # catalog ids of Vertex AI / Generative Language
