@@ -31,8 +31,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [initTheme]);
 
   useEffect(() => {
+    const root = document.documentElement;
+    let restoreFrame = 0;
     try {
-      const root = document.documentElement;
+      // theme.css gives every element a color/border-color transition, so a
+      // theme switch used to start ~1,000 transitions at once: ~400 ms of
+      // style work on a 4x-throttled phone before the next frame (the INP of
+      // the toggle). Backgrounds never animated, so the switch already read
+      // as instant; suspend transitions for the frame that applies it.
+      root.classList.add('no-transition');
       root.classList.remove('theme-light', 'theme-dark', 'theme-party');
       root.classList.add(`theme-${theme}`);
       // Data attribute for CSS variables
@@ -54,6 +61,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('[Theme Provider] Error applying theme:', error);
     }
+    // Two frames: the first paints the new theme with transitions off, the
+    // second turns hover and focus transitions back on.
+    restoreFrame = requestAnimationFrame(() => {
+      restoreFrame = requestAnimationFrame(() => root.classList.remove('no-transition'));
+    });
+    return () => {
+      cancelAnimationFrame(restoreFrame);
+      root.classList.remove('no-transition');
+    };
   }, [theme]);
 
   return <>{children}</>;
