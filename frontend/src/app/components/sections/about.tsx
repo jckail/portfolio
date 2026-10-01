@@ -91,7 +91,7 @@ const TLDRContent = memo(({
   const shortcutModifier = isApplePlatform() ? '⌘' : 'Ctrl';
 
   return (
-    <div className="about-section">
+    <div className="about-section panel">
       <div className="about-hero">
         <div className="about-hero-copy">
           <p className="about-eyebrow">{aboutMeData.greeting}</p>
@@ -121,80 +121,78 @@ const TLDRContent = memo(({
             height="200"
           />
         </div>
+
+        <div className="about-actions">
+          <ErrorBoundary>
+            <SocialLinks
+              github={contactData.github}
+              linkedin={contactData.linkedin}
+              email={contactData.email}
+              onResumeClick={onResumeClick}
+              onContactSelect={onContactSelect}
+            />
+          </ErrorBoundary>
+          <button
+            type="button"
+            className="about-shortcut-hint"
+            onClick={openCommandPalette}
+            title={`Quick navigation (${shortcutModifier}+K)`}
+            aria-keyshortcuts={isApplePlatform() ? 'Meta+K' : 'Control+K'}
+          >
+            <kbd>{shortcutModifier}</kbd>
+            <kbd>K</kbd>
+            <span className="about-shortcut-label">Quick nav</span>
+          </button>
+        </div>
       </div>
 
-      <div className="about-actions">
-        <ErrorBoundary>
-          <SocialLinks
-            github={contactData.github}
-            linkedin={contactData.linkedin}
-            email={contactData.email}
-            onResumeClick={onResumeClick}
-            onContactSelect={onContactSelect}
-          />
-        </ErrorBoundary>
-        <button
-          type="button"
-          className="about-shortcut-hint"
-          onClick={openCommandPalette}
-          title={`Quick navigation (${shortcutModifier}+K)`}
-          aria-keyshortcuts={isApplePlatform() ? 'Meta+K' : 'Control+K'}
-        >
-          <kbd>{shortcutModifier}</kbd>
-          <kbd>K</kbd>
-          <span className="about-shortcut-label">Quick nav</span>
-        </button>
-      </div>
+      <div className="about-details">
+        <div className="brief-bio">
+          {bioParagraphs.map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
+          {chatAvailable && (
+            <p>
+              Ask my{' '}
+              <span className="ai-highlight" {...buttonize(handleAIClick)}>
+                AI Assistant 🤖
+              </span>{' '}
+              below for more details about me.
+            </p>
+          )}
+        </div>
 
-      {aboutMeData.primary_skills?.length > 0 && (
-        <div className="about-skill-icons" aria-label="Primary skills">
-          {aboutMeData.primary_skills.map((name, index) => {
-            const skillKey = findSkillKey(skillsData, name);
-            const skill = getOwn(skillsData, skillKey);
-            return (
-              <div
-                key={name}
-                className="about-skill-item"
-                style={{ '--item-index': index } as React.CSSProperties}
-                title={name}
-                {...(skillKey
-                  ? buttonize(() => onSkillSelect(skillKey))
-                  : {})}
-              >
-                <div className="about-skill-icon-container">
+        {aboutMeData.primary_skills?.length > 0 && (
+          <div className="about-skill-icons" aria-label="Primary skills">
+            {aboutMeData.primary_skills.map(name => {
+              const skillKey = findSkillKey(skillsData, name);
+              const skill = getOwn(skillsData, skillKey);
+              return (
+                <div
+                  key={name}
+                  className={`about-skill-item${skillKey ? ' is-interactive' : ''}`}
+                  title={name}
+                  {...(skillKey
+                    ? buttonize(() => onSkillSelect(skillKey))
+                    : {})}
+                >
                   {skill ? (
                     <SkillIcon
                       name={skill.image}
                       className="about-skill-icon"
-                      size={40}
+                      size={28}
                       aria-label={name}
                     />
                   ) : (
-                    <span className="about-skill-fallback">{name.slice(0, 2)}</span>
+                    <span className="about-skill-fallback" aria-hidden="true">{name.slice(0, 2)}</span>
                   )}
                   <span className="about-skill-name">{name}</span>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="brief-bio">
-        {bioParagraphs.map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
-        ))}
-        {chatAvailable && (
-          <p>
-            Ask my{' '}
-            <span className="ai-highlight" style={{ cursor: 'pointer' }} {...buttonize(handleAIClick)}>
-              AI Assistant 🤖
-            </span>{' '}
-            below for more details about me.
-          </p>
+              );
+            })}
+          </div>
         )}
       </div>
-
     </div>
   );
 });

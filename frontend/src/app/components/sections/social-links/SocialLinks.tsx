@@ -39,14 +39,43 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
     onContactSelect();
   };
 
+  // Primary action first (Contact), then the resume, then the profile links
   return (
     <div className="social-links">
+      {email && (
+        <button
+          onClick={handleContactClick}
+          className="contact-button btn btn-primary"
+          aria-label="View Contact"
+          data-action="view"
+          data-label="Contact modal"
+          id="contact-button"
+          type="button"
+        >
+          <EmailIcon />
+          <strong>Contact</strong>
+        </button>
+      )}
+
+      <button
+        onClick={handleResumeClick}
+        className="resume-button btn"
+        aria-label="View Resume"
+        data-action="view"
+        data-label="Resume Section"
+        id="resume-button"
+        type="button"
+      >
+        <ResumeIcon />
+        <strong>Resume</strong>
+      </button>
+
       {github && (
-        <a 
-          href={github} 
-          target="_blank" 
+        <a
+          href={github}
+          target="_blank"
           rel="noopener noreferrer"
-          className="icon-link"
+          className="icon-link btn-icon"
           aria-label="GitHub Profile"
           onClick={() => handleSocialClick('github', github)}
           data-social="github"
@@ -57,11 +86,11 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
         </a>
       )}
       {linkedin && (
-        <a 
-          href={linkedin} 
-          target="_blank" 
+        <a
+          href={linkedin}
+          target="_blank"
           rel="noopener noreferrer"
-          className="icon-link"
+          className="icon-link btn-icon"
           aria-label="LinkedIn Profile"
           onClick={() => handleSocialClick('linkedin', linkedin)}
           data-social="linkedin"
@@ -71,33 +100,6 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
           <LinkedInIcon />
         </a>
       )}
-      {email && (
-            <button 
-            onClick={handleContactClick}
-            className="contact-button"
-            aria-label="View Contact"
-            data-action="view"
-            data-label="Contact modal"
-            id="contact-button"
-            type="button"
-          >
-            <strong>Contact</strong>
-            <EmailIcon />
-          </button>
-      )}
-
-      <button 
-        onClick={handleResumeClick}
-        className="resume-button"
-        aria-label="View Resume"
-        data-action="view"
-        data-label="Resume Section"
-        id="resume-button"
-        type="button"
-      >
-        <strong>Resume</strong>
-        <ResumeIcon />
-      </button>
     </div>
   );
 };
