@@ -60,3 +60,28 @@ This feature branch is based on `feat/refresh-2026-10` to preserve the portfolio
 Review it against that branch; do not copy its changes onto the older audit checkout.
 Production release uses `.github/workflows/deploy.yml` after integration into `main`.
 Never use `helpers/deploy.sh` or a laptop deploy command.
+
+## Graph and vector dataset
+
+The catalog also includes an independent, seeded commerce dataset under the optional
+`exploration` field. It is separate from the lifecycle scenarios: switching a scenario
+or running custom lifecycle parameters does not regenerate these products or purchases.
+The same export command regenerates both datasets.
+
+The exploration contains 48 products across six categories, 32 synthetic customers,
+and 160 purchase rows. Graph nodes represent customers, products, and categories.
+Customer-to-product edges aggregate purchased quantities; product-to-category edges
+represent category membership. The graph view shows a bounded one-hop neighborhood,
+with the relationship table providing the complete selected neighborhood.
+
+Each product carries an eight-dimensional, nonnegative unit vector. The six category
+features plus portability and premium positioning are deliberately handcrafted.
+They are not language-model embeddings. The browser ranks other products by cosine
+similarity, excludes the selected product, and breaks ties by product ID. Feature
+contributions explain the score; similarity is not a probability or a learned
+recommendation. No graph database, vector database, external API, or paid service is
+required for this small reproducible example.
+
+Backend validation checks IDs, references, vector dimensions and normalization, and
+graph consistency before serving the artifact. Frontend and browser tests cover
+selection, product search, graph neighborhoods, similarity rankings, and mobile layout.

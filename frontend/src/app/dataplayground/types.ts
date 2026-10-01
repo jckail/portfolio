@@ -62,9 +62,36 @@ export interface RunResult {
   lineage: { metric: string; definition: string; source: string; sql: string }[];
 }
 export interface Catalog {
+  exploration?: ExplorationDataset;
   schema_version: number;
   engine_version: string;
   source: { repository: string; command: string };
   live_simulation: boolean;
   runs: RunResult[];
+}
+
+export interface ExplorationProduct {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  price_cents: number;
+  vector: number[];
+}
+export interface ExplorationDataset {
+  seed: number;
+  description: string;
+  dimensions: string[];
+  products: ExplorationProduct[];
+  customers: { id: string; name: string; segment: string }[];
+  purchases: { id: string; customer_id: string; product_id: string; quantity: number }[];
+  graph: {
+    nodes: { id: string; label: string; kind: 'customer' | 'product' | 'category' }[];
+    edges: {
+      source: string;
+      target: string;
+      relation: 'purchased' | 'belongs_to';
+      weight: number;
+    }[];
+  };
 }

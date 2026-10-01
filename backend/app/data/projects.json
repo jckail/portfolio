@@ -128,9 +128,9 @@
     },
     "data_playground": {
         "title": "Data Playground",
-        "description": "An interactive data-engineering lab: simulate a business, validate its events, and trace the analytics.",
+        "description": "An interactive data-engineering lab for event pipelines, SQL analytics, relationship graphs, and vector similarity.",
         "link": "https://github.com/jckail/data_playground",
-        "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. The original PostgreSQL and Streamlit experiment remains in the source repository.",
+        "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. A separate synthetic commerce dataset connects products, customers, and purchases in a relationship graph and explains cosine similarity over handcrafted product feature vectors. The original PostgreSQL and Streamlit experiment remains in the source repository.",
         "logoPath": "playground-icon.svg",
         "tech_stack": [
             "Python",

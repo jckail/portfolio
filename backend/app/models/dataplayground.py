@@ -3,6 +3,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .dataplayground_exploration import Exploration
+
 Count = Annotated[int, Field(ge=0, strict=True)]
 Fraction = Annotated[float, Field(ge=0, le=1, allow_inf_nan=False, strict=True)]
 ShortText = Annotated[str, Field(max_length=500)]
@@ -128,6 +130,7 @@ class LabCatalog(Contract):
     engine_version: Literal["1.0.0"]
     source: ArtifactSource
     runs: Annotated[list[SimulationRun], Field(min_length=1, max_length=10)]
+    exploration: Exploration | None = None
 
 
 class PublicLabCatalog(LabCatalog):

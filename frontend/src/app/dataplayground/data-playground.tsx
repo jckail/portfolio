@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { useThemeStore } from '../../shared/stores/theme-store';
 import { endpoints, getJson, postJson } from '../../shared/utils/api';
+import Exploration from './exploration';
 import '../../styles/base/theme.css';
 import './data-playground.css';
 
@@ -244,7 +245,7 @@ function Workspace({ catalog }: { catalog: Catalog }) {
           )}
         </details>
       </section>
-      <section className="lab-pipeline-section" aria-labelledby="pipeline-title">
+      <section id="lab-pipeline" className="lab-pipeline-section" aria-labelledby="pipeline-title">
         <div className="lab-section-heading">
           <div>
             <h2 id="pipeline-title">From event to evidence</h2>
@@ -659,6 +660,14 @@ export default function DataPlayground() {
             </p>
           </aside>
         </div>
+        {catalog?.exploration && (
+          <nav className="lab-explore-nav" aria-label="Lab sections">
+            <a href="#lab-pipeline">Lifecycle pipeline</a>
+            <a href="#lab-exploration">Product dataset</a>
+            <a href="#lab-graph">Graph relationships</a>
+            <a href="#lab-vectors">Vector similarity</a>
+          </nav>
+        )}
         {error ? (
           <div className="lab-empty" role="alert">
             <h2>The experiments could not load.</h2>
@@ -679,6 +688,7 @@ export default function DataPlayground() {
             <button onClick={() => setAttempt((value) => value + 1)}>Check again</button>
           </div>
         )}
+        {catalog?.exploration && <Exploration dataset={catalog.exploration} />}
       </main>
       <footer className="lab-footer">
         <a href="/">Back to portfolio</a>
