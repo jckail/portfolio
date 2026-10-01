@@ -1,6 +1,6 @@
 """Static file serving for the built SPA, with a history-API fallback.
 
-The React app uses BrowserRouter, so a hard load of a client route such as
+The React app reads window.location for its routes, so a hard load of a client route such as
 ``/admin`` reaches the server as a plain GET. Without a fallback that request
 falls through to StaticFiles and returns ``{"detail": "Not Found"}`` JSON.
 
