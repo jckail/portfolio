@@ -28,6 +28,7 @@ from starlette.routing import get_route_path
 from starlette.staticfiles import NotModifiedResponse, StaticFiles
 from starlette.types import Scope
 
+from .dataplayground_document import LAB_PATHS, LAB_URL, render_document
 from .middleware.compression import GZIP_MINIMUM_SIZE
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ logger = logging.getLogger(__name__)
 # pathname check in app/components/main-content.tsx). Other unknown paths
 # still get the SPA shell so the visitor lands on the site, but with a 404
 # status so crawlers do not index junk URLs as duplicate homepages.
-SPA_ROUTES = frozenset({"/", "/admin"})
+SPA_ROUTES = frozenset({"/", "/admin", "/dataplayground", "/dataplayground/"})
 
 # Never answer these with index.html. /api and /ws keep JSON 404s for
 # clients; a missing /assets chunk must fail loudly rather than parse HTML
@@ -190,8 +191,7 @@ def _link_header() -> str:
     )
 
 
-# Only the home page is the document of record. Everything else that falls
-# back to index.html (the admin login, unknown URLs) must stay out of indexes.
+# Home and the lab are public documents. Admin and unknown URLs stay noindex.
 HOME_PATHS = frozenset({"/", "/index.html"})
 
 
@@ -251,9 +251,8 @@ class SPAStaticFiles(StaticFiles):
             jsonld = jsonld or discovery.jsonld_json
         self._snapshot = snapshot
         self._jsonld = jsonld
-        # One entry per variant: the home page (with the snapshot) and the
-        # bare shell served for /admin and unknown URLs.
-        self._index: dict[bool, IndexEntry] = {}
+        # Separate content hashes and compression for home, lab, and bare shell.
+        self._index: dict[str, IndexEntry] = {}
         self._index_lock = threading.Lock()
 
     @property
@@ -270,12 +269,14 @@ class SPAStaticFiles(StaticFiles):
                     stat_result = os.stat(self.index_path)
                     self._index_entry(stat_result, home=True)
                     self._index_entry(stat_result, home=False)
+                    self._index_entry(stat_result, lab=True)
                 except OSError:
                     pass
 
-    def _index_entry(self, stat_result: os.stat_result, home: bool = False) -> IndexEntry | None:
+    def _index_entry(self, stat_result: os.stat_result, home: bool = False, lab: bool = False) -> IndexEntry | None:
         """index.html with the bootstrap block, rebuilt only when the file changes."""
-        entry = self._index.get(home)
+        variant = "lab" if lab else "home" if home else "bare"
+        entry = self._index.get(variant)
         if entry is not None and (entry.mtime_ns, entry.size) == (stat_result.st_mtime_ns, stat_result.st_size):
             return entry
         try:
@@ -285,7 +286,9 @@ class SPAStaticFiles(StaticFiles):
             return None
         if len(raw) != stat_result.st_size:
             return None  # rewritten mid-read (local rebuild)
-        if self._jsonld is not None:
+        if lab:
+            raw = render_document(raw)
+        elif self._jsonld is not None:
             raw = inject_jsonld(raw, self._jsonld())
         if home and self._snapshot is not None:
             raw = inject_root_content(raw, self._snapshot())
@@ -302,7 +305,7 @@ class SPAStaticFiles(StaticFiles):
             gzip_etag=f'"{digest}-gz"',
         )
         with self._index_lock:
-            self._index[home] = entry
+            self._index[variant] = entry
         return entry
 
     def _index_response(self, scope: Scope, status_code: int) -> Response | None:
@@ -311,7 +314,8 @@ class SPAStaticFiles(StaticFiles):
         except OSError:
             return None
         home = status_code == 200 and get_route_path(scope) in HOME_PATHS
-        entry = self._index_entry(stat_result, home=home)
+        lab = status_code == 200 and get_route_path(scope) in LAB_PATHS
+        entry = self._index_entry(stat_result, home=home, lab=lab)
         if entry is None:
             return None
         wants_gzip = _accepts_gzip(scope)
@@ -323,6 +327,8 @@ class SPAStaticFiles(StaticFiles):
         }
         if home:
             headers["link"] = _link_header()
+        elif lab:
+            headers["link"] = f'<{LAB_URL}>; rel="canonical"'
         else:
             headers["x-robots-tag"] = "noindex"
         if status_code == 200 and self.is_not_modified(Headers(headers), Headers(scope=scope)):

@@ -515,6 +515,7 @@ def sitemap_xml() -> bytes:
     modified = last_modified_date()
     entries = [
         ("/", modified, "monthly", "1.0"),
+        ("/dataplayground", modified, "monthly", "0.8"),
         ("/llms.txt", modified, "monthly", "0.5"),
         ("/llms-full.txt", modified, "monthly", "0.5"),
         ("/resume.json", modified, "monthly", "0.6"),
