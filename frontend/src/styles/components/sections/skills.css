@@ -176,6 +176,27 @@
   color: var(--text-color);
 }
 
+/* AI & agents is the focus area: an accent rail and a short caption */
+.skill-category.is-featured {
+  position: relative;
+  padding-left: var(--spacing-md);
+}
+
+.skill-category.is-featured::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--spacing-md);
+  bottom: var(--spacing-md);
+  width: 3px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.skill-category.is-featured .skill-chip {
+  border-color: var(--chip-border);
+}
+
 /* Modal content shared with SkillModal */
 .experience-info {
   color: var(--text-color);

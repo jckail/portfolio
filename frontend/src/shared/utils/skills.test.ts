@@ -1,8 +1,17 @@
 import { describe, it, expect } from 'vitest';
 
-import { findSkillKey, formatTag } from './skills';
+import {
+  categoryPosition,
+  findSkillKey,
+  formatTag,
+  relatedSkills,
+  resolveTagToSkillKey,
+  skillChatPrompt,
+  skillSearchText,
+  skillUsage,
+} from './skills';
 
-import type { SkillsData } from '../../types/skills';
+import type { Skill, SkillsData } from '../../types/skills';
 
 const skills = {
   pytorch: { display_name: 'PyTorch' },
@@ -54,5 +63,65 @@ describe('findSkillKey', () => {
       second: { display_name: 'spark' },
     } as unknown as SkillsData;
     expect(findSkillKey(dupes, 'spark')).toBe('first');
+  });
+});
+
+describe('skill relationships', () => {
+  const data = {
+    python: { display_name: 'Python', general_category: 'Languages', sub_category: 'General', related: ['pytorch', 'nope', 'python', 'pytorch'] },
+    pytorch: { display_name: 'PyTorch', general_category: 'AI', sub_category: 'DL', related: [] },
+    tensorflow: { display_name: 'TensorFlow', general_category: 'AI', sub_category: 'DL' },
+    rag: { display_name: 'RAG', general_category: 'AI', sub_category: 'LLM', tags: [] },
+    agent_harnesses: { display_name: 'Agent Harnesses', general_category: 'AI', sub_category: 'Agents' },
+  } as unknown as SkillsData;
+
+  it('resolves tags by display name and by key', () => {
+    expect(resolveTagToSkillKey(data, 'python')).toBe('python');
+    expect(resolveTagToSkillKey(data, 'agent-harnesses')).toBe('agent_harnesses');
+    expect(resolveTagToSkillKey(data, 'constructor')).toBeUndefined();
+    expect(resolveTagToSkillKey(data, '__proto__')).toBeUndefined();
+  });
+
+  it('finds roles and projects whose tech stack names the skill', () => {
+    const experienceData = {
+      a: { company: 'A', title: 'Eng', date: '2020', tech_stack: ['python', 'agent-harnesses'] },
+      b: { company: 'B', title: 'Eng', date: '2019', tech_stack: ['sql'] },
+    };
+    const projectsData = { p: { title: 'P', tech_stack: ['Python'] }, q: { title: 'Q' } };
+    expect(skillUsage(data, 'python', { experienceData, projectsData })).toEqual({
+      roles: [{ key: 'a', company: 'A', title: 'Eng', date: '2020' }],
+      projects: [{ key: 'p', title: 'P' }],
+    });
+    expect(skillUsage(data, 'rag', { experienceData, projectsData })).toEqual({ roles: [], projects: [] });
+    expect(skillUsage(data, 'rag', {})).toEqual({ roles: [], projects: [] });
+  });
+
+  it('uses the related field, dropping unknown, self and duplicate keys', () => {
+    expect(relatedSkills(data, 'python')).toEqual(['pytorch']);
+  });
+
+  it('falls back to the sub-category when there is no related list', () => {
+    expect(relatedSkills(data, 'tensorflow')).toEqual(['pytorch']);
+    expect(relatedSkills(data, 'rag')).toEqual([]);
+    expect(relatedSkills(data, 'constructor')).toEqual([]);
+  });
+
+  it('places a skill among its category in data order', () => {
+    expect(categoryPosition(data, 'pytorch')).toEqual({
+      category: 'AI', index: 0, total: 4, previous: undefined, next: 'tensorflow',
+    });
+    expect(categoryPosition(data, 'agent_harnesses')?.next).toBeUndefined();
+    expect(categoryPosition(data, 'python')?.total).toBe(1);
+    expect(categoryPosition(data, '__proto__')).toBeUndefined();
+  });
+
+  it('builds the assistant prompt and search text from the data', () => {
+    expect(skillChatPrompt({ display_name: 'Kafka' })).toContain('Kafka');
+    const text = skillSearchText(data, {
+      display_name: 'Python', description: 'A language', general_category: 'Languages',
+      tags: ['data-science'], related: ['pytorch'],
+    } as unknown as Skill);
+    expect(text).toContain('pytorch');
+    expect(text).toContain('data science');
   });
 });

@@ -10,6 +10,8 @@ export interface Skill {
   examples: Record<string, string>;
   general_category: string;
   sub_category?: string;
+  /** Keys of related skills (backend SkillDetail.related). */
+  related?: string[];
 }
 
 export type SkillsData = Record<string, Skill>;

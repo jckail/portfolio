@@ -1,19 +1,22 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
+import { skillSearchText } from '../../../shared/utils/skills';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { useSkill } from './skills/hooks/useSkill';
 import { SkillModalHost, prefetchSkillModal as prefetchModal } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
 
-import type { Skill } from '../../../types/skills';
+import type { Skill, SkillsData } from '../../../types/skills';
 import '../../../styles/components/sections/skills.css';
 
+// AI leads: it is the focus area, so it is listed and styled first.
 const CATEGORY_ORDER = [
-  'Programming Languages',
   'Artificial Intelligence',
+  'Programming Languages',
   'Data Engineering',
 ];
+const FEATURED_CATEGORY = 'Artificial Intelligence';
 
 /** Pinned categories first in CATEGORY_ORDER order, the rest alphabetically. */
 function compareCategories(a: string, b: string): number {
@@ -63,7 +66,7 @@ const SkillCategory = memo(({
   skillList: (Skill & { key: string })[];
   onSkillSelect: (key: string) => void;
 }) => (
-  <div className="skill-category">
+  <div className={`skill-category${category === FEATURED_CATEGORY ? ' is-featured' : ''}`}>
     <h3>
       {category}
       <span className="skill-category-count">
@@ -81,17 +84,11 @@ const SkillCategory = memo(({
 ));
 SkillCategory.displayName = 'SkillCategory';
 
-function matchesQuery(skill: Skill, query: string): boolean {
+// Name, description, category, tags and the names of related skills.
+function matchesQuery(skillsData: SkillsData, skill: Skill, query: string): boolean {
   if (!query) return true;
-  const haystack = [
-    skill.display_name,
-    skill.description,
-    skill.general_category,
-    ...skill.tags,
-  ]
-    .join(' ')
-    .toLowerCase();
-  return haystack.includes(query);
+  const text = skillSearchText(skillsData, skill);
+  return query.split(/\s+/).every(word => text.includes(word));
 }
 
 const TechnicalSkills: React.FC = () => {
@@ -121,7 +118,7 @@ const TechnicalSkills: React.FC = () => {
         if (activeCategory && skill.general_category !== activeCategory) {
           continue;
         }
-        if (!matchesQuery(skill, normalizedQuery)) continue;
+        if (!matchesQuery(skillsData, skill, normalizedQuery)) continue;
         const category = skill.general_category;
         if (!categorized[category]) categorized[category] = [];
         categorized[category].push({ key, ...skill });
@@ -162,7 +159,7 @@ const TechnicalSkills: React.FC = () => {
             id="skills-search"
             type="search"
             className="skills-search-input"
-            placeholder="Search by name, tag, or category…"
+            placeholder="Search by name, tag, related skill or category…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoComplete="off"
@@ -216,7 +213,12 @@ const TechnicalSkills: React.FC = () => {
         )}
       </div>
 
-      <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
+      <SkillModalHost
+        skillsData={skillsData}
+        skillKey={selectedSkill}
+        onClose={closeSkill}
+        onNavigate={setSelectedSkill}
+      />
     </section>
   );
 };

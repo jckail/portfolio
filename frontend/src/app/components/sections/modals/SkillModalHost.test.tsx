@@ -6,6 +6,9 @@ import { SkillModalHost } from './SkillModalHost';
 
 import type { SkillsData } from '../../../../types/skills';
 
+vi.mock('../../../providers/data-provider', () => ({
+  useData: () => ({ experienceData: null, projectsData: null, isLoading: false }),
+}));
 vi.mock('../../../../shared/utils/analytics', () => ({ trackModalView: vi.fn() }));
 vi.mock('../../../../shared/components/skill-icon/SkillIcon', () => ({ default: () => null }));
 
