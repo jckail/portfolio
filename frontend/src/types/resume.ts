@@ -7,6 +7,7 @@ export interface Project {
   logoPath?: string;
   tech_stack?: string[];
   last_commit?: string;
+  link_label?: string;
 }
 
 export type ProjectsData = Record<string, Project>;

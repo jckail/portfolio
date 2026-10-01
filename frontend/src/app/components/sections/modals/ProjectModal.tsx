@@ -111,7 +111,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             rel="noopener noreferrer"
             className="visit-website-btn"
           >
-            View project
+            {project.link_label || 'View project'}
           </a>
           {project.link2 && (
             <a
