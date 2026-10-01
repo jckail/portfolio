@@ -104,10 +104,14 @@ def cache_control_for(path: str, method: str, status: int, content_type: str) ->
     """The Cache-Control a response gets when its handler did not set one.
 
     Vite emits content-hashed filenames under /assets/, so those files can be
-    cached forever. Images are unhashed, so they get a shorter TTL. HTML must
+    cached forever. Versioned font files are cached forever too. Images are unhashed, so they get a shorter TTL. HTML must
     always be revalidated so deploys take effect immediately.
     """
     if path.startswith("/assets/"):
+        return IMMUTABLE
+    if path.startswith("/fonts/") and path.endswith(".woff2"):
+        # Self-hosted font files carry their release in the name
+        # (montserrat-v31-...), so a new version is a new URL.
         return IMMUTABLE
     if path.startswith(("/images/", "/api/assets/")):
         return ONE_DAY

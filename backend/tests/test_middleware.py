@@ -239,6 +239,9 @@ def test_cache_policy_table():
     assert cache_control_for("/api/admin/verify", "GET", 200, "application/json") is None
     assert cache_control_for("/api/health/ready", "GET", 503, "application/json") == "no-store"
     assert cache_control_for("/images/a.webp", "GET", 200, "image/webp") == "public, max-age=86400"
+    # versioned font files never change under the same name
+    assert cache_control_for("/fonts/montserrat-v31-latin-wght-normal.woff2", "GET", 200, "font/woff2") == "public, max-age=31536000, immutable"
+    assert cache_control_for("/fonts/OFL-Montserrat.txt", "GET", 200, "text/plain") is None
 
 
 def test_websocket_scopes_pass_through_untouched(client):
