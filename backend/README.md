@@ -8,7 +8,7 @@ panel. In production it also serves the built frontend from `frontend/dist`.
 
 - **FastAPI** + **Uvicorn** (ASGI) on **Python 3.12+**
 - **Pydantic v2** for data models and validation
-- **Anthropic Claude Haiku 4.5** for the AI chat assistant (WebSocket streaming)
+- **Vertex AI Gemini** (or Anthropic Claude) for the AI chat assistant (WebSocket streaming)
 - **Supabase** for admin auth, telemetry, and log/chat persistence
 - **SendGrid** for contact-form email
 
@@ -60,12 +60,28 @@ Server → client messages:
 
 Implementation notes:
 
-- The model defaults to `claude-haiku-4-5` and can be overridden with the
-  `CHAT_MODEL` environment variable; `CHAT_MAX_TOKENS` caps response length.
+- The model sits behind a provider interface (`backend/app/services/llm/`):
+  `vertex_gemini.py` (Vertex AI REST + SSE through httpx) and `anthropic.py`.
+  Settings (all read in `config.py`):
+
+  | Variable | Default | Meaning |
+  |---|---|---|
+  | `CHAT_PROVIDER` | `vertex` if `VERTEX_API_KEY` is set, else `anthropic` | `vertex` or `anthropic` |
+  | `VERTEX_API_KEY` | none (secret) | Service-account-bound API key; sent only in the `x-goog-api-key` header |
+  | `ANTHROPIC_API_KEY` | none (secret) | Used when the provider is `anthropic` |
+  | `CHAT_MODEL` | `gemini-3.1-flash-lite` (vertex), `claude-haiku-4-5` (anthropic) | Primary model |
+  | `CHAT_FALLBACK_MODEL` | `gemini-2.5-flash` | Vertex only: used after the primary fails twice (5xx, timeout) |
+  | `CHAT_MAX_TOKENS` | `1024` | Caps response length |
+  | `CHAT_DAILY_TOKEN_BUDGET` | `2000000` | Tokens per UTC day per instance; chat reports unavailable once spent (resets on cold start) |
+
+  `/api/chat/status` is true only when the provider's key is set, the auth
+  circuit breaker is closed and the daily budget is not spent. Neither chat key
+  is required to boot; without one the assistant is simply unavailable.
 - Conversation history is kept per connection (bounded), so follow-up
   questions work.
 - The static system prompt (`backend/app/prompts/portfoliosystemprompt.md`) and
-  portfolio data use Anthropic prompt caching to cut latency and cost.
+  portfolio data are byte-stable so provider prompt caching applies (explicit
+  cache breakpoints on Anthropic) to cut latency and cost.
 - Messages are capped at 2,000 characters and rate limited to 10 per minute
   per connection.
 
@@ -174,14 +190,15 @@ PRODUCTION_URL=http://localhost:8080
 PORT=8080
 ADMIN_EMAIL=you@example.com
 RESUME_FILE=YourResume.pdf
-ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_API_KEY=sk-ant-...    # or VERTEX_API_KEY for the Vertex provider (one is enough)
 SENDGRID_API_KEY=SG....
 ```
 
 Optional:
 
 ```env
-CHAT_MODEL=claude-haiku-4-5     # override the assistant model
+CHAT_PROVIDER=vertex            # vertex | anthropic (see the chat settings table)
+CHAT_MODEL=gemini-3.1-flash-lite  # override the assistant model
 CHAT_MAX_TOKENS=1024            # cap assistant response length
 CONTACT_SENDER_EMAIL=...        # SendGrid verified sender (defaults to assistant@jordan-kail.com)
 GIT_COMMIT=...                  # reported by /api/health (set automatically by CI deploys)

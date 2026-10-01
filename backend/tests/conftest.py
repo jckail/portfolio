@@ -15,6 +15,11 @@ _TEST_ENV = {
     "RESUME_FILE": "JordanKailResume.pdf",
     "ANTHROPIC_API_KEY": "test-anthropic-key",
     "SENDGRID_API_KEY": "test-sendgrid-key",
+    # Pin the provider so a developer's real Vertex key or CHAT_PROVIDER never
+    # reaches a test; Vertex tests build their own provider on a mock transport.
+    "VERTEX_API_KEY": "",
+    "CHAT_PROVIDER": "anthropic",
+    "CHAT_MODEL": "claude-haiku-4-5",
     # Forced empty so a real number in a developer's shell or .env never
     # reaches a test; tests that need one patch a dummy value into Settings.
     "CONTACT_PHONE": "",
