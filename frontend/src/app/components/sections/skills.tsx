@@ -2,7 +2,6 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
-import { buttonize } from '../../../shared/utils/a11y';
 import { useSkill } from './skills/hooks/useSkill';
 import { SkillModalHost, prefetchSkillModal as prefetchModal } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
@@ -28,33 +27,30 @@ function compareCategories(a: string, b: string): number {
 
 const SkillItem = memo(({
   skill,
-  index,
   onSelect,
 }: {
   skill: Skill & { key: string };
-  index: number;
   onSelect: (key: string) => void;
 }) => (
-  <div
-    className="skill-item"
-    onMouseEnter={prefetchModal}
-    style={{ '--item-index': index } as React.CSSProperties}
-    title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
-    aria-label={`View ${skill.display_name} details`}
-    {...buttonize(() => onSelect(skill.key))}
-  >
-    <div className="skill-icon-container">
-      <div className="icon-wrapper">
-        <SkillIcon
-          name={skill.image}
-          className="skill-icon"
-          size={32}
-          aria-label={skill.display_name}
-        />
-      </div>
+  <li>
+    <button
+      type="button"
+      className="skill-chip"
+      onMouseEnter={prefetchModal}
+      onFocus={prefetchModal}
+      title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
+      aria-label={`View ${skill.display_name} details`}
+      onClick={() => onSelect(skill.key)}
+    >
+      <SkillIcon
+        name={skill.image}
+        className="skill-chip-icon"
+        size={20}
+        aria-label={skill.display_name}
+      />
       <span className="skill-name">{skill.display_name}</span>
-    </div>
-  </div>
+    </button>
+  </li>
 ));
 SkillItem.displayName = 'SkillItem';
 
@@ -68,17 +64,19 @@ const SkillCategory = memo(({
   onSkillSelect: (key: string) => void;
 }) => (
   <div className="skill-category">
-    <h3>{category}</h3>
-    <div className="skill-list">
-      {skillList.map((skill, index) => (
-        <SkillItem
-          key={skill.key}
-          skill={skill}
-          index={index}
-          onSelect={onSkillSelect}
-        />
+    <h3>
+      {category}
+      <span className="skill-category-count">
+        <span className="sr-only">, </span>
+        {skillList.length}
+        <span className="sr-only"> skills</span>
+      </span>
+    </h3>
+    <ul className="skill-list">
+      {skillList.map(skill => (
+        <SkillItem key={skill.key} skill={skill} onSelect={onSkillSelect} />
       ))}
-    </div>
+    </ul>
   </div>
 ));
 SkillCategory.displayName = 'SkillCategory';
