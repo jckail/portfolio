@@ -41,6 +41,15 @@ def test_script_src_disallows_inline_scripts(client):
     assert "'self'" in script_src
 
 
+def test_fonts_are_self_hosted_only(client):
+    """index.html self-hosts its fonts under /fonts/, so the CSP no longer
+    needs (or allows) the Google Fonts origins."""
+    csp = client.get("/api/health").headers["Content-Security-Policy"]
+    assert _directive(csp, "font-src").split()[1:] == ["'self'", "data:"]
+    assert "fonts.googleapis.com" not in _directive(csp, "style-src")
+    assert "fonts.gstatic.com" not in csp
+
+
 def test_connect_src_has_no_wildcard_websockets(client):
     """Bare ws:/wss: would let injected script open a socket to any host."""
     csp = client.get("/api/health").headers["Content-Security-Policy"]

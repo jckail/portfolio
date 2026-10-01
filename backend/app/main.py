@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from .api import api_router, ws_router
 from .config import get_settings, missing_required_vars
 from .models.data_loader import load_all
+from .spa import SPAStaticFiles
 from .utils.logger import get_supabase_handler, setup_logging
 from .utils.request_context import clear_request_id, set_request_id
 from .utils.supabase_client import supabase
@@ -76,7 +77,9 @@ def build_csp(frame_ancestors: str = "'none'") -> str:
 
     No 'unsafe-inline' in script-src: the GA bootstrap lives in
     /ga-init.js, and the JSON-LD block in index.html is a data block the
-    browser never executes. style-src keeps 'unsafe-inline' for Emotion/MUI.
+    browser never executes. style-src keeps 'unsafe-inline' for Emotion/MUI
+    and the inline @font-face block in index.html. Fonts are self-hosted
+    under /fonts/, so no Google Fonts origins are allowed.
     """
     return (
         "default-src 'self'; "
@@ -85,8 +88,8 @@ def build_csp(frame_ancestors: str = "'none'") -> str:
         "form-action 'self'; "
         f"frame-ancestors {frame_ancestors}; "
         "img-src 'self' data: https:; "
-        "font-src 'self' https://fonts.gstatic.com data:; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' data:; "
+        "style-src 'self' 'unsafe-inline'; "
         f"script-src 'self' {GA_SCRIPT_SOURCES}; "
         f"connect-src 'self' {GA_CONNECT_SOURCES}{_websocket_origins()}; "
         "frame-src 'self'; "
@@ -192,7 +195,13 @@ async def add_response_headers(request: Request, call_next):
                 response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
             elif path.startswith(("/images/", "/api/assets/")):
                 response.headers["Cache-Control"] = "public, max-age=86400"
-            elif path == "/" or path.endswith(".html") or path in UNHASHED_SCRIPTS:
+            elif (
+                path == "/"
+                or path.endswith(".html")
+                or path in UNHASHED_SCRIPTS
+                # SPA history fallback: /admin and unknown paths get index.html
+                or response.headers.get("content-type", "").startswith("text/html")
+            ):
                 # Unhashed root scripts (the GA consent bootstrap) revalidate
                 # like the HTML that loads them; otherwise browsers cache them
                 # heuristically and keep running a stale consent default.
@@ -279,7 +288,7 @@ async def initialize_static_files():
         # Serve frontend static files
         frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist'))
         if os.path.exists(frontend_dir):
-            app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+            app.mount("/", SPAStaticFiles(directory=frontend_dir, html=True), name="frontend")
             logger.info(f"Mounted frontend directory: {frontend_dir}")
     except Exception as e:
         logger.error(f"Error mounting static files: {str(e)}")
