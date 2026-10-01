@@ -63,6 +63,14 @@ export default defineConfig({
     // Skip gzip-size reporting to speed up CI builds.
     reportCompressedSize: false,
     rollupOptions: {
+      // Production builds drop debug logging: console.log / console.debug
+      // calls are treated as side-effect free, so the minifier removes them
+      // (their arguments are still evaluated if those have side effects).
+      // console.info / warn / error are kept. This covers debug calls in
+      // section components as well as the providers.
+      treeshake: {
+        manualPureFunctions: ['console.log', 'console.debug'],
+      },
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
