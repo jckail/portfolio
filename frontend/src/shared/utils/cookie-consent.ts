@@ -3,6 +3,9 @@ export const COOKIE_CONSENT_KEY = 'portfolio_cookie_consent';
 /** Window event that asks the consent portal to show the banner again. */
 export const OPEN_COOKIE_SETTINGS_EVENT = 'portfolio:open-cookie-settings';
 
+/** Fired on window after every consent change (accept, deny, withdraw). */
+export const CONSENT_CHANGE_EVENT = 'portfolio:consent-changed';
+
 export type CookieConsent = 'accepted' | 'denied';
 
 declare global {
@@ -73,6 +76,7 @@ export function setCookieConsent(value: CookieConsent): void {
   } else {
     clearAnalyticsCookies();
   }
+  window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
 }
 
 export function hasAnalyticsConsent(): boolean {

@@ -1,3 +1,6 @@
+import { track } from '../analytics/core';
+import { lengthBucket } from '../analytics/events';
+import { TRACKABLE_ANCHORS } from './analytics-anchors';
 import { hasAnalyticsConsent } from './cookie-consent';
 
 type GtagParams = Record<string, unknown>;
@@ -134,17 +137,7 @@ const sectionMetadata: Record<string, Record<string, string>> = {
   }
 };
 
-// Section anchors that may be reported to GA. URL fragments are attacker-
-// controlled (anyone can craft a link), so anything else, such as an email
-// address pasted after the #, is dropped rather than landing in GA reports.
-export const TRACKABLE_ANCHORS: ReadonlySet<string> = new Set([
-  'about',
-  'experience',
-  'projects',
-  'skills',
-  'resume',
-  'doodle',
-]);
+export { TRACKABLE_ANCHORS };
 
 const trackableAnchor = (anchor: string | null | undefined): string | null => {
   const id = (anchor ?? '').replace(/^#/, '');
@@ -160,6 +153,9 @@ const getFullPagePath = (): string => {
 
 // Track theme change
 export const trackThemeChange = async (newTheme: string, previousTheme: string): Promise<void> => {
+  // First-party stream only: GA gets its own theme_change_<name> event below.
+  track('theme_change', { theme: newTheme, from: previousTheme });
+  if (newTheme === 'party') track('party_mode');
   await waitForGtag();
   const sessionId = analyticsSessionId();
   safeGtagCall('event', `theme_change_${newTheme}`, {
@@ -271,6 +267,7 @@ export const trackPageView = async (path: string): Promise<void> => {
 // A duplicate here was inflating GA4 pageview counts.
 export const trackSectionView = async (sectionId: string): Promise<void> => {
   if (!trackableAnchor(sectionId)) return;
+  track('section_view', { section: sectionId });
   await waitForGtag();
   const sessionId = analyticsSessionId();
   const metadata = sectionMetadata[sectionId] || {
@@ -324,6 +321,7 @@ export const trackResumeDownload = async (
   version: string,
   source: string
 ): Promise<void> => {
+  if (!source.endsWith('_error')) track('resume_download', { source });
   await waitForGtag();
   const sessionId = analyticsSessionId();
   safeGtagCall('event', 'resume_download', {
@@ -340,6 +338,7 @@ export const trackResumeView = async (
   format: string,
   source: string
 ): Promise<void> => {
+  track('resume_preview', { source });
   await waitForGtag();
   const sessionId = analyticsSessionId();
   
@@ -378,6 +377,7 @@ export const trackChatMessage = async (
   messageType: 'sent' | 'received',
   messageLength: number
 ): Promise<void> => {
+  if (messageType === 'sent') track('chat_message_sent', { len: lengthBucket(messageLength) });
   await waitForGtag();
   const sessionId = analyticsSessionId();
   safeGtagCall('event', 'chat_message', {

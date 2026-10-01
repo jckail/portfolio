@@ -17,4 +17,6 @@ export const endpoints = {
     logs: '/api/admin/logs',
   },
   telemetry: '/api/telemetry',
+  /** First-party product events (anonymous, 204, consent-gated by the sender). */
+  events: '/api/events',
 } as const;

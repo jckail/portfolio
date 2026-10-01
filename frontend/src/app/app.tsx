@@ -11,6 +11,7 @@ import { useEasterEggs } from '../shared/hooks/use-easter-eggs';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared/utils/analytics';
+import { useAnalyticsTracker } from '../shared/analytics';
 import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
 import { CommandPaletteHost } from '../shared/components/command-palette-host';
 import ReadingProgress from '../shared/components/reading-progress';
@@ -81,6 +82,7 @@ const App: React.FC = () => {
   useKeyboardShortcuts();
   useEasterEggs();
   useThemeEvents();
+  useAnalyticsTracker();
 
   return (
     <ErrorBoundary>
