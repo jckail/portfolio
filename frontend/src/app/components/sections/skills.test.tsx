@@ -59,4 +59,19 @@ describe('Skills section', () => {
     expect(screen.queryByRole('button', { name: 'View Python details' })).toBeNull();
     expect(screen.getByText(/1 skill shown/)).toBeInTheDocument();
   });
+
+  it('marks the active filter as pressed and keeps the status region mounted', () => {
+    const { container } = render(<TechnicalSkills />);
+    const status = container.querySelector('.skills-filter-status');
+    expect(status).toHaveAttribute('aria-live', 'polite');
+    expect(status).toBeEmptyDOMElement();
+    expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
+
+    const filter = screen.getByRole('button', { name: 'Data Engineering' });
+    fireEvent.click(filter);
+    expect(filter).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
+    expect(container.querySelector('.skills-filter-status')).toBe(status);
+    expect(status).toHaveTextContent('1 skill shown');
+  });
 });

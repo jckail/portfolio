@@ -171,6 +171,7 @@ const TechnicalSkills: React.FC = () => {
             <button
               type="button"
               className={`skills-filter-chip${activeCategory === null ? ' is-active' : ''}`}
+              aria-pressed={activeCategory === null}
               onClick={() => setActiveCategory(null)}
             >
               All
@@ -180,6 +181,7 @@ const TechnicalSkills: React.FC = () => {
                 key={category}
                 type="button"
                 className={`skills-filter-chip${activeCategory === category ? ' is-active' : ''}`}
+                aria-pressed={activeCategory === category}
                 onClick={() =>
                   setActiveCategory(prev => (prev === category ? null : category))
                 }
@@ -188,12 +190,14 @@ const TechnicalSkills: React.FC = () => {
               </button>
             ))}
           </div>
-          {(normalizedQuery || activeCategory) && (
-            <p className="skills-filter-status" aria-live="polite">
-              {totalVisible} skill{totalVisible === 1 ? '' : 's'} shown
-              {normalizedQuery ? ` for “${query.trim()}”` : ''}
-            </p>
-          )}
+          {/* Always mounted: a live region inserted together with its text
+              is often not announced. */}
+          <p className="skills-filter-status" aria-live="polite">
+            {(normalizedQuery || activeCategory) &&
+              `${totalVisible} skill${totalVisible === 1 ? '' : 's'} shown${
+                normalizedQuery ? ` for “${query.trim()}”` : ''
+              }`}
+          </p>
         </div>
 
         {totalVisible === 0 ? (

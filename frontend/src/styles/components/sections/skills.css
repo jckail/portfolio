@@ -83,6 +83,16 @@
   font-size: var(--text-sm);
 }
 
+/* The status line stays mounted as a live region; take it out of the flow
+   while it has nothing to say so the toolbar does not grow a gap. */
+.skills-filter-status:empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
 /* All categories in one panel, separated by hairlines */
 .skills-grid {
   padding: var(--spacing-xs) var(--panel-padding);
@@ -212,8 +222,6 @@
   background-color: var(--btn-primary-hover);
 }
 
-/* Loading and Error States */
-.loading-skills,
 .error-message {
   text-align: center;
   padding: var(--spacing-lg);

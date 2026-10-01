@@ -10,7 +10,6 @@
   --spacing-lg: 1.5rem;    /* 24px */
   --spacing-xl: 2rem;      /* 32px */
   --spacing-2xl: 3rem;     /* 48px */
-  --spacing-3xl: 4rem;     /* 64px */
 
   /* Vertical rhythm between page sections, and inside a panel */
   --section-gap: clamp(3rem, 6vw, 5rem);
@@ -28,15 +27,11 @@
   /* Control sizes: one height for every button, chips are a step smaller */
   --control-height: 2.75rem;    /* 44px: comfortable touch target */
   --control-height-sm: 2rem;    /* 32px */
-  --chip-height: 1.75rem;       /* 28px */
 
   /* Z-index. Dialogs are portaled to <body> and sit above every other
      body-level layer: the cookie/telemetry banners (--z-overlay) and the chat
      button and window (9999, set inline in the chat components). The command
      palette (12000) and reading progress bar (11000) stay above dialogs. */
-  --z-base: 1;
-  --z-above: 10;
-  --z-modal: 100;
   --z-overlay: 1000;
   --z-header: 1000;
   --z-dialog: 10500;
@@ -51,7 +46,6 @@
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --transition-fast: 0.15s var(--ease-out);
   --transition-normal: 0.25s var(--ease-out);
-  --transition-slow: 0.45s var(--ease-out);
 
   /* Typefaces: Quantico for display and UI labels, Montserrat for reading */
   --font-display: 'Quantico', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -74,7 +68,6 @@
 
   /* Kept for older stylesheets; equal to --text-base / --text-xs */
   --font-size-base: var(--text-base);
-  --font-size-mobile-base: var(--text-sm);
 }
 
 @media (max-width: 768px) {

@@ -5,27 +5,18 @@
   --background-color: transparent;
   --surface-color: transparent;
   --section-background: transparent;
-  --section-background-blur: 9px;
   --text-color: #000000;
   --text-secondary: #535353;
   --border-color: #000000;
   --primary: #0403ff;
   --primary-hover: #000000;
   --primary-light: rgba(43, 43, 79, 0.1);
-  --primary-light-hover: rgba(4, 3, 255, 0.2);
   --primary-border: #000000;
-  --subsection-primary: #0303ff32;
-  --subsection-border: rgba(4, 3, 255, 0.4);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --background-color-invert: #000000;
   --solid-color: #ffffff;
   --border-thickness: 1px;
-  --image-background: #ffffff;
   --underline-color: #000000;
-  --skill-tag-background:#000000;
-  --skill-tag-text: #ffffff;
   /* Text on --primary / --primary-border fills (resume buttons).
      White on #000 21:1, on #0403ff 8.6:1. */
   --on-primary-text: #ffffff;
@@ -35,7 +26,6 @@
   /* Opaque, page-contrasting focus indicator (WCAG 2.4.11 needs 3:1).
      Deliberately NOT --primary-border, which is translucent by design. */
   --focus-ring: #0403ff;  /* 8.6:1 on white */
-  --ai-background-color: #000000;
   /* Chrome surfaces (header, nav drawer): near-opaque so page content
      scrolling underneath stays unreadable through them. */
   --surface: rgba(255, 255, 255, 0.92);
@@ -45,7 +35,6 @@
   /* Legacy aliases still used by shared/components/elements */
   --primary-color: var(--primary);
   --primary-color-hover: #0302b3;
-  --secondary-color: var(--primary-light);
   /* Component tokens (see variables.css for the theme-independent scale) */
   --page-bg: #ffffff;
   --panel-bg: rgba(255, 255, 255, 0.88);
@@ -76,34 +65,24 @@
   --background-color: transparent;
   --surface-color: #0303ff11;
   --section-background: #0303ff1d;
-  --section-background-blur: 5px;
   --text-color: #ffffff;
   --text-secondary: #d4d4d4;
   --border-color: #0303ff11;
   --primary: #0403ff;
   --primary-hover: #3332ff;
   --primary-light: rgba(4, 3, 255, 0.2);
-  --primary-light-hover: rgba(4, 3, 255, 0.3);
   --primary-border: rgba(4, 3, 255, 0.4);
-  --subsection-primary: #0303ff56;
-  --subsection-border: rgba(4, 3, 255, 0.4);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
   --solid-color: #000000be;
-  --background-color-invert: #ffffff;
   --border-thickness: 1px;
-  --image-background: #ffffff;
   --underline-color: #0403ff;
-  --skill-tag-background: rgba(4, 3, 255, 0.4);
-  --skill-tag-text: #ffffff;
   /* White on #020166 (40% #0403ff over black) ~15:1, on #0403ff 8.6:1. */
   --on-primary-text: #ffffff;
   /* #0403ff on black measures 2.46:1 (WCAG AA needs 4.5:1), so accent text
      uses a lightened tint (~7.4:1) while --primary stays for backgrounds. */
   --accent-text: #8b8aff;
   --focus-ring: #8b8aff;  /* 7.4:1 on black */
-  --ai-background-color: rgba(4, 3, 255, 0.5);
   /* Chrome surfaces (header, nav drawer): near-opaque so page content
      scrolling underneath stays unreadable through them. */
   --surface: rgba(6, 6, 20, 0.9);
@@ -113,7 +92,6 @@
   /* Legacy aliases still used by shared/components/elements */
   --primary-color: var(--primary);
   --primary-color-hover: var(--primary-hover);
-  --secondary-color: var(--primary-light);
   /* Component tokens (see variables.css for the theme-independent scale) */
   --page-bg: #000000;
   --panel-bg: rgba(9, 9, 36, 0.62);
@@ -144,31 +122,21 @@
   --background-color: transparent;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);
-  --section-background-blur: 2px;
   --text-color: #ff00ff;
   --text-secondary: #00ffff;
   --border-color: #ff00ff;
   --primary: #ff00ff;
   --primary-hover: #00ffff;
   --primary-light: rgba(255, 0, 255, 0.2);
-  --primary-light-hover: rgba(0, 255, 255, 0.3);
   --primary-border: #ff00ff;
-  --subsection-primary: rgba(255, 0, 255, 0.3);
-  --subsection-border: #00ffff;
-  --shadow-sm: 0 1px 2px rgba(255, 0, 255, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 255, 255, 0.3);
   --shadow-lg: 0 10px 15px rgba(255, 0, 255, 0.3);
-  --background-color-invert: #ffffff;
   --border-thickness: 2px;
-  --image-background: #ffffff;
-  --skill-tag-background: #00ffff;
   /* White on cyan measures 1.25:1; black on cyan is 16.7:1. */
-  --skill-tag-text: #000000;
   /* White on #ff00ff is 3.1:1; black is 6.7:1. */
   --on-primary-text: #000000;
   --accent-text: #ff00ff;
   --focus-ring: #ffff00;  /* 19.5:1 on black */
-  --ai-background-color: #ff00ff;
   /* Were missing here, so modals had no fill and links no underline in party mode */
   --solid-color: #000000e6;
   --underline-color: #00ffff;
@@ -181,7 +149,6 @@
   /* Legacy aliases still used by shared/components/elements */
   --primary-color: var(--primary);
   --primary-color-hover: var(--primary-hover);
-  --secondary-color: var(--primary-light);
   /* Component tokens (see variables.css for the theme-independent scale) */
   --page-bg: #000000;
   --panel-bg: rgba(20, 0, 30, 0.6);
