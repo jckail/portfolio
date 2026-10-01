@@ -23,6 +23,11 @@ queries) — never exposing the service-role key to the browser.
   signal — a Supabase outage or misconfigured credentials directly fails
   the health check (and therefore the CI/CD deploy gate and the uptime
   alert), which is intentional: the site depends on it.
+- **Update (superseded in part):** `/api/health` is now a liveness probe and
+  returns 200 with `"status": "degraded"` when the database is unreachable, so
+  Cloud Run does not restart a container that serves the site from local JSON.
+  `/api/health/ready` fails closed with 503 and is what the uptime check and
+  deploy verification use.
 - Two credential tiers (anon vs. service-role) require care to keep the
   service-role key server-side only — it lives in Secret Manager, never
   in a frontend bundle or GitHub Actions log.

@@ -2,42 +2,35 @@
 
 Build, run, and deployment tooling for the portfolio app.
 
+> **Do not run `deploy.sh`.** It replaces Secret Manager bindings with
+> plaintext env vars and skips the zero-traffic canary (`../HANDOFF.md`).
+> Production ships only through the GitHub Actions `Deploy` workflow.
+
 | File | Purpose |
 |------|---------|
-| `deploy.sh` | Build the Docker image, push to Artifact Registry, deploy to Cloud Run, and health-check the result |
+| `deploy.sh` | UNSAFE, kept for reference: manual build, push and deploy. Do not run it |
+| `e2e-docker.sh` | Run the Playwright suite in the pinned Playwright container against a server you started |
 | `local_test.sh` | Full local run: builds the frontend, starts the backend on `:8080` and the Vite dev server on `:5173` |
 | `kill_hanging.sh` | Kill leftover dev-server processes |
 | `docker-compose.yml` | Containerized local run using `Dockerfile.dev` |
 | `Dockerfile.prod` | Multi-stage production image (Node 22 frontend build → Python 3.12 runtime) |
 | `Dockerfile.dev` | Same as prod but with `--reload` and dev config |
 | `test_email.py` | Post-deploy smoke test for the SendGrid contact endpoint |
-| `build_resume_pdf.py` | Regenerate `backend/assets/JordanKailResume.pdf` from declared content |
+| `build_resume_pdf.py` | Regenerate the ATS-first resume (`JordanKailResume.pdf`, `.txt`, `.meta.json`) from `backend/app/data/*.json` |
 | `verify_deployment.py` | Deploy authorization gate — re-checks CI on current `main` before promoting traffic |
 | `compile-requirements.sh` | Regenerate the hash-pinned `requirements.lock.txt` |
-| `assets/resumeicons.ttf` | Icon subset font used by the resume generator |
+| `assets/fonts/` | Fonts the resume generator embeds |
 
 ## Deploying
 
-The primary deploy path is the GitHub Actions `Deploy` workflow, which
-ships every push to `main` automatically (setup in
-[`../DEPLOYMENT.md`](../DEPLOYMENT.md)). `deploy.sh` is the manual fallback:
-
-```bash
-# Requires: docker, gcloud (authenticated), jq, and a filled-in .env at the repo root
-./helpers/deploy.sh            # production deploy (default)
-./helpers/deploy.sh --dev      # local dev image build only
-```
-
-The script is configured via environment variables (all have sensible
-defaults): `GCP_PROJECT_ID`, `GCP_REGION`, `SERVICE_NAME`, `AR_REPOSITORY`,
-plus optional `CLOUD_RUN_MEMORY`, `CLOUD_RUN_CPU`, `CLOUD_RUN_MIN_INSTANCES`,
-and `CLOUD_RUN_MAX_INSTANCES`.
-
-Images are tagged with the current git commit and pushed to **Artifact
-Registry** (`{region}-docker.pkg.dev/{project}/{repo}/{service}:{sha}`).
+The only deploy path is the GitHub Actions `Deploy` workflow, which ships every
+push to `main` as a zero-traffic revision, verifies it, then promotes it (setup
+in [`../DEPLOYMENT.md`](../DEPLOYMENT.md)). `deploy.sh` is not a fallback; see
+the warning at the top.
 
 > For managing the underlying infrastructure (APIs, registry, secrets, IAM,
-> the Cloud Run service itself) with Terraform, see [`../infra/`](../infra/README.md).
+> the Cloud Run service itself) with Terraform, see [`../infra/`](../infra/README.md)
+> and read `../HANDOFF.md` first.
 
 ## Local development
 
@@ -46,6 +39,19 @@ Registry** (`{region}-docker.pkg.dev/{project}/{repo}/{service}:{sha}`).
 # Frontend: http://localhost:5173  (hot reload; proxies /api and /ws)
 # Backend:  http://localhost:8080  (serves the built frontend + API docs at /docs)
 ```
+
+Browser tests in a container (needs Docker; run `npm ci` in `e2e/` once). The
+script pins the Playwright image to the version in `e2e/package-lock.json` and
+maps `localhost` to the host, so the page stays on `localhost` (the CSP upgrades
+other http hosts to https):
+
+```bash
+E2E_BASE_URL=http://localhost:8080 ./helpers/e2e-docker.sh
+E2E_BASE_URL=http://localhost:9130 ./helpers/e2e-docker.sh tests/smoke.spec.ts
+```
+
+Start the backend with empty `VERTEX_API_KEY` and `ANTHROPIC_API_KEY` if you do
+not want any real model call.
 
 Or containerized:
 
@@ -86,27 +92,20 @@ mismatches without automatic retries. Removing tags closes tagged URLs, not ever
 possible revision access path, and does not revoke credentials or delete images.
 
 
-## Regenerating the resume PDF
+## Regenerating the resume
 
-`backend/assets/JordanKailResume.pdf` used to be a third-party (Enhancv)
-export that could only be updated by hand. It drifted: it advertised a stale
-employer for months, and nothing caught it because the only test asserted the
-file existed.
-
-It is now generated from content declared in `build_resume_pdf.py`, so a role
-change is a reviewable diff:
+`build_resume_pdf.py` derives the PDF, a plain-text copy and a manifest from
+`backend/app/data/*.json`, so a role or skill change is a data edit followed by
+one regeneration, and the diff is reviewable. The layout is single column,
+selectable text, plain headings (Summary, Experience, Skills, Projects), and no
+phone number. No education section is written because the data has none.
 
 ```bash
-pip install reportlab                 # not a runtime dependency
-python helpers/build_resume_pdf.py    # writes the PDF + a .meta.json manifest
+uv run --no-project --with reportlab --with pypdf python helpers/build_resume_pdf.py
 ```
 
-The script prints where each column ends and warns if content would overflow
-the single page. It also writes `JordanKailResume.meta.json`, which
-`backend/tests/test_data.py` compares against the first entry in
-`backend/app/data/experience.json` — so if you change your current role and
-forget to regenerate, the test suite fails. **Regenerate the PDF; never hand-edit
-the manifest.**
-
-Layout, colours and the icon glyphs were lifted from the original export, so
-the output is visually consistent with previous versions.
+reportlab and pypdf are not runtime dependencies. The script prints warnings if
+content would overflow the page. `backend/tests/test_resume_pdf.py` and
+`test_data.py` compare the artifacts with the data, so a forgotten
+regeneration fails the suite. **Regenerate; never hand-edit the PDF, text or
+manifest.**
