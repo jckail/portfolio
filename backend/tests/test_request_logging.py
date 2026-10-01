@@ -2,6 +2,7 @@
 import asyncio
 import json
 import logging
+import sys
 
 from app.utils.json_log import JsonFormatter
 from app.utils.request_context import clear_request_id, get_request_id, set_request_id
@@ -95,6 +96,33 @@ def test_supabase_handler_captures_request_id_at_emit(monkeypatch):
     # Flushing happens later, in a context with no request id
     asyncio.run(handler._flush_batch(handler._drain_queue()))
     assert shipped[0]["metadata"]["request_id"] == "req-at-emit"
+
+
+def test_supabase_handler_ships_the_traceback_for_exception_records(monkeypatch):
+    # A Handler has no formatException; flushing a record with exc_info used to
+    # raise AttributeError, which broke shutdown and dropped the whole batch.
+    from backend.app.utils import logger as logger_module
+
+    handler = logger_module.SupabaseHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    try:
+        raise ValueError("kaboom")
+    except ValueError:
+        record = logging.LogRecord(
+            name="backend.app.test", level=logging.ERROR, pathname="test.py",
+            lineno=1, msg="failed", args=(), exc_info=sys.exc_info(),
+        )
+    handler.emit(record)
+
+    shipped = []
+
+    async def fake_store_logs_batch(logs):
+        shipped.extend(logs)
+        return logs
+
+    monkeypatch.setattr(logger_module.supabase, "store_logs_batch", fake_store_logs_batch)
+    asyncio.run(handler._flush_batch(handler._drain_queue()))
+    assert "ValueError: kaboom" in shipped[0]["metadata"]["exception"]
 
 
 def test_json_formatter_prefers_request_id_stamped_on_record():

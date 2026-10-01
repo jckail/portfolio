@@ -26,6 +26,7 @@ LOG_FILE_MAX_BYTES = 5 * 1024 * 1024
 LOG_FILE_BACKUPS = 3
 
 _fallback_lock = threading.Lock()
+_EXCEPTION_FORMATTER = logging.Formatter()
 
 
 def _fallback_logger() -> logging.Logger:
@@ -146,7 +147,9 @@ class SupabaseHandler(logging.Handler):
             if request_id:
                 metadata['request_id'] = request_id
             if record.exc_info:
-                metadata['exception'] = self.formatException(record.exc_info)
+                # A Handler has no formatException (only Formatters do), so
+                # this raised for every record that carried exc_info.
+                metadata['exception'] = _EXCEPTION_FORMATTER.formatException(record.exc_info)
 
             formatted_logs.append({
                 'level': record.levelname,
