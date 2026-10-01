@@ -311,11 +311,15 @@ a {
   animation: none;
 }
 
+/* The 87.5% stop keeps the green -> magenta leg bright: interpolated
+   straight through sRGB it dipped to about #a15ea1, 4.4:1 on the party
+   background, and Lighthouse failed contrast whenever it sampled that phase. */
 @keyframes party-colors {
   0% { color: #ff00ff; }
   25% { color: #00ffff; }
   50% { color: #ffff00; }
   75% { color: #00ff00; }
+  87.5% { color: #a0a0ff; }
   100% { color: #ff00ff; }
 }
 
