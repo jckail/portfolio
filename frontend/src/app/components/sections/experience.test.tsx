@@ -12,7 +12,7 @@ const experienceData = {
     title: 'Engineer',
     date: '2025',
     location: 'Remote',
-    highlights: [],
+    highlights: [] as string[],
     link: 'https://example.com',
     logoPath: '',
     company_description: 'desc',
@@ -118,6 +118,38 @@ describe('Experience logo button', () => {
       expect(new URLSearchParams(window.location.search).get('company')).toBe('together-ai');
     } finally {
       item.logoPath = original;
+    }
+  });
+});
+
+describe('Experience timeline', () => {
+  it('shows every highlight for the current role, two for older roles, and opens details', async () => {
+    const data = experienceData as Record<string, (typeof experienceData)['together_ai']>;
+    const current = data.together_ai;
+    const originalHighlights = current.highlights;
+    const originalDate = current.date;
+    current.highlights = ['now 1', 'now 2', 'now 3'];
+    current.date = '02/2025 - Present';
+    data.prove = {
+      ...current,
+      company: 'Prove Identity',
+      date: '06/2023 - 01/2025',
+      highlights: ['old 1', 'old 2', 'old 3'],
+    };
+    try {
+      render(<Experience />);
+      for (const text of ['now 1', 'now 2', 'now 3', 'old 1', 'old 2']) {
+        expect(screen.getByText(text)).toBeInTheDocument();
+      }
+      expect(screen.queryByText('old 3')).toBeNull();
+
+      fireEvent.click(screen.getByRole('button', { name: /^Role details\s+for Prove Identity$/ }));
+      expect(new URLSearchParams(window.location.search).get('company')).toBe('prove-identity');
+      expect(await screen.findByRole('dialog', { name: 'Prove Identity' })).toBeInTheDocument();
+    } finally {
+      delete data.prove;
+      current.highlights = originalHighlights;
+      current.date = originalDate;
     }
   });
 });

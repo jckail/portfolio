@@ -41,6 +41,9 @@ export function resolveExperienceKey(
   return Object.hasOwn(experienceData, key) ? key : undefined;
 }
 
+/** Older roles show this many highlights inline; the rest are in the modal. */
+const OLDER_ROLE_HIGHLIGHTS = 2;
+
 const ExperienceTimeline = memo(({
   experience,
   skillsData,
@@ -53,57 +56,70 @@ const ExperienceTimeline = memo(({
   onSelectSkill: (skillName: string) => void;
 }) => {
   return (
-    <div className="timeline">
-      {Object.entries(experience).map(([key, item]) => (
-        <div key={key} className="timeline-item">
-          <div className="timeline-header-wrapper">
-            {item.logoPath && (
-              <div
-                className="logo-link"
-                onMouseEnter={prefetchExperienceModal}
-                style={{ cursor: 'pointer' }}
-                {...buttonize(() => onSelectExperience(key))}
-              >
-                {/* The logo's own text (e.g. "together.ai") is decorative; the
-                    name comes from the hidden text so it never contradicts what
-                    is drawn (Lighthouse label-content-name-mismatch). */}
-                <CompanyLogo
-                  name={item.logoPath}
-                  size={64}
-                  aria-hidden
-                  className="company-logo"
-                />
-                <span className="sr-only">{`View ${item.company} experience details`}</span>
+    <ol className="timeline">
+      {Object.entries(experience).map(([key, item], index) => {
+        const isCurrent = index === 0 || /\bpresent\b/i.test(item.date ?? '');
+        const highlights = item.highlights ?? [];
+        const shown = isCurrent ? highlights : highlights.slice(0, OLDER_ROLE_HIGHLIGHTS);
+        return (
+          <li key={key} className={`timeline-item${isCurrent ? ' is-current' : ''}`}>
+            <div className="timeline-header-wrapper">
+              {item.logoPath && (
+                <div
+                  className="logo-link"
+                  onMouseEnter={prefetchExperienceModal}
+                  {...buttonize(() => onSelectExperience(key))}
+                >
+                  {/* The logo's own text (e.g. "together.ai") is decorative; the
+                      name comes from the hidden text so it never contradicts what
+                      is drawn (Lighthouse label-content-name-mismatch). */}
+                  <CompanyLogo
+                    name={item.logoPath}
+                    size={64}
+                    aria-hidden
+                    className="company-logo"
+                  />
+                  <span className="sr-only">{`View ${item.company} experience details`}</span>
+                </div>
+              )}
+              <div className="timeline-header">
+                <h3>{item.company}</h3>
+                <p className="timeline-title">{item.title}</p>
               </div>
-            )}
-            <div className="timeline-header">
-              <h3>{item.company}</h3>
-              <h4>{item.title}</h4>
               <div className="timeline-meta">
                 <span className="date">{item.date}</span>
                 <span className="location">{item.location}</span>
               </div>
             </div>
-          </div>
-          <div className="experience-highlights">
-            <TechStackTags
-              tags={item.tech_stack}
-              skillsData={skillsData}
-              onSelectSkill={onSelectSkill}
-              onSkillHover={prefetchSkillModal}
-            />
 
-            {item.highlights && (
+            {shown.length > 0 && (
               <ul className="highlights">
-                {item.highlights.map((highlight, idx) => (
+                {shown.map((highlight, idx) => (
                   <li key={idx}>{highlight}</li>
                 ))}
               </ul>
             )}
-          </div>
-        </div>
-      ))}
-    </div>
+
+            <div className="timeline-footer">
+              <TechStackTags
+                tags={item.tech_stack}
+                skillsData={skillsData}
+                onSelectSkill={onSelectSkill}
+                onSkillHover={prefetchSkillModal}
+              />
+              <button
+                type="button"
+                className="btn-link timeline-more"
+                onClick={() => onSelectExperience(key)}
+                onMouseEnter={prefetchExperienceModal}
+              >
+                Role details<span className="sr-only">{` for ${item.company}`}</span>
+              </button>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
   );
 });
 ExperienceTimeline.displayName = 'ExperienceTimeline';
