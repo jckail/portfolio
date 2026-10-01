@@ -120,7 +120,7 @@ jobs:
     # its own. Ratchet upward only.
     - name: Auth-surface coverage gate
       run: |
-        python -m coverage report --fail-under=60 \
+        python -m coverage report --fail-under=91 \
           --include='backend/app/middleware/*,backend/app/api/admin_routes.py'
 
   terraform:

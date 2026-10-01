@@ -17,14 +17,14 @@ export default defineConfig({
       // ever measures the files tests already happen to import). This is
       // Vitest 4's replacement for the removed `all: true` option.
       include: ['src/**'],
-      // Modest floor below current numbers; ratchet up as coverage grows.
+      // Set ~3 points below measured; ratchet up as coverage grows.
       // Values recalibrated for Vitest 4 — the denominator changed with
       // the all->include migration, so these differ from the old config.
       thresholds: {
-        statements: 18,
-        lines: 18,
-        branches: 15,
-        functions: 12,
+        statements: 65,
+        lines: 67,
+        branches: 59,
+        functions: 64,
       },
     },
   },
