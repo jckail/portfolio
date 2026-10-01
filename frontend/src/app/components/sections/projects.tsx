@@ -8,6 +8,7 @@ import { getOwn } from '../../../shared/utils/lookup';
 import { useProject } from './projects/hooks/useProject';
 import { SkillModalHost } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
+import { TechStackTags } from './tech-stack-tags';
 
 import type { Project } from '../../../types/resume';
 import type { SkillsData } from '../../../types/skills';
@@ -19,23 +20,25 @@ const prefetchProjectModal = () => import('./modals/ProjectModal');
 
 const EMPTY_SKILLS: SkillsData = Object.freeze(Object.create(null));
 
+/** Tags shown on a card; the modal lists the whole stack. */
+const CARD_TAG_LIMIT = 4;
+
 const ProjectCard = memo(({
   projectKey,
   project,
-  index,
+  skillsData,
   onSelect,
+  onSelectSkill,
 }: {
   projectKey: string;
   project: Project;
-  index: number;
+  skillsData: SkillsData;
   onSelect: (key: string) => void;
+  onSelectSkill: (skillKey: string) => void;
 }) => {
+  const tags = project.tech_stack ?? [];
   return (
-    <div
-      className="project-card"
-      style={{ '--item-index': index } as React.CSSProperties}
-      onMouseEnter={prefetchProjectModal}
-    >
+    <article className="project-card" onMouseEnter={prefetchProjectModal}>
       {/* Named by its visible content (title, description) plus a hidden
           suffix, not an aria-label that would leave the visible text out
           (Lighthouse label-content-name-mismatch). */}
@@ -46,7 +49,7 @@ const ProjectCard = memo(({
         <div className="project-image">
           <ProjectIcon
             name={project.logoPath || 'github-logo.svg'}
-            size={100}
+            size={48}
             aria-hidden
             className="project-icon"
           />
@@ -55,10 +58,17 @@ const ProjectCard = memo(({
         <p>{project.description}</p>
         <span className="sr-only"> (view details)</span>
       </div>
+      {tags.length > 0 && (
+        <TechStackTags
+          tags={tags.slice(0, CARD_TAG_LIMIT)}
+          skillsData={skillsData}
+          onSelectSkill={onSelectSkill}
+        />
+      )}
       <div className="project-links">
         <button
           type="button"
-          className="project-link primary"
+          className="project-link primary btn btn-sm"
           onClick={() => onSelect(projectKey)}
         >
           View details
@@ -68,13 +78,13 @@ const ProjectCard = memo(({
             href={project.link2}
             target="_blank"
             rel="noopener noreferrer"
-            className="project-link secondary"
+            className="project-link secondary btn btn-sm"
           >
-            Live Demo
+            Live demo
           </a>
         )}
       </div>
-    </div>
+    </article>
   );
 });
 ProjectCard.displayName = 'ProjectCard';
@@ -114,13 +124,14 @@ const Projects: React.FC = () => {
         <div className="projects-grid">
           {/* The data objects themselves, not per-render copies, so the
               memoised cards skip re-rendering when a modal opens. */}
-          {Object.entries(projectsData).map(([key, item], index) => (
+          {Object.entries(projectsData).map(([key, item]) => (
             <ProjectCard
               key={key}
               projectKey={key}
               project={item}
-              index={index}
+              skillsData={skillsData ?? EMPTY_SKILLS}
               onSelect={setSelectedProject}
+              onSelectSkill={openSkillFromProject}
             />
           ))}
         </div>
