@@ -1,373 +1,301 @@
 #!/usr/bin/env python3
-"""Regenerate JordanKailResume.pdf.
+"""Regenerate the ATS-first resume (PDF + plain text + manifest).
 
-The previous PDF was an Enhancv export that could only be updated by hand, so
-it silently drifted from `backend/app/data/experience.json` (it still showed
-Prove Identity as the current role long after that stopped being true, and
-`backend/tests/test_data.py` only asserts the file exists, so CI never
-noticed).
+Every word of the resume is derived from the site's own data files
+(`backend/app/data/*.json`), so a role change is a data edit followed by one
+regeneration, not a second hand-typed copy that drifts.
 
-This script rebuilds the same two-column layout from content declared below,
-so a role change is a code review rather than a trip to a third-party editor.
-Geometry, colours and the icon font are taken from the original export:
+Layout rules, chosen for applicant-tracking systems and LLM resume parsers
+(Ashby, Greenhouse, Lever, Workday, iCIMS):
 
-    page            A4, 595.92 x 842.88 pt
-    left column     x 24.7 .. 339   (experience)
-    right column    x 361.2 .. 571  (skills, projects)
-    accent          #0403ff   body #384347   headings #000000
-    body 8pt / role 10pt / section 12pt / name 20pt
+    * US Letter, a single column, linear reading order
+    * headings: Summary, Experience, Skills, Projects (no Education section:
+      the repo has no education data and none is invented)
+    * real selectable text in an embedded, subsetted TrueType font with a
+      Unicode map; no images, no tables, no header/footer content
+    * "Company - Title - Location" line, then "MM/YYYY - MM/YYYY | Present"
+    * URLs are written out as visible text and carry link annotations
+    * no phone number (the site reveals it only after a visitor leaves an email)
 
-Arial is substituted with Helvetica, which is metrically equivalent and built
-into reportlab. The `resumeicons` glyphs are the subset font extracted from
-the original PDF, so the email/location/link/project marks are the
-originals rather than lookalikes.
+reportlab is NOT a repo dependency. Run with:
 
-Usage:
-    python helpers/build_resume_pdf.py [-o backend/assets/JordanKailResume.pdf]
+    uv run --no-project --with reportlab --with pypdf python helpers/build_resume_pdf.py
+
+The content helpers below import nothing outside the standard library, so
+`backend/tests/test_resume_pdf.py` can use them without reportlab.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 from pathlib import Path
-
-from reportlab.lib.colors import HexColor
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+from xml.sax.saxutils import escape
 
 REPO = Path(__file__).resolve().parent.parent
 ASSETS = REPO / "backend" / "assets"
+DATA = REPO / "backend" / "app" / "data"
+FONTS = Path(__file__).resolve().parent / "assets" / "fonts"
 
-PAGE_W, PAGE_H = 595.92, 842.88
-LEFT_X, LEFT_R = 24.7, 339.0
-RIGHT_X, RIGHT_R = 361.2, 571.0
+PDF_NAME = "JordanKailResume.pdf"
+DASH = "–"  # en dash in date ranges
+SEP = "—"  # em dash in "Company - Title - Location"
+BULLET = "•"
 
-ACCENT = HexColor("#0403ff")
-BODY = HexColor("#384347")
-HEAD = HexColor("#000000")
-RULE = HexColor("#c8ccce")
-
-F_REG, F_BOLD, F_ITAL = "Helvetica", "Helvetica-Bold", "Helvetica-Oblique"
-F_ICON = "ResumeIcons"
-
-# Glyphs in the extracted icon font, named for what they draw.
-# The phone glyph ("E") is unused: the number is not printed on the public
-# resume; the site reveals it after a visitor leaves an email address.
-ICON_EMAIL, ICON_PIN, ICON_LINK = "", "", "q"
-
-NAME = "Jordan Kail"
-TAGLINE = "AI | Data | Machine Learning"
-EMAIL, LOCATION = "jckail13@gmail.com", "Denver, CO"
-LINKS = ["github.com/jckail", "linkedin.com/in/jckail"]
-SITE = "jordan-kail.com"
-
-EXPERIENCE = [
-    {
-        "company": "Together AI",
-        "title": "Staff Software Engineer",
-        "dates": "02/2025 - Present",
-        "where": "San Francisco, CA",
-        "bullets": [
-            "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, "
-            "and telemetry that turn inference and training traffic into product, reliability, and "
-            "capacity signals.",
-            "Build internal agent tooling and evaluation harnesses that let engineering teams develop, "
-            "test, and ship LLM-powered agents on Together's inference stack.",
-            "Design data infrastructure for large-scale training and inference workloads, covering dataset "
-            "curation, lineage, and quality controls for open-model work.",
-        ],
-    },
-    {
-        "company": "Prove Identity",
-        "title": "Staff Software Engineer - Data",
-        "dates": "06/2023 - 01/2025",
-        "where": "Remote, USA",
-        "bullets": [
-            "Spearheaded a company-wide refactor from on-prem Java + Oracle to cloud-based Go + Postgres, "
-            "reducing core product API response time to 12ms and operational expenses by 95%.",
-            "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and "
-            "OpenAI, automating 150+ human-hours weekly.",
-        ],
-    },
-    {
-        "company": "Meta | Facebook",
-        "title": "Senior Data Engineer",
-        "dates": "01/2021 - 09/2022",
-        "where": "Menlo Park, CA | Seattle, WA | Remote, USA",
-        "bullets": [
-            "Led data engineering efforts for Facebook Public Groups and Community Chats, managing a team "
-            "of 10+ engineers.",
-            "Developed and deployed 100+ ML pipelines with Airflow, Spark, and PyTorch, leveraging NLP "
-            "and computer vision to optimize ad targeting and notifications for billions of users.",
-            "Designed an automated framework to dynamically generate thousands of async Spark data "
-            "pipelines, increasing compute efficiency by 66%.",
-        ],
-    },
-    {
-        "company": "Deloitte",
-        "title": "Consultant - AI & Advanced Analytics",
-        "dates": "12/2018 - 12/2020",
-        "where": "Menlo Park, CA | Seattle, WA",
-        "bullets": [
-            "Automated ~31% of human processed healthcare claims using transformer ML models, saving "
-            "250,000+ hours annually.",
-            "Cut daily processing time for exabyte-scale video reliability metrics by 90% while "
-            "expanding metric coverage.",
-            "Led 20+ consultants on Fortune 50 engagements, translating client needs into actionable "
-            "requirements and ensuring timely delivery.",
-        ],
-    },
-    {
-        "company": "Wide Open West",
-        "title": "Senior Data Engineer",
-        "dates": "11/2017 - 12/2018",
-        "where": "Denver, CO",
-        "bullets": [
-            "Built ML applications using custom classification and churn models, driving a 22% YoY "
-            "increase in customer package upgrades.",
-            "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and "
-            "engineering teams company-wide.",
-        ],
-    },
-    {
-        "company": "Common Spirit Health",
-        "title": "Data Engineer",
-        "dates": "09/2016 - 11/2017",
-        "where": "Denver, CO",
-        "bullets": [
-            "Architected and delivered new rest APIs and data lakes, improving data processing time for "
-            "external partner data products from 7 days to 5 minutes.",
-        ],
-    },
-    {
-        "company": "AcuStream (acquired by R1)",
-        "title": "Software Engineer - Data",
-        "dates": "04/2013 - 09/2016",
-        "where": "Boulder, CO",
-        "bullets": [
-            "Built a custom invoicing system leveraging rule-based algorithms and machine learning, "
-            "driving over $300M in annual recurring revenue.",
-        ],
-    },
+# Display order of skill categories (general_category in skills.json): the AI
+# work leads, matching the rest of the site. Unlisted categories follow.
+CATEGORY_ORDER = [
+    "Artificial Intelligence",
+    "Programming Languages",
+    "Data Engineering",
+    "Big Data",
+    "Data Science",
+    "Databases",
+    "Cloud Computing",
+    "DevOps",
+    "Web Development",
+    "Development Tools",
 ]
+CATEGORY_LABEL = {"Artificial Intelligence": "AI & Machine Learning"}
 
-SKILLS = [
-    ("Programming", "Python, SQL, JavaScript, TypeScript, Go, Rust, Scala"),
-    ("AI & ML", "OpenAI, Anthropic, LangChain, Llama.cpp, Ollama, Llama Index, PyTorch, TensorFlow, "
-                "Hugging Face, Vector Databases, Embeddings, Agents, Evals, RAG, Cuda, Scikit-Learn"),
-    ("Big Data", "Airflow, Kafka, Spark, Flink, DBT, Snowflake, Databricks, Iceberg, Redis, ProtoBuff, "
-                 "Neo4J, MongoDB, Postgres, PySpark, Streamlit"),
-    ("Web Development", "Docker, Kubernetes, FastAPI, Flask, Django, Svelte, React, Node.js, HTML, "
-                        "GraphQL, Gin, NoSQL, Json"),
-    ("Amazon Web Services (AWS)", "EMR, EKS, SageMaker, S3, Redshift, Glue, MWAA, RDS, Kinesis, "
-                                  "Firehose, DynamoDB, Bedrock"),
-    ("Google Cloud Platform (GCP)", "BigQuery, Compute Engine, Dataflow, AutoML, Vertex AI Studio, "
-                                    "PubSub, Cloud Run, Looker, Firebase"),
-]
-
-PROJECTS = [
-    (";", "AI Teaching Assistant - Super Teacher",
-     "Full stack AI powered web application to help teachers manage their students and provide "
-     "recommendations and insights.",
-     ["github.com/jckail/superteacher", "the-super-teacher.com"]),
-    ("T", "AI Integrated Professional Portfolio",
-     "Custom full stack react web application with integrated AI showcasing my experience, projects "
-     "and skills.",
-     ["github.com/jckail/portfolio", "jckail.com"]),
-    ("}", "Loyalty Management App - PointUp.io",
-     'AI web app for managing "All of your hotel, credit card, and airline loyalty points in one place".',
-     ["github.com/jckail/point_bot", "pointup.io"]),
-    ("H", "TechCrunch - Join Group via QR Code",
-     "Created the ability for Facebook group admins to invite users to their groups by generating a QR "
-     "Code. Used by millions daily.",
-     ["https://tny.app/lybucwkc"]),
-    ("S", "AI Agent Job Matching - Jobbr",
-     "Created a custom AI agent that matches a resume to available jobs at tech companies.",
-     ["github.com/jckail/Jobbr"]),
-]
+# Projects shown on the resume, in order. Text comes from projects.json.
+PROJECT_KEYS = ["super_teacher", "jobbr", "go_pilot", "ai_billing", "portfolio", "pointup", "qr_for_groups"]
 
 
-def register_icon_font(font_path: Path) -> bool:
-    try:
-        pdfmetrics.registerFont(TTFont(F_ICON, str(font_path)))
-        return True
-    except Exception:
-        return False
+# --------------------------------------------------------------------------
+# content (stdlib only)
+# --------------------------------------------------------------------------
+def _load(name: str) -> dict:
+    return json.loads((DATA / f"{name}.json").read_text(encoding="utf-8"))
 
 
-def wrap(text: str, font: str, size: float, width: float) -> list[str]:
-    """Greedy wrap on the real glyph metrics reportlab will use."""
-    words, lines, cur = text.split(), [], ""
-    for w in words:
-        trial = f"{cur} {w}".strip()
-        if pdfmetrics.stringWidth(trial, font, size) <= width or not cur:
-            cur = trial
-        else:
-            lines.append(cur)
-            cur = w
-    if cur:
-        lines.append(cur)
-    return lines
+def pretty_dates(raw: str) -> str:
+    """'02/2025 - Present' -> '02/2025 – Present'."""
+    return re.sub(r"\s+-\s+", f" {DASH} ", raw.strip())
 
 
-class Resume:
-    def __init__(self, path: Path, icons: bool):
-        self.c = canvas.Canvas(str(path), pagesize=(PAGE_W, PAGE_H))
-        self.c.setTitle("Jordan Kail - Resume")
-        self.c.setAuthor("Jordan Kail")
-        self.c.setSubject("Staff Software Engineer - AI, Data, Machine Learning")
-        self.icons = icons
-
-    def icon(self, ch: str, x: float, y: float, size: float, color=ACCENT) -> None:
-        if not self.icons:
-            return
-        self.c.setFont(F_ICON, size)
-        self.c.setFillColor(color)
-        self.c.drawString(x, PAGE_H - y, ch)
-
-    def text(self, s: str, x: float, y: float, font: str, size: float, color) -> None:
-        self.c.setFont(font, size)
-        self.c.setFillColor(color)
-        self.c.drawString(x, PAGE_H - y, s)
-
-    def rule(self, x0: float, x1: float, y: float, color=RULE, w: float = 0.6) -> None:
-        self.c.setStrokeColor(color)
-        self.c.setLineWidth(w)
-        self.c.line(x0, PAGE_H - y, x1, PAGE_H - y)
-
-    def paragraph(self, s: str, x: float, y: float, width: float, font: str,
-                  size: float, color, leading: float) -> float:
-        for line in wrap(s, font, size, width):
-            self.text(line, x, y, font, size, color)
-            y += leading
-        return y
-
-    def section(self, title: str, x: float, x1: float, y: float) -> float:
-        self.text(title, x, y, F_BOLD, 12, HEAD)
-        self.rule(x, x1, y + 5.5, HEAD, 1.1)
-        return y + 20
-
-    # ---- header -------------------------------------------------------
-    def header(self) -> float:
-        self.text(NAME, LEFT_X, 34, F_BOLD, 20, HEAD)
-        self.text(TAGLINE, LEFT_X + 1.7, 55, F_BOLD, 10, ACCENT)
-
-        y = 76
-        x = LEFT_X
-        self.icon(ICON_EMAIL, x, y, 8)
-        x += 11
-        self.text(EMAIL, x, y, F_BOLD, 8, BODY)
-        x += pdfmetrics.stringWidth(EMAIL, F_BOLD, 8) + 10
-        self.icon(ICON_PIN, x, y, 7.6)
-        x += 10
-        self.text(LOCATION, x, y, F_BOLD, 8, BODY)
-
-        y = 96
-        x = LEFT_X
-        for link in LINKS:
-            self.icon(ICON_LINK, x, y, 7.6)
-            x += 10
-            self.text(link, x, y, F_BOLD, 8, BODY)
-            x += pdfmetrics.stringWidth(link, F_BOLD, 8) + 14
-
-        qr = ASSETS / "jordan_kail_qr_code.png"
-        if qr.exists():
-            self.c.drawImage(str(qr), 495.2, PAGE_H - 86.9, width=75.6, height=75.6, mask="auto")
-        self.icon(ICON_LINK, 497.3, 97, 7.6)
-        self.text(SITE, 507, 97, F_BOLD, 8, BODY)
-        return 121
-
-    # ---- columns ------------------------------------------------------
-    def experience(self, y: float) -> float:
-        y = self.section("EXPERIENCE", LEFT_X, LEFT_R, y)
-        width = LEFT_R - LEFT_X - 10
-        for i, job in enumerate(EXPERIENCE):
-            if i:
-                self.rule(LEFT_X, LEFT_R, y - 7)
-                y += 3
-            self.text(job["company"], LEFT_X, y, F_BOLD, 10, HEAD)
-            y += 14.4
-            self.text(job["title"], LEFT_X, y, F_BOLD, 10, ACCENT)
-            y += 14.2
-            meta = f'{job["dates"]}   |   {job["where"]}'
-            self.text(meta, LEFT_X + 10, y, F_REG, 8, BODY)
-            y += 11.3
-            for b in job["bullets"]:
-                self.text("•", LEFT_X + 2.6, y, F_REG, 8.2, BODY)
-                y = self.paragraph(b, LEFT_X + 10, y, width, F_REG, 8, BODY, 10.8)
-            y += 3.5
-        return y
-
-    def skills(self, y: float) -> float:
-        y = self.section("SKILLS", RIGHT_X, RIGHT_R, y)
-        width = RIGHT_R - RIGHT_X
-        for name, items in SKILLS:
-            self.text(name, RIGHT_X, y, F_BOLD, 10, ACCENT)
-            y += 17.5
-            y = self.paragraph(items, RIGHT_X, y, width, F_REG, 8, BODY, 11.1)
-            y += 8
-        return y
-
-    def projects(self, y: float) -> float:
-        y = self.section("PROJECTS", RIGHT_X, RIGHT_R, y)
-        tx = RIGHT_X + 22
-        width = RIGHT_R - tx
-        for glyph, title, desc, links in PROJECTS:
-            self.icon(glyph, RIGHT_X + 1.6, y + 2.3, 15.9)
-            self.text(title, tx, y, F_BOLD, 10, HEAD)
-            y += 14
-            y = self.paragraph(desc, tx, y, width, F_REG, 8, BODY, 11.2)
-            for link in links:
-                self.text(link, tx, y, F_ITAL, 8, BODY)
-                y += 11.2
-            y += 7
-        return y
-
-    def save(self) -> None:
-        self.c.showPage()
-        self.c.save()
+def pretty_company(raw: str) -> str:
+    """'Meta | Facebook' -> 'Meta (Facebook)'."""
+    parts = [p.strip() for p in raw.split("|")]
+    return parts[0] if len(parts) == 1 else f"{parts[0]} ({', '.join(parts[1:])})"
 
 
-def write_manifest(out: Path) -> None:
-    """Record what this PDF says, so a test can catch it going stale.
+def pretty_location(raw: str) -> str:
+    return "; ".join(p.strip() for p in raw.split("+"))
 
-    The previous resume was a third-party export that drifted from the site
-    for months without anything failing, because the only test asserted the
-    file existed. This manifest lets CI compare the PDF's current role
-    against experience.json.
-    """
-    current = EXPERIENCE[0]
-    manifest = {
-        "generated_by": "helpers/build_resume_pdf.py",
-        "pdf": out.name,
-        "current_company": current["company"],
-        "current_title": current["title"],
-        "current_dates": current["dates"],
-        "companies": [j["company"] for j in EXPERIENCE],
+
+def bare_url(url: str) -> str:
+    return re.sub(r"^https?://(www\.)?", "", url).rstrip("/")
+
+
+def short_url(url: str, limit: int = 45) -> str:
+    """Visible link text: the bare URL, or just the host when it would wrap mid-word."""
+    bare = bare_url(url)
+    return bare if len(bare) <= limit else bare.split("/")[0]
+
+
+def first_sentence(text: str) -> str:
+    text = " ".join(text.split())
+    m = re.search(r"^.*?[.!?](?=\s|$)", text)
+    return m.group(0) if m else text
+
+
+def load_content() -> dict:
+    """Everything the resume says, derived from the data files."""
+    contact, about = _load("contact"), _load("aboutme")
+    exp, skills, projects = _load("experience"), _load("skills"), _load("projects")
+
+    roles = []
+    for key, r in exp.items():
+        roles.append(
+            {
+                "key": key,
+                "company": pretty_company(r["company"]),
+                "raw_company": r["company"],
+                "title": r["title"],
+                "dates": pretty_dates(r["date"]),
+                "raw_dates": r["date"],
+                "location": pretty_location(r["location"]),
+                "bullets": list(r["highlights"]),
+            }
+        )
+
+    grouped: dict[str, list[str]] = {}
+    for s in skills.values():
+        if s.get("professional_experience"):
+            grouped.setdefault(s["general_category"], []).append(s["display_name"])
+    order = [c for c in CATEGORY_ORDER if c in grouped] + [c for c in grouped if c not in CATEGORY_ORDER]
+    skill_groups = [(CATEGORY_LABEL.get(c, c), grouped[c]) for c in order]
+
+    projs = []
+    for k in PROJECT_KEYS:
+        p = projects[k]
+        links = [short_url(u) for u in (p.get("link"), p.get("link2")) if u]
+        projs.append(
+            {
+                "title": p["title"].strip(),
+                "description": first_sentence(p["description"]),
+                "links": links,
+                "urls": [u for u in (p.get("link"), p.get("link2")) if u],
+            }
+        )
+
+    name = f"{contact['firstName']} {contact['lastName']}"
+    return {
+        "name": name,
+        "headline": f"{contact['title']} {SEP} AI, Agents, Data & Machine Learning",
+        "email": contact["email"],
+        "location": contact["location"],
+        "links": [
+            (bare_url(contact["linkedin"]), contact["linkedin"]),
+            (bare_url(contact["github"]), contact["github"]),
+            (bare_url(contact["website"]), contact["website"]),
+        ],
+        "summary": " ".join(about["description"].split()),
+        "roles": roles,
+        "skills": skill_groups,
+        "projects": projs,
     }
-    path = out.with_suffix(".meta.json")
-    path.write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"  wrote {path.name}")
 
 
-def build(out: Path, icon_font: Path) -> None:
-    r = Resume(out, register_icon_font(icon_font))
-    top = r.header()
-    left_end = r.experience(top)
-    right_end = r.projects(r.skills(top) + 3)
-    r.save()
-    write_manifest(out)
-    print(f"  left column ends at  {left_end:6.1f} pt")
-    print(f"  right column ends at {right_end:6.1f} pt")
-    print(f"  page height          {PAGE_H:6.1f} pt")
-    if max(left_end, right_end) > PAGE_H - 12:
-        print("  WARNING: content overflows the page")
+def resume_text(c: dict | None = None) -> str:
+    """Clean plain-text version, same content and order as the PDF."""
+    c = c or load_content()
+    out = [c["name"].upper(), c["headline"]]
+    out.append(f"{c['location']} | {c['email']} | " + " | ".join(label for label, _ in c["links"]))
+    out += ["", "SUMMARY", c["summary"], "", "EXPERIENCE"]
+    for r in c["roles"]:
+        out += ["", f"{r['company']} {SEP} {r['title']} {SEP} {r['location']}", r["dates"]]
+        out += [f"{BULLET} {b}" for b in r["bullets"]]
+    out += ["", "SKILLS"]
+    out += [f"{label}: {', '.join(items)}" for label, items in c["skills"]]
+    out += ["", "PROJECTS"]
+    for p in c["projects"]:
+        out += ["", p["title"] + (f" {SEP} {', '.join(p['links'])}" if p["links"] else ""), p["description"]]
+    return "\n".join(out) + "\n"
+
+
+def manifest(c: dict, text: str) -> dict:
+    """What the PDF says, so a test can catch it going stale."""
+    cur = c["roles"][0]
+    return {
+        "generated_by": "helpers/build_resume_pdf.py",
+        "pdf": PDF_NAME,
+        "current_company": cur["raw_company"],
+        "current_title": cur["title"],
+        "current_dates": cur["raw_dates"],
+        "companies": [r["raw_company"] for r in c["roles"]],
+        "roles": [{"company": r["raw_company"], "bullets": r["bullets"]} for r in c["roles"]],
+        "sections": ["Summary", "Experience", "Skills", "Projects"],
+        "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+    }
+
+
+# --------------------------------------------------------------------------
+# PDF (reportlab, imported lazily)
+# --------------------------------------------------------------------------
+def build_pdf(c: dict, out: Path) -> None:
+    from reportlab.lib.colors import HexColor
+    from reportlab.lib.enums import TA_LEFT
+    from reportlab.lib.fonts import addMapping
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfgen import canvas as rl_canvas
+    from reportlab.platypus import HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate, Spacer
+
+    for name, fname in [("Roboto", "Roboto-Regular"), ("Roboto-Bold", "Roboto-Bold"),
+                        ("Roboto-Italic", "Roboto-Italic"), ("Roboto-BoldItalic", "Roboto-BoldItalic")]:
+        pdfmetrics.registerFont(TTFont(name, str(FONTS / f"{fname}.ttf")))
+    addMapping("Roboto", 0, 0, "Roboto")
+    addMapping("Roboto", 1, 0, "Roboto-Bold")
+    addMapping("Roboto", 0, 1, "Roboto-Italic")
+    addMapping("Roboto", 1, 1, "Roboto-BoldItalic")
+
+    ink, accent, muted = HexColor("#1a1a1a"), HexColor("#17365d"), HexColor("#444444")
+
+    def style(name, **kw):
+        base = dict(fontName="Roboto", fontSize=9, leading=11.6, textColor=ink, alignment=TA_LEFT)
+        base.update(kw)
+        return ParagraphStyle(name, **base)
+
+    s_name = style("name", fontName="Roboto-Bold", fontSize=22, leading=26, textColor=accent)
+    s_head = style("headline", fontName="Roboto-Bold", fontSize=11, leading=14, textColor=ink)
+    s_contact = style("contact", fontSize=9, leading=12.5, textColor=muted)
+    s_sec = style("sec", fontName="Roboto-Bold", fontSize=11.5, leading=14, textColor=accent, spaceBefore=9, spaceAfter=1)
+    s_body = style("body", spaceAfter=2)
+    s_role = style("role", fontName="Roboto-Bold", fontSize=10, leading=13, spaceBefore=6)
+    s_dates = style("dates", fontSize=8.8, leading=11, textColor=muted, spaceAfter=1.2)
+    s_bullet = style("bullet", leftIndent=12, bulletIndent=2, bulletFontName="Roboto", bulletFontSize=9, spaceAfter=1.6)
+    s_skill = style("skill", spaceAfter=2.2)
+    s_proj = style("proj", fontName="Roboto-Bold", fontSize=9.4, leading=12.5, spaceBefore=3)
+
+    def link(label: str, url: str) -> str:
+        return f'<a href="{escape(url)}" color="#17365d">{escape(label)}</a>'
+
+    story = [Paragraph(escape(c["name"]), s_name), Paragraph(escape(c["headline"]), s_head)]
+    contact_bits = [escape(c["location"]), link(c["email"], f"mailto:{c['email']}")]
+    contact_bits += [link(label, url) for label, url in c["links"]]
+    story.append(Paragraph(" &nbsp;|&nbsp; ".join(contact_bits), s_contact))
+
+    def section(title: str):
+        return [Paragraph(title, s_sec),
+                HRFlowable(width="100%", thickness=0.8, color=accent, spaceBefore=1, spaceAfter=3)]
+
+    story += section("Summary") + [Paragraph(escape(c["summary"]), s_body)]
+
+    story += section("Experience")
+    for r in c["roles"]:
+        head = [Paragraph(escape(f"{r['company']} {SEP} {r['title']} {SEP} {r['location']}"), s_role),
+                Paragraph(escape(r["dates"]), s_dates)]
+        first, rest = r["bullets"][0], r["bullets"][1:]
+        story.append(KeepTogether(head + [Paragraph(escape(first), s_bullet, bulletText=BULLET)]))
+        story += [Paragraph(escape(b), s_bullet, bulletText=BULLET) for b in rest]
+
+    story += section("Skills")
+    for label, items in c["skills"]:
+        story.append(Paragraph(f"<b>{escape(label)}:</b> {escape(', '.join(items))}", s_skill))
+
+    story += section("Projects")
+    for p in c["projects"]:
+        bits = [link(label, url) for label, url in zip(p["links"], p["urls"], strict=True)]
+        title = escape(p["title"]) + (f" {SEP} " + ", ".join(bits) if bits else "")
+        story.append(KeepTogether([Paragraph(title, s_proj), Paragraph(escape(p["description"]), s_body)]))
+    story.append(Spacer(1, 2))
+
+    class Canvas(rl_canvas.Canvas):
+        def __init__(self, *a, **kw):
+            kw["lang"] = "en-US"
+            kw["initialFontName"] = "Roboto"
+            super().__init__(*a, **kw)
+            self.setViewerPreference("DisplayDocTitle", "true")
+
+    doc = SimpleDocTemplate(
+        str(out), pagesize=letter, leftMargin=0.65 * inch, rightMargin=0.65 * inch,
+        topMargin=0.5 * inch, bottomMargin=0.5 * inch,
+        title=f"{c['name']} {SEP} Resume", author=c["name"],
+        subject="Staff Software Engineer: AI, agents, data engineering and machine learning",
+        keywords=", ".join(["AI agents", "LLM", "machine learning", "data engineering", "Python", "SQL",
+                            "agent platform", "RAG", "Spark", "Kafka", "Airflow", "Kubernetes"]),
+        creator="helpers/build_resume_pdf.py", producer="ReportLab",
+    )
+    doc.build(story, canvasmaker=Canvas)
+
+
+def build(out: Path) -> None:
+    c = load_content()
+    text = resume_text(c)
+    build_pdf(c, out)
+    out.with_suffix(".txt").write_text(text, encoding="utf-8")
+    out.with_suffix(".meta.json").write_text(json.dumps(manifest(c, text), indent=2, ensure_ascii=False) + "\n",
+                                             encoding="utf-8")
+    print(f"  wrote {out.name}, {out.with_suffix('.txt').name}, {out.with_suffix('.meta.json').name}")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("-o", "--out", default=str(ASSETS / "JordanKailResume.pdf"))
-    ap.add_argument("--icon-font", default=str(Path(__file__).resolve().parent / "assets" / "resumeicons.ttf"))
-    a = ap.parse_args()
-    build(Path(a.out), Path(a.icon_font))
+    ap.add_argument("-o", "--out", default=str(ASSETS / PDF_NAME))
+    build(Path(ap.parse_args().out))
