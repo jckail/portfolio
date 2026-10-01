@@ -7,7 +7,7 @@ import time
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.app.config import get_settings
 from backend.app.middleware.auth_middleware import verify_admin_token
@@ -39,8 +39,9 @@ _login_global_limiter = SlidingWindowLimiter(max_events=20, window_seconds=3600,
 LOGIN_FAILURE_MIN_SECONDS = 1.0
 
 class LoginCredentials(BaseModel):
-    email: str
-    password: str
+    # Bounded: the body is read in full before the rate limiter can help.
+    email: str = Field(..., max_length=254)
+    password: str = Field(..., max_length=1024)
 
 
 class LoginToken(BaseModel):
