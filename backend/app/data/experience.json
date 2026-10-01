@@ -6,8 +6,8 @@
         "location": "San Francisco, CA",
         "highlights": [
             "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-            "Tech lead for the agents platform: created the agent harness and built an internal agents factory that teams use to develop, evaluate and ship LLM agents, and contributed to multiple patent filings for proprietary agent-platform IP.",
-            "Built and operate agents for infrastructure automation, finance automation and other internal workflows, helping the company avoid significant headcount growth while improving on-call response and infrastructure maintenance.",
+            "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
+            "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
             "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
             "Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship."
         ],
@@ -27,8 +27,8 @@
         ],
         "more_highlights": [
             "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-            "Tech lead for the agents platform: created the agent harness and built an internal agents factory that teams use to develop, evaluate and ship LLM agents, and contributed to multiple patent filings for proprietary agent-platform IP.",
-            "Built and operate agents for infrastructure automation, finance automation and other internal workflows, helping the company avoid significant headcount growth while improving on-call response and infrastructure maintenance.",
+            "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
+            "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
             "Build tracing, replay, and regression-testing harnesses for LLM agents, giving internal teams a repeatable way to evaluate agentic features before they ship.",
             "Own core data platform services for inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
             "Develop streaming and batch pipelines that make model-serving and GPU-fleet telemetry queryable in near real time for capacity planning and reliability engineering.",
@@ -43,7 +43,7 @@
         "date": "06/2023 - 01/2025",
         "location": "Denver, CO",
         "highlights": [
-            "Built agents and harnesses to govern statistical models for identity and fraud resolution; they became core frameworks.",
+            "Built agents and harnesses that govern the statistical models used for identity and fraud resolution; these became core frameworks.",
             "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
             "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
             "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
@@ -63,7 +63,7 @@
             "rag"
         ],
         "more_highlights": [
-            "Built agents and harnesses to govern statistical models for identity and fraud resolution; they became core frameworks.",
+            "Built agents and harnesses that govern the statistical models used for identity and fraud resolution; these became core frameworks.",
             "Engineered AI-powered RAG chatbots leveraging Airflow, LangChain, and OpenAI APIs to automate customer service workflows, reducing manual efforts by 150 hours per week. Addressed NLP challenges in ambiguous query handling, driving a 20% improvement in first-contact resolution.",
             "Spearheaded a company-wide migration from legacy Java/Oracle infrastructure to a cloud-native Go/PostgreSQL stack, cutting API response times from 30s to 12ms and slashing operational costs by 95%. Overcame challenges with service downtime, seamlessly integrating AWS services (Athena, S3, EC2) for enhanced scalability.",
             "Managed and mentored 9 data engineers and 6 data scientists, driving a 20% improvement in project delivery timelines. Collaborated with the VP of Platform Engineering on critical initiatives, serving as the primary data liaison to ensure seamless cross-departmental coordination.",
@@ -81,7 +81,7 @@
         "date": "01/2021 - 09/2022",
         "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
         "highlights": [
-            "Built AI/ML classifiers and the data, feature and evaluation pipelines around them, applying NLP and computer-vision models in production at Facebook scale.",
+            "Built AI/ML classifiers and the data, feature and evaluation pipelines around them.",
             "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.",
             "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.",
@@ -101,7 +101,7 @@
             "pytorch"
         ],
         "more_highlights": [
-            "Built AI/ML classifiers and the data, feature and evaluation pipelines around them, applying NLP and computer-vision models in production at Facebook scale.",
+            "Built AI/ML classifiers and the data, feature and evaluation pipelines around them.",
             "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers. Collaborated with data science, ML, and hardware teams to align product goals, resulting in a 20% faster delivery of cross-platform features.",
             "Designed exabyte scale data models for Community Messenger to handle multi-platform data streams, increasing user engagement by 35% across Instagram, WhatsApp, Facebook, and Quest despite complex cross-platform dependencies.",
