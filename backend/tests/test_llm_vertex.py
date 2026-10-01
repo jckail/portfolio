@@ -209,3 +209,14 @@ def test_plan_models_retries_primary_once_then_falls_back():
     provider = provider_for(lambda r: httpx.Response(200))
     assert provider.plan_models("a", "b") == ["a", "a", "b"]
     assert provider.plan_models("a", "a") == ["a", "a"]
+
+
+def test_thinking_is_minimal_so_reasoning_does_not_eat_the_reply_budget():
+    # Live finding: thinkingLevel LOW spent ~1000 of 1024 output tokens on reasoning,
+    # so replies were cut off after a few words with the "length limit" note.
+    from backend.app.services.llm.vertex_gemini import build_body
+
+    gemini3 = build_body(make_request(model="gemini-3.1-flash-lite"))
+    assert gemini3["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "MINIMAL"}
+    gemini25 = build_body(make_request(model="gemini-2.5-flash"))
+    assert gemini25["generationConfig"]["thinkingConfig"] == {"thinkingBudget": 0}

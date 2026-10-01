@@ -114,7 +114,7 @@ def build_body(request: LLMRequest) -> dict:
     # Gemini 3 reasons before answering; thinking tokens count against
     # maxOutputTokens, so keep it minimal for a short conversational reply.
     if request.model.startswith("gemini-3"):
-        body["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "LOW"}
+        body["generationConfig"]["thinkingConfig"] = {"thinkingLevel": "MINIMAL"}
     elif request.model.startswith("gemini-2.5-flash"):
         body["generationConfig"]["thinkingConfig"] = {"thinkingBudget": 0}
     return body
