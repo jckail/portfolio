@@ -379,11 +379,14 @@ class ConnectionManager:
                 key: value.model_dump(mode="json") if hasattr(value, "model_dump") else value
                 for key, value in get_all_models().items()
             }
+            # Skills are ~70% of the data and are searchable, so the prompt
+            # carries only an index; details come from search_portfolio.
+            serializable["skills"] = _skills_index(serializable.get("skills"))
             self._portfolio_data = json.dumps(serializable, ensure_ascii=False)
         return [
             self._base_prompt,
             CONTEXT_HANDLING_PROMPT,
-            f"Portfolio data (source of truth for Jordan's background):\n{self._portfolio_data}",
+            f"Portfolio data (source of truth for Jordan's background; `skills` is an index only, call search_portfolio for skill details):\n{self._portfolio_data}",
         ]
 
     def _visitor_context(self, client_id: str) -> str:
@@ -762,6 +765,28 @@ class ConnectionManager:
                 message_type='received',
                 message_detail=final_response
             )
+
+
+def _skills_index(skills: object) -> list[str]:
+    """One short line per skill: key, name, category, years and whether it is professional."""
+    if isinstance(skills, dict) and set(skills) == {"root"}:
+        skills = skills["root"]
+    if not isinstance(skills, dict):
+        return []
+    lines = []
+    for key, skill in skills.items():
+        if not isinstance(skill, dict):
+            continue
+        parts = [str(skill.get("display_name") or key)]
+        category = " / ".join(str(x) for x in (skill.get("general_category"), skill.get("sub_category")) if x)
+        if category:
+            parts.append(category)
+        if skill.get("years_of_experience"):
+            parts.append(f"{skill['years_of_experience']} yrs")
+        if skill.get("professional_experience"):
+            parts.append("professional")
+        lines.append(f"{key}: " + ", ".join(parts))
+    return lines
 
 
 def _len_bucket(length: int) -> str:

@@ -255,3 +255,13 @@ async def test_rest_limiters_are_shared_and_enforced(mail):
     # Contact and phone have separate budgets, like the REST routes.
     assert (await chat_tools.execute_confirmed(
         "contact_jordan", {"subject": "s", "message": "m"}, "v@example.com", "4.4.4.4")).ok
+
+
+def test_prompt_carries_a_skills_index_not_the_full_skill_data():
+    from backend.app.services.chat_service import manager
+
+    data = manager._system_parts()[2]
+    assert "search_portfolio" in data
+    assert "python: Python" in data  # index line
+    assert "related" not in data.split('"skills"')[1]  # per-skill detail left to search
+    assert len(data) < 60_000
