@@ -143,6 +143,14 @@ describe('SkillModal', () => {
     expect(screen.getByRole('button', { name: /Previous/ })).toBeDisabled();
   });
 
+  it('steps with the arrow key while focus is on the close button', async () => {
+    render(<Harness initial="go" />);
+    const close = await screen.findByRole('button', { name: 'Close' });
+    close.focus();
+    fireEvent.keyDown(close, { key: 'ArrowRight' });
+    expect(await screen.findByRole('dialog', { name: 'Rust' })).toBeInTheDocument();
+  });
+
   it('ignores arrow keys typed into a field', async () => {
     render(<Harness initial="go" />);
     const dialog = await screen.findByRole('dialog', { name: 'Go' });

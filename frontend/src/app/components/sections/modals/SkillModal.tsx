@@ -77,8 +77,9 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       if (isTypingTarget(event.target)) return;
-      const root = rootRef.current;
-      if (!root || !root.contains(document.activeElement)) return;
+      // The dialog, not just the content: the close button is its sibling
+      const dialog = rootRef.current?.closest('[role="dialog"]');
+      if (!dialog || !dialog.contains(document.activeElement)) return;
       const target = event.key === 'ArrowLeft' ? position?.previous : position?.next;
       if (!target) return;
       event.preventDefault();
