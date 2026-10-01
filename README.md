@@ -9,7 +9,7 @@ Welcome to my professional portfolio! Visit [jckail.com](https://www.jckail.com)
 This portfolio is a modern, full-stack web application showcasing my
 professional experience through an interactive and engaging interface —
 React + TypeScript on the frontend, FastAPI on the backend, and an AI
-assistant powered by Anthropic's Claude Haiku 4.5.
+assistant on Vertex AI Gemini (Anthropic Claude is a supported alternative).
 
 ## Key Features ✨
 
@@ -17,19 +17,24 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 - 📝 Dynamic professional timeline with detailed experiences
 - 🛠️ Comprehensive skills showcase with proficiency levels
 - 📊 Project portfolio with live demos and descriptions
-- 📄 Downloadable PDF resume
+- 📄 Downloadable ATS-friendly PDF resume, generated from the same data the site renders
+- 🔎 Machine-readable surfaces from that data: crawler HTML snapshot, JSON-LD,
+  `/llms.txt`, `/resume.json`, `/sitemap.xml`
 
 ### Smart Interactions
-- 🤖 AI chat assistant (Claude Haiku 4.5, streamed over WebSocket) with
-  conversation memory, page-aware context, and **site-navigation tools**
-  (open sections/modals, download resume)
+- 🤖 AI chat assistant (streamed over WebSocket) with conversation memory,
+  page-aware context, portfolio search, and **site-navigation tools** (open
+  sections/modals, download resume). It can also draft a message to Jordan,
+  a meeting request or a phone-number request, but nothing is sent or
+  revealed until the visitor reviews the card, enters their own email and
+  confirms
 - 🔗 Deep-linkable sections, modals, projects, and chat (`?ai_chat=open`,
   `?project=`, `?skill=`, `?company=`)
 - ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections;
   `Ctrl/Cmd+K` command palette
 - 🎨 Interactive doodle canvas (footer easter egg) + party mode (Konami /
   `?party=1`)
-- 🍪 Cookie consent with GA consent-mode defaults
+- 🍪 Cookie consent (denied by default, reopenable from the footer); analytics, including a first-party anonymous event stream, run only after opt-in
 - 📱 Responsive design for all devices
 - ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
 - 🌓 Light/dark mode — and a hidden party mode 🎉
@@ -43,14 +48,13 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 
 ### Frontend 🎨
 - **React 18 + TypeScript** with **Vite 8** for fast dev and optimized builds
-- **React Router** for navigation
 - **Zustand** for state management
 - **MUI** + CSS custom properties for UI and theming
 - **Vitest 4** for unit tests; **Playwright** for containerized E2E smoke tests
 
 ### Backend 🔧
 - **FastAPI** on **Python 3.12** with **Pydantic v2**
-- **Anthropic Claude Haiku 4.5** for the streaming AI chat assistant
+- **Vertex AI Gemini** (or **Anthropic Claude**) for the streaming AI chat assistant, behind a provider interface
 - **Supabase** for auth, telemetry, and log persistence
 - **SendGrid** for contact email
 
@@ -63,6 +67,7 @@ assistant powered by Anthropic's Claude Haiku 4.5.
 - **GitHub Actions**: CI (lint, coverage-gated tests, Trivy image scan,
   Docker + Terraform checks) plus verify-before-promote deploys to Cloud Run
   on `main` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
+- **Cloud Logging** structured logs and events; Terraform for log-based metrics, alerts and a dashboard is written in `infra/` but not yet applied to production
 - **Dependabot** for monthly grouped dependency updates
 
 ## Repository Layout 📂
@@ -77,18 +82,19 @@ portfolio/
 │
 ├── backend/           # FastAPI server (see backend/README.md)
 │   ├── app/
-│   │   ├── api/       # API routes (REST + chat WebSocket)
+│   │   ├── api/       # API routes (REST, chat WebSocket, discovery documents)
+│   │   ├── services/  # Chat service, tools, and the llm/ provider layer
 │   │   ├── config.py  # Centralized typed settings (all env access)
 │   │   ├── models/    # Pydantic models + data loaders
 │   │   ├── data/      # Portfolio content (JSON)
 │   │   └── utils/     # Logging, Supabase client
-│   ├── assets/        # System prompt, resume
+│   ├── assets/        # Generated resume (PDF, text, manifest), party sprites
 │   └── tests/         # Pytest suite (runs offline, no credentials needed)
 │
 ├── e2e/               # Playwright smoke tests against the built image
 ├── docs/adr/          # Architecture decision records
 ├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
-├── helpers/           # Deploy script, Dockerfiles, local dev tooling
+├── helpers/           # Dockerfiles, local dev tooling, e2e-in-Docker, resume generator
 └── .github/workflows/ # CI + automatic Cloud Run deploys
 ```
 
@@ -118,18 +124,20 @@ Then open:
 - Backend API + built frontend: http://localhost:8080
 - API documentation: http://localhost:8080/docs
 
+### Browser tests
+
+```bash
+E2E_BASE_URL=http://localhost:8080 ./helpers/e2e-docker.sh   # Playwright in a container
+```
+
 ### Deployment
 
 Merges to `main` deploy automatically to Cloud Run via GitHub Actions once
-the one-time setup in [DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Manual
-fallback:
+the one-time setup in [DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Do not
+deploy from a laptop: `helpers/deploy.sh` is kept for reference only and is
+unsafe (see [helpers/README.md](./helpers/README.md) and `HANDOFF.md`).
 
-```bash
-./helpers/deploy.sh          # build, push, deploy to Cloud Run, health-check
-```
-
-See [helpers/README.md](./helpers/README.md) for the deploy script and
-[infra/README.md](./infra/README.md) for Terraform-managed infrastructure.
+See [infra/README.md](./infra/README.md) for Terraform-managed infrastructure.
 
 ## Architecture 🏗️
 
@@ -139,7 +147,7 @@ flowchart LR
   CloudRun --> FastAPI
   FastAPI -->|static| React[React SPA]
   FastAPI -->|REST| Content[Portfolio JSON]
-  FastAPI -->|WebSocket + tools| Claude[Claude Haiku 4.5]
+  FastAPI -->|WebSocket + tools| Model[Vertex Gemini or Anthropic]
   FastAPI --> Supabase[(Supabase)]
   FastAPI --> SendGrid[SendGrid]
   GH[GitHub Actions] -->|WIF| AR[Artifact Registry]
@@ -148,8 +156,9 @@ flowchart LR
 ```
 
 Visitor traffic hits Cloud Run, which serves the Vite-built SPA and the
-FastAPI API (including the streaming chat WebSocket). Claude can request
-validated UI actions that the SPA executes. Secrets live in Secret Manager;
+FastAPI API (including the streaming chat WebSocket). The model can request
+validated UI actions that the SPA executes; actions that send mail or reveal
+contact data only run after the visitor confirms them. Secrets live in Secret Manager;
 deploys are keyless via Workload Identity Federation and only promote a
 revision to 100% traffic after a health check against the new revision.
 
@@ -160,6 +169,7 @@ revision to 100% traffic after a health check against the new revision.
 - [Deployment checklist (secrets & CI/CD setup)](./DEPLOYMENT.md)
 - [Deployment tooling](./helpers/README.md)
 - [Infrastructure (Terraform)](./infra/README.md)
+- [Architecture decisions](./docs/adr/README.md)
 - [Improvement roadmap](./ROADMAP.md)
 - API reference: `/docs` on a running backend
 

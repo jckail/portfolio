@@ -7,6 +7,7 @@ class ProjectDetail(BaseModel):
     title: str = Field(..., description="Project title")
     description: str = Field(..., description="Brief project description")
     link: HttpUrl = Field(..., description="Primary project link")
+    link_label: str = Field("View project", description="Label for the primary link button")
     link2: HttpUrl | None = Field(None, description="Secondary project link (optional)")
     description_detail: str = Field(..., description="Detailed project description")
     logoPath: str = Field(..., description="Path to project logo")

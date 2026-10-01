@@ -35,6 +35,9 @@ status_router = APIRouter(prefix="/chat")
 # Session ids are opaque to the server, but they key per-connection state, so
 # bound the shape to keep the key space sane and the value log-safe.
 _CLIENT_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
+# The GA session id is client-supplied and written to Supabase, so it gets the
+# same bounded, boring shape or is ignored.
+_GA_SESSION_RE = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 # Client-persisted transcripts are replayed on reconnect; cap the frame before
 # it is walked so a huge array cannot be allocated on our behalf.
@@ -148,6 +151,8 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
 
         # Store user message in Supabase
         ga_session_id = data.get('ga_session_id')
+        if not (isinstance(ga_session_id, str) and _GA_SESSION_RE.fullmatch(ga_session_id)):
+            ga_session_id = None
         if ga_session_id:
             await supabase.store_chat_message(
                 google_analytics_session_id=ga_session_id,

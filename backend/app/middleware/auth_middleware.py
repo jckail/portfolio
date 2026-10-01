@@ -27,8 +27,8 @@ async def verify_auth_token(authorization: str | None = Header(None)):
         # supabase-py is synchronous; keep the event loop free
         user_response = await asyncio.to_thread(supabase.get_client().auth.get_user, token)
     except Exception as e:
-        # Log details server-side; never leak provider internals to the client
-        logger.warning("Token verification failed: %s", e)
+        # Class only: provider error text can echo the token or account details.
+        logger.warning("Token verification failed (%s)", type(e).__name__)
         raise HTTPException(status_code=401, detail="Invalid token")
 
     if not user_response or not user_response.user:

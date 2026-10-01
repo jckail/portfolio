@@ -40,6 +40,7 @@
         "description": "Featured on TechCrunch - Won internal hackathon and created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
         "link": "https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/",
         "description_detail": "",
+        "link_label": "Read coverage",
         "logoPath": "techcrunch-icon.svg",
         "last_commit": "January 2022"
     },

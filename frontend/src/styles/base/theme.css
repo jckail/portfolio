@@ -264,30 +264,64 @@ a {
   color: #ffffff;
 }
 
-/* Party mode animations */
-.theme-party * {
-  animation: party-colors 5s infinite;
+/* Party mode: ONE animation on <body> drives the colour cycle. Every other
+   element takes `color: inherit`, so the cycle is a single animated node
+   instead of one infinite animation per element (about 800 of them, which
+   cost roughly 4s of style recalculation per 5s and made Lighthouse time out).
+   Controls with their own fill are excluded so they keep their static,
+   contrast-checked foreground (e.g. #e6ff19 text on a #00ffff tag measured
+   1.11:1). prefers-reduced-motion collapses the animation to one frame.
+   steps(6) per colour leg: each colour change re-resolves style for the whole
+   page (~50ms in a throttled headless run), so it runs at about 5Hz, not 60.
+   It sits on body, not <html>: the same animation on <html> forced a full
+   style recalculation of the whole tree every frame (about 40ms each). */
+.theme-party body {
+  animation: party-colors 5s steps(6, end) infinite;
 }
 
-/* The color cycle above would override token colors on filled controls
-   (e.g. #e6ff19 text on a #00ffff tag measured 1.11:1), so controls with
-   their own fill keep their static, contrast-checked foreground. */
-.theme-party .skill-tag,
-.theme-party .skill-tag *,
-.theme-party .skill-chip,
-.theme-party .skill-chip *,
-.theme-party .btn-primary,
-.theme-party .btn-primary *,
-.theme-party .btn:hover,
-.theme-party .btn:hover *,
-.theme-party .btn-icon:hover,
-.theme-party .btn-icon:hover *,
-.theme-party .download-button,
-.theme-party .download-button *,
-.theme-party .contact-phone-button,
-.theme-party .skills-filter-chip:hover,
-.theme-party .skills-filter-chip.is-active {
-  animation: none;
+/* Controls that keep their own foreground: no transitions either, or each
+   one would start a colour transition on every cycle step. */
+.theme-party :is(
+    .skill-tag,
+    .skill-tag *,
+    .skill-chip,
+    .skill-chip *,
+    .btn-primary,
+    .btn-primary *,
+    .btn:hover,
+    .btn:hover *,
+    .btn-icon:hover,
+    .btn-icon:hover *,
+    .download-button,
+    .download-button *,
+    .contact-phone-button,
+    .skills-filter-chip:hover,
+    .skills-filter-chip.is-active
+  ) {
+  transition: none;
+}
+
+.theme-party
+  :not(
+    body,
+    .skill-tag,
+    .skill-tag *,
+    .skill-chip,
+    .skill-chip *,
+    .btn-primary,
+    .btn-primary *,
+    .btn:hover,
+    .btn:hover *,
+    .btn-icon:hover,
+    .btn-icon:hover *,
+    .download-button,
+    .download-button *,
+    .contact-phone-button,
+    .skills-filter-chip:hover,
+    .skills-filter-chip.is-active
+  ) {
+  color: inherit !important;
+  transition-property: border-color !important;
 }
 
 /* The 87.5% stop keeps the green -> magenta leg bright: interpolated

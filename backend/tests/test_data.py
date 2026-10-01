@@ -103,3 +103,13 @@ def test_ai_work_leads_the_recent_roles():
     assert "agents platform" in experience["together_ai"].highlights[1].lower()
     assert "govern" in experience["prove"].highlights[0].lower()
     assert "classifiers" in experience["meta"].highlights[0].lower()
+
+
+def test_project_link_label_defaults_and_override():
+    from backend.app.models import load_projects
+
+    projects = load_projects()
+    root = projects.root if hasattr(projects, "root") else projects
+    assert root["qr_for_groups"].link_label == "Read coverage"
+    others = [p.link_label for k, p in root.items() if k != "qr_for_groups"]
+    assert others and all(label == "View project" for label in others)

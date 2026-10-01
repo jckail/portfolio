@@ -191,3 +191,16 @@ def test_resume_pdf_revalidates_instead_of_refetching(client):
     assert client.head("/api/resume").status_code == 200
     again = client.get("/api/resume", headers={"if-none-match": response.headers["etag"]})
     assert again.status_code == 304
+
+
+# --- Snapshot focus behaviour ------------------------------------------------------
+
+
+def test_snapshot_links_are_not_tabbable():
+    """The snapshot is replaced by the app moments after load. A tabbable link in it
+    would take an early Tab and then be removed, dropping focus before the skip link."""
+    html = discovery.snapshot_html().decode()
+    links = re.findall(r"<a\b[^>]*>", html)
+    assert links, "expected the snapshot to contain links"
+    assert all('tabindex="-1"' in tag for tag in links), [t for t in links if 'tabindex="-1"' not in t][:3]
+    assert not re.search(r"<(button|input|select|textarea)\b", html)

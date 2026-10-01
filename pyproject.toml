@@ -36,6 +36,8 @@ extend-immutable-calls = [
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
+addopts = "-m 'not live'"
+markers = ["live: calls the real model through a running backend (backend/tests/chat_eval); never run in CI"]
 
 [tool.coverage.run]
 source = ["backend/app"]
@@ -44,5 +46,5 @@ source = ["backend/app"]
 # The floor must sit just under actual coverage or it can never fail. It was
 # left at 60 while the suite reached ~70, so it could only have fired if
 # someone deleted a sixth of the tests. Ratchet upward only.
-fail_under = 72
+fail_under = 91
 show_missing = true

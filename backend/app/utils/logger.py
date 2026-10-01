@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import re
 import socket
 import sys
 import threading
@@ -26,6 +27,38 @@ LOG_FILE_MAX_BYTES = 5 * 1024 * 1024
 LOG_FILE_BACKUPS = 3
 
 SINK_LOGGER_NAME = 'backend.app.utils.supabase_client'
+
+# uvicorn's WebSocket handshake lines read `127.0.0.1:41884 - "WebSocket
+# /ws/<client id>" 403`: plain text on stdout with the peer address and the raw
+# request path. The HTTP access logger is disabled in main.py and the app's own
+# access line carries neither, so these are the one place a raw address (and a
+# client-chosen path) could reach Cloud Logging.
+_PEER_ADDRESS_LINE = re.compile(r'^\[?[0-9a-fA-F.:]+\]?:\d+ - "')
+_UVICORN_LOGGERS = ('uvicorn', 'uvicorn.error', 'uvicorn.access', 'websockets', 'websockets.server')
+
+
+class DropPeerAddressLines(logging.Filter):
+    """Drop server log lines that start with the client's ``host:port``."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            return not _PEER_ADDRESS_LINE.match(record.getMessage())
+        except Exception:
+            return True
+
+
+def _scrub_server_loggers() -> None:
+    drop = DropPeerAddressLines()
+    seen = []
+    for name in _UVICORN_LOGGERS:
+        target = logging.getLogger(name)
+        if not any(isinstance(f, DropPeerAddressLines) for f in target.filters):
+            target.addFilter(drop)
+        for handler in target.handlers:
+            if handler not in seen:
+                seen.append(handler)
+                if not any(isinstance(f, DropPeerAddressLines) for f in handler.filters):
+                    handler.addFilter(drop)
 
 _fallback_lock = threading.Lock()
 _EXCEPTION_FORMATTER = logging.Formatter()
@@ -214,6 +247,8 @@ def setup_logging(name: str = APP_LOGGER_NAME) -> logging.Logger:
     root = logging.getLogger(LOGGER_NAME)
     if root.handlers:
         return logging.getLogger(name)
+
+    _scrub_server_loggers()
 
     root.setLevel(logging.INFO)
     # Human-readable message for the Supabase admin dashboard

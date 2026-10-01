@@ -11,6 +11,11 @@ history replay after reconnect, rate-limit notices). Two natural options:
 Server-Sent Events (one-way HTTP stream, client sends new messages via a
 separate POST) or a single WebSocket connection for both directions.
 
+**Update:** the model is now chosen by a provider layer (ADR 0005), the
+`prefill_contact` tool is no longer offered, and the socket also carries
+`history`, `confirm_action`, `cancel_action` and `action_result` frames
+(ADR 0006; `backend/README.md` has the contract).
+
 ## Decision
 
 Use a WebSocket per chat session (`backend/app/api/chat_routes.py`,
