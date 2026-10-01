@@ -1,5 +1,7 @@
 """Unit tests for chat tool-action normalization."""
-from backend.app.services.chat_actions import normalize_tool_action
+import pytest
+
+from backend.app.services.chat_actions import CHAT_TOOLS, normalize_tool_action
 
 
 def test_navigate_section_accepts_known_targets():
@@ -55,3 +57,40 @@ def test_set_theme_accepts_known_values():
 
 def test_unknown_tool_rejected():
     assert normalize_tool_action("rm_rf", {}) is None
+
+
+def test_tool_schemas_reject_unknown_properties():
+    for tool in CHAT_TOOLS:
+        assert tool["input_schema"]["additionalProperties"] is False, tool["name"]
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["__proto__", "constructor", "Constructor", "-x", "a/b", "a b", "x" * 65, "<script>"],
+)
+def test_open_modal_rejects_unsafe_keys(key):
+    assert normalize_tool_action("open_modal", {"kind": "company", "key": key}) is None
+
+
+def test_open_modal_checks_skill_and_project_keys_against_data():
+    assert normalize_tool_action("open_modal", {"kind": "skill", "key": "not_a_skill"}) is None
+    assert normalize_tool_action("open_modal", {"kind": "project", "key": "nope"}) is None
+    assert normalize_tool_action("open_modal", {"kind": "skill", "key": "Node.js"}) == {
+        "action": "open_modal", "kind": "skill", "key": "node.js",
+    }
+    assert normalize_tool_action("open_modal", {"kind": "project", "key": "jobbr"}) == {
+        "action": "open_modal", "kind": "project", "key": "jobbr",
+    }
+
+
+def test_open_modal_company_accepts_frontend_aliases():
+    # Company deep links resolve aliases client-side, so only the charset applies
+    assert normalize_tool_action("open_modal", {"kind": "company", "key": "meta-facebook"}) == {
+        "action": "open_modal", "kind": "company", "key": "meta-facebook",
+    }
+
+
+def test_open_modal_contact_ignores_key():
+    assert normalize_tool_action("open_modal", {"kind": "contact", "key": "__proto__"}) == {
+        "action": "open_modal", "kind": "contact", "key": None,
+    }

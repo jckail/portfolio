@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
 
 
 class Contact(BaseModel):
@@ -14,8 +14,8 @@ class Contact(BaseModel):
     github: HttpUrl = Field(..., description="GitHub profile URL")
     linkedin: HttpUrl = Field(..., description="LinkedIn profile URL")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "firstName": "Jordan",
                 "lastName": "Kail",
@@ -29,3 +29,4 @@ class Contact(BaseModel):
                 "linkedin": "https://www.linkedin.com/in/jckail/"
             }
         }
+    )

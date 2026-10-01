@@ -1,5 +1,6 @@
 import asyncio
 import os
+import re
 import sys
 from contextlib import asynccontextmanager
 
@@ -35,6 +36,67 @@ settings = get_settings()
 # actively harmful.
 PRIVATE_API_PREFIXES = ("/api/admin", "/api/logs")
 NEVER_CACHE_PREFIXES = ("/api/health",)
+# Scripts served from the dist root without a content hash in the filename.
+UNHASHED_SCRIPTS = frozenset({"/ga-init.js"})
+
+# A client-supplied X-Request-ID is echoed in the response and stamped on
+# every log line, so only accept short, boring values; anything else gets a
+# fresh server-generated ID.
+REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9._-]{8,64}$")
+
+# The resume PDF is shown in a same-origin <iframe> (PDFViewer), so it is the
+# one response allowed to be framed, and only by this site.
+FRAMEABLE_PATHS = ("/api/resume",)
+
+
+def _websocket_origins() -> str:
+    """wss:// equivalents of the deployed HTTPS origins.
+
+    CSP Level 3 lets 'self' match same-host wss://, but older Safari does not,
+    so the production hosts are listed explicitly for the chat socket.
+    """
+    origins = [*settings.allowed_origins, settings.production_url]
+    hosts = {
+        "wss://" + origin[len("https://"):].rstrip("/")
+        for origin in origins
+        if origin.startswith("https://")
+    }
+    return "".join(f" {host}" for host in sorted(hosts))
+
+
+GA_SCRIPT_SOURCES = "https://www.googletagmanager.com https://www.google-analytics.com"
+GA_CONNECT_SOURCES = (
+    "https://www.google-analytics.com https://*.google-analytics.com "
+    "https://*.analytics.google.com https://www.googletagmanager.com"
+)
+
+
+def build_csp(frame_ancestors: str = "'none'") -> str:
+    """Content-Security-Policy for every response.
+
+    No 'unsafe-inline' in script-src: the GA bootstrap lives in
+    /ga-init.js, and the JSON-LD block in index.html is a data block the
+    browser never executes. style-src keeps 'unsafe-inline' for Emotion/MUI.
+    """
+    return (
+        "default-src 'self'; "
+        "base-uri 'self'; "
+        "object-src 'none'; "
+        "form-action 'self'; "
+        f"frame-ancestors {frame_ancestors}; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        f"script-src 'self' {GA_SCRIPT_SOURCES}; "
+        f"connect-src 'self' {GA_CONNECT_SOURCES}{_websocket_origins()}; "
+        "frame-src 'self'; "
+        "worker-src 'self' blob:; "
+        "upgrade-insecure-requests"
+    )
+
+
+CSP_DEFAULT = build_csp()
+CSP_FRAMEABLE = build_csp("'self'")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -82,16 +144,23 @@ app = FastAPI(
     title="jordan-kail.com API",
     description="API for the Jordan-Kail.com application",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    # The schema publishes the admin route map, and Swagger's CDN assets are
+    # blocked by our own CSP anyway, so the docs exist only in dev mode.
+    docs_url="/docs" if settings.dev_mode else None,
+    redoc_url="/redoc" if settings.dev_mode else None,
+    openapi_url="/openapi.json" if settings.dev_mode else None,
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
-    allow_credentials=True,
+    # Admin auth is a Bearer header, not a cookie, so credentialed CORS is
+    # never needed.
+    allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
+    expose_headers=["X-Request-ID"]
 )
 
 # Compress API/static responses larger than 1 KB
@@ -107,7 +176,9 @@ async def add_response_headers(request: Request, call_next):
     always be revalidated so deploys take effect immediately.
     """
     incoming = request.headers.get("x-request-id")
-    request_id = set_request_id(incoming if incoming else None)
+    if not (incoming and REQUEST_ID_PATTERN.match(incoming)):
+        incoming = None
+    request_id = set_request_id(incoming)
     request.state.request_id = request_id
 
     try:
@@ -121,7 +192,10 @@ async def add_response_headers(request: Request, call_next):
                 response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
             elif path.startswith(("/images/", "/api/assets/")):
                 response.headers["Cache-Control"] = "public, max-age=86400"
-            elif path == "/" or path.endswith(".html"):
+            elif path == "/" or path.endswith(".html") or path in UNHASHED_SCRIPTS:
+                # Unhashed root scripts (the GA consent bootstrap) revalidate
+                # like the HTML that loads them; otherwise browsers cache them
+                # heuristically and keep running a stale consent default.
                 response.headers["Cache-Control"] = "no-cache"
             elif path.startswith(NEVER_CACHE_PREFIXES):
                 # Health must never be served from a cache. A stale "healthy"
@@ -146,26 +220,16 @@ async def add_response_headers(request: Request, call_next):
                     "public, max-age=60, stale-while-revalidate=300"
                 )
 
+        frameable = request.url.path in FRAMEABLE_PATHS
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN" if frameable else "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
         # Ignored over plain HTTP (local dev); effective behind Cloud Run's TLS
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        # CSP: allow self + Google Fonts/GA; GA config is inline in index.html
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "base-uri 'self'; "
-            "object-src 'none'; "
-            "frame-ancestors 'none'; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' https://fonts.gstatic.com data:; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; "
-            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com wss: ws:; "
-            "frame-src 'self'; "
-            "worker-src 'self' blob:; "
-            "upgrade-insecure-requests"
+            CSP_FRAMEABLE if frameable else CSP_DEFAULT
         )
         return response
     finally:

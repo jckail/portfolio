@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl, RootModel
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
 class ProjectDetail(BaseModel):
@@ -29,8 +29,8 @@ class Projects(RootModel[dict[str, ProjectDetail]]):
 
 
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "super_teacher": {
                     "title": "Super Teacher",
@@ -45,3 +45,4 @@ class Projects(RootModel[dict[str, ProjectDetail]]):
                 }
             }
         }
+    )

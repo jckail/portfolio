@@ -1,8 +1,12 @@
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from ..models import ExperienceHighlight
 from ..models.data_loader import load_experience
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,8 +21,9 @@ async def get_all_experience() -> dict[str, ExperienceHighlight]:
         return experience.model_dump()
     except HTTPException as he:
         raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to load experience")
+        raise HTTPException(status_code=500, detail="Unable to load experience")
 
 @router.get("/experience/{company_key}", response_model=ExperienceHighlight)
 async def get_experience(company_key: str) -> ExperienceHighlight:
@@ -39,5 +44,6 @@ async def get_experience(company_key: str) -> ExperienceHighlight:
         raise HTTPException(status_code=404, detail="Experience not found")
     except HTTPException as he:
         raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to load experience")
+        raise HTTPException(status_code=500, detail="Unable to load experience")

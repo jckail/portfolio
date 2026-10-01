@@ -150,6 +150,7 @@ class SupabaseClient:
                     'timestamp': datetime.now(UTC).isoformat(),
                     'level': log['level'].upper(),
                     'message': log['message'],
+                    'session_uuid': log.get('session_uuid'),
                     'metadata': log['metadata'],
                     'source': log['source'],
                     'ip_address': log['ip_address']

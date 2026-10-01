@@ -5,6 +5,7 @@ and convert them into their corresponding Pydantic models.
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,11 @@ from .contact import Contact
 from .experience import Experience
 from .projects import Projects
 from .skills import Skills
+
+logger = logging.getLogger(__name__)
+
+# Details (paths, parser messages) go to the log; clients get a generic error.
+_GENERIC_DETAIL = "Unable to load site content"
 
 
 class DataCache:
@@ -48,11 +54,9 @@ def load_json_data(file_path: str) -> dict:
     try:
         with open(file_path) as f:
             return json.load(f)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error loading JSON from {file_path}: {str(e)}"
-        )
+    except Exception:
+        logger.exception("Error loading JSON from %s", file_path)
+        raise HTTPException(status_code=500, detail=_GENERIC_DETAIL)
 
 def load_model[T: BaseModel](model_class: type[T], json_file: str) -> T:
     """Load JSON data into a specified Pydantic model."""
@@ -64,11 +68,9 @@ def load_model[T: BaseModel](model_class: type[T], json_file: str) -> T:
         return model_class.model_validate(data)
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error loading model {model_class.__name__} from {json_file}: {str(e)}"
-        )
+    except Exception:
+        logger.exception("Error loading model %s from %s", model_class.__name__, json_file)
+        raise HTTPException(status_code=500, detail=_GENERIC_DETAIL)
 
 def load_experience() -> Experience:
     """Load experience data from JSON."""
@@ -106,8 +108,8 @@ def load_all() -> dict[str, Any]:
             'aboutme': cache.get_or_load('aboutme', load_aboutme),
             'contact': cache.get_or_load('contact', load_contact)
         }
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error loading all models: {str(e)}"
-        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Error loading all models")
+        raise HTTPException(status_code=500, detail=_GENERIC_DETAIL)

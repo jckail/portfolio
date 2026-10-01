@@ -1,3 +1,4 @@
+import asyncio
 import html
 import logging
 
@@ -86,9 +87,11 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)):
         # the outbound message to them.
         message.reply_to = str(email_data.from_email)
 
-        # Send the email using SendGrid
+        # Send the email using SendGrid. The client is synchronous; running it
+        # inline would stall every other request (and chat stream) on this
+        # worker for the length of the HTTP call.
         sg = SendGridAPIClient(settings.sendgrid_api_key)
-        response = sg.send(message)
+        response = await asyncio.to_thread(sg.send, message)
 
         if response.status_code >= 200 and response.status_code < 300:
             logger.info("Contact form email delivered")

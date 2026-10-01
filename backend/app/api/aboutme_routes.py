@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from ..models import AboutMe
 from ..models.data_loader import load_aboutme
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -16,5 +20,6 @@ async def get_aboutme() -> AboutMe:
         return about_me
     except HTTPException as he:
         raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to load about me information")
+        raise HTTPException(status_code=500, detail="Unable to load about me information")

@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl, RootModel
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
 class ExperienceHighlight(BaseModel):
@@ -24,8 +24,8 @@ class Experience(RootModel[dict[str, ExperienceHighlight]]):
     — newest role first.
     """
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "together_ai": {
                     "company": "Together AI",
@@ -45,3 +45,4 @@ class Experience(RootModel[dict[str, ExperienceHighlight]]):
                 }
             }
         }
+    )

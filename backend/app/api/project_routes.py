@@ -1,8 +1,12 @@
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from ..models import ProjectDetail
 from ..models.data_loader import load_projects
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,8 +21,9 @@ async def get_all_projects() -> dict[str, ProjectDetail]:
         return projects.model_dump()
     except HTTPException as he:
         raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to load projects")
+        raise HTTPException(status_code=500, detail="Unable to load projects")
 
 @router.get("/projects/{project_key}", response_model=ProjectDetail)
 async def get_project(project_key: str) -> ProjectDetail:
@@ -39,5 +44,6 @@ async def get_project(project_key: str) -> ProjectDetail:
         raise HTTPException(status_code=404, detail="Project not found")
     except HTTPException as he:
         raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Failed to load projects")
+        raise HTTPException(status_code=500, detail="Unable to load projects")

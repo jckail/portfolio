@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Field, HttpUrl, RootModel
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
 class SkillDetail(BaseModel):
@@ -18,8 +18,8 @@ class SkillDetail(BaseModel):
 class Skills(RootModel[dict[str, SkillDetail]]):
     """Model for all skills."""
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "python": {
                     "display_name": "Python",
@@ -35,3 +35,4 @@ class Skills(RootModel[dict[str, SkillDetail]]):
                 }
             }
         }
+    )

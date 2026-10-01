@@ -16,6 +16,8 @@ class JsonFormatter(logging.Formatter):
             "timestamp": datetime.fromtimestamp(
                 record.created, tz=UTC
             ).isoformat(),
+            # Cloud Logging only maps `severity`; `level` is kept for jq users.
+            "severity": record.levelname,
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -23,7 +25,8 @@ class JsonFormatter(logging.Formatter):
             "funcName": record.funcName,
             "lineno": record.lineno,
         }
-        request_id = get_request_id()
+        # Prefer the id stamped at emit time (see SupabaseHandler.emit).
+        request_id = getattr(record, "request_id", None) or get_request_id()
         if request_id:
             payload["request_id"] = request_id
         if record.exc_info:

@@ -4,12 +4,54 @@ import os
 import socket
 import sys
 import threading
+from logging.handlers import RotatingFileHandler
 
 from ..utils.supabase_client import supabase
 from .json_log import JsonFormatter
 from .request_context import get_request_id
 
-LOGGER_NAME = 'quickresume'
+# Handlers live on the package root so every `logging.getLogger(__name__)`
+# under backend.* emits through them. Anything outside the package (httpx,
+# uvicorn, supabase) stays out, which also keeps the Supabase sink from
+# logging its own HTTP calls into an endless loop.
+LOGGER_NAME = 'backend'
+# What setup_logging() hands back to modules that call it for a logger.
+APP_LOGGER_NAME = 'backend.app'
+
+# Cloud Run sets K_SERVICE. Its filesystem is in-memory, so local log files
+# there only eat the instance's RAM; stdout already goes to Cloud Logging.
+ON_CLOUD_RUN = bool(os.getenv('K_SERVICE'))
+LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')
+LOG_FILE_MAX_BYTES = 5 * 1024 * 1024
+LOG_FILE_BACKUPS = 3
+
+_fallback_lock = threading.Lock()
+
+
+def _fallback_logger() -> logging.Logger:
+    """Last-resort sink for records the Supabase handler could not deliver.
+
+    Deliberately outside the `backend` tree (and non-propagating) so writing
+    here can never re-enter the Supabase handler. Bounded either way: stderr
+    on Cloud Run, a rotating file locally.
+    """
+    fallback = logging.getLogger('portfolio_log_fallback')
+    with _fallback_lock:
+        if not fallback.handlers:
+            fallback.propagate = False
+            fallback.setLevel(logging.INFO)
+            if ON_CLOUD_RUN:
+                handler: logging.Handler = logging.StreamHandler(sys.stderr)
+            else:
+                os.makedirs(LOG_DIR, exist_ok=True)
+                handler = RotatingFileHandler(
+                    os.path.join(LOG_DIR, 'fallback.log'),
+                    maxBytes=LOG_FILE_MAX_BYTES,
+                    backupCount=LOG_FILE_BACKUPS,
+                    encoding='utf-8',
+                )
+            fallback.addHandler(handler)
+    return fallback
 
 
 class SupabaseHandler(logging.Handler):
@@ -98,7 +140,9 @@ class SupabaseHandler(logging.Handler):
                 'lineno': record.lineno,
                 'hostname': self._hostname
             }
-            request_id = get_request_id()
+            # Captured in emit(): this runs in the flush task, whose context
+            # never carries the originating request's id.
+            request_id = getattr(record, 'request_id', None)
             if request_id:
                 metadata['request_id'] = request_id
             if record.exc_info:
@@ -119,6 +163,8 @@ class SupabaseHandler(logging.Handler):
                 self._fallback_log(f"Failed log: {log}")
 
     def emit(self, record):
+        if getattr(record, 'request_id', None) is None:
+            record.request_id = get_request_id()
         try:
             if self._loop is not None and self._loop.is_running():
                 # Thread-safe handoff to the event loop's queue.
@@ -135,13 +181,10 @@ class SupabaseHandler(logging.Handler):
             self._fallback_log(f"Log queue full, dropping record: {record.getMessage()}")
 
     def _fallback_log(self, message: str):
-        """Write to fallback log file when Supabase logging fails"""
+        """Record a delivery failure without going through Supabase again."""
         try:
-            fallback_log_path = os.path.join(os.path.dirname(__file__), '..', 'logs', 'fallback.log')
-            os.makedirs(os.path.dirname(fallback_log_path), exist_ok=True)
-            with open(fallback_log_path, 'a') as f:
-                f.write(f"{message}\n")
-        except OSError:
+            _fallback_logger().warning(message)
+        except Exception:
             pass
 
 
@@ -154,13 +197,17 @@ def get_supabase_handler() -> SupabaseHandler | None:
     return None
 
 
-def setup_logging():
-    """Setup logging with JSON stdout + Supabase sink. Idempotent."""
-    logger = logging.getLogger(LOGGER_NAME)
-    if logger.handlers:
-        return logger
+def setup_logging(name: str = APP_LOGGER_NAME) -> logging.Logger:
+    """Attach JSON stdout + Supabase sinks to the `backend` logger. Idempotent.
 
-    logger.setLevel(logging.INFO)
+    Returns the logger called `name` (default `backend.app`) for callers that
+    use it directly; modules may equally use `logging.getLogger(__name__)`.
+    """
+    root = logging.getLogger(LOGGER_NAME)
+    if root.handlers:
+        return logging.getLogger(name)
+
+    root.setLevel(logging.INFO)
     # Human-readable message for the Supabase admin dashboard
     plain_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -171,7 +218,7 @@ def setup_logging():
         supabase_handler = SupabaseHandler()
         supabase_handler.setLevel(logging.INFO)
         supabase_handler.setFormatter(plain_formatter)
-        logger.addHandler(supabase_handler)
+        root.addHandler(supabase_handler)
     except Exception as e:
         print(f"Failed to setup Supabase handler: {str(e)}")
 
@@ -180,18 +227,23 @@ def setup_logging():
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setLevel(logging.INFO)
         stream_handler.setFormatter(json_formatter)
-        logger.addHandler(stream_handler)
+        root.addHandler(stream_handler)
     except Exception as e:
         print(f"Failed to setup stream handler: {str(e)}")
 
-    # File handler as backup (also JSON for local grep/jq)
-    try:
-        log_dir = os.path.join(os.path.dirname(__file__), '..', 'logs')
-        os.makedirs(log_dir, exist_ok=True)
-        file_handler = logging.FileHandler(os.path.join(log_dir, 'app.log'))
-        file_handler.setFormatter(json_formatter)
-        logger.addHandler(file_handler)
-    except Exception as e:
-        print(f"Failed to setup file handler: {str(e)}")
+    # Local-only JSON file for grep/jq, rotated so it cannot grow unbounded.
+    if not ON_CLOUD_RUN:
+        try:
+            os.makedirs(LOG_DIR, exist_ok=True)
+            file_handler = RotatingFileHandler(
+                os.path.join(LOG_DIR, 'app.log'),
+                maxBytes=LOG_FILE_MAX_BYTES,
+                backupCount=LOG_FILE_BACKUPS,
+                encoding='utf-8',
+            )
+            file_handler.setFormatter(json_formatter)
+            root.addHandler(file_handler)
+        except Exception as e:
+            print(f"Failed to setup file handler: {str(e)}")
 
-    return logger
+    return logging.getLogger(name)

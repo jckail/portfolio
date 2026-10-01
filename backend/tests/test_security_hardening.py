@@ -173,8 +173,8 @@ def test_log_endpoint_rejects_a_non_uuid_session(client):
         json={"sessionUUID": "../../../etc/passwd", "message": "hello"},
     )
     # Previously returned 200 with an error body, making rejected logs
-    # indistinguishable from stored ones.
-    assert response.status_code == 400
+    # indistinguishable from stored ones. Request-model validation -> 422.
+    assert response.status_code == 422
 
 
 def test_log_batch_rejects_oversized_batches(client):
@@ -285,11 +285,19 @@ class _FakeReq:
         self.client = type("C", (), {"host": host})()
 
 
-def test_client_ip_reads_the_rightmost_forwarded_hop():
+def test_client_ip_reads_the_rightmost_forwarded_hop(monkeypatch):
     """X-Forwarded-For is appended to by each hop, so the LEFTMOST entry is
     whatever the caller sent. Reading it let anyone mint a fresh rate-limit
     bucket per request by rotating the header."""
+    import dataclasses
+
+    from backend.app import config
+    from backend.app.utils import rate_limit
     from backend.app.utils.rate_limit import client_ip
+
+    # Trust is on behind Cloud Run's front end; force it on here.
+    trusted = dataclasses.replace(config.get_settings(), trust_forwarded_for=True)
+    monkeypatch.setattr(rate_limit, "get_settings", lambda: trusted)
 
     spoofed = _FakeReq(xff="1.2.3.4, 9.9.9.9")
     assert client_ip(spoofed) == "9.9.9.9"

@@ -13,16 +13,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Variables that must be present for the app to boot; validated in main.py
-# so a misconfigured deployment fails fast with a clear error.
+# so a misconfigured deployment fails fast with a clear error. This is the
+# single source of truth: list only what the app actually reads. PRODUCTION_URL
+# and RESUME_FILE were required here but never read (the resume filename comes
+# from aboutme.json), so they are optional settings now.
 REQUIRED_ENV_VARS: tuple[str, ...] = (
     "SUPABASE_URL",
     "SUPABASE_ANON_KEY",
     "SUPABASE_SERVICE_ROLE",
     "ALLOWED_ORIGINS",
-    "PRODUCTION_URL",
     "PORT",
     "ADMIN_EMAIL",
-    "RESUME_FILE",
     "ANTHROPIC_API_KEY",
     "SENDGRID_API_KEY",
 )
@@ -60,6 +61,11 @@ class Settings:
     git_commit: str
     dev_mode: bool
 
+    # Platform / proxy trust
+    on_cloud_run: bool
+    trust_forwarded_for: bool
+    trusted_proxy_hops: int
+
     @property
     def chat_available(self) -> bool:
         """Whether the AI assistant can serve requests."""
@@ -74,8 +80,27 @@ def _parse_bool(raw: str) -> bool:
     return raw.lower() in ("1", "true", "yes")
 
 
+def _forwarded_for_trust(on_cloud_run: bool) -> bool:
+    """Whether X-Forwarded-For can be used to identify the client.
+
+    The header is only meaningful when a proxy we control appends to it. Cloud
+    Run's Google front end always appends the real peer, so trust defaults on
+    there (K_SERVICE is set by the platform). Anywhere else - local, docker
+    compose - the caller reaches the app directly and would pick their own
+    rate-limit bucket, so trust is off unless explicitly configured.
+    An explicit TRUST_FORWARDED_FOR wins either way.
+    """
+    explicit = os.getenv("TRUST_FORWARDED_FOR", "").strip()
+    if explicit:
+        return _parse_bool(explicit)
+    if os.getenv("TRUSTED_PROXY_HOPS", "").strip():
+        return True
+    return on_cloud_run
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
+    on_cloud_run = bool(os.getenv("K_SERVICE"))
     return Settings(
         supabase_url=os.getenv("SUPABASE_URL", ""),
         supabase_anon_key=os.getenv("SUPABASE_ANON_KEY", ""),
@@ -97,6 +122,9 @@ def get_settings() -> Settings:
         port=int(os.getenv("PORT", "8080")),
         git_commit=os.getenv("GIT_COMMIT", ""),
         dev_mode=_parse_bool(os.getenv("DEV_MODE", "")),
+        on_cloud_run=on_cloud_run,
+        trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
+        trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),
     )
 
 

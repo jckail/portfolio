@@ -19,6 +19,114 @@ def test_security_headers_present(client):
     assert "default-src 'self'" in csp
     assert "frame-ancestors 'none'" in csp
     assert "googletagmanager.com" in csp
+    assert response.headers["Cross-Origin-Opener-Policy"] == "same-origin"
+
+
+def _directive(csp: str, name: str) -> str:
+    for part in csp.split(";"):
+        part = part.strip()
+        if part.startswith(name + " "):
+            return part
+    raise AssertionError(f"{name} missing from CSP: {csp!r}")
+
+
+def test_script_src_disallows_inline_scripts(client):
+    """The GA bootstrap is an external file, so inline script must stay
+    blocked: 'unsafe-inline' would hand any injected <script> the admin token
+    kept in localStorage."""
+    csp = client.get("/api/health").headers["Content-Security-Policy"]
+    script_src = _directive(csp, "script-src")
+    assert "'unsafe-inline'" not in script_src
+    assert "'unsafe-eval'" not in script_src
+    assert "'self'" in script_src
+
+
+def test_connect_src_has_no_wildcard_websockets(client):
+    """Bare ws:/wss: would let injected script open a socket to any host."""
+    csp = client.get("/api/health").headers["Content-Security-Policy"]
+    sources = _directive(csp, "connect-src").split()[1:]
+    assert "'self'" in sources
+    assert "ws:" not in sources
+    assert "wss:" not in sources
+    assert "form-action 'self'" in csp
+
+
+def test_websocket_origins_derive_from_https_origins(monkeypatch):
+    from backend.app import main
+
+    monkeypatch.setattr(
+        main,
+        "settings",
+        main.settings.__class__(
+            **{
+                **main.settings.__dict__,
+                "allowed_origins": ("https://jordan-kail.com", "http://localhost:5173"),
+                "production_url": "https://www.jordan-kail.com/",
+            }
+        ),
+    )
+    assert main._websocket_origins() == " wss://jordan-kail.com wss://www.jordan-kail.com"
+
+
+def test_resume_is_frameable_by_same_origin_only(client):
+    """PDFViewer embeds /api/resume in a same-origin iframe; DENY/'none'
+    rendered it as a broken frame."""
+    response = client.get("/api/resume")
+    assert response.headers["X-Frame-Options"] == "SAMEORIGIN"
+    csp = response.headers["Content-Security-Policy"]
+    assert _directive(csp, "frame-ancestors") == "frame-ancestors 'self'"
+    assert "'unsafe-inline'" not in _directive(csp, "script-src")
+
+
+def test_other_routes_stay_unframeable(client):
+    for path in ("/api/health", "/api/resume/other", "/api/experience"):
+        response = client.get(path)
+        assert response.headers["X-Frame-Options"] == "DENY", path
+        assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]
+
+
+@pytest.mark.parametrize(
+    "incoming",
+    ["short", "x" * 65, "x" * 3000, "abc def ghi", "abcdefgh/../etc", "id;drop<script>"],
+)
+def test_invalid_request_id_is_replaced(client, incoming):
+    response = client.get("/api/health", headers={"X-Request-ID": incoming})
+    rid = response.headers["X-Request-ID"]
+    assert rid != incoming
+    assert len(rid) == 32  # uuid4().hex
+
+
+def test_valid_request_id_is_echoed(client):
+    rid = "trace-1234.abc_DEF"
+    response = client.get("/api/health", headers={"X-Request-ID": rid})
+    assert response.headers["X-Request-ID"] == rid
+
+
+def test_api_docs_hidden_outside_dev_mode(client):
+    from backend.app.config import get_settings
+
+    if get_settings().dev_mode:
+        pytest.skip("DEV_MODE enabled in this environment")
+    for path in ("/docs", "/redoc", "/openapi.json"):
+        response = client.get(path)
+        # Falls through to the static mount: never the schema or Swagger UI.
+        assert '"openapi"' not in response.text, path
+        assert "swagger" not in response.text.lower(), path
+
+
+def test_cors_does_not_allow_credentials(client):
+    response = client.options(
+        "/api/experience",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "authorization",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert "access-control-allow-credentials" not in response.headers
+    assert "authorization" in response.headers["access-control-allow-headers"].lower()
 
 
 @pytest.mark.skipif(
@@ -26,6 +134,18 @@ def test_security_headers_present(client):
 )
 def test_html_is_not_cached(client):
     response = client.get("/")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-cache"
+
+
+@pytest.mark.skipif(
+    not os.path.isfile(os.path.join(FRONTEND_DIST, "ga-init.js")),
+    reason="frontend not built",
+)
+def test_unhashed_consent_bootstrap_revalidates(client):
+    """ga-init.js has no content hash, so without an explicit header browsers
+    cached it heuristically and kept a stale consent default after a change."""
+    response = client.get("/ga-init.js")
     assert response.status_code == 200
     assert response.headers["Cache-Control"] == "no-cache"
 

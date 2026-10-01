@@ -27,6 +27,20 @@ PROTECTED_ROUTES = [
 ]
 
 
+@pytest.fixture(autouse=True)
+def _fast_unthrottled_login(monkeypatch):
+    """Login is rate limited and failure-padded; neither is under test here
+    (see test_api_hardening.py), so keep these tests fast and independent."""
+    from backend.app.api import admin_routes
+
+    monkeypatch.setattr(admin_routes, "LOGIN_FAILURE_MIN_SECONDS", 0.0)
+    admin_routes._login_ip_limiter.reset()
+    admin_routes._login_global_limiter.reset()
+    yield
+    admin_routes._login_ip_limiter.reset()
+    admin_routes._login_global_limiter.reset()
+
+
 def _user(email):
     return types.SimpleNamespace(user=types.SimpleNamespace(email=email))
 

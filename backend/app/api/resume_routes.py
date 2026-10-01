@@ -18,24 +18,20 @@ def get_resume_file_path():
 
         if not file_name:
             logger.error("resume_name not found in aboutme data")
-            raise HTTPException(
-                status_code=500, detail="resume_name not found in aboutme data"
-            )
+            raise HTTPException(status_code=500, detail="Unable to load resume")
 
         file_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", file_name)
 
         if not os.path.exists(file_path):
             logger.error(f"Resume file '{file_name}' not found")
-            raise HTTPException(
-                status_code=404, detail=f"Resume file '{file_name}' not found."
-            )
+            raise HTTPException(status_code=404, detail="Resume not found")
 
         return file_path
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error getting resume file path: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Error getting resume file path")
+        raise HTTPException(status_code=500, detail="Unable to load resume")
 
 @router.get("/resume")
 async def serve_resume(request: Request):

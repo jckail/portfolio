@@ -18,20 +18,35 @@ from (see ``client_ip``), and a misconfigured ``TRUSTED_PROXY_HOPS`` would
 hand every caller their own bucket. The global limit is the backstop that
 holds regardless, so it must be sized against the real budget rather than
 left to a multiple of the per-client value.
+
+Whether the header is read at all is decided in ``config`` (on by default on
+Cloud Run, off elsewhere, overridable with ``TRUST_FORWARDED_FOR``).
 """
 from __future__ import annotations
 
-import os
+import logging
 import time
 from collections import deque
 
-# How many trusted proxies sit in front of the app. 0 means the last
-# X-Forwarded-For entry is the one to trust.
-_TRUSTED_PROXY_HOPS = max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "0")))
+from backend.app.config import get_settings
+
+logger = logging.getLogger(__name__)
+_trust_mode_logged = False
 
 # Entries idle for longer than this are dropped during pruning so the key space
 # cannot grow without bound when every caller presents a distinct address.
 _IDLE_EVICT_SECONDS = 900
+
+
+def _log_trust_mode_once(trusted: bool, hops: int) -> None:
+    global _trust_mode_logged
+    if _trust_mode_logged:
+        return
+    _trust_mode_logged = True
+    if trusted:
+        logger.info("Rate-limit keys use X-Forwarded-For (trusted proxy hops: %d)", hops)
+    else:
+        logger.info("Rate-limit keys use the socket peer; X-Forwarded-For is ignored")
 
 
 def client_ip(request_or_ws) -> str:
@@ -49,15 +64,26 @@ def client_ip(request_or_ws) -> str:
     default of 0 (the last entry) is the conservative choice: it can only ever
     over-group callers behind a shared proxy, never under-group an attacker.
 
+    The header is ignored entirely unless forwarded-for trust is on (see
+    ``config._forwarded_for_trust``). Without a proxy that appends to it, even
+    the rightmost entry is the caller's own text, so reading it would let a
+    direct client mint a fresh bucket per request; the socket peer is used
+    instead.
+
     This value is advisory: it is a bucketing key, never an authorization
     signal, and the global ceiling in SlidingWindowLimiter is what holds if
     this is wrong.
     """
-    forwarded = request_or_ws.headers.get("x-forwarded-for")
+    settings = get_settings()
+    _log_trust_mode_once(settings.trust_forwarded_for, settings.trusted_proxy_hops)
+    forwarded = (
+        request_or_ws.headers.get("x-forwarded-for")
+        if settings.trust_forwarded_for else None
+    )
     if forwarded:
         hops = [h.strip() for h in forwarded.split(",") if h.strip()]
         if hops:
-            index = max(0, len(hops) - 1 - _TRUSTED_PROXY_HOPS)
+            index = max(0, len(hops) - 1 - settings.trusted_proxy_hops)
             # Bound the key so a long header cannot inflate the key space.
             return hops[index][:64]
     client = getattr(request_or_ws, "client", None)
@@ -91,8 +117,13 @@ class SlidingWindowLimiter:
         for key in stale:
             del self._buckets[key]
 
-    def allow(self, key: str) -> bool:
-        """Record an event for ``key``; return False when it should be rejected."""
+    def check(self, key: str, cost: int = 1) -> bool:
+        """Return whether ``cost`` events for ``key`` would be admitted, recording nothing.
+
+        Lets a caller consult several limiters and charge them only when all
+        of them pass, so one limiter's rejection does not leave another charged.
+        """
+        cost = max(1, cost)
         now = time.monotonic()
         self._prune(now)
 
@@ -100,17 +131,48 @@ class SlidingWindowLimiter:
 
         while self._global and self._global[0] < cutoff:
             self._global.popleft()
-        if len(self._global) >= self.global_max_events:
+        if len(self._global) + cost > self.global_max_events:
             return False
 
-        times = self._buckets.setdefault(key, deque())
-        while times and times[0] < cutoff:
-            times.popleft()
-        if len(times) >= self.max_events:
-            return False
+        times = self._buckets.get(key)
+        if times is not None:
+            while times and times[0] < cutoff:
+                times.popleft()
+            if len(times) + cost > self.max_events:
+                return False
+        return True
 
-        times.append(now)
-        self._global.append(now)
+    def record(self, key: str, cost: int = 1) -> None:
+        """Record ``cost`` events for ``key`` unconditionally (pair with ``check``)."""
+        cost = max(1, cost)
+        now = time.monotonic()
+        self._buckets.setdefault(key, deque()).extend([now] * cost)
+        self._global.extend([now] * cost)
+
+    def refund(self, key: str, cost: int = 1) -> None:
+        """Remove up to ``cost`` of the most recent events for ``key``.
+
+        For callers that charge before doing the work - so concurrent requests
+        cannot all slip past the check - and then decide the request should
+        not have counted.
+        """
+        times = self._buckets.get(key)
+        for _ in range(max(1, cost)):
+            if not times or not self._global:
+                return
+            times.pop()
+            self._global.pop()
+
+    def allow(self, key: str, cost: int = 1) -> bool:
+        """Record ``cost`` events for ``key``; return False when it should be rejected.
+
+        ``cost`` lets one request that does N units of work (a log batch) be
+        charged N, so batching cannot multiply the effective limit. A rejected
+        call records nothing.
+        """
+        if not self.check(key, cost):
+            return False
+        self.record(key, cost)
         return True
 
     def reset(self) -> None:

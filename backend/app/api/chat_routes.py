@@ -46,8 +46,11 @@ async def chat_status():
     The frontend hides the chat button when the assistant cannot work
     (e.g. no Anthropic API key configured) instead of letting visitors
     discover the failure through unanswered messages.
+
+    Also false while the auth circuit breaker is open, so a rejected API key
+    hides the button instead of failing every visitor message.
     """
-    return {"available": settings.chat_available}
+    return {"available": manager.is_available()}
 
 
 def _origin_allowed(websocket: WebSocket) -> bool:

@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from ..config import get_settings
 from ..middleware.auth_middleware import verify_admin_token
@@ -23,7 +24,52 @@ MAX_INGEST_BYTES = 64 * 1024
 MAX_BATCH_LOGS = 50
 MAX_LOG_MESSAGE_CHARS = 2000
 
-_ingest_limiter = SlidingWindowLimiter(max_events=60, window_seconds=60, global_max_events=1200)
+# The limiter counts stored entries, not requests: a batch is charged one unit
+# per log line, so batching cannot multiply the allowance by MAX_BATCH_LOGS.
+_ingest_limiter = SlidingWindowLimiter(max_events=120, window_seconds=60, global_max_events=1200)
+
+# The file fallback only exists for local debugging. Cloud Run's writable
+# filesystem is backed by instance memory, so on the platform it is disabled
+# outright; locally it is capped so a Supabase outage plus an anonymous
+# caller cannot grow the log tree without bound.
+MAX_FALLBACK_FILE_BYTES = 1024 * 1024
+MAX_FALLBACK_TOTAL_BYTES = 5 * 1024 * 1024
+_fallback_bytes_written = 0
+
+
+class TelemetryPayload(BaseModel):
+    """Shape of a POST /api/telemetry body. Unknown keys are ignored."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    sessionUUID: uuid.UUID
+    timestamp: datetime
+    browserInfo: dict[str, Any] = Field(default_factory=dict)
+    connectionInfo: dict[str, Any] = Field(default_factory=dict)
+    deviceInfo: dict[str, Any] = Field(default_factory=dict)
+    featureSupport: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("timestamp", mode="before")
+    @classmethod
+    def _iso_string_only(cls, value: Any) -> Any:
+        # Pydantic would read a bare number as a Unix epoch; the client always
+        # sends ISO 8601, so anything else is a malformed request.
+        if not isinstance(value, str):
+            raise ValueError("timestamp must be an ISO 8601 string")
+        return value
+
+
+class LogEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    sessionUUID: uuid.UUID
+    message: str = ""
+
+
+class LogBatch(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    logs: list[LogEntry] = Field(..., min_length=1)
 
 
 async def _read_json_capped(request: Request, max_bytes: int = MAX_INGEST_BYTES) -> Any:
@@ -44,28 +90,72 @@ async def _read_json_capped(request: Request, max_bytes: int = MAX_INGEST_BYTES)
         raise HTTPException(status_code=400, detail="Malformed JSON body")
 
 
-def _enforce_ingest_limit(request: Request) -> None:
-    if not _ingest_limiter.allow(client_ip(request)):
+def _enforce_ingest_limit(request: Request, cost: int = 1) -> None:
+    if not _ingest_limiter.allow(client_ip(request), cost=cost):
         raise HTTPException(status_code=429, detail="Too many requests")
+
+
+def _validate[M: BaseModel](model: type[M], data: Any) -> M:
+    """Validate a parsed body, turning type errors into a 422.
+
+    Without this a wrong-typed field (a numeric sessionUUID, say) reached
+    uuid/datetime calls and surfaced as a 500. The error list omits the input
+    values so a 64 KB body is not echoed back.
+    """
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail="Body must be a JSON object")
+    try:
+        return model.model_validate(data)
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=422,
+            detail=e.errors(include_url=False, include_context=False, include_input=False),
+        )
+
+_LOCAL_HOSTNAMES = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
+def _host_is_local(host_header: str) -> bool:
+    """True when a Host header names this machine (port ignored)."""
+    host = host_header.strip().lower()
+    if host.startswith("["):  # bracketed IPv6, e.g. [::1]:8080
+        host = host[1:host.find("]")] if "]" in host else host
+    else:
+        host = host.rsplit(":", 1)[0] if host.count(":") == 1 else host
+    return host in _LOCAL_HOSTNAMES
+
 
 def is_local_dev_environment(request: Request) -> bool:
     """Allow the admin-auth bypass only when the server itself is explicitly
-    running in dev mode AND the request comes from a loopback address.
+    running in dev mode AND the request comes from a loopback address AND
+    names a local Host.
+
+    A loopback peer alone is not enough: a DNS-rebinding page reaches
+    127.0.0.1 with its own hostname in Host, and a local proxy forwards LAN
+    callers from loopback (the forwarding headers give that away). Never on
+    Cloud Run, whatever DEV_MODE says.
 
     The Origin header is client-controlled and must never be used as a
     security signal on its own.
     """
-    if not get_settings().dev_mode:
+    settings = get_settings()
+    if not settings.dev_mode or settings.on_cloud_run:
         return False
 
     client_host = request.client.host if request.client else None
     if not client_host:
         return False
     try:
-        ip = ipaddress.ip_address(client_host)
-        return ip.is_loopback
+        if not ipaddress.ip_address(client_host).is_loopback:
+            return False
     except ValueError:
         return False
+
+    if not _host_is_local(request.headers.get("host", "")):
+        return False
+    return not any(
+        request.headers.get(h) for h in ("x-forwarded-for", "x-forwarded-host", "forwarded")
+    )
 
 async def verify_access(request: Request):
     """Verify access based on local dev environment or admin authentication"""
@@ -115,27 +205,7 @@ async def store_telemetry(request: Request):
     """Store telemetry data from the frontend"""
     _enforce_ingest_limit(request)
     try:
-        telemetry_data: dict[str, Any] = await _read_json_capped(request)
-        if not isinstance(telemetry_data, dict):
-            raise HTTPException(status_code=400, detail="Body must be a JSON object")
-
-        # Validate required fields
-        if 'sessionUUID' not in telemetry_data:
-            raise HTTPException(status_code=400, detail="Missing sessionUUID")
-        if 'timestamp' not in telemetry_data:
-            raise HTTPException(status_code=400, detail="Missing timestamp")
-
-        # Validate UUID format
-        try:
-            uuid_obj = uuid.UUID(telemetry_data['sessionUUID'])
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid sessionUUID format")
-
-        # Ensure timestamp is in ISO format
-        try:
-            timestamp = datetime.fromisoformat(telemetry_data['timestamp'].replace('Z', '+00:00'))
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid timestamp format")
+        payload = _validate(TelemetryPayload, await _read_json_capped(request))
 
         # Get Supabase client
         supabase = SupabaseClient()
@@ -143,12 +213,12 @@ async def store_telemetry(request: Request):
         # Store telemetry data in Supabase (off the event loop; the SDK is sync)
         try:
             entry = {
-                'timestamp': timestamp.isoformat(),
-                'session_uuid': str(uuid_obj),
-                'browser_info': telemetry_data.get('browserInfo', {}),
-                'connection_info': telemetry_data.get('connectionInfo', {}),
-                'device_info': telemetry_data.get('deviceInfo', {}),
-                'feature_support': telemetry_data.get('featureSupport', {}),
+                'timestamp': payload.timestamp.isoformat(),
+                'session_uuid': str(payload.sessionUUID),
+                'browser_info': payload.browserInfo,
+                'connection_info': payload.connectionInfo,
+                'device_info': payload.deviceInfo,
+                'feature_support': payload.featureSupport,
                 'ip_address': client_ip(request)
             }
             await asyncio.to_thread(
@@ -157,8 +227,8 @@ async def store_telemetry(request: Request):
 
             return {"status": "success", "message": "Telemetry data stored successfully"}
 
-        except Exception as e:
-            logger.error(f"Failed to store telemetry data in Supabase: {str(e)}")
+        except Exception:
+            logger.exception("Failed to store telemetry data in Supabase")
             raise HTTPException(
                 status_code=500,
                 detail="Failed to store telemetry data"
@@ -232,12 +302,68 @@ async def get_logs(request: Request, session_uuid: str = None):
         logger.exception("Error fetching logs")
         raise HTTPException(status_code=500, detail="Unable to fetch logs")
 
-def _valid_session_uuid(value: Any) -> str | None:
-    """Return the canonical UUID string, or None when it isn't one."""
-    try:
-        return str(uuid.UUID(str(value)))
-    except (ValueError, AttributeError, TypeError):
-        return None
+def _normalize_message(message: str) -> str:
+    """Bound and single-line a client log message, adding a timestamp."""
+    # Newlines would let a caller forge extra entries in the file fallback,
+    # which /api/logs parses back one line per record.
+    message = message.replace("\r", " ").replace("\n", " ")[:MAX_LOG_MESSAGE_CHARS]
+    if not message.startswith('[20'):  # Check if timestamp is already present
+        timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+        message = f'[{timestamp}] {message}'
+    return message
+
+
+def _file_fallback_allowed() -> bool:
+    return not get_settings().on_cloud_run
+
+
+async def _write_file_fallback(lines_by_session: dict[str, list[str]]) -> None:
+    """Append undeliverable frontend logs to local files, within the byte caps."""
+    global _fallback_bytes_written
+    if not _file_fallback_allowed():
+        logger.warning("Dropping frontend logs: Supabase unavailable and file fallback is disabled")
+        return
+    for session_uuid, lines in lines_by_session.items():
+        data = "".join(f"{line}\n" for line in lines)
+        size = len(data.encode("utf-8"))
+        log_file_path = get_log_file_path(session_uuid)
+        try:
+            existing = os.path.getsize(log_file_path)
+        except OSError:
+            existing = 0
+        if (_fallback_bytes_written + size > MAX_FALLBACK_TOTAL_BYTES
+                or existing + size > MAX_FALLBACK_FILE_BYTES):
+            logger.warning("Dropping frontend logs: file fallback size cap reached")
+            continue
+        _fallback_bytes_written += size
+        # Append without blocking the event loop
+        await asyncio.to_thread(_append_line, log_file_path, data)
+
+
+async def _store_frontend_logs(entries: list[tuple[str, str]], peer: str) -> None:
+    """Store (session_uuid, message) pairs with one Supabase insert.
+
+    store_logs_batch() swallows its own errors and returns None on failure,
+    so check the result rather than relying on an exception.
+    """
+    messages = [(sid, _normalize_message(msg)) for sid, msg in entries]
+    result = await SupabaseClient().store_logs_batch([
+        {
+            'level': "INFO",
+            'message': message,
+            'session_uuid': sid,
+            'metadata': {},
+            'source': "frontend",
+            'ip_address': peer,
+        }
+        for sid, message in messages
+    ])
+    if result is None:
+        logger.error("Failed to store frontend logs in Supabase; using file fallback")
+        by_session: dict[str, list[str]] = {}
+        for sid, message in messages:
+            by_session.setdefault(sid, []).append(message)
+        await _write_file_fallback(by_session)
 
 
 @router.post("/log")
@@ -245,19 +371,9 @@ async def log_message(request: Request):
     """Log a single message"""
     _enforce_ingest_limit(request)
     try:
-        body = await _read_json_capped(request)
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Body must be a JSON object")
-
-        message = body.get("message", "")
-        session_uuid = _valid_session_uuid(body.get("sessionUUID"))
-
-        # A validation failure is a client error; returning 200 here made
-        # rejected logs indistinguishable from stored ones.
-        if session_uuid is None:
-            raise HTTPException(status_code=400, detail="Valid sessionUUID is required")
-
-        return await store_log_message(message, session_uuid, client_ip(request))
+        entry = _validate(LogEntry, await _read_json_capped(request))
+        await _store_frontend_logs([(str(entry.sessionUUID), entry.message)], client_ip(request))
+        return {"status": "success", "message": "Log written successfully"}
     except HTTPException:
         raise
     except Exception:
@@ -267,90 +383,33 @@ async def log_message(request: Request):
 @router.post("/log/batch")
 async def log_messages_batch(request: Request):
     """Log multiple messages in a single request"""
+    # Charged before the body is read, deliberately: a refused batch (413, 422
+    # or a 429 on the second charge below) still costs one unit, so malformed
+    # or oversized requests are rate limited too rather than free to repeat.
     _enforce_ingest_limit(request)
     try:
         body = await _read_json_capped(request)
-        if not isinstance(body, dict):
-            raise HTTPException(status_code=400, detail="Body must be a JSON object")
-
-        logs = body.get("logs", [])
-        if not isinstance(logs, list) or not logs:
-            raise HTTPException(status_code=400, detail="No logs provided")
-        if len(logs) > MAX_BATCH_LOGS:
+        # Checked before validation so an oversized batch is refused without
+        # validating every entry.
+        if isinstance(body, dict) and isinstance(body.get("logs"), list) \
+                and len(body["logs"]) > MAX_BATCH_LOGS:
             raise HTTPException(
                 status_code=413, detail=f"Batch exceeds {MAX_BATCH_LOGS} entries"
             )
+        batch = _validate(LogBatch, body)
 
-        peer = client_ip(request)
+        # One unit was charged on entry; charge the rest of the batch now.
+        if len(batch.logs) > 1:
+            _enforce_ingest_limit(request, cost=len(batch.logs) - 1)
 
-        # Process all logs in the batch
-        results = []
-        for log_entry in logs:
-            if not isinstance(log_entry, dict):
-                continue
-            message = log_entry.get("message", "")
-            session_uuid = _valid_session_uuid(log_entry.get("sessionUUID"))
-
-            if session_uuid is None:
-                logger.warning("Skipping batch log entry with invalid sessionUUID")
-                continue
-
-            result = await store_log_message(message, session_uuid, peer)
-            results.append(result)
-
-        # Check if any logs were processed successfully
-        if any(result.get("status") == "success" for result in results):
-            return {"status": "success", "message": "Batch processed successfully"}
-
-        raise HTTPException(status_code=400, detail="Failed to process any logs in batch")
+        await _store_frontend_logs(
+            [(str(entry.sessionUUID), entry.message) for entry in batch.logs],
+            client_ip(request),
+        )
+        return {"status": "success", "message": "Batch processed successfully"}
 
     except HTTPException:
         raise
     except Exception:
         logger.exception("Error in log_messages_batch endpoint")
         raise HTTPException(status_code=500, detail="Unable to store logs")
-
-async def store_log_message(message: str, session_uuid: str, client_ip: str):
-    """Store a single log message"""
-    try:
-        # MAX_LOG_MESSAGE_CHARS existed but was never applied, so `message` was
-        # bounded only by the 64 KB body cap - and was then stored twice, once
-        # as the log line and again in metadata.
-        if not isinstance(message, str):
-            return {"status": "error", "message": "Invalid log message"}
-        # Newlines would let a caller forge extra entries in the file fallback,
-        # which /api/logs parses back one line per record.
-        message = message.replace("\r", " ").replace("\n", " ")[:MAX_LOG_MESSAGE_CHARS]
-        # Add timestamp if not present
-        if not message.startswith('[20'):  # Check if timestamp is already present
-            timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
-            message = f'[{timestamp}] {message}'
-
-        # Get Supabase client only when needed
-        supabase = SupabaseClient()
-
-        # Try to store in Supabase first. store_log() swallows its own errors
-        # and returns None on failure, so check the result rather than
-        # relying on an exception that will never be raised.
-        result = await supabase.store_log(
-            level="INFO",
-            message=message,
-            session_uuid=session_uuid,
-            source="frontend",
-            ip_address=client_ip
-        )
-        if result is None:
-            logger.error("Failed to store frontend log in Supabase; using file fallback")
-            log_file_path = get_log_file_path(session_uuid)
-
-            # Ensure message ends with newline
-            if not message.endswith('\n'):
-                message += '\n'
-
-            # Append message to log file without blocking the event loop
-            await asyncio.to_thread(_append_line, log_file_path, message)
-
-        return {"status": "success", "message": "Log written successfully"}
-    except Exception:
-        logger.exception("Error storing log message")
-        return {"status": "error", "message": "Unable to store log"}
