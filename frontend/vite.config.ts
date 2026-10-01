@@ -78,7 +78,6 @@ export default defineConfig({
           // the initial graph. The engine is only reached through the lazy
           // particles-canvas boundary, so leave placement to the splitter.
           if (id.includes('tsparticles')) return undefined;
-          if (id.includes('react-router')) return 'router';
           // MUI + Emotion are reachable only through the lazily-loaded chat.
           // Returning undefined leaves them to the automatic splitter, which
           // places them in the chat's own async chunk. The catch-all below

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { Header } from './header/header';
 import TLDR from './sections/about';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
+import { useLocation } from '../../shared/hooks/use-location';
 import { useData } from '../providers/data-provider';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';

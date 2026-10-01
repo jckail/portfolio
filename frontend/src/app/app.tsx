@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import MainContent from './components/main-content';
 import { ParticlesProvider } from './providers/particles-provider';
@@ -7,6 +6,7 @@ import { DataProvider } from './providers/data-provider';
 import { ResumeProvider } from './providers/resume-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useKeyboardShortcuts } from '../shared/hooks/use-keyboard-shortcuts';
+import { useLocation } from '../shared/hooks/use-location';
 import { useEasterEggs } from '../shared/hooks/use-easter-eggs';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';

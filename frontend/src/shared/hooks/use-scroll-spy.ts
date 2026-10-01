@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useSectionStore } from '../stores/section-store';
 import { trackSectionView, trackAnchorChange } from '../utils/analytics';
 import { scrollToSection } from '../utils/scroll-utils';
 import { isScrollLocked } from './use-scroll-lock';
+import { useLocation } from './use-location';
 
 const DEBUG = import.meta.env.DEV;
 const debugLog = (message: string, data?: unknown) => {
@@ -140,9 +140,8 @@ export const useScrollSpy = () => {
           | PerformanceNavigationTiming
           | undefined;
         const isInitialLoad = !(navEntry?.type ?? 'navigate').includes('navigate');
-        const isResumeClick = location.state?.fromResumeButton;
 
-        if (targetSection && (isInitialLoad || isResumeClick)) {
+        if (targetSection && isInitialLoad) {
           debugLog('Scrolling to target section', { id: targetId });
           // section[id] carries scroll-margin-top for the fixed header, so a
           // single scrollIntoView lands the heading below it
