@@ -14,6 +14,7 @@ class SkillDetail(BaseModel):
     examples: dict = Field(default_factory=dict, description="Examples of skill usage")
     general_category: str = Field(..., description="Primary category of the skill")
     sub_category: str = Field(..., description="Sub-category of the skill")
+    related: list[str] = Field(default_factory=list, description="Keys of related skills, shown as links in the skill modal")
 
 class Skills(RootModel[dict[str, SkillDetail]]):
     """Model for all skills."""
@@ -31,7 +32,8 @@ class Skills(RootModel[dict[str, SkillDetail]]):
                     "weblink": "https://www.python.org/",
                     "examples": {},
                     "general_category": "Programming Languages",
-                    "sub_category": "General Purpose"
+                    "sub_category": "General Purpose",
+                    "related": ["pandas", "pytorch"]
                 }
             }
         }

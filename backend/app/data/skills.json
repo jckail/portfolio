@@ -4,1228 +4,2647 @@
         "image": "airbyte.svg",
         "professional_experience": false,
         "years_of_experience": 2,
-        "tags": ["data-integration", "etl", "data-pipeline", "open-source", "cloud-native", "data-engineering"],
-        "description": "An open-source data integration platform that helps sync data from applications, APIs & databases to warehouses, lakes & analytics platforms.",
+        "tags": [
+            "data-integration",
+            "etl",
+            "data-pipeline",
+            "open-source",
+            "cloud-native",
+            "data-engineering"
+        ],
+        "description": "Open-source data integration platform with a large connector catalog for syncing data from APIs, databases and SaaS tools into warehouses and lakes. Commonly used to stand up ELT ingestion without hand-written extract code.",
         "weblink": "https://airbyte.com/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Data Integration"
+        "sub_category": "Data Integration",
+        "related": [
+            "dbt",
+            "airflow",
+            "snowflake",
+            "bigquery"
+        ]
     },
     "airtable": {
         "display_name": "Airtable",
         "image": "airtable.svg",
         "professional_experience": false,
         "years_of_experience": 2,
-        "tags": ["database", "collaboration", "low-code", "saas", "productivity", "no-code", "spreadsheet"],
-        "description": "A cloud collaboration platform that combines the functionality of a database with the visual organization of a spreadsheet.",
+        "tags": [
+            "database",
+            "collaboration",
+            "low-code",
+            "saas",
+            "productivity",
+            "no-code",
+            "spreadsheet"
+        ],
+        "description": "Cloud spreadsheet-database hybrid with views, forms and automations. Often used for lightweight operational tracking and internal workflows before data moves to a warehouse.",
         "weblink": "https://airtable.com/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "Collaboration Platform"
+        "sub_category": "Collaboration Platform",
+        "related": [
+            "retool"
+        ]
     },
     "amazon_bedrock": {
         "display_name": "Amazon Bedrock",
         "image": "arch_amazon_bedrock.svg",
         "professional_experience": true,
         "years_of_experience": 1,
-        "tags": ["ai", "llm", "aws", "cloud-service", "machine-learning", "foundation-models"],
-        "description": "A fully managed service that offers foundation models from leading AI companies through an API.",
+        "tags": [
+            "ai",
+            "llm",
+            "aws",
+            "cloud-service",
+            "machine-learning",
+            "foundation-models"
+        ],
+        "description": "Managed AWS service that exposes foundation models from several providers behind one API, with guardrails and agent tooling. Typically used to add LLM features to AWS-hosted applications without running model infrastructure.",
         "weblink": "https://aws.amazon.com/bedrock/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Cloud AI Services"
+        "sub_category": "Cloud AI Services",
+        "related": [
+            "aws",
+            "claude_ai",
+            "agent_platforms",
+            "rag"
+        ]
     },
     "airflow": {
         "display_name": "Airflow",
         "image": "airflow.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["orchestration", "workflow", "data-pipeline", "python", "apache", "scheduling", "dag"],
-        "description": "A platform to programmatically author, schedule, and monitor workflows using Python.",
+        "tags": [
+            "orchestration",
+            "workflow",
+            "data-pipeline",
+            "python",
+            "apache",
+            "scheduling",
+            "dag"
+        ],
+        "description": "Python-based workflow orchestrator that defines pipelines as DAGs with scheduling, retries and monitoring. A standard choice for batch data pipelines, ML training schedules and RAG ingestion jobs.",
         "weblink": "https://airflow.apache.org/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Workflow Orchestration"
+        "sub_category": "Workflow Orchestration",
+        "related": [
+            "cloud_composer",
+            "spark",
+            "dbt",
+            "python"
+        ]
     },
     "azure": {
         "display_name": "Azure",
         "image": "azure.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["cloud", "infrastructure", "services", "microsoft", "iaas", "paas", "saas"],
-        "description": "A cloud computing service created by Microsoft for building, testing, deploying, and managing applications and services.",
+        "tags": [
+            "cloud",
+            "infrastructure",
+            "services",
+            "microsoft",
+            "iaas",
+            "paas",
+            "saas"
+        ],
+        "description": "Microsoft's cloud platform covering compute, storage, data and AI services. Used for enterprise workloads, including managed data warehousing and hosted model APIs.",
         "weblink": "https://azure.microsoft.com/en-us/",
         "examples": {},
         "general_category": "Cloud Computing",
-        "sub_category": "Cloud Platform"
+        "sub_category": "Cloud Platform",
+        "related": [
+            "aws",
+            "gcp"
+        ]
     },
     "aws": {
         "display_name": "AWS",
         "image": "aws.svg",
         "professional_experience": true,
         "years_of_experience": 10,
-        "tags": ["cloud", "infrastructure", "services", "amazon", "iaas", "paas", "saas"],
-        "description": "Amazon Web Services, a comprehensive cloud computing platform offering over 200 fully featured services.",
+        "tags": [
+            "cloud",
+            "infrastructure",
+            "services",
+            "amazon",
+            "iaas",
+            "paas",
+            "saas"
+        ],
+        "description": "Amazon's cloud platform spanning compute, storage, databases, analytics and ML services. A common home for data lakes (S3, Athena), streaming and model-serving workloads.",
         "weblink": "https://aws.amazon.com/",
         "examples": {},
         "general_category": "Cloud Computing",
-        "sub_category": "Cloud Platform"
+        "sub_category": "Cloud Platform",
+        "related": [
+            "kinesis_firehose",
+            "dynamodb",
+            "amazon_bedrock",
+            "kubernetes"
+        ]
     },
     "cassandra": {
         "display_name": "Cassandra",
         "image": "cassandra.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["database", "nosql", "distributed", "apache", "big-data", "wide-column", "scalable"],
-        "description": "A free and open-source, distributed, wide-column store, NoSQL database management system.",
+        "tags": [
+            "database",
+            "nosql",
+            "distributed",
+            "apache",
+            "big-data",
+            "wide-column",
+            "scalable"
+        ],
+        "description": "Distributed wide-column NoSQL database built for high write throughput and horizontal scale across data centers. Used for time-ordered, high-volume event and profile data.",
         "weblink": "https://cassandra.apache.org/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "NoSQL Databases"
+        "sub_category": "NoSQL Databases",
+        "related": [
+            "kafka",
+            "dynamodb",
+            "rocksdb"
+        ]
     },
     "cpp": {
         "display_name": "C++",
         "image": "cpp.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["language", "general-purpose", "systems", "object-oriented", "performance", "game-development"],
-        "description": "A general-purpose programming language created as an extension of the C programming language.",
+        "tags": [
+            "language",
+            "general-purpose",
+            "systems",
+            "object-oriented",
+            "performance",
+            "game-development"
+        ],
+        "description": "Compiled systems language that offers fine-grained control over memory and performance. Used for performance-critical engines, and underlies many ML and database internals.",
         "weblink": "https://en.wikipedia.org/wiki/C%2B%2B",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Systems Programming"
+        "sub_category": "Systems Programming",
+        "related": [
+            "rust",
+            "go"
+        ]
     },
     "hadoop": {
         "display_name": "Hadoop",
         "image": "hadoop.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["big-data", "distributed-computing", "storage", "apache", "java", "mapreduce", "hdfs"],
-        "description": "A framework that allows for the distributed processing of large data sets across clusters of computers.",
+        "tags": [
+            "big-data",
+            "distributed-computing",
+            "storage",
+            "apache",
+            "java",
+            "mapreduce",
+            "hdfs"
+        ],
+        "description": "Original open-source stack for distributed storage (HDFS) and batch processing across commodity clusters. Foundation of many data lakes that later moved to Spark and open table formats.",
         "weblink": "https://hadoop.apache.org/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Distributed Computing"
+        "sub_category": "Distributed Computing",
+        "related": [
+            "spark",
+            "iceberg",
+            "dataproc"
+        ]
     },
     "iceberg": {
         "display_name": "Iceberg",
         "image": "iceberg.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["data-lake", "table-format", "analytics", "apache", "big-data", "storage", "data-format"],
-        "description": "An open table format for huge analytic datasets designed to improve on the known limitations of Hive tables.",
+        "tags": [
+            "data-lake",
+            "table-format",
+            "analytics",
+            "apache",
+            "big-data",
+            "storage",
+            "data-format"
+        ],
+        "description": "Open table format that adds schema evolution, snapshots and ACID semantics to large analytic datasets on object storage. Lets Spark, Trino and Flink share the same lake tables.",
         "weblink": "https://iceberg.apache.org/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Data Lake Technology"
+        "sub_category": "Data Lake Technology",
+        "related": [
+            "spark",
+            "trino",
+            "flink"
+        ]
     },
     "kafka": {
         "display_name": "Kafka",
         "image": "kafka.svg",
         "professional_experience": true,
         "years_of_experience": 9,
-        "tags": ["streaming", "messaging", "distributed-systems", "apache", "event-driven", "pub-sub", "real-time"],
-        "description": "A distributed event streaming platform capable of handling trillions of events a day.",
+        "tags": [
+            "streaming",
+            "messaging",
+            "distributed-systems",
+            "apache",
+            "event-driven",
+            "pub-sub",
+            "real-time"
+        ],
+        "description": "Distributed commit-log platform for high-throughput event streaming. The usual backbone for real-time pipelines, change-data capture and event-driven architectures.",
         "weblink": "https://kafka.apache.org/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Stream Processing"
+        "sub_category": "Stream Processing",
+        "related": [
+            "flink",
+            "pulsar",
+            "pubsub",
+            "spark"
+        ]
     },
     "pulsar": {
         "display_name": "Pulsar",
         "image": "apachepulsar.svg",
         "professional_experience": true,
         "years_of_experience": 1,
-        "tags": ["streaming", "messaging", "pub-sub", "apache", "distributed-systems", "event-driven", "real-time"],
-        "description": "A cloud-native, distributed messaging and streaming platform originally created at Yahoo!",
+        "tags": [
+            "streaming",
+            "messaging",
+            "pub-sub",
+            "apache",
+            "distributed-systems",
+            "event-driven",
+            "real-time"
+        ],
+        "description": "Cloud-native messaging and streaming platform with multi-tenancy and tiered storage. An alternative to Kafka for pub/sub plus queue workloads.",
         "weblink": "https://pulsar.apache.org/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Stream Processing"
+        "sub_category": "Stream Processing",
+        "related": [
+            "kafka",
+            "pubsub",
+            "flink"
+        ]
     },
-
     "spark": {
         "display_name": "Spark",
         "image": "spark.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["processing", "big-data", "analytics", "apache", "scala", "python", "java", "distributed-computing"],
-        "description": "A unified analytics engine for large-scale data processing with built-in modules for streaming, SQL, ML and graph processing.",
+        "tags": [
+            "processing",
+            "big-data",
+            "analytics",
+            "apache",
+            "scala",
+            "python",
+            "java",
+            "distributed-computing"
+        ],
+        "description": "Distributed analytics engine for large-scale batch and streaming processing with SQL, DataFrame and ML APIs. Widely used for ETL, feature engineering and training-data preparation.",
         "weblink": "https://spark.apache.org/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Data Processing"
+        "sub_category": "Data Processing",
+        "related": [
+            "airflow",
+            "databricks",
+            "iceberg",
+            "python"
+        ]
     },
-
-
     "bigquery": {
         "display_name": "BigQuery",
         "image": "bigquery.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["data-warehouse", "analytics", "google-cloud", "sql", "big-data", "serverless"],
-        "description": "Google's fully managed, serverless data warehouse that enables super-fast SQL queries.",
+        "tags": [
+            "data-warehouse",
+            "analytics",
+            "google-cloud",
+            "sql",
+            "big-data",
+            "serverless"
+        ],
+        "description": "Serverless columnar data warehouse on Google Cloud that runs SQL over very large datasets. Used for analytics, feature tables and increasingly ML directly in SQL.",
         "weblink": "https://cloud.google.com/bigquery",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Data Warehouse"
+        "sub_category": "Data Warehouse",
+        "related": [
+            "dbt",
+            "looker",
+            "gcp",
+            "snowflake"
+        ]
     },
     "chroma": {
         "display_name": "Chroma",
         "image": "chroma.svg",
         "professional_experience": true,
         "years_of_experience": 1,
-        "tags": ["vector-db", "embeddings", "rag", "ai", "open-source", "similarity-search"],
-        "description": "An open-source embedding database for building AI applications with language models.",
+        "tags": [
+            "vector-db",
+            "embeddings",
+            "rag",
+            "ai",
+            "open-source",
+            "similarity-search"
+        ],
+        "description": "Open-source embedding database for storing and querying vectors with metadata. Popular for prototyping retrieval-augmented generation (RAG) applications.",
         "weblink": "https://www.trychroma.com/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Vector Database"
+        "sub_category": "Vector Database",
+        "related": [
+            "pinecone",
+            "quadrant",
+            "rag",
+            "langchain"
+        ]
     },
     "claude_ai": {
         "display_name": "Claude AI",
         "image": "claude_ai.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["ai", "llm", "anthropic", "nlp", "machine-learning", "language-model"],
-        "description": "An AI assistant created by Anthropic, known for its advanced natural language capabilities.",
+        "tags": [
+            "ai",
+            "llm",
+            "anthropic",
+            "nlp",
+            "machine-learning",
+            "language-model"
+        ],
+        "description": "Family of large language models and assistant from Anthropic, strong at long-context reasoning, coding and tool use. Used to build assistants and agents through the API.",
         "weblink": "https://www.anthropic.com/claude",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Language Models"
+        "sub_category": "Language Models",
+        "related": [
+            "openai",
+            "agent_platforms",
+            "llm_evaluation",
+            "langchain"
+        ]
     },
     "cloud_composer": {
         "display_name": "Cloud Composer",
         "image": "cloud_composer.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["orchestration", "google-cloud", "airflow", "workflow", "data-pipeline", "serverless"],
-        "description": "Google Cloud's fully managed workflow orchestration service built on Airflow.",
+        "tags": [
+            "orchestration",
+            "google-cloud",
+            "airflow",
+            "workflow",
+            "data-pipeline",
+            "serverless"
+        ],
+        "description": "Google Cloud's managed Apache Airflow service. Used to run DAG-based pipelines without operating the scheduler and workers yourself.",
         "weblink": "https://cloud.google.com/composer",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Workflow Orchestration"
+        "sub_category": "Workflow Orchestration",
+        "related": [
+            "airflow",
+            "gcp",
+            "bigquery"
+        ]
     },
     "cloud_data_fusion": {
         "display_name": "Cloud Data Fusion",
         "image": "cloud_data_fusion.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["data-integration", "etl", "google-cloud", "data-pipeline", "no-code"],
-        "description": "Fully managed, cloud-native data integration service for building ETL/ELT data pipelines.",
+        "tags": [
+            "data-integration",
+            "etl",
+            "google-cloud",
+            "data-pipeline",
+            "no-code"
+        ],
+        "description": "Managed, visual ETL/ELT service on Google Cloud built on the open-source CDAP project. Used to assemble batch data integration pipelines with prebuilt connectors.",
         "weblink": "https://cloud.google.com/data-fusion",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Data Integration"
+        "sub_category": "Data Integration",
+        "related": [
+            "gcp",
+            "dataproc",
+            "bigquery"
+        ]
     },
-
-
     "css3": {
         "display_name": "CSS3",
         "image": "css3.svg",
         "professional_experience": true,
         "years_of_experience": 14,
-        "tags": ["frontend", "styling", "web", "design", "responsive", "w3c", "web-standards"],
-        "description": "Cascading Style Sheets language used for describing the presentation of a document written in HTML.",
+        "tags": [
+            "frontend",
+            "styling",
+            "web",
+            "design",
+            "responsive",
+            "w3c",
+            "web-standards"
+        ],
+        "description": "Style language for the layout, typography and theming of web pages. Underpins responsive design, dark mode via custom properties, and accessible UI.",
         "weblink": "https://www.w3.org/Style/CSS/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Frontend Styling"
+        "sub_category": "Frontend Styling",
+        "related": [
+            "html5",
+            "tailwind_css"
+        ]
     },
     "databricks": {
         "display_name": "Databricks",
         "image": "databricks.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["data-platform", "analytics", "spark", "lakehouse", "ml", "cloud"],
-        "description": "A unified analytics platform built on top of Spark, offering collaborative notebooks and ML tools.",
+        "tags": [
+            "data-platform",
+            "analytics",
+            "spark",
+            "lakehouse",
+            "ml",
+            "cloud"
+        ],
+        "description": "Lakehouse platform built around Spark with managed notebooks, job orchestration and MLflow-style ML tooling. Used for large-scale data engineering and model development.",
         "weblink": "https://databricks.com/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Data Platform"
+        "sub_category": "Data Platform",
+        "related": [
+            "spark",
+            "iceberg",
+            "python"
+        ]
     },
     "datadog": {
         "display_name": "Datadog",
         "image": "datadog.svg",
         "professional_experience": false,
         "years_of_experience": 2,
-        "tags": ["monitoring", "observability", "devops", "analytics", "apm", "logging", "metrics"],
-        "description": "A monitoring and analytics platform for developers, IT operations teams, and business users.",
+        "tags": [
+            "monitoring",
+            "observability",
+            "devops",
+            "analytics",
+            "apm",
+            "logging",
+            "metrics"
+        ],
+        "description": "SaaS observability platform for metrics, traces, logs and alerting. Used to monitor services and data pipelines and to drive on-call alerting.",
         "weblink": "https://www.datadoghq.com/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Monitoring"
+        "sub_category": "Monitoring",
+        "related": [
+            "prometheus",
+            "grafana",
+            "opentelemetry",
+            "splunk"
+        ]
     },
     "dataprep": {
         "display_name": "Dataprep",
         "image": "dataprep.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["data-preparation", "etl", "cleaning", "google-cloud", "no-code", "data-wrangling"],
-        "description": "An intelligent data service for visually exploring, cleaning, and preparing data for analysis.",
+        "tags": [
+            "data-preparation",
+            "etl",
+            "cleaning",
+            "google-cloud",
+            "no-code",
+            "data-wrangling"
+        ],
+        "description": "Visual data-preparation service on Google Cloud for profiling, cleaning and transforming data without code. Used for ad-hoc preparation ahead of analytics or ML.",
         "weblink": "https://cloud.google.com/dataprep",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Data Preparation"
+        "sub_category": "Data Preparation",
+        "related": [
+            "gcp",
+            "bigquery",
+            "dataproc"
+        ]
     },
     "dataproc": {
         "display_name": "Dataproc",
         "image": "dataproc.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["data-processing", "google-cloud", "spark", "hadoop", "big-data", "serverless"],
-        "description": "A fully managed and highly scalable service for running Spark and Hadoop clusters.",
+        "tags": [
+            "data-processing",
+            "google-cloud",
+            "spark",
+            "hadoop",
+            "big-data",
+            "serverless"
+        ],
+        "description": "Managed Spark and Hadoop service on Google Cloud with fast cluster start-up. Used for batch ETL and ML data preparation at scale.",
         "weblink": "https://cloud.google.com/dataproc",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Data Processing"
+        "sub_category": "Data Processing",
+        "related": [
+            "spark",
+            "hadoop",
+            "gcp",
+            "cloud_composer"
+        ]
     },
-"dbt": {
+    "dbt": {
         "display_name": "DBT",
         "image": "dbt.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["data-transformation", "analytics", "sql", "data-modeling", "version-control", "data-engineering", "elt"],
-        "description": "Data Build Tool (dbt) enables analytics engineers to transform data in their warehouses by writing SQL-based data transformations.",
+        "tags": [
+            "data-transformation",
+            "analytics",
+            "sql",
+            "data-modeling",
+            "version-control",
+            "data-engineering",
+            "elt"
+        ],
+        "description": "SQL-first transformation framework that adds version control, testing and documentation to warehouse models. Standard tool for analytics engineering and data-quality checks.",
         "weblink": "https://www.getdbt.com/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Data Transformation"
+        "sub_category": "Data Transformation",
+        "related": [
+            "sql",
+            "bigquery",
+            "snowflake",
+            "airflow"
+        ]
     },
     "django": {
         "display_name": "Django",
         "image": "django.svg",
         "professional_experience": true,
         "years_of_experience": 11,
-        "tags": ["backend", "framework", "python", "web", "orm", "mvc", "rest"],
-        "description": "A high-level Python web framework that encourages rapid development and clean, pragmatic design.",
+        "tags": [
+            "backend",
+            "framework",
+            "python",
+            "web",
+            "orm",
+            "mvc",
+            "rest"
+        ],
+        "description": "Batteries-included Python web framework with ORM, admin and auth. Used for data-backed web applications and internal tools.",
         "weblink": "https://www.djangoproject.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Backend Framework"
+        "sub_category": "Backend Framework",
+        "related": [
+            "python",
+            "flask",
+            "postgresql"
+        ]
     },
     "docker": {
         "display_name": "Docker",
         "image": "docker.svg",
         "professional_experience": true,
         "years_of_experience": 9,
-        "tags": ["infrastructure", "containerization", "devops", "microservices", "deployment", "cloud-native"],
-        "description": "A platform for developing, shipping, and running applications in containers.",
+        "tags": [
+            "infrastructure",
+            "containerization",
+            "devops",
+            "microservices",
+            "deployment",
+            "cloud-native"
+        ],
+        "description": "Container tooling that packages an application with its dependencies into a portable image. Used to ship reproducible services, pipelines and model-serving workloads.",
         "weblink": "https://www.docker.com/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Containerization"
+        "sub_category": "Containerization",
+        "related": [
+            "kubernetes",
+            "github_actions",
+            "linux"
+        ]
     },
     "duckdb": {
         "display_name": "DuckDB",
         "image": "duckdb.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["database", "analytics", "embedded", "sql", "olap", "columnar"],
-        "description": "An in-process SQL OLAP database management system focused on analytical queries.",
+        "tags": [
+            "database",
+            "analytics",
+            "embedded",
+            "sql",
+            "olap",
+            "columnar"
+        ],
+        "description": "In-process analytical SQL database that reads Parquet, CSV and more directly. Useful for fast local analysis and as an embedded engine in data tools.",
         "weblink": "https://duckdb.org/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Analytical Database"
+        "sub_category": "Analytical Database",
+        "related": [
+            "sql",
+            "pandas",
+            "postgresql"
+        ]
     },
     "dynamodb": {
         "display_name": "DynamoDB",
         "image": "dynamodb.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["database", "nosql", "aws", "serverless", "key-value", "document", "cloud"],
-        "description": "A fully managed NoSQL database service that provides fast and predictable performance with seamless scalability.",
+        "tags": [
+            "database",
+            "nosql",
+            "aws",
+            "serverless",
+            "key-value",
+            "document",
+            "cloud"
+        ],
+        "description": "AWS's fully managed key-value and document database with single-digit-millisecond latency at scale. Used for session, metadata and high-throughput lookup data.",
         "weblink": "https://aws.amazon.com/dynamodb/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "NoSQL Database"
+        "sub_category": "NoSQL Database",
+        "related": [
+            "aws",
+            "cassandra",
+            "mongodb"
+        ]
     },
     "elasticsearch": {
         "display_name": "Elasticsearch",
         "image": "elastic_search.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["database", "search", "analytics", "full-text", "distributed", "elk-stack"],
-        "description": "A distributed, RESTful search and analytics engine capable of addressing a growing number of use cases.",
+        "tags": [
+            "database",
+            "search",
+            "analytics",
+            "full-text",
+            "distributed",
+            "elk-stack"
+        ],
+        "description": "Distributed search and analytics engine built on Lucene, supporting full-text, filtering and vector search. Used for log analytics and search features.",
         "weblink": "https://www.elastic.co/elasticsearch/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Search Engine"
+        "sub_category": "Search Engine",
+        "related": [
+            "splunk",
+            "pinecone",
+            "postgresql"
+        ]
     },
     "fastapi": {
         "display_name": "FastAPI",
         "image": "fastapi.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["backend", "framework", "python", "api", "rest", "async", "openapi"],
-        "description": "A modern, fast web framework for building APIs with Python based on standard Python type hints.",
+        "tags": [
+            "backend",
+            "framework",
+            "python",
+            "api",
+            "rest",
+            "async",
+            "openapi"
+        ],
+        "description": "Modern Python web framework built on type hints and Pydantic, with automatic OpenAPI docs and async support. A common choice for model-serving and agent back ends.",
         "weblink": "https://fastapi.tiangolo.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "API Framework"
+        "sub_category": "API Framework",
+        "related": [
+            "python",
+            "sqlalchemy",
+            "react",
+            "agent_platforms"
+        ]
     },
     "figma": {
         "display_name": "Figma",
         "image": "figma.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["design", "ui-ux", "collaboration", "prototyping", "vector", "web-based"],
-        "description": "A collaborative interface design tool that enables team design processes with real-time collaboration.",
+        "tags": [
+            "design",
+            "ui-ux",
+            "collaboration",
+            "prototyping",
+            "vector",
+            "web-based"
+        ],
+        "description": "Browser-based interface design and prototyping tool. Used for UI mockups, design systems and design hand-off to engineers.",
         "weblink": "https://www.figma.com/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "UI/UX Design"
+        "sub_category": "UI/UX Design",
+        "related": [
+            "react",
+            "css3"
+        ]
     },
     "firestore": {
         "display_name": "Firestore",
         "image": "firestore.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["database", "nosql", "firebase", "google-cloud", "real-time", "serverless"],
-        "description": "A flexible, scalable NoSQL cloud database to store and sync data for client- and server-side development.",
+        "tags": [
+            "database",
+            "nosql",
+            "firebase",
+            "google-cloud",
+            "real-time",
+            "serverless"
+        ],
+        "description": "Google Cloud's serverless document database with real-time sync. Used for app state and metadata that needs simple scaling.",
         "weblink": "https://firebase.google.com/products/firestore",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "NoSQL Database"
+        "sub_category": "NoSQL Database",
+        "related": [
+            "gcp",
+            "mongodb",
+            "supabase"
+        ]
     },
     "flask": {
         "display_name": "Flask",
         "image": "flask.svg",
         "professional_experience": true,
         "years_of_experience": 10,
-        "tags": ["backend", "framework", "python", "web", "microframework", "wsgi"],
-        "description": "A lightweight WSGI web application framework designed to get started quickly and scale up to complex applications.",
+        "tags": [
+            "backend",
+            "framework",
+            "python",
+            "web",
+            "microframework",
+            "wsgi"
+        ],
+        "description": "Lightweight Python micro-framework for web services. Often used for small APIs and for wrapping models behind HTTP endpoints.",
         "weblink": "https://flask.palletsprojects.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Backend Framework"
+        "sub_category": "Backend Framework",
+        "related": [
+            "python",
+            "fastapi",
+            "django"
+        ]
     },
     "flink": {
         "display_name": "Flink",
         "image": "apacheflink.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["streaming", "processing", "big-data", "apache", "real-time", "distributed"],
-        "description": "A framework and distributed processing engine for stateful computations over unbounded and bounded data streams.",
+        "tags": [
+            "streaming",
+            "processing",
+            "big-data",
+            "apache",
+            "real-time",
+            "distributed"
+        ],
+        "description": "Stateful stream-processing engine with event-time semantics and exactly-once guarantees. Used for real-time pipelines, enrichment and streaming analytics.",
         "weblink": "https://flink.apache.org/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Stream Processing"
+        "sub_category": "Stream Processing",
+        "related": [
+            "kafka",
+            "spark",
+            "pulsar"
+        ]
     },
     "gin": {
         "display_name": "Gin",
         "image": "gin_go.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["backend", "framework", "go", "web", "rest", "api", "middleware"],
-        "description": "A high-performance HTTP web framework written in Go (go) that features a martini-like API.",
+        "tags": [
+            "backend",
+            "framework",
+            "go",
+            "web",
+            "rest",
+            "api",
+            "middleware"
+        ],
+        "description": "Fast HTTP web framework for Go with minimal overhead. Used to build lean, high-throughput APIs and services.",
         "weblink": "https://gin-gonic.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Backend Framework"
+        "sub_category": "Backend Framework",
+        "related": [
+            "go",
+            "postgresql",
+            "docker"
+        ]
     },
     "git": {
         "display_name": "Git",
         "image": "git.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["version-control", "development", "collaboration", "devops", "source-control"],
-        "description": "A distributed version control system for tracking changes in source code during software development.",
+        "tags": [
+            "version-control",
+            "development",
+            "collaboration",
+            "devops",
+            "source-control"
+        ],
+        "description": "Distributed version control system for tracking changes and collaborating on code. Foundation of review, branching and release workflows.",
         "weblink": "https://git-scm.com/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Version Control"
+        "sub_category": "Version Control",
+        "related": [
+            "github_actions",
+            "linux"
+        ]
     },
     "github_actions": {
         "display_name": "GitHub Actions",
         "image": "github_actions.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["ci-cd", "automation", "devops", "github", "workflow", "integration"],
-        "description": "A CI/CD platform that automates software workflows directly from GitHub repositories.",
+        "tags": [
+            "ci-cd",
+            "automation",
+            "devops",
+            "github",
+            "workflow",
+            "integration"
+        ],
+        "description": "CI/CD and automation built into GitHub, defined as workflow files in the repository. Used to test, scan and deploy services and to keep builds reproducible.",
         "weblink": "https://github.com/features/actions",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "CI/CD"
+        "sub_category": "CI/CD",
+        "related": [
+            "git",
+            "docker",
+            "terraform"
+        ]
     },
     "go": {
         "display_name": "Go",
         "image": "go.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["language", "general-purpose", "compiled", "concurrent", "systems", "backend"],
-        "description": "An open source programming language designed for building simple, reliable, and efficient software.",
+        "tags": [
+            "language",
+            "general-purpose",
+            "compiled",
+            "concurrent",
+            "systems",
+            "backend"
+        ],
+        "description": "Statically typed, compiled language with built-in concurrency, designed for simple and reliable services. Used for APIs, streaming consumers and infrastructure tooling.",
         "weblink": "https://go.org/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Systems Programming"
+        "sub_category": "Systems Programming",
+        "related": [
+            "gin",
+            "kafka",
+            "kubernetes",
+            "postgresql"
+        ]
     },
-
-"gcp": {
+    "gcp": {
         "display_name": "Google Cloud",
         "image": "google_cloud.svg",
         "professional_experience": true,
         "years_of_experience": 7,
-        "tags": ["cloud", "infrastructure", "services", "google", "iaas", "paas", "saas"],
-        "description": "A suite of cloud computing services that runs on the same infrastructure that Google uses internally.",
+        "tags": [
+            "cloud",
+            "infrastructure",
+            "services",
+            "google",
+            "iaas",
+            "paas",
+            "saas"
+        ],
+        "description": "Google's cloud platform with data, analytics and AI services such as BigQuery, Pub/Sub and Vertex AI. Used to build data platforms and model workloads.",
         "weblink": "https://cloud.google.com/",
         "examples": {},
         "general_category": "Cloud Computing",
-        "sub_category": "Cloud Platform"
+        "sub_category": "Cloud Platform",
+        "related": [
+            "bigquery",
+            "pubsub",
+            "vertex_ai",
+            "kubernetes"
+        ]
     },
     "google_gemini": {
         "display_name": "Google Gemini",
         "image": "google_gemini.svg",
         "professional_experience": true,
         "years_of_experience": 1,
-        "tags": ["ai", "llm", "google", "machine-learning", "multimodal", "foundation-models"],
-        "description": "Google's most capable AI model, featuring multimodal capabilities across text, code, images, and more.",
+        "tags": [
+            "ai",
+            "llm",
+            "google",
+            "machine-learning",
+            "multimodal",
+            "foundation-models"
+        ],
+        "description": "Google's family of multimodal foundation models for text, code, images and more, available through Vertex AI and the Gemini API. Used for assistants, tool-calling agents and long-context tasks.",
         "weblink": "https://deepmind.google/technologies/gemini/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Language Models"
+        "sub_category": "Language Models",
+        "related": [
+            "vertex_ai",
+            "gcp",
+            "agent_platforms",
+            "llm_evaluation"
+        ]
     },
     "grafana": {
         "display_name": "Grafana",
         "image": "grafana.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["monitoring", "visualization", "observability", "dashboards", "metrics", "analytics", "open-source"],
-        "description": "An open-source analytics and visualization web application for monitoring and observability.",
+        "tags": [
+            "monitoring",
+            "visualization",
+            "observability",
+            "dashboards",
+            "metrics",
+            "analytics",
+            "open-source"
+        ],
+        "description": "Open-source dashboarding and alerting layer over metrics, logs and traces. Commonly paired with Prometheus for service and pipeline monitoring.",
         "weblink": "https://grafana.com/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Monitoring & Visualization"
+        "sub_category": "Monitoring & Visualization",
+        "related": [
+            "prometheus",
+            "datadog",
+            "opentelemetry"
+        ]
     },
     "graphql": {
         "display_name": "GraphQL",
         "image": "graphql.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["api", "query-language", "web", "facebook", "rest-alternative", "data-fetching"],
-        "description": "A query language for APIs and a runtime for fulfilling those queries with existing data.",
+        "tags": [
+            "api",
+            "query-language",
+            "web",
+            "facebook",
+            "rest-alternative",
+            "data-fetching"
+        ],
+        "description": "Query language and runtime that lets clients request exactly the fields they need from a typed schema. Used to unify data access across services.",
         "weblink": "https://graphql.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "API Technology"
+        "sub_category": "API Technology",
+        "related": [
+            "typescript",
+            "react",
+            "node.js"
+        ]
     },
     "html5": {
         "display_name": "HTML5",
         "image": "html5.svg",
         "professional_experience": true,
         "years_of_experience": 14,
-        "tags": ["frontend", "markup", "web", "semantic", "w3c", "web-standards"],
-        "description": "The latest version of the HTML standard, introducing new elements, attributes, and behaviors for modern websites.",
+        "tags": [
+            "frontend",
+            "markup",
+            "web",
+            "semantic",
+            "w3c",
+            "web-standards"
+        ],
+        "description": "Current HTML standard for structuring web content with semantic elements and built-in media and form support. The base layer for accessible web interfaces.",
         "weblink": "https://html.spec.whatwg.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Frontend Markup"
+        "sub_category": "Frontend Markup",
+        "related": [
+            "css3",
+            "javascript"
+        ]
     },
     "hugging_face": {
         "display_name": "Hugging Face",
         "image": "huggingface.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["ai", "ml", "nlp", "transformers", "machine-learning", "model-hub", "open-source"],
-        "description": "A platform providing tools for building, training and deploying ML models, particularly for NLP tasks.",
+        "tags": [
+            "ai",
+            "ml",
+            "nlp",
+            "transformers",
+            "machine-learning",
+            "model-hub",
+            "open-source"
+        ],
+        "description": "Hub and libraries (Transformers, Datasets) for sharing, fine-tuning and serving open models. Central to working with open-weight NLP and LLM models.",
         "weblink": "https://huggingface.co/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Machine Learning Platform"
+        "sub_category": "Machine Learning Platform",
+        "related": [
+            "pytorch",
+            "tensorflow",
+            "ai_classifiers",
+            "llm_evaluation"
+        ]
     },
     "jaeger": {
         "display_name": "Jaeger",
         "image": "jaeger_tracing.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["tracing", "observability", "monitoring", "distributed-tracing", "microservices", "cncf"],
-        "description": "An open-source distributed tracing system for microservices-based distributed systems.",
+        "tags": [
+            "tracing",
+            "observability",
+            "monitoring",
+            "distributed-tracing",
+            "microservices",
+            "cncf"
+        ],
+        "description": "Open-source distributed tracing backend for following a request across services. Used to find latency and error sources in microservice systems.",
         "weblink": "https://www.jaegertracing.io/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Distributed Tracing"
+        "sub_category": "Distributed Tracing",
+        "related": [
+            "opentelemetry",
+            "prometheus",
+            "grafana"
+        ]
     },
     "java": {
         "display_name": "Java",
         "image": "java.svg",
         "professional_experience": true,
         "years_of_experience": 11,
-        "tags": ["language", "general-purpose", "object-oriented", "enterprise", "jvm", "cross-platform"],
-        "description": "A class-based, object-oriented programming language designed to be write once, run anywhere.",
+        "tags": [
+            "language",
+            "general-purpose",
+            "object-oriented",
+            "enterprise",
+            "jvm",
+            "cross-platform"
+        ],
+        "description": "Mature object-oriented language on the JVM, widely used in enterprise back ends and big-data systems such as Kafka, Hadoop and Spark.",
         "weblink": "https://www.java.com/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Enterprise Development"
+        "sub_category": "Enterprise Development",
+        "related": [
+            "scala",
+            "spark",
+            "kafka"
+        ]
     },
     "javascript": {
         "display_name": "JavaScript",
         "image": "javascript.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["language", "web", "frontend", "scripting", "ecmascript", "browser", "node"],
-        "description": "A high-level, interpreted programming language that conforms to the ECMAScript specification.",
+        "tags": [
+            "language",
+            "web",
+            "frontend",
+            "scripting",
+            "ecmascript",
+            "browser",
+            "node"
+        ],
+        "description": "The language of the web, running in browsers and on servers via Node.js. Used for interactive front ends and full-stack applications.",
         "weblink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Web Development"
+        "sub_category": "Web Development",
+        "related": [
+            "typescript",
+            "react",
+            "node.js"
+        ]
     },
     "jupyter": {
         "display_name": "Jupyter",
         "image": "jupyter.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["development", "data-science", "interactive", "python", "notebook", "analysis"],
-        "description": "An open-source project for interactive computing across dozens of programming languages.",
+        "tags": [
+            "development",
+            "data-science",
+            "interactive",
+            "python",
+            "notebook",
+            "analysis"
+        ],
+        "description": "Interactive notebooks that mix code, results and narrative. A standard workspace for data exploration, model prototyping and sharing analysis.",
         "weblink": "https://jupyter.org/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Interactive Computing"
+        "sub_category": "Interactive Computing",
+        "related": [
+            "python",
+            "pandas",
+            "numpy",
+            "pytorch"
+        ]
     },
     "keras": {
         "display_name": "Keras",
         "image": "keras.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["ai", "ml", "deep-learning", "neural-networks", "tensorflow", "python"],
-        "description": "A high-level neural networks API, written in Python and capable of running on top of TensorFlow.",
+        "tags": [
+            "ai",
+            "ml",
+            "deep-learning",
+            "neural-networks",
+            "tensorflow",
+            "python"
+        ],
+        "description": "High-level deep-learning API that runs on top of TensorFlow and other backends. Used to define and train neural networks quickly.",
         "weblink": "https://keras.io/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Deep Learning Framework"
+        "sub_category": "Deep Learning Framework",
+        "related": [
+            "tensorflow",
+            "pytorch",
+            "python"
+        ]
     },
     "kinesis_firehose": {
         "display_name": "Kinesis Firehose",
         "image": "kinesis_firehose.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["streaming", "aws", "data-delivery", "real-time", "data-pipeline", "serverless"],
-        "description": "A fully managed service for delivering real-time streaming data to destinations like S3, Redshift, and Elasticsearch.",
+        "tags": [
+            "streaming",
+            "aws",
+            "data-delivery",
+            "real-time",
+            "data-pipeline",
+            "serverless"
+        ],
+        "description": "Managed AWS service that batches and delivers streaming data to S3, Redshift, OpenSearch and other destinations. Used for low-ops stream ingestion.",
         "weblink": "https://aws.amazon.com/kinesis/data-firehose/",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Stream Processing"
+        "sub_category": "Stream Processing",
+        "related": [
+            "aws",
+            "kafka",
+            "elasticsearch"
+        ]
     },
     "kubernetes": {
         "display_name": "Kubernetes",
         "image": "kubernetes.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["infrastructure", "orchestration", "devops", "containers", "microservices", "cloud-native", "cncf"],
-        "description": "An open-source system for automating deployment, scaling, and management of containerized applications.",
+        "tags": [
+            "infrastructure",
+            "orchestration",
+            "devops",
+            "containers",
+            "microservices",
+            "cloud-native",
+            "cncf"
+        ],
+        "description": "Container orchestrator that schedules, scales and heals workloads across a cluster. The common substrate for serving services, jobs and ML or GPU workloads.",
         "weblink": "https://kubernetes.io/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Container Orchestration"
+        "sub_category": "Container Orchestration",
+        "related": [
+            "docker",
+            "terraform",
+            "prometheus",
+            "go"
+        ]
     },
     "langchain": {
         "display_name": "LangChain",
         "image": "langchain.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["ai", "llm", "framework", "python", "javascript", "rag", "agents"],
-        "description": "A framework for developing applications powered by language models through composability.",
+        "tags": [
+            "ai",
+            "llm",
+            "framework",
+            "python",
+            "javascript",
+            "rag",
+            "agents"
+        ],
+        "description": "Framework for composing LLM applications from prompts, retrievers, tools and agents. Commonly used for RAG pipelines and tool-using agents.",
         "weblink": "https://langchain.org/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "LLM Framework"
+        "sub_category": "LLM Framework",
+        "related": [
+            "openai",
+            "chroma",
+            "pinecone",
+            "agent_platforms",
+            "rag"
+        ]
     },
     "linux": {
         "display_name": "Linux",
         "image": "linux.svg",
         "professional_experience": true,
         "years_of_experience": 14,
-        "tags": ["os", "kernel", "unix", "open-source", "operating-system", "server", "embedded"],
-        "description": "A family of open-source Unix-like operating systems based on the Linux kernel.",
+        "tags": [
+            "os",
+            "kernel",
+            "unix",
+            "open-source",
+            "operating-system",
+            "server",
+            "embedded"
+        ],
+        "description": "Open-source operating system kernel and ecosystem that runs most servers and containers. Core to day-to-day infrastructure and production debugging.",
         "weblink": "https://www.linux.org/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "Operating System"
+        "sub_category": "Operating System",
+        "related": [
+            "docker",
+            "kubernetes",
+            "nginx"
+        ]
     },
-
     "looker": {
         "display_name": "Looker",
         "image": "looker.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["bi", "analytics", "visualization", "data-platform", "google-cloud", "business-intelligence"],
-        "description": "A business intelligence software and big data analytics platform that helps explore, analyze and share real-time business analytics.",
+        "tags": [
+            "bi",
+            "analytics",
+            "visualization",
+            "data-platform",
+            "google-cloud",
+            "business-intelligence"
+        ],
+        "description": "Business-intelligence platform with a governed semantic layer (LookML). Used to give teams consistent metrics and self-serve dashboards.",
         "weblink": "https://www.looker.com/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Business Intelligence"
+        "sub_category": "Business Intelligence",
+        "related": [
+            "bigquery",
+            "tableau",
+            "sql"
+        ]
     },
-"material_ui": {
+    "material_ui": {
         "display_name": "Material UI",
         "image": "material_ui.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["frontend", "ui-framework", "react", "component-library", "material-design", "web"],
-        "description": "A popular React UI framework implementing Google's Material Design principles.",
+        "tags": [
+            "frontend",
+            "ui-framework",
+            "react",
+            "component-library",
+            "material-design",
+            "web"
+        ],
+        "description": "React component library implementing Google's Material Design. Used for accessible, themeable UI building blocks.",
         "weblink": "https://mui.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "UI Framework"
+        "sub_category": "UI Framework",
+        "related": [
+            "react",
+            "typescript",
+            "css3"
+        ]
     },
-
     "mistral_ai": {
         "display_name": "Mistral AI",
         "image": "mistral_ai.svg",
         "professional_experience": true,
         "years_of_experience": 1,
-        "tags": ["ai", "llm", "open-source", "language-model", "machine-learning"],
-        "description": "An open-source large language model known for its efficient performance and open weights.",
+        "tags": [
+            "ai",
+            "llm",
+            "open-source",
+            "language-model",
+            "machine-learning"
+        ],
+        "description": "Developer of efficient language models, with several open-weight releases. Used where smaller or self-hostable models are preferred.",
         "weblink": "https://mistral.ai/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Language Models"
+        "sub_category": "Language Models",
+        "related": [
+            "hugging_face",
+            "claude_ai",
+            "openai"
+        ]
     },
     "mongodb": {
         "display_name": "MongoDB",
         "image": "mongodb.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["database", "nosql", "document-store", "json", "distributed", "cloud"],
-        "description": "A document-oriented NoSQL database using JSON-like documents with optional schemas.",
+        "tags": [
+            "database",
+            "nosql",
+            "document-store",
+            "json",
+            "distributed",
+            "cloud"
+        ],
+        "description": "Document database that stores JSON-like documents with flexible schemas. Used for evolving, nested application data.",
         "weblink": "https://www.mongodb.com/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Document Store"
+        "sub_category": "Document Store",
+        "related": [
+            "dynamodb",
+            "firestore",
+            "postgresql"
+        ]
     },
-
     "mysql": {
         "display_name": "MySQL",
         "image": "mysql.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["database", "relational", "sql", "oracle", "open-source", "rdbms"],
-        "description": "An open-source relational database management system using structured query language (SQL).",
+        "tags": [
+            "database",
+            "relational",
+            "sql",
+            "oracle",
+            "open-source",
+            "rdbms"
+        ],
+        "description": "Widely deployed open-source relational database. Used for transactional application data and as a reliable SQL back end.",
         "weblink": "https://www.mysql.com/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Relational Database"
+        "sub_category": "Relational Database",
+        "related": [
+            "postgresql",
+            "sql",
+            "sqlalchemy"
+        ]
     },
     "neo4j": {
         "display_name": "Neo4j",
         "image": "neo4j.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["database", "graph", "nosql", "cypher", "relationships", "network-analysis"],
-        "description": "A native graph database platform built to leverage data relationships in real time.",
+        "tags": [
+            "database",
+            "graph",
+            "nosql",
+            "cypher",
+            "relationships",
+            "network-analysis"
+        ],
+        "description": "Native graph database queried with Cypher, optimised for relationship-heavy data. Used for entity resolution, recommendations and knowledge graphs.",
         "weblink": "https://neo4j.com/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Graph Database"
+        "sub_category": "Graph Database",
+        "related": [
+            "sql",
+            "python",
+            "rag"
+        ]
     },
     "nginx": {
         "display_name": "NGINX",
         "image": "nginx.svg",
         "professional_experience": true,
         "years_of_experience": 11,
-        "tags": ["web-server", "proxy", "load-balancer", "reverse-proxy", "high-performance"],
-        "description": "A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache.",
+        "tags": [
+            "web-server",
+            "proxy",
+            "load-balancer",
+            "reverse-proxy",
+            "high-performance"
+        ],
+        "description": "High-performance web server and reverse proxy with load balancing and caching. Commonly the front door for web apps and APIs.",
         "weblink": "https://nginx.org/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Web Server"
+        "sub_category": "Web Server",
+        "related": [
+            "docker",
+            "linux",
+            "kubernetes"
+        ]
     },
     "node.js": {
         "display_name": "Node.js",
         "image": "node.js.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["backend", "runtime", "javascript", "server-side", "event-driven", "npm"],
-        "description": "A JavaScript runtime built on Chrome's V8 JavaScript engine for building scalable network applications.",
+        "tags": [
+            "backend",
+            "runtime",
+            "javascript",
+            "server-side",
+            "event-driven",
+            "npm"
+        ],
+        "description": "JavaScript runtime built on V8 for event-driven network services and tooling. Used for APIs, build pipelines and server-side rendering.",
         "weblink": "https://nodejs.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Runtime Environment"
+        "sub_category": "Runtime Environment",
+        "related": [
+            "javascript",
+            "typescript",
+            "react"
+        ]
     },
     "numpy": {
         "display_name": "NumPy",
         "image": "numpy.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["scientific-computing", "python", "array", "mathematics", "data-science", "numerical"],
-        "description": "The fundamental package for scientific computing with Python, providing support for large, multi-dimensional arrays and matrices.",
+        "tags": [
+            "scientific-computing",
+            "python",
+            "array",
+            "mathematics",
+            "data-science",
+            "numerical"
+        ],
+        "description": "Core Python library for fast n-dimensional array computing. Foundation for pandas, scikit-learn and most numerical and ML code.",
         "weblink": "https://numpy.org/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Scientific Computing"
+        "sub_category": "Scientific Computing",
+        "related": [
+            "pandas",
+            "scikit_learn",
+            "pytorch"
+        ]
     },
     "openai": {
         "display_name": "OpenAI",
         "image": "openai.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["ai", "llm", "cloud-service", "gpt", "machine-learning", "nlp"],
-        "description": "A leading AI research company providing access to advanced language models and AI services.",
+        "tags": [
+            "ai",
+            "llm",
+            "cloud-service",
+            "gpt",
+            "machine-learning",
+            "nlp"
+        ],
+        "description": "AI lab and API provider of GPT models, embeddings and tool-calling. Used to build chat assistants, RAG systems and agents.",
         "weblink": "https://openai.com/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "AI Services"
+        "sub_category": "AI Services",
+        "related": [
+            "langchain",
+            "claude_ai",
+            "llm_evaluation",
+            "rag"
+        ]
     },
     "opentelemetry": {
         "display_name": "OpenTelemetry",
         "image": "opentelemetry.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["observability", "tracing", "metrics", "monitoring", "cncf", "cloud-native"],
-        "description": "An observability framework for cloud-native software, providing tools for generating, collecting, and exporting telemetry data.",
+        "tags": [
+            "observability",
+            "tracing",
+            "metrics",
+            "monitoring",
+            "cncf",
+            "cloud-native"
+        ],
+        "description": "Vendor-neutral standard and SDKs for emitting traces, metrics and logs. Used to instrument services once and route telemetry to any backend.",
         "weblink": "https://opentelemetry.io/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Observability"
+        "sub_category": "Observability",
+        "related": [
+            "jaeger",
+            "prometheus",
+            "datadog",
+            "grafana"
+        ]
     },
     "pandas": {
         "display_name": "Pandas",
         "image": "pandas.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["data-analysis", "python", "dataframe", "data-science", "analytics", "data-manipulation"],
-        "description": "A fast, powerful, and flexible data analysis library for Python, providing high-performance data structures and tools.",
+        "tags": [
+            "data-analysis",
+            "python",
+            "dataframe",
+            "data-science",
+            "analytics",
+            "data-manipulation"
+        ],
+        "description": "Python library for tabular data analysis with DataFrames. Used for data cleaning, exploration and feature preparation.",
         "weblink": "https://pandas.pydata.org/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Data Analysis"
+        "sub_category": "Data Analysis",
+        "related": [
+            "numpy",
+            "jupyter",
+            "scikit_learn",
+            "python"
+        ]
     },
     "php": {
         "display_name": "PHP",
         "image": "php.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["language", "web", "backend", "server-side", "scripting", "wordpress"],
-        "description": "A popular general-purpose scripting language especially suited for web development.",
+        "tags": [
+            "language",
+            "web",
+            "backend",
+            "server-side",
+            "scripting",
+            "wordpress"
+        ],
+        "description": "Server-side scripting language that powers a large part of the web. Used for web applications and CMS-driven sites.",
         "weblink": "https://www.php.net/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Web Development"
+        "sub_category": "Web Development",
+        "related": [
+            "javascript",
+            "mysql"
+        ]
     },
     "pinecone": {
         "display_name": "Pinecone",
         "image": "pinecone.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["vector-db", "similarity-search", "ai", "machine-learning", "embeddings", "cloud"],
-        "description": "A fully managed vector database for building high-performance vector search applications.",
+        "tags": [
+            "vector-db",
+            "similarity-search",
+            "ai",
+            "machine-learning",
+            "embeddings",
+            "cloud"
+        ],
+        "description": "Managed vector database for low-latency similarity search over embeddings. Used for semantic search and RAG retrieval.",
         "weblink": "https://www.pinecone.io/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Vector Database"
+        "sub_category": "Vector Database",
+        "related": [
+            "chroma",
+            "quadrant",
+            "rag",
+            "langchain"
+        ]
     },
-"playwright": {
+    "playwright": {
         "display_name": "Playwright",
         "image": "playwrite.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["testing", "automation", "web", "e2e", "browser", "microsoft", "cross-browser"],
-        "description": "A framework for web testing and automation that enables reliable end-to-end testing for modern web apps.",
+        "tags": [
+            "testing",
+            "automation",
+            "web",
+            "e2e",
+            "browser",
+            "microsoft",
+            "cross-browser"
+        ],
+        "description": "Browser automation and end-to-end test framework for Chromium, Firefox and WebKit. Used for reliable UI smoke and regression tests.",
         "weblink": "https://playwright.dev/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "Testing Framework"
+        "sub_category": "Testing Framework",
+        "related": [
+            "selenium",
+            "javascript",
+            "github_actions"
+        ]
     },
     "selenium": {
         "display_name": "Selenium",
         "image": "selenium.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["testing", "automation", "web", "e2e", "browser", "microsoft", "cross-browser"],
-        "description": "A framework for web testing and automation that enables reliable end-to-end testing for modern web apps.",
+        "tags": [
+            "testing",
+            "automation",
+            "web",
+            "e2e",
+            "browser",
+            "microsoft",
+            "cross-browser"
+        ],
+        "description": "Long-standing browser automation framework driven by WebDriver. Used for end-to-end UI testing and web scraping.",
         "weblink": "https://www.selenium.dev/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "Testing Framework"
+        "sub_category": "Testing Framework",
+        "related": [
+            "playwright",
+            "python",
+            "javascript"
+        ]
     },
     "postgresql": {
         "display_name": "PostgreSQL",
         "image": "postgresql.svg",
         "professional_experience": true,
         "years_of_experience": 12,
-        "tags": ["database", "relational", "sql", "open-source", "rdbms", "enterprise"],
-        "description": "A powerful, open source object-relational database system with a strong reputation for reliability and features.",
+        "tags": [
+            "database",
+            "relational",
+            "sql",
+            "open-source",
+            "rdbms",
+            "enterprise"
+        ],
+        "description": "Open-source relational database with strong SQL, transactions, JSON and extension support. A dependable default for application and analytical data.",
         "weblink": "https://www.postgresql.org/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Relational Database"
+        "sub_category": "Relational Database",
+        "related": [
+            "sql",
+            "sqlalchemy",
+            "timescaledb",
+            "supabase"
+        ]
     },
-
     "presto": {
         "display_name": "Presto",
         "image": "presto.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["query-engine", "big-data", "sql", "distributed", "analytics", "facebook"],
-        "description": "A distributed SQL query engine optimized for ad-hoc analysis of data at a massive scale.",
+        "tags": [
+            "query-engine",
+            "big-data",
+            "sql",
+            "distributed",
+            "analytics",
+            "facebook"
+        ],
+        "description": "Distributed SQL query engine for fast interactive analytics across many data sources. Originated at Facebook and is the ancestor of Trino.",
         "weblink": "https://prestodb.io/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Query Engine"
+        "sub_category": "Query Engine",
+        "related": [
+            "trino",
+            "hadoop",
+            "spark"
+        ]
     },
     "prometheus": {
         "display_name": "Prometheus",
         "image": "prometheus.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["monitoring", "metrics", "alerting", "time-series", "cncf", "observability"],
-        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability.",
+        "tags": [
+            "monitoring",
+            "metrics",
+            "alerting",
+            "time-series",
+            "cncf",
+            "observability"
+        ],
+        "description": "Time-series monitoring system with a pull model, PromQL and alerting rules. A standard for service and Kubernetes metrics.",
         "weblink": "https://prometheus.io/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Monitoring"
+        "sub_category": "Monitoring",
+        "related": [
+            "grafana",
+            "kubernetes",
+            "opentelemetry",
+            "datadog"
+        ]
     },
     "pubsub": {
         "display_name": "PubSub",
         "image": "pubsub.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["messaging", "google-cloud", "pub-sub", "streaming", "real-time", "event-driven"],
-        "description": "Google Cloud's real-time messaging service for independent applications to publish and subscribe to asynchronous events.",
+        "tags": [
+            "messaging",
+            "google-cloud",
+            "pub-sub",
+            "streaming",
+            "real-time",
+            "event-driven"
+        ],
+        "description": "Google Cloud's managed publish/subscribe messaging service for asynchronous, event-driven systems. Used to decouple producers and consumers at scale.",
         "weblink": "https://cloud.google.com/pubsub",
         "examples": {},
         "general_category": "Data Engineering",
-        "sub_category": "Messaging"
+        "sub_category": "Messaging",
+        "related": [
+            "kafka",
+            "gcp",
+            "flink"
+        ]
     },
     "python": {
         "display_name": "Python",
         "image": "python.svg",
         "professional_experience": true,
         "years_of_experience": 15,
-        "tags": ["language", "general-purpose", "scripting", "data-science", "web", "ai", "automation"],
-        "description": "A high-level programming language known for its simplicity, readability, and vast ecosystem of libraries.",
+        "tags": [
+            "language",
+            "general-purpose",
+            "scripting",
+            "data-science",
+            "web",
+            "ai",
+            "automation"
+        ],
+        "description": "General-purpose language with a rich ecosystem for data, ML and automation. The primary language for pipelines, model code and agent frameworks.",
         "weblink": "https://www.python.org/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "General Purpose"
+        "sub_category": "General Purpose",
+        "related": [
+            "pandas",
+            "pytorch",
+            "fastapi",
+            "airflow"
+        ]
     },
     "pytorch": {
         "display_name": "PyTorch",
         "image": "pytorch.svg",
         "professional_experience": true,
         "years_of_experience": 7,
-        "tags": ["ai", "ml", "deep-learning", "neural-networks", "facebook", "python", "research"],
-        "description": "An open source machine learning framework that accelerates the path from research prototyping to production deployment.",
+        "tags": [
+            "ai",
+            "ml",
+            "deep-learning",
+            "neural-networks",
+            "facebook",
+            "python",
+            "research"
+        ],
+        "description": "Open-source deep-learning framework with dynamic graphs and a research-to-production path. Used to train, fine-tune and serve neural models, including classifiers and LLMs.",
         "weblink": "https://pytorch.org/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Deep Learning Framework"
+        "sub_category": "Deep Learning Framework",
+        "related": [
+            "python",
+            "tensorflow",
+            "hugging_face",
+            "ai_classifiers"
+        ]
     },
     "quadrant": {
-        "display_name": "Quadrant",
+        "display_name": "Qdrant",
         "image": "quadrant.svg",
         "professional_experience": false,
         "years_of_experience": 1,
-        "tags": ["vector-db", "similarity-search", "ai", "embeddings", "cloud", "managed-service"],
-        "description": "A fully-managed vector database service designed for AI applications and similarity search.",
+        "tags": [
+            "vector-db",
+            "similarity-search",
+            "ai",
+            "embeddings",
+            "cloud",
+            "managed-service"
+        ],
+        "description": "Qdrant is an open-source vector database and similarity search engine with payload filtering. Used for semantic search and RAG retrieval.",
         "weblink": "https://quadrant.ai/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Vector Database"
+        "sub_category": "Vector Database",
+        "related": [
+            "chroma",
+            "pinecone",
+            "rag"
+        ]
     },
-
-
     "react": {
         "display_name": "React",
         "image": "react.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["frontend", "framework", "javascript", "ui", "facebook", "component-based", "spa"],
-        "description": "A JavaScript library for building user interfaces, particularly single page applications.",
+        "tags": [
+            "frontend",
+            "framework",
+            "javascript",
+            "ui",
+            "facebook",
+            "component-based",
+            "spa"
+        ],
+        "description": "Component-based JavaScript library for building user interfaces. Used for interactive applications such as dashboards and chat UIs.",
         "weblink": "https://react.dev/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Frontend Framework"
+        "sub_category": "Frontend Framework",
+        "related": [
+            "typescript",
+            "redux",
+            "material_ui",
+            "vite"
+        ]
     },
-"redis": {
+    "redis": {
         "display_name": "Redis",
         "image": "redis.svg",
         "professional_experience": true,
         "years_of_experience": 7,
-        "tags": ["database", "cache", "in-memory", "nosql", "key-value", "pub-sub", "data-structures"],
-        "description": "An open-source, in-memory data structure store used as a database, cache, message broker, and queue.",
+        "tags": [
+            "database",
+            "cache",
+            "in-memory",
+            "nosql",
+            "key-value",
+            "pub-sub",
+            "data-structures"
+        ],
+        "description": "In-memory data store used as a cache, queue, rate limiter and lightweight database. Used to cut latency and absorb load in front of slower systems.",
         "weblink": "https://redis.io/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "In-Memory Store"
+        "sub_category": "In-Memory Store",
+        "related": [
+            "postgresql",
+            "nginx",
+            "kafka"
+        ]
     },
     "redux": {
         "display_name": "Redux",
         "image": "redux.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["frontend", "state-management", "react", "javascript", "flux-pattern", "predictable-state"],
-        "description": "A predictable state container for JavaScript apps, commonly used with React.",
+        "tags": [
+            "frontend",
+            "state-management",
+            "react",
+            "javascript",
+            "flux-pattern",
+            "predictable-state"
+        ],
+        "description": "Predictable state container for JavaScript applications, commonly used with React. Used to manage complex client-side state.",
         "weblink": "https://redux.js.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "State Management"
+        "sub_category": "State Management",
+        "related": [
+            "react",
+            "typescript"
+        ]
     },
     "retool": {
         "display_name": "Retool",
         "image": "retool.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["internal-tools", "low-code", "development", "business-tools", "rapid-development", "dashboard"],
-        "description": "A platform for building internal tools quickly through a drag-and-drop interface and custom code.",
+        "tags": [
+            "internal-tools",
+            "low-code",
+            "development",
+            "business-tools",
+            "rapid-development",
+            "dashboard"
+        ],
+        "description": "Low-code platform for assembling internal tools and admin panels on top of databases and APIs. Used for operational dashboards and back-office workflows.",
         "weblink": "https://retool.com/",
         "examples": {},
         "general_category": "Development Tools",
-        "sub_category": "Low-Code Platform"
+        "sub_category": "Low-Code Platform",
+        "related": [
+            "postgresql",
+            "airtable"
+        ]
     },
     "rocksdb": {
         "display_name": "RocksDB",
         "image": "rocksdb.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["database", "embedded", "key-value", "facebook", "storage-engine", "persistent"],
-        "description": "A high-performance embedded database for key-value data, optimized for fast storage.",
+        "tags": [
+            "database",
+            "embedded",
+            "key-value",
+            "facebook",
+            "storage-engine",
+            "persistent"
+        ],
+        "description": "Embedded key-value store based on LSM trees, tuned for fast writes and SSDs. Underlies stateful systems such as Flink state and Kafka Streams.",
         "weblink": "https://rocksdb.org/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Embedded Database"
+        "sub_category": "Embedded Database",
+        "related": [
+            "flink",
+            "kafka",
+            "cassandra"
+        ]
     },
     "rust": {
         "display_name": "Rust",
         "image": "rust.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["language", "systems", "performance", "safety", "concurrent", "mozilla", "low-level"],
-        "description": "A systems programming language focused on safety, concurrency, and performance.",
+        "tags": [
+            "language",
+            "systems",
+            "performance",
+            "safety",
+            "concurrent",
+            "mozilla",
+            "low-level"
+        ],
+        "description": "Memory-safe systems language with performance comparable to C and C++. Used for high-performance services and data tooling.",
         "weblink": "https://www.rust-lang.org/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Systems Programming"
+        "sub_category": "Systems Programming",
+        "related": [
+            "cpp",
+            "go",
+            "webassembly"
+        ]
     },
     "scala": {
         "display_name": "Scala",
         "image": "scala.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["language", "functional", "big-data", "jvm", "object-oriented", "spark", "type-safe"],
-        "description": "A programming language that combines object-oriented and functional programming in one concise, high-level language.",
+        "tags": [
+            "language",
+            "functional",
+            "big-data",
+            "jvm",
+            "object-oriented",
+            "spark",
+            "type-safe"
+        ],
+        "description": "JVM language blending object-oriented and functional programming. Heavily used for Spark jobs and large-scale data processing.",
         "weblink": "https://www.scala-lang.org/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "JVM Languages"
+        "sub_category": "JVM Languages",
+        "related": [
+            "spark",
+            "java",
+            "kafka"
+        ]
     },
     "scikit_learn": {
         "display_name": "Scikit-learn",
         "image": "scikit_learn.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["ml", "python", "data-science", "machine-learning", "analytics", "algorithms", "statistics"],
-        "description": "A machine learning library for Python, featuring various classification, regression and clustering algorithms.",
+        "tags": [
+            "ml",
+            "python",
+            "data-science",
+            "machine-learning",
+            "analytics",
+            "algorithms",
+            "statistics"
+        ],
+        "description": "Python library of classical machine-learning algorithms with a consistent API. Used for classification, regression, clustering and evaluation baselines.",
         "weblink": "https://scikit-learn.org/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Machine Learning"
+        "sub_category": "Machine Learning",
+        "related": [
+            "python",
+            "pandas",
+            "numpy",
+            "ai_classifiers"
+        ]
     },
     "snowflake": {
         "display_name": "Snowflake",
         "image": "snowflake.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["data-warehouse", "cloud", "analytics", "sql", "data-platform", "data-sharing"],
-        "description": "A cloud-based data warehousing platform that enables storage, processing, and analysis of data at scale.",
+        "tags": [
+            "data-warehouse",
+            "cloud",
+            "analytics",
+            "sql",
+            "data-platform",
+            "data-sharing"
+        ],
+        "description": "Cloud data warehouse that separates storage and compute with elastic scaling. Used for governed analytics and data sharing.",
         "weblink": "https://www.snowflake.com/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Data Warehouse"
+        "sub_category": "Data Warehouse",
+        "related": [
+            "bigquery",
+            "dbt",
+            "sql"
+        ]
     },
-
     "splunk": {
         "display_name": "Splunk",
         "image": "splunk.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["monitoring", "logging", "analytics", "observability", "search", "security", "enterprise"],
-        "description": "A platform for searching, monitoring, and analyzing machine-generated big data via a web-style interface.",
+        "tags": [
+            "monitoring",
+            "logging",
+            "analytics",
+            "observability",
+            "search",
+            "security",
+            "enterprise"
+        ],
+        "description": "Platform for searching, analysing and alerting on machine data and logs. Used for operational monitoring, security and incident investigation.",
         "weblink": "https://www.splunk.com/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Log Management"
+        "sub_category": "Log Management",
+        "related": [
+            "datadog",
+            "elasticsearch",
+            "prometheus"
+        ]
     },
     "sql": {
         "display_name": "SQL",
         "image": "sql.svg",
         "professional_experience": true,
         "years_of_experience": 15,
-        "tags": ["language", "database", "query", "data", "relational", "ansi-standard", "data-manipulation"],
-        "description": "A standard language for storing, manipulating and retrieving data in relational databases.",
+        "tags": [
+            "language",
+            "database",
+            "query",
+            "data",
+            "relational",
+            "ansi-standard",
+            "data-manipulation"
+        ],
+        "description": "Standard language for querying and shaping relational data. Foundation of analytics, data modeling and pipeline logic.",
         "weblink": "https://www.iso.org/standard/63555.html",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Query Language"
+        "sub_category": "Query Language",
+        "related": [
+            "postgresql",
+            "dbt",
+            "bigquery",
+            "spark"
+        ]
     },
     "sqlalchemy": {
         "display_name": "SQLAlchemy",
         "image": "sqlalchemy.svg",
         "professional_experience": true,
         "years_of_experience": 10,
-        "tags": ["backend", "orm", "python", "database", "sql", "data-access", "toolkit"],
-        "description": "A SQL toolkit and Object-Relational Mapping (ORM) library for Python.",
+        "tags": [
+            "backend",
+            "orm",
+            "python",
+            "database",
+            "sql",
+            "data-access",
+            "toolkit"
+        ],
+        "description": "Python SQL toolkit and ORM with a Core expression layer. Used to talk to relational databases from services and pipelines.",
         "weblink": "https://www.sqlalchemy.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "ORM"
+        "sub_category": "ORM",
+        "related": [
+            "python",
+            "postgresql",
+            "fastapi"
+        ]
     },
     "streamlit": {
         "display_name": "Streamlit",
         "image": "streamlit.svg",
         "professional_experience": true,
         "years_of_experience": 3,
-        "tags": ["visualization", "python", "dashboard", "data-apps", "rapid-development", "ui"],
-        "description": "An open-source framework for rapidly creating and sharing beautiful, custom web apps for machine learning and data science.",
+        "tags": [
+            "visualization",
+            "python",
+            "dashboard",
+            "data-apps",
+            "rapid-development",
+            "ui"
+        ],
+        "description": "Python framework for building interactive data and ML apps with minimal front-end code. Used for quick demos, internal dashboards and model explorers.",
         "weblink": "https://streamlit.io/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Data Apps"
+        "sub_category": "Data Apps",
+        "related": [
+            "python",
+            "pandas",
+            "jupyter"
+        ]
     },
-"supabase": {
+    "supabase": {
         "display_name": "Supabase",
         "image": "supabase_logo.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["backend", "database", "authentication", "postgresql", "firebase-alternative", "real-time", "open-source"],
-        "description": "An open source Firebase alternative providing all the backend features developers need to build a product.",
+        "tags": [
+            "backend",
+            "database",
+            "authentication",
+            "postgresql",
+            "firebase-alternative",
+            "real-time",
+            "open-source"
+        ],
+        "description": "Open-source back-end platform built on PostgreSQL, offering auth, storage and real-time APIs. Used to ship application back ends quickly.",
         "weblink": "https://supabase.com/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Database Platform"
+        "sub_category": "Database Platform",
+        "related": [
+            "postgresql",
+            "firestore",
+            "fastapi"
+        ]
     },
     "svelte": {
         "display_name": "Svelte",
         "image": "svelte.svg",
         "professional_experience": false,
         "years_of_experience": 3,
-        "tags": ["frontend", "framework", "javascript", "reactive", "compiler", "component-based"],
-        "description": "A radical new approach to building user interfaces that compiles your code to tiny, framework-less vanilla JS.",
+        "tags": [
+            "frontend",
+            "framework",
+            "javascript",
+            "reactive",
+            "compiler",
+            "component-based"
+        ],
+        "description": "Compiler-based UI framework that ships minimal runtime JavaScript. Used for fast, lightweight web front ends.",
         "weblink": "https://svelte.dev/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Frontend Framework"
+        "sub_category": "Frontend Framework",
+        "related": [
+            "react",
+            "typescript",
+            "vite"
+        ]
     },
     "tableau": {
         "display_name": "Tableau",
         "image": "tableau_software.svg",
         "professional_experience": true,
         "years_of_experience": 8,
-        "tags": ["visualization", "bi", "analytics", "data-analysis", "reporting", "dashboards", "salesforce"],
-        "description": "A visual analytics platform that helps people see and understand their data.",
+        "tags": [
+            "visualization",
+            "bi",
+            "analytics",
+            "data-analysis",
+            "reporting",
+            "dashboards",
+            "salesforce"
+        ],
+        "description": "Visual analytics platform for building interactive dashboards. Used to explore data and communicate metrics to business teams.",
         "weblink": "https://www.tableau.com/",
         "examples": {},
         "general_category": "Data Science",
-        "sub_category": "Business Intelligence"
+        "sub_category": "Business Intelligence",
+        "related": [
+            "looker",
+            "sql",
+            "bigquery"
+        ]
     },
     "tailwind_css": {
         "display_name": "Tailwind CSS",
         "image": "tailwind_css.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["css", "frontend", "styling", "utility-first", "responsive", "design-system"],
-        "description": "A utility-first CSS framework for rapidly building custom user interfaces.",
+        "tags": [
+            "css",
+            "frontend",
+            "styling",
+            "utility-first",
+            "responsive",
+            "design-system"
+        ],
+        "description": "Utility-first CSS framework for composing designs directly in markup. Used for consistent, rapid UI styling.",
         "weblink": "https://tailwindcss.com/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "CSS Framework"
+        "sub_category": "CSS Framework",
+        "related": [
+            "css3",
+            "react"
+        ]
     },
     "tensorflow": {
         "display_name": "TensorFlow",
         "image": "tensorflow.svg",
         "professional_experience": true,
         "years_of_experience": 6,
-        "tags": ["ai", "ml", "deep-learning", "google", "neural-networks", "python", "data-science"],
-        "description": "An end-to-end open source platform for machine learning, developed by Google.",
+        "tags": [
+            "ai",
+            "ml",
+            "deep-learning",
+            "google",
+            "neural-networks",
+            "python",
+            "data-science"
+        ],
+        "description": "Google's end-to-end machine-learning platform for training and serving models. Widely used for production deep learning and mobile or edge inference.",
         "weblink": "https://www.tensorflow.org/",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "Deep Learning Framework"
+        "sub_category": "Deep Learning Framework",
+        "related": [
+            "keras",
+            "pytorch",
+            "python"
+        ]
     },
     "terraform": {
         "display_name": "Terraform",
         "image": "hashicorp_terraform.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["infrastructure", "iac", "devops", "hashicorp", "cloud", "automation", "configuration"],
-        "description": "An infrastructure as code tool that lets you define both cloud and on-prem resources in human-readable configuration files.",
+        "tags": [
+            "infrastructure",
+            "iac",
+            "devops",
+            "hashicorp",
+            "cloud",
+            "automation",
+            "configuration"
+        ],
+        "description": "Infrastructure-as-code tool that declares cloud resources in configuration and plans changes before applying them. Used for reproducible, reviewable infrastructure.",
         "weblink": "https://www.terraform.io/",
         "examples": {},
         "general_category": "DevOps",
-        "sub_category": "Infrastructure as Code"
+        "sub_category": "Infrastructure as Code",
+        "related": [
+            "gcp",
+            "aws",
+            "kubernetes",
+            "github_actions"
+        ]
     },
     "timescaledb": {
         "display_name": "TimescaleDB",
         "image": "timescale.svg",
         "professional_experience": false,
         "years_of_experience": 2,
-        "tags": ["database", "timeseries", "postgresql", "analytics", "scaling", "metrics"],
-        "description": "An open-source database designed to make SQL scalable for time-series data.",
+        "tags": [
+            "database",
+            "timeseries",
+            "postgresql",
+            "analytics",
+            "scaling",
+            "metrics"
+        ],
+        "description": "PostgreSQL extension for time-series data with automatic partitioning and compression. Used for metrics, telemetry and event data.",
         "weblink": "https://www.timescale.com/",
         "examples": {},
         "general_category": "Databases",
-        "sub_category": "Time Series Database"
+        "sub_category": "Time Series Database",
+        "related": [
+            "postgresql",
+            "prometheus",
+            "sql"
+        ]
     },
     "trino": {
         "display_name": "Trino",
         "image": "trino.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["query-engine", "sql", "big-data", "distributed", "analytics", "data-lake"],
-        "description": "A fast distributed SQL query engine for big data analytics that helps analyze data anywhere.",
+        "tags": [
+            "query-engine",
+            "sql",
+            "big-data",
+            "distributed",
+            "analytics",
+            "data-lake"
+        ],
+        "description": "Distributed SQL engine that queries many data sources in place, forked from Presto. Used for federated analytics over lakes and warehouses.",
         "weblink": "https://trino.io/",
         "examples": {},
         "general_category": "Big Data",
-        "sub_category": "Query Engine"
+        "sub_category": "Query Engine",
+        "related": [
+            "presto",
+            "iceberg",
+            "spark",
+            "sql"
+        ]
     },
     "typescript": {
         "display_name": "TypeScript",
         "image": "typescript.svg",
         "professional_experience": true,
         "years_of_experience": 5,
-        "tags": ["language", "javascript", "static-typing", "microsoft", "web", "superset", "type-safe"],
-        "description": "A typed superset of JavaScript that compiles to plain JavaScript, adding optional types, classes, and modules.",
+        "tags": [
+            "language",
+            "javascript",
+            "static-typing",
+            "microsoft",
+            "web",
+            "superset",
+            "type-safe"
+        ],
+        "description": "Typed superset of JavaScript that catches errors at compile time. Used for maintainable front ends and Node services.",
         "weblink": "https://www.typescriptlang.org/",
         "examples": {},
         "general_category": "Programming Languages",
-        "sub_category": "Web Development"
+        "sub_category": "Web Development",
+        "related": [
+            "javascript",
+            "react",
+            "node.js"
+        ]
     },
     "vertex_ai": {
         "display_name": "Vertex AI",
         "image": "vertexai.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["ai", "ml", "google-cloud", "machine-learning", "mlops", "model-training", "model-deployment"],
-        "description": "Google Cloud's unified ML platform for building, deploying, and scaling AI models.",
+        "tags": [
+            "ai",
+            "ml",
+            "google-cloud",
+            "machine-learning",
+            "mlops",
+            "model-training",
+            "model-deployment"
+        ],
+        "description": "Google Cloud's managed ML platform for training, tuning, deploying and evaluating models, including Gemini. Used to run ML and LLM workloads on GCP.",
         "weblink": "https://cloud.google.com/vertex-ai",
         "examples": {},
         "general_category": "Artificial Intelligence",
-        "sub_category": "ML Platform"
+        "sub_category": "ML Platform",
+        "related": [
+            "gcp",
+            "google_gemini",
+            "bigquery",
+            "llm_evaluation"
+        ]
     },
     "vite": {
         "display_name": "Vite",
         "image": "vite.js.svg",
         "professional_experience": true,
         "years_of_experience": 2,
-        "tags": ["build-tool", "frontend", "development", "bundler", "javascript", "vue", "react"],
-        "description": "A modern frontend build tool that significantly improves the development experience.",
+        "tags": [
+            "build-tool",
+            "frontend",
+            "development",
+            "bundler",
+            "javascript",
+            "vue",
+            "react"
+        ],
+        "description": "Fast front-end build tool with instant dev server and optimised production bundling. Used to build modern single-page apps.",
         "weblink": "https://vitejs.dev/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Build Tools"
+        "sub_category": "Build Tools",
+        "related": [
+            "react",
+            "typescript",
+            "javascript"
+        ]
     },
     "webassembly": {
         "display_name": "WebAssembly",
         "image": "webassembly.svg",
         "professional_experience": true,
         "years_of_experience": 4,
-        "tags": ["web", "performance", "low-level", "binary", "cross-platform", "compilation", "w3c"],
-        "description": "A binary instruction format for stack-based virtual machines, enabling high-performance applications on the web.",
+        "tags": [
+            "web",
+            "performance",
+            "low-level",
+            "binary",
+            "cross-platform",
+            "compilation",
+            "w3c"
+        ],
+        "description": "Portable binary instruction format that runs near-native code in browsers and other runtimes. Used to bring compute-heavy code, from Rust or C++, to the web.",
         "weblink": "https://webassembly.org/",
         "examples": {},
         "general_category": "Web Development",
-        "sub_category": "Web Standards"
+        "sub_category": "Web Standards",
+        "related": [
+            "rust",
+            "cpp",
+            "javascript"
+        ]
+    },
+    "agent_platforms": {
+        "display_name": "Agent Platforms",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "agents",
+            "llm",
+            "platform-engineering",
+            "ai"
+        ],
+        "description": "Shared infrastructure for building, running and governing LLM-powered agents: model access, tool and permission management, memory, orchestration, observability and evaluation. A platform lets many teams ship agents consistently instead of rebuilding the same plumbing.",
+        "weblink": "https://www.anthropic.com/engineering/building-effective-agents",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agentic Systems",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation",
+            "langchain",
+            "claude_ai"
+        ]
+    },
+    "agent_harnesses": {
+        "display_name": "Agent Harnesses",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "agents",
+            "llm",
+            "tool-use",
+            "orchestration"
+        ],
+        "description": "The runtime scaffolding around a model that turns it into an agent: the loop that calls tools, manages context and state, enforces guardrails and permissions, and records traces. A good harness makes agent behavior repeatable, testable and safe to operate.",
+        "weblink": "https://www.anthropic.com/engineering/building-effective-agents",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agentic Systems",
+        "related": [
+            "agent_platforms",
+            "agent_evaluation",
+            "llm_evaluation",
+            "python"
+        ]
+    },
+    "agent_evaluation": {
+        "display_name": "Agent Evaluation",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "agents",
+            "evaluation",
+            "testing",
+            "llm"
+        ],
+        "description": "Testing agents end to end: scored task suites, tool-call and trajectory checks, tracing and replay, and regression gates before release. Because agents act over many steps, evaluation looks at the whole trajectory rather than a single answer.",
+        "weblink": "https://www.anthropic.com/engineering/building-effective-agents",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Evaluation",
+        "related": [
+            "agent_harnesses",
+            "llm_evaluation",
+            "agent_platforms"
+        ]
+    },
+    "llm_evaluation": {
+        "display_name": "LLM Evaluation",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "llm",
+            "evaluation",
+            "ml-ops",
+            "ai"
+        ],
+        "description": "Measuring language-model quality with curated datasets, rubric or model-graded scoring and human review, tracked over time to catch regressions when prompts, models or retrieval change.",
+        "weblink": "https://docs.anthropic.com/en/docs/test-and-evaluate/develop-tests",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Evaluation",
+        "related": [
+            "agent_evaluation",
+            "rag",
+            "claude_ai",
+            "openai"
+        ]
+    },
+    "ai_classifiers": {
+        "display_name": "AI Classifiers",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "classification",
+            "machine-learning",
+            "nlp",
+            "ai"
+        ],
+        "description": "Model-based systems that assign labels or scores to content or events, from classical ML to transformer models. Production use depends on labeled data, feature and training pipelines, threshold calibration, evaluation and monitoring.",
+        "weblink": "https://developers.google.com/machine-learning/crash-course/classification",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Machine Learning Systems",
+        "related": [
+            "pytorch",
+            "scikit_learn",
+            "hugging_face",
+            "model_governance"
+        ]
+    },
+    "model_governance": {
+        "display_name": "Model Governance",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "governance",
+            "machine-learning",
+            "risk",
+            "mlops"
+        ],
+        "description": "Controls that keep statistical and ML models trustworthy in production: versioning, approval and audit trails, monitoring for drift and bias, documented decision logic, and clear ownership. Especially important for high-stakes domains such as identity and fraud.",
+        "weblink": "https://www.nist.gov/itl/ai-risk-management-framework",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Responsible AI",
+        "related": [
+            "ai_classifiers",
+            "agent_harnesses",
+            "scikit_learn",
+            "python"
+        ]
+    },
+    "rag": {
+        "display_name": "RAG",
+        "image": "automl.svg",
+        "professional_experience": true,
+        "years_of_experience": 1,
+        "tags": [
+            "rag",
+            "llm",
+            "retrieval",
+            "vector-search"
+        ],
+        "description": "Retrieval-Augmented Generation: retrieving relevant documents, typically through embeddings and a vector store, and giving them to a language model as context. Grounds answers in current, private data and reduces hallucination.",
+        "weblink": "https://aws.amazon.com/what-is/retrieval-augmented-generation/",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "LLM Frameworks",
+        "related": [
+            "langchain",
+            "pinecone",
+            "chroma",
+            "llm_evaluation"
+        ]
     }
 }
-
-
-
-

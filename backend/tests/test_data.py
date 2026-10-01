@@ -76,3 +76,30 @@ def test_resume_pdf_matches_the_current_role():
         "the first experience entry should be the current role"
     )
     assert (assets / manifest["pdf"]).is_file()
+
+
+def test_skill_related_keys_resolve():
+    """`related` links in the skill modal must point at real skills."""
+    skills = get_all_models()["skills"].root
+    for key, skill in skills.items():
+        for rel in skill.related:
+            assert rel in skills, f"{key} lists unknown related skill {rel}"
+            assert rel != key
+
+
+def test_experience_tech_stack_tags_name_known_skills():
+    """Tags that should open a skill modal must match a skill display name."""
+    models = get_all_models()
+    names = {s.display_name.lower() for s in models["skills"].root.values()}
+    experience = models["experience"].root
+    for role in ("together_ai", "prove", "meta"):
+        for tag in experience[role].tech_stack:
+            assert tag.replace("-", " ").lower() in names, f"{role}: unknown skill tag {tag}"
+
+
+def test_ai_work_leads_the_recent_roles():
+    """The AI/agents bullets come first: older roles only show two bullets."""
+    experience = get_all_models()["experience"].root
+    assert "agents platform" in experience["together_ai"].highlights[1].lower()
+    assert "govern" in experience["prove"].highlights[0].lower()
+    assert "classifiers" in experience["meta"].highlights[0].lower()
