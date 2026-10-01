@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { getJson, endpoints } from '../../shared/utils/api';
+import { readBootstrapData } from '../../shared/utils/bootstrap-data';
 import { toLookup } from '../../shared/utils/lookup';
 
 import type {
@@ -42,18 +43,50 @@ const cache: {
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<DataContextType>({
-    experienceData: null,
-    skillsData: null,
-    projectsData: null,
-    aboutMeData: null,
-    contactData: null,
-    isLoading: true,
+const LOADING_STATE: DataContextType = {
+  experienceData: null,
+  skillsData: null,
+  projectsData: null,
+  aboutMeData: null,
+  contactData: null,
+  isLoading: true,
+  error: null,
+};
+
+/**
+ * Ready state from the data the server inlined into index.html, or null.
+ * Read once, synchronously, before the first render: the hero then paints in
+ * the same frame the bundle runs instead of after the content API answers.
+ */
+function initialState(): DataContextType | null {
+  const boot = readBootstrapData();
+  if (!boot) return null;
+  // The dictionaries looked up by URL params get no prototype (see
+  // shared/utils/lookup); aboutMe/contact are only read by field.
+  const experience = toLookup(boot.experience as unknown as ExperienceData);
+  const skills = toLookup(boot.skills as unknown as SkillsData);
+  const projects = toLookup(boot.projects as unknown as ProjectsData);
+  const aboutMe = boot.aboutMe as unknown as AboutMe;
+  const contact = boot.contact as unknown as ContactData;
+  Object.assign(cache, { experience, skills, projects, aboutMe, contact, lastFetchTime: Date.now() });
+  return {
+    experienceData: experience,
+    skillsData: skills,
+    projectsData: projects,
+    aboutMeData: aboutMe,
+    contactData: contact,
+    isLoading: false,
     error: null,
-  });
+  };
+}
+
+export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<DataContextType>(() => initialState() ?? LOADING_STATE);
+  // Already populated from the inlined bootstrap block: nothing to fetch.
+  const needsFetch = useRef(state.isLoading);
 
   useEffect(() => {
+    if (!needsFetch.current) return;
     const controller = new AbortController();
 
     const fetchAllData = async () => {

@@ -93,6 +93,7 @@ def warm() -> None:
         collection_payload(name)
     for name in ("experience", "projects", "skills"):
         item_payloads(name)
+    bootstrap_json()
 
 
 def _etag_matches(if_none_match: str, *etags: str | None) -> bool:
@@ -123,3 +124,51 @@ def payload_response(request: Request, payload: JsonPayload) -> Response:
         headers["Content-Encoding"] = "gzip"
         return Response(payload.gzip_body, media_type="application/json", headers=headers)
     return Response(payload.body, media_type="application/json", headers=headers)
+
+
+# Keys of the bootstrap document, mapped to the collection each one carries.
+# The SPA's DataProvider reads the same names (frontend/src/app/providers).
+BOOTSTRAP_KEYS = {
+    "aboutMe": "aboutme",
+    "contact": "contact",
+    "experience": "experience",
+    "projects": "projects",
+    "skills": "skills",
+}
+
+# Characters that could end or confuse the surrounding <script> element. The
+# JSON stays valid because each is replaced by its \\u escape.
+_SCRIPT_SAFE = (
+    (b"<", b"\\u003c"),
+    (b">", b"\\u003e"),
+    (b"&", b"\\u0026"),
+    (" ".encode(), b"\\u2028"),
+    (" ".encode(), b"\\u2029"),
+)
+
+
+def script_safe(body: bytes) -> bytes:
+    """JSON bytes with every ``<``, ``>``, ``&``, U+2028 and U+2029 escaped.
+
+    The result parses to the same value and contains no ``<`` at all, so it
+    can sit inside a ``<script>`` element without ending it.
+    """
+    for raw, escaped in _SCRIPT_SAFE:
+        body = body.replace(raw, escaped)
+    return body
+
+
+@cache
+def bootstrap_json() -> bytes:
+    """Every first-render payload as one JSON object, safe to inline in HTML.
+
+    index.html embeds this in a non-executable ``<script type="application/json">``
+    block so the hero can render without waiting for five API round trips.
+    The output never contains ``<``, so no ``</script>`` or ``<!--`` can
+    appear inside the element, whatever the portfolio data holds.
+    """
+    parts = [
+        _render(key) + b":" + collection_payload(name).body
+        for key, name in BOOTSTRAP_KEYS.items()
+    ]
+    return script_safe(b"{" + b",".join(parts) + b"}")

@@ -16,6 +16,7 @@ import logging
 import mimetypes
 import os
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
 from email.utils import formatdate
 
@@ -122,6 +123,38 @@ class GzipCache:
         return count
 
 
+BOOTSTRAP_ELEMENT_ID = "bootstrap-data"
+_BOOTSTRAP_OPEN = f'<script type="application/json" id="{BOOTSTRAP_ELEMENT_ID}">'.encode()
+_BODY_CLOSE = b"</body>"
+
+
+def inject_bootstrap(html: bytes, data: bytes) -> bytes:
+    """Embed ``data`` (JSON) in ``html`` as a non-executable data block.
+
+    A ``type="application/json"`` script is never run, so the strict
+    ``script-src`` CSP still holds. ``data`` must already be script-safe (no
+    ``<`` at all, see ``api.content.bootstrap_json``); anything else is
+    refused rather than risk closing the element early.
+    """
+    if b"<" in data:
+        raise ValueError("bootstrap data must not contain '<'")
+    block = _BOOTSTRAP_OPEN + data + b"</script>"
+    at = html.rfind(_BODY_CLOSE)
+    if at == -1:
+        return html + block
+    return html[:at] + block + html[at:]
+
+
+@dataclass(frozen=True, slots=True)
+class IndexEntry:
+    mtime_ns: int
+    size: int
+    body: bytes
+    etag: str
+    gzip_body: bytes
+    gzip_etag: str
+
+
 def _accepts_gzip(scope: Scope) -> bool:
     # Same test GZipMiddleware applies.
     return "gzip" in Headers(scope=scope).get("accept-encoding", "")
@@ -145,15 +178,89 @@ class SPAStaticFiles(StaticFiles):
     """StaticFiles that serves index.html for unmatched HTML navigations and
     gzip-encoded text files from a per-process cache."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, bootstrap: Callable[[], bytes] | None = None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.gzip_cache = GzipCache()
+        # Returns the JSON inlined into every index.html response, so the SPA
+        # can render the hero without first fetching the content API.
+        self._bootstrap = bootstrap
+        self._index: IndexEntry | None = None
+        self._index_lock = threading.Lock()
+
+    @property
+    def index_path(self) -> str:
+        return os.path.join(str(self.directory), "index.html")
 
     def warm_gzip_cache(self) -> None:
         """Pre-compress the dist tree (blocking; run it in a thread)."""
         if self.directory is not None:
             count = self.gzip_cache.warm(str(self.directory))
             logger.info("Pre-compressed %d static files", count)
+            if self._bootstrap is not None:
+                try:
+                    self._index_entry(os.stat(self.index_path))
+                except OSError:
+                    pass
+
+    def _index_entry(self, stat_result: os.stat_result) -> IndexEntry | None:
+        """index.html with the bootstrap block, rebuilt only when the file changes."""
+        entry = self._index
+        if entry is not None and (entry.mtime_ns, entry.size) == (stat_result.st_mtime_ns, stat_result.st_size):
+            return entry
+        try:
+            with open(self.index_path, "rb") as f:
+                raw = f.read()
+        except OSError:
+            return None
+        if len(raw) != stat_result.st_size:
+            return None  # rewritten mid-read (local rebuild)
+        body = inject_bootstrap(raw, self._bootstrap())
+        # A content hash, not mtime: the body depends on the data as well as
+        # the file, and must not keep an old tag across a content-only deploy.
+        digest = hashlib.sha256(body).hexdigest()[:32]
+        entry = IndexEntry(
+            mtime_ns=stat_result.st_mtime_ns,
+            size=stat_result.st_size,
+            body=body,
+            etag=f'"{digest}"',
+            gzip_body=gzip.compress(body, compresslevel=9, mtime=0),
+            gzip_etag=f'"{digest}-gz"',
+        )
+        with self._index_lock:
+            self._index = entry
+        return entry
+
+    def _index_response(self, scope: Scope, status_code: int) -> Response | None:
+        try:
+            stat_result = os.stat(self.index_path)
+        except OSError:
+            return None
+        entry = self._index_entry(stat_result)
+        if entry is None:
+            return None
+        wants_gzip = _accepts_gzip(scope)
+        headers = {
+            # No Last-Modified: the body also depends on the content data,
+            # so the file's mtime would let If-Modified-Since return a stale
+            # 304. Revalidation goes through the content-hash ETag only.
+            "etag": entry.gzip_etag if wants_gzip else entry.etag,
+        }
+        if status_code == 200 and self.is_not_modified(Headers(headers), Headers(scope=scope)):
+            return NotModifiedResponse(Headers(headers))
+        if wants_gzip:
+            # GZipMiddleware adds Vary itself to the responses it passes
+            # through uncompressed; a pre-encoded one must carry its own.
+            headers["content-encoding"] = "gzip"
+            headers["vary"] = "Accept-Encoding"
+        return Response(
+            entry.gzip_body if wants_gzip else entry.body,
+            status_code=status_code,
+            media_type="text/html",
+            headers=headers,
+        )
+
+    def _is_index(self, path: str) -> bool:
+        return self._bootstrap is not None and os.path.abspath(path) == os.path.abspath(self.index_path)
 
     def file_response(
         self,
@@ -163,6 +270,10 @@ class SPAStaticFiles(StaticFiles):
         status_code: int = 200,
     ) -> Response:
         path = str(full_path)
+        if self._is_index(path):
+            response = self._index_response(scope, status_code)
+            if response is not None:
+                return response
         if (
             status_code == 200
             # HEAD and Range requests keep the plain FileResponse semantics.
@@ -194,12 +305,17 @@ class SPAStaticFiles(StaticFiles):
         except HTTPException as exc:
             if exc.status_code != 404 or not self._should_fallback(scope):
                 raise
-            index = os.path.join(str(self.directory), "index.html")
+            index = self.index_path
             if not os.path.isfile(index):
                 raise
+            status_code = spa_fallback_status(get_route_path(scope))
+            if self._bootstrap is not None:
+                response = self._index_response(scope, status_code)
+                if response is not None:
+                    return response
             return FileResponse(
                 index,
-                status_code=spa_fallback_status(get_route_path(scope)),
+                status_code=status_code,
                 media_type="text/html",
             )
 

@@ -116,7 +116,7 @@ def mount_static_files() -> SPAStaticFiles | None:
 
     if not os.path.exists(FRONTEND_DIST):
         return None
-    frontend = SPAStaticFiles(directory=FRONTEND_DIST, html=True)
+    frontend = SPAStaticFiles(directory=FRONTEND_DIST, html=True, bootstrap=content.bootstrap_json)
     app.mount("/", frontend, name="frontend")
     logger.info("Mounted frontend directory: %s", FRONTEND_DIST)
     return frontend
