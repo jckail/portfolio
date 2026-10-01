@@ -44,7 +44,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
   const titleId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const isFirstKey = useRef(true);
+  const shownKey = useRef(skillKey);
   const chatAvailable = useChatAvailable();
   const { experienceData, projectsData, isLoading } = useData();
 
@@ -64,10 +64,8 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
   // After moving to another skill, announce it by focusing its title and show
   // the top of the new content. Not on first mount: the focus trap owns that.
   useEffect(() => {
-    if (isFirstKey.current) {
-      isFirstKey.current = false;
-      return;
-    }
+    if (shownKey.current === skillKey) return;
+    shownKey.current = skillKey;
     titleRef.current?.focus({ preventScroll: true });
     const scroller = titleRef.current?.closest<HTMLElement>('[role="dialog"]');
     if (scroller) scroller.scrollTop = 0;
@@ -158,6 +156,11 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
           ) : (
             <>
               {usage.roles.length > 0 && (
+                <p className="skm-sublabel" aria-hidden="true">
+                  Roles
+                </p>
+              )}
+              {usage.roles.length > 0 && (
                 <ul className="skm-roles" aria-label="Roles">
                   {usage.roles.map(role => (
                     <li key={role.key}>
@@ -174,6 +177,11 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
                     </li>
                   ))}
                 </ul>
+              )}
+              {usage.projects.length > 0 && (
+                <p className="skm-sublabel" aria-hidden="true">
+                  Projects
+                </p>
               )}
               {usage.projects.length > 0 && (
                 <ul className="skm-chips" aria-label="Projects">
