@@ -2,6 +2,7 @@ import asyncio
 import hmac
 import logging
 import os
+import sys
 import time
 from datetime import UTC, datetime
 
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 
 from backend.app.config import get_settings
 from backend.app.middleware.auth_middleware import verify_admin_token
+from backend.app.utils import metrics
 from backend.app.utils.events import log_event
 from backend.app.utils.rate_limit import SlidingWindowLimiter, client_ip
 from backend.app.utils.supabase_client import SupabaseClient
@@ -59,19 +61,50 @@ class AdminLogFiles(BaseModel):
 
 
 class AdminAnalytics(BaseModel):
-    pageViews: int = 0
-    uniqueVisitors: int = 0
-    averageTimeOnSite: str = "0:00"
-    topReferrers: list[str] = []
+    """Process-local counters since this instance started.
+
+    Cloud Run runs several instances that start and stop independently, so
+    these are one instance's view, not site totals; site-wide figures live in
+    the log-based metrics.
+    """
+
+    scope: str = "process"
     lastUpdated: str
+    uptimeSeconds: int
+    events: dict[str, int]
+    eventsByName: dict[str, int]
+    contact: dict[str, int]
+    phone: dict[str, int]
+    rateLimitHits: dict[str, int]
 
 
 class AdminHealth(BaseModel):
-    status: str = "healthy"
+    scope: str = "process"
+    status: str
     lastChecked: str
-    diskSpace: str = "N/A"
-    memoryUsage: str = "N/A"
-    activeUsers: int = 0
+    version: str
+    uptimeSeconds: int
+    memoryUsageMb: float | None
+    requestsByStatusClass: dict[str, int]
+    serverErrorRate: float | None
+
+
+# A rate over a handful of requests is noise, so health only turns degraded
+# once there is enough traffic for the ratio to mean something.
+DEGRADED_MIN_REQUESTS = 20
+DEGRADED_ERROR_RATE = 0.05
+
+
+def _memory_usage_mb() -> float | None:
+    """Peak resident set size of this process, or None where unsupported."""
+    try:
+        import resource
+
+        peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    except (ImportError, OSError):
+        return None
+    # Linux reports kilobytes, macOS bytes.
+    return round(peak / (1024 * 1024 if sys.platform == "darwin" else 1024), 1)
 
 async def _pad_failure(started: float) -> None:
     remaining = LOGIN_FAILURE_MIN_SECONDS - (time.monotonic() - started)
@@ -173,8 +206,22 @@ async def verify_admin(user = Depends(verify_admin_token)) -> TokenStatus:
 
 @router.get("/analytics", response_model=AdminAnalytics)
 async def get_analytics(user = Depends(verify_admin_token)) -> AdminAnalytics:
-    """Placeholder: no analytics backend is wired up, so every count is zero."""
-    return AdminAnalytics(lastUpdated=datetime.now(UTC).isoformat())
+    """Event and rate-limit counters for this instance (see AdminAnalytics)."""
+    snap = metrics.snapshot()
+    events = snap["events"]
+    return AdminAnalytics(
+        lastUpdated=datetime.now(UTC).isoformat(),
+        uptimeSeconds=snap["uptime_seconds"],
+        events=events,
+        eventsByName=snap["event_names"],
+        contact={"sent": events.get("contact.sent", 0), "failed": events.get("contact.failed", 0)},
+        phone={
+            "requested": events.get("phone.requested", 0),
+            "revealed": events.get("phone.revealed", 0),
+            "failed": events.get("phone.failed", 0),
+        },
+        rateLimitHits=snap["rate_limit_hits"],
+    )
 
 def _read_log_files(log_dir: str) -> list[str]:
     """Collect lines from every .log file under log_dir (blocking)."""
@@ -201,5 +248,20 @@ async def get_admin_logs(user = Depends(verify_admin_token)) -> AdminLogFiles:
 
 @router.get("/health", response_model=AdminHealth)
 async def get_admin_health(user = Depends(verify_admin_token)) -> AdminHealth:
-    """Placeholder: no host metrics are collected, so these are fixed values."""
-    return AdminHealth(lastChecked=datetime.now(UTC).isoformat())
+    """Uptime, version, memory and the 5xx ratio for this instance."""
+    snap = metrics.snapshot()
+    classes = snap["requests_by_status_class"]
+    total = sum(classes.values())
+    error_rate = round(classes.get("5xx", 0) / total, 4) if total else None
+    degraded = (
+        total >= DEGRADED_MIN_REQUESTS and error_rate is not None and error_rate > DEGRADED_ERROR_RATE
+    )
+    return AdminHealth(
+        status="degraded" if degraded else "healthy",
+        lastChecked=datetime.now(UTC).isoformat(),
+        version=get_settings().git_commit or "unknown",
+        uptimeSeconds=snap["uptime_seconds"],
+        memoryUsageMb=_memory_usage_mb(),
+        requestsByStatusClass=classes,
+        serverErrorRate=error_rate,
+    )

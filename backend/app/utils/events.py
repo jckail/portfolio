@@ -74,5 +74,5 @@ def sanitize_fields(fields: dict) -> dict:
 def log_event(event: str, **fields) -> None:
     """Emit one structured event line and bump the process-local counter."""
     clean = sanitize_fields(fields)
-    metrics.count_event(event, clean.get("limiter") if event == "rate_limit.blocked" else None)
+    metrics.count_event(event, limiter=clean.get("limiter"), name=clean.get("name"))
     logger.info(event, extra={"event": event, "event_fields": clean})

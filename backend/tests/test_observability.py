@@ -391,3 +391,67 @@ def test_supabase_handler_skips_events_and_its_own_warnings():
     for record in (event, sink, normal):
         handler.emit(record)
     assert handler._queue.qsize() == 1
+
+
+# --- admin analytics / health (real, process-local data) ------------------
+
+@pytest.fixture
+def as_admin(client):
+    from backend.app.middleware.auth_middleware import verify_admin_token
+
+    client.app.dependency_overrides[verify_admin_token] = lambda: types.SimpleNamespace(email="admin@example.com")
+    yield
+    client.app.dependency_overrides.pop(verify_admin_token, None)
+
+
+def test_admin_analytics_reports_real_counters(client, as_admin, fake_mail):
+    from backend.app.utils.events import log_event
+
+    log_event("contact.sent")
+    log_event("contact.sent")
+    log_event("contact.failed", reason="send_failed")
+    log_event("phone.revealed")
+    log_event("rate_limit.blocked", limiter="events")
+    client.post("/api/events", json={"event": "chat_open"})
+    body = client.get("/api/admin/analytics").json()
+    assert body["scope"] == "process"
+    assert body["contact"] == {"sent": 2, "failed": 1}
+    assert body["phone"] == {"requested": 0, "revealed": 1, "failed": 0}
+    assert body["rateLimitHits"] == {"events": 1}
+    assert body["eventsByName"] == {"chat_open": 1}
+    assert body["uptimeSeconds"] >= 0
+    assert "pageViews" not in body
+
+
+def test_admin_health_reports_status_counts_and_version(client, as_admin):
+    client.get("/api/skills")
+    body = client.get("/api/admin/health").json()
+    assert body["status"] == "healthy"
+    assert body["requestsByStatusClass"].get("2xx", 0) >= 1
+    assert body["serverErrorRate"] == 0.0
+    assert body["version"]
+    assert body["uptimeSeconds"] >= 0
+    assert body["memoryUsageMb"] is None or body["memoryUsageMb"] > 0
+    assert "diskSpace" not in body and "activeUsers" not in body
+
+
+def test_admin_health_degrades_on_a_high_5xx_ratio(client, as_admin):
+    for _ in range(18):
+        metrics.count_status(200)
+    for _ in range(4):
+        metrics.count_status(500)
+    body = client.get("/api/admin/health").json()
+    assert body["status"] == "degraded"
+
+
+def test_admin_health_ignores_a_tiny_sample(client, as_admin):
+    metrics.count_status(500)
+    assert client.get("/api/admin/health").json()["status"] == "healthy"
+
+
+def test_metrics_key_space_is_bounded():
+    for i in range(metrics.MAX_KEYS + 50):
+        metrics.count_event(f"x{i}")
+    snap = metrics.snapshot()["events"]
+    assert len(snap) <= metrics.MAX_KEYS + 1
+    assert snap["other"] >= 50

@@ -4,10 +4,16 @@ import re
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import HTMLResponse
 
+from ..config import get_settings
+
 router = APIRouter()
 
 # Same-site relative paths only: path segments plus an optional query/hash
 _SAFE_PATH_RE = re.compile(r'^[A-Za-z0-9_\-./]*(\?[A-Za-z0-9_\-=&%.]*)?(#[A-Za-z0-9_\-]*)?$')
+
+# Bounds for explicit width/height: real screens, not 99999 or negatives.
+MIN_VIEWPORT_PX = 1
+MAX_VIEWPORT_PX = 4096
 
 # Grouped viewports by device types
 KNOWN_VIEWPORTS: dict[str, dict[str, tuple[int, int]]] = {
@@ -64,11 +70,17 @@ def get_default_for_device_type(device_type: str) -> tuple[int, int]:
 @router.get("/custom_resolution", response_class=HTMLResponse)
 async def custom_resolution(
     additional_path: str | None = Query("", description="Render Other Paths on the site"),
-    width: int | None = Query(None, description="Window width"),
-    height: int | None = Query(None, description="Window height"),
+    width: int | None = Query(None, ge=MIN_VIEWPORT_PX, le=MAX_VIEWPORT_PX, description="Window width"),
+    height: int | None = Query(None, ge=MIN_VIEWPORT_PX, le=MAX_VIEWPORT_PX, description="Window height"),
     device_name: str | None = Query(None, description="Device name"),
     device_type: str | None = Query(None, description="Device type (e.g., phones, tablets, laptops, desktops)"),
 ):
+    # The page frames the SPA at "/", which every response forbids framing
+    # (X-Frame-Options DENY, frame-ancestors 'none'), so it cannot render on a
+    # deployed site. It is a local viewport helper and is not served otherwise.
+    if not get_settings().dev_mode:
+        raise HTTPException(status_code=404, detail="Not found")
+
     # Handle resolution based on device_name
     if device_name:
         viewport = _VIEWPORTS_BY_NAME.get(device_name.lower())
