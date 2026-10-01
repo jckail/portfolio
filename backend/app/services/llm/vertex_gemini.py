@@ -7,6 +7,7 @@ from here carries only a short label, never response or exception text.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import AsyncIterator
 
 import httpx
@@ -34,6 +35,10 @@ VERTEX_BASE_URL = "https://aiplatform.googleapis.com/v1/publishers/google/models
 _BLOCKED_FINISH = frozenset({
     "SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "IMAGE_SAFETY", "LANGUAGE",
 })
+# A model id is a path segment of the request URL: refuse anything that could
+# add segments, a query or a different host (it comes from configuration, but
+# one bad env value should not be able to redirect the request).
+_MODEL_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 # Fields the Gemini function-declaration schema (an OpenAPI subset) accepts.
 _SCHEMA_KEYS = ("type", "description", "enum", "properties", "required", "items", "format", "nullable")
 
@@ -143,6 +148,8 @@ class VertexGeminiProvider:
         await self._http.aclose()
 
     async def stream(self, request: LLMRequest) -> AsyncIterator[Event]:
+        if not _MODEL_ID_RE.fullmatch(request.model or ""):
+            raise ProviderError("bad_model")
         url = f"{VERTEX_BASE_URL}/{request.model}:streamGenerateContent"
         headers = {"x-goog-api-key": self._api_key, "content-type": "application/json"}
         calls: list[ToolCall] = []

@@ -1,5 +1,6 @@
 import html
 import logging
+import re
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Body, HTTPException, Request, Response
@@ -74,7 +75,8 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
     sender = str(email_data.from_email)
     # Header fields must stay single-line: a CR/LF here would let a submitter
     # append their own SMTP headers.
-    safe_subject = email_data.subject.replace("\r", " ").replace("\n", " ").strip()
+    # \s also covers U+2028/U+2029/NEL, which some mail stacks treat as line breaks.
+    safe_subject = re.sub(r"\s+", " ", email_data.subject).strip()
     try:
         # Both bodies are built from visitor-supplied text, so the HTML
         # variant is escaped rather than interpolated raw.
