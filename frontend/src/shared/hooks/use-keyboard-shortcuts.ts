@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 
 import { setQueryParam } from '../utils/url-params';
 import { scrollToSection } from '../utils/scroll-utils';
+import { isChatAvailable } from '../utils/chat-availability';
 
 /**
  * Global shortcuts (ignored while typing in inputs):
- *   ? or /  → open AI chat
+ *   ? or /  → open AI chat (when the assistant is available)
  *   g then e/p/s/r/a → jump to Experience / Projects / Skills / Resume / About
  */
 export function useKeyboardShortcuts() {
@@ -30,7 +31,7 @@ export function useKeyboardShortcuts() {
 
       const key = event.key.toLowerCase();
 
-      if (key === '?' || key === '/') {
+      if ((key === '?' || key === '/') && isChatAvailable()) {
         event.preventDefault();
         setQueryParam('ai_chat', 'open');
         window.dispatchEvent(new PopStateEvent('popstate'));

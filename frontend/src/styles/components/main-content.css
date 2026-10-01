@@ -22,6 +22,9 @@
     width: 100%;
     height: 100%;
     padding: 5px;
+    /* Padding inside the width: on phones a content-box 95% + 30px padding
+       came out ~10px wider than the viewport and clipped the hero. */
+    box-sizing: border-box;
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
@@ -37,7 +40,6 @@
 .section {
     min-height: calc(100vh - var(--header-height));
     padding: 60px 0;
-    scroll-margin-top: calc(var(--header-height) + 20px);
     position: relative;
 }
 
@@ -77,14 +79,20 @@
 /* Ensure smooth scrolling behavior */
 html {
     scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+/* Hash links, nav jumps and scrollToSection() all land a section's heading
+   just below the fixed header. (scroll-margin on <html> did nothing.) */
+section[id] {
+    scroll-margin-top: calc(var(--header-height) + 16px);
 }
 
 @media (max-width: 768px) {
     
     .main {
         overflow-x: hidden;
-        width: 100vw;
+        /* 100vw includes the scrollbar, so it overflowed by its width */
+        width: 100%;
     }
 
     .main main {
@@ -95,8 +103,8 @@ html {
     }
 
     .main-content {
-        padding: 15px;
-        width: 95%;
+        padding: 15px var(--page-gutter);
+        width: 100%;
         overflow-x: hidden;
     }
     
@@ -117,4 +125,31 @@ html {
         padding: 0px 0 var(--spacing-lg);
         margin: 0;
     }
+}
+
+/* Space reserved for lazy sections while their chunk or data is in flight
+   (see SectionSlot in main-content.tsx). Approximations of each section's
+   rendered height, measured at 1440px and 390px; under- rather than
+   over-estimate so a fast load never leaves a gap that then collapses. */
+.section-slot--experience { --slot-min-height: 2800px; }
+.section-slot--projects { --slot-min-height: 1000px; }
+.section-slot--skills { --slot-min-height: 3700px; }
+.section-slot--resume { --slot-min-height: 1450px; }
+
+.section-slot.is-pending,
+.section-skeleton {
+    min-height: var(--slot-min-height, 400px);
+}
+
+.section-skeleton {
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+}
+
+@media (max-width: 768px) {
+    .section-slot--experience { --slot-min-height: 3600px; }
+    .section-slot--projects { --slot-min-height: 2400px; }
+    .section-slot--skills { --slot-min-height: 3500px; }
+    .section-slot--resume { --slot-min-height: 1100px; }
 }

@@ -4,7 +4,7 @@ import { useData } from '../../providers/data-provider';
 import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
-import { findSkillKey } from '../../../shared/utils/skills';
+import { findSkillKey, formatTag } from '../../../shared/utils/skills';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
 
@@ -24,6 +24,29 @@ const prefetchSkillModal = () => {
   const modalPromise = import('./modals/SkillModal');
   return modalPromise;
 };
+
+// Company slug (the shareable ?company= value) <-> experience data key.
+// Maps, not object literals: the slug comes from the URL, and a plain object
+// would answer `constructor`/`__proto__` from Object.prototype.
+const SLUG_TO_KEY = new Map<string, string>([
+  ['together-ai', 'together_ai'],
+  ['prove-identity', 'prove'],
+  ['meta-facebook', 'meta'],
+  ['deloitte', 'deloitte'],
+  ['wide-open-west', 'wide_open_west'],
+  ['common-spirit-health', 'common_spirit_health'],
+  ['acustream-r1', 'acustream'],
+]);
+const KEY_TO_SLUG = new Map(Array.from(SLUG_TO_KEY, ([slug, key]) => [key, slug]));
+
+/** Resolve a ?company= value to an own key of the experience data, if any. */
+export function resolveExperienceKey(
+  experienceData: Record<string, ExperienceItem>,
+  slug: string
+): string | undefined {
+  const key = SLUG_TO_KEY.get(slug) ?? slug;
+  return Object.hasOwn(experienceData, key) ? key : undefined;
+}
 
 const ExperienceTimeline = memo(({ 
   experience, 
@@ -78,11 +101,11 @@ const ExperienceTimeline = memo(({
                     style={{ cursor: 'pointer' }}
                     {...buttonize(() => onSelectSkill(skillKey))}
                   >
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 ) : (
                   <span key={index} className="skill-tag">
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 );
               })}
@@ -109,31 +132,9 @@ const Experience: React.FC = () => {
   const { selectedExperience, setSelectedExperience } = useExperience();
   const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
 
-  // Map company slugs to experience keys
-  const companyKeyMap: { [key: string]: string } = {
-    'together-ai': 'together_ai',
-    'prove-identity': 'prove',
-    'meta-facebook': 'meta',
-    'deloitte': 'deloitte',
-    'wide-open-west': 'wide_open_west',
-    'common-spirit-health': 'common_spirit_health',
-    'acustream-r1': 'acustream'
-  };
-
-  // Map experience keys to company slugs
-  const keyCompanyMap: { [key: string]: string } = {
-    'together_ai': 'together-ai',
-    'prove': 'prove-identity',
-    'meta': 'meta-facebook',
-    'deloitte': 'deloitte',
-    'wide_open_west': 'wide-open-west',
-    'common_spirit_health': 'common-spirit-health',
-    'acustream': 'acustream-r1'
-  };
-
   const handleSelectExperience = (key: string) => {
     // useExperience mirrors this state into the ?company= URL parameter
-    setSelectedExperience(keyCompanyMap[key] || key);
+    setSelectedExperience(KEY_TO_SLUG.get(key) ?? key);
   };
 
   if (error) return <div>Error: {error}</div>;
@@ -147,6 +148,10 @@ const Experience: React.FC = () => {
       </section>
     );
   }
+
+  const experienceKey = selectedExperience
+    ? resolveExperienceKey(experienceData, selectedExperience)
+    : undefined;
 
   return (
     <section id="experience" className="section-container">
@@ -162,11 +167,11 @@ const Experience: React.FC = () => {
         />
       </div>
 
-      {selectedExperience && experienceData[companyKeyMap[selectedExperience] || selectedExperience] && (
+      {experienceKey && (
         <Suspense fallback={<LoadingSpinner />}>
           <ExperienceModal
-            experience={experienceData[companyKeyMap[selectedExperience] || selectedExperience]}
-            experienceKey={selectedExperience}
+            experience={experienceData[experienceKey]}
+            experienceKey={selectedExperience ?? undefined}
             skillsData={skillsData}
             onClose={() => setSelectedExperience(null)}
             onSelectSkill={setSelectedSkill}
@@ -174,7 +179,7 @@ const Experience: React.FC = () => {
         </Suspense>
       )}
 
-      {selectedSkill && skillsData[selectedSkill] && (
+      {selectedSkill && Object.hasOwn(skillsData, selectedSkill) && (
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
             skill={skillsData[selectedSkill]}

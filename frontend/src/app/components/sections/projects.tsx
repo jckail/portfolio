@@ -114,7 +114,7 @@ const Projects: React.FC = () => {
         </div>
       </div>
 
-      {selectedProject && projectsData[selectedProject] && (
+      {selectedProject && Object.hasOwn(projectsData, selectedProject) && (
         <Suspense fallback={<LoadingSpinner />}>
           <ProjectModal
             projectKey={selectedProject}
@@ -129,7 +129,7 @@ const Projects: React.FC = () => {
         </Suspense>
       )}
 
-      {selectedSkill && skillsData?.[selectedSkill] && (
+      {selectedSkill && skillsData && Object.hasOwn(skillsData, selectedSkill) && (
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
             skill={skillsData[selectedSkill]}

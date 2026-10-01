@@ -5,6 +5,12 @@
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
+  /* Old names some stylesheets still use; prefer -sm / -md */
+  --spacing-s: var(--spacing-sm);
+  --spacing-m: var(--spacing-md);
+
+  /* Mobile side gutter so cards never touch the screen edge */
+  --page-gutter: 16px;
 
   /* Border radius */
   --radius-sm: 4px;
@@ -17,14 +23,21 @@
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 
-  /* Z-index */
+  /* Z-index. Dialogs are portaled to <body> and sit above every other
+     body-level layer: the cookie/telemetry banners (--z-overlay) and the chat
+     button and window (9999, set inline in the chat components). The command
+     palette (12000) and reading progress bar (11000) stay above dialogs. */
   --z-base: 1;
   --z-above: 10;
   --z-modal: 100;
   --z-overlay: 1000;
+  --z-header: 1000;
+  --z-dialog: 10500;
 
   /* Layout */
-  --header-height: 80px;
+  /* The header's full border-box height (it used to render 16px taller
+     than this token because of content-box padding) */
+  --header-height: 96px;
   --max-width: 1080px;
 
   /* Transitions */
@@ -44,13 +57,9 @@
 
 @media (max-width: 768px) {
   :root {
-      --header-height: 50px;
+      --header-height: 66px;
   }
 
-  html {
-    scroll-behavior: smooth;
-    scroll-margin-top: calc(var(--header-height) + 75px);
-}
   .main-content {
       padding-top: 55px;
   }

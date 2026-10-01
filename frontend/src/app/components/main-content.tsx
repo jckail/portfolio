@@ -6,6 +6,7 @@ import TLDR from './sections/about';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
 import { useAppLogic } from '../providers/app-logic-provider';
+import { useData } from '../providers/data-provider';
 import { ErrorBoundary } from './error-boundary';
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { useThemeStore } from '../../shared/stores/theme-store';
@@ -68,8 +69,32 @@ const AdminLogin = React.lazy(() =>
   }))
 );
 
-// Loading fallback component
-const LoadingFallback = LoadingSpinner;
+type SlotName = 'experience' | 'projects' | 'skills' | 'resume';
+
+/**
+ * Reserves roughly a section's rendered height until both its chunk and the
+ * shared resume data have arrived. Without this each section starts as a 48px
+ * spinner and then grows to thousands of pixels, shoving everything below it
+ * (the main source of layout shift on load). Heights live in main-content.css.
+ */
+const SectionSlot: React.FC<{ name: SlotName; children: React.ReactNode }> = ({ name, children }) => {
+  const { isLoading } = useData();
+  return (
+    <div className={`section-slot section-slot--${name}${isLoading ? ' is-pending' : ''}`}>
+      <ErrorBoundary>
+        <Suspense
+          fallback={
+            <div className="section-skeleton" aria-hidden="true">
+              <LoadingSpinner />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
+      </ErrorBoundary>
+    </div>
+  );
+};
 
 // Separate Admin components to reduce main content complexity
 const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void }> = ({ 
@@ -82,7 +107,10 @@ const AdminComponents: React.FC<{ isAdminModalOpen: boolean; onClose: () => void
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingFallback />}>
+      {/* No spinner: AdminHandler renders nothing visible, and a fallback here
+          sat above the page for a moment on every load, then vanished and
+          pulled the whole page up (a layout shift). */}
+      <Suspense fallback={null}>
         {isAdminModalOpen && (
           <AdminLogin 
             isOpen={isAdminModalOpen} 
@@ -167,33 +195,27 @@ const MainContentInner: React.FC<MainContentProps> = () => {
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <Experience />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="experience">
+            <Experience />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <Projects />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="projects">
+            <Projects />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <TechnicalSkills />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="skills">
+            <TechnicalSkills />
+          </SectionSlot>
 
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
-              <MyResume />
-            </Suspense>
-          </ErrorBoundary>
+          <SectionSlot name="resume">
+            <MyResume />
+          </SectionSlot>
 
           {/* Doodle section with smooth transition */}
+          {/* No spinner fallback: the doodle is collapsed until opened, so a
+              48px placeholder would only appear and then vanish (a shift). */}
           <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback />}>
+            <Suspense fallback={null}>
               <Doodle isVisible={showDoodle} isPartyMode={isPartyMode} />
             </Suspense>
           </ErrorBoundary>

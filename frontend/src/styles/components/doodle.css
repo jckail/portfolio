@@ -52,7 +52,8 @@
 }
 
 .doodle-content {
-  @apply w-full;
+  /* auto, not w-full: 100% plus the 1rem side margins overflowed the viewport */
+  width: auto;
   flex: 1;
   min-height: 70vh;
   border: var(--border-thickness) solid var(--primary-border);

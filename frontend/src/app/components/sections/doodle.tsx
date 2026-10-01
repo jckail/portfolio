@@ -24,6 +24,7 @@ const COLORS = [
 
 const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
   const drawing = useRef(false);
   const lastPoint = useRef<Point | null>(null);
   const colorIndex = useRef(0);
@@ -49,6 +50,14 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
       ctx.lineJoin = 'round';
     }
   }, []);
+
+  // Hidden, the board is only collapsed (max-height 0, opacity 0), so its
+  // Clear button stayed in the tab order inside an aria-hidden section.
+  // inert removes it from focus and the accessibility tree. React 18 has no
+  // inert prop, so set the attribute directly.
+  useEffect(() => {
+    sectionRef.current?.toggleAttribute('inert', !active);
+  }, [active]);
 
   useEffect(() => {
     if (!active) return;
@@ -125,6 +134,7 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
 
   return (
     <section
+      ref={sectionRef}
       id="doodle"
       className={`doodle-container ${containerClass}`}
       aria-hidden={!active}

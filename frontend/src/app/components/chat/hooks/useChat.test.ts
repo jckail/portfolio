@@ -1,8 +1,9 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { useChat } from './useChat';
+import { useChat, getChatSessionId } from './useChat';
 import { CHAT_STORAGE_KEY, WELCOME_MESSAGE } from '../chat-storage';
+import { COOKIE_CONSENT_KEY } from '../../../../shared/utils/cookie-consent';
 
 vi.mock('../../../../shared/utils/analytics', () => ({
   trackChatMessage: vi.fn().mockResolvedValue(undefined),
@@ -138,6 +139,66 @@ describe('useChat', () => {
 
     const first = JSON.parse(FakeWebSocket.instances[0].sent[0]);
     expect(first.type).toBe('context');
+  });
+
+  it('leaves admin telemetry and marked subtrees out of page context', () => {
+    const root = document.createElement('div');
+    root.id = 'root';
+    root.innerHTML =
+      '<p>public resume text</p>' +
+      '<div class="telemetry-banner">console: secret admin log</div>' +
+      '<div data-no-chat-context>hidden widget</div>' +
+      '<div class="cookie-banner">cookie text</div>';
+    document.body.appendChild(root);
+    try {
+      const { result } = renderHook(() => useChat());
+      act(() => {
+        result.current.initializeChat();
+        FakeWebSocket.instances[0].simulateOpen();
+      });
+      const context = JSON.parse(
+        JSON.parse(FakeWebSocket.instances[0].sent[0]).content
+      ).text as string;
+      expect(context).toContain('public resume text');
+      expect(context).not.toContain('secret admin log');
+      expect(context).not.toContain('hidden widget');
+      expect(context).not.toContain('cookie text');
+    } finally {
+      root.remove();
+    }
+  });
+
+  describe('chat session id', () => {
+    afterEach(() => {
+      localStorage.removeItem(COOKIE_CONSENT_KEY);
+    });
+
+    it('uses a random chat id, not the analytics id, without consent', () => {
+      const id = getChatSessionId();
+      expect(id).toMatch(/^chat_/);
+      expect(id).not.toBe('sid_test');
+      // Stable within the tab so stored turns stay grouped
+      expect(getChatSessionId()).toBe(id);
+    });
+
+    it('uses the analytics session id once analytics consent is given', () => {
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+      expect(getChatSessionId()).toBe('sid_test');
+    });
+
+    it('sends the chat id in the ga_session_id field the backend reads', async () => {
+      const { result } = renderHook(() => useChat());
+      act(() => {
+        result.current.initializeChat();
+        FakeWebSocket.instances[0].simulateOpen();
+      });
+      await act(async () => {
+        await result.current.handleSuggestedPrompt('hi');
+      });
+      const frames = FakeWebSocket.instances[0].sent.map(raw => JSON.parse(raw));
+      const message = frames.find(f => f.type === 'message');
+      expect(message.ga_session_id).toMatch(/^chat_/);
+    });
   });
 
   it('replays persisted history to the server on reconnect', () => {

@@ -1,38 +1,53 @@
 import React, { lazy, Suspense } from 'react';
 
-// Lazy load SVG components
-const SVG_COMPONENTS: Record<string, React.LazyExoticComponent<React.FC<React.SVGProps<SVGSVGElement>>>> = {
-  'airbyte.svg': lazy(() => import('../../../assets/icons/airbyte.svg?react')),
-  'apacheflink.svg': lazy(() => import('../../../assets/icons/apacheflink.svg?react')),
-  'apachepulsar.svg': lazy(() => import('../../../assets/icons/apachepulsar.svg?react')),
-  'apacherocketmq.svg': lazy(() => import('../../../assets/icons/apacherocketmq.svg?react')),
-  'aws.svg': lazy(() => import('../../../assets/icons/aws.svg?react')),
-  'datadog.svg': lazy(() => import('../../../assets/icons/datadog.svg?react')),
-  'django.svg': lazy(() => import('../../../assets/icons/django.svg?react')),
-  'duckdb.svg': lazy(() => import('../../../assets/icons/duckdb.svg?react')),
-  'flask.svg': lazy(() => import('../../../assets/icons/flask.svg?react')),
-  'jupyter.svg': lazy(() => import('../../../assets/icons/jupyter.svg?react')),
-  'kafka.svg': lazy(() => import('../../../assets/icons/kafka.svg?react')),
-  'kubernetes.svg': lazy(() => import('../../../assets/icons/kubernetes.svg?react')),
-  'langchain.svg': lazy(() => import('../../../assets/icons/langchain.svg?react')),
-  'llamaindex.svg': lazy(() => import('../../../assets/icons/llamaindex.svg?react')),
-  'milvus_black.svg': lazy(() => import('../../../assets/icons/milvus_black.svg?react')),
-  'neo4j.svg': lazy(() => import('../../../assets/icons/neo4j.svg?react')),
-  'openai.svg': lazy(() => import('../../../assets/icons/openai.svg?react')),
-  'pandas.svg': lazy(() => import('../../../assets/icons/pandas.svg?react')),
-  'pinecone.svg': lazy(() => import('../../../assets/icons/pinecone.svg?react')),
-  'prefect.svg': lazy(() => import('../../../assets/icons/prefect.svg?react')),
-  'retool.svg': lazy(() => import('../../../assets/icons/retool.svg?react')),
-  'rust.svg': lazy(() => import('../../../assets/icons/rust.svg?react')),
-  'scikit_learn.svg': lazy(() => import('../../../assets/icons/scikit_learn.svg?react')),
-  'socketdotio.svg': lazy(() => import('../../../assets/icons/socketdotio.svg?react')),
-  'splunk.svg': lazy(() => import('../../../assets/icons/splunk.svg?react')),
-  'sqlalchemy.svg': lazy(() => import('../../../assets/icons/sqlalchemy.svg?react')),
-  'timescale.svg': lazy(() => import('../../../assets/icons/timescale.svg?react')),
-  'trino.svg': lazy(() => import('../../../assets/icons/trino.svg?react')),
-  'trpc.svg': lazy(() => import('../../../assets/icons/trpc.svg?react')),
-  'postgresql.svg': lazy(() => import('../../../assets/icons/postgresql.svg?react')),
-};
+/**
+ * Names served from the inline SVG set in ./skill-icon-set (kept in sync by
+ * SkillIcon.test.tsx). Anything else falls back to /images/icons/<name>.
+ */
+export const INLINE_SKILL_ICONS: ReadonlySet<string> = new Set([
+  'airbyte.svg',
+  'apacheflink.svg',
+  'apachepulsar.svg',
+  'apacherocketmq.svg',
+  'aws.svg',
+  'datadog.svg',
+  'django.svg',
+  'duckdb.svg',
+  'flask.svg',
+  'jupyter.svg',
+  'kafka.svg',
+  'kubernetes.svg',
+  'langchain.svg',
+  'llamaindex.svg',
+  'milvus_black.svg',
+  'neo4j.svg',
+  'openai.svg',
+  'pandas.svg',
+  'pinecone.svg',
+  'prefect.svg',
+  'retool.svg',
+  'rust.svg',
+  'scikit_learn.svg',
+  'socketdotio.svg',
+  'splunk.svg',
+  'sqlalchemy.svg',
+  'timescale.svg',
+  'trino.svg',
+  'trpc.svg',
+  'postgresql.svg',
+]);
+
+// One chunk for the whole set, fetched the first time any inline icon renders.
+const loadIconSet = () => import('./skill-icon-set');
+
+const InlineIcon = lazy(() =>
+  loadIconSet().then(({ default: set }) => ({
+    default: ({ name, ...svgProps }: React.SVGProps<SVGSVGElement> & { name: string }) => {
+      const Svg = set[name];
+      return Svg ? <Svg {...svgProps} /> : null;
+    },
+  }))
+);
 
 export interface IconProps {
   name: string;
@@ -42,12 +57,11 @@ export interface IconProps {
 }
 
 const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
-  const SvgComponent = SVG_COMPONENTS[name];
-
-  if (SvgComponent) {
+  if (INLINE_SKILL_ICONS.has(name)) {
     return (
       <Suspense fallback={<div className={`${className} skeleton`} style={{ width: size, height: size }} />}>
-        <SvgComponent
+        <InlineIcon
+          name={name}
           width={size}
           height={size}
           className={className}

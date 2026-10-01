@@ -226,7 +226,7 @@ const TechnicalSkills: React.FC = () => {
         )}
       </div>
 
-      {selectedSkill && skillsData[selectedSkill] && (
+      {selectedSkill && Object.hasOwn(skillsData, selectedSkill) && (
         <Suspense fallback={<LoadingSpinner />}>
           <SkillModal
             skill={skillsData[selectedSkill]}

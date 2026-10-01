@@ -11,13 +11,17 @@
 
 .reading-progress-bar {
   height: 100%;
-  width: 0;
+  width: 100%;
   background: linear-gradient(
     90deg,
     var(--primary-border, #38bdf8),
     var(--primary-hover, #a78bfa)
   );
-  transition: width 80ms linear;
+  /* Scaled from the left by ReadingProgress; transform avoids a layout per frame */
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  transition: transform 80ms linear;
 }
 
 .party-burst::after {

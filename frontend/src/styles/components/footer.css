@@ -76,3 +76,24 @@
     font-size: 0.7rem;
   }
 }
+
+/* Phones: three links side by side squeezed each into a narrow column and
+   wrapped mid-label ("Cookie / settings"). Stack them instead, one per line,
+   each a full-height tap target (WCAG 2.5.8). */
+@media (max-width: 480px) {
+  .footer-links {
+    flex-direction: column;
+    align-items: center;
+    margin-left: 0;
+    gap: 4px;
+  }
+
+  .footer-link,
+  .footer-link-doodle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+}

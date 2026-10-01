@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
 
 import ProjectIcon from '../../../../shared/components/project-icon/ProjectIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
-import { findSkillKey } from '../../../../shared/utils/skills';
+import { findSkillKey, formatTag } from '../../../../shared/utils/skills';
 import { trackModalView } from '../../../../shared/utils/analytics';
-import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
 import type { Project } from '../../../../types/resume';
@@ -52,8 +52,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   onClose,
   onSelectSkill,
 }) => {
-  useEscapeKey(onClose);
-  const trapRef = useFocusTrap(true);
+  const trapRef = useFocusTrap(true, onClose);
+  const titleId = useId();
 
   useEffect(() => {
     trackModalView(projectKey, 'project', project.title);
@@ -63,7 +63,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const detail =
     project.description_detail?.trim() || project.description;
 
-  return (
+  // Portaled to <body>: see ExperienceModal
+  return createPortal(
     <div
       className="skill-modal-overlay"
       role="presentation"
@@ -76,13 +77,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         className="skill-modal-content project-modal-content"
         role="dialog"
         aria-modal="true"
-        aria-label={project.title}
+        aria-labelledby={titleId}
       >
         <button className="modal-close-button" onClick={onClose} aria-label="Close">
           &times;
         </button>
         <div className="modal-header">
-          <h5>{project.title}</h5>
+          <h2 id={titleId}>{project.title}</h2>
           <div className="modal-icon-wrapper">
             <div className="icon-wrapper">
               <ProjectIcon
@@ -119,11 +120,11 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                     style={{ cursor: 'pointer' }}
                     {...buttonize(() => onSelectSkill(skillKey))}
                   >
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 ) : (
                   <span key={index} className="skill-tag">
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 );
               })}
@@ -155,7 +156,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

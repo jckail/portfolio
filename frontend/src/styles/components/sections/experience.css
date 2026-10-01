@@ -181,7 +181,7 @@
   margin-top: var(--spacing-lg);
 }
 
-.highlights-section h4 {
+.highlights-section h3 {
   color: var(--text-color);
   margin-bottom: var(--spacing-sm);
 }

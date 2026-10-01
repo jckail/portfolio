@@ -3,6 +3,7 @@ import React, { memo, lazy, Suspense } from 'react';
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import { buttonize } from '../../../shared/utils/a11y';
+import { useChatAvailable } from '../../../shared/hooks/use-chat-available';
 import { findSkillKey } from '../../../shared/utils/skills';
 import { buildHeadshotSrcSet } from '../../../shared/utils/responsive-image';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
@@ -14,13 +15,47 @@ import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 
 import type { AboutMe, Contact } from '../../../types/resume';
 import type { Skill } from './modals/SkillModal';
+import type { ExperienceItem } from './modals/ExperienceModal';
 
 const ContactModal = lazy(() => import('./modals/ContactModal'));
 const SkillModal = lazy(() => import('./modals/SkillModal'));
 
+export interface CurrentRole {
+  title: string;
+  company?: string;
+}
+
+/**
+ * The role to headline in the hero: the experience entry whose date runs to
+ * "Present", falling back to the contact title when no entry is current.
+ */
+export function findCurrentRole(
+  experienceData: Record<string, ExperienceItem> | null | undefined,
+  fallbackTitle?: string
+): CurrentRole | null {
+  const current = Object.values(experienceData ?? {}).find(item =>
+    /\bpresent\b/i.test(item?.date ?? '')
+  );
+  if (current?.title) {
+    return { title: current.title, company: current.company };
+  }
+  return fallbackTitle ? { title: fallbackTitle } : null;
+}
+
+const isApplePlatform = () =>
+  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+
+/** Opens the command palette by replaying the shortcut its host listens for. */
+const openCommandPalette = () => {
+  window.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: isApplePlatform(), bubbles: true })
+  );
+};
+
 const TLDRContent = memo(({
   aboutMeData,
   contactData,
+  currentRole,
   skillsData,
   onResumeClick,
   onContactSelect,
@@ -28,11 +63,14 @@ const TLDRContent = memo(({
 }: {
   aboutMeData: AboutMe;
   contactData: Contact;
+  currentRole: CurrentRole | null;
   skillsData: Record<string, Skill>;
   onResumeClick: () => void;
   onContactSelect: () => void;
   onSkillSelect: (key: string) => void;
 }) => {
+  // Hidden when the assistant is unavailable: the launcher it clicks is gone.
+  const chatAvailable = useChatAvailable();
   const handleAIClick = () => {
     const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
     if (chatButton) {
@@ -45,11 +83,28 @@ const TLDRContent = memo(({
     .map(p => p.trim())
     .filter(Boolean);
 
+  const fullName = [contactData.firstName, contactData.lastName].filter(Boolean).join(' ');
+  const shortcutModifier = isApplePlatform() ? '⌘' : 'Ctrl';
+
   return (
     <div className="about-section">
-      <h2>{aboutMeData.greeting}</h2>
-      <div className="about-content">
-        <p>{aboutMeData.description}</p>
+      <div className="about-hero">
+        <div className="about-hero-copy">
+          <p className="about-eyebrow">{aboutMeData.greeting}</p>
+          <h2 className="about-name">{fullName || aboutMeData.greeting}</h2>
+          {currentRole && (
+            <p className="about-role">
+              {currentRole.title}
+              {currentRole.company && (
+                <>
+                  {' '}<span className="about-role-at">at</span>{' '}
+                  <span className="about-role-company">{currentRole.company}</span>
+                </>
+              )}
+            </p>
+          )}
+          <p className="about-description">{aboutMeData.description}</p>
+        </div>
 
         <div className="headshot-container">
           <img
@@ -62,6 +117,29 @@ const TLDRContent = memo(({
             height="200"
           />
         </div>
+      </div>
+
+      <div className="about-actions">
+        <ErrorBoundary>
+          <SocialLinks
+            github={contactData.github}
+            linkedin={contactData.linkedin}
+            email={contactData.email}
+            onResumeClick={onResumeClick}
+            onContactSelect={onContactSelect}
+          />
+        </ErrorBoundary>
+        <button
+          type="button"
+          className="about-shortcut-hint"
+          onClick={openCommandPalette}
+          title={`Quick navigation (${shortcutModifier}+K)`}
+          aria-keyshortcuts={isApplePlatform() ? 'Meta+K' : 'Control+K'}
+        >
+          <kbd>{shortcutModifier}</kbd>
+          <kbd>K</kbd>
+          <span className="about-shortcut-label">Quick nav</span>
+        </button>
       </div>
 
       {aboutMeData.primary_skills?.length > 0 && (
@@ -102,22 +180,15 @@ const TLDRContent = memo(({
         {bioParagraphs.map((paragraph, index) => (
           <p key={index}>{paragraph}</p>
         ))}
-        <ErrorBoundary>
-          <SocialLinks
-            github={contactData.github}
-            linkedin={contactData.linkedin}
-            email={contactData.email}
-            onResumeClick={onResumeClick}
-            onContactSelect={onContactSelect}
-          />
-        </ErrorBoundary>
-        <p>
-          Ask my{' '}
-          <span className="ai-highlight" style={{ cursor: 'pointer' }} {...buttonize(handleAIClick)}>
-            AI Assistant 🤖
-          </span>{' '}
-          below for more details about me.
-        </p>
+        {chatAvailable && (
+          <p>
+            Ask my{' '}
+            <span className="ai-highlight" style={{ cursor: 'pointer' }} {...buttonize(handleAIClick)}>
+              AI Assistant 🤖
+            </span>{' '}
+            below for more details about me.
+          </p>
+        )}
       </div>
 
       {aboutMeData.open_to && (
@@ -138,7 +209,7 @@ const TLDRContent = memo(({
 TLDRContent.displayName = 'TLDRContent';
 
 const TLDR: React.FC = () => {
-  const { aboutMeData, contactData, skillsData, isLoading, error } = useData();
+  const { aboutMeData, contactData, experienceData, skillsData, isLoading, error } = useData();
   const { selectedContact, setSelectedContact } = useContact();
   const [selectedSkill, setSelectedSkill] = React.useState<string | null>(null);
 
@@ -149,14 +220,19 @@ const TLDR: React.FC = () => {
   if (error) return <div className="error-aboutme">Error: {error}</div>;
 
   if (isLoading || !aboutMeData || !contactData || !skillsData) {
+    // Sized like the rendered hero so its arrival doesn't push the page down.
     return (
-      <section id="about" className="section-container">
+      <section id="about" className="section-container" aria-busy="true">
         <div className="section-content">
-          <LoadingSpinner />
+          <div className="about-section about-skeleton">
+            <LoadingSpinner />
+          </div>
         </div>
       </section>
     );
   }
+
+  const currentRole = findCurrentRole(experienceData, contactData.title);
 
   return (
     <section id="about" className="section-container">
@@ -165,6 +241,7 @@ const TLDR: React.FC = () => {
           <TLDRContent
             aboutMeData={aboutMeData}
             contactData={contactData}
+            currentRole={currentRole}
             skillsData={skillsData}
             onResumeClick={handleResumeClick}
             onContactSelect={() => setSelectedContact(true)}

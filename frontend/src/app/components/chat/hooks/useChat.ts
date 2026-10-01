@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 
 import { Message } from '../../../../types/chat';
 import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
+import { hasAnalyticsConsent } from '../../../../shared/utils/cookie-consent';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 import {
   executeChatAction,
@@ -28,6 +29,40 @@ function createClientId(): string {
   }
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }
+
+const CHAT_SESSION_KEY = 'chat_session_id';
+
+/**
+ * ID the backend stores chat turns under (sent as `ga_session_id`, the
+ * field name the server expects). It is only joined to the analytics session
+ * when the visitor has accepted analytics cookies; otherwise it is a random
+ * per-tab ID with no link to GA.
+ */
+export function getChatSessionId(): string {
+  if (hasAnalyticsConsent()) return getSessionId();
+  try {
+    let id = sessionStorage.getItem(CHAT_SESSION_KEY);
+    if (!id) {
+      id = `chat_${createClientId()}`;
+      sessionStorage.setItem(CHAT_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return `chat_${createClientId()}`;
+  }
+}
+
+// Subtrees never sent to the model as page context: the chat itself, the
+// cookie banner, and admin-only UI (telemetry shows console output and
+// errors). Mark any other element with data-no-chat-context to exclude it.
+const CONTEXT_EXCLUDE_SELECTOR = [
+  '[role="dialog"]',
+  '.MuiDialog-root',
+  '.telemetry-banner',
+  '.admin-login-overlay',
+  '.cookie-banner',
+  '[data-no-chat-context]',
+].join(', ');
 
 export const useChat = () => {
   const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
@@ -99,10 +134,7 @@ export const useChat = () => {
     if (!mainContent) return '';
 
     const clone = mainContent.cloneNode(true) as HTMLElement;
-    const chatDialog = clone.querySelector('[role="dialog"]');
-    if (chatDialog) {
-      chatDialog.remove();
-    }
+    clone.querySelectorAll(CONTEXT_EXCLUDE_SELECTOR).forEach(el => el.remove());
 
     const context = {
       text: clone.textContent?.trim() || '',
@@ -120,7 +152,7 @@ export const useChat = () => {
           JSON.stringify({
             type: 'message',
             content: queuedMessage,
-            ga_session_id: getSessionId(),
+            ga_session_id: getChatSessionId(),
           })
         );
       }
@@ -352,7 +384,7 @@ export const useChat = () => {
           JSON.stringify({
             type: 'message',
             content: trimmed,
-            ga_session_id: getSessionId(),
+            ga_session_id: getChatSessionId(),
           })
         );
       }

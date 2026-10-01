@@ -2,7 +2,7 @@
 
 /* Base Section Styles */
 .section {
-  margin-bottom: var(--spacing-s);
+  margin-bottom: var(--spacing-sm);
   width: 100%;
 }
 

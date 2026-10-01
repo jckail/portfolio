@@ -225,7 +225,12 @@
 .skill-tag {
   background: var(--skill-tag-background);
   color: var(--skill-tag-text, #ffffff);
-  padding: 1px var(--spacing-xs);
+  /* Clickable chips open modals: keep them at least 24px tall (WCAG 2.5.8) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 10px;
+  line-height: 1.2;
   border-radius: 5px;
   font-size: .9rem;
   text-transform: capitalize;
@@ -245,7 +250,7 @@
   border-radius: var(--radius-md);
 }
 
-.examples-section h4 {
+.examples-section h3 {
   margin-bottom: var(--spacing-sm);
 }
 
@@ -339,18 +344,25 @@
   .skill-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 6px;
     margin-bottom: var(--spacing-md);
   }
   
   .skill-tag {
     background: var(--skill-tag-background);
-    color: white;
-    padding: 1px var(--spacing-xs);
+    color: var(--skill-tag-text, #ffffff);
+    padding: 4px 10px;
     border-radius: 5px;
     font-size: 0.7rem;
     text-transform: capitalize;
     transition: all var(--transition-fast);
     font-weight: bold;
+  }
+}
+
+/* Bigger targets for touch */
+@media (pointer: coarse) {
+  .skill-tag[role='button'] {
+    min-height: 28px;
   }
 }

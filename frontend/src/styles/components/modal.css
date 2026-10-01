@@ -17,7 +17,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--z-dialog);
   backdrop-filter: blur(5px);
 }
 
@@ -81,7 +81,7 @@
 }
 
 .contact-info strong {
-  color: var(--primary-color);
+  color: var(--accent-text);
   min-width: 80px;
 }
 
@@ -144,8 +144,8 @@
 .contact-form-group input:focus,
 .contact-form-group textarea:focus {
   /* focus ring supplied by the global :focus-visible rule in base/app.css */
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px var(--primary-color-transparent);
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 2px var(--primary-light);
 }
 
 .contact-form-group textarea {
@@ -213,7 +213,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--z-dialog);
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -228,7 +228,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--z-dialog);
   backdrop-filter: blur(5px);
   color: var(--text-color);
 }
@@ -278,7 +278,7 @@
   color: var(--text-color);
 }
 
-.experience-modal-timeline-header h3 {
+.experience-modal-timeline-header h2 {
   margin-top: 2px;
   color: var(--text-color);
   font-size: 1.5rem;
@@ -287,7 +287,10 @@
   border-bottom: var(--border-thickness) solid var(--underline-color);
 }
 
-.experience-modal-timeline-header h4 {
+.experience-modal-timeline-header .experience-modal-role {
+  /* A <p> now (was an h4), so restore the heading font the base p rule overrides */
+  font-family: 'Quantico', sans-serif !important;
+  font-weight: 700;
   margin-top: 5px;
   color: var(--text-color);
   font-size: 1.0rem;
@@ -368,7 +371,7 @@
   align-items: center;
   justify-content: left;
 }
-.contact-modal-header h5 {
+.contact-modal-header h2 {
   color: var(--text-color);
   font-size: 2rem;
   margin: 5px;
@@ -385,7 +388,7 @@
   justify-content: center;
 }
 
-.modal-header h5 {
+.modal-header h2 {
   color: var(--text-color);
   font-size: 2rem;
   margin: 5px;
@@ -406,6 +409,12 @@
 .modal-body {
   color: var(--text-color);
   margin-top: 30px;
+}
+
+/* Dialog subheads are h3 under the h2 title (they were h4); keep the old size */
+.modal-body h3 {
+  font-size: 1em;
+  margin-top: 1.33em;
 }
 
 .modal-details {
@@ -481,7 +490,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: var(--z-dialog);
   backdrop-filter: blur(5px);
 }
 
@@ -646,14 +655,14 @@
     margin-top: -5px;
   }
 
-  .experience-modal-timeline-header h3 {
+  .experience-modal-timeline-header h2 {
     font-size: 1rem;
     text-align: left;
     margin-bottom: 4px;
     line-height: 1.2;
   }
 
-  .experience-modal-timeline-header h4 {
+  .experience-modal-timeline-header .experience-modal-role {
     font-size: 0.85rem;
     text-align: left;
     margin-top: 2px;
@@ -671,7 +680,7 @@
     max-height: 10px;
     
   }
-  .contact-modal-header h5 {
+  .contact-modal-header h2 {
     color: var(--text-color);
     font-size: 2rem;
     margin: 5px;

@@ -23,43 +23,165 @@
   border-color: var(--primary-hover);
 }
 
-.about-section h2 {
-  color: var(--text-color);
-  font-size: 2rem;
-  margin-top: 0px;
-  margin-bottom: var(--spacing-xs);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-bottom: var(--border-thickness) solid var(--primary-border);
-}
+/* ---- Hero: name, current role, one-line pitch, headshot ---- */
 
-.about-content {
-  display: flex;
-  flex-direction: row;
-  
-  gap: var(--spacing-xl);
+.about-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto 1fr;
+  column-gap: var(--spacing-xl);
+  align-items: start;
   width: 100%;
-  min-height: 225px;
-  padding-top: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
-  
 }
 
-.about-content p {
-  margin-top: 30px;
+/* The copy wrapper is transparent to the grid so the description can move
+   under the headshot on narrow phones without duplicating markup. */
+.about-hero-copy {
+  display: contents;
+}
+
+.about-hero-copy > * {
+  grid-column: 1;
+}
+
+.about-section .about-eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  opacity: 0.85;
   color: var(--text-color);
-  line-height: 1.5;
-  margin-bottom: 0px;
-  font-size: 1.50rem;
+}
+
+/* #about h2 in main-sections.css styles section headings with a bottom rule;
+   the hero name is a display title instead. */
+#about .about-name {
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+  font-size: 3rem;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--text-color);
+}
+
+.about-section .about-role {
+  margin: 0.5rem 0 0;
+  font-family: 'Quantico', sans-serif !important;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-color);
+}
+
+.about-role-at {
   font-weight: 400;
-  max-width: 65%;
-  flex: 1;
+  opacity: 0.75;
+}
+
+.about-role-company {
+  color: var(--accent-text, var(--text-color));
+}
+
+.about-section .about-description {
+  margin: var(--spacing-sm) 0 0;
+  max-width: 60ch;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+.headshot-container {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: center;
+  width: 180px;
+  height: 180px;
+  border-radius: 12%;
+  background: transparent;
+}
+
+.headshot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 12%;
+  border: 4px solid black;
+}
+
+/* Loading placeholder sized like the rendered hero (see TLDR in about.tsx). */
+.about-skeleton {
+  min-height: 780px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ---- Action row: social links, contact/resume and the Ctrl+K hint ---- */
+
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.about-shortcut-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 32px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+}
+
+.about-shortcut-hint:hover,
+.about-shortcut-hint:focus-visible {
+  opacity: 1;
+  background: var(--background-color);
+}
+
+.about-shortcut-hint kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--primary-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-color);
+  background: var(--background-color);
+}
+
+.about-shortcut-label {
+  margin-left: 0.2rem;
+}
+
+/* Keyboard shortcuts are meaningless on touch-only devices and phones. */
+@media (hover: none) and (pointer: coarse), (max-width: 480px) {
+  .about-shortcut-hint {
+    display: none;
+  }
 }
 
 .about-skill-icons {
-  grid-column: 1;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-md);
 
   border-top: var(--border-thickness) solid var(--primary-border);
@@ -114,38 +236,6 @@
   text-align: center;
   color: var(--text-color);
   margin-top: 0px;
-}
-
-.headshot-container {
-  margin-top: 20px;
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  width: 185px;
-  height: 185px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border-radius: 12%;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-}
-
-.headshot {
-  width: 97%;
-  height: 97%;
-  object-fit: cover;
-  border-radius: 12%;
-  display: block;
-  padding: auto;
-  transition: transform var(--transition-normal),
-              box-shadow var(--transition-normal);
-  object-position: top;
-  align-items: center;
-  
-  border: 4px solid black;
 }
 
 .brief-bio {
@@ -226,110 +316,98 @@
   transform: translateY(-1px);
 }
 
-.social-links {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-top: 0px;
-  height: var(--icon-size-desktop);
-  margin-bottom: var(--spacing-sm);
-  align-items: center; /* Ensures proper vertical alignment */
-  
+/* All four hero buttons share one height and border so the row reads as a
+   set; the icon-only links are square. Scoped to the hero because
+   header.css styles the same class names in the nav bar. */
+.about-section {
+  --about-action-size: 44px;
 }
 
-.social-links .icon-link {
+.about-section .social-links {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+}
+
+.about-section .social-links .icon-link,
+.about-section .social-links .contact-button,
+.about-section .social-links .resume-button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-color);
-  transition: all var(--transition-normal);
-  padding: var(--spacing-xs) var(--spacing-s);
-  border-radius: var(--radius-sm);
-  height: var(--icon-size-desktop);
-  min-height: var(--icon-size-desktop);
-  max-height: var(--icon-size-desktop);
-  background: transparent;
-}
-
-.social-links .icon-link:hover {
-  color: var(--accent-text);
-  background: var(--primary);
-  border: var(--border-thickness) solid var(--primary);
-}
-
-.social-links .icon-link svg {
-  min-width: var(--icon-size-desktop);
-  min-height: var(--icon-size-desktop);
-  background: var(--background-color);
-  color: var(--text-color);
+  gap: 0.5rem;
+  box-sizing: border-box;
+  height: var(--about-action-size);
+  min-height: var(--about-action-size);
+  max-height: var(--about-action-size);
+  margin: 0;
   border: 2px solid var(--primary-border);
   border-radius: var(--radius-sm);
+  background: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Quantico', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast);
+}
+
+.about-section .social-links .icon-link {
+  width: var(--about-action-size);
+  padding: 0;
+}
+
+.about-section .social-links .contact-button,
+.about-section .social-links .resume-button {
+  width: auto;
+  padding: 0 0.9rem;
+}
+
+/* The glyphs are fill="currentColor"; neutralise the nav-bar svg box styles
+   (header.css) so every icon sits the same size inside its button. */
+.about-section .social-links svg {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  transform: none;
+}
+
+.about-section .social-links .icon-link:hover,
+.about-section .social-links .icon-link:focus-visible,
+.about-section .social-links .contact-button:hover,
+.about-section .social-links .contact-button:focus-visible,
+.about-section .social-links .resume-button:hover,
+.about-section .social-links .resume-button:focus-visible {
+  background: var(--primary);
+  border-color: var(--primary);
+  /* White on --primary; --text-color here measured 2.46:1 in light and
+     1:1 in party mode. */
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.about-section .social-links .icon-link:hover svg,
+.about-section .social-links .icon-link:focus-visible svg {
+  background: transparent;
+  border: none;
+  transform: none;
 }
 
 .strong{
   font-weight: bold;
   margin-left: 100px;
-}
-
- .resume-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  padding: 0px 0px 0px 15px;
-  background: var(--background-color);
-  color: var(--text-color);
-  border: 2px solid var(--primary-border);
-  border-radius: var(--radius-sm);
-  font-size: 25px;
-  transition: all var(--transition-normal);
-  min-height: var(--icon-size-desktop);
-  width: 165px;
-  font-weight: bold;
-}
-.contact-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  padding: 0px 0px 0px 15px;
-  background: var(--background-color);
-  color: var(--text-color);
-  border: 2px solid var(--primary-border);
-  border-radius: var(--radius-sm);
-  font-size: 25px;
-  transition: all var(--transition-normal);
-  min-height: var(--icon-size-desktop);
-  width: 165px;
-  font-weight: bold;
-}
-.contact-button svg {
-  min-width: var(--icon-size-desktop);
-  min-height: var(--icon-size-desktop);
-}
-
-.contact-button:hover {
-  background: var(--primary);
-  transform: scale(1.1);
-  border: var(--border-thickness) solid var(--primary);
-  cursor: pointer;
-}
-
-.icon-link, .contact-button, .resume-button svg {
-  min-width: var(--icon-size-desktop);
-  min-height: var(--icon-size-desktop);
-}
-
-.social-links .icon-link:hover svg,
-.social-links .resume-button:hover {
-  background: var(--primary);
-  /* The glyph is fill="currentColor" and a non-hover rule sets `color` on this
-     same element, so the colour has to be restated here or the icon keeps
-     --text-color on a --primary background: 2.46:1 in light, 1:1 in party. */
-  color: #ffffff;
-  transform: scale(1.1);
-  border: var(--border-thickness) solid var(--primary);
-  cursor: pointer;
 }
 
 .ai-highlight {
@@ -355,193 +433,88 @@
 }
 
 @media (max-width: 768px) {
-
-
   .about-section {
     margin-top: 20px;
-    background: var(--section-background);
-    backdrop-filter: blur(var(--section-background-blur));
     border-radius: var(--radius-sm);
-    padding: var(--spacing-lg);
-    border: var(--border-thickness) solid var(--primary-border);
-    transition: transform var(--transition-normal),
-                box-shadow var(--transition-normal);
-                
+    padding: var(--spacing-md) var(--spacing-sm);
+    --about-action-size: 40px;
   }
 
-
-  .about-section h2 {
-    font-size: 1.35rem;
+  .about-hero {
+    column-gap: var(--spacing-md);
   }
 
-  .about-section p {
+  .about-section .about-eyebrow {
+    font-size: 0.9rem;
+  }
+
+  #about .about-name {
+    font-size: 2rem;
+  }
+
+  .about-section .about-role {
     font-size: 1rem;
-    margin-top: 10px;
-    font-weight: 400;
-    
+    margin-top: 0.35rem;
   }
 
-  .about-content {
-    display: flex;
-    flex-direction: row;
-    
-    min-height: 105px;
-    gap: var(--spacing-md);
-    padding-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-    align-items: center;
-    
-  }
-  .about-content p {
-    
-    
-    color: var(--text-color);
-    line-height: 1.3;
-    margin-top: var(--spacing-sm);
-    font-size: .9rem;
-    font-weight: 400;
-    max-width: 70%;
-    flex: 1; /* Ensures the paragraph takes up available space */
-    text-align: left; /* Ensures the text is left-aligned */
-    align-self: center; /* Centers the headshot-container vertically */
+  .about-section .about-description {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    max-width: none;
   }
 
   .headshot-container {
-    
-    max-width: 115px;
-    max-height: 115px;
-    margin-top: 5px;
-    background-color:transparent;
-    align-self: center; /* Centers the headshot-container vertically */
-  }
-  .headshot {
-    width: 95%;
-    height: 95%;
-    border: 4px solid black;
-  }
-  
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
-    height: var(--icon-size-mobile);
-  }
-  
-  .social-links .icon-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-color);
-    transition: all var(--transition-normal);
-    padding: var(--spacing-xs) 0px;
-    border-radius: var(--radius-sm);
-    height: var(--icon-size-mobile);
-    min-height: var(--icon-size-mobile);
-    max-height: var(--icon-size-mobile);
-    background: transparent;
-  }
-  
-  .social-links .icon-link:hover {
-    color: var(--accent-text);
-    background: var(--primary);
-    border: var(--border-thickness) solid var(--primary);
-  }
-  
-  .social-links .icon-link svg {
-    min-width: var(--icon-size-mobile);
-    min-height: var(--icon-size-mobile);
-    background: var(--background-color);
-    color: var(--text-color);
-    border: var(--border-thickness) solid var(--primary-border);
-    border-radius: var(--radius-sm);
-  }
-  
-  .strong{
-    font-weight: bold;
-    margin-left: 100px;
-  }
-  
-  .resume-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0px;
-    padding: 0px 0px 0px 0px;
-    padding-left:5px;
-    background: var(--background-color);
-    color: var(--text-color);
-    border: var(--border-thickness) solid var(--primary-border);
-    border-radius: var(--radius-sm);
-    font-size: 15px;
-    transition: all var(--transition-normal);
-    min-height: var(--icon-size-mobile);
-    width: 110px;
-    font-weight: bold;
-  }
-  
-  .social-links .resume-button svg {
-    min-width: var(--icon-size-mobile);
-    min-height: var(--icon-size-mobile);
-  }
-  
-  .social-links .icon-link:hover svg,
-  .social-links .resume-button:hover {
-    background: var(--primary);
-    transform: scale(1.1);
-    border: var(--border-thickness) solid var(--primary);
-    cursor: pointer;
-  }
-  .contact-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0px;
-    padding: 0px 0px 0px 0px;
-    padding-left:5px;
-    background: var(--background-color);
-    color: var(--text-color);
-    border: var(--border-thickness) solid var(--primary-border);
-    border-radius: var(--radius-sm);
-    font-size: 15px;
-    transition: all var(--transition-normal);
-    min-height: var(--icon-size-mobile);
-    width: 110px;
-    font-weight: bold;
-  }
-  .contact-button svg {
-    min-width: var(--icon-size-mobile);
-    min-height: var(--icon-size-mobile);
-  }
-  
-  .contact-button:hover {
-    background: var(--primary);
-    transform: scale(1.1);
-    border: var(--border-thickness) solid var(--primary);
-    cursor: pointer;
-  }
-  
-  .brief-bio {
-    margin-top: 20px;
+    width: 96px;
+    height: 96px;
   }
 
+  .headshot {
+    border-width: 3px;
+  }
+
+  .about-skeleton {
+    min-height: 920px;
+  }
+
+  .about-section .social-links {
+    gap: 6px;
+  }
+
+  .about-section .social-links .contact-button,
+  .about-section .social-links .resume-button {
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    padding: 0 0.55rem;
+  }
+
+  .about-skill-icons {
+    gap: var(--spacing-sm);
+  }
+
+  .about-section .social-links svg {
+    width: 20px;
+    height: 20px;
+  }
 
   .brief-bio p {
-    font-size: .8rem;
-    line-height: 1.5;
-    margin-top: 15px;
-    
-  }
-  .ai-highlight {
-    color: var(--text-color);
-    font-weight: bold;
-    /* background: var(--ai-background-color);
-    border-radius: 50%;
-    padding: .9em .45em; */
-    display: inline-block;
-    text-align: center;
     font-size: .85rem;
-    
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  .ai-highlight {
+    font-size: .85rem;
+  }
+}
+
+/* Narrow phones: the pitch drops under the name/headshot row so neither is
+   squeezed into a sliver. */
+@media (max-width: 420px) {
+  .headshot-container {
+    grid-row: 1 / 4;
+  }
+
+  .about-section .about-description {
+    grid-column: 1 / -1;
   }
 }

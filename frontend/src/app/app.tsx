@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, Suspense } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { RouteObject, useLocation } from 'react-router-dom';
 
 import MainContent from './components/main-content';
@@ -15,13 +15,11 @@ import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared
 import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
 import { CommandPaletteHost } from '../shared/components/command-palette';
 import ReadingProgress from '../shared/components/reading-progress';
+import ChatPortal from './components/chat/chat-portal';
 
 import type { Theme } from '../types/theme';
 
 import '../styles/base/app.css';
-
-// Lazy load ChatPortal since it's not immediately needed
-const ChatPortal = React.lazy(() => import('./components/chat/chat-portal'));
 
 const App: React.FC = () => {
   const { theme, setTheme } = useThemeStore();
@@ -90,11 +88,15 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <DataProvider>
         <ResumeProvider>
-          <ParticlesProvider 
-            config={baseConfig} 
-            key={theme}
-          >
-            <div style={{ isolation: 'isolate' }}>
+          {/* No key={theme} here: re-keying remounted the entire page on every
+              theme toggle (refetching sections, resetting scroll-spy and
+              modals) just to restart the particles, which ParticlesCanvas now
+              does by itself when `config` changes. */}
+          <ParticlesProvider config={baseConfig}>
+            {/* width: #root is a centred flex column, so without it this
+                wrapper shrinks to its content and the page visibly widens
+                once the sections arrive (CLS). */}
+            <div style={{ isolation: 'isolate', width: '100%' }}>
               {/* First tab stop: lets keyboard users bypass the header and
                   the whole side-panel nav on every page load. */}
               <a className="skip-to-content" href="#main-content">
@@ -107,10 +109,8 @@ const App: React.FC = () => {
                 <MainContent />
               </ErrorBoundary>
 
-              {/* Chat portal lazy loaded */}
-              <Suspense fallback={null}>
-                <ChatPortal />
-              </Suspense>
+              {/* Tiny launcher; the chat panel itself is lazy-loaded inside */}
+              <ChatPortal />
 
               <CookieConsentPortal />
               <CommandPaletteHost />

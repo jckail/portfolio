@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
 
 import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { buttonize } from '../../../../shared/utils/a11y';
-import { findSkillKey } from '../../../../shared/utils/skills';
+import { findSkillKey, formatTag } from '../../../../shared/utils/skills';
 import { trackModalView } from '../../../../shared/utils/analytics';
-import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 
 import type { Skill } from './SkillModal';
@@ -41,8 +41,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   onSelectSkill 
 }) => {
   // URL sync (?company= and back-button behavior) is owned by useExperience.
-  useEscapeKey(onClose);
-  const trapRef = useFocusTrap(true);
+  const trapRef = useFocusTrap(true, onClose);
+  const titleId = useId();
 
   useEffect(() => {
     trackModalView(experienceKey || experience.company, 'experience', experience.company);
@@ -52,7 +52,9 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
     ? `${window.location.origin}${window.location.pathname}?company=${encodeURIComponent(experienceKey)}`
     : undefined;
 
-  return (
+  // Portaled to <body> so it stacks above the cookie banner and chat button,
+  // which are also body-level; inside #root no z-index could get it there.
+  return createPortal(
     <div
       className="experience-modal-overlay"
       role="presentation"
@@ -65,7 +67,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
         className="experience-modal-content"
         role="dialog"
         aria-modal="true"
-        aria-label={`${experience.company} experience details`}
+        aria-labelledby={titleId}
       >
         <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="experience-modal-wrapper"></div>
@@ -86,8 +88,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             </a>
           )}
           <div className="experience-modal-timeline-header">
-            <h3>{experience.company}</h3>
-            <h4>{experience.title}</h4>
+            <h2 id={titleId}>{experience.company}</h2>
+            <p className="experience-modal-role">{experience.title}</p>
             <div className="timeline-meta">
               <span className="date">{experience.date}</span>
               <span className="location">{experience.location}</span>
@@ -96,10 +98,10 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
         </div>
         
         <div className="modal-body">
-          <h4>Company Description:</h4>
+          <h3>Company Description:</h3>
           <p className="company-description">{experience.company_description}</p>
           <div className="highlights-section">
-            <h4>Tech Stack:</h4>
+            <h3>Tech Stack:</h3>
             <div className="skill-tags">
               {experience.tech_stack.map((tag: string, index: number) => {
                 const skillKey = findSkillKey(skillsData, tag);
@@ -110,16 +112,16 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
                     style={{ cursor: 'pointer' }}
                     {...buttonize(() => onSelectSkill(skillKey))}
                   >
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 ) : (
                   <span key={index} className="skill-tag">
-                    {tag.replace(/-/g, ' ')}
+                    {formatTag(tag, skillsData, skillKey)}
                   </span>
                 );
               })}
             </div>
-            <h4>Detailed Highlights:</h4>
+            <h3>Detailed Highlights:</h3>
             <ul className="highlights">
               {experience.more_highlights.map((highlight: string, index: number) => (
                 <li key={index}>{highlight}</li>
@@ -134,7 +136,8 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
         </div>
         
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import '../../../../styles/components/modal.css';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
-import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import { postJson, endpoints } from '../../../../shared/utils/api';
 import {
@@ -64,8 +64,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
     return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
   }, []);
 
-  useEscapeKey(onClose);
-  const trapRef = useFocusTrap(true);
+  const trapRef = useFocusTrap(true, onClose);
+  const titleId = useId();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -97,7 +97,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
     }
   };
 
-  return (
+  // Portaled to <body>: see ExperienceModal
+  return createPortal(
     <div
       className="contact-modal-overlay"
       role="presentation"
@@ -110,13 +111,13 @@ const ContactModal: React.FC<ContactModalProps> = ({
         className="contact-modal-content"
         role="dialog"
         aria-modal="true"
-        aria-label="Contact"
+        aria-labelledby={titleId}
       >
       <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
 
         <div className="contact-modal-header">
 
-          <h5>Contact</h5>
+          <h2 id={titleId}>Contact</h2>
 
         </div>
 
@@ -194,7 +195,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

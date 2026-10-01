@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { scrollToSection } from '../../utils/scroll-utils';
+import { useEscapeKey } from '../../hooks/use-escape-key';
 import '../../../styles/components/navigation/side-panel.css';
 
 interface SidePanelProps {
@@ -73,6 +74,18 @@ const useCurrentSection = () => {
 
 const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
   const currentSection = useCurrentSection();
+  const navRef = React.useRef<HTMLElement | null>(null);
+
+  // Closed, the drawer only slides off-screen; inert keeps its buttons out
+  // of the tab order and the accessibility tree. (React 18 has no inert prop.)
+  React.useEffect(() => {
+    navRef.current?.toggleAttribute('inert', !isOpen);
+  }, [isOpen]);
+
+  const closeOnEscape = React.useCallback(() => {
+    if (isOpen) onClose();
+  }, [isOpen, onClose]);
+  useEscapeKey(closeOnEscape);
 
   const sections = [
     { id: 'about', label: 'About' },
@@ -95,7 +108,12 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose }) => {
         role="presentation"
         onClick={onClose}
       />
-      <nav className={`side-panel ${isOpen ? 'open' : ''}`}>
+      <nav
+        ref={navRef}
+        id="side-panel"
+        aria-label="Sections"
+        className={`side-panel ${isOpen ? 'open' : ''}`}
+      >
         <div className="side-panel-content">
           {sections.map((section) => (
             <button

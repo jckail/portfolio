@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogContent, useTheme, useMediaQuery } from '@mui/material';
+import { Dialog, DialogContent, Typography, useTheme, useMediaQuery } from '@mui/material';
 
 import { ChatButton } from './components/ChatButton';
 import { ChatHeader } from './components/ChatHeader';
@@ -98,6 +98,14 @@ const Chat: React.FC<ChatProps> = ({
             p: '16px !important'
           }}
         >
+          <Typography
+            variant="caption"
+            component="p"
+            sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
+          >
+            Conversations are logged to improve the assistant. Please don&apos;t share sensitive info.
+          </Typography>
+
           <ChatMessages
             messages={messages}
             isLoading={isLoading}

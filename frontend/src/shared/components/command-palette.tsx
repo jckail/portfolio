@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 
 import { scrollToSection } from '../utils/scroll-utils';
 import { setQueryParam } from '../utils/url-params';
-import { useEscapeKey } from '../hooks/use-escape-key';
 import { useFocusTrap } from '../hooks/use-focus-trap';
+import { useChatAvailable } from '../hooks/use-chat-available';
 import '../../styles/components/command-palette.css';
 
 interface Command {
@@ -53,7 +53,7 @@ function buildCommands(onClose: () => void): Command[] {
       id: 'chat',
       label: 'Open AI assistant',
       hint: '?',
-      keywords: 'claude bot help',
+      keywords: 'chat ai assistant claude bot help',
       run: openParam('ai_chat', 'open'),
     },
     {
@@ -93,12 +93,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const trapRef = useFocusTrap(open);
-  useEscapeKey(() => {
-    if (open) onClose();
-  });
+  const trapRef = useFocusTrap(open, onClose);
 
-  const commands = useMemo(() => buildCommands(onClose), [onClose]);
+  const chatAvailable = useChatAvailable();
+  const commands = useMemo(
+    () => buildCommands(onClose).filter(cmd => chatAvailable || cmd.id !== 'chat'),
+    [onClose, chatAvailable]
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -158,7 +159,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
           ref={inputRef}
           className="command-palette-input"
           type="search"
-          placeholder="Jump to a section, open chat, download resume…"
+          placeholder={
+            chatAvailable
+              ? 'Jump to a section, open chat, download resume…'
+              : 'Jump to a section, download resume…'
+          }
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={onKeyDown}

@@ -32,7 +32,17 @@
   /* Opaque, page-contrasting focus indicator (WCAG 2.4.11 needs 3:1).
      Deliberately NOT --primary-border, which is translucent by design. */
   --focus-ring: #0403ff;  /* 8.6:1 on white */
-  --ai-background-color: #000000;;
+  --ai-background-color: #000000;
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-opaque: #ffffff;
+  --border: rgba(0, 0, 0, 0.15);
+  --input-background: #f3f3f7;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: #0302b3;
+  --secondary-color: var(--primary-light);
 }
 
 .theme-dark {
@@ -65,6 +75,16 @@
   --accent-text: #8b8aff;
   --focus-ring: #8b8aff;  /* 7.4:1 on black */
   --ai-background-color: rgba(4, 3, 255, 0.5);
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(6, 6, 20, 0.9);
+  --surface-opaque: #08081a;
+  --border: rgba(139, 138, 255, 0.25);
+  --input-background: #14142b;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: var(--primary-hover);
+  --secondary-color: var(--primary-light);
 }
 
 .theme-party {
@@ -94,9 +114,30 @@
   --accent-text: #ff00ff;
   --focus-ring: #ffff00;  /* 19.5:1 on black */
   --ai-background-color: #ff00ff;
+  /* Were missing here, so modals had no fill and links no underline in party mode */
+  --solid-color: #000000e6;
+  --underline-color: #00ffff;
+  /* Chrome surfaces (header, nav drawer): near-opaque so page content
+     scrolling underneath stays unreadable through them. */
+  --surface: rgba(20, 0, 30, 0.9);
+  --surface-opaque: #14001e;
+  --border: rgba(255, 0, 255, 0.4);
+  --input-background: #22002e;
+  /* Legacy aliases still used by shared/components/elements */
+  --primary-color: var(--primary);
+  --primary-color-hover: var(--primary-hover);
+  --secondary-color: var(--primary-light);
 }
 
 /* Base styles */
+/* border-box everywhere: width:100% plus padding was pushing .main-content,
+   the footer and the doodle board 5-22px past a 390px viewport */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html {
   margin: 0;
   padding: 0;

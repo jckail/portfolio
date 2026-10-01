@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
 
 import SkillIcon from '../../../../shared/components/skill-icon/SkillIcon';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { trackModalView } from '../../../../shared/utils/analytics';
-import { useEscapeKey } from '../../../../shared/hooks/use-escape-key';
+import { formatTag } from '../../../../shared/utils/skills';
 import { useFocusTrap } from '../../../../shared/hooks/use-focus-trap';
 import '../../../../styles/components/modal.css';
 
@@ -31,8 +32,8 @@ interface SkillModalProps {
 // display-name slug, which conflicted with useSkill's data key and broke
 // shared/bookmarked skill links.
 const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => {
-  useEscapeKey(onClose);
-  const trapRef = useFocusTrap(true);
+  const trapRef = useFocusTrap(true, onClose);
+  const titleId = useId();
 
   useEffect(() => {
     trackModalView(skillKey || skill.display_name, 'skill', skill.display_name);
@@ -42,7 +43,8 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => 
     ? `${window.location.origin}${window.location.pathname}?skill=${encodeURIComponent(skillKey)}`
     : undefined;
 
-  return (
+  // Portaled to <body>: see ExperienceModal
+  return createPortal(
     <div
       className="skill-modal-overlay"
       role="presentation"
@@ -55,11 +57,11 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => 
         className="skill-modal-content"
         role="dialog"
         aria-modal="true"
-        aria-label={skill.display_name}
+        aria-labelledby={titleId}
       >
         <button className="modal-close-button" onClick={onClose} aria-label="Close">&times;</button>
         <div className="modal-header">
-          <h5>{skill.display_name}</h5>
+          <h2 id={titleId}>{skill.display_name}</h2>
           <div className="modal-icon-wrapper">
             <div className="icon-wrapper">
               <SkillIcon
@@ -80,13 +82,13 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => 
           <div className="skill-tags">
             {skill.tags.map((tag: string, index: number) => (
               <span key={index} className="skill-tag">
-                {tag.replace(/-/g, ' ')}
+                {formatTag(tag)}
               </span>
             ))}
           </div>
           {Object.keys(skill.examples).length > 0 && (
             <div className="examples-section">
-              <h4>Examples:</h4>
+              <h3>Examples:</h3>
               <ul>
                 {Object.entries(skill.examples).map(([key, value]: [string, string]) => (
                   <li key={key}>{value}</li>
@@ -102,7 +104,8 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, onClose }) => 
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -45,6 +45,19 @@ const cache: {
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Copy a JSON dictionary onto a null-prototype object.
+ *
+ * Sections index these maps with untrusted URL params (?skill=, ?project=,
+ * ?company=). On a plain object `data['constructor']` or `data['__proto__']`
+ * resolves through Object.prototype to something truthy, which mounted an
+ * empty modal (or crashed the section). With no prototype, only keys the API
+ * actually returned can match.
+ */
+export function toLookup<T extends object>(data: T): T {
+  return Object.assign(Object.create(null) as T, data);
+}
+
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<DataContextType>({
     experienceData: null,
@@ -87,18 +100,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           getJson<ContactData>(endpoints.contactInfo, init)
         ]);
 
-        // Update cache
-        cache.experience = experience;
-        cache.skills = skills;
-        cache.projects = projects;
+        // Update cache. The dictionaries looked up by URL params get no
+        // prototype (see toLookup); aboutMe/contact are only read by field.
+        cache.experience = toLookup(experience);
+        cache.skills = toLookup(skills);
+        cache.projects = toLookup(projects);
         cache.aboutMe = aboutMe;
         cache.contact = contact;
         cache.lastFetchTime = now;
 
         setState({
-          experienceData: experience,
-          skillsData: skills,
-          projectsData: projects,
+          experienceData: cache.experience,
+          skillsData: cache.skills,
+          projectsData: cache.projects,
           aboutMeData: aboutMe,
           contactData: contact,
           isLoading: false,

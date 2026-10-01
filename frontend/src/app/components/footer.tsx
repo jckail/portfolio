@@ -2,6 +2,7 @@ import React from 'react';
 
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { buttonize } from '../../shared/utils/a11y';
+import { openCookieSettings } from '../../shared/utils/cookie-consent';
 import '../../styles/components/footer.css';
 
 interface FooterProps {
@@ -25,14 +26,21 @@ const Footer: React.FC<FooterProps> = ({ onDoodleToggle, doodleClickCount, isPar
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-links">
-          <a 
-            href="/docs" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            OpenAPI Doc
-          </a>
+          {/* The API docs are served only when the backend runs in dev mode */}
+          {import.meta.env.DEV && (
+            <a
+              href="/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              OpenAPI Doc
+            </a>
+          )}
+
+          <span className="footer-link" {...buttonize(openCookieSettings)}>
+            Cookie settings
+          </span>
 
           <span className="footer-link" {...buttonize(handleScrollToTop)}>
             Scroll to top
