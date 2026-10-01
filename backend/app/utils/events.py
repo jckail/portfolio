@@ -50,13 +50,21 @@ _ALLOWED_FIELDS = frozenset({"len_bucket", "limiter", "kind", "tool", "name", "r
 _MAX_VALUE_CHARS = 100
 _SAFE_VALUE = re.compile(r"[^\w .:/@+-]")
 _EMAIL_LIKE = re.compile(r"[^@\s]+@[^@\s]+")
+# Values that look like an address, a phone number or a credential are dropped
+# whole, whichever field they arrive in: dotted-quad IPv4, IPv6, 7+ digits
+# (allowing separators), key prefixes and long opaque tokens.
+_IPV4_LIKE = re.compile(r"\d{1,3}(?:\.\d{1,3}){3}")
+_IPV6_LIKE = re.compile(r"(?:[0-9a-fA-F]{0,4}:){2,}[0-9a-fA-F]{0,4}")
+_PHONE_LIKE = re.compile(r"\+?\d(?:[\s().-]*\d){6,}")
+_SECRET_LIKE = re.compile(r"(?i)\b(?:(?:sk|pk|sg|ghp|xox[a-z])[-_.]|eyj)[\w.-]{6,}|\bbearer\s+\S{6,}|[A-Za-z0-9_-]{32,}")
+_SENSITIVE_VALUE = (_EMAIL_LIKE, _IPV4_LIKE, _IPV6_LIKE, _PHONE_LIKE, _SECRET_LIKE)
 
 
 def _clean_value(value):
     if isinstance(value, bool | int | float) or value is None:
         return value
     text = str(value)
-    if _EMAIL_LIKE.search(text):
+    if any(pattern.search(text) for pattern in _SENSITIVE_VALUE):
         return "[redacted]"
     return _SAFE_VALUE.sub("", text)[:_MAX_VALUE_CHARS]
 
