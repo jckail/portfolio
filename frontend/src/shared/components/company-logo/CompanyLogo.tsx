@@ -11,6 +11,11 @@ export const INLINE_COMPANY_LOGOS: ReadonlySet<string> = new Set([
   'r1.svg',
 ]);
 
+/** Logos that are a symbol only (no wordmark), so they get a tile fitted to them. */
+const MARK_ONLY_COMPANY_LOGOS: ReadonlySet<string> = new Set(['together.svg']);
+
+export const isMarkOnlyLogo = (name: string): boolean => MARK_ONLY_COMPANY_LOGOS.has(name);
+
 const InlineLogo = lazy(() =>
   import('./company-logo-set').then(({ default: set }) => ({
     default: ({ name, ...svgProps }: React.SVGProps<SVGSVGElement> & { name: string }) => {

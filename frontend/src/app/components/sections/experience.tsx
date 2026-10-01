@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, memo, useCallback, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
-import CompanyLogo from '../../../shared/components/company-logo/CompanyLogo';
+import CompanyLogo, { isMarkOnlyLogo } from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { getOwn } from '../../../shared/utils/lookup';
@@ -66,13 +66,13 @@ const ExperienceTimeline = memo(({
             <div className="timeline-header-wrapper">
               {item.logoPath && (
                 <div
-                  className="logo-link"
+                  className={`logo-link${isMarkOnlyLogo(item.logoPath) ? ' logo-link--mark' : ''}`}
                   onMouseEnter={prefetchExperienceModal}
                   {...buttonize(() => onSelectExperience(key))}
                 >
-                  {/* The logo's own text (e.g. "together.ai") is decorative; the
-                      name comes from the hidden text so it never contradicts what
-                      is drawn (Lighthouse label-content-name-mismatch). */}
+                  {/* The logo is decorative; the name comes from the hidden text so it
+                      never contradicts what is drawn (Lighthouse
+                      label-content-name-mismatch). */}
                   <CompanyLogo
                     name={item.logoPath}
                     size={64}

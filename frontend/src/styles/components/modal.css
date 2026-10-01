@@ -331,6 +331,13 @@
   transition: transform var(--transition-normal),
               box-shadow var(--transition-normal);
 }
+
+/* Symbol-only logo (Together AI): a square tile, not the wordmark-sized one. */
+.experience-modal-company-logo--mark {
+  width: 65px;
+  padding: 9px;
+  box-sizing: border-box;
+}
 .experience-modal-timeline-header {
   display: column;
   align-items: center;
@@ -638,6 +645,12 @@
     margin-top: 10px;
     color: var(--text-color);
     margin-left: -10px;
+  }
+
+  .experience-modal-company-logo--mark {
+    width: 33px;
+    height: 33px;
+    padding: 4px;
   }
 
   .experience-modal-logo-link {

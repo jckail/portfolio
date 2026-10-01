@@ -1,6 +1,6 @@
 import React, { useEffect, useId } from 'react';
 
-import CompanyLogo from '../../../../shared/components/company-logo/CompanyLogo';
+import CompanyLogo, { isMarkOnlyLogo } from '../../../../shared/components/company-logo/CompanyLogo';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackModalView } from '../../../../shared/utils/analytics';
@@ -55,7 +55,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
               name={experience.logoPath}
               size={64}
               aria-label={`${experience.company} logo`}
-              className="experience-modal-company-logo"
+              className={`experience-modal-company-logo${isMarkOnlyLogo(experience.logoPath) ? ' experience-modal-company-logo--mark' : ''}`}
             />
           </a>
         )}

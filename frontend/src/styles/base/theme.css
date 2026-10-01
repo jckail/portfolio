@@ -39,6 +39,12 @@
   --page-bg: #ffffff;
   --panel-bg: rgba(255, 255, 255, 0.88);
   --panel-bg-strong: rgba(255, 255, 255, 0.96);
+  /* Together AI mark (assets/icons/companylogos/together.svg). The brand
+     lavender is 1.9:1 on white, under the 3:1 minimum for a graphic, so light
+     mode uses the same hue at 3.4:1; magenta and orange already pass. */
+  --together-magenta: #ef2cc1;
+  --together-lavender: #a271ed;
+  --together-orange: #fc4c02;
   --panel-border: rgba(10, 10, 40, 0.12);
   --panel-border-hover: rgba(4, 3, 255, 0.45);
   --panel-blur: 8px;
@@ -96,6 +102,9 @@
   --page-bg: #000000;
   --panel-bg: rgba(9, 9, 36, 0.62);
   --panel-bg-strong: rgba(9, 9, 36, 0.88);
+  --together-magenta: #ef2cc1;
+  --together-lavender: #caaef5;
+  --together-orange: #fc4c02;
   --panel-border: rgba(139, 138, 255, 0.18);
   --panel-border-hover: rgba(139, 138, 255, 0.5);
   --panel-blur: 10px;
@@ -153,6 +162,9 @@
   --page-bg: #000000;
   --panel-bg: rgba(20, 0, 30, 0.6);
   --panel-bg-strong: rgba(20, 0, 30, 0.9);
+  --together-magenta: #ef2cc1;
+  --together-lavender: #caaef5;
+  --together-orange: #fc4c02;
   --panel-border: rgba(255, 0, 255, 0.5);
   --panel-border-hover: #00ffff;
   --panel-blur: 4px;

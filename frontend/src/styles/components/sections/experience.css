@@ -81,6 +81,12 @@
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
+.logo-link--mark {
+  /* A symbol-only logo (Together AI) needs a tile fitted to it, not the
+     128px one the wordmark logos use. */
+  width: 56px;
+}
+
 .logo-link:hover {
   border-color: var(--panel-border-hover);
   background: var(--btn-secondary-hover-bg);
