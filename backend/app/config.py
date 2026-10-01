@@ -83,6 +83,8 @@ class Settings:
     gcp_project_id: str = "portfolio-383615"
     service_name: str = "quickresume"
     access_log_enabled: bool = True
+    # Optional independent Python lab. Empty keeps the generated catalog available.
+    dataplayground_api_url: str = ""
 
     @property
     def chat_available(self) -> bool:
@@ -161,6 +163,7 @@ def get_settings() -> Settings:
         gcp_project_id=os.getenv("GCP_PROJECT_ID", "").strip() or "portfolio-383615",
         service_name=os.getenv("K_SERVICE", "").strip() or "quickresume",
         access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),
+        dataplayground_api_url=os.getenv("DATAPLAYGROUND_API_URL", "").strip(),
         on_cloud_run=on_cloud_run,
         trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
         trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),

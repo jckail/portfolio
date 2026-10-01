@@ -23,6 +23,7 @@ _TEST_ENV = {
     # Forced empty so a real number in a developer's shell or .env never
     # reaches a test; tests that need one patch a dummy value into Settings.
     "CONTACT_PHONE": "",
+    "DATAPLAYGROUND_API_URL": "",
 }
 
 # Assign unconditionally, never setdefault: a developer with real
