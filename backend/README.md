@@ -213,7 +213,9 @@ rather than calling `os.getenv` in feature code.
 - CORS origins must be exact strings (no wildcard ports).
 - Admin routes require a Supabase bearer token matching `ADMIN_EMAIL`.
 - The chat WebSocket enforces message-size and rate limits.
-- `custom_resolution` validates and escapes its path input.
+- `custom_resolution` validates and escapes its path input, bounds width/height
+  to 1-4096, and is served only when `DEV_MODE=true` (it frames the SPA, which
+  is unframeable on a deployed site).
 - Every response carries security headers (`X-Content-Type-Options`,
   `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS).
 - Responses over 1 KB are gzip-compressed; hashed frontend assets are served
@@ -224,3 +226,27 @@ rather than calling `os.getenv` in feature code.
   into JSON bytes, a gzip variant and a strong `ETag` (`api/content.py`); a
   matching `If-None-Match` gets a body-less 304. Built SPA text files are
   gzip-compressed once per process the same way (`spa.py`).
+
+## Logging and events
+
+- stdout is one JSON object per line with `severity`, `message`, and, when the
+  request carried `X-Cloud-Trace-Context`, `logging.googleapis.com/trace` and
+  `spanId` (project from `GCP_PROJECT_ID`, default `portfolio-383615`). ERROR
+  lines add `serviceContext {service, version=GIT_COMMIT}` and the stack trace
+  so Error Reporting groups them.
+- `middleware/access_log.py` writes one `http.request` line per API request
+  (method, route template, status, `latency_ms`, bytes). Health probes and
+  static assets are skipped; `ACCESS_LOG=false` turns it off. No client
+  address, query string, headers or bodies are logged.
+- `utils/events.py` `log_event(name, **fields)` emits the business events that
+  Terraform log-based metrics count (`jsonPayload.event`): `auth.*`,
+  `rate_limit.blocked{limiter}`, `contact.*`, `phone.*`, `event.received{name}`
+  and the `chat.*` set. Fields are sanitised; emails, addresses, message text
+  and secrets are dropped. Name every `SlidingWindowLimiter` (`name=`) so
+  `rate_limit.blocked` carries a label.
+- `POST /api/events` (204) takes `{event, props}` from the SPA after consent.
+  The name must be in `EVENT_NAMES` (mirrors `frontend/src/shared/analytics/events.ts`;
+  a test keeps them equal) and props are an allowlist validated against the data.
+- `GET /api/admin/analytics` and `/api/admin/health` return process-local
+  counters (`utils/metrics.py`): one instance since it started, not site totals.
+- Access lines and events are not shipped to the Supabase `logs` table.
