@@ -43,6 +43,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         fullWidth
         multiline
         maxRows={4}
+        // A named, labelled field (Chrome flags form fields with neither).
+        id="chat-message"
+        name="message"
+        autoComplete="off"
+        inputProps={{ 'aria-label': 'Message the AI assistant' }}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyPress={handleKeyPress}

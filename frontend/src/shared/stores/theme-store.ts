@@ -50,7 +50,6 @@ const saveThemePreference = (theme: Theme): void => {
   try {
     if (typeof window === 'undefined') return;
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-    console.log('[Theme Store] Saved theme preference:', theme);
   } catch (error) {
     console.error('[Theme Store] Error saving theme preference:', error);
   }

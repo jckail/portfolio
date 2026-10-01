@@ -19,6 +19,14 @@ afterEach(() => {
 });
 
 describe('CommandPalette', () => {
+  it('labels its search field and gives it an id and name', () => {
+    // Chrome flags form fields with neither attribute (autofill can't key on them)
+    render(<CommandPalette open onClose={() => {}} />);
+    const input = screen.getByRole('searchbox', { name: 'Search commands' });
+    expect(input).toHaveAttribute('id', 'command-palette-search');
+    expect(input).toHaveAttribute('name', 'command-palette-search');
+  });
+
   it('finds the assistant by the word its placeholder uses', () => {
     // The placeholder says "open chat", but the command's keywords did not
     // include "chat", so typing it listed nothing.

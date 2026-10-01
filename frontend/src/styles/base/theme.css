@@ -26,6 +26,9 @@
   --underline-color: #000000;
   --skill-tag-background:#000000;
   --skill-tag-text: #ffffff;
+  /* Text on --primary / --primary-border fills (resume buttons).
+     White on #000 21:1, on #0403ff 8.6:1. */
+  --on-primary-text: #ffffff;
   /* Accent used as *text*. Must clear 4.5:1 against the page background,
      which --primary does not always do (see .theme-dark below). */
   --accent-text: #0403ff;
@@ -70,6 +73,8 @@
   --underline-color: #0403ff;
   --skill-tag-background: rgba(4, 3, 255, 0.4);
   --skill-tag-text: #ffffff;
+  /* White on #020166 (40% #0403ff over black) ~15:1, on #0403ff 8.6:1. */
+  --on-primary-text: #ffffff;
   /* #0403ff on black measures 2.46:1 (WCAG AA needs 4.5:1), so accent text
      uses a lightened tint (~7.4:1) while --primary stays for backgrounds. */
   --accent-text: #8b8aff;
@@ -111,6 +116,8 @@
   --skill-tag-background: #00ffff;
   /* White on cyan measures 1.25:1; black on cyan is 16.7:1. */
   --skill-tag-text: #000000;
+  /* White on #ff00ff is 3.1:1; black is 6.7:1. */
+  --on-primary-text: #000000;
   --accent-text: #ff00ff;
   --focus-ring: #ffff00;  /* 19.5:1 on black */
   --ai-background-color: #ff00ff;
@@ -179,6 +186,19 @@ h1, h2, h3, h4, h5, h6 {
 /* Party mode animations */
 .theme-party * {
   animation: party-colors 5s infinite;
+}
+
+/* The color cycle above would override token colors on filled controls
+   (e.g. #e6ff19 text on a #00ffff tag measured 1.11:1), so controls with
+   their own fill keep their static, contrast-checked foreground. */
+.theme-party .skill-tag,
+.theme-party .skill-tag *,
+.theme-party .download-button,
+.theme-party .download-button *,
+.theme-party .about-cta-button,
+.theme-party .skills-filter-chip:hover,
+.theme-party .skills-filter-chip.is-active {
+  animation: none;
 }
 
 @keyframes party-colors {

@@ -53,7 +53,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
           document.documentElement.style.transform = '';
         });
         
-        console.log('[Theme Provider] Applied theme:', theme);
       } catch (error) {
         console.error('[Theme Provider] Error applying theme:', error);
       }

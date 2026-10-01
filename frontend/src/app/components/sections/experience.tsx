@@ -67,17 +67,20 @@ const ExperienceTimeline = memo(({
             {item.logoPath && (
               <div
                 className="logo-link"
-                aria-label={`View ${item.company} experience details`}
                 onMouseEnter={prefetchExperienceModal}
                 style={{ cursor: 'pointer' }}
                 {...buttonize(() => onSelectExperience(key))}
               >
-                <CompanyLogo 
+                {/* The logo's own text (e.g. "together.ai") is decorative; the
+                    name comes from the hidden text so it never contradicts what
+                    is drawn (Lighthouse label-content-name-mismatch). */}
+                <CompanyLogo
                   name={item.logoPath || "github-logo.svg"}
                   size={64}
-                  aria-label={`${item.company} logo`}
+                  aria-hidden
                   className="company-logo"
                 />
+                <span className="sr-only">{`View ${item.company} experience details`}</span>
               </div>
             )}
             <div className="timeline-header">

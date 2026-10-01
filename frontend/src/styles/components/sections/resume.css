@@ -9,6 +9,7 @@
 .download-button {
   width: 100%;
   background: var(--primary-border);
+  color: var(--on-primary-text);
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   border: none;
@@ -18,14 +19,14 @@
 }
 
 .button-text {
-  color: white;
+  color: var(--on-primary-text);
   font-size: 1.5rem;
   font-family: 'Quantico', sans-serif !important;
   font-weight: 900;
 }
 
 .download-button:hover {
-  color: white;
+  color: var(--on-primary-text);
   background: var(--primary);
   transform: translateY(-2px);
   border: var(--border-thickness) solid var(--primary);
@@ -226,7 +227,7 @@ a:not(.resume-button):hover {
     width: 100%;
   }
   .button-text {
-    color: white;
+    color: var(--on-primary-text);
     font-size: 1.25rem;
     font-family: 'Quantico', sans-serif !important;
     font-weight: 900;

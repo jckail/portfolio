@@ -70,3 +70,50 @@
     justify-content: center;
   }
 }
+
+/* Phones: a compact bottom bar instead of a centred stacked card that
+   covered a quarter of the viewport. Deny and Accept share one row at equal
+   width and height so refusing is exactly as easy as accepting. */
+@media (max-width: 480px) {
+  .cookie-banner {
+    /* The chat button dock (z 9999, fixed bottom) otherwise sits on top of
+       Deny at this width. Stay below dialogs (--z-dialog). */
+    z-index: calc(var(--z-dialog) - 1);
+    padding: var(--spacing-sm) var(--spacing-md);
+    padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .cookie-content {
+    gap: var(--spacing-sm);
+    padding: 0;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .cookie-content p {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  /* The footer "Cookie settings" link still exists; only the hint is cut. */
+  .cookie-detail {
+    display: none;
+  }
+
+  .cookie-buttons {
+    gap: var(--spacing-sm);
+    justify-content: stretch;
+  }
+
+  .cookie-button {
+    flex: 1 1 0;
+    min-height: 44px;
+    padding: var(--spacing-sm);
+    font-size: 0.875rem;
+  }
+
+  /* Match Deny's 1px border so both buttons get the same box. */
+  .cookie-button.accept {
+    border: 1px solid transparent;
+  }
+}

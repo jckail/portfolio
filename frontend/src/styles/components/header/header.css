@@ -70,7 +70,14 @@
   gap: 2px;
 }
 
-.nav-left h1 {
+/* <p>, not h1/h2 (one h1 per page, in the hero). The global p rule sets
+   Montserrat !important, so the display font is restated here. */
+.nav-left .header-name,
+.nav-left .header-tagline {
+  font-family: 'Quantico', sans-serif !important;
+}
+
+.nav-left .header-name {
   font-size: 2.0rem;
   font-weight: 600;
   color: var(--text-color);
@@ -80,7 +87,7 @@
   font-weight: bold;
 }
 
-.nav-left h2 {
+.nav-left .header-tagline {
   font-size: 1.25rem;
   color: var(--text-color);
   margin: 0;
@@ -197,11 +204,11 @@
     height: 100%;
   }
 
-  .nav-left h1 {
+  .nav-left .header-name {
     font-size: 1.4rem;
   }
 
-  .nav-left h2 {
+  .nav-left .header-tagline {
     font-size: 0.85rem;
   }
 
@@ -272,11 +279,11 @@
     align-items: center;
   }
 
-  .nav-left h1 {
+  .nav-left .header-name {
     font-size: 1rem;
   }
 
-  .nav-left h2 {
+  .nav-left .header-tagline {
     font-size: 0.8rem;
   }
 

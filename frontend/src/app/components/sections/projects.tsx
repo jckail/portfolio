@@ -31,21 +31,24 @@ const ProjectCard = memo(({
       style={{ '--item-index': index } as React.CSSProperties}
       onMouseEnter={prefetchProjectModal}
     >
+      {/* Named by its visible content (title, description) plus a hidden
+          suffix, not an aria-label that would leave the visible text out
+          (Lighthouse label-content-name-mismatch). */}
       <div
         className="project-card-main"
-        aria-label={`View ${project.title} details`}
         {...buttonize(() => onSelect(projectKey))}
       >
         <div className="project-image">
           <ProjectIcon
             name={project.logoPath || 'github-logo.svg'}
             size={100}
-            aria-label={`${project.title} project icon`}
+            aria-hidden
             className="project-icon"
           />
         </div>
         <h3>{project.title}</h3>
         <p>{project.description}</p>
+        <span className="sr-only"> (view details)</span>
       </div>
       <div className="project-links">
         <button

@@ -97,3 +97,27 @@ describe('Experience deep links', () => {
     expect(new URLSearchParams(window.location.search).has('company')).toBe(false);
   });
 });
+
+describe('Experience logo button', () => {
+  it('is named by text that is in the DOM, not an aria-label over the logo', () => {
+    const item = experienceData.together_ai;
+    const original = item.logoPath;
+    item.logoPath = 'acme-logo.svg';
+    try {
+      render(<Experience />);
+      const button = screen.getByRole('button', { name: 'View Together AI experience details' });
+      // label-content-name-mismatch only applies to aria-label/labelledby names
+      expect(button).not.toHaveAttribute('aria-label');
+      expect(button).toHaveClass('logo-link');
+      // The logo's own text/alt is hidden so it cannot contradict the name
+      const logo = button.querySelector('img');
+      expect(logo).toHaveAttribute('aria-hidden', 'true');
+      expect(logo).toHaveAttribute('alt', '');
+
+      fireEvent.keyDown(button, { key: 'Enter' });
+      expect(new URLSearchParams(window.location.search).get('company')).toBe('together-ai');
+    } finally {
+      item.logoPath = original;
+    }
+  });
+});

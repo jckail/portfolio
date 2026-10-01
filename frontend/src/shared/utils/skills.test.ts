@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { findSkillKey, formatTag } from './skills';
+
 import type { Skill } from '../../app/components/sections/modals/SkillModal';
 
 const skills = {

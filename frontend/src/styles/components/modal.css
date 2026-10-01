@@ -131,7 +131,11 @@
 
 .contact-form-group input,
 .contact-form-group textarea {
-  padding: var(--spacing-xs);
+  /* Form controls don't inherit the page font; use the body copy face */
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.4;
+  padding: var(--spacing-sm) var(--spacing-md);
   border: 2px solid var(--primary-border);
   border-radius: var(--radius-md);
   background: var(--background-color);
@@ -711,7 +715,7 @@
   .contact-form-group input,
   .contact-form-group textarea {
     font-size: 18px;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
   }
 
   .contact-submit-button {

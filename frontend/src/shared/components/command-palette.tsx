@@ -159,6 +159,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
           ref={inputRef}
           className="command-palette-input"
           type="search"
+          id="command-palette-search"
+          name="command-palette-search"
+          aria-label="Search commands"
+          autoComplete="off"
           placeholder={
             chatAvailable
               ? 'Jump to a section, open chat, download resume…'

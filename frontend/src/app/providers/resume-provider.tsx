@@ -44,7 +44,6 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const handleDownload = async () => {
-    console.log('Starting download process...');
     if (!resumeFileName) {
       const error = 'Resume filename not available';
       console.error(error);
@@ -68,26 +67,17 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       const blob = await response.blob();
-      console.log('PDF blob received, size:', blob.size);
       const url = window.URL.createObjectURL(blob);
-      
-      console.log('Creating download link...');
+
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
       a.download = resumeFileName;
-      
-      console.log('Appending link to document...');
       document.body.appendChild(a);
-      
-      console.log('Triggering download...');
       a.click();
-      
-      console.log('Cleaning up...');
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
       
-      console.log('Download process complete');
       setPdfUrl(url);
     } catch (err) {
       console.error('Error in download process:', err);
@@ -96,7 +86,6 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   useEffect(() => {
-    console.log('ResumeProvider mounted, fetching filename...');
     fetchResumeFileName();
     setupPdfUrl(); // Initial setup of PDF URL
   }, []);
@@ -111,7 +100,6 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     return () => {
       if (pdfUrl) {
-        console.log('Cleaning up PDF URL on unmount');
         window.URL.revokeObjectURL(pdfUrl);
       }
     };

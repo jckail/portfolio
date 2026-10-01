@@ -60,7 +60,7 @@
 .skills-filter-chip.is-active {
   background: var(--primary);
   border-color: var(--primary);
-  color: white;
+  color: var(--on-primary-text);
 }
 
 .skills-filter-status,

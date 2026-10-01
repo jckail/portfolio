@@ -28,8 +28,12 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onDeny }) => {
       <div className="cookie-content">
         <p>
           With your consent, this site uses Google Analytics cookies to understand
-          traffic. Nothing is loaded unless you click &quot;Accept All&quot;, and you can
-          change your choice anytime under &quot;Cookie settings&quot; in the footer.
+          traffic. Nothing is loaded unless you click &quot;Accept All&quot;
+          <span className="cookie-detail">
+            , and you can change your choice anytime under &quot;Cookie settings&quot; in
+            the footer
+          </span>
+          .
         </p>
         <div className="cookie-buttons">
           <button onClick={handleDenyAll} className="cookie-button deny">

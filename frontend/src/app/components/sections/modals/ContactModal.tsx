@@ -20,6 +20,14 @@ interface ContactModalProps {
   onClose: () => void;
 }
 
+// Mirror the EmailMessage caps in backend/app/api/contact_routes.py
+// (EmailStr itself rejects addresses over 254 characters).
+const CONTACT_LIMITS = {
+  from_email: 254,
+  subject: 150,
+  message: 5000,
+} as const;
+
 const DEFAULT_FORM = {
   from_email: '',
   subject: 'Connecting via your Portfolio',
@@ -153,6 +161,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   value={formData.from_email}
                   onChange={handleInputChange}
                   required
+                  maxLength={CONTACT_LIMITS.from_email}
+                  autoComplete="email"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -166,6 +176,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   value={formData.subject}
                   onChange={handleInputChange}
                   required
+                  maxLength={CONTACT_LIMITS.subject}
                 />
               </div>
 
@@ -177,6 +188,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
                   value={formData.message}
                   onChange={handleInputChange}
                   required
+                  maxLength={CONTACT_LIMITS.message}
                   rows={5}
                 />
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 
 import { Theme } from '../../../types/theme';
 import { SidePanel } from '../navigation';
@@ -55,6 +55,7 @@ const Header: React.FC<HeaderProps> = memo(({
   isToggleHidden
 }) => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
   const { contactData, isLoading, error } = useData();
 
   const updateURL = (isOpen: boolean) => {
@@ -84,16 +85,22 @@ const Header: React.FC<HeaderProps> = memo(({
       <header className="header">
         <nav className="nav-container">
           <div className="nav-left">
-            <button 
+            <button
+              ref={menuToggleRef}
+              type="button"
               onClick={toggleSidePanel}
               className={`menu-toggle ${isSidePanelOpen ? 'active' : ''}`}
               aria-label="Toggle navigation menu"
+              aria-expanded={isSidePanelOpen}
+              aria-controls="side-panel"
             >
               <SandwichIcon/>
             </button>
             <div className="header-titles">
-              <h1>{contactData.firstName}{" "}{contactData.lastName}</h1>
-              <h2>AI | Data | ML</h2>
+              {/* Not headings: the page's single h1 is the hero name in About,
+                  and a tagline is not a section title. */}
+              <p className="header-name">{contactData.firstName}{" "}{contactData.lastName}</p>
+              <p className="header-tagline">AI | Data | ML</p>
             </div>
           </div>
           <div className="nav-right">
@@ -109,9 +116,10 @@ const Header: React.FC<HeaderProps> = memo(({
           </div>
         </nav>
       </header>
-      <SidePanel 
-        isOpen={isSidePanelOpen} 
-        onClose={handleCloseSidePanel} 
+      <SidePanel
+        isOpen={isSidePanelOpen}
+        onClose={handleCloseSidePanel}
+        returnFocusRef={menuToggleRef}
       />
     </>
   );

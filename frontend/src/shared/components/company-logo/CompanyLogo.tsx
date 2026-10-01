@@ -25,6 +25,8 @@ export interface IconProps {
   className?: string;
   size?: number;
   'aria-label'?: string;
+  /** Decorative use: hide from assistive tech (the parent supplies the name). */
+  'aria-hidden'?: boolean;
 }
 
 const CompanyLogo: React.FC<IconProps> = ({ name, className = 'company-logo', size = 32, ...props }) => {
@@ -45,7 +47,7 @@ const CompanyLogo: React.FC<IconProps> = ({ name, className = 'company-logo', si
   return (
     <img 
       src={`/images/companylogos/${name}`}
-      alt={name.replace('.svg', '')}
+      alt={props['aria-hidden'] ? '' : name.replace('.svg', '')}
       width={size}
       height={size}
       className={className}

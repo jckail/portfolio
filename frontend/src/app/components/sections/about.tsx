@@ -91,7 +91,7 @@ const TLDRContent = memo(({
       <div className="about-hero">
         <div className="about-hero-copy">
           <p className="about-eyebrow">{aboutMeData.greeting}</p>
-          <h2 className="about-name">{fullName || aboutMeData.greeting}</h2>
+          <h1 className="about-name">{fullName || aboutMeData.greeting}</h1>
           {currentRole && (
             <p className="about-role">
               {currentRole.title}
