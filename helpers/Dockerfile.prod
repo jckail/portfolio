@@ -16,6 +16,17 @@ RUN npm run build
 
 # Backend setup
 FROM python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+
+# The pinned base digest predates the Debian security fixes for these four
+# packages (Trivy HIGH: CVE-2026-103111 pcre2, CVE-2026-75804 and
+# CVE-2026-84782 openssl; fixed in 3.5.7-1~deb13u3 / 10.46-1~deb13u3). Upgrade
+# only them. Drop this once Dependabot bumps the digest to an image that
+# already carries the fixes.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade \
+        libssl3t64 openssl openssl-provider-legacy libpcre2-8-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy the frontend build (Vite already copies public/, favicons included)
