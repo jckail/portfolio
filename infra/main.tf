@@ -16,6 +16,7 @@ locals {
     SUPABASE_SERVICE_ROLE = google_secret_manager_secret.secrets["supabase_service_role"].secret_id
     ANTHROPIC_API_KEY     = google_secret_manager_secret.secrets["anthropic_api_key"].secret_id
     SENDGRID_API_KEY      = google_secret_manager_secret.secrets["sendgrid_api_key"].secret_id
+    CONTACT_PHONE         = google_secret_manager_secret.contact_phone.secret_id
   }
 
   # Plain (non-secret) environment variables
@@ -110,6 +111,33 @@ resource "google_secret_manager_secret_iam_member" "run_access" {
   member    = "serviceAccount:${google_service_account.run.email}"
 }
 
+# The phone number is revealed only to visitors who leave an email
+# (POST /api/contact/phone). Its value is written out of band with
+#   printf '%s' '<number>' | gcloud secrets versions add contact-phone --data-file=-
+# so it stays out of git and out of Terraform state; Terraform owns only the
+# container and the runtime binding. Created with gcloud on 2026-10-01, hence
+# the import.
+import {
+  to = google_secret_manager_secret.contact_phone
+  id = "projects/${var.project_id}/secrets/contact-phone"
+}
+
+resource "google_secret_manager_secret" "contact_phone" {
+  secret_id = "contact-phone"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.services]
+}
+
+resource "google_secret_manager_secret_iam_member" "contact_phone_run_access" {
+  secret_id = google_secret_manager_secret.contact_phone.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.run.email}"
+}
+
 # ---------------------------------------------------------------------------
 # Cloud Run service
 # ---------------------------------------------------------------------------
@@ -176,6 +204,7 @@ resource "google_cloud_run_v2_service" "app" {
   depends_on = [
     google_project_service.services,
     google_secret_manager_secret_version.secret_versions,
+    google_secret_manager_secret_iam_member.contact_phone_run_access,
   ]
 }
 

@@ -20,6 +20,12 @@ operational notes below stay useful.
   `supabase_service_role`, `anthropic_api_key`, `sendgrid_api_key`) are in
   Secret Manager, mounted into Cloud Run via `secretKeyRef` — no plaintext
   secrets on the service or in git.
+- A sixth secret, `contact-phone`, is mounted as `CONTACT_PHONE` (added
+  2026-10-01 with gcloud, `--no-traffic`). It is the phone number that
+  `POST /api/contact/phone` reveals only after a visitor leaves an email.
+  Terraform owns the container and the runtime binding (imported in
+  `infra/main.tf`), not the value, so it is not in state. Rotate with
+  `printf '%s' '<number>' | gcloud secrets versions add contact-phone --data-file=-`.
 - Branch protection on `main` requires the 4 CI checks (Backend, Docker,
   Frontend, Terraform) before merge.
 - **There is no `terraform-plan.yml` workflow.** It was removed as a security
