@@ -62,7 +62,7 @@ export interface RunResult {
   lineage: { metric: string; definition: string; source: string; sql: string }[];
 }
 export interface Catalog {
-  exploration?: ExplorationDataset;
+  exploration?: ExplorationDataset | null;
   schema_version: number;
   engine_version: string;
   source: { repository: string; command: string };

@@ -56,8 +56,8 @@ pytest. `backend/tests/test_dataplayground.py` checks the generated artifact and
 boundaries, with fake upstream responses. SPA/discovery tests cover direct navigation,
 canonical metadata, ETags, no-JavaScript content, and sitemap inclusion.
 
-This feature branch is based on `feat/refresh-2026-10` to preserve the portfolio refresh.
-Review it against that branch; do not copy its changes onto the older audit checkout.
+The portfolio refresh is integrated into `main`; review this feature against `main`.
+Do not copy these changes onto the older audit checkout.
 Production release uses `.github/workflows/deploy.yml` after integration into `main`.
 Never use `helpers/deploy.sh` or a laptop deploy command.
 
