@@ -36,10 +36,10 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onDeny }) => {
           .
         </p>
         <div className="cookie-buttons">
-          <button onClick={handleDenyAll} className="cookie-button deny">
+          <button onClick={handleDenyAll} type="button" className="cookie-button deny btn">
             Deny All
           </button>
-          <button onClick={handleAcceptAll} className="cookie-button accept">
+          <button onClick={handleAcceptAll} type="button" className="cookie-button accept btn btn-primary">
             Accept All
           </button>
         </div>

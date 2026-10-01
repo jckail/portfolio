@@ -1,99 +1,69 @@
 .footer {
-  @apply w-full py-6 mt-12 border-t border-gray-800;
-  margin-top: 0px;
-  padding-top: 20px;
-  padding-bottom: 5px;
   position: relative;
   z-index: 10000;
+  width: 100%;
+  margin-top: var(--section-gap);
+  padding: var(--spacing-lg) 0 var(--spacing-xl);
+  border-top: 1px solid var(--hairline);
 }
 
 .footer-content {
-  @apply container mx-auto px-4 flex flex-col items-center gap-2;
-  
-}
-
-.footer-text {
-  @apply text-sm text-center;
-  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
 }
 
 .footer-links {
-  @apply flex gap-4 text-sm ;
-  
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-xs) var(--spacing-lg);
 }
 
-.footer-link {
-  @apply cursor-pointer;
-  color: var(--text-color) !important;
-  transition: opacity 0.3s ease;
-  text-decoration: underline;
-  font-size: 1rem;
-}
-
+.footer-link,
 .footer-link-doodle {
-  @apply cursor-pointer;
-  color: var(--text-color) !important;
-  transition: opacity 0.3s ease;
-  text-decoration: none;
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  white-space: nowrap;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.footer a.footer-link {
+  color: var(--text-secondary);
+}
+
+.footer-link:hover,
+.footer a.footer-link:hover {
+  color: var(--text-color);
+  text-decoration-color: currentColor;
 }
 
 .footer-link-doodle:hover {
-  @apply cursor-pointer;
-  color: var(--accent-text) !important;
-  transition: opacity 0.3s ease;
-  text-decoration: none;
-  font-size: 1.75;
+  color: var(--accent-text);
 }
 
-.footer-link:hover {
-  opacity: 0.7;
-  color:  var(--primary) !important;
-}
-
-/* Ensure anchor tags in footer use the correct color */
-.footer a {
-  color: var(--text-color) !important;
-  text-decoration: none;
-}
-
-.footer a:hover {
-  color: var(--text-color) !important;
-  opacity: 0.7;
-}
-
-
-@media (max-width: 768px) {
-  .footer-links{
-    margin-left: 60px;
-    gap:12px;
-  }
-
-  .footer-link {
-    font-size: 0.7rem;
-  }
-  .footer-link-doodle {
-    font-size: 0.7rem;
-  }
-}
-
-/* Phones: three links side by side squeezed each into a narrow column and
-   wrapped mid-label ("Cookie / settings"). Stack them instead, one per line,
-   each a full-height tap target (WCAG 2.5.8). */
+/* Phones: one link per line, each a full-height tap target (WCAG 2.5.8) */
 @media (max-width: 480px) {
   .footer-links {
     flex-direction: column;
     align-items: center;
-    margin-left: 0;
-    gap: 4px;
+    gap: var(--spacing-xs);
   }
 
-  .footer-link,
-  .footer-link-doodle {
-    display: inline-flex;
-    align-items: center;
-    min-height: 24px;
-    white-space: nowrap;
-    font-size: 0.8rem;
+  /* Clear the chat button docked bottom-left */
+  .footer {
+    padding-bottom: calc(var(--spacing-2xl) + 48px);
   }
 }

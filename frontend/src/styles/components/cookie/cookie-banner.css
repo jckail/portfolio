@@ -3,11 +3,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 1rem;
+  /* Opaque: page text scrolling underneath must not show through */
+  background: var(--surface-opaque);
+  color: var(--text-color);
+  border-top: 1px solid var(--panel-border);
+  box-shadow: 0 -12px 32px -20px rgba(0, 0, 0, 0.6);
+  padding: var(--spacing-md);
   z-index: var(--z-overlay);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .cookie-content {
@@ -22,7 +26,8 @@
 
 .cookie-content p {
   margin: 0;
-  font-size: 0.9rem;
+  max-width: var(--measure);
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
 
@@ -32,31 +37,10 @@
   flex-shrink: 0;
 }
 
+/* Deny and Accept are the same size: refusing is as easy as accepting.
+   Visuals come from .btn / .btn-primary (app.css). */
 .cookie-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.cookie-button.accept {
-  background: #0403ff;
-  color: white;
-}
-
-.cookie-button.accept:hover {
-  background: #0302cc;
-}
-
-.cookie-button.deny {
-  background: transparent;
-  border: 1px solid #ffffff;
-  color: white;
-}
-
-.cookie-button.deny:hover {
-  background: rgba(255, 255, 255, 0.1);
+  min-width: 7.5rem;
 }
 
 @media (max-width: 768px) {
@@ -107,13 +91,6 @@
 
   .cookie-button {
     flex: 1 1 0;
-    min-height: 44px;
-    padding: var(--spacing-sm);
-    font-size: 0.875rem;
-  }
-
-  /* Match Deny's 1px border so both buttons get the same box. */
-  .cookie-button.accept {
-    border: 1px solid transparent;
+    min-width: 0;
   }
 }

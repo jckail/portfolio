@@ -89,7 +89,7 @@ const Header: React.FC = memo(() => {
               ref={menuToggleRef}
               type="button"
               onClick={toggleSidePanel}
-              className={`menu-toggle ${isSidePanelOpen ? 'active' : ''}`}
+              className={`menu-toggle btn-icon${isSidePanelOpen ? ' active' : ''}`}
               aria-label="Toggle navigation menu"
               aria-expanded={isSidePanelOpen}
               aria-controls="side-panel"
@@ -105,9 +105,10 @@ const Header: React.FC = memo(() => {
           </div>
           <div className="nav-right">
             {!isToggleHidden && (
-              <button 
+              <button
+                type="button"
                 onClick={toggleTheme}
-                className="theme-toggle"
+                className="theme-toggle btn-icon"
                 aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
               >
                 <ThemeIcon theme={theme} />

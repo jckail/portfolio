@@ -2,8 +2,8 @@
    pinned to the bottom so the button lines up with the content column. */
 .chat-fab-dock {
   position: fixed;
-  bottom: 15px;
-  left: 52%;
+  bottom: 16px;
+  left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
   width: 100%;
@@ -20,46 +20,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   padding: 0;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
-  background: var(--ai-background-color);
+  background: var(--btn-primary-bg);
   color: #ffffff;
-  font-size: 2.5rem;
+  font-size: 2rem;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
-              0 6px 10px 0 rgba(0, 0, 0, 0.14),
-              0 1px 18px 0 rgba(0, 0, 0, 0.12);
-  transition: transform 0.5s ease-in-out, background-color 0.5s ease-in-out;
-  animation: chatFabPulse 10s infinite;
+  box-shadow: var(--elevation-2), 0 10px 24px -8px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-normal), background-color var(--transition-normal);
 }
 
 .chat-fab:hover,
 .chat-fab:focus-visible {
-  background: var(--primary);
-  transform: scale(1.5);
-  /* An active animation would override the hover transform. */
-  animation: none;
+  background: var(--btn-primary-hover);
+  transform: scale(1.08);
 }
 
 .chat-fab:focus-visible {
-  outline: 3px solid var(--primary-border, #ffffff);
+  outline: 3px solid var(--focus-ring, #ffffff);
   outline-offset: 3px;
-}
-
-@keyframes chatFabPulse {
-  0%, 100% { transform: scale(1); }
-  25%, 75% { transform: scale(1.05); }
-  35%, 65% { transform: scale(1.1); }
 }
 
 @media (max-width: 599.95px) {
   .chat-fab {
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
+    width: 52px;
+    height: 52px;
+    font-size: 1.75rem;
   }
 }
