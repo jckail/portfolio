@@ -19,6 +19,7 @@ from backend.app.services.chat_service import (
     MAX_USER_MESSAGE_CHARS,
     manager,
 )
+from backend.app.utils.events import log_event
 from backend.app.utils.rate_limit import client_ip
 from backend.app.utils.supabase_client import supabase
 
@@ -168,6 +169,7 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
 @router.websocket("/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     if not _origin_allowed(websocket):
+        log_event("ws.rejected_origin")
         await websocket.close(code=1008)
         return
 

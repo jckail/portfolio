@@ -235,6 +235,16 @@ def test_websocket_rejects_a_foreign_origin(client):
     _assert_rejected(client, "/ws/origin-test-client", {"origin": "https://evil.tld"})
 
 
+def test_websocket_foreign_origin_emits_the_alertable_event(client, monkeypatch):
+    """Terraform alerts on jsonPayload.event=ws.rejected_origin; it must be logged."""
+    from backend.app.api import chat_routes
+
+    seen = []
+    monkeypatch.setattr(chat_routes, "log_event", lambda event, **fields: seen.append((event, fields)))
+    _assert_rejected(client, "/ws/origin-event-client", {"origin": "https://evil.tld"})
+    assert seen == [("ws.rejected_origin", {})]
+
+
 def test_websocket_accepts_an_allowed_origin(client):
     with client.websocket_connect(
         "/ws/origin-ok-client", headers={"origin": "http://localhost:5173"}
