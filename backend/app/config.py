@@ -24,9 +24,11 @@ REQUIRED_ENV_VARS: tuple[str, ...] = (
     "ALLOWED_ORIGINS",
     "PORT",
     "ADMIN_EMAIL",
-    "ANTHROPIC_API_KEY",
     "SENDGRID_API_KEY",
 )
+# ANTHROPIC_API_KEY / VERTEX_API_KEY are deliberately not required: the chat
+# assistant needs one of them, and without either it reports itself
+# unavailable instead of stopping the whole site from booting.
 
 # Starlette requires exact origin strings (wildcard ports never match), so
 # the default lists the common local dev servers explicitly.
@@ -45,8 +47,15 @@ class Settings:
 
     # AI assistant
     anthropic_api_key: str
+    # Secret. Sent only in the x-goog-api-key header, never logged or put in a URL.
+    vertex_api_key: str
+    # "vertex" or "anthropic"; see _resolve_chat_provider.
+    chat_provider: str
     chat_model: str
+    chat_fallback_model: str
     chat_max_tokens: int
+    # Tokens per UTC day per instance; chat reports unavailable once spent.
+    chat_daily_token_budget: int
 
     # Email
     sendgrid_api_key: str
@@ -70,14 +79,31 @@ class Settings:
     trust_forwarded_for: bool
     trusted_proxy_hops: int
 
+    # Observability (defaulted so a Settings built by hand in a test still works)
+    gcp_project_id: str = "portfolio-383615"
+    service_name: str = "quickresume"
+    access_log_enabled: bool = True
+
     @property
     def chat_available(self) -> bool:
         """Whether the AI assistant can serve requests."""
-        return bool(self.anthropic_api_key)
+        key = self.vertex_api_key if self.chat_provider == "vertex" else self.anthropic_api_key
+        return bool(key)
 
 
 def _parse_origins(raw: str) -> tuple[str, ...]:
     return tuple(origin.strip() for origin in raw.split(",") if origin.strip())
+
+
+DEFAULT_CHAT_MODELS = {"vertex": "gemini-3.1-flash-lite", "anthropic": "claude-haiku-4-5"}
+
+
+def _resolve_chat_provider(raw: str, vertex_api_key: str) -> str:
+    """Pick the chat provider: explicit CHAT_PROVIDER, else Vertex when its key exists."""
+    choice = raw.strip().lower()
+    if choice in DEFAULT_CHAT_MODELS:
+        return choice
+    return "vertex" if vertex_api_key else "anthropic"
 
 
 def _parse_bool(raw: str) -> bool:
@@ -105,14 +131,19 @@ def _forwarded_for_trust(on_cloud_run: bool) -> bool:
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     on_cloud_run = bool(os.getenv("K_SERVICE"))
+    vertex_api_key = os.getenv("VERTEX_API_KEY", "").strip()
+    chat_provider = _resolve_chat_provider(os.getenv("CHAT_PROVIDER", ""), vertex_api_key)
     return Settings(
         supabase_url=os.getenv("SUPABASE_URL", ""),
         supabase_anon_key=os.getenv("SUPABASE_ANON_KEY", ""),
         supabase_service_role=os.getenv("SUPABASE_SERVICE_ROLE", ""),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY", ""),
-        # Claude Haiku 4.5: fastest model with near-frontier intelligence.
-        chat_model=os.getenv("CHAT_MODEL", "claude-haiku-4-5"),
+        vertex_api_key=vertex_api_key,
+        chat_provider=chat_provider,
+        chat_model=os.getenv("CHAT_MODEL", "").strip() or DEFAULT_CHAT_MODELS[chat_provider],
+        chat_fallback_model=os.getenv("CHAT_FALLBACK_MODEL", "").strip() or "gemini-2.5-flash",
         chat_max_tokens=int(os.getenv("CHAT_MAX_TOKENS", "1024")),
+        chat_daily_token_budget=int(os.getenv("CHAT_DAILY_TOKEN_BUDGET", "") or "2000000"),
         sendgrid_api_key=os.getenv("SENDGRID_API_KEY", ""),
         contact_sender_email=os.getenv(
             "CONTACT_SENDER_EMAIL", "assistant@jordan-kail.com"
@@ -127,6 +158,9 @@ def get_settings() -> Settings:
         port=int(os.getenv("PORT", "8080")),
         git_commit=os.getenv("GIT_COMMIT", ""),
         dev_mode=_parse_bool(os.getenv("DEV_MODE", "")),
+        gcp_project_id=os.getenv("GCP_PROJECT_ID", "").strip() or "portfolio-383615",
+        service_name=os.getenv("K_SERVICE", "").strip() or "quickresume",
+        access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),
         on_cloud_run=on_cloud_run,
         trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
         trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),
