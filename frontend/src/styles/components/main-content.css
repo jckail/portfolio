@@ -103,3 +103,19 @@ section[id] {
   .section-slot--skills { --slot-min-height: 2250px; }
   .section-slot--resume { --slot-min-height: 950px; }
 }
+
+/* Content failed to load: a message and a retry, not a blank gap */
+.data-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl) var(--page-gutter);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.data-error p {
+  margin: 0;
+  max-width: var(--measure);
+}

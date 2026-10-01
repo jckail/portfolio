@@ -12,6 +12,7 @@ import '../../../styles/components/sections/about.css';
 import SocialLinks from './social-links/SocialLinks';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { useContact } from './about/hooks/useContact';
+import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { SkillModalHost } from './modals/SkillModalHost';
 
@@ -214,7 +215,7 @@ const TLDR: React.FC = () => {
     [experienceData, contactData?.title]
   );
 
-  if (error) return <div className="error-aboutme">Error: {error}</div>;
+  if (error) return <DataError what="the portfolio" className="error-aboutme" />;
 
   if (isLoading || !aboutMeData || !contactData || !skillsData) {
     // Sized like the rendered hero so its arrival doesn't push the page down.

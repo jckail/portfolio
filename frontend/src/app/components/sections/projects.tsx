@@ -1,9 +1,11 @@
-import React, { Suspense, lazy, memo, useCallback, useState } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import { buttonize } from '../../../shared/utils/a11y';
+import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { useDeepLink } from '../../../shared/hooks/use-deep-link';
 import { getOwn } from '../../../shared/utils/lookup';
 import { useProject } from './projects/hooks/useProject';
 import { SkillModalHost } from './modals/SkillModalHost';
@@ -69,6 +71,7 @@ const ProjectCard = memo(({
         <button
           type="button"
           className="project-link primary btn btn-sm"
+          data-project-key={projectKey}
           onClick={() => onSelect(projectKey)}
         >
           View details
@@ -97,17 +100,44 @@ const Projects: React.FC = () => {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
   const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
-  const closeSkill = useCallback(() => setSelectedSkill(null), []);
+  // Project the skill dialog was opened from: focus returns to its card when
+  // the skill closes, because the project dialog is gone by then.
+  const skillOpenedFromRef = useRef<string | null>(null);
+  // A ref, so the callback below stays stable and the memoised cards do not
+  // re-render each time a project dialog opens.
+  const selectedProjectRef = useRef(selectedProject);
+  selectedProjectRef.current = selectedProject;
+  const closeSkill = useCallback(() => {
+    setSelectedSkill(null);
+    const from = skillOpenedFromRef.current;
+    skillOpenedFromRef.current = null;
+    if (!from) return;
+    requestAnimationFrame(() => {
+      Array.from(document.querySelectorAll<HTMLElement>('[data-project-key]'))
+        .find(button => button.dataset.projectKey === from)
+        ?.focus({ preventScroll: true });
+    });
+  }, []);
   // Close the project first: one dialog at a time (audit F-3)
   const openSkillFromProject = useCallback(
     (skillKey: string) => {
+      skillOpenedFromRef.current = selectedProjectRef.current;
       setSelectedProject(null);
       setSelectedSkill(skillKey);
     },
     [setSelectedProject]
   );
 
-  if (error) return <div className="error-message">Error: {error}</div>;
+  useDeepLink({
+    param: 'project',
+    value: selectedProject,
+    ready: !!projectsData,
+    valid: !!getOwn(projectsData, selectedProject),
+    sectionId: 'projects',
+    clear: closeProject,
+  });
+
+  if (error) return <DataError what="the projects section" />;
 
   if (isLoading || !projectsData) {
     return <SectionPlaceholder id="projects" />;

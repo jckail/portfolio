@@ -136,13 +136,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           error: null,
         });
       } catch (err: unknown) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-          setState(prev => ({
-            ...prev,
-            error: err instanceof Error ? err.message : 'Failed to fetch data',
-            isLoading: false,
-          }));
-        }
+        // An abort is the effect cleanup, not a failure. Anything else (even a
+        // thrown non-Error) must end the loading state, or the page spins forever.
+        if (err instanceof Error && err.name === 'AbortError') return;
+        setState(prev => ({
+          ...prev,
+          error: err instanceof Error ? err.message : 'Failed to fetch data',
+          isLoading: false,
+        }));
       }
     };
 

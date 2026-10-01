@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 
 import { Header } from './header/header';
+import { NotFound, isKnownPath } from './not-found';
 import TLDR from './sections/about';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
@@ -188,6 +189,14 @@ const MainContent: React.FC = () => {
   }, [pathname]);
 
   const closeAdmin = useCallback(() => setIsAdminModalOpen(false), []);
+
+  if (!isKnownPath(pathname)) {
+    return (
+      <ErrorBoundary>
+        <NotFound pathname={pathname} />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

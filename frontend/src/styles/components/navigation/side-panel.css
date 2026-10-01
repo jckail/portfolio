@@ -1,205 +1,89 @@
+/* Full-page scrim behind the open drawer. Below the header (so the toggle
+   stays reachable) and below the panel itself. */
 .side-panel-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 120px;
-  bottom: 0;
-  background: var(--surface);
-
-  z-index: 999;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.45);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--transition-fast), visibility var(--transition-fast);
-  background: var(--surface);
 }
 
 .side-panel-overlay.active {
   opacity: 1;
   visibility: visible;
-  width: 120px;
-  background: var(--surface);
 }
 
+/* The drawer is opaque: --surface is translucent and let the hero text show
+   through. */
 .side-panel {
   position: fixed;
   top: calc(var(--header-height) + 15px);
   left: -500px;
-  height: auto;
-  width: 120px;
-
-
-
-
-  border-right: 1px solid var(--border);
-
-  border-bottom-right-radius: var(--radius-md);
-
+  width: 170px;
+  max-width: calc(100vw - 2 * var(--spacing-md));
+  box-sizing: border-box;
+  background: var(--surface-opaque);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   transition: left var(--transition-fast);
   z-index: 999;
-  background: var(--surface);
-
 }
 
 .side-panel.open {
   left: 0;
-
-  z-index: 999;
-  background: var(--surface);
-
 }
 
 .side-panel-content {
-  background: var(--surface);
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  width: 170px;
-  backdrop-filter: blur(15px);
-  min-height: 250px;
-  /* Sets a minimum height */
-  justify-content: flex-end;
-  border-bottom-right-radius: 10px;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
 }
 
+/* Every item shares one box; the active one only recolours its underline, so
+   the outline always lines up with the label. */
 .nav-item {
-  width: 150px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
   padding: var(--spacing-sm) var(--spacing-md);
   background: none;
-  border: none;
+  border: var(--border-thickness) solid transparent;
+  border-radius: 10px;
   color: var(--text-color);
   font-size: 1rem;
   text-align: left;
-
-
-  margin-left: 10px;
   font-family: 'Quantico', sans-serif !important;
   font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
 }
 
 .nav-item:hover {
-  border: var(--border-thickness) solid var(--primary-border);
-
-  width: 150px;
-  color: var(--text-color);
-  border-radius: 10px;
-  margin-left: 15px;
-  cursor: pointer;
-
+  border-color: var(--primary-border);
 }
 
 .nav-item.active {
-  font-size: 1.2rem;
-  border-bottom: var(--border-thickness) solid var(--underline-color);
-  color: var(--text-color);
-
-
-  padding: var(--spacing-md) var(--spacing-md);
-  padding-bottom: 0px;
-  margin-left: 15px;
-  width: 140px;
-  font-family: 'Quantico', sans-serif !important;
+  border-bottom-color: var(--underline-color);
+  border-radius: 10px 10px 0 0;
   font-weight: 900;
-  background: var(--surface);
 }
 
 .nav-item.active:hover {
-  background: var(--primary);
-  color: var(--surface);
-  opacity: 0.9;
-  color: var(--text-color);
-  background: var(--surface);
-  border: var(--border-thickness) solid var(--primary-border);
-  margin-left: 15px;
-  width: 150px;
-  cursor: pointer;
+  border-color: var(--primary-border);
+  border-bottom-color: var(--underline-color);
 }
 
 @media (max-width: 768px) {
   .side-panel {
-    position: fixed;
-    top: calc(var(--header-height) + 15px);
-    left: -500px;
-    height: auto;
-    width: 120px;
-
-
-
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-
-    border-bottom-right-radius: var(--radius-md);
-
-    transition: left var(--transition-fast);
-    z-index: 999;
-    border-radius: 10px;
-    background: var(--surface);
-  }
-
-  .side-panel-content {
-
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    width: 120px;
-    backdrop-filter: blur(15px);
-    min-height: 240px;
-    /* Sets a minimum height */
-    height: 240px;
-    /* Sets a minimum height */
-    justify-content: flex-end;
-    border-bottom-right-radius: 10px;
+    width: 150px;
   }
 
   .nav-item {
-    width: 120px;
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-size: .95rem;
-    text-align: left;
-    transition: all var(--transition-fast);
-
-    margin-left: 5px;
-    font-family: 'Quantico', sans-serif !important;
-    font-weight: 700;
-  }
-
-  .nav-item:hover {
-    background: var(--primary);
-    width: 120px;
-    color: var(--text-color);
-    border-radius: 10px;
-    background: var(--surface);
-    cursor: pointer;
-
-
-  }
-
-  .nav-item.active {
-    font-size: .9rem;
-    border-bottom: var(--border-thickness) solid var(--underline-color);
-    color: var(--text-color);
-
-
-    padding: var(--spacing-md) var(--spacing-md);
-    padding-bottom: 0px;
-    margin-left: 10px;
-    width: 100px;
-    font-family: 'Quantico', sans-serif !important;
-    font-weight: 900;
-    font-weight: bold;
-    background: var(--surface);
-  }
-
-  .nav-item.active:hover {
-    width: 100px;
-    background: var(--primary);
-    color: var(--surface);
-    opacity: 0.9;
-    color: var(--text-color);
-    background: var(--surface);
-    cursor: pointer;
+    font-size: 0.95rem;
   }
 }

@@ -1,9 +1,11 @@
-import React, { Suspense, lazy, memo, useCallback, useState } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import CompanyLogo, { isMarkOnlyLogo } from '../../../shared/components/company-logo/CompanyLogo';
 import { buttonize } from '../../../shared/utils/a11y';
+import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
+import { useDeepLink } from '../../../shared/hooks/use-deep-link';
 import { getOwn } from '../../../shared/utils/lookup';
 import '../../../styles/components/sections/experience.css';
 import { useExperience } from './experience/hooks/useExperience';
@@ -43,6 +45,9 @@ export function resolveExperienceKey(
 
 /** Older roles show this many highlights inline; the rest are in the modal. */
 const OLDER_ROLE_HIGHLIGHTS = 2;
+
+/** Slug (or data key) from the URL to the data key used by the timeline. */
+const resolveKey = (slugOrKey: string): string => SLUG_TO_KEY.get(slugOrKey) ?? slugOrKey;
 
 const ExperienceTimeline = memo(({
   experience,
@@ -110,6 +115,7 @@ const ExperienceTimeline = memo(({
               <button
                 type="button"
                 className="btn-link timeline-more"
+                data-experience-key={key}
                 onClick={() => onSelectExperience(key)}
                 onMouseEnter={prefetchExperienceModal}
               >
@@ -138,9 +144,50 @@ const Experience: React.FC = () => {
     [setSelectedExperience]
   );
   const closeExperience = useCallback(() => setSelectedExperience(null), [setSelectedExperience]);
-  const closeSkill = useCallback(() => setSelectedSkill(null), []);
+  // The role dialog the skill was opened from, so focus can go back to its
+  // "Role details" button when the skill dialog closes (the role dialog is
+  // unmounted by then, so there is nothing else to return to).
+  const skillOpenedFromRef = useRef<string | null>(null);
+  const selectedExperienceRef = useRef(selectedExperience);
+  selectedExperienceRef.current = selectedExperience;
+  const closeSkill = useCallback(() => {
+    setSelectedSkill(null);
+    const from = skillOpenedFromRef.current;
+    skillOpenedFromRef.current = null;
+    if (!from) return;
+    requestAnimationFrame(() => {
+      const buttons = document.querySelectorAll<HTMLElement>('[data-experience-key]');
+      Array.from(buttons)
+        .find(button => button.dataset.experienceKey === from)
+        ?.focus({ preventScroll: true });
+    });
+  }, []);
+  // One dialog at a time: close the role dialog before the skill opens on top
+  // of it (audit F-3), as projects.tsx does.
+  const openSkillFromTimeline = useCallback((skillKey: string) => {
+    skillOpenedFromRef.current = null;
+    setSelectedSkill(skillKey);
+  }, []);
+  const openSkillFromRole = useCallback(
+    (skillKey: string) => {
+      const current = selectedExperienceRef.current;
+      skillOpenedFromRef.current = current ? resolveKey(current) : null;
+      setSelectedExperience(null);
+      setSelectedSkill(skillKey);
+    },
+    [setSelectedExperience]
+  );
 
-  if (error) return <div>Error: {error}</div>;
+  useDeepLink({
+    param: 'company',
+    value: selectedExperience,
+    ready: !!experienceData,
+    valid: !!experienceData && !!selectedExperience && !!resolveExperienceKey(experienceData, selectedExperience),
+    sectionId: 'experience',
+    clear: closeExperience,
+  });
+
+  if (error) return <DataError what="the experience section" />;
 
   if (isLoading || !experienceData || !skillsData) {
     return <SectionPlaceholder id="experience" />;
@@ -161,7 +208,7 @@ const Experience: React.FC = () => {
           experience={experienceData}
           skillsData={skillsData}
           onSelectExperience={handleSelectExperience}
-          onSelectSkill={setSelectedSkill}
+          onSelectSkill={openSkillFromTimeline}
         />
       </div>
 
@@ -172,7 +219,7 @@ const Experience: React.FC = () => {
             experienceKey={selectedExperience ?? undefined}
             skillsData={skillsData}
             onClose={closeExperience}
-            onSelectSkill={setSelectedSkill}
+            onSelectSkill={openSkillFromRole}
           />
         </Suspense>
       )}

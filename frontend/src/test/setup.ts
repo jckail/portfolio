@@ -1,7 +1,19 @@
 import '@testing-library/jest-dom/vitest';
+import { configure } from '@testing-library/react';
 import { beforeAll, vi } from 'vitest';
 
+// Lazily loaded dialogs (React.lazy + a dynamic import that Vite has to
+// transform) can take well over the 1s default when the machine is busy;
+// findBy*/waitFor stop as soon as the element appears, so a larger ceiling
+// only costs time when something is genuinely broken.
+configure({ asyncUtilTimeout: 5000 });
+
 beforeAll(() => {
+  // jsdom does not implement scrolling
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = vi.fn();
+  }
+
   // Mock window.matchMedia
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

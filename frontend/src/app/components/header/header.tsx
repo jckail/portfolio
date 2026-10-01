@@ -77,8 +77,9 @@ const Header: React.FC = memo(() => {
     updateURL(false);
   };
 
-  if (error) return <div>Error: {error}</div>;
-  if (isLoading || !contactData) return <HeaderSkeleton />;
+  // On failure the About section shows the error; the header just stays a skeleton
+  // rather than repeating it.
+  if (error || isLoading || !contactData) return <HeaderSkeleton />;
 
   return (
     <>

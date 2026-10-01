@@ -54,6 +54,14 @@
   color: var(--accent-text);
 }
 
+@media (max-width: 768px), (pointer: coarse) {
+  .footer-link,
+  .footer-link-doodle {
+    min-height: 44px;
+    padding: 0 var(--spacing-xs);
+  }
+}
+
 /* Phones: one link per line, each a full-height tap target (WCAG 2.5.8) */
 @media (max-width: 480px) {
   .footer-links {

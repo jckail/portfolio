@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within, waitFor } from '@testing-library/react';
 
 import Experience, { resolveExperienceKey } from './experience';
 
@@ -83,18 +83,33 @@ describe('Experience deep links', () => {
     // Portaled out of #experience so it can stack above body-level layers
     expect(experienceDialog.closest('#experience')).toBeNull();
 
+    // One dialog at a time: opening a skill closes the role dialog first
     fireEvent.click(within(experienceDialog).getByRole('button', { name: 'Python' }));
     const skillDialog = await screen.findByRole('dialog', { name: 'Python' });
-    expect(experienceDialog).toHaveAttribute('inert');
+    expect(experienceDialog).not.toBeInTheDocument();
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(new URLSearchParams(window.location.search).has('company')).toBe(false);
 
-    // Escape closes the skill (top) first, leaving the experience open
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(skillDialog).not.toBeInTheDocument();
-    expect(screen.getByRole('dialog', { name: 'Together AI' })).not.toHaveAttribute('inert');
-
-    fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).toBeNull();
-    expect(new URLSearchParams(window.location.search).has('company')).toBe(false);
+  });
+
+  it('drops an unknown ?company= and scrolls to the section for a known one', async () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    window.history.replaceState({}, '', '/?company=nope');
+    const { unmount } = render(<Experience />);
+    await waitFor(() => expect(window.location.search).toBe(''));
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    unmount();
+
+    window.history.replaceState({}, '', '/?company=together-ai');
+    render(<Experience />);
+    await screen.findByRole('dialog', { name: 'Together AI' });
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+    expect(window.location.search).toBe('?company=together-ai');
   });
 });
 

@@ -153,6 +153,15 @@
   text-decoration-color: currentColor;
 }
 
+/* Touch screens: text-style actions get a 44px hit area (the glyphs stay
+   the same size; the padding is invisible). */
+@media (max-width: 768px), (pointer: coarse) {
+  .btn-link {
+    min-height: 44px;
+    padding: 0 var(--spacing-xs);
+  }
+}
+
 /* Tags: tech stacks under roles and projects. Clickable ones open a skill. */
 .skill-tags {
   display: flex;
