@@ -23,6 +23,9 @@ test.describe('routing', () => {
 test.describe('keyboard', () => {
   test('skip link is the first tab stop and targets main content', async ({ page }) => {
     await page.goto('/');
+    // Wait for the app to replace the server-rendered snapshot; an earlier Tab
+    // would race the swap (slow CI machines hit this).
+    await expect(page.locator('section#about')).toBeAttached();
     await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: 'Skip to main content' });
     await expect(skip).toBeFocused();

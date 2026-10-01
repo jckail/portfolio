@@ -176,7 +176,10 @@ def last_modified_date() -> str:
 
 
 def _a(url: str, label: str, rel: str = "noopener") -> str:
-    return f'<a href="{escape(url, quote=True)}" rel="{rel}">{escape(label)}</a>'
+    # tabindex=-1: the snapshot is replaced by the app moments after load. If its
+    # links were tabbable, an early Tab would land on one that React then removes,
+    # dropping focus before the skip link. Still readable by crawlers and AT.
+    return f'<a href="{escape(url, quote=True)}" rel="{rel}" tabindex="-1">{escape(label)}</a>'
 
 
 def _time(iso: str | None, label: str) -> str:
