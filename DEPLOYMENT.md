@@ -2,13 +2,20 @@
 
 Everything the repository owner must provide to enable automatic deploys to
 GCP Cloud Run. Once these steps are done, every merge to `main` builds,
-pushes, deploys, and health-checks a new version with no further action.
+pushes, deploys to a zero-traffic tagged revision, verifies it and then promotes
+it, with no further action.
+
+> Read `HANDOFF.md` before running Terraform against this project. A plain
+> `terraform apply` can roll the live service back to the mutable `:latest`
+> image, and `infra/` now describes more than production has applied
+> (Vertex, observability, budgets). Treat step 1 below as the original
+> bootstrap, not a routine command.
 
 ## Where each kind of secret lives (and why it's safe in a public repo)
 
 | Kind | Example | Where it goes | Public exposure |
 |------|---------|---------------|-----------------|
-| Runtime app secrets | Supabase keys, Anthropic API key, SendGrid key | **GCP Secret Manager** (written once via Terraform, mounted into Cloud Run as env vars) | Never in git or GitHub |
+| Runtime app secrets | Supabase keys, SendGrid key, the chat provider key (`vertex-api-key` or Anthropic), the optional `contact-phone` | **GCP Secret Manager** (written once via Terraform, mounted into Cloud Run as env vars) | Never in git or GitHub |
 | Deploy identity | WIF provider name, deployer service-account email | **GitHub Actions repository secrets** | Encrypted; never shown in the UI, masked in logs, **not** available to fork PRs |
 | Non-secret deploy config | project id, region, service name | **GitHub Actions repository variables** | Visible to repo collaborators only; harmless if leaked |
 | Local dev config | `.env` at the repo root | Your machine only | Git-ignored |
@@ -38,6 +45,9 @@ cp terraform.tfvars.example terraform.tfvars   # git-ignored
 #   - admin_email, resume_file, allowed_origins, production_url
 #   - secrets = { supabase_url, supabase_anon_key, supabase_service_role,
 #                 anthropic_api_key, sendgrid_api_key }
+#   The Vertex API key and the contact phone are NOT in tfvars: their secret
+#   containers are created by Terraform and the values are added with gcloud
+#   (see infra/README.md "Vertex API key" and the contact-phone note).
 terraform init
 terraform apply
 ```
@@ -69,13 +79,20 @@ Same page, **Variables** tab:
 
 Push to `main` (or run the `Deploy` workflow manually from the Actions tab).
 The workflow builds the image, pushes it tagged with the commit SHA, deploys
-to Cloud Run, and polls `/api/health` until it returns 200.
+to a tagged zero-traffic revision, polls that revision's `/api/health`
+(liveness) until it returns 200, rechecks CI, promotes traffic, and checks the
+production URL. The uptime alert uses `/api/health/ready`, which also fails
+when Supabase is down.
 
 ## Rotating or changing a secret
 
 - **Runtime secrets** (Supabase/Anthropic/SendGrid): update the value in
-  `infra/terraform.tfvars`, run `terraform apply`, then redeploy (Cloud Run
-  reads `latest` secret versions at instance startup).
+  `infra/terraform.tfvars`, review the plan as `HANDOFF.md` describes, then
+  redeploy (Cloud Run reads `latest` secret versions at instance startup).
+- **Vertex API key**: create a new key bound to the `portfolio-vertex` service
+  account, add it as a new secret version, start a new Deploy run, verify the
+  chat, then delete the old key. Never print the key. Steps are in
+  `infra/README.md`.
 - **Deploy identity**: these are resource names, not credentials — they only
   need updating if you recreate the Terraform resources.
 
@@ -99,5 +116,7 @@ to Cloud Run, and polls `/api/health` until it returns 200.
 ## Everyday deploys after setup
 
 - Merge/push to `main` → automatic deploy via GitHub Actions.
-- Manual fallback: `./helpers/deploy.sh` (builds, pushes, and deploys from
-  your machine using your gcloud credentials and the root `.env`).
+- There is no safe manual fallback. Do not run `./helpers/deploy.sh`: it
+  replaces Secret Manager bindings with plaintext env vars and skips the canary
+  (`HANDOFF.md`). To recover, shift traffic back to the previous revision as
+  `HANDOFF.md` describes, or re-run the `Deploy` workflow.

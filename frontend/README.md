@@ -1,4 +1,4 @@
-# Frontend Technical Documentation 🎨
+# Frontend Technical Documentation
 
 React single-page app for [jckail.com](https://www.jckail.com): an
 interactive resume with an AI chat assistant, theming (including a hidden
@@ -7,30 +7,32 @@ party mode), and analytics.
 ## Technology Stack
 
 - **React 18** + **TypeScript** on **Vite 8**
-- **React Router 7** for routing
+- A small `useLocation` hook (`shared/hooks/use-location.ts`) instead of a router library
 - **Zustand** for global state (theme, section, admin, telemetry)
 - **MUI 6** (chat dialog) + plain CSS with custom properties for theming
 - **Vitest** + Testing Library for unit tests
 - **ESLint** + **Prettier** for code quality
 
-## Architecture Overview 🏗️
+## Architecture Overview
 
 ```
 src/
 ├── app/                     # Application core
 │   ├── components/          # Feature components
-│   │   ├── chat/            # AI assistant (WebSocket streaming)
+│   │   ├── chat/            # AI assistant (WebSocket streaming, confirmation cards)
 │   │   ├── sections/        # About, experience, projects, skills, resume
 │   │   └── admin/           # Admin login + telemetry panel
 │   └── providers/           # Data, resume, particles providers
 │
 ├── shared/                  # Cross-cutting code
-│   ├── components/          # Header, navigation, cookie banner, etc.
+│   ├── analytics/           # Consent-gated typed events (core, tracker, events list)
+│   ├── components/          # Header, navigation, cookie banner, command palette, etc.
 │   ├── stores/              # Zustand stores
 │   ├── hooks/               # useScrollSpy, useMediaQuery, useEscapeKey, ...
 │   └── utils/
 │       ├── api/             # Typed API client (getJson/postJson) + endpoint registry
-│       ├── analytics.ts     # GA4 events (page views, sections, chat, theme)
+│       ├── analytics.ts     # GA4 helpers (page views, sections, chat, theme)
+│       ├── bootstrap-data.ts # Reads the content the server inlined into index.html
 │       └── a11y.ts          # buttonize(): keyboard support for styled elements
 │
 ├── styles/                  # Global CSS (variables, sections, components)
@@ -42,12 +44,24 @@ All backend calls go through `shared/utils/api` — it throws a typed
 `endpoints.ts` is the single registry of backend paths. The one exception
 is the resume PDF download, which needs a raw `fetch` for the blob.
 
-## Key Features 🔑
+## Key Features
 
 ### AI Chat Assistant
 
-- Connects to the backend over WebSocket (`/ws/{client_id}`) and streams
-  Claude Haiku 4.5 responses chunk by chunk.
+- Connects to the backend over WebSocket (`/ws/{client_id}`) and streams the
+  assistant's reply chunk by chunk. The model behind it (Vertex Gemini or
+  Anthropic) is a backend setting; the SPA does not know or care.
+- Frames it handles: streamed message chunks, `action` (navigate, open a modal,
+  download the resume, switch theme; run only after `chat-actions.ts`
+  re-validates them), `confirm_action` and `action_result`.
+- `confirm_action` renders a `ConfirmActionCard`. For contact, phone and
+  meeting requests the visitor reviews the draft, types their own email and
+  presses Confirm, which sends a `confirm_action` frame back (Cancel sends
+  `cancel_action`). Nothing is sent or revealed until then, and the server
+  ignores unknown or expired ids. A revealed phone number is shown from the
+  `action_result` frame only.
+- The transcript is kept in `sessionStorage` and replayed to the server in a
+  `history` frame after a reconnect.
 - All chat state lives in a single `useChat()` instance owned by
   `ChatPortal`; the `Chat` component is purely presentational.
 - Deep-linkable via `?ai_chat=open`.
@@ -67,16 +81,37 @@ is the resume PDF download, which needs a raw `fetch` for the blob.
 
 - Light/dark themes via CSS variables, persisted to `localStorage` and the
   `?theme=` URL param.
-- Party mode easter egg: toggle the theme 10 times within 5 seconds.
+- Party mode easter egg: toggle the theme 10 times within 5 seconds, the
+  Konami code, `?party=1`, the footer doodle, or the chat `set_theme` tool
+  (see `theme-store.ts` and `use-easter-eggs.ts`).
 
 ### Navigation & Analytics
 
 - `useScrollSpy` (owned by `MainContent`) syncs the URL hash with the visible
   section and reports section views to GA4.
-- Modals (experience, skills, contact) are lazy loaded and deep-linkable via
-  query params.
+- Product analytics are a typed, closed event set (`shared/analytics/events.ts`).
+  `track()` sends batched, anonymous events to `POST /api/events` and mirrors
+  some to GA4, but only after the visitor accepts analytics; withdrawing
+  consent (footer "Cookie settings") stops the tracker and empties the queue.
+  The backend keeps its own copy of the names and a test asserts they match.
+  Props are low-cardinality and validated; never send free text.
+- Modals (experience, skills, projects, contact) are lazy loaded and
+  deep-linkable via query params (`?skill=`, `?project=`, `?company=`). Deep
+  links must not use a raw bracket lookup on a parsed object.
+- First paint uses content the server inlines into `index.html`
+  (`bootstrap-data.ts`) and falls back to `GET /api/...` when it is absent,
+  as in the Vite dev server. Crawlers get a separate server-built HTML
+  snapshot inside `#root`; React replaces it on mount.
 
-## Development Guide 👩‍💻
+### Build
+
+`vite.config.ts` splits chunks by hand. MUI, Emotion and tsparticles must
+**not** be named in `manualChunks`: they are left to the automatic splitter so
+they stay in the lazy chat and particles chunks instead of the initial graph.
+Read the comment there before changing it. Lighthouse byte budgets in CI guard
+the result.
+
+## Development Guide
 
 ```bash
 npm install          # install dependencies
@@ -86,6 +121,7 @@ npm run build        # type-check + production build
 npm run preview      # preview the production build
 
 npm test             # run unit tests once (CI mode)
+npm run test:coverage  # with the coverage floors from vitest.config.ts
 npm run test:watch   # watch mode
 npm run lint         # ESLint (zero warnings allowed)
 npm run type-check   # tsc --noEmit
@@ -96,22 +132,29 @@ The dev server proxies both `/api` (REST) and `/ws` (chat WebSocket) to the
 backend on `localhost:8080`, so run the backend first (see
 [backend/README.md](../backend/README.md)).
 
-## Testing 🧪
+## Testing
 
-Unit tests live next to the code they cover (`*.test.ts[x]`) and run with
+Browser smoke tests live in `../e2e/` (Playwright). Without local Chromium
+libraries, run them in the pinned container with `../helpers/e2e-docker.sh`
+against a running server. Unit tests live next to the code they cover (`*.test.ts[x]`) and run with
 Vitest + jsdom. `src/test/setup.ts` provides DOM API mocks
 (`matchMedia`, `IntersectionObserver`, `ResizeObserver`).
 
-Current coverage focuses on the riskiest client logic:
+Coverage floors live in `vitest.config.ts` and use `include: ['src/**']`, so
+untested files count as zero; do not copy the numbers into docs. Tests focus on
+the riskiest client logic:
 
 - `useChat` — WebSocket lifecycle against a fake socket: single-connection
   guarantee, context frame on open, queueing/flush, chunk streaming,
   malformed frames, unmount cleanup, URL sync
+- `ConfirmActionCard` and `chat-confirm` — draft validation, email gate,
+  confirm and cancel frames
+- `shared/analytics` — consent gating, queueing, de-duplication, tracker
 - `useSkill` — `?skill=` deep links, back/forward navigation
 - `analytics` — session ids, page-view hash de-duplication
 - `theme-store` — toggling, persistence, party mode
 
-## Contributing 🤝
+## Contributing
 
 1. Follow the existing architecture (`app/` features, `shared/` reusables)
 2. Keep components typed — avoid `any`
