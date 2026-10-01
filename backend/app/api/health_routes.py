@@ -1,16 +1,17 @@
 import asyncio
+import logging
 import subprocess
 import time
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from ..config import get_settings
-from ..utils.logger import setup_logging
 from ..utils.supabase_client import SupabaseClient
 
 router = APIRouter()
-logger = setup_logging()
+logger = logging.getLogger(__name__)
 
 # The database probe behind liveness is cached and time-boxed. /api/health is
 # public and backs the Cloud Run startup probe (timeoutSeconds=3), so it must
@@ -70,6 +71,28 @@ def get_version() -> dict[str, Any]:
 VERSION_INFO = get_version()
 
 
+class DatabaseCheck(BaseModel):
+    status: str
+    connection: str
+    details: str | None = None
+
+
+class VersionInfo(BaseModel):
+    hash: str
+    source: str
+
+
+class HealthChecks(BaseModel):
+    database: DatabaseCheck
+    version: VersionInfo
+
+
+class HealthStatus(BaseModel):
+    status: str
+    message: str
+    checks: HealthChecks
+
+
 async def _check_database(deadline_seconds: float | None = None) -> tuple[bool, dict[str, Any]]:
     """Probe Supabase connectivity. Returns (ok, detail) and never raises."""
     if deadline_seconds is None:
@@ -118,8 +141,8 @@ async def _cached_database_status() -> tuple[bool, dict[str, Any]]:
         return ok, detail
 
 
-@router.get("/health")
-async def health_check():
+@router.get("/health", response_model=HealthStatus, response_model_exclude_none=True)
+async def health_check() -> dict[str, Any]:
     """Liveness check: is this process able to serve requests?
 
     Deliberately returns 200 even when Supabase is unreachable. This path
@@ -144,8 +167,8 @@ async def health_check():
     }
 
 
-@router.get("/health/ready")
-async def readiness_check():
+@router.get("/health/ready", response_model=HealthStatus, response_model_exclude_none=True)
+async def readiness_check() -> dict[str, Any]:
     """Readiness check: is every dependency actually working?
 
     Fails closed with 503 so uptime monitoring and deploy verification can

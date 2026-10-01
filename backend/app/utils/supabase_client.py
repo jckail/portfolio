@@ -47,46 +47,6 @@ class SupabaseClient:
         return cls._admin_client
 
     @classmethod
-    async def create_admin_user(cls, email: str, password: str):
-        """Create a new admin user using the service role client."""
-        try:
-            admin_client = cls.get_admin_client()
-            response = await asyncio.to_thread(
-                admin_client.auth.admin.create_user,
-                {
-                    "email": email,
-                    "password": password,
-                    "email_confirm": True
-                }
-            )
-
-            if response.user:
-                # supabase-py rpc() is synchronous; run it off the event loop
-                await asyncio.to_thread(
-                    lambda: admin_client.rpc(
-                        'set_claim',
-                        {
-                            'uid': response.user.id,
-                            'claim': 'role',
-                            'value': 'admin'
-                        }
-                    ).execute()
-                )
-            return response
-        except Exception as e:
-            raise Exception(f"Failed to create admin user: {str(e)}")
-
-    @classmethod
-    async def verify_token(cls, token: str) -> dict[str, Any] | None:
-        """Verify a JWT token and return user data if valid."""
-        try:
-            admin_client = cls.get_admin_client()
-            user = await asyncio.to_thread(admin_client.auth.get_user, token)
-            return user.user if user else None
-        except Exception:
-            return None
-
-    @classmethod
     async def sign_in_with_password(cls, email: str, password: str):
         """Sign in a user with email and password."""
         try:

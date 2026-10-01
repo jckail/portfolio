@@ -10,54 +10,53 @@ router = APIRouter()
 _SAFE_PATH_RE = re.compile(r'^[A-Za-z0-9_\-./]*(\?[A-Za-z0-9_\-=&%.]*)?(#[A-Za-z0-9_\-]*)?$')
 
 # Grouped viewports by device types
-def get_known_viewports() -> dict[str, dict[str, tuple[int, int]]]:
-    return {
-        "phones": {
-            "iphone 16 pro": (402, 874),
-            "iphone 15 pro": (393, 852),
-            "iphone 14": (390, 844),
-            "samsung galaxy s23": (412, 915),
-            "samsung galaxy z fold 5 (folded)": (384, 846),
-            "google pixel 8": (412, 915),
-            "google pixel 7a": (412, 892),
-            "oneplus 11": (412, 933),
-            "xiaomi 13 pro": (412, 919),
-            "samsung galaxy a54": (412, 915),
-            "iphone se (3rd gen)": (375, 667),
-            "iphone 13 mini": (375, 812),
-            "samsung galaxy z flip 5 (folded)": (412, 919),
-        },
-        "tablets": {
-            "ipad pro 12.9": (1024, 1366),
-            "ipad air 10.9": (820, 1180),
-            "ipad mini 6": (744, 1133),
-            "samsung galaxy tab s8": (1600, 2560),
-            "microsoft surface pro 9": (1920, 1280),
-        },
-        "laptops": {
-            "macbook air 13": (1440, 900),
-            "macbook pro 16": (1536, 2048),
-            "dell xps 13": (1920, 1200),
-            "hp spectre x360": (1920, 1080),
-            "lenovo thinkpad x1 carbon": (2560, 1440),
-        },
-        "desktops": {
-            "4k monitor": (3840, 2160),
-            "1440p monitor": (2560, 1440),
-            "1080p monitor": (1920, 1080),
-            "720p monitor": (1280, 720),
-        },
-    }
+KNOWN_VIEWPORTS: dict[str, dict[str, tuple[int, int]]] = {
+    "phones": {
+        "iphone 16 pro": (402, 874),
+        "iphone 15 pro": (393, 852),
+        "iphone 14": (390, 844),
+        "samsung galaxy s23": (412, 915),
+        "samsung galaxy z fold 5 (folded)": (384, 846),
+        "google pixel 8": (412, 915),
+        "google pixel 7a": (412, 892),
+        "oneplus 11": (412, 933),
+        "xiaomi 13 pro": (412, 919),
+        "samsung galaxy a54": (412, 915),
+        "iphone se (3rd gen)": (375, 667),
+        "iphone 13 mini": (375, 812),
+        "samsung galaxy z flip 5 (folded)": (412, 919),
+    },
+    "tablets": {
+        "ipad pro 12.9": (1024, 1366),
+        "ipad air 10.9": (820, 1180),
+        "ipad mini 6": (744, 1133),
+        "samsung galaxy tab s8": (1600, 2560),
+        "microsoft surface pro 9": (1920, 1280),
+    },
+    "laptops": {
+        "macbook air 13": (1440, 900),
+        "macbook pro 16": (1536, 2048),
+        "dell xps 13": (1920, 1200),
+        "hp spectre x360": (1920, 1080),
+        "lenovo thinkpad x1 carbon": (2560, 1440),
+    },
+    "desktops": {
+        "4k monitor": (3840, 2160),
+        "1440p monitor": (2560, 1440),
+        "1080p monitor": (1920, 1080),
+        "720p monitor": (1280, 720),
+    },
+}
+# Device name -> viewport across every group (names are unique).
+_VIEWPORTS_BY_NAME = {name: size for group in KNOWN_VIEWPORTS.values() for name, size in group.items()}
+
 
 def get_default_for_device_type(device_type: str) -> tuple[int, int]:
     """Return default width/height based on the first resolution in the given device type."""
-    known_viewports = get_known_viewports()
-    device_type = device_type.lower()
-
-    # Check if the device type exists in the known viewports
-    if device_type in known_viewports and known_viewports[device_type]:
-        # Return the first resolution in the device type as the default
-        return next(iter(known_viewports[device_type].values()))
+    group = KNOWN_VIEWPORTS.get(device_type.lower())
+    if group:
+        # The first resolution in the group is its default
+        return next(iter(group.values()))
 
     # Fallback to default phone size if the device type is not found
     return (375, 800)
@@ -70,16 +69,9 @@ async def custom_resolution(
     device_name: str | None = Query(None, description="Device name"),
     device_type: str | None = Query(None, description="Device type (e.g., phones, tablets, laptops, desktops)"),
 ):
-    known_viewports = get_known_viewports()
-
     # Handle resolution based on device_name
     if device_name:
-        # Search through all device types for the given name
-        viewport = None
-        for devices in known_viewports.values():
-            if device_name.lower() in devices:
-                viewport = devices[device_name.lower()]
-                break
+        viewport = _VIEWPORTS_BY_NAME.get(device_name.lower())
         if not viewport:
             raise HTTPException(status_code=404, detail="Device not found")
         width, height = viewport

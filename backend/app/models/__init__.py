@@ -1,16 +1,15 @@
+from pydantic import BaseModel
+
 from .aboutme import AboutMe
 from .contact import Contact
-from .data_loader import load_aboutme, load_all, load_contact, load_experience, load_projects, load_skills
+from .data_loader import load_aboutme, load_contact, load_experience, load_projects, load_skills
 from .experience import Experience, ExperienceHighlight
 from .projects import ProjectDetail, Projects
 from .skills import SkillDetail, Skills
 
 
-def get_all_models():
-    """
-    Aggregates all model dictionaries into a single JSON object.
-    Returns a dictionary containing all model data.
-    """
+def get_all_models() -> dict[str, BaseModel]:
+    """Every content model, keyed the way the chat system prompt names them."""
     return {
         "about_me": load_aboutme(),
         "contact": load_contact(),
@@ -36,5 +35,5 @@ __all__ = [
     'load_skills',
     'load_aboutme',
     'load_contact',
-    'load_all'
+    'get_all_models',
 ]

@@ -27,6 +27,9 @@ from __future__ import annotations
 import logging
 import time
 from collections import deque
+from collections.abc import Mapping
+
+from fastapi import HTTPException
 
 from backend.app.config import get_settings
 
@@ -180,3 +183,16 @@ class SlidingWindowLimiter:
         self._buckets.clear()
         self._global.clear()
         self._last_prune = 0.0
+
+
+def enforce_rate_limit(
+    limiter: SlidingWindowLimiter,
+    request,
+    *,
+    detail: str = "Too many requests",
+    cost: int = 1,
+    headers: Mapping[str, str] | None = None,
+) -> None:
+    """Charge ``cost`` to the caller's bucket, or raise 429 with ``detail``."""
+    if not limiter.allow(client_ip(request), cost=cost):
+        raise HTTPException(status_code=429, detail=detail, headers=dict(headers) if headers else None)

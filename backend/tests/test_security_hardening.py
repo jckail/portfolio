@@ -11,7 +11,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from backend.app.api import contact_routes, telemetry_routes
 from backend.app.api.telemetry_routes import get_log_file_path
-from backend.app.services import chat_service
+from backend.app.services import chat_service, owner_mail
 
 
 @pytest.fixture(autouse=True)
@@ -46,7 +46,7 @@ class FakeSendGridClient:
 @pytest.fixture
 def captured_mail(monkeypatch):
     FakeSendGridClient.sent = []
-    monkeypatch.setattr(contact_routes, "SendGridAPIClient", FakeSendGridClient)
+    monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGridClient)
     return FakeSendGridClient.sent
 
 

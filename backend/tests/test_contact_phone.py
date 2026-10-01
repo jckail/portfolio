@@ -12,6 +12,7 @@ import pytest
 
 from backend.app import config
 from backend.app.api import contact_routes
+from backend.app.services import owner_mail
 
 DUMMY_PHONE = "555-0100"
 
@@ -39,7 +40,7 @@ def _isolate(monkeypatch):
     FakeSendGrid.sent = []
     FakeSendGrid.status_code = 202
     FakeSendGrid.raises = None
-    monkeypatch.setattr(contact_routes, "SendGridAPIClient", FakeSendGrid)
+    monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGrid)
     yield
     contact_routes._phone_limiter.reset()
 
@@ -47,6 +48,7 @@ def _isolate(monkeypatch):
 def _with_settings(monkeypatch, **overrides):
     settings = dataclasses.replace(config.get_settings(), **overrides)
     monkeypatch.setattr(contact_routes, "get_settings", lambda: settings)
+    monkeypatch.setattr(owner_mail, "get_settings", lambda: settings)
     return settings
 
 
@@ -121,7 +123,7 @@ def test_send_runs_off_the_event_loop(client, monkeypatch):
             seen["thread"] = threading.current_thread()
             return super().send(message)
 
-    monkeypatch.setattr(contact_routes, "SendGridAPIClient", ThreadRecorder)
+    monkeypatch.setattr(owner_mail, "SendGridAPIClient", ThreadRecorder)
     _with_settings(monkeypatch, contact_phone=DUMMY_PHONE)
     assert client.post("/api/contact/phone", json={"email": "v@example.com"}).status_code == 200
     assert seen["thread"] is not threading.main_thread()

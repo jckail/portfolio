@@ -39,14 +39,47 @@ class LoginCredentials(BaseModel):
     email: str
     password: str
 
+
+class LoginToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class AdminMessage(BaseModel):
+    message: str
+
+
+class TokenStatus(AdminMessage):
+    user: str | None
+
+
+class AdminLogFiles(BaseModel):
+    logs: list[str]
+
+
+class AdminAnalytics(BaseModel):
+    pageViews: int = 0
+    uniqueVisitors: int = 0
+    averageTimeOnSite: str = "0:00"
+    topReferrers: list[str] = []
+    lastUpdated: str
+
+
+class AdminHealth(BaseModel):
+    status: str = "healthy"
+    lastChecked: str
+    diskSpace: str = "N/A"
+    memoryUsage: str = "N/A"
+    activeUsers: int = 0
+
 async def _pad_failure(started: float) -> None:
     remaining = LOGIN_FAILURE_MIN_SECONDS - (time.monotonic() - started)
     if remaining > 0:
         await asyncio.sleep(remaining)
 
 
-@router.post("/login")
-async def admin_login(request: Request, credentials: LoginCredentials):
+@router.post("/login", response_model=LoginToken)
+async def admin_login(request: Request, credentials: LoginCredentials) -> LoginToken:
     """
     Authenticate admin user
     """
@@ -72,7 +105,7 @@ async def admin_login(request: Request, credentials: LoginCredentials):
     return result
 
 
-async def _attempt_login(credentials: LoginCredentials):
+async def _attempt_login(credentials: LoginCredentials) -> LoginToken:
     try:
         email = credentials.email
         password = credentials.password
@@ -98,10 +131,7 @@ async def _attempt_login(credentials: LoginCredentials):
         if not response.user or not response.session:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        return {
-            "access_token": response.session.access_token,
-            "token_type": "bearer"
-        }
+        return LoginToken(access_token=response.session.access_token)
 
     except HTTPException:
         raise
@@ -110,11 +140,11 @@ async def _attempt_login(credentials: LoginCredentials):
         logger.warning("Admin login failed at the auth provider", exc_info=True)
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-@router.post("/logout")
+@router.post("/logout", response_model=AdminMessage)
 async def admin_logout(
     user = Depends(verify_admin_token),
     authorization: str | None = Header(None)
-):
+) -> AdminMessage:
     """
     Logout admin user, invalidating the session token used for the request.
     """
@@ -122,37 +152,22 @@ async def admin_logout(
         supabase = SupabaseClient()
         token = authorization.removeprefix('Bearer ').strip() if authorization else None
         await supabase.sign_out(token)
-        return {"message": "Successfully logged out"}
-    except HTTPException:
-        raise
     except Exception:
         logger.exception("Admin logout failed")
         raise HTTPException(status_code=500, detail="Logout failed")
+    return AdminMessage(message="Successfully logged out")
 
-@router.get("/verify")
-async def verify_admin(user = Depends(verify_admin_token)):
+@router.get("/verify", response_model=TokenStatus)
+async def verify_admin(user = Depends(verify_admin_token)) -> TokenStatus:
     """
     Verify admin token is valid
     """
-    return {"message": "Token is valid", "user": user.email}
+    return TokenStatus(message="Token is valid", user=user.email)
 
-@router.get("/analytics")
-async def get_analytics(user = Depends(verify_admin_token)):
-    """Get analytics data"""
-    try:
-        analytics = {
-            "pageViews": 0,
-            "uniqueVisitors": 0,
-            "averageTimeOnSite": "0:00",
-            "topReferrers": [],
-            "lastUpdated": datetime.now(UTC).isoformat()
-        }
-        return analytics
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Failed to build analytics")
-        raise HTTPException(status_code=500, detail="Unable to load analytics")
+@router.get("/analytics", response_model=AdminAnalytics)
+async def get_analytics(user = Depends(verify_admin_token)) -> AdminAnalytics:
+    """Placeholder: no analytics backend is wired up, so every count is zero."""
+    return AdminAnalytics(lastUpdated=datetime.now(UTC).isoformat())
 
 def _read_log_files(log_dir: str) -> list[str]:
     """Collect lines from every .log file under log_dir (blocking)."""
@@ -165,35 +180,19 @@ def _read_log_files(log_dir: str) -> list[str]:
     return logs
 
 
-@router.get("/logs")
-async def get_admin_logs(user = Depends(verify_admin_token)):
+@router.get("/logs", response_model=AdminLogFiles)
+async def get_admin_logs(user = Depends(verify_admin_token)) -> AdminLogFiles:
     """Get application logs"""
     try:
         log_dir = os.path.join(os.path.dirname(__file__), "../logs")
         logs = await asyncio.to_thread(_read_log_files, log_dir)
-        return {"logs": logs}
-    except HTTPException:
-        raise
     except Exception:
         logger.exception("Failed to read application logs")
         raise HTTPException(status_code=500, detail="Unable to read logs")
+    return AdminLogFiles(logs=logs)
 
 
-
-@router.get("/health")
-async def get_admin_health(user = Depends(verify_admin_token)):
-    """Get system health information"""
-    try:
-        health_info = {
-            "status": "healthy",
-            "lastChecked": datetime.now(UTC).isoformat(),
-            "diskSpace": "N/A",
-            "memoryUsage": "N/A",
-            "activeUsers": 0
-        }
-        return health_info
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Failed to build admin health info")
-        raise HTTPException(status_code=500, detail="Unable to load health info")
+@router.get("/health", response_model=AdminHealth)
+async def get_admin_health(user = Depends(verify_admin_token)) -> AdminHealth:
+    """Placeholder: no host metrics are collected, so these are fixed values."""
+    return AdminHealth(lastChecked=datetime.now(UTC).isoformat())

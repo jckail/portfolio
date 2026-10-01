@@ -1,6 +1,7 @@
 import asyncio
 import ipaddress
 import json
+import logging
 import os
 import uuid
 from datetime import UTC, datetime
@@ -11,12 +12,11 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from ..config import get_settings
 from ..middleware.auth_middleware import verify_admin_token
-from ..utils.logger import setup_logging
-from ..utils.rate_limit import SlidingWindowLimiter, client_ip
+from ..utils.rate_limit import SlidingWindowLimiter, client_ip, enforce_rate_limit
 from ..utils.supabase_client import SupabaseClient
 
 router = APIRouter()
-logger = setup_logging()
+logger = logging.getLogger(__name__)
 
 # These ingest endpoints are unauthenticated and write to shared storage, so
 # both the size of a single request and the rate of requests are bounded.
@@ -72,6 +72,15 @@ class LogBatch(BaseModel):
     logs: list[LogEntry] = Field(..., min_length=1)
 
 
+class IngestResult(BaseModel):
+    status: str = "success"
+    message: str
+
+
+class LogRows(BaseModel):
+    logs: list[dict[str, Any]]
+
+
 async def _read_json_capped(request: Request, max_bytes: int = MAX_INGEST_BYTES) -> Any:
     """Read a JSON body, refusing anything over `max_bytes`.
 
@@ -91,8 +100,7 @@ async def _read_json_capped(request: Request, max_bytes: int = MAX_INGEST_BYTES)
 
 
 def _enforce_ingest_limit(request: Request, cost: int = 1) -> None:
-    if not _ingest_limiter.allow(client_ip(request), cost=cost):
-        raise HTTPException(status_code=429, detail="Too many requests")
+    enforce_rate_limit(_ingest_limiter, request, cost=cost)
 
 
 def _validate[M: BaseModel](model: type[M], data: Any) -> M:
@@ -200,8 +208,8 @@ def get_log_file_path(session_uuid=None):
 
     return os.path.join(frontend_log_dir, filename)
 
-@router.post("/telemetry")
-async def store_telemetry(request: Request):
+@router.post("/telemetry", response_model=IngestResult)
+async def store_telemetry(request: Request) -> IngestResult:
     """Store telemetry data from the frontend"""
     _enforce_ingest_limit(request)
     try:
@@ -225,7 +233,7 @@ async def store_telemetry(request: Request):
                 lambda: supabase.get_admin_client().table('telemetry').insert(entry).execute()
             )
 
-            return {"status": "success", "message": "Telemetry data stored successfully"}
+            return IngestResult(message="Telemetry data stored successfully")
 
         except Exception:
             logger.exception("Failed to store telemetry data in Supabase")
@@ -244,8 +252,8 @@ async def store_telemetry(request: Request):
             detail="Unable to store telemetry data"
         )
 
-@router.get("/logs")
-async def get_logs(request: Request, session_uuid: str = None):
+@router.get("/logs", response_model=LogRows)
+async def get_logs(request: Request, session_uuid: str | None = None) -> LogRows:
     """Fetch logs from Supabase, falling back to file system if needed"""
     # Verify access (local dev environment or admin auth)
     await verify_access(request)
@@ -268,7 +276,7 @@ async def get_logs(request: Request, session_uuid: str = None):
 
         result = await asyncio.to_thread(query.execute)
         if result.data:
-            return {"logs": result.data}
+            return LogRows(logs=result.data)
 
         # Fall back to file system if no logs in Supabase
         logs = []
@@ -295,7 +303,7 @@ async def get_logs(request: Request, session_uuid: str = None):
                                 "message": log
                             })
 
-        return {"logs": logs}
+        return LogRows(logs=logs)
     except HTTPException:
         raise
     except Exception:
@@ -366,22 +374,22 @@ async def _store_frontend_logs(entries: list[tuple[str, str]], peer: str) -> Non
         await _write_file_fallback(by_session)
 
 
-@router.post("/log")
-async def log_message(request: Request):
+@router.post("/log", response_model=IngestResult)
+async def log_message(request: Request) -> IngestResult:
     """Log a single message"""
     _enforce_ingest_limit(request)
     try:
         entry = _validate(LogEntry, await _read_json_capped(request))
         await _store_frontend_logs([(str(entry.sessionUUID), entry.message)], client_ip(request))
-        return {"status": "success", "message": "Log written successfully"}
+        return IngestResult(message="Log written successfully")
     except HTTPException:
         raise
     except Exception:
         logger.exception("Error in log_message endpoint")
         raise HTTPException(status_code=500, detail="Unable to store log")
 
-@router.post("/log/batch")
-async def log_messages_batch(request: Request):
+@router.post("/log/batch", response_model=IngestResult)
+async def log_messages_batch(request: Request) -> IngestResult:
     """Log multiple messages in a single request"""
     # Charged before the body is read, deliberately: a refused batch (413, 422
     # or a 429 on the second charge below) still costs one unit, so malformed
@@ -406,7 +414,7 @@ async def log_messages_batch(request: Request):
             [(str(entry.sessionUUID), entry.message) for entry in batch.logs],
             client_ip(request),
         )
-        return {"status": "success", "message": "Batch processed successfully"}
+        return IngestResult(message="Batch processed successfully")
 
     except HTTPException:
         raise

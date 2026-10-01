@@ -60,21 +60,18 @@ def test_connect_src_has_no_wildcard_websockets(client):
     assert "form-action 'self'" in csp
 
 
-def test_websocket_origins_derive_from_https_origins(monkeypatch):
-    from backend.app import main
+def test_websocket_origins_derive_from_https_origins():
+    import dataclasses
 
-    monkeypatch.setattr(
-        main,
-        "settings",
-        main.settings.__class__(
-            **{
-                **main.settings.__dict__,
-                "allowed_origins": ("https://jordan-kail.com", "http://localhost:5173"),
-                "production_url": "https://www.jordan-kail.com/",
-            }
-        ),
+    from backend.app.config import get_settings
+    from backend.app.middleware.response_headers import websocket_origins
+
+    settings = dataclasses.replace(
+        get_settings(),
+        allowed_origins=("https://jordan-kail.com", "http://localhost:5173"),
+        production_url="https://www.jordan-kail.com/",
     )
-    assert main._websocket_origins() == " wss://jordan-kail.com wss://www.jordan-kail.com"
+    assert websocket_origins(settings) == " wss://jordan-kail.com wss://www.jordan-kail.com"
 
 
 def test_resume_is_frameable_by_same_origin_only(client):
@@ -207,3 +204,43 @@ def test_error_responses_are_not_cached(client):
         response = client.get(path)
         assert response.status_code != 200
         assert "public" not in response.headers.get("Cache-Control", "")
+
+
+@pytest.mark.skipif(
+    not os.path.isdir(os.path.join(FRONTEND_DIST, "fonts")), reason="frontend not built"
+)
+def test_already_compressed_media_skips_gzip(client):
+    fonts = os.path.join(FRONTEND_DIST, "fonts")
+    woff2 = next(f for f in os.listdir(fonts) if f.endswith(".woff2"))
+    response = client.get(f"/fonts/{woff2}", headers={"accept-encoding": "gzip"})
+    assert response.status_code == 200
+    assert "content-encoding" not in response.headers
+    assert response.headers["content-length"] == str(os.path.getsize(os.path.join(fonts, woff2)))
+
+
+def test_zuni_sprites_skip_gzip(client):
+    response = client.get("/api/zuni?subject=1", headers={"accept-encoding": "gzip"})
+    assert response.status_code == 200
+    assert "content-encoding" not in response.headers
+
+
+def test_compressible_dynamic_responses_are_still_gzipped(client):
+    response = client.get("/api/resume", headers={"accept-encoding": "gzip"})
+    assert response.status_code == 200
+    assert response.headers.get("content-encoding") == "gzip"
+
+
+def test_cache_policy_table():
+    from backend.app.middleware.response_headers import PUBLIC_CONTENT, cache_control_for
+
+    assert cache_control_for("/api/skills", "GET", 304, "") == PUBLIC_CONTENT
+    assert cache_control_for("/api/skills", "GET", 404, "application/json") is None
+    assert cache_control_for("/api/skills", "POST", 200, "application/json") is None
+    assert cache_control_for("/api/admin/verify", "GET", 200, "application/json") is None
+    assert cache_control_for("/api/health/ready", "GET", 503, "application/json") == "no-store"
+    assert cache_control_for("/images/a.webp", "GET", 200, "image/webp") == "public, max-age=86400"
+
+
+def test_websocket_scopes_pass_through_untouched(client):
+    with client.websocket_connect("/ws/abcdefgh-1234", headers={"origin": "http://localhost:5173"}) as ws:
+        ws.send_json({"type": "context", "content": "x"})

@@ -11,6 +11,7 @@ import re
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 
 from backend.app.config import get_settings
 from backend.app.services.chat_service import (
@@ -39,8 +40,12 @@ _CLIENT_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
 MAX_SEEDED_TURNS = 100
 
 
-@status_router.get("/status")
-async def chat_status():
+class ChatStatus(BaseModel):
+    available: bool
+
+
+@status_router.get("/status", response_model=ChatStatus)
+async def chat_status() -> ChatStatus:
     """Report whether the AI assistant is available.
 
     The frontend hides the chat button when the assistant cannot work
@@ -50,7 +55,7 @@ async def chat_status():
     Also false while the auth circuit breaker is open, so a rejected API key
     hides the button instead of failing every visitor message.
     """
-    return {"available": manager.is_available()}
+    return ChatStatus(available=manager.is_available())
 
 
 def _origin_allowed(websocket: WebSocket) -> bool:

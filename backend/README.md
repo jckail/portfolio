@@ -110,9 +110,10 @@ backend/
 ├── app/
 │   ├── api/            # Route modules (thin: parse/validate + delegate)
 │   ├── services/       # Business logic (chat_service: Claude streaming,
-│   │                   #   history, rate limits, prompt caching)
+│   │                   #   history, rate limits, prompt caching;
+│   │                   #   owner_mail: SendGrid notifications to ADMIN_EMAIL)
 │   ├── config.py       # Centralized typed settings (all env access lives here)
-│   ├── middleware/     # Auth dependency (Supabase token verification)
+│   ├── middleware/     # Auth dependency, response headers, selective gzip
 │   ├── models/         # Pydantic models + JSON data loaders (cached)
 │   ├── data/           # Portfolio content as JSON (source of truth)
 │   ├── utils/          # Logging (Supabase batching handler), Supabase client
@@ -199,4 +200,10 @@ rather than calling `os.getenv` in feature code.
 - Every response carries security headers (`X-Content-Type-Options`,
   `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS).
 - Responses over 1 KB are gzip-compressed; hashed frontend assets are served
-  with immutable one-year cache headers, HTML with `no-cache`.
+  with immutable one-year cache headers, HTML with `no-cache`. Images, fonts
+  and sprites skip gzip (already compressed).
+- Content routes (`/api/aboutme`, `/api/skills[/{key}]`, `/api/experience[/{key}]`,
+  `/api/projects[/{key}]`, `/api/contact/info`) are rendered once at startup
+  into JSON bytes, a gzip variant and a strong `ETag` (`api/content.py`); a
+  matching `If-None-Match` gets a body-less 304. Built SPA text files are
+  gzip-compressed once per process the same way (`spa.py`).

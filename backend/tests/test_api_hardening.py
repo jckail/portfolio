@@ -17,10 +17,12 @@ from backend.app import config
 from backend.app.api import (
     admin_routes,
     contact_routes,
+    content,
     health_routes,
-    skills_routes,
     telemetry_routes,
 )
+from backend.app.models import data_loader
+from backend.app.services import owner_mail
 from backend.app.utils import rate_limit
 
 ADMIN_EMAIL = "admin@example.com"
@@ -190,7 +192,7 @@ def test_spoofed_forwarded_for_does_not_reset_a_bucket_when_trust_is_off(
         def send(self, _message):
             return types.SimpleNamespace(status_code=202)
 
-    monkeypatch.setattr(contact_routes, "SendGridAPIClient", FakeSendGrid)
+    monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGrid)
     payload = {"from_email": "a@example.com", "subject": "Hi", "message": "body"}
 
     limit = contact_routes._email_limiter.max_events
@@ -217,7 +219,7 @@ def test_contact_send_runs_off_the_event_loop_thread(client, monkeypatch):
             seen["thread"] = threading.current_thread()
             return types.SimpleNamespace(status_code=202)
 
-    monkeypatch.setattr(contact_routes, "SendGridAPIClient", FakeSendGrid)
+    monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGrid)
     response = client.post(
         "/api/contact/send-email",
         json={"from_email": "a@example.com", "subject": "Hi", "message": "body"},
@@ -439,14 +441,28 @@ def test_version_info_carries_no_error_text():
 
 # --- Error bodies and config ----------------------------------------------
 
-def test_content_routes_return_generic_500s(client, monkeypatch):
-    def boom():
-        raise RuntimeError("/srv/app/data/skills.json: secret parser detail")
+@pytest.fixture
+def broken_skills_file(monkeypatch, tmp_path):
+    """Point the loaders at a corrupt skills.json with cold caches."""
+    (tmp_path / "skills.json").write_text('{"python": {"secret parser detail": ')
+    monkeypatch.setattr(data_loader, "DATA_DIR", tmp_path)
+    data_loader.load_skills.cache_clear()
+    content.collection_payload.cache_clear()
+    content.item_payloads.cache_clear()
+    yield
+    monkeypatch.undo()
+    data_loader.load_skills.cache_clear()
+    content.collection_payload.cache_clear()
+    content.item_payloads.cache_clear()
 
-    monkeypatch.setattr(skills_routes, "load_skills", boom)
-    response = client.get("/api/skills")
+
+@pytest.mark.parametrize("path", ["/api/skills", "/api/skills/python"])
+def test_content_routes_return_generic_500s(client, broken_skills_file, path):
+    response = client.get(path)
     assert response.status_code == 500
-    assert "secret" not in response.text and "/srv" not in response.text
+    assert response.json() == {"detail": "Unable to load site content"}
+    assert "secret" not in response.text and str(data_loader.DATA_DIR) not in response.text
+    assert "public" not in response.headers.get("Cache-Control", "")
 
 
 def test_unread_env_vars_are_not_required():
