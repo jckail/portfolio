@@ -3,7 +3,7 @@
 # commit gets the same bytes; Dependabot's docker ecosystem (dependabot.yml)
 # bumps the digests monthly to pick up Debian/Alpine security patches. The tag
 # stays alongside for readability and so Dependabot knows which line to track.
-FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS frontend-build
+FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -14,7 +14,7 @@ COPY frontend/ ./
 ENV NODE_ENV=production
 RUN npm run build
 
-FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS copilot-build
+FROM node:26-bookworm-slim@sha256:662933cf47f013bc8e4beb31a6116448427a82057ba7c42c97e4c5ba766504c2 AS copilot-build
 WORKDIR /app/copilot
 COPY copilot/package*.json ./
 RUN npm ci --ignore-scripts --omit=dev
