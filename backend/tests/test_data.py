@@ -130,7 +130,8 @@ def test_project_secondary_links_and_labels():
         assert root[key].link2_label == "Interactive demo"
     assert str(root["super_teacher"].link2) == "https://www.the-super-teacher.com/"
     assert str(root["pointup"].link2) == "https://www.pointup.io/"
-    assert root["super_teacher"].link2_label == root["pointup"].link2_label == "Open app"
+    assert root["super_teacher"].link2_label == "Earlier version"
+    assert root["pointup"].link2_label == "Open app"
 
 
 def test_pointup_describes_the_typescript_monorepo():
