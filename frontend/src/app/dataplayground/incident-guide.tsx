@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useRuntime } from './use-runtime';
 import './incident-guide.css';
@@ -154,15 +154,59 @@ function Guide() {
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const actionButton = useRef<HTMLButtonElement>(null);
+  const status = useRef<HTMLDivElement>(null);
+  const focusOwnership = useRef<{
+    origin: HTMLButtonElement;
+    owned: boolean;
+    advance: boolean;
+  } | null>(null);
   const guide = guides[incident];
   const current = checkpoints.length;
-  async function runStep() {
+  useEffect(() => {
+    const movedFocus = (event: FocusEvent) => {
+      const ownership = focusOwnership.current;
+      if (ownership && event.target !== ownership.origin && event.target !== document.body)
+        ownership.owned = false;
+    };
+    const movedPointer = (event: PointerEvent) => {
+      const ownership = focusOwnership.current;
+      if (ownership && !ownership.origin.contains(event.target as Node)) ownership.owned = false;
+    };
+    document.addEventListener('focusin', movedFocus);
+    document.addEventListener('pointerdown', movedPointer);
+    return () => {
+      document.removeEventListener('focusin', movedFocus);
+      document.removeEventListener('pointerdown', movedPointer);
+      focusOwnership.current = null;
+    };
+  }, []);
+  useLayoutEffect(() => {
+    const ownership = focusOwnership.current;
+    if (!ownership?.advance) return;
+    focusOwnership.current = null;
+    // Disabling or removing the old button may leave body focused. A move to
+    // another control or a pointer click elsewhere gives up the handoff.
+    if (
+      ownership.owned &&
+      (document.activeElement === ownership.origin || document.activeElement === document.body)
+    )
+      (actionButton.current || status.current)?.focus();
+  }, [current]);
+  async function runStep(origin: HTMLButtonElement) {
     if (!state || loading || pending || current >= guide.steps.length) return;
+    const ownership = {
+      origin,
+      owned: document.activeElement === origin,
+      advance: false,
+    };
+    focusOwnership.current = ownership;
     const step = guide.steps[current];
     setPending(true);
     setFeedback('');
     try {
       const after = await action(step.request(state));
+      if (focusOwnership.current !== ownership) return;
       if (!after) {
         setFeedback(
           'No successful action result was received. Review the workspace error and retry this step.'
@@ -170,14 +214,17 @@ function Guide() {
         return;
       }
       const observed = step.observe(state, after);
-      if (observed.complete) setCheckpoints((previous) => [...previous, observed.detail]);
-      else
+      if (observed.complete) {
+        ownership.advance = true;
+        setCheckpoints((previous) => [...previous, observed.detail]);
+      } else
         setFeedback(
           `${observed.detail} Checkpoint not met; inspect the current state and retry this step.`
         );
     } catch {
       setFeedback('The action could not finish. Review the workspace error and retry this step.');
     } finally {
+      if (!ownership.advance && focusOwnership.current === ownership) focusOwnership.current = null;
       setPending(false);
     }
   }
@@ -218,7 +265,11 @@ function Guide() {
               {checkpoints[index] ? (
                 <p className="lab-incident-checkpoint">Observed checkpoint: {checkpoints[index]}</p>
               ) : index === current ? (
-                <button disabled={pending || loading} onClick={() => void runStep()}>
+                <button
+                  ref={actionButton}
+                  disabled={pending || loading}
+                  onClick={(event) => void runStep(event.currentTarget)}
+                >
                   {pending ? 'Checking action result…' : step.button}
                 </button>
               ) : (
@@ -227,7 +278,7 @@ function Guide() {
             </li>
           ))}
         </ol>
-        <div role="status">
+        <div ref={status} role="status" tabIndex={-1}>
           {feedback ||
             (current === guide.steps.length
               ? 'Investigation complete: all checkpoints were observed in returned workspace states.'

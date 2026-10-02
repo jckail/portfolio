@@ -39,9 +39,9 @@ async def body(request: Request, contract: type[BaseModel], max_bytes: int = 240
         raise HTTPException(415, "Send tool inputs as JSON.", headers=_HEADERS)
     data = bytearray()
     async for chunk in request.stream():
-        data.extend(chunk)
-        if len(data) > max_bytes:
+        if len(data) + len(chunk) > max_bytes:
             raise HTTPException(413, "Tool input is too large.", headers=_HEADERS)
+        data.extend(chunk)
     try:
         return contract.model_validate_json(bytes(data))
     except ValidationError as exc:
@@ -49,16 +49,23 @@ async def body(request: Request, contract: type[BaseModel], max_bytes: int = 240
                             headers=_HEADERS) from None
 
 
-async def operate(request: Request, response: Response, method: str, *args):
+def operation_capability(request: Request, response: Response) -> str:
     response.headers.update(_HEADERS)
     enforce_rate_limit(_operations, request, headers=_HEADERS)
-    token = capability(request)
+    return capability(request)
+
+
+async def execute(token: str, method: str, *args):
     try:
         return await asyncio.to_thread(getattr(get_runtime(), method), token, *args)
     except KeyError:
         raise HTTPException(410, "Your workspace expired. Create another to continue.", headers=_HEADERS) from None
     except ValueError as exc:
         raise HTTPException(422, str(exc), headers=_HEADERS) from None
+
+
+async def operate(request: Request, response: Response, method: str, *args):
+    return await execute(operation_capability(request, response), method, *args)
 
 
 @router.post("/runtime/session", response_model=SessionResponse)
@@ -79,14 +86,16 @@ async def runtime_state(request: Request, response: Response):
 
 @router.post("/runtime/action", response_model=RuntimeState)
 async def runtime_action(request: Request, response: Response):
+    token = operation_capability(request, response)
     config = await body(request, RuntimeAction, 4096)
-    return await operate(request, response, "action", config)
+    return await execute(token, "action", config)
 
 
 @router.post("/runtime/query", response_model=QueryResult)
 async def runtime_query(request: Request, response: Response):
+    token = operation_capability(request, response)
     config = await body(request, QueryRequest)
-    return await operate(request, response, "query", config)
+    return await execute(token, "query", config)
 
 
 @router.post("/runtime/close")

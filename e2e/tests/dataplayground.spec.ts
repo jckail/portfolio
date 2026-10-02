@@ -45,6 +45,12 @@ test('lab supports mobile, keyboard entry, and both themes without page overflow
   await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme === 'dark' ? 'dark' : 'light');
   const dimensions = await page.evaluate(() => ({ width: innerWidth, content: document.documentElement.scrollWidth }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.width);
+  await page.getByRole('button', { name: 'Show copilot', exact: true }).click();
+  const copilot = page.getByRole('complementary', { name: 'Data copilot', exact: true });
+  await expect(copilot).toBeFocused();
+  await expect(copilot).toBeInViewport();
+  await page.getByRole('button', { name: 'Hide copilot', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Show copilot', exact: true })).toBeFocused();
 });
 
 test('every saved scenario has browser-valid custom parameters, including fractional churn', async ({ page }) => {
@@ -230,10 +236,15 @@ test('guided incidents verify recovery and downloaded SQL retains execution prov
   await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
   await page.getByRole('link', { name: 'Operations', exact: true }).click();
   await page.getByText('Guided incident investigations', { exact: true }).click();
-  for (const name of ['Guide: stop producer', 'Guide: pause consumer', 'Guide: produce lag batch', 'Guide: drain recovery batch']) {
-    await page.getByRole('button', { name, exact: true }).click();
+  const steps = ['Guide: stop producer', 'Guide: pause consumer', 'Guide: produce lag batch', 'Guide: drain recovery batch'];
+  for (let index = 0; index < steps.length; index++) {
+    const button = page.getByRole('button', { name: steps[index], exact: true });
+    await button.focus();
+    await page.keyboard.press('Enter');
+    if (index + 1 < steps.length) await expect(page.getByRole('button', { name: steps[index + 1], exact: true })).toBeFocused();
   }
   await expect(page.locator('.lab-incident-guide')).toContainText('Investigation complete');
+  await expect(page.locator('.lab-incident-guide [role="status"]')).toBeFocused();
   await expect(page.locator('.lab-incident-checkpoint')).toHaveCount(4);
   await page.getByLabel('Investigation', { exact: true }).selectOption('publication');
   await page.getByRole('button', { name: 'Guide: run failing DAG', exact: true }).click();
@@ -262,4 +273,27 @@ test('guided incidents verify recovery and downloaded SQL retains execution prov
   expect(Object.keys(evidence).sort()).toEqual(['kind', 'result', 'row_limit', 'sampled', 'schema_version', 'scope', 'sql', 'sql_truncated']);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('an ambiguous copilot confirmation retires its card and invites fresh inspection', async ({ page }) => {
+  await page.route('**/api/dataplayground/copilot/status', route => route.fulfill({ json: { available: true } }));
+  await page.route('**/api/dataplayground/copilot/chat', route => route.fulfill({ json: {
+    text: 'Inspect state before applying this consumer change.', events: [], limited: false,
+    proposals: [{ id: 'ambiguous-confirmation', action: { action: 'consumer_pause' }, reason: 'Observe lag.', expires_in_seconds: 600 }],
+  } }));
+  let confirmations = 0;
+  await page.route('**/api/dataplayground/copilot/confirm', async route => {
+    confirmations++;
+    await route.abort('failed');
+  });
+  await page.goto('/dataplayground');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the consumer and propose a pause.');
+  await page.getByRole('button', { name: 'Investigate', exact: true }).click();
+  await page.getByRole('button', { name: 'Apply change', exact: true }).click();
+  await expect(page.getByText(/^Outcome not confirmed/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Apply change', exact: true })).toHaveCount(0);
+  expect(confirmations).toBe(1);
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the current consumer state.');
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
 });

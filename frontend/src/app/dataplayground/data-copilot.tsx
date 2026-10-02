@@ -80,6 +80,8 @@ const starters = [
   'Propose a consumer pause so I can observe lag, then explain how to recover.',
   'Inspect the latest DAG run and explain any retry or blocked task.',
 ];
+const unconfirmedChange =
+  'Outcome not confirmed. Inspect the current workspace before requesting a new proposal. This confirmation will not be retried.';
 
 export function DataCopilot({ catalog }: { catalog: Catalog }) {
   const { session, state, confirm, loading: runtimeLoading, error: runtimeError } = useRuntime();
@@ -205,10 +207,17 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
       if (tokenRef.current !== token || generationRef.current !== generation) return;
       if (applied)
         setResolved((previous) => ({ ...previous, [proposal.id]: 'Applied to this workspace.' }));
-      else setError('The change could not be applied. Review the workspace status and try again.');
+      else {
+        setResolved((previous) => ({ ...previous, [proposal.id]: unconfirmedChange }));
+        setError(
+          'The change could not be confirmed. Inspect the workspace and request a new proposal.'
+        );
+      }
     } catch (failure) {
-      if (tokenRef.current === token && generationRef.current === generation)
-        setError(failure instanceof Error ? failure.message : 'Could not apply the change.');
+      if (tokenRef.current === token && generationRef.current === generation) {
+        setResolved((previous) => ({ ...previous, [proposal.id]: unconfirmedChange }));
+        setError(failure instanceof Error ? failure.message : 'Could not confirm the change.');
+      }
     } finally {
       if (tokenRef.current === token && generationRef.current === generation) {
         setApplying(false);
