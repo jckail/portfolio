@@ -181,3 +181,14 @@ async def test_sdk_retries_are_rejected_before_reservation():
         await draft_grounded_answer("Python", approved=True, subject="verified", ledger=ledger,
                                     client=SimpleNamespace(max_retries=2))
     ledger.reserve.assert_not_called()
+
+
+def test_production_router_mounts_shared_evidence_and_mcp(client, monkeypatch):
+    monkeypatch.setattr(onsite, "limiter", SlidingWindowLimiter(10, 60, global_max_events=100))
+    monkeypatch.setattr(mcp, "limiter", SlidingWindowLimiter(30, 60, global_max_events=300))
+    answer = client.post("/api/assistant/evidence", json={"query": "Python"})
+    assert answer.status_code == 200 and answer.json()["sources"]
+    external = rpc(client, "tools/call", {"name": "search_public_evidence", "arguments": {"query": "Python"}})
+    assert external.status_code == 200
+    assert external.json()["result"]["structuredContent"] == answer.json()
+    assert client.get("/api/assistant/capabilities").json()["paid_agents"] is False

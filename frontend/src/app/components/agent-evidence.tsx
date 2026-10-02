@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { postJson } from '../../shared/utils/api';
-import { assistantEndpoints } from '../../shared/utils/api/assistant-endpoints';
+import { endpoints } from '../../shared/utils/api/endpoints';
 import '../../styles/components/agent-evidence.css';
 
 interface Source { id: string; title: string; url: string; snippets: string[] }
 interface Answer { mode: string; answer: string; sources: Source[] }
 
 const suggestions = ['agent systems', 'data platforms', 'machine learning'];
-const endpoint = '/api/mcp';
+const endpoint = endpoints.publicMcp;
 
 export default function AgentEvidence() {
   const [query, setQuery] = useState('');
@@ -37,7 +37,7 @@ export default function AgentEvidence() {
     setError('');
     setAnswer(null);
     try {
-      const result = await postJson<Answer>(assistantEndpoints.evidence, { query: text.trim() }, { signal: controller.signal });
+      const result = await postJson<Answer>(endpoints.assistantEvidence, { query: text.trim() }, { signal: controller.signal });
       if (id === serial.current && mounted.current) setAnswer(result);
     } catch (failure) {
       if (id === serial.current && mounted.current && !controller.signal.aborted) {

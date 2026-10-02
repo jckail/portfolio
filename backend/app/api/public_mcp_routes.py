@@ -62,9 +62,9 @@ async def public_mcp(request: Request):
         return _error(None, -32000, "Rate limit exceeded", 429)
     raw = bytearray()
     async for chunk in request.stream():
-        raw.extend(chunk)
-        if len(raw) > 8192:
+        if len(raw) + len(chunk) > 8192:
             return _error(None, -32600, "Request too large", 413)
+        raw.extend(chunk)
     try:
         message = json.loads(raw)
     except (ValueError, UnicodeDecodeError, RecursionError):

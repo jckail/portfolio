@@ -15,6 +15,8 @@ import { LoadingSpinner } from '../../shared/components/loading-spinner';
 import '../../styles/components/main-content.css';
 import '../../styles/components/loading.css';
 
+const AgentEvidence = React.lazy(() => import('./agent-evidence'));
+
 // Lazy load components below the fold
 const TechnicalSkills = React.lazy(() => import('./sections/skills'));
 const Experience = React.lazy(() => import('./sections/experience'));
@@ -138,6 +140,10 @@ const MainContentInner: React.FC = () => {
           {/* About section is eagerly loaded */}
           <ErrorBoundary>
             <TLDR />
+          </ErrorBoundary>
+
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSpinner />}><AgentEvidence /></Suspense>
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}

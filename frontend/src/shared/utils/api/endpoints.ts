@@ -1,5 +1,8 @@
 /** Canonical backend endpoint paths (relative, same-origin). */
 export const endpoints = {
+  assistantEvidence: '/api/assistant/evidence',
+  assistantCapabilities: '/api/assistant/capabilities',
+  publicMcp: '/api/mcp',
   dataPlayground: '/api/dataplayground',
   dataPlaygroundSimulate: '/api/dataplayground/simulate',
   dataPlaygroundSession: '/api/dataplayground/runtime/session',
