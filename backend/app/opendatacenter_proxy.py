@@ -14,7 +14,9 @@ from fastapi.responses import RedirectResponse, Response, StreamingResponse
 from .config import Settings, get_settings
 
 router = APIRouter()
-PUBLIC_RESOURCES = frozenset({"facilities", "compare", "coverage", "facets", "components", "sources", "changes"})
+PUBLIC_RESOURCES = frozenset(
+    {"facilities", "compare", "coverage", "facets", "components", "sources", "changes", "entities", "organizations"}
+)
 REQUEST_HEADERS = frozenset(
     {
         "accept",

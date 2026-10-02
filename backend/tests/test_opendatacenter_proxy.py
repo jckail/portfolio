@@ -37,8 +37,9 @@ def gateway(client, monkeypatch):
         app.dependency_overrides.pop(get_settings, None)
 
 
-def test_unconfigured_gateway_is_not_public(client):
-    assert client.get("/opendatacenter/", headers={"accept": "text/html"}).status_code == 404
+@pytest.mark.parametrize("path", ["/opendatacenter/", "/opendatacenter/v1/organizations", "/opendatacenter/v1/entities/entity-1"])
+def test_unconfigured_gateway_is_not_public(client, path):
+    assert client.get(path, headers={"accept": "text/html"}).status_code == 404
 
 
 def test_public_reads_preserve_subpath_query_and_drop_credentials(gateway):
@@ -53,6 +54,32 @@ def test_public_reads_preserve_subpath_query_and_drop_credentials(gateway):
     assert "cookie" not in seen[-1].headers
     assert seen[-1].headers["origin"] == "https://jckail.com"
     assert response.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+@pytest.mark.parametrize("path", ["organizations?q=Acme&limit=20&cursor=opaque", "entities/entity-1"])
+def test_organization_and_entity_reads_preserve_route_and_strip_credentials(gateway, method, path):
+    client, seen = gateway
+    response = client.request(
+        method,
+        f"/opendatacenter/v1/{path}",
+        headers={"authorization": "Bearer never-forward", "cookie": "private=value"},
+    )
+    assert response.status_code == 200
+    assert str(seen[-1].url) == f"https://atlas-example.a.run.app/opendatacenter/v1/{path}"
+    assert seen[-1].method == method
+    assert "authorization" not in seen[-1].headers
+    assert "cookie" not in seen[-1].headers
+    assert response.headers["cache-control"] == "no-store"
+    assert response.content == (b"" if method == "HEAD" else b'{"public":true}')
+
+
+@pytest.mark.parametrize("method", ["POST", "PUT", "PATCH", "DELETE"])
+@pytest.mark.parametrize("path", ["organizations", "entities/entity-1"])
+def test_organization_and_entity_writes_never_reach_upstream(gateway, method, path):
+    client, seen = gateway
+    assert client.request(method, f"/opendatacenter/v1/{path}", json={"name": "forged"}).status_code == 404
+    assert not seen
 
 
 def test_static_asset_and_map_csp(gateway):
@@ -114,6 +141,12 @@ def test_streamed_asset_respects_downstream_identity_encoding(gateway, monkeypat
     ("method", "path"),
     [
         ("GET", "/opendatacenter/v1/admin/ingestions"),
+        ("GET", "/opendatacenter/v1/admin/entities"),
+        ("HEAD", "/opendatacenter/v1/admin/entities"),
+        ("POST", "/opendatacenter/v1/admin/entities"),
+        ("POST", "/opendatacenter/v1/admin/derivations"),
+        ("GET", "/opendatacenter/v1/organizations-admin"),
+        ("GET", "/opendatacenter/v1/entities-admin"),
         ("POST", "/opendatacenter/v1/facilities"),
         ("GET", "/opendatacenter/v1/unknown"),
         ("GET", "/opendatacenter/unknown.js"),
