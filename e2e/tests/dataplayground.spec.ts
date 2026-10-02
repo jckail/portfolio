@@ -294,5 +294,6 @@ test('an ambiguous copilot confirmation retires its card and invites fresh inspe
   await expect(page.getByText(/^Outcome not confirmed/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Apply change', exact: true })).toHaveCount(0);
   expect(confirmations).toBe(1);
-  await expect(page.getByRole('button', { name: 'Inspect my workspace and explain how records move through it.', exact: true })).toBeEnabled();
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the current consumer state.');
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
 });

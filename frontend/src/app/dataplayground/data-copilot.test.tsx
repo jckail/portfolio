@@ -337,7 +337,10 @@ describe('structured investigation evidence', () => {
         'Inspect the current workspace before requesting a new proposal'
       );
       expect(confirm).toHaveBeenCalledTimes(1);
-      expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled();
+      fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+        target: { value: 'Inspect the current consumer state.' },
+      });
+      expect(screen.getByRole('button', { name: 'Investigate' })).toBeEnabled();
     }
   );
   it('ignores a late confirmation failure after a same-token reset', async () => {
