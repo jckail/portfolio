@@ -220,18 +220,38 @@ def _is_html_navigation(scope: Scope) -> bool:
 
 
 def _accepts_any_document(scope: Scope) -> bool:
-    """True for a missing Accept or one that lists ``*/*`` without asking for JSON.
+    """True for a missing Accept or a positive wildcard without positive JSON.
 
     Many crawlers and link unfurlers send ``*/*`` (or nothing). The home page
     already answers them because StaticFiles serves ``/`` directly; this lets
     the known client routes do the same. An explicit JSON preference (an API
-    client such as ``application/json, */*``) is not a document request.
+    client such as ``application/json, */*``) is not a document request. A
+    q=0 range is refused, so it neither enables a wildcard nor requests JSON.
+    This only governs the wildcard path; explicit HTML navigation is separate.
     """
-    for name, value in scope.get("headers", []):
-        if name == b"accept":
-            accept = value.lower()
-            return b"*/*" in accept and b"json" not in accept
-    return True
+    accepts = Headers(scope=scope).getlist("accept")
+    if not accepts:
+        return True
+    wildcard = False
+    for accept in accepts:
+        for media_range in accept.lower().split(","):
+            media_type, *parameters = media_range.split(";")
+            media_type = media_type.strip()
+            weight = 1.0
+            for parameter in parameters:
+                name, _, value = parameter.partition("=")
+                if name.strip() == "q":
+                    value = value.strip()
+                    weight = float(value) if re.fullmatch(r"(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)", value) else 0.0
+                    break
+            if weight <= 0:
+                continue
+            subtype = media_type.partition("/")[2]
+            if subtype == "json" or subtype.endswith("+json"):
+                return False
+            if media_type == "*/*":
+                wildcard = True
+    return wildcard
 
 
 def spa_fallback_status(route_path: str) -> int:
