@@ -28,4 +28,19 @@ describe('CookieBanner', () => {
     expect(onDeny).toHaveBeenCalledOnce();
     expect(onAccept).not.toHaveBeenCalled();
   });
+
+  it('publishes its height for the chat launcher and clears it on dismiss', () => {
+    const root = document.documentElement;
+    const { container } = render(<CookieBanner />);
+    expect(root.style.getPropertyValue('--cookie-banner-height')).toBe('0px');
+    fireEvent.click(screen.getByText('Deny All'));
+    expect(root.style.getPropertyValue('--cookie-banner-height')).toBe('');
+    expect(container.querySelector<HTMLElement>('.cookie-banner')?.style.display).toBe('none');
+  });
+
+  it('clears the published height on unmount', () => {
+    const { unmount } = render(<CookieBanner />);
+    unmount();
+    expect(document.documentElement.style.getPropertyValue('--cookie-banner-height')).toBe('');
+  });
 });
