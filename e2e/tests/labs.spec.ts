@@ -40,3 +40,14 @@ test('an unknown lab slug shows the Not Found view', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back to the portfolio' })).toHaveAttribute('href', '/');
 });
+
+
+for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
+  test(`${slug} lab does not overflow horizontally at phone width`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/${slug}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, 'page must not scroll sideways').toBeLessThanOrEqual(0);
+  });
+}

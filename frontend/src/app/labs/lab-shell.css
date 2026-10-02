@@ -3,6 +3,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  /* Pin the width to the viewport. #root is a flex column and the shell has no
+     explicit width, so it used to size itself to the widest unbreakable content
+     inside (a code listing, a wide table) and push the whole page sideways at
+     phone width. Those blocks scroll inside their own boxes. */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   color: var(--text-color);
   background: var(--page-bg);
