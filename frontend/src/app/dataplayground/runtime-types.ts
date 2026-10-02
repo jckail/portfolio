@@ -23,6 +23,8 @@ export interface QueryRequest {
   row_limit: number;
 }
 export interface QueryResult {
+  workspace_generation?: number | null;
+  data_revision?: number | null;
   columns: string[];
   rows: (string | number | null)[][];
   row_count: number;
@@ -30,6 +32,12 @@ export interface QueryResult {
   elapsed_ms: number;
 }
 export interface RuntimeState {
+  workspace_generation?: number;
+  data_revision?: number;
+  dag_input_revision?: number | null;
+  model_input_revision?: number | null;
+  dag_stale?: boolean;
+  models_stale?: boolean;
   scenario_id: string;
   runtime: string;
   source: string;

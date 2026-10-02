@@ -19,7 +19,7 @@ interface RuntimeContextValue {
   loading: boolean;
   error: string;
   create: (scenarioId: string) => Promise<void>;
-  action: (request: RuntimeAction) => Promise<void>;
+  action: (request: RuntimeAction) => Promise<RuntimeState | undefined>;
   query: (request: QueryRequest) => Promise<QueryResult | undefined>;
   refresh: () => Promise<void>;
   confirm: (proposalId: string) => Promise<boolean>;
@@ -149,7 +149,7 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
   const mutate = useCallback(
     async (path: string, request: RuntimeAction | { id: string }) => {
       const allocated = current.current;
-      if (!allocated || busy.current) return false;
+      if (!allocated || busy.current) return undefined;
       const expected = generation.current;
       const version = ++revision.current;
       busy.current = true;
@@ -159,12 +159,12 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
         const next = await postJson<RuntimeState>(path, request, authorization(allocated.token));
         if (mounted.current && expected === generation.current && version === revision.current) {
           setState(next);
-          return true;
+          return next;
         }
-        return false;
+        return undefined;
       } catch (cause) {
         fail(cause, expected);
-        return false;
+        return undefined;
       } finally {
         if (mounted.current && expected === generation.current) {
           busy.current = false;
@@ -176,12 +176,13 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
   );
   const action = useCallback(
     async (request: RuntimeAction) => {
-      await mutate(endpoints.dataPlaygroundAction, request);
+      return await mutate(endpoints.dataPlaygroundAction, request);
     },
     [mutate]
   );
   const confirm = useCallback(
-    (proposalId: string) => mutate(endpoints.dataPlaygroundCopilotConfirm, { id: proposalId }),
+    async (proposalId: string) =>
+      Boolean(await mutate(endpoints.dataPlaygroundCopilotConfirm, { id: proposalId })),
     [mutate]
   );
 

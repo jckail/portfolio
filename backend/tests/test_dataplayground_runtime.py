@@ -181,6 +181,89 @@ def test_executed_models_sql_tests_and_dag_failure_retry(runtime):
     assert next(t for t in failure.dag_trace if t.task_id == "exploration").status == "success"
 
 
+def test_run_evidence_tracks_accepted_data_and_preserves_historical_publication(runtime):
+    token = session(runtime)
+    initial = runtime.state(token)
+    assert initial.workspace_generation == 1 and initial.data_revision == 0
+    assert initial.dag_input_revision is None and initial.model_input_revision is None
+    assert not initial.dag_stale and not initial.models_stale
+    published = runtime.action(token, RuntimeAction(action="dag_run"))
+    assert published.dag_input_revision == published.model_input_revision == 0
+
+    queued = runtime.action(token, RuntimeAction(action="produce", batch_size=20, duplicate_rate=0.2, invalid_rate=0.2))
+    assert queued.data_revision == 0 and not queued.dag_stale
+    changed = runtime.action(token, RuntimeAction(action="consumer_drain"))
+    assert changed.data_revision == changed.streaming.inserted == 12
+    assert changed.dag_stale and changed.models_stale
+    assert changed.dag_published and changed.dag_fingerprint == published.dag_fingerprint
+    rebuilt = runtime.action(token, RuntimeAction(action="models_run"))
+    assert rebuilt.model_input_revision == 12 and not rebuilt.models_stale
+    assert rebuilt.dag_input_revision == 0 and rebuilt.dag_stale
+
+    runtime.action(token, RuntimeAction(action="consumer_replay"))
+    replayed = runtime.action(token, RuntimeAction(action="consumer_drain"))
+    assert replayed.data_revision == 12 and not replayed.models_stale
+    fresh = runtime.action(token, RuntimeAction(action="dag_run"))
+    assert fresh.dag_input_revision == fresh.model_input_revision == 12
+    assert not fresh.dag_stale and not fresh.models_stale
+    assert fresh.dag_fingerprint != published.dag_fingerprint
+    failed = runtime.action(token, RuntimeAction(action="dag_run", failure="permanent"))
+    assert failed.dag_input_revision == 12 and failed.model_input_revision is None
+    assert not failed.dag_published and failed.dag_fingerprint is None
+
+
+def test_reset_generation_rejects_old_actions_before_background_execution():
+    now = [0.0]
+    manager = RuntimeManager(background=False, clock=lambda: now[0])
+    try:
+        token = session(manager)
+        reset = manager.action(token, RuntimeAction(action="reset"), expected_generation=1)
+        assert reset.workspace_generation == 2 and reset.data_revision == 0
+        assert reset.dag_input_revision is None and reset.model_input_revision is None
+        manager.action(token, RuntimeAction(action="producer_start"), expected_generation=2)
+        before = manager.diagnostics(token)
+        now[0] += 1
+        for action in ("produce", "consumer_drain", "reset"):
+            with pytest.raises(ValueError, match="Workspace changed"):
+                manager.action(token, RuntimeAction(action=action), expected_generation=1)
+        with pytest.raises(ValueError, match="Workspace changed"):
+            manager.query(token, QueryRequest(sql="SELECT COUNT(*) FROM events"), expected_generation=1)
+        with pytest.raises(ValueError, match="Workspace changed"):
+            manager.state(token, expected_generation=1)
+        assert manager.diagnostics(token) == before
+        next_reset = manager.action(token, RuntimeAction(action="reset"), expected_generation=2)
+        assert next_reset.workspace_generation == 3 and next_reset.streaming.produced == 0
+    finally:
+        manager.close()
+
+
+def test_query_provenance_and_diagnostics_are_bounded_and_do_not_tick():
+    now = [0.0]
+    manager = RuntimeManager(background=False, clock=lambda: now[0])
+    try:
+        token = session(manager)
+        manager.action(token, RuntimeAction(action="produce", batch_size=100, invalid_rate=0.2))
+        consumed = manager.action(token, RuntimeAction(action="consumer_drain"))
+        result = manager.query(token, QueryRequest(sql="SELECT COUNT(*) FROM events"), expected_generation=1)
+        assert result.workspace_generation == 1 and result.data_revision == consumed.data_revision == 80
+        manager.action(token, RuntimeAction(action="dag_run"))
+        manager.action(token, RuntimeAction(action="producer_start", invalid_rate=0.2))
+        before = manager.diagnostics(token)
+        now[0] += 1
+        diagnostic = manager.diagnostics(token)
+        assert diagnostic == before
+        assert diagnostic["workspace_generation"] == 1 and diagnostic["data_revision"] == 80
+        assert diagnostic["run"]["dag_input_revision"] == 80 and not diagnostic["run"]["dag_stale"]
+        assert diagnostic["quarantine"]["total_rows"] == 20
+        assert len(diagnostic["quarantine"]["sample"]) == 10
+        assert diagnostic["quarantine"]["sample_truncated"]
+        assert set(diagnostic["quarantine"]["sample"][0]) == {"partition", "offset", "event_id", "reason"}
+        assert len(diagnostic["logs"]) <= 20
+        assert token not in str(diagnostic) and "payload" not in str(diagnostic["quarantine"])
+    finally:
+        manager.close()
+
+
 @pytest.mark.parametrize(
     "change",
     [

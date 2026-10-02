@@ -1,0 +1,35 @@
+.lab-incident-guide {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg);
+}
+.lab-incident-guide p {
+  margin: 12px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.lab-incident-guide select {
+  display: block;
+  margin-top: 8px;
+}
+.lab-incident-guide ol {
+  padding-left: 24px;
+}
+.lab-incident-guide li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.lab-incident-guide li[aria-current='step'] > strong {
+  color: var(--accent-text);
+}
+.lab-incident-checkpoint {
+  padding-left: 12px;
+  border-left: 2px solid var(--rail-color);
+}
+.lab-incident-guide [role='status'] {
+  margin: 16px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}

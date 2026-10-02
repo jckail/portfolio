@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 
 from backend.app.models.dataplayground_copilot import CopilotRequest
-from backend.app.models.dataplayground_runtime import SessionRequest
+from backend.app.models.dataplayground_runtime import RuntimeAction, SessionRequest
 from backend.app.services import dataplayground_copilot as copilot
 from backend.app.services.dataplayground_runtime import RuntimeManager
 from backend.app.services.llm import Finish, TextDelta, ToolCall, Usage
@@ -82,11 +82,113 @@ def test_actual_pi_sql_tool_loop_preserves_vertex_state_and_exposes_bounded_evid
     assert second.messages[-1]["results"][0]["output"]["rows"] == [[48]]
     assert second.max_tokens == 1024
     evidence = next(event for event in response.events if event["type"] == "tool_result")
-    assert evidence["result"] == {"sql": sql, "columns": ["count"], "row_count": 1, "truncated": False, "rows": [[48]]}
+    result = evidence["result"]
+    assert result == {"sql": sql, "columns": ["count"], "row_count": 1, "truncated": False, "rows": [[48]],
+                      "sql_truncated": False, "row_limit": 1, "elapsed_ms": result["elapsed_ms"],
+                      "sampled_row_count": 1, "sample_truncated": False,
+                      "workspace_generation": 1, "data_revision": 0}
+    assert result["elapsed_ms"] >= 0
     serialized = response.model_dump_json()
     assert "opaque-signature" not in serialized and token not in serialized
     assert copilot._tokens_used == 35 and copilot._tokens_reserved == 0
     assert not copilot._active_workspaces
+
+
+def test_actual_pi_incident_tool_reads_quality_contracts_without_mutation(setup, monkeypatch):
+    runtime, _ = setup
+    token = session(runtime)
+    runtime.action(token, RuntimeAction(action="produce", batch_size=30, invalid_rate=0.2, duplicate_rate=0.2))
+    before = runtime.action(token, RuntimeAction(action="consumer_drain", limit=100))
+    provider = FakeProvider([
+        [ToolCall("call_0", "inspect_incident", {}, {"thoughtSignature": "incident-private"}),
+         Usage(5, 5), Finish("tool_use")],
+        [TextDelta("Observed quarantine reasons and partition offsets."), Usage(5, 5), Finish("end")],
+    ])
+    use_provider(monkeypatch, provider)
+    response = run_chat(token, "Investigate injected quality issues without changing controls.")
+    evidence = next(event["result"] for event in response.events if event.get("tool") == "inspect_incident" and event["type"] == "tool_result")
+    assert evidence["workspace_generation"] == before.workspace_generation
+    assert evidence["quarantine"]["total_rows"] > 0
+    assert 1 <= len(evidence["quarantine"]["sample"]) <= 10
+    assert all(row["reason"] == "Negative amount_cents" for row in evidence["quarantine"]["sample"])
+    assert len(evidence["logs"]) <= 20 and "model_runs" in evidence["run"]
+    assert runtime.state(token).streaming == before.streaming
+    assert provider.requests[-1].messages[-1]["results"][0]["output"] == evidence
+    assert provider.requests[-1].messages[-2]["tool_calls"][0].provider_state == {"thoughtSignature": "incident-private"}
+    assert "incident-private" not in response.model_dump_json()
+    assert "payload" not in json.dumps(evidence) and token not in json.dumps(evidence)
+
+
+def test_pre_reset_proposal_cannot_apply_to_replacement_workspace(setup):
+    runtime, _ = setup
+    token = session(runtime)
+    proposal = copilot._tool(token, "propose_runtime_change", {"action": "produce", "batch_size": 7, "reason": "Inspect a controlled batch"})["proposal"]
+    fresh = runtime.action(token, RuntimeAction(action="reset"))
+    with pytest.raises(ValueError):
+        copilot.confirm(token, proposal["id"])
+    assert proposal["id"] not in copilot._pending
+    assert runtime.state(token).streaming == fresh.streaming
+
+
+def test_stale_tool_and_confirmation_do_not_tick_replacement_workspace(setup, monkeypatch):
+    runtime, _ = setup
+    now = [runtime.clock()]
+    monkeypatch.setattr(runtime, "clock", lambda: now[0])
+    token = session(runtime)
+    proposal = copilot._tool(token, "propose_runtime_change", {"action": "produce", "reason": "Old generation"})["proposal"]
+    runtime.action(token, RuntimeAction(action="reset"))
+    runtime.action(token, RuntimeAction(action="producer_start"))
+    before = runtime.diagnostics(token)
+    now[0] += 10
+    with pytest.raises(ValueError):
+        copilot._tool(token, "inspect_workspace", {}, expected_generation=1)
+    assert runtime.diagnostics(token)["streaming"] == before["streaming"]
+    with pytest.raises(ValueError):
+        copilot.confirm(token, proposal["id"])
+    assert runtime.diagnostics(token)["streaming"] == before["streaming"]
+    assert proposal["id"] not in copilot._pending
+
+
+def test_actual_pi_turn_stops_at_reset_instead_of_inspecting_new_generation(setup, monkeypatch):
+    runtime, _ = setup
+    token = session(runtime)
+
+    class ResetProvider(FakeProvider):
+        async def stream(self, request):
+            if self.requests:
+                runtime.action(token, RuntimeAction(action="reset"))
+            async for event in super().stream(request):
+                yield event
+
+    provider = ResetProvider([
+        [ToolCall("call_0", "inspect_workspace", {}), Usage(5, 5), Finish("tool_use")],
+        [ToolCall("call_0", "propose_runtime_change", {"action": "produce", "reason": "Old investigation"}),
+         Usage(5, 5), Finish("tool_use")],
+    ])
+    use_provider(monkeypatch, provider)
+    with pytest.raises(copilot.CopilotUnavailable):
+        run_chat(token)
+    assert provider.closed and len(provider.requests) == 2
+    assert not copilot._pending and not copilot._active_workspaces
+    assert runtime.state(token).workspace_generation == 2
+    assert runtime.state(token).streaming.produced == 0
+
+
+def test_sql_evidence_distinguishes_return_limit_sample_and_byte_trimming(setup):
+    runtime, _ = setup
+    token = session(runtime)
+    args = {"sql": "SELECT * FROM purchases", "row_limit": 20}
+    result = copilot._tool(token, "query_sql", args)
+    evidence = copilot._evidence("query_sql", args, result)["result"]
+    assert evidence["row_count"] == 20 and evidence["truncated"] is True
+    assert evidence["row_limit"] == 20 and evidence["sampled_row_count"] == 10
+    assert evidence["sample_truncated"] is True and evidence["sql_truncated"] is False
+    assert evidence["workspace_generation"] == 1 and evidence["data_revision"] == 0
+    oversized = {**result, "rows": [["x" * 2000] * 10] * 20}
+    trimmed = copilot._evidence("query_sql", {**args, "sql": " " * 4001}, oversized)["result"]
+    assert "rows" not in trimmed and trimmed["sampled_row_count"] == 0
+    assert trimmed["sample_truncated"] is True and trimmed["evidence_truncated"] is True
+    assert trimmed["sql_truncated"] is True and len(trimmed["sql"]) == 4000
 
 
 def test_private_subprocess_environment_excludes_credentials_host_auth_and_node_options(setup, monkeypatch):

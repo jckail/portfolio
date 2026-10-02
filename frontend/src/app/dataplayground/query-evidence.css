@@ -1,0 +1,18 @@
+.lab-query-evidence {
+  margin-block: var(--spacing-md);
+}
+.lab-query-evidence p {
+  overflow-wrap: anywhere;
+}
+.lab-query-statement {
+  margin-block: var(--spacing-sm);
+}
+.lab-query-statement pre {
+  max-height: 15rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lab-query-evidence > button {
+  margin-top: var(--spacing-sm);
+}

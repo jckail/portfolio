@@ -11,6 +11,28 @@ const call = (id, name, args, provider_state = {}) => ({ id, name, args, provide
 const done = frames => frames.findLast(frame => frame.type === 'done');
 
 // These tests instantiate and execute the installed Pi Agent, not a host mock.
+test('real Pi incident tool delivers bounded diagnostics and preserves its private signature', async () => {
+  const frames = [], requests = [], reads = [];
+  const evidence = { workspace_generation: 2, data_revision: 4,
+    quarantine: { total_rows: 1, sample: [{ partition: 0, offset: 3, event_id: 'runtime-3', reason: 'Negative amount_cents' }], sample_truncated: false },
+    streaming: { backlog: 8, quarantined: 2 }, run: { models_stale: true }, logs: [] };
+  await runCopilot({ request: start, emit: frame => frames.push(frame), bridge: async (type, payload) => {
+    if (type === 'provider_request') {
+      requests.push(payload.request);
+      if (requests.length === 1) return tools([call('call_0', 'inspect_incident', {}, { thoughtSignature: 'private-incident' })]);
+      assert.deepEqual(payload.request.messages.at(-1).results[0].output, evidence);
+      assert.deepEqual(payload.request.messages.at(-2).tool_calls[0].provider_state, { thoughtSignature: 'private-incident' });
+      return final('Quality counters include replay observations; materialized outputs are stale.');
+    }
+    reads.push(payload);
+    return evidence;
+  } });
+  assert.deepEqual(reads, [{ tool: 'inspect_incident', args: {} }]);
+  assert.equal(done(frames).ok, true);
+  assert.equal(JSON.stringify(frames).includes('private-incident'), false);
+  assert.equal(TOOL_SCHEMAS.find(tool => tool.name === 'inspect_incident').parameters.additionalProperties, false);
+});
+
 test('real Pi loop executes tools and echoes opaque Vertex state across rounds', async () => {
   const frames = [], requests = [], reads = [];
   const providerState = { thoughtSignature: 'opaque-signature-not-browser-data', extra: { future: true } };

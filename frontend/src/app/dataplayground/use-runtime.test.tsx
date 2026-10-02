@@ -358,3 +358,24 @@ describe('visitor runtime state', () => {
     visibility.mockRestore();
   });
 });
+
+describe('mutation receipts for guided investigations', () => {
+  it('returns observed state only after success and does not create a success receipt on failure', async () => {
+    const { result } = renderHook(useRuntime, { wrapper });
+    await act(async () => result.current.create('baseline'));
+    const produced = { ...state, streaming: { ...state.streaming, produced: 5, backlog: 5 } };
+    vi.mocked(postJson).mockResolvedValueOnce(produced);
+    let receipt: RuntimeState | undefined;
+    await act(async () => {
+      receipt = await result.current.action({ action: 'produce', batch_size: 5 });
+    });
+    expect(receipt).toEqual(produced);
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(422, 'Unable to drain this batch.'));
+    await act(async () => {
+      receipt = await result.current.action({ action: 'consumer_drain' });
+    });
+    expect(receipt).toBeUndefined();
+    expect(result.current.state).toEqual(produced);
+    expect(result.current.error).toBe('Unable to drain this batch.');
+  });
+});
