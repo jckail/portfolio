@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ReactNode } from 'react';
 
+import { COOKIE_CONSENT_KEY, CONSENT_CHANGE_EVENT } from '../../shared/utils/cookie-consent';
 import { getJson, postJson } from '../../shared/utils/api';
 import DataPlayground from './data-playground';
 
@@ -135,10 +136,26 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  localStorage.removeItem(COOKIE_CONSENT_KEY);
   window.history.replaceState(null, '', '/dataplayground');
 });
 
 describe('Data Playground', () => {
+  it('lets visitors withdraw existing analytics consent from the workbench footer', async () => {
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    const changed = vi.fn();
+    window.addEventListener(CONSENT_CHANGE_EVENT, changed);
+    render(<DataPlayground />);
+    expect(screen.queryByRole('region', { name: 'Cookie consent' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Cookie settings' }));
+    expect(await screen.findByRole('region', { name: 'Cookie consent' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Deny All' }));
+    expect(localStorage.getItem(COOKIE_CONSENT_KEY)).toBe('denied');
+    expect(changed).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('region', { name: 'Cookie consent' })).toBeNull();
+    window.removeEventListener(CONSENT_CHANGE_EVENT, changed);
+  });
+
   it('switches scenarios and preserves the baseline comparison', async () => {
     render(<DataPlayground />);
     fireEvent.click(await screen.findByRole('button', { name: 'Acquisition' }));

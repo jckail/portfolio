@@ -280,7 +280,7 @@ function Workflow({ dag }: { dag: ArchitectureDataset['dags'][number] }) {
       />
       {task && (
         <section className="lab-architecture-detail" aria-labelledby="lab-task-title">
-          <h4 id="lab-task-title">{task.name}</h4>
+          <h3 id="lab-task-title">{task.name}</h3>
           <p>{task.description}</p>
           <dl>
             <dt>Output</dt>
