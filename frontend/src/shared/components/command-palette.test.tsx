@@ -19,6 +19,47 @@ afterEach(() => {
 });
 
 describe('CommandPalette', () => {
+  it('keeps the chosen command selected when availability removes an earlier option', () => {
+    render(<CommandPalette open onClose={() => {}} />);
+    const input = screen.getByRole('combobox');
+    for (let i = 0; i < 9; i += 1) fireEvent.keyDown(input, { key: 'ArrowDown' });
+    const party = screen.getByRole('option', { name: /Start party mode/ });
+    expect(party).toHaveAttribute('aria-selected', 'true');
+
+    act(() => setChatAvailable(false));
+
+    expect(party).toHaveAttribute('aria-selected', 'true');
+    expect(input).toHaveAttribute('aria-activedescendant', party.id);
+  });
+
+  it('does not switch a selected contact command to download when the assistant disappears', () => {
+    const onClose = vi.fn();
+    const originalUrl = window.location.href;
+    render(<CommandPalette open onClose={onClose} />);
+    fireEvent.mouseEnter(screen.getByRole('option', { name: 'Open contact form' }));
+
+    act(() => setChatAvailable(false));
+
+    const contact = screen.getByRole('option', { name: 'Open contact form' });
+    expect(contact).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('combobox')).toHaveAttribute('aria-activedescendant', contact.id);
+    fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+    expect(new URLSearchParams(window.location.search).get('contact')).toBe('open');
+    expect(onClose).toHaveBeenCalledOnce();
+    window.history.replaceState(null, '', originalUrl);
+  });
+
+  it('selects a visible command if the active assistant option disappears', () => {
+    render(<CommandPalette open onClose={() => {}} />);
+    fireEvent.mouseEnter(screen.getByRole('option', { name: /Open AI assistant/ }));
+
+    act(() => setChatAvailable(false));
+
+    const about = screen.getByRole('option', { name: /Go to About/ });
+    expect(about).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('combobox')).toHaveAttribute('aria-activedescendant', about.id);
+  });
+
   it('keeps keyboard selection visible and announces its active option', () => {
     const scroll = vi.fn();
     Element.prototype.scrollIntoView = scroll;
