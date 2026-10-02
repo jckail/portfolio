@@ -4,6 +4,7 @@ The upstream is operator configuration, never a request parameter. The route
 is dormant until that configuration is set after the atlas rights gate.
 """
 
+import re
 from collections.abc import AsyncIterator
 from urllib.parse import urlsplit
 
@@ -77,6 +78,10 @@ def permitted(path: str, method: str) -> bool:
         return method in ("GET", "POST", "DELETE")
     if path.startswith("/v1/"):
         resource = path.split("/", 3)[2]
+        if resource == "entities":
+            return method in ("GET", "HEAD") and re.fullmatch(
+                r"/v1/entities/[A-Za-z0-9_-]+(?:/history)?", path
+            ) is not None
         return method in ("GET", "HEAD") and resource in PUBLIC_RESOURCES
     return False
 
