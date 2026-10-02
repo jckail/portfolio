@@ -1,6 +1,6 @@
 # 0002: Supabase for data, auth, and chat logging
 
-**Status:** Accepted (reflects the current implementation)
+**Status:** Accepted; superseded in part (the health-check consequence below, see the Update note)
 
 ## Context
 

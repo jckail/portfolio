@@ -41,7 +41,7 @@ terraform apply
 
 ### Deploying a new image version
 
-1. Build and push the image (or use `../helpers/deploy.sh` which also does this):
+1. Build and push the image (do not use `../helpers/deploy.sh`; it is unsafe, see `../HANDOFF.md`):
 
    ```bash
    GIT_COMMIT=$(git rev-parse HEAD)
@@ -113,9 +113,11 @@ create a GCS bucket and uncomment the `backend "gcs"` block in `versions.tf`.
 
 ## Relationship to `helpers/deploy.sh`
 
-`helpers/deploy.sh` is the fast path: it builds the image, pushes it to
-Artifact Registry, and deploys a Cloud Run revision with `gcloud`, passing
-configuration as plain environment variables.
+Do not run `helpers/deploy.sh`. It builds and pushes an image and deploys a
+Cloud Run revision with `gcloud`, but it replaces the Secret Manager bindings
+with plain environment variables and skips the zero-traffic canary
+(`../HANDOFF.md`). Production ships only through the GitHub Actions `Deploy`
+workflow.
 
 Terraform describes the infrastructure itself (APIs, repository, service account,
 secrets, scaling policy). When using multiple deployment paths, reconcile drift
