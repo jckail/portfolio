@@ -90,6 +90,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         },
       }}
     >
+      {/* Keep the live region mounted before loading starts. Announce the
+          response state once, rather than every streamed text delta. */}
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {isLoading ? 'Assistant is responding.' : ''}
+      </span>
       {messages.map((msg, index) => (
         <Box
           key={index}
