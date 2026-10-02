@@ -14,7 +14,7 @@ Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
   },
 });
 
-afterEach(cleanup);
+afterEach(() => { cleanup(); window.history.replaceState({}, '', '/'); });
 
 const Harness: React.FC = () => {
   const [open, setOpen] = React.useState(false);
@@ -78,5 +78,14 @@ describe('SidePanel focus management', () => {
     const toggle = openDrawer();
     fireEvent.click(screen.getByText('Skills'));
     expect(document.activeElement).toBe(toggle);
+  });
+});
+
+describe('SidePanel current location', () => {
+  it('announces the active section rather than relying on its highlight', () => {
+    window.history.replaceState({}, '', '/#projects');
+    render(<SidePanel isOpen onClose={() => {}} />);
+    expect(screen.getByRole('button', { name: 'Projects' })).toHaveAttribute('aria-current', 'location');
+    expect(screen.getByRole('button', { name: 'About' })).not.toHaveAttribute('aria-current');
   });
 });
