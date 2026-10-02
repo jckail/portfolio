@@ -521,6 +521,8 @@
   overflow-wrap: anywhere;
 }
 .lab-footer {
+  flex-wrap: wrap;
+  align-items: center;
   border-top: 1px solid var(--hairline);
   padding: 24px 0 40px;
   display: flex;
