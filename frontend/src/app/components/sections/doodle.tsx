@@ -75,7 +75,8 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => scrollToSection('doodle'));
     };
-    navigate();
+    // Party mode reveals the board decoratively; only explicit opening navigates.
+    if (isVisible) navigate();
     window.addEventListener('portfolio:open-doodle', navigate);
     window.addEventListener('resize', resize);
     return () => {
@@ -83,7 +84,7 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
       window.removeEventListener('portfolio:open-doodle', navigate);
       window.removeEventListener('resize', resize);
     };
-  }, [active, resize]);
+  }, [active, isVisible, resize]);
 
   const getPoint = (event: React.PointerEvent<HTMLCanvasElement>): Point => {
     const rect = event.currentTarget.getBoundingClientRect();

@@ -14,6 +14,23 @@ afterEach(() => {
 });
 
 describe('Doodle', () => {
+  it('keeps party activation at the current section until the board is explicitly opened', () => {
+    window.history.replaceState({}, '', '/#projects');
+    const navigate = vi.fn();
+    Element.prototype.scrollIntoView = navigate;
+    let frame: FrameRequestCallback | undefined;
+    const requestFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { frame = callback; return 1; });
+    const { rerender } = render(<Doodle isVisible={false} isPartyMode={false} />);
+    rerender(<Doodle isVisible={false} isPartyMode />);
+    expect(requestFrame).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(window.location.hash).toBe('#projects');
+    fireEvent(window, new CustomEvent('portfolio:open-doodle'));
+    frame?.(0);
+    expect(navigate).toHaveBeenCalledOnce();
+    window.history.replaceState({}, '', '/');
+  });
+
   it('preserves the drawing bitmap when its viewport resizes', () => {
     const drawImage = vi.fn();
     const context = { drawImage, setTransform: vi.fn() };

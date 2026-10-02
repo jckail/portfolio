@@ -10,7 +10,7 @@ Review branch `fix/superdesign-portfolio-ux` is rebased onto merged Portfolio co
 - S4: the workbench footer opens the existing shared consent portal, letting visitors withdraw a saved choice on the independently mounted lab page.
 - S5: `/index.html` is recognized as the home-page alias already served by the backend.
 - S6: the section drawer announces its highlighted location with `aria-current`.
-- S7/D1: footer, palette and assistant request doodle visibility through one shared action. The page owns visibility; the board expands its height immediately, retaining an opacity fade, and scrolls on the next animation frame through the reduced-motion-aware helper after modal cleanup. Reopening an already visible board still navigates to it.
+- S7/D1: footer, palette and assistant request doodle visibility through one shared action. The page owns visibility; the board expands its height immediately, retaining an opacity fade, and scrolls on the next animation frame through the reduced-motion-aware helper after modal cleanup. Reopening an already visible board still navigates to it. Party theme activation reveals the board decoratively without changing the current scroll destination; only explicit board opening requests navigation.
 - D2/D3: command search is a combobox with stable option IDs and an active descendant. Options remain outside sequential Tab navigation, and arrow selection scrolls the active option into view.
 - D4: ordinary page shortcuts ignore the shared modal stack and focused controls inside other modal dialogs, including MUI dialogs. Ctrl/Cmd+K remains the intentional global palette control.
 
