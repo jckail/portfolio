@@ -1,10 +1,18 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ReactNode } from 'react';
+
 import { getJson, postJson } from '../../shared/utils/api';
 import DataPlayground from './data-playground';
 
 import type { Catalog, RunResult } from './types';
+
+vi.mock('./use-runtime', () => ({
+  RuntimeProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
+vi.mock('./operations', () => ({ Operations: () => <p>Runtime operations</p> }));
+vi.mock('./data-copilot', () => ({ DataCopilot: () => <p>Copilot</p> }));
 
 vi.mock('../../shared/utils/api', () => ({
   getJson: vi.fn(),
@@ -120,11 +128,15 @@ const catalog: Catalog = {
   runs: [baseline, acquisition],
 };
 beforeEach(() => {
+  window.history.replaceState(null, '', '#workbench-lifecycle');
   vi.mocked(getJson).mockReset();
   vi.mocked(postJson).mockReset();
   vi.mocked(getJson).mockResolvedValue(catalog);
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.history.replaceState(null, '', '/dataplayground');
+});
 
 describe('Data Playground', () => {
   it('switches scenarios and preserves the baseline comparison', async () => {

@@ -185,6 +185,8 @@ resource "google_cloud_run_v2_service" "app" {
 
   template {
     service_account = google_service_account.run.email
+    # Best-effort routing for temporary visitor labs; restart recovery remains required.
+    session_affinity = true
 
     scaling {
       min_instance_count = var.min_instances

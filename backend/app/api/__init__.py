@@ -7,6 +7,7 @@ from .contact_routes import router as contact_router
 from .content_routes import router as content_router
 from .custom_resolution import router as custom_resolution_router
 from .dataplayground_routes import router as dataplayground_router
+from .dataplayground_runtime_routes import router as dataplayground_runtime_router
 from .discovery_routes import router as discovery_router
 from .events_routes import router as events_router
 from .health_routes import router as health_router
@@ -18,6 +19,7 @@ from .zuni_routes import router as zuni_router
 # inclusion order only sets the order of the (dev-only) OpenAPI listing.
 api_router = APIRouter(prefix="/api")
 api_router.include_router(dataplayground_router)
+api_router.include_router(dataplayground_runtime_router)
 api_router.include_router(health_router, tags=["health"])
 api_router.include_router(resume_router, tags=["resume"])
 api_router.include_router(telemetry_router, tags=["telemetry"])

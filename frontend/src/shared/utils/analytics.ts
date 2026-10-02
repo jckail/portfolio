@@ -37,6 +37,10 @@ const isGtagLoaded = (): boolean => {
 let gtagReady: Promise<void> | null = null;
 
 const waitForGtag = (): Promise<void> => {
+  // Without consent gtag.js is never requested. Do not leave readiness timers
+  // running for events that safeGtagCall will drop, or memoize that early exit:
+  // a later consent grant must still be able to wait for the script.
+  if (!hasAnalyticsConsent()) return Promise.resolve();
   if (gtagReady) return gtagReady;
 
   gtagReady = new Promise((resolve) => {

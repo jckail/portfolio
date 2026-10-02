@@ -13,6 +13,7 @@ from .config import get_settings, missing_required_vars
 from .middleware.access_log import AccessLogMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
 from .middleware.response_headers import ResponseHeadersMiddleware
+from .services.dataplayground_runtime import close_cached_runtime
 from .spa import SPAStaticFiles
 from .utils.logger import get_supabase_handler, setup_logging
 from .utils.supabase_client import supabase
@@ -64,6 +65,7 @@ async def lifespan(app: FastAPI):
     yield
 
     logger.info("Shutting down the application...")
+    await asyncio.to_thread(close_cached_runtime)
     if supabase_handler is not None:
         await supabase_handler.stop()
 

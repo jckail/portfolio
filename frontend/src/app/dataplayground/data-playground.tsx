@@ -5,6 +5,10 @@ import { useThemeStore } from '../../shared/stores/theme-store';
 import { endpoints, getJson, postJson } from '../../shared/utils/api';
 import Exploration from './exploration';
 import Architecture from './architecture';
+import WorkbenchShell from './workbench-shell';
+import { Operations } from './operations';
+import { DataCopilot } from './data-copilot';
+import { RuntimeProvider } from './use-runtime';
 import '../../styles/base/theme.css';
 import './data-playground.css';
 
@@ -627,7 +631,7 @@ export default function DataPlayground() {
     return () => controller.abort();
   }, [attempt]);
   return (
-    <div className="data-lab">
+    <div className="data-lab lab-workbench-page">
       <a className="lab-skip" href="#lab-main">
         Skip to experiments
       </a>
@@ -640,46 +644,13 @@ export default function DataPlayground() {
         </button>
       </header>
       <main id="lab-main">
-        <div className="lab-intro">
-          <div>
-            <p className="lab-intro-label">An end-to-end data engineering lab</p>
-            <h1>Follow the data.</h1>
-            <p>
-              From a signup to a business metric. Change the scenario, inspect what breaks, and
-              trace the result back to the events and SQL.
-            </p>
-          </div>
-          <aside>
-            <span className="lab-synthetic-mark" aria-hidden="true">
-              {'{ }'}
-            </span>
-            <strong>Synthetic by design.</strong>
-            <p>
-              Reproducible experiments.
-              <br />
-              No real customer data.
-            </p>
-          </aside>
+        <div className="lab-workbench-intro">
+          <h1>Data Playground</h1>
+          <p>
+            Follow synthetic data from event production to trusted metrics. Inspect the work, query
+            the results, and test what breaks.
+          </p>
         </div>
-        {(catalog?.exploration || catalog?.architecture) && (
-          <nav className="lab-explore-nav" aria-label="Lab sections">
-            <a href="#lab-pipeline">Lifecycle pipeline</a>
-            {catalog.architecture && (
-              <>
-                <a href="#lab-dags">Workflow execution</a>
-                <a href="#lab-models">Data models</a>
-                <a href="#lab-decisions">Engineering decisions</a>
-              </>
-            )}
-            {catalog.exploration && (
-              <>
-                <a href="#lab-exploration">Product dataset</a>
-                <a href="#lab-graph">Graph relationships</a>
-                <a href="#lab-vectors">Vector similarity</a>
-              </>
-            )}
-          </nav>
-        )}
         {error ? (
           <div className="lab-empty" role="alert">
             <h2>The experiments could not load.</h2>
@@ -693,15 +664,29 @@ export default function DataPlayground() {
             Loading reproducible experiments…
           </p>
         ) : catalog.runs.length ? (
-          <Workspace catalog={catalog} />
+          <RuntimeProvider catalog={catalog}>
+            <WorkbenchShell
+              views={{
+                overview: <Operations view="overview" catalog={catalog} />,
+                operations: <Operations view="operations" catalog={catalog} />,
+                sql: <Operations view="sql" catalog={catalog} />,
+                lifecycle: <Workspace catalog={catalog} />,
+                architecture: catalog.architecture ? (
+                  <Architecture dataset={catalog.architecture} />
+                ) : undefined,
+                exploration: catalog.exploration ? (
+                  <Exploration dataset={catalog.exploration} />
+                ) : undefined,
+              }}
+              copilot={<DataCopilot catalog={catalog} />}
+            />
+          </RuntimeProvider>
         ) : (
           <div className="lab-empty">
             <h2>No experiments are available yet.</h2>
             <button onClick={() => setAttempt((value) => value + 1)}>Check again</button>
           </div>
         )}
-        {catalog?.architecture && <Architecture dataset={catalog.architecture} />}
-        {catalog?.exploration && <Exploration dataset={catalog.exploration} />}
       </main>
       <footer className="lab-footer">
         <a href="/">Back to portfolio</a>

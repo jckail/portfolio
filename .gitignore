@@ -117,3 +117,5 @@ openai-chatgpt-latest.vsix
 .claude/
 .codex/
 .cursor/
+.superdesign/
+copilot/node_modules/

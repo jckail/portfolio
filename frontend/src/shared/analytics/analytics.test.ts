@@ -34,6 +34,7 @@ describe('product analytics', () => {
     resetTrackerForTests();
     beacon.mockClear();
     vi.stubGlobal('Blob', FakeBlob);
+    vi.stubGlobal('gtag', vi.fn());
     Object.defineProperty(navigator, 'sendBeacon', { value: beacon, configurable: true });
     vi.useFakeTimers();
   });
