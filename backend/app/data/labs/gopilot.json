@@ -1,0 +1,22 @@
+{
+  "slug": "gopilot",
+  "project_key": "go_pilot",
+  "title": "goPilot: CLI replay for a Go debugging assistant",
+  "description": "An interactive replay of goPilot, a CLI that runs Go code, lint and tests, filters the errors and sends them with project context to an OpenAI assistant.",
+  "intro": [
+    "goPilot is a command-line tool, written with Go, Python and Bash, that helps debug and develop Go applications. One script updates the assistant's context, runs the code, runs golangci-lint and runs the tests, and flags choose which of those stages happen and where each output is written.",
+    "Each stage's output goes through a small Python error parser that keeps only the lines that look like errors. Those lines are sent, along with the project's consolidated Go source and optional Go documentation, to an OpenAI assistant through the assistants API, and a link to the resulting thread is printed.",
+    "This page replays that flow in your browser: pick the flags, step through the stages and see how the request is put together. The sample Go bug, the console output and the assistant replies are canned and illustrative."
+  ],
+  "features": [
+    "CLI flags as toggles that build the equivalent command line",
+    "Stepper for update context, run, lint, test and ask the assistant",
+    "Faithful error-parser keyword filter applied to canned output",
+    "Diagram of how context and parsed errors become the assistant request",
+    "Clearly labelled canned assistant replies and a diff of the suggested fix",
+    "Read-only console with a live region, keyboard operable"
+  ],
+  "repo": "https://github.com/jckail/goPilot",
+  "demo_notice": "Illustrative replay: the Go snippet, console output and assistant replies are synthetic, and everything runs entirely in your browser. Nothing is executed or sent anywhere.",
+  "updated": "2026-10-01"
+}
