@@ -24,6 +24,7 @@ _TEST_ENV = {
     # reaches a test; tests that need one patch a dummy value into Settings.
     "CONTACT_PHONE": "",
     "DATAPLAYGROUND_API_URL": "",
+    "OPENDATACENTER_UPSTREAM_URL": "",
 }
 
 # Assign unconditionally, never setdefault: a developer with real

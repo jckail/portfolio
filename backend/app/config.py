@@ -73,6 +73,7 @@ class Settings:
     port: int
     git_commit: str
     dev_mode: bool
+    opendatacenter_upstream_url: str
 
     # Platform / proxy trust
     on_cloud_run: bool
@@ -160,6 +161,7 @@ def get_settings() -> Settings:
         port=int(os.getenv("PORT", "8080")),
         git_commit=os.getenv("GIT_COMMIT", ""),
         dev_mode=_parse_bool(os.getenv("DEV_MODE", "")),
+        opendatacenter_upstream_url=os.getenv("OPENDATACENTER_UPSTREAM_URL", ""),
         gcp_project_id=os.getenv("GCP_PROJECT_ID", "").strip() or "portfolio-383615",
         service_name=os.getenv("K_SERVICE", "").strip() or "quickresume",
         access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),
