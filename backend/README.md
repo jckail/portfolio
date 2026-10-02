@@ -32,6 +32,16 @@ GET /api/skills/{skill_name}        # One skill
 GET /api/contact/info               # Contact details (never includes a phone number)
 ```
 
+### Hosted labs and forwards
+
+```http
+GET /api/labs                       # Validated lab records (backend/app/data/labs/*.json)
+GET /api/labs/{slug}                # One lab record (404 when unknown)
+GET /{slug}  and  /{slug}/          # Forwarded app: 302 to its own domain (forwards.json); hosted lab: SPA document, 200
+```
+
+See [`docs/labs.md`](../docs/labs.md).
+
 ### Discovery documents (site root, not under `/api`)
 
 Generated from the same JSON the SPA renders (`api/discovery.py`), cached for
@@ -131,8 +141,13 @@ Implementation notes:
 - The static system prompt (`backend/app/prompts/portfoliosystemprompt.md`) and
   portfolio data are byte-stable so provider prompt caching applies (explicit
   cache breakpoints on Anthropic).
-- Limits (in `chat_service.py`): 2,000 characters per message, 10 messages per
-  60 s per connection, 30 per IP, 5 sockets per IP, 200 total, 300 s idle timeout.
+- Limits (in `chat_service.py`): 2,000 characters per message; 20 history
+  messages kept per connection; 4,000 characters of page context; a `history`
+  frame is only accepted on a connection with no history yet and is capped
+  (`MAX_SEEDED_TURNS = 100` in `chat_routes.py`, 24,000 characters in
+  `chat_service.py`); 10 messages per 60 s per connection, 30 per IP and 120
+  instance-wide in the same window; 5 sockets per IP, 200 total; 300 s idle
+  timeout.
 - The socket accepts same-origin handshakes plus `ALLOWED_ORIGINS`
   (`chat_routes.py`), because CORS middleware does not cover WebSockets.
 
@@ -198,7 +213,8 @@ backend/
 │   ├── middleware/     # Auth dependency, response headers, selective gzip, access log
 │   ├── spa.py          # SPA fallback, HTML snapshot and JSON-LD injection
 │   ├── models/         # Pydantic models + JSON data loaders (cached)
-│   ├── data/           # Portfolio content as JSON (source of truth)
+│   ├── data/           # Portfolio content as JSON (source of truth); labs/ and forwards.json
+│   ├── labs.py         # Lab and forward catalog loader and validation (see docs/labs.md)
 │   ├── prompts/        # Chat system prompt
 │   ├── utils/          # Logging, log_event, metrics, rate limits, Supabase client
 │   └── main.py         # App entry: env validation, CORS, lifespan, static files
