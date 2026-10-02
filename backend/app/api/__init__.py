@@ -10,6 +10,8 @@ from .dataplayground_routes import router as dataplayground_router
 from .discovery_routes import router as discovery_router
 from .events_routes import router as events_router
 from .health_routes import router as health_router
+from .labs_routes import forwards_router
+from .labs_routes import router as labs_router
 from .resume_routes import router as resume_router
 from .telemetry_routes import router as telemetry_router
 from .zuni_routes import router as zuni_router
@@ -18,6 +20,7 @@ from .zuni_routes import router as zuni_router
 # inclusion order only sets the order of the (dev-only) OpenAPI listing.
 api_router = APIRouter(prefix="/api")
 api_router.include_router(dataplayground_router)
+api_router.include_router(labs_router)
 api_router.include_router(health_router, tags=["health"])
 api_router.include_router(resume_router, tags=["resume"])
 api_router.include_router(telemetry_router, tags=["telemetry"])
@@ -32,6 +35,7 @@ api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 # Appending the routes (rather than include_router, which would prefix them)
 # keeps their paths as declared when main.py includes api_router.
 api_router.routes.extend(discovery_router.routes)
+api_router.routes.extend(forwards_router.routes)  # /<slug> 302s to apps hosted elsewhere
 
 # The chat socket is mounted under /ws.
 ws_router = APIRouter(prefix="/ws")

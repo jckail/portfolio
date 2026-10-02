@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import pytest
 
 from backend.app.api import discovery
+from backend.app.labs import load_labs
 from backend.app.models import load_aboutme, load_contact, load_experience, load_projects, load_skills
 
 # Anything shaped like a North American phone number.
@@ -169,6 +170,7 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
     assert locs == [
         "https://www.jckail.com/",
         "https://www.jckail.com/dataplayground",
+        *(f"https://www.jckail.com/{slug}" for slug in load_labs()),
         "https://www.jckail.com/llms.txt",
         "https://www.jckail.com/llms-full.txt",
         "https://www.jckail.com/resume.json",
