@@ -1,8 +1,12 @@
+import json
 import os
+import subprocess
+import unittest
 import urllib.error
 from unittest import mock
-import unittest
-from verify_deployment import EXPECTED_JOBS, GateError, Pending, verify, main
+
+from verify_deployment import EXPECTED_JOBS, GateError, Pending, main, verify
+from verify_runtime import RuntimeProbeError, verify_runtime
 
 SHA = "a" * 40
 REPO = "jckail/portfolio"
@@ -104,6 +108,64 @@ class GuardTests(unittest.TestCase):
              mock.patch("verify_deployment.verify", side_effect=Pending("pending")):
             with self.assertRaises(GateError):
                 main()
+
+
+class RuntimeTests(unittest.TestCase):
+    def result(self, *, sha=SHA, state="healthy", status="200", returncode=0):
+        body = json.dumps({"status": state, "checks": {"version": {"hash": sha}}})
+        return mock.Mock(returncode=returncode, stdout=body + "\n" + status)
+
+    def verify(self, runner, attempts=1):
+        verify_runtime("https://candidate.run.app", SHA, attempts, run=runner, sleep=lambda _: None)
+
+    def test_exact_healthy_and_degraded_liveness(self):
+        for state in ("healthy", "degraded"):
+            with self.subTest(state=state):
+                self.verify(mock.Mock(return_value=self.result(state=state)))
+
+    def test_wrong_commit_malformed_body_non200_and_curl_failure_rejected(self):
+        adverse = [self.result(sha="b" * 40), self.result(status="503"), self.result(returncode=28),
+                   self.result(state="unhealthy"), mock.Mock(returncode=0, stdout="<html>ok</html>\n200"),
+                   mock.Mock(returncode=0, stdout="[]\n200"), mock.Mock(returncode=0, stdout='{"status":"healthy"}\n200')]
+        for result in adverse:
+            with self.subTest(result=result.stdout), self.assertRaises(RuntimeProbeError):
+                self.verify(mock.Mock(return_value=result))
+
+    def test_connection_errors_and_timeout_exhaust_bounded_retries(self):
+        for error in (OSError("unavailable"), subprocess.TimeoutExpired("curl", 15)):
+            runner = mock.Mock(side_effect=error)
+            with self.subTest(error=type(error).__name__), self.assertRaises(RuntimeProbeError):
+                self.verify(runner, attempts=2)
+            self.assertEqual(runner.call_count, 2)
+
+    def test_old_revision_during_promotion_retried_until_expected_commit(self):
+        runner = mock.Mock(side_effect=[self.result(sha="b" * 40), self.result()])
+        self.verify(runner, attempts=2)
+        self.assertEqual(runner.call_count, 2)
+
+    def test_probe_has_connection_total_and_process_deadlines(self):
+        runner = mock.Mock(return_value=self.result())
+        self.verify(runner)
+        command = runner.call_args.args[0]
+        self.assertEqual(command[command.index("--connect-timeout") + 1], "5")
+        self.assertEqual(command[command.index("--max-time") + 1], "10")
+        self.assertEqual(runner.call_args.kwargs["timeout"], 15)
+        self.assertEqual(command[-1], "https://candidate.run.app/api/health")
+
+    def test_invalid_commit_or_origin_never_probed(self):
+        runner = mock.Mock()
+        for url, sha in (("http://candidate.run.app", SHA), ("https://user:pass@candidate.run.app", SHA),
+                         ("https://candidate.run.app/?token=private", SHA), ("https://candidate.run.app", "main")):
+            with self.subTest(url=url), self.assertRaises(RuntimeProbeError):
+                verify_runtime(url, sha, run=runner)
+        runner.assert_not_called()
+
+    def test_invalid_attempt_limits_never_probed(self):
+        runner = mock.Mock()
+        for attempts in (0, 13, True):
+            with self.subTest(attempts=attempts), self.assertRaises(RuntimeProbeError):
+                verify_runtime("https://candidate.run.app", SHA, attempts, run=runner)
+        runner.assert_not_called()
 
 
 if __name__ == "__main__":
