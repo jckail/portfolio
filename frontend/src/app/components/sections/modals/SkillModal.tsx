@@ -101,7 +101,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
       closeButton
     >
       <div ref={rootRef} className="skm-root">
-        <header className="skm-header">
+        <div className="skm-header">
           <div className="skm-icon" aria-hidden="true">
             <SkillIcon name={skill.image} className="skm-icon-img" size={56} />
           </div>
@@ -118,7 +118,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
               {skill.professional_experience ? ' · Professional experience' : ' · Personal and project experience'}
             </p>
           </div>
-        </header>
+        </div>
 
         <p className="skm-description">{skill.description}</p>
 
