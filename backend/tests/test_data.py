@@ -163,3 +163,9 @@ def test_photo_src_must_be_a_site_image_path():
     for bad in ("https://evil.example/a.png", "/etc/passwd", "../a.png", "javascript:1"):
         with pytest.raises(ValidationError):
             ExperiencePhoto(src=bad, alt="x")
+
+
+def test_project_titles_have_no_stray_whitespace():
+    projects = get_all_models()["projects"].root
+    for key, project in projects.items():
+        assert project.title == project.title.strip(), f"{key} title has stray whitespace"
