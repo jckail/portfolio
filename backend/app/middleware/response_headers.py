@@ -25,6 +25,8 @@ PRIVATE_API_PREFIXES = ("/api/admin", "/api/logs")
 NEVER_CACHE_PREFIXES = ("/api/health", "/api/dataplayground/runtime", "/api/dataplayground/copilot")
 # Scripts served from the dist root without a content hash in the filename.
 UNHASHED_SCRIPTS = frozenset({"/ga-init.js"})
+ATLAS_PREFIX = "/opendatacenter"
+ATLAS_MAP_CONNECT = "https://demotiles.maplibre.org"
 
 # A client-supplied X-Request-ID is echoed in the response and stamped on
 # every log line, so only accept short, boring values; anything else gets a
@@ -74,7 +76,9 @@ def websocket_origins(settings: Settings) -> str:
     return "".join(f" {host}" for host in sorted(hosts))
 
 
-def build_csp(settings: Settings, frame_ancestors: str = "'none'") -> str:
+def build_csp(
+    settings: Settings, frame_ancestors: str = "'none'", extra_connect: str = ""
+) -> str:
     """Content-Security-Policy for every response.
 
     No 'unsafe-inline' in script-src: the GA bootstrap lives in
@@ -93,7 +97,7 @@ def build_csp(settings: Settings, frame_ancestors: str = "'none'") -> str:
         "font-src 'self' data:; "
         "style-src 'self' 'unsafe-inline'; "
         f"script-src 'self' {GA_SCRIPT_SOURCES}; "
-        f"connect-src 'self' {GA_CONNECT_SOURCES}{websocket_origins(settings)}; "
+        f"connect-src 'self' {GA_CONNECT_SOURCES}{websocket_origins(settings)}{extra_connect}; "
         "frame-src 'self'; "
         "worker-src 'self' blob:; "
         "upgrade-insecure-requests"
@@ -107,6 +111,13 @@ def cache_control_for(path: str, method: str, status: int, content_type: str) ->
     cached forever. Versioned font files are cached forever too. Images are unhashed, so they get a shorter TTL. HTML must
     always be revalidated so deploys take effect immediately.
     """
+    if path.startswith(ATLAS_PREFIX + "/v1/") or path.startswith(ATLAS_PREFIX + "/mcp"):
+        # Revoked source rights must not survive in a shared browser/proxy cache.
+        return "no-store"
+    if path.startswith(ATLAS_PREFIX + "/assets/"):
+        return IMMUTABLE if status in (200, 304) else "no-store"
+    if path in (ATLAS_PREFIX, ATLAS_PREFIX + "/"):
+        return "no-cache"
     if path.startswith("/assets/"):
         return IMMUTABLE
     if path.startswith("/fonts/") and path.endswith(".woff2"):
@@ -151,6 +162,7 @@ class ResponseHeadersMiddleware:
         self.app = app
         self.csp_default = build_csp(settings)
         self.csp_frameable = build_csp(settings, "'self'")
+        self.csp_atlas = build_csp(settings, extra_connect=f" {ATLAS_MAP_CONNECT}")
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -171,7 +183,11 @@ class ResponseHeadersMiddleware:
             if message["type"] == "http.response.start":
                 headers = MutableHeaders(scope=message)
                 headers["X-Request-ID"] = request_id
-                if "cache-control" not in headers:
+                if path.startswith(ATLAS_PREFIX + "/v1/") or path.startswith(ATLAS_PREFIX + "/mcp"):
+                    headers["Cache-Control"] = "no-store"
+                elif path.startswith(ATLAS_PREFIX + "/assets/") and message["status"] not in (200, 304):
+                    headers["Cache-Control"] = "no-store"
+                elif "cache-control" not in headers:
                     policy = cache_control_for(
                         path, method, message["status"], headers.get("content-type", "")
                     )
@@ -181,7 +197,9 @@ class ResponseHeadersMiddleware:
                     headers[name] = value
                 headers["X-Frame-Options"] = "SAMEORIGIN" if frameable else "DENY"
                 headers["Content-Security-Policy"] = (
-                    self.csp_frameable if frameable else self.csp_default
+                    self.csp_frameable if frameable else self.csp_atlas
+                    if path == ATLAS_PREFIX or path.startswith(ATLAS_PREFIX + "/")
+                    else self.csp_default
                 )
             await send(message)
 

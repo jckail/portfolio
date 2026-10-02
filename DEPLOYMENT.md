@@ -120,3 +120,19 @@ when Supabase is down.
   replaces Secret Manager bindings with plaintext env vars and skips the canary
   (`HANDOFF.md`). To recover, shift traffic back to the previous revision as
   `HANDOFF.md` describes, or re-run the `Deploy` workflow.
+
+### OpenDataCenter path gateway
+
+The portfolio serves `/opendatacenter/` through a narrow same-origin gateway to
+the independent OpenDataCenter Cloud Run service. The gateway remains a 404 until
+`OPENDATACENTER_UPSTREAM_URL` is set on the portfolio service. Set it only after
+the atlas source-rights release gate and its private canary have passed, using
+the canonical HTTPS `*.run.app` service origin (no path or query). The atlas
+service must be publicly invokable before enabling this variable; the gateway
+does not forward portfolio credentials or mint a Cloud Run identity token.
+Removing the variable disables the route without changing portfolio routing.
+
+The path prefix is preserved upstream. The portfolio permits only atlas static
+assets, public `/v1` reads, and the read-only MCP endpoint. Its scoped CSP allows
+the atlas map style host; atlas REST and MCP responses are marked `no-store` so
+rights changes are not held in a shared cache.

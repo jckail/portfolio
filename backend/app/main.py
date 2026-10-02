@@ -14,6 +14,7 @@ from .middleware.access_log import AccessLogMiddleware
 from .middleware.canonical_host import CanonicalHostMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
 from .middleware.response_headers import ResponseHeadersMiddleware
+from .opendatacenter_proxy import router as opendatacenter_router
 from .services.dataplayground_runtime import close_cached_runtime
 from .spa import SPAStaticFiles
 from .utils.logger import get_supabase_handler, setup_logging
@@ -106,6 +107,7 @@ app.add_middleware(AccessLogMiddleware, settings=settings)
 # Mount API routes first; the SPA mount at "/" is added at startup.
 app.include_router(api_router)
 app.include_router(ws_router)
+app.include_router(opendatacenter_router)
 
 
 def initialize_supabase() -> None:
