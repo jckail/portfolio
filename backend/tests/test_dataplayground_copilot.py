@@ -549,3 +549,48 @@ def test_boolean_usage_is_invalid_and_conservatively_charged(setup, usage):
         asyncio.run(copilot._model(provider, request))
     assert copilot._tokens_used == len(copilot._encode(request)) + 1024
     assert copilot._tokens_reserved == 0
+
+
+def test_real_vertex_sse_fallback_ids_repeat_across_genuine_pi_rounds(setup, monkeypatch):
+    """Actual Vertex parser + real Node Pi loop; all HTTP is MockTransport."""
+    import httpx
+
+    from backend.app.services.llm import VertexGeminiProvider
+
+    runtime, _ = setup
+    token = session(runtime)
+    bodies = []
+    definitions = [
+        ("inspect_workspace", {}),
+        ("query_sql", {"sql": "SELECT COUNT(*) AS count FROM products", "row_limit": 1}),
+        ("propose_runtime_change", {"action": "consumer_pause", "reason": "Observe lag."}),
+    ]
+
+    def handler(request):
+        bodies.append(json.loads(request.content))
+        index = len(bodies) - 1
+        if index < len(definitions):
+            name, args = definitions[index]
+            # No functionCall.id: the real Vertex adapter emits call_0 again.
+            part = {"functionCall": {"name": name, "args": args}, "thoughtSignature": f"opaque-{index}"}
+        else:
+            part = {"text": "There are 48 products. Review the proposed consumer pause."}
+        payload = {"candidates": [{"content": {"role": "model", "parts": [part]}, "finishReason": "STOP"}],
+                   "usageMetadata": {"promptTokenCount": 10, "candidatesTokenCount": 5}}
+        return httpx.Response(200, content=("data: " + json.dumps(payload) + "\r\n\r\n").encode(),
+                              headers={"content-type": "text/event-stream"})
+
+    provider = VertexGeminiProvider("dummy-offline-key", transport=httpx.MockTransport(handler))
+    use_provider(monkeypatch, provider)
+    result = run_chat(token, "Inspect this workspace, count products and propose pausing consumption.")
+    assert len(bodies) == 4
+    assert result.text.startswith("There are 48 products.")
+    assert [event["tool"] for event in result.events if event["type"] == "tool_result"] == [item[0] for item in definitions]
+    assert len(result.proposals) == 1 and result.proposals[0]["id"] in copilot._pending
+    assert runtime.state(token).streaming.consumer_paused  # No proposal was applied.
+    echoed = [part for turn in bodies[-1]["contents"] if turn["role"] == "model"
+              for part in turn["parts"] if "functionCall" in part]
+    assert [part["thoughtSignature"] for part in echoed] == ["opaque-0", "opaque-1", "opaque-2"]
+    assert [part["functionCall"]["name"] for part in echoed] == [item[0] for item in definitions]
+    assert "opaque-" not in result.model_dump_json()
+    assert "dummy-offline-key" not in result.model_dump_json()

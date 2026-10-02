@@ -180,3 +180,46 @@ test('private NDJSON cancellation reaps worker without provider completion', asy
   const exit = await new Promise(resolve => child.on('close', code => resolve(code)));
   assert.equal(exit, 0); assert.equal(errors, ''); assert.equal(done(frames).cancelled, true);
 });
+
+test('Vertex fallback IDs can repeat across rounds while Pi IDs and signatures remain distinct', async () => {
+  const frames = [], requests = [], executed = [];
+  const definitions = [
+    ['inspect_workspace', {}],
+    ['query_sql', { sql: 'SELECT COUNT(*) FROM products', row_limit: 1 }],
+    ['propose_runtime_change', { action: 'consumer_pause', reason: 'Observe lag.' }],
+  ];
+  await runCopilot({ request: start, emit: frame => frames.push(frame), bridge: async (type, payload) => {
+    if (type === 'provider_request') {
+      requests.push(payload.request);
+      if (requests.length <= definitions.length) {
+        const [name, args] = definitions[requests.length - 1];
+        return tools([call('call_0', name, args, { thoughtSignature: 'signature-' + requests.length })]);
+      }
+      return final('Inspected the workspace, queried products and proposed a pause.');
+    }
+    executed.push(payload.tool);
+    if (payload.tool === 'propose_runtime_change') return { proposal: { id: 'visitor-confirmation-one', action: { action: 'consumer_pause' } } };
+    return { count: 48 };
+  } });
+  assert.equal(done(frames).ok, true);
+  assert.deepEqual(executed, definitions.map(([name]) => name));
+  const transcript = requests.at(-1).messages;
+  const calls = transcript.filter(message => message.role === 'assistant').flatMap(message => message.tool_calls);
+  const results = transcript.filter(message => message.role === 'tool').flatMap(message => message.results);
+  assert.equal(new Set(calls.map(item => item.id)).size, 3);
+  assert.deepEqual(results.map(item => item.call_id), calls.map(item => item.id));
+  assert.deepEqual(calls.map(item => item.provider_state.thoughtSignature), ['signature-1', 'signature-2', 'signature-3']);
+  assert.equal(frames.find(frame => frame.type === 'proposal').proposal.id, 'visitor-confirmation-one');
+  assert.equal(JSON.stringify(frames).includes('signature-'), false);
+});
+
+test('duplicate IDs within one provider response are still rejected', async () => {
+  const frames = []; let executions = 0;
+  await runCopilot({ request: start, emit: frame => frames.push(frame), bridge: async type => {
+    if (type === 'provider_request') return tools([call('call_0', 'inspect_workspace', {}), call('call_0', 'inspect_catalog', {})]);
+    executions += 1; return {};
+  } });
+  assert.equal(done(frames).ok, false);
+  assert.equal(frames.find(frame => frame.type === 'error').kind, 'protocol');
+  assert.equal(executions, 0);
+});
