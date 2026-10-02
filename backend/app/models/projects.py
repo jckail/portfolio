@@ -9,6 +9,7 @@ class ProjectDetail(BaseModel):
     link: HttpUrl = Field(..., description="Primary project link")
     link_label: str = Field("View project", description="Label for the primary link button")
     link2: HttpUrl | None = Field(None, description="Secondary project link (optional)")
+    link2_label: str = Field("Live demo", description="Label for the secondary link button")
     description_detail: str = Field(..., description="Detailed project description")
     logoPath: str = Field(..., description="Path to project logo")
     # Optional: not every project has a publishable stack (the Facebook QR

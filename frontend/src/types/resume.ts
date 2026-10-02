@@ -4,6 +4,7 @@ export interface Project {
   description_detail: string;
   link: string;
   link2?: string;
+  link2_label?: string;
   logoPath?: string;
   tech_stack?: string[];
   last_commit?: string;
