@@ -700,8 +700,8 @@ export default function DataPlayground() {
             <button onClick={() => setAttempt((value) => value + 1)}>Check again</button>
           </div>
         )}
-        {catalog?.exploration && <Exploration dataset={catalog.exploration} />}
         {catalog?.architecture && <Architecture dataset={catalog.architecture} />}
+        {catalog?.exploration && <Exploration dataset={catalog.exploration} />}
       </main>
       <footer className="lab-footer">
         <a href="/">Back to portfolio</a>
