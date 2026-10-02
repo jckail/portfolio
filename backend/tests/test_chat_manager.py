@@ -3,6 +3,7 @@ import json
 from types import SimpleNamespace
 
 from backend.app.services.chat_service import (
+    IP_RATE_LIMIT_MAX_MESSAGES,
     MAX_ASSISTANT_TURN_CHARS,
     MAX_HISTORY_MESSAGES,
     MAX_PAGE_CONTEXT_CHARS,
@@ -201,3 +202,24 @@ def test_daily_budget_resets_on_a_new_utc_day():
     manager._budget_day -= timedelta(days=1)
     assert manager.is_available() is True
     assert manager._tokens_used_today == 0
+
+
+def test_chat_rate_limits_emit_the_rate_limit_event(monkeypatch):
+    """The 'rate-limit burst' alert counts jsonPayload.event=rate_limit.blocked, so the
+    chat limiters must emit it too (the REST routes already do)."""
+    from backend.app.services import chat_service
+
+    events = []
+    monkeypatch.setattr(chat_service, "log_event", lambda name, **fields: events.append((name, fields)))
+
+    manager = make_manager()
+    for _ in range(RATE_LIMIT_MAX_MESSAGES):
+        assert manager.is_rate_limited("c-limit") is False
+    assert manager.is_rate_limited("c-limit") is True
+    assert ("rate_limit.blocked", {"limiter": "chat_connection"}) in events
+
+    events.clear()
+    for _ in range(IP_RATE_LIMIT_MAX_MESSAGES):
+        assert manager.is_ip_rate_limited("203.0.113.9") is False
+    assert manager.is_ip_rate_limited("203.0.113.9") is True
+    assert events == [("rate_limit.blocked", {"limiter": "chat_ip"})]

@@ -281,7 +281,10 @@ class ConnectionManager:
 
     def is_ip_rate_limited(self, ip: str) -> bool:
         """Peer-keyed message limit; survives reconnects by design."""
-        return not self.ip_limiter.allow(ip)
+        blocked = not self.ip_limiter.allow(ip)
+        if blocked:
+            log_event("rate_limit.blocked", limiter="chat_ip")
+        return blocked
 
     def reset_limits(self) -> None:
         """Clear rate-limit state (used by tests)."""
@@ -293,6 +296,7 @@ class ConnectionManager:
         timestamps = self.message_timestamps.setdefault(client_id, [])
         timestamps[:] = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW_SECONDS]
         if len(timestamps) >= RATE_LIMIT_MAX_MESSAGES:
+            log_event("rate_limit.blocked", limiter="chat_connection")
             return True
         timestamps.append(now)
         return False
