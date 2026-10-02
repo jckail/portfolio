@@ -84,6 +84,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
       await postJson(endpoints.sendEmail, formData);
@@ -176,8 +177,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
               />
             </div>
 
-            {error && <div className="contact-error-message">{error}</div>}
-            {success && <div className="contact-success-message">Message sent successfully!</div>}
+            {error && <div className="contact-error-message" role="alert">{error}</div>}
+            {success && <div className="contact-success-message" role="status">Message sent successfully!</div>}
 
             <button
               type="submit"

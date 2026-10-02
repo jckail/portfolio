@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- Named overflow regions must be keyboard-focusable for horizontal table scrolling. */
 import { useEffect, useState } from 'react';
 
+import CookieConsentPortal from '../../shared/components/cookie/cookie-consent-portal';
+import { openCookieSettings } from '../../shared/utils/cookie-consent';
 import { useThemeStore } from '../../shared/stores/theme-store';
 import { endpoints, getJson, postJson } from '../../shared/utils/api';
 import Exploration from './exploration';
@@ -690,8 +692,12 @@ export default function DataPlayground() {
       </main>
       <footer className="lab-footer">
         <a href="/">Back to portfolio</a>
+        <button type="button" className="lab-cookie-settings" onClick={openCookieSettings}>
+          Cookie settings
+        </button>
         <span>Built to be inspected.</span>
       </footer>
+      <CookieConsentPortal />
     </div>
   );
 }

@@ -71,7 +71,7 @@ const MyResume: React.FC = () => {
               </span>
             </button>
             {(error || providerError) && (
-              <div className="error-container">
+              <div className="error-container" role="alert">
                 <p className="error-message">{error || providerError}</p>
               </div>
             )}

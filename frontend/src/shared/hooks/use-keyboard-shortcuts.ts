@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 
+import { openDialogCount } from './dialog-stack';
 import { setQueryParam } from '../utils/url-params';
 import { scrollToSection } from '../utils/scroll-utils';
 import { isChatAvailable } from '../utils/chat-availability';
@@ -27,7 +28,15 @@ export function useKeyboardShortcuts() {
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      if (isTypingTarget(event.target)) return;
+      const target = event.target;
+      if (
+        isTypingTarget(target) ||
+        openDialogCount() > 0 ||
+        (target instanceof HTMLElement && target.closest('[role="dialog"][aria-modal="true"]'))
+      ) {
+        pendingG = false;
+        return;
+      }
 
       const key = event.key.toLowerCase();
 

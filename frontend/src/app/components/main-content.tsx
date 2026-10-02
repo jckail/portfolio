@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 
+import { openDoodle } from '../../shared/utils/open-doodle';
 import { Header } from './header/header';
 import { NotFound, isKnownPath } from './not-found';
 import TLDR from './sections/about';
@@ -85,6 +86,15 @@ const MainContentInner: React.FC = () => {
   const [showDoodle, setShowDoodle] = useState(false);
   const [doodleClickCount, setDoodleClickCount] = useState(0);
 
+  useEffect(() => {
+    const reveal = () => {
+      setShowDoodle(true);
+      setDoodleClickCount(1);
+    };
+    window.addEventListener('portfolio:open-doodle', reveal);
+    return () => window.removeEventListener('portfolio:open-doodle', reveal);
+  }, []);
+
   // Handle initial hash navigation
   useEffect(() => {
     const hash = window.location.hash;
@@ -111,15 +121,7 @@ const MainContentInner: React.FC = () => {
       setDoodleClickCount(1); // Reset to "Click again to doodle more" state
     } else if (doodleClickCount === 0) {
       // First click: Show doodle and update URL hash
-      setShowDoodle(true);
-      window.history.pushState(null, '', '#doodle');
-      // Scroll to doodle section
-      setTimeout(() => {
-        const doodleSection = document.getElementById('doodle');
-        if (doodleSection) {
-          doodleSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+      openDoodle();
       setDoodleClickCount(1);
     } else if (doodleClickCount === 1) {
       // Second click: Set theme to party
