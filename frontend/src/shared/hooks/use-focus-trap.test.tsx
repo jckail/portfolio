@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 
 import { useFocusTrap } from './use-focus-trap';
@@ -56,7 +56,100 @@ const pressEscape = () => fireEvent.keyDown(document.body, { key: 'Escape' });
 
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
   document.documentElement.style.overflow = '';
+});
+
+describe('useFocusTrap escaped focus', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, 'offsetParent', 'get').mockReturnValue(document.body);
+  });
+
+  it('recovers the exact last control when focus escapes to the document body', async () => {
+    render(<Dialog name="admin" onClose={() => {}}><input aria-label="Email" /></Dialog>);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    act(() => email.focus());
+    act(() => email.blur());
+    expect(document.activeElement).toBe(document.body);
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(document.activeElement).toBe(email);
+  });
+
+  it('preserves focus that moved to another control before recovery', async () => {
+    render(<Dialog name="admin" onClose={() => {}}><input aria-label="Email" /></Dialog>);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    const button = screen.getByRole('button', { name: 'admin button' });
+    act(() => { email.focus(); email.blur(); button.focus(); });
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('does not recover after closing, preserving the page opener', async () => {
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    try {
+      const view = render(<Dialog name="admin" onClose={() => {}}><input aria-label="Email" /></Dialog>);
+      const email = screen.getByRole('textbox', { name: 'Email' });
+      act(() => { email.focus(); email.blur(); });
+      view.unmount();
+
+      await act(async () => { await Promise.resolve(); });
+
+      expect(document.activeElement).toBe(opener);
+      expect(openDialogCount()).toBe(0);
+    } finally {
+      opener.remove();
+    }
+  });
+
+  it('does not steal focus from a newly opened top dialog', async () => {
+    const Fixture = ({ upper = false }) => (
+      <>
+        <Dialog name="admin" onClose={() => {}}><input aria-label="Email" /></Dialog>
+        {upper && <Dialog name="confirmation" onClose={() => {}} />}
+      </>
+    );
+    const view = render(<Fixture />);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    act(() => { email.focus(); email.blur(); });
+    view.rerender(<Fixture upper />);
+    const topButton = screen.getByRole('button', { name: 'confirmation button' });
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(document.activeElement).toBe(topButton);
+    expect(screen.getByRole('dialog', { name: 'admin' })).toHaveAttribute('inert');
+  });
+
+  it('falls back when the remembered control was removed', async () => {
+    const Fixture = ({ input = true }) => (
+      <Dialog name="admin" onClose={() => {}}>{input && <input aria-label="Email" />}</Dialog>
+    );
+    const view = render(<Fixture />);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    act(() => { email.focus(); email.blur(); });
+    view.rerender(<Fixture input={false} />);
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(email.isConnected).toBe(false);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'admin button' }));
+  });
+
+  it('falls back when the remembered control became disabled', async () => {
+    render(<Dialog name="admin" onClose={() => {}}><input aria-label="Email" /></Dialog>);
+    const email = screen.getByRole('textbox', { name: 'Email' }) as HTMLInputElement;
+    act(() => { email.focus(); email.blur(); email.disabled = true; });
+
+    await act(async () => { await Promise.resolve(); });
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'admin button' }));
+  });
 });
 
 describe('useFocusTrap dialog stack', () => {
@@ -130,5 +223,52 @@ describe('useFocusTrap dialog stack', () => {
     unmount();
     expect(openDialogCount()).toBe(0);
     expect(isScrollLocked()).toBe(false);
+  });
+
+  it('keeps focus in the top dialog when navigation removes a background dialog', () => {
+    const visible = vi.spyOn(HTMLElement.prototype, 'offsetParent', 'get')
+      .mockImplementation(() => document.body);
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    const Fixture = ({ lower = true, upper = false }) => (
+      <>
+        {lower && <Dialog name="skill" onClose={() => {}} />}
+        {upper && <Dialog name="admin" onClose={() => {}} />}
+      </>
+    );
+
+    try {
+      const view = render(<Fixture />);
+      view.rerender(<Fixture upper />);
+      const adminButton = screen.getByRole('button', { name: 'admin button' });
+      expect(document.activeElement).toBe(adminButton);
+
+      view.rerender(<Fixture lower={false} upper />);
+
+      expect(document.activeElement).toBe(adminButton);
+      expect(openDialogCount()).toBe(1);
+      expect(isScrollLocked()).toBe(true);
+      expect(screen.getByRole('dialog', { name: 'admin' })).not.toHaveAttribute('inert');
+      view.unmount();
+    } finally {
+      visible.mockRestore();
+      opener.remove();
+    }
+  });
+
+  it('restores the page opener when the only dialog closes', () => {
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    try {
+      const view = render(<Dialog name="only" onClose={() => {}} />);
+      view.unmount();
+      expect(document.activeElement).toBe(opener);
+      expect(openDialogCount()).toBe(0);
+      expect(isScrollLocked()).toBe(false);
+    } finally {
+      opener.remove();
+    }
   });
 });
