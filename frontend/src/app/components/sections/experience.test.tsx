@@ -97,7 +97,9 @@ describe('Experience deep links', () => {
     // One dialog at a time: opening a skill closes the role dialog first
     fireEvent.click(within(experienceDialog).getByRole('button', { name: 'Python' }));
     const skillDialog = await screen.findByRole('dialog', { name: 'Python' });
-    expect(experienceDialog).not.toBeInTheDocument();
+    // The role dialog leaves as the skill dialog arrives; under a slow runner the
+    // two can overlap for a frame, so assert the settled state, not the instant.
+    await waitFor(() => expect(experienceDialog).not.toBeInTheDocument());
     expect(screen.getAllByRole('dialog')).toHaveLength(1);
     expect(new URLSearchParams(window.location.search).has('company')).toBe(false);
 

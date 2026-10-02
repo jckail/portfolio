@@ -210,7 +210,8 @@ on merge to `main`.
 - ~~**P1 — Focus trap in modals.**~~ Done: `useFocusTrap` on experience,
   skill, project, and contact dialogs.
 - ~~**P1 — Interactive doodle canvas.**~~ Done: pointer-drawing canvas with
-  clear control; party mode adds colorful glow strokes.
+  clear control; party mode adds colorful glow strokes. The second footer
+  click enters party mode and the next click ends it.
 - ~~**P1 — Cookie consent banner.**~~ Done: consent-mode defaults to denied;
   banner gates analytics until accept/deny; choice persisted in localStorage;
   the footer's "Cookie settings" reopens it. Consent Mode v2 signals are
@@ -219,8 +220,10 @@ on merge to `main`.
   `a/e/p/s/r` jumps to About/Experience/Projects/Skills/Resume.
 - ~~**P2 — Command palette.**~~ Done: `Ctrl/Cmd+K` fuzzy jump to sections,
   chat, contact, resume download, and party mode.
-- ~~**P2 — Konami / party URL eggs.**~~ Done: ↑↑↓↓←→←→BA and `?party=1`
-  activate party mode with a burst animation.
+- ~~**P2 — Konami / party URL eggs.**~~ Done: ↑↑↓↓←→←→BA (with a burst
+  animation) and `?party=1` / `#party` activate party mode. Other triggers:
+  ten theme toggles in five seconds, the second footer doodle click, and the
+  chat `set_theme` tool.
 - ~~**P2 — Chat contact prefill.**~~ Superseded: `prefill_contact` is no longer
   offered to the model; `contact_jordan` with a confirmation card replaced it.
 - ~~**P2 — Project story timeline.**~~ Done: project modals show Snapshot /
