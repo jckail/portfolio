@@ -275,4 +275,49 @@ describe('runtime workbench views', () => {
       'Model contracts: Not run'
     );
   });
+  it('marks retained SQL evidence historical when accepted data changes without rerunning it', async () => {
+    query.mockResolvedValue({
+      workspace_generation: 1,
+      data_revision: 0,
+      columns: ['event_count'],
+      rows: [[5]],
+      row_count: 1,
+      elapsed_ms: 2,
+      truncated: false,
+    });
+    const view = render(<Operations catalog={catalog} view="sql" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await screen.findByRole('region', { name: 'SQL query results' });
+    expect(screen.queryByText(/These query results are historical/)).not.toBeInTheDocument();
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, data_revision: 10 },
+    });
+    view.rerender(<Operations catalog={catalog} view="sql" />);
+    expect(screen.getByText(/These query results are historical/)).toHaveTextContent(
+      'recorded at data revision 0; the current workspace is at revision 10'
+    );
+    expect(
+      within(screen.getByRole('region', { name: 'SQL query results' })).getByText('5')
+    ).toBeInTheDocument();
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Download query evidence' })).toBeEnabled();
+  });
+  it('discloses missing query provenance instead of presenting it as current', async () => {
+    query.mockResolvedValue({
+      columns: ['event_count'],
+      rows: [[5]],
+      row_count: 1,
+      elapsed_ms: 2,
+      truncated: false,
+    });
+    render(<Operations catalog={catalog} view="sql" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await screen.findByRole('region', { name: 'SQL query results' });
+    expect(screen.getByText(/Query freshness is unavailable/)).toHaveTextContent(
+      'data revision is missing'
+    );
+    expect(screen.queryByText(/These query results are historical/)).not.toBeInTheDocument();
+    expect(query).toHaveBeenCalledTimes(1);
+  });
 });

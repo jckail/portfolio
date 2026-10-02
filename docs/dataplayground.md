@@ -166,6 +166,8 @@ After an observed checkpoint, keyboard focus moves to the next action or the fin
 status when the originating button still owns focus. Moving focus or clicking
 elsewhere during the request cancels that handoff; workspace replacement or unmount
 also clears it.
+An unsuccessful action returns focus to its retry button only while that button
+still owns the interaction; moving elsewhere during the request preserves focus.
 
 The execution summary distinguishes failed attempts, successful retries, blocked
 tasks, publication, and model contract outcomes. Accepted warehouse inserts advance
@@ -175,11 +177,18 @@ rows mark older results stale while retaining their historical status and finger
 Build SQL models or rerun the DAG to verify current inputs; streaming progress does
 not automatically rerun either operation. Reset replaces the workspace and increments
 its generation, independently of its new data revision.
+If a later DAG fails before executing analytics, preceding SQL model evidence and
+its input revision remain available. A failed publication does not establish that
+model tables were rebuilt or removed; check the recorded revision and freshness.
 
 Named run snapshots preserve up to six observed workspace states in the current
 browser tab. Capture a named state before a controlled change, execute the change,
 then capture another state and compare their record counts, partition offsets,
 accepted-data revisions, task attempts, model contracts, and publication evidence.
+Duplicate display names are distinguished with their snapshot IDs. Model contract
+details retain each recorded test's name, pass/fail status, and failed-row count;
+an absent model run or empty test list does not invent passing contracts.
+Capture timestamps use the browser's clock and are not server execution timings.
 Captured values remain unchanged when the live workspace refreshes. Failed attempts
 and replay consumption attempts retain their own accounting boundaries; they are
 not additional accepted warehouse rows. A numerical difference shows what was
@@ -187,8 +196,13 @@ observed at the two captures, not proof that a particular action caused it.
 
 Snapshot JSON downloads use an explicit allowlist of lab evidence. They contain no
 workspace capability, provider credentials, copilot conversation, raw event payloads,
-or private provider state. Snapshots clear when the workspace is replaced or reset;
+or private provider state. Snapshots live in memory and clear when the workspace is
+replaced, reset, or expires, and when the page reloads or the tab closes;
 they are not server-side run history, durable storage, or an offline replay log.
+Missing revisions or freshness flags remain unknown rather than asserting a fresh
+run. Bounded evidence discloses omitted entries and cannot establish a complete table
+inventory or task trace beyond its captured bounds. A missing table or model in a
+comparison is not interpreted as zero rows.
 
 This is a local educational scheduler and event log with SQLite transformations;
 Airflow, Kafka, and dbt daemons are not deployed. State lives on one serving process,
@@ -201,8 +215,11 @@ requests advance at most one due batch instead of inventing a catch-up burst.
 
 SQL accepts a single SELECT/WITH query against allowlisted lab tables. A SQLite
 read-only authorizer, restricted functions, execution deadline/step ceiling, bounded
-rows/columns/cells/output, and two query slots constrain work. Results identify
-truncation and elapsed query time. Workspace capabilities travel only in bearer
+rows/columns/cells/output, and two query slots constrain work. Text cells are limited
+to 2,000 Unicode code points, including any clipping ellipsis. A truncated result can reflect
+row limits, clipped cells, or the output-size ceiling; increasing a row limit does
+not restore clipped cell contents. Results identify truncation and elapsed query
+time. Workspace capabilities travel only in bearer
 headers, remain in browser memory, and never appear in URLs. All runtime and copilot
 responses are no-store.
 
@@ -215,6 +232,10 @@ The same evidence table and download are available for copilot SQL results. Thos
 may display a smaller sample of the returned rows, with explicit sample and shortened
 SQL notices. Downloads preserve the evidence actually shown rather than fetching
 additional records or publishing a dataset.
+Previously executed queries remain historical evidence when accepted-data revisions
+advance. The console discloses the recorded and current revisions and requires an
+explicit rerun to update rows; it does not silently execute edited SQL. Missing
+revision metadata is disclosed rather than asserting freshness.
 
 ## Data Copilot
 

@@ -366,4 +366,62 @@ describe('manual incident investigations', () => {
     open();
     expect(screen.getByRole('status')).toHaveTextContent('0 / 4');
   });
+  it.each(['failed', 'contradictory', 'rejected'])(
+    'restores owned retry focus after a %s receipt without advancing',
+    async (outcome) => {
+      const originalTabIndex = document.body.getAttribute('tabindex');
+      document.body.tabIndex = -1;
+      try {
+        const user = userEvent.setup();
+        let resolve!: (value: RuntimeState | undefined) => void;
+        let reject!: (reason: Error) => void;
+        action.mockImplementation(
+          () =>
+            new Promise<RuntimeState | undefined>((done, fail) => {
+              resolve = done;
+              reject = fail;
+            })
+        );
+        render(<IncidentGuide />);
+        open();
+        const retry = screen.getByRole('button', { name: 'Guide: stop producer' });
+        retry.focus();
+        await user.keyboard('{Enter}');
+        document.body.focus();
+        await act(async () => {
+          if (outcome === 'rejected') reject(new Error('Interrupted'));
+          else resolve(outcome === 'failed' ? undefined : state);
+        });
+        expect(screen.getByRole('button', { name: 'Guide: stop producer' })).toHaveFocus();
+        expect(screen.queryByText(/Observed checkpoint:/)).not.toBeInTheDocument();
+        expect(screen.getByRole('status')).not.toHaveTextContent('Investigation complete');
+      } finally {
+        if (originalTabIndex === null) document.body.removeAttribute('tabindex');
+        else document.body.setAttribute('tabindex', originalTabIndex);
+      }
+    }
+  );
+  it('does not steal focus moved elsewhere when an action fails', async () => {
+    const user = userEvent.setup();
+    let resolve!: (value: undefined) => void;
+    action.mockReturnValue(
+      new Promise<undefined>((done) => {
+        resolve = done;
+      })
+    );
+    render(
+      <>
+        <button>Another control</button>
+        <IncidentGuide />
+      </>
+    );
+    open();
+    screen.getByRole('button', { name: 'Guide: stop producer' }).focus();
+    await user.keyboard('{Enter}');
+    const elsewhere = screen.getByRole('button', { name: 'Another control' });
+    elsewhere.focus();
+    await act(async () => resolve(undefined));
+    expect(elsewhere).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Guide: stop producer' })).not.toHaveFocus();
+  });
 });

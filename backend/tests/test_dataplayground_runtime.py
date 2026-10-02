@@ -181,6 +181,34 @@ def test_executed_models_sql_tests_and_dag_failure_retry(runtime):
     assert next(t for t in failure.dag_trace if t.task_id == "exploration").status == "success"
 
 
+def test_failed_dag_preserves_existing_materialization_revision_and_staleness(runtime):
+    token = session(runtime)
+    built = runtime.action(token, RuntimeAction(action="models_run"))
+    old_rows = query(runtime, token, "SELECT SUM(signups+activations+payments+churns) FROM runtime_daily").rows
+    runtime.action(token, RuntimeAction(action="produce", batch_size=5))
+    changed = runtime.action(token, RuntimeAction(action="consumer_drain"))
+    assert changed.models_stale and changed.data_revision == 5
+    failed = runtime.action(token, RuntimeAction(action="dag_run", failure="permanent"))
+    assert failed.model_runs == built.model_runs
+    assert failed.model_input_revision == built.model_input_revision == 0
+    assert failed.models_stale and not failed.dag_published
+    assert query(runtime, token, "SELECT SUM(signups+activations+payments+churns) FROM runtime_daily").rows == old_rows
+    repaired = runtime.action(token, RuntimeAction(action="dag_run"))
+    assert repaired.dag_published and not repaired.models_stale
+    assert repaired.model_input_revision == repaired.data_revision == 5
+    assert query(runtime, token, "SELECT SUM(signups+activations+payments+churns) FROM runtime_daily").rows == [[old_rows[0][0] + 5]]
+
+
+@pytest.mark.parametrize("length", [2000, 2001])
+@pytest.mark.parametrize("character", ["x", "🚀"])
+def test_query_cell_limit_includes_ellipsis(runtime, length, character):
+    result = query(runtime, session(runtime), "SELECT '" + character * length + "' AS value")
+    expected = character * 2000 if length == 2000 else character * 1999 + "…"
+    assert result.rows == [[expected]]
+    assert len(result.rows[0][0]) == 2000
+    assert result.truncated is (length > 2000)
+
+
 def test_run_evidence_tracks_accepted_data_and_preserves_historical_publication(runtime):
     token = session(runtime)
     initial = runtime.state(token)
@@ -207,8 +235,11 @@ def test_run_evidence_tracks_accepted_data_and_preserves_historical_publication(
     assert fresh.dag_input_revision == fresh.model_input_revision == 12
     assert not fresh.dag_stale and not fresh.models_stale
     assert fresh.dag_fingerprint != published.dag_fingerprint
+    fresh_rows = query(runtime, token, "SELECT * FROM runtime_daily ORDER BY date").rows
     failed = runtime.action(token, RuntimeAction(action="dag_run", failure="permanent"))
-    assert failed.dag_input_revision == 12 and failed.model_input_revision is None
+    assert failed.dag_input_revision == failed.model_input_revision == 12
+    assert failed.model_runs == fresh.model_runs and not failed.models_stale
+    assert query(runtime, token, "SELECT * FROM runtime_daily ORDER BY date").rows == fresh_rows
     assert not failed.dag_published and failed.dag_fingerprint is None
 
 

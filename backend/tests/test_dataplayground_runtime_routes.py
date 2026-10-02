@@ -183,6 +183,27 @@ def test_copilot_expired_capability_and_confirmation_ownership(runtime_client):
     assert expired.status_code == 410 and expired.headers["cache-control"] == "no-store"
 
 
+@pytest.mark.parametrize("lifecycle", ["closed", "expired"])
+def test_workspace_loss_during_investigation_maps_to_private_410(runtime_client, monkeypatch, lifecycle):
+    client, runtime, now = runtime_client
+    headers, allocated = create(client)
+
+    async def losing_workspace(token, _request):
+        runtime.diagnostics(token)  # Capability is valid when this investigation begins.
+        if lifecycle == "closed":
+            runtime.delete(token)
+        else:
+            now[0] += runtime.ttl + 1
+        copilot._workspace_call(runtime.diagnostics, token)
+
+    monkeypatch.setattr(copilot, "chat", losing_workspace)
+    response = client.post(ROOT + "/copilot/chat", headers=headers, json={"message": "Inspect workspace"})
+    assert response.status_code == 410
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json() == {"detail": "Your workspace expired. Create another to continue."}
+    assert allocated.token not in response.text
+
+
 def test_runtime_capacity_errors_are_private(runtime_client):
     client, runtime, _ = runtime_client
     runtime.capacity = 1

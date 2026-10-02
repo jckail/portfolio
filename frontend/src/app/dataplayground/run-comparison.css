@@ -69,6 +69,20 @@
 .lab-comparison-controls dd {
   margin: 6px 0;
 }
+.lab-comparison-contract-evidence {
+  margin: 20px 0;
+}
+.lab-comparison-contract-evidence article {
+  margin: 16px 0;
+}
+.lab-comparison-contract-evidence h6 {
+  font-size: 13px;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+.lab-snapshot-list strong {
+  overflow-wrap: anywhere;
+}
 @media (max-width: 600px) {
   .lab-run-comparison form,
   .lab-comparison-selectors,
