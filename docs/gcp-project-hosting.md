@@ -17,10 +17,27 @@ prove a particular source SHA or application journey is deployed.
 | Portfolio: `jckail.com`, `www.jckail.com` | Domain mappings target `quickresume`, project `portfolio-383615`; service is ready. | Preserve existing routing; release through guarded main CI/CD and verify the exact deployed SHA. |
 | Portfolio aliases: `jordan-kail.com`, `www.jordan-kail.com` | Included in the project's six existing mappings. | Preserve the aliases; verify their actual mapping targets and canonical redirects during inventory. |
 | Legacy teacher site: `the-super-teacher.com`, `www.the-super-teacher.com` | Both map to old `edutrack`, not the new Superteacher service. | Leave them intact until a separately reviewed data-preserving teacher-site cutover is ready. |
-| Proposed `superteacher.jckail.com` | DNS lookup returned NXDOMAIN; no new hostname cutover verified. New Superteacher staging hit Litestream root-file permissions; packaging PR is pending. | Qualify the staging packaging fix, persistence/restore and data lineage, accounts and email before production. |
+| Proposed `superteacher.jckail.com` | NXDOMAIN; no hostname cutover. Packaging fix merged; isolated staging `00009-bcw` is ready, with separate runtime and restore receipts. | Resolve production data lineage, accounts, email and drain/cutover gates; preserve the original staging feature-check failure. |
 | Proposed `jobbr.jckail.com` | NXDOMAIN; existing Jobbr source sessions remain active. No GCP target is verified. | Freeze reviewed source, identify runtime/database/identity requirements, then qualify a GCP candidate. |
 | Proposed `atlas.jckail.com` | NXDOMAIN; no hostname cutover verified. | Preserve OpenDataCenter's source-rights and private-canary gates before public hosting or gateway activation. |
-| Proposed `links.jckail.com` | NXDOMAIN. Project `linksaver-445700` exists, but Run, Artifact Registry and SQL APIs are disabled; current artifact storage is local. Extension delivery is in progress. | Review the runtime/storage plan and extension release separately; provision only the candidate's required services after review. |
+| Proposed `links.jckail.com` | NXDOMAIN. Project `linksaver-445700` exists; Run, Artifact Registry and SQL APIs were disabled at inventory. Configured GCS artifact storage is merged, but no hosted backend is qualified. | Qualify real backend startup, private storage/identity and the extension separately; provision only the reviewed candidate's required services. |
+
+### Qualified source and isolated staging follow-up
+
+[Superteacher PR63](https://github.com/jckail/superteacher/pull/63) repaired the
+runtime file permissions. Accepted source `fe2cd01582d288346bb8f9fa565b7938ad7d24ff`
+was built and deployed to the isolated staging service as revision `00009-bcw`.
+Canonical smoke, a separate read-only feature continuation, template-only parent
+preflight, temporary-database restore and final HTTP readback passed. The original
+feature run failed an unidentified Overview assertion and remains preserved;
+later passing checks do not rewrite that historical result. Restore checks do
+not establish production data lineage, IAM-enforced read-only access or zero RPO.
+
+[Linksaver PR4](https://github.com/jckail/linkSaver/pull/4) merged configured GCS
+artifact storage with 27 focused tests and successful PR/main CI. The transport
+tests use an inert GCS implementation; they do not prove real ADC, bucket access,
+full backend startup or hosted extension authentication. Real startup isolation
+and container packaging are the next source work, before a private cloud canary.
 
 The inventory found no Compute URL maps in `portfolio-383615`. A subsequent
 read-only CLI audit enumerated all 11 projects accessible to the active account:
@@ -167,14 +184,16 @@ subdomain is a separate public-release decision.
 - Release coordinator: confirm the authoritative DNS management account and editable
   zone; qualify the merged Portfolio workflow's exact-commit deployment and retain
   its receipts before any hostname cutover.
-- Superteacher owner: finish packaging/staging, durable-data lineage and restore,
-  accounts and email gates; separately propose legacy-domain migration.
+- Superteacher owner: preserve isolated staging/restore receipts and the original
+  feature failure; finish production data lineage, accounts, email and drain gates
+  before separately proposing legacy-domain migration.
 - Jobbr owner: supply a reviewed GCP runtime/data/identity candidate from the
   current source session; existing hosting is not a GCP deployment receipt.
 - Atlas owner: supply source-rights and private-canary evidence before public
   upstream/domain activation.
-- Linksaver owner: supply the artifact-persistence and API/runtime plan plus
-  extension qualification; a project ID alone is not provisioned hosting.
+- Linksaver owner: qualify actual startup/container packaging and private storage
+  transport, then extension authentication; the merged adapter and a project ID
+  alone do not establish provisioned hosting.
 
 Record source SHA, checks, image digest, target/project, data gates, DNS/mapping
 changes and remaining blockers in each actual repository's checkpoint. Keep
