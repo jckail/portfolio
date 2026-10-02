@@ -22,12 +22,27 @@ prove a particular source SHA or application journey is deployed.
 | Proposed `atlas.jckail.com` | NXDOMAIN; no hostname cutover verified. | Preserve OpenDataCenter's source-rights and private-canary gates before public hosting or gateway activation. |
 | Proposed `links.jckail.com` | NXDOMAIN. Project `linksaver-445700` exists, but Run, Artifact Registry and SQL APIs are disabled; current artifact storage is local. Extension delivery is in progress. | Review the runtime/storage plan and extension release separately; provision only the candidate's required services after review. |
 
-The inventory found no Compute URL maps or Cloud DNS zones in
-`portfolio-383615`. `jckail.com` nameservers are
+The inventory found no Compute URL maps in `portfolio-383615`. A subsequent
+read-only CLI audit enumerated all 11 projects accessible to the active account:
+Cloud DNS returned complete empty zone lists in `portfolio-383615` and `web3data`;
+the other nine projects reported disabled Cloud DNS APIs. Cloud Domains returned
+a complete empty registration list in `portfolio-383615`; its API was disabled
+in the other ten projects. Disabled APIs leave those inventories unverified;
+none were enabled for discovery. Other accounts or inaccessible projects remain
+outside this audit's coverage.
+
+Public DNS confirms `jckail.com` nameservers
 `ns-cloud-d1.googledomains.com` through `ns-cloud-d4.googledomains.com`.
-Nameservers alone do not identify the managing account or GCP project. The release coordinator has
-requested the authoritative DNS provider/account; that answer is pending.
-Proposed hostname labels are planning choices, not existing reservations.
+[Verisign's public RDAP response](https://rdap.verisign.com/com/v1/domain/JCKAIL.COM)
+identifies registrar `Squarespace Domains II LLC`, handle `895`, with those same
+nameservers. Registrar identity does not establish the DNS management account.
+[Google's migration FAQ](https://docs.cloud.google.com/domains/docs/faq) explains
+that Squarespace continues using Google Cloud DNS infrastructure and that Cloud
+Domains registrations remain managed through Google's Console/API/CLI. Neither
+the registrar nor the nameservers prove a user-visible GCP zone or a Squarespace
+DNS account. The release coordinator must confirm the authorized management
+account and editable zone before proposing changes. Proposed hostname labels
+are planning choices, not existing reservations.
 
 ## Inventory before any change
 
@@ -71,10 +86,12 @@ to replace an existing mapping from access to a service or registrar.
    [Google's deployment-pipeline WIF guidance](https://docs.cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).
 3. Preserve Portfolio's successful-current-main CI gate, rerun refusal, pushed
    digest/revision equality and freshness recheck immediately before promotion.
-   [PR #76](https://github.com/jckail/portfolio/pull/76) proposes bounded canary and
-   production probes requiring the health version hash to equal `$GITHUB_SHA`;
-   it is pending integration at this document's source base. Recheck its merged
-   status before treating that extra guard as active workflow behavior.
+   [PR #76](https://github.com/jckail/portfolio/pull/76) merged as
+   `04f6c8516679c813371bf1b370dde9e5b6c1f474`. The main workflow now includes bounded
+   canary and production probes requiring the health version hash to equal
+   `$GITHUB_SHA`. Source integration is verified; production deployment remains
+   unverified until the exact-commit Deploy run passes and its receipts establish
+   the live serving revision.
 4. Stage a no-traffic candidate on its tagged Cloud Run URL before DNS. Validate
    liveness, exact source/artifact identity, dependency readiness and the relevant
    authenticated journeys. Portfolio liveness can be `degraded` with HTTP 200;
@@ -138,8 +155,9 @@ subdomain is a separate public-release decision.
 
 ## Next handoffs
 
-- Release coordinator: resolve the authoritative DNS account; qualify pending Portfolio delivery
-  changes and retain exact deployment receipts before any hostname cutover.
+- Release coordinator: confirm the authoritative DNS management account and editable
+  zone; qualify the merged Portfolio workflow's exact-commit deployment and retain
+  its receipts before any hostname cutover.
 - Superteacher owner: finish packaging/staging, durable-data lineage and restore,
   accounts and email gates; separately propose legacy-domain migration.
 - Jobbr owner: supply a reviewed GCP runtime/data/identity candidate from the
