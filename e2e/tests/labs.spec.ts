@@ -51,3 +51,12 @@ for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
     expect(overflow, 'page must not scroll sideways').toBeLessThanOrEqual(0);
   });
 }
+
+for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
+  test(`${slug} lab has exactly one main landmark and one h1`, async ({ page }) => {
+    await page.goto(`/${slug}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('main')).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  });
+}

@@ -177,7 +177,7 @@ export default function CryptoTraderLab() {
   }
 
   return (
-    <div className="ct-lab">
+    <main id="main-content" className="ct-lab">
       <header>
         <p className="ct-eyebrow">Archived project · educational demo</p>
         <h1>Algo Crypto</h1>
@@ -396,6 +396,6 @@ export default function CryptoTraderLab() {
           try a few seeds.
         </p>
       </section>
-    </div>
+    </main>
   );
 }
