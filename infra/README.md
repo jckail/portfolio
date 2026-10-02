@@ -108,8 +108,11 @@ IAM grants. A Git push does **not** apply Terraform. See
 
 ### Remote state
 
-State is local by default. For anything beyond a single-operator setup,
-create a GCS bucket and uncomment the `backend "gcs"` block in `versions.tf`.
+State lives in the GCS bucket named in the `backend "gcs"` block of
+`versions.tf`. That bucket has been documented as readable by project Viewer
+and as holding plaintext secrets (see `HANDOFF.md` and the audit docs), so
+treat read access to it as access to production secrets and do not run a
+blanket apply against it.
 
 ## Relationship to `helpers/deploy.sh`
 
