@@ -43,6 +43,28 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     }
     initial.focus({ preventScroll: true });
 
+    let lastFocused: HTMLElement = initial;
+    const onFocusIn = (event: FocusEvent) => {
+      if (isTopDialog(id) && event.target instanceof HTMLElement && node.contains(event.target)) {
+        lastFocused = event.target;
+      }
+    };
+    const onFocusOut = (event: FocusEvent) => {
+      if (!isTopDialog(id) || !(event.target instanceof Node) || !node.contains(event.target)) return;
+      // History navigation can move focus to the body without a Tab key. Wait
+      // for the destination, and never reclaim focus after teardown or stacking.
+      queueMicrotask(() => {
+        if (!isTopDialog(id) || !node.isConnected || node.hasAttribute('inert') || node.contains(document.activeElement)) return;
+        const target = lastFocused.isConnected && node.contains(lastFocused)
+          && !lastFocused.matches(':disabled') && lastFocused.offsetParent !== null
+          ? lastFocused : focusables()[0] ?? node;
+        target.focus({ preventScroll: true });
+      });
+    };
+
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('focusout', onFocusOut, true);
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (!isTopDialog(id)) return;
 
@@ -81,6 +103,8 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener('focusin', onFocusIn, true);
+      document.removeEventListener('focusout', onFocusOut, true);
       const wasTopDialog = isTopDialog(id);
       removeDialog(id);
       // A background dialog can close on navigation while another remains
