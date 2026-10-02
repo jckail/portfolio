@@ -94,3 +94,30 @@
     min-width: 0;
   }
 }
+
+/* Short viewports (landscape phones, 400% zoom): keep the banner a thin bar
+   so it does not take most of the screen. */
+@media (max-height: 500px) {
+  .cookie-banner {
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  .cookie-content {
+    gap: var(--spacing-sm);
+    padding: 0;
+  }
+
+  .cookie-detail {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .cookie-banner {
+    background: Canvas;
+    color: CanvasText;
+    border-top: 1px solid CanvasText;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

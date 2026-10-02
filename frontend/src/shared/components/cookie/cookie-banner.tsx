@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../../../styles/components/cookie/cookie-banner.css';
 
 interface CookieBannerProps {
@@ -9,11 +9,34 @@ interface CookieBannerProps {
 const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onDeny }) => {
   const bannerRef = useRef<HTMLDivElement>(null);
 
+  // Publish the banner's height so the fixed chat launcher can sit above it
+  // instead of underneath. Cleared when the banner is dismissed or unmounts.
+  useEffect(() => {
+    const el = bannerRef.current;
+    const root = document.documentElement;
+    if (!el) return undefined;
+    const publish = () => {
+      root.style.setProperty('--cookie-banner-height', `${el.offsetHeight}px`);
+    };
+    publish();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(publish);
+    observer?.observe(el);
+    return () => {
+      observer?.disconnect();
+      root.style.removeProperty('--cookie-banner-height');
+    };
+  }, []);
+
+  const clearBannerHeight = () => {
+    document.documentElement.style.removeProperty('--cookie-banner-height');
+  };
+
   const handleAcceptAll = () => {
     if (onAccept) onAccept();
     if (bannerRef.current) {
       bannerRef.current.style.display = 'none';
     }
+    clearBannerHeight();
   };
 
   const handleDenyAll = () => {
@@ -21,6 +44,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({ onAccept, onDeny }) => {
     if (bannerRef.current) {
       bannerRef.current.style.display = 'none';
     }
+    clearBannerHeight();
   };
 
   return (

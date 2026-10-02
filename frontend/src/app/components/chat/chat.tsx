@@ -79,7 +79,14 @@ const Chat: React.FC<ChatProps> = ({
             backdropFilter: 'blur(30px)',
             background: isMobile ? 'var(--solid-color)':'var(--surface-color)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            overflowY: 'hidden'
+            overflowY: 'hidden',
+            // Translucent blur surfaces are dropped in forced colors; use system colors
+            '@media (forced-colors: active)': {
+              backdropFilter: 'none',
+              background: 'Canvas',
+              color: 'CanvasText',
+              border: '1px solid CanvasText',
+            },
           }
         }}
         sx={{

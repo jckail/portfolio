@@ -71,6 +71,12 @@ describe('SkillModal', () => {
     expect(within(dialog).getByRole('link', { name: /Python docs/ })).toHaveAttribute('href', 'https://example.com/docs');
   });
 
+  it('does not add a banner landmark while open', async () => {
+    render(<Harness />);
+    await screen.findByRole('dialog', { name: 'Python' });
+    expect(screen.queryAllByRole('banner')).toHaveLength(0);
+  });
+
   it('derives roles and projects from the data at render time', async () => {
     render(<Harness />);
     const dialog = await screen.findByRole('dialog', { name: 'Python' });
