@@ -74,6 +74,13 @@
   background: var(--section-background);
 }
 
+/* Light mode uses a transparent section background. Keep keyboard selection
+   visible in every theme, including forced colors where fills can disappear. */
+.command-palette-item.is-active {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
 .command-palette-item kbd,
 .command-palette-footer kbd {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
