@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, cleanup } from '@testing-library/react';
+import { render, act, cleanup } from '@testing-library/react';
 
 import ReadingProgress from './reading-progress';
 
@@ -36,16 +36,23 @@ const runFrames = () =>
   });
 
 describe('ReadingProgress', () => {
+  it('is hidden from assistive tech (decorative, outside any landmark)', () => {
+    const { container } = render(<ReadingProgress />);
+    const root = container.querySelector('.reading-progress')!;
+    expect(root).toHaveAttribute('aria-hidden', 'true');
+    expect(root).not.toHaveAttribute('role');
+  });
+
   it('coalesces a burst of scroll events into one frame', () => {
-    render(<ReadingProgress />);
+    const { container } = render(<ReadingProgress />);
     scrollTo(100);
     scrollTo(200);
     scrollTo(250);
     expect(frames).toHaveLength(1);
 
     runFrames();
-    const bar = screen.getByRole('progressbar');
-    expect(bar).toHaveAttribute('aria-valuenow', '25');
+    const fill = container.querySelector<HTMLElement>('.reading-progress-bar')!;
+    expect(fill.style.transform).toBe('scaleX(0.25)');
   });
 
   it('drives the bar with transform: scaleX, not width', () => {
