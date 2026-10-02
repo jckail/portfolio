@@ -1,6 +1,6 @@
 # Portfolio UX audit corrections
 
-Review branch `fix/superdesign-portfolio-ux` is based on merged Portfolio commit `5fd6e11`. It changes the home page and shared UI, plus two isolated workbench corrections in files verified untouched by the active workbench owner.
+Review branch `fix/superdesign-portfolio-ux` is rebased onto merged Portfolio commit `99b77d6`. The original audit baseline was `5fd6e11`. It changes the home page and shared UI, plus two isolated workbench corrections in files verified untouched by the active workbench owner.
 
 ## Corrected findings
 
