@@ -94,6 +94,9 @@ describe('skill relationships', () => {
     });
     expect(skillUsage(data, 'rag', { experienceData, projectsData })).toEqual({ roles: [], projects: [] });
     expect(skillUsage(data, 'rag', {})).toEqual({ roles: [], projects: [] });
+    // a role with no tech_stack (the sabbatical) is never listed and never throws
+    const gap = { ...experienceData, gap: { company: 'Sabbatical', title: 'Digital nomad life', date: '2022' } };
+    expect(skillUsage(data, 'python', { experienceData: gap, projectsData }).roles.map(r => r.key)).toEqual(['a']);
   });
 
   it('uses the related field, dropping unknown, self and duplicate keys', () => {

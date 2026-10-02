@@ -743,3 +743,43 @@
     padding: var(--spacing-sm) var(--spacing-md);
   }
 }
+/* Role dialog: compass mark for roles with no company logo, and the optional photo gallery. */
+.experience-modal-mark {
+  display: block;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.experience-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-sm) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.experience-photos figure {
+  margin: 0;
+}
+
+.experience-photos img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--section-background);
+}
+
+.experience-photos figcaption {
+  margin-top: var(--spacing-xs);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 768px) {
+  .experience-modal-mark.experience-modal-company-logo--mark {
+    padding: 4px;
+  }
+}

@@ -40,11 +40,23 @@ export interface ExperienceItem {
   date: string;
   location: string;
   highlights: string[];
-  link: string;
-  logoPath: string;
+  /** Absent for entries with no company, such as a career break. */
+  link?: string | null;
+  logoPath?: string | null;
   company_description: string;
-  tech_stack: string[];
+  tech_stack?: string[];
   more_highlights: string[];
+  /** Title the ATS resume uses instead of `title` (the site ignores it). */
+  resume_title?: string | null;
+  /** Optional gallery shown in the role dialog; empty or absent renders nothing. */
+  photos?: ExperiencePhoto[];
+}
+
+export interface ExperiencePhoto {
+  /** Site-relative path under frontend/public/images/. */
+  src: string;
+  alt: string;
+  caption?: string | null;
 }
 
 export type ExperienceData = Record<string, ExperienceItem>;
