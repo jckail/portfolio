@@ -24,6 +24,9 @@ _TEST_ENV = {
     # reaches a test; tests that need one patch a dummy value into Settings.
     "CONTACT_PHONE": "",
     "DATAPLAYGROUND_API_URL": "",
+    # Host canonicalization stays off in tests unless a test builds its own Settings.
+    "ALIAS_HOSTS": "",
+    "CANONICAL_HOST": "",
 }
 
 # Assign unconditionally, never setdefault: a developer with real

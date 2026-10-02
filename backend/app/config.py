@@ -5,6 +5,7 @@ settings instead of calling os.getenv at scattered call sites. Values are
 read once at first access and are immutable afterwards.
 """
 import os
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -86,6 +87,10 @@ class Settings:
     # Optional independent Python lab. Empty keeps the generated catalog available.
     dataplayground_api_url: str = ""
     dataplayground_copilot_daily_tokens: int = 40000
+    # Host canonicalization (opt-in). Requests to an ALIAS_HOSTS host are
+    # 301-redirected to CANONICAL_HOST. Empty alias list = feature off.
+    canonical_host: str = "www.jckail.com"
+    alias_hosts: tuple[str, ...] = ()
 
     @property
     def chat_available(self) -> bool:
@@ -96,6 +101,26 @@ class Settings:
 
 def _parse_origins(raw: str) -> tuple[str, ...]:
     return tuple(origin.strip() for origin in raw.split(",") if origin.strip())
+
+
+_HOST_RE = re.compile(r"^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
+
+
+def _validate_host(raw: str, name: str) -> str:
+    """A bare lowercase DNS name: no scheme, path, port, userinfo or IP literal."""
+    host = raw.strip().lower()
+    if not _HOST_RE.fullmatch(host):
+        raise ValueError(f"{name}: {raw!r} must be a bare hostname (no scheme, path or port)")
+    if host.endswith(".run.app") or host == "localhost" or host.endswith(".localhost"):
+        raise ValueError(f"{name}: {raw!r} is a platform/local host and can never be an alias")
+    return host
+
+
+def parse_alias_hosts(raw: str, canonical: str) -> tuple[str, ...]:
+    hosts = tuple(dict.fromkeys(_validate_host(h, "ALIAS_HOSTS") for h in raw.split(",") if h.strip()))
+    if canonical in hosts:
+        raise ValueError("ALIAS_HOSTS must not contain CANONICAL_HOST (redirect loop)")
+    return hosts
 
 
 DEFAULT_CHAT_MODELS = {"vertex": "gemini-3.1-flash-lite", "anthropic": "claude-haiku-4-5"}
@@ -136,6 +161,8 @@ def get_settings() -> Settings:
     on_cloud_run = bool(os.getenv("K_SERVICE"))
     vertex_api_key = os.getenv("VERTEX_API_KEY", "").strip()
     chat_provider = _resolve_chat_provider(os.getenv("CHAT_PROVIDER", ""), vertex_api_key)
+    canonical_host = _validate_host(os.getenv("CANONICAL_HOST", "") or "www.jckail.com", "CANONICAL_HOST")
+    alias_hosts = parse_alias_hosts(os.getenv("ALIAS_HOSTS", ""), canonical_host)
     return Settings(
         supabase_url=os.getenv("SUPABASE_URL", ""),
         supabase_anon_key=os.getenv("SUPABASE_ANON_KEY", ""),
@@ -166,6 +193,8 @@ def get_settings() -> Settings:
         access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),
         dataplayground_api_url=os.getenv("DATAPLAYGROUND_API_URL", "").strip(),
         dataplayground_copilot_daily_tokens=max(0, int(os.getenv("DATAPLAYGROUND_COPILOT_DAILY_TOKENS", "40000"))),
+        canonical_host=canonical_host,
+        alias_hosts=alias_hosts,
         on_cloud_run=on_cloud_run,
         trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
         trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),

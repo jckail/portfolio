@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 import pytest
 
 from backend.app.api import discovery
+from backend.app.labs import load_labs
 from backend.app.models import load_aboutme, load_contact, load_experience, load_projects, load_skills
 
 # Anything shaped like a North American phone number.
@@ -85,7 +86,7 @@ def test_llms_txt_follows_the_convention(client):
     assert "(https://www.jckail.com/llms-full.txt)" in text
     assert "(https://www.jckail.com/resume.json)" in text
     for job in load_experience().root.values():
-        assert f"[{job.company}]" in text
+        assert (f"[{job.company}]" if job.link else f"- {job.company}:") in text
     for project in load_projects().root.values():
         assert f"[{project.title.strip()}]" in text
     # every link target is an absolute http(s) URL
@@ -169,6 +170,7 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
     assert locs == [
         "https://www.jckail.com/",
         "https://www.jckail.com/dataplayground",
+        *(f"https://www.jckail.com/{slug}" for slug in load_labs()),
         "https://www.jckail.com/llms.txt",
         "https://www.jckail.com/llms-full.txt",
         "https://www.jckail.com/resume.json",
@@ -204,3 +206,22 @@ def test_snapshot_links_are_not_tabbable():
     assert links, "expected the snapshot to contain links"
     assert all('tabindex="-1"' in tag for tag in links), [t for t in links if 'tabindex="-1"' not in t][:3]
     assert not re.search(r"<(button|input|select|textarea)\b", html)
+
+
+def test_sabbatical_is_an_explained_gap_not_an_unknown_employer(client):
+    jobs = list(load_experience().root)
+    assert jobs.index("prove") + 1 == jobs.index("sabbatical") == jobs.index("meta") - 1
+    job = load_experience().root["sabbatical"]
+    assert job.link is None and job.logoPath is None and job.tech_stack == []
+
+    work = {w["name"]: w for w in client.get("/resume.json").json()["work"]}
+    item = work["Sabbatical"]
+    assert item["position"] == "Career break (digital nomad)"
+    assert (item["startDate"], item["endDate"]) == ("2022-10", "2023-05")
+    assert "url" not in item
+
+    html = discovery.snapshot_html().decode()
+    assert "<h3>Digital nomad life, Sabbatical</h3>" in html
+    assert "None" not in html.split('id="seo-experience"')[1].split("</section>")[0]
+    full = client.get("/llms-full.txt").text
+    assert "### Digital nomad life, Sabbatical" in full and "10/2022 - 05/2023 | Location independent\n" in full

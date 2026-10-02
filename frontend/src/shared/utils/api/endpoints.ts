@@ -10,6 +10,8 @@ export const endpoints = {
   dataPlaygroundCopilotStatus: '/api/dataplayground/copilot/status',
   dataPlaygroundCopilotChat: '/api/dataplayground/copilot/chat',
   dataPlaygroundCopilotConfirm: '/api/dataplayground/copilot/confirm',
+  /** Hosted lab demos: list, and `/<slug>` for one (backend/app/api/labs_routes.py). */
+  labs: '/api/labs',
   aboutMe: '/api/aboutme',
   experience: '/api/experience',
   skills: '/api/skills',

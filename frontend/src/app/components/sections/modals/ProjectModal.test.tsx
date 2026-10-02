@@ -36,3 +36,21 @@ describe('ProjectModal primary link label', () => {
     expect(screen.queryByRole('link', { name: 'View project' })).toBeNull();
   });
 });
+
+describe('ProjectModal secondary link label', () => {
+  it('defaults to "Live demo"', () => {
+    renderModal({ ...base, link2: 'https://example.com/live' });
+    expect(screen.getByRole('link', { name: 'Live demo' }).getAttribute('href')).toBe('https://example.com/live');
+  });
+
+  it('uses link2_label when provided', () => {
+    renderModal({ ...base, link2: 'https://example.com/live', link2_label: 'Interactive demo' });
+    expect(screen.getByRole('link', { name: 'Interactive demo' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Live demo' })).toBeNull();
+  });
+
+  it('renders no secondary link without link2', () => {
+    renderModal(base);
+    expect(screen.getAllByRole('link')).toHaveLength(1);
+  });
+});

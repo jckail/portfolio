@@ -228,6 +228,10 @@ Chat UI state lives in one `useChat()` (`app/components/chat/hooks/useChat.ts`) 
 
 A behavior change without a test in the matching file is unfinished.
 
+## Hosted apps
+
+Other projects reach `jckail.com/<slug>` as a hosted demo (served here, synthetic data, runs in the browser) or as a 302 forward to the app's own domain. Data: `backend/app/data/labs/<slug>.json` and `backend/app/data/forwards.json`; lab UI: `frontend/src/app/labs/<slug>/lab.tsx` (default export, self-contained, lazy via `LabHost`). Slug rules, reserved slugs and the checklist are in `docs/apps.md`. Do not change another app's Cloud Run service or domain mapping from this repo.
+
 ## Production boundaries
 
 Runtime secrets (`supabase_url`, `supabase_anon_key`, `supabase_service_role`, `anthropic_api_key`, `sendgrid_api_key`, `vertex-api-key`, `contact-phone`) belong in Secret Manager, mounted as `secretKeyRef`. GitHub Actions authenticates with Workload Identity Federation. There are no service-account keys.

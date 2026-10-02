@@ -7,6 +7,7 @@
   "companies": [
     "Together AI",
     "Prove Identity",
+    "Sabbatical",
     "Meta | Facebook",
     "Deloitte",
     "Wide Open West",
@@ -31,6 +32,12 @@
         "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
         "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
         "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
+      ]
+    },
+    {
+      "company": "Sabbatical",
+      "bullets": [
+        "Stepped away from corporate life to live a digital nomad life with my wife."
       ]
     },
     {
@@ -79,5 +86,5 @@
     "Skills",
     "Projects"
   ],
-  "text_sha256": "2006804215f61f18a1f1debc2492806456e5af68ad6176743b4e0f43270fe834"
+  "text_sha256": "f384605904dbc6659e0da022c998f300e609ff855e64f5b9471d286981b83572"
 }
