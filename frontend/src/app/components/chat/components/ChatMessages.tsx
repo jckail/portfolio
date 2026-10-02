@@ -100,6 +100,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         >
           <Paper
             elevation={1}
+            className={msg.type === 'user' ? 'party-pinned' : undefined}
             sx={{
               p: 1.5,
               maxWidth: '95%',
@@ -147,6 +148,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
           <Paper
             elevation={1}
+            className="party-pinned"
             sx={{
               p: 1.5,
               backgroundColor: 'var(--primary)',
