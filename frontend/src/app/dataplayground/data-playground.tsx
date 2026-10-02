@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useThemeStore } from '../../shared/stores/theme-store';
 import { endpoints, getJson, postJson } from '../../shared/utils/api';
 import Exploration from './exploration';
+import Architecture from './architecture';
 import '../../styles/base/theme.css';
 import './data-playground.css';
 
@@ -660,12 +661,23 @@ export default function DataPlayground() {
             </p>
           </aside>
         </div>
-        {catalog?.exploration && (
+        {(catalog?.exploration || catalog?.architecture) && (
           <nav className="lab-explore-nav" aria-label="Lab sections">
             <a href="#lab-pipeline">Lifecycle pipeline</a>
-            <a href="#lab-exploration">Product dataset</a>
-            <a href="#lab-graph">Graph relationships</a>
-            <a href="#lab-vectors">Vector similarity</a>
+            {catalog.architecture && (
+              <>
+                <a href="#lab-dags">Workflow execution</a>
+                <a href="#lab-models">Data models</a>
+                <a href="#lab-decisions">Engineering decisions</a>
+              </>
+            )}
+            {catalog.exploration && (
+              <>
+                <a href="#lab-exploration">Product dataset</a>
+                <a href="#lab-graph">Graph relationships</a>
+                <a href="#lab-vectors">Vector similarity</a>
+              </>
+            )}
           </nav>
         )}
         {error ? (
@@ -689,6 +701,7 @@ export default function DataPlayground() {
           </div>
         )}
         {catalog?.exploration && <Exploration dataset={catalog.exploration} />}
+        {catalog?.architecture && <Architecture dataset={catalog.architecture} />}
       </main>
       <footer className="lab-footer">
         <a href="/">Back to portfolio</a>
