@@ -56,7 +56,13 @@ export interface IconProps {
   'aria-label'?: string;
 }
 
-const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, ...props }) => {
+/**
+ * Decorative: every caller renders the skill's name beside the icon, so the
+ * icon carries no name of its own (a spoken "python" twice was an axe
+ * image-redundant-alt hit on every chip). The aria-label prop is accepted for
+ * compatibility and intentionally not forwarded.
+ */
+const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size = 32, 'aria-label': _label, ...props }) => {
   if (INLINE_SKILL_ICONS.has(name)) {
     return (
       <Suspense fallback={<div className={`${className} skeleton`} style={{ width: size, height: size }} />}>
@@ -65,6 +71,7 @@ const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size =
           width={size}
           height={size}
           className={className}
+          aria-hidden="true"
           {...props}
         />
       </Suspense>
@@ -74,7 +81,8 @@ const SkillIcon: React.FC<IconProps> = ({ name, className = 'skill-icon', size =
   return (
     <img 
       src={`/images/icons/${name}`}
-      alt={name.replace('.svg', '')}
+      alt=""
+      aria-hidden="true"
       width={size}
       height={size}
       className={className}
