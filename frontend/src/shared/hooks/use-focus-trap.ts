@@ -81,8 +81,13 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
+      const wasTopDialog = isTopDialog(id);
       removeDialog(id);
-      previouslyFocused.current?.focus?.({ preventScroll: true });
+      // A background dialog can close on navigation while another remains
+      // open. Its opener must not steal focus from that top dialog.
+      if (wasTopDialog) {
+        previouslyFocused.current?.focus?.({ preventScroll: true });
+      }
     };
   }, [active]);
 

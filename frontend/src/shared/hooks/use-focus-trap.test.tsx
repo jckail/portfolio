@@ -131,4 +131,51 @@ describe('useFocusTrap dialog stack', () => {
     expect(openDialogCount()).toBe(0);
     expect(isScrollLocked()).toBe(false);
   });
+
+  it('keeps focus in the top dialog when navigation removes a background dialog', () => {
+    const visible = vi.spyOn(HTMLElement.prototype, 'offsetParent', 'get')
+      .mockImplementation(() => document.body);
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    const Fixture = ({ lower = true, upper = false }) => (
+      <>
+        {lower && <Dialog name="skill" onClose={() => {}} />}
+        {upper && <Dialog name="admin" onClose={() => {}} />}
+      </>
+    );
+
+    try {
+      const view = render(<Fixture />);
+      view.rerender(<Fixture upper />);
+      const adminButton = screen.getByRole('button', { name: 'admin button' });
+      expect(document.activeElement).toBe(adminButton);
+
+      view.rerender(<Fixture lower={false} upper />);
+
+      expect(document.activeElement).toBe(adminButton);
+      expect(openDialogCount()).toBe(1);
+      expect(isScrollLocked()).toBe(true);
+      expect(screen.getByRole('dialog', { name: 'admin' })).not.toHaveAttribute('inert');
+      view.unmount();
+    } finally {
+      visible.mockRestore();
+      opener.remove();
+    }
+  });
+
+  it('restores the page opener when the only dialog closes', () => {
+    const opener = document.createElement('button');
+    document.body.append(opener);
+    opener.focus();
+    try {
+      const view = render(<Dialog name="only" onClose={() => {}} />);
+      view.unmount();
+      expect(document.activeElement).toBe(opener);
+      expect(openDialogCount()).toBe(0);
+      expect(isScrollLocked()).toBe(false);
+    } finally {
+      opener.remove();
+    }
+  });
 });
