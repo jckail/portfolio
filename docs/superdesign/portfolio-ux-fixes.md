@@ -1,6 +1,6 @@
 # Portfolio UX audit corrections
 
-Review branch `fix/superdesign-portfolio-ux` is rebased onto merged Portfolio commit `99b77d6`. The original audit baseline was `5fd6e11`. It changes the home page and shared UI, plus two isolated workbench corrections in files verified untouched by the active workbench owner.
+Review branch `fix/superdesign-portfolio-ux` is rebased onto merged Portfolio commit `5bb68df`. The original audit baseline was `5fd6e11`. It changes the home page and shared UI, plus two isolated workbench corrections in files verified untouched by the active workbench owner.
 
 ## Corrected findings
 
@@ -25,3 +25,7 @@ Focused regression files cover failed resume outcomes and analytics, announced c
 For browser review, an isolated Vite preview uses port5186. Its temporary config allows only public production API GETs, rejects all mutation methods, disables chat availability, and has no websocket proxy. The preview config and dependency symlink are local helpers and are excluded from this patch. The root session owns the single browser tab and final browser verification. Its local timing retest confirmed palette opening now ends at `#doodle`, with the board top87.6px below the viewport top, visible and non-inert.
 
 Root browser verification: cold `/dataplayground#lab-vectors` selected Explore and placed the vector section at73.7px from the top on a414px viewport, with no page overflow. Cookie settings opened the named consent region on the independently mounted workbench. Command palette final party option stayed visible and exposed its active descendant. Local `/index.html` rendered home. Open doodle landed at87.6px below the header and remained non-inert. A synthetic bitmap mark persisted across an actual canvas resize from325×717 to349×792; this is bitmap-resize verification, not a claimed pointer-drawing gesture. Screenshot capture timed out; full rendered visual review remains incomplete.
+
+## Release validation
+
+The release branch retains the subsequently merged drawer focus-trap tests and appends its current-location regression. Local full coverage and production builds are deferred because the shared verification queue is occupied; the exact-head GitHub CI frontend coverage/build and production-image browser gates provide the release checks. They must pass alongside Backend, Terraform and Bugbot before merge. The production release uses only the guarded GitHub Actions workflow, including canary verification and traffic promotion.
