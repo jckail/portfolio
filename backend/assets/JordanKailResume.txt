@@ -73,7 +73,7 @@ Super Teacher — github.com/jckail/superteacher, the-super-teacher.com
 A classroom copilot that answers 'who needs me today, and why?' with a ranked needs-attention list, a gradebook, attendance, and a streaming Claude assistant grounded in the class data.
 
 Jobbr — github.com/jckail/Jobbr, jckail.com/jobbr
-Agentic AI job matching a resume to available jobs at tech companies.
+An AI-assisted job-search prototype that parses tech-company postings into structured data and matches them to resumes, using Python, LangChain, FastAPI and OpenAI.
 
 goPilot — github.com/jckail/goPilot, jckail.com/gopilot
 Agentic AI developer assistant and cli tool to help debug, develop, and compile apps written in GO.
