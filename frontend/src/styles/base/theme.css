@@ -65,6 +65,9 @@
   --elevation-1: 0 1px 2px rgba(10, 10, 40, 0.06), 0 2px 8px -4px rgba(10, 10, 40, 0.08);
   --elevation-2: 0 0 0 1px rgba(4, 3, 255, 0.18), 0 14px 32px -16px rgba(4, 3, 255, 0.35);
   --particles-opacity: 0.55;
+  /* Party-only pinned colours; defined in every theme so the sets match. */
+  --party-pinned-fg: #000000;
+  --party-hint-text: #ff80ff;
 }
 
 .theme-dark {
@@ -125,6 +128,9 @@
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
   --elevation-2: 0 0 0 1px rgba(139, 138, 255, 0.28), 0 16px 40px -18px rgba(4, 3, 255, 0.7);
   --particles-opacity: 0.6;
+  /* Party-only pinned colours; defined in every theme so the sets match. */
+  --party-pinned-fg: #000000;
+  --party-hint-text: #ff80ff;
 }
 
 .theme-party {
@@ -185,6 +191,12 @@
   --elevation-1: 0 4px 12px rgba(255, 0, 255, 0.25);
   --elevation-2: 0 0 0 1px #00ffff, 0 0 28px rgba(0, 255, 255, 0.45);
   --particles-opacity: 1;
+  /* Pinned foregrounds for controls that sit on a saturated fill or a faint
+     panel. They are excluded from the animated colour cycle below, so their
+     contrast does not depend on which phase the body animation is in.
+     party-theme.test.ts computes the ratios. */
+  --party-pinned-fg: #000000;   /* on #ff00ff 6.7:1, on #00ffff 16.7:1 */
+  --party-hint-text: #ff80ff;   /* on #0d0d0d (page + 5% white panel) */
 }
 
 /* Base styles */
@@ -286,6 +298,13 @@ a {
     .skill-tag *,
     .skill-chip,
     .skill-chip *,
+    .skm-chip,
+    .skm-chip *,
+    .visit-website-btn,
+    .visit-website-btn *,
+    .doodle-hint,
+    .party-pinned,
+    .party-pinned *,
     .btn-primary,
     .btn-primary *,
     .btn:hover,
@@ -308,6 +327,13 @@ a {
     .skill-tag *,
     .skill-chip,
     .skill-chip *,
+    .skm-chip,
+    .skm-chip *,
+    .visit-website-btn,
+    .visit-website-btn *,
+    .doodle-hint,
+    .party-pinned,
+    .party-pinned *,
     .btn-primary,
     .btn-primary *,
     .btn:hover,
@@ -322,6 +348,21 @@ a {
   ) {
   color: inherit !important;
   transition-property: border-color !important;
+}
+
+/* Pinned pairs. The cycle colour used to override these: #d050ff on the
+   #00ffff skill chip measured 2.66:1 and #aaff00 on the #ff00ff website
+   button 2.54:1. */
+.theme-party .skm-chip,
+.theme-party .visit-website-btn,
+.theme-party .party-pinned,
+.theme-party .party-pinned * {
+  color: var(--party-pinned-fg) !important;
+}
+
+.theme-party .doodle-hint {
+  color: var(--party-hint-text) !important;
+  opacity: 1;
 }
 
 /* The 87.5% stop keeps the green -> magenta leg bright: interpolated
