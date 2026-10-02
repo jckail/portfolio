@@ -1,10 +1,10 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
+import App from './app/app';
 import { ThemeProvider } from './app/providers/theme-provider';
 import './styles/base/variables.css';
 
-const App = lazy(() => import('./app/app'));
 const DataPlayground = lazy(() => import('./app/dataplayground/data-playground'));
 const isDataPlayground = /^\/dataplayground\/?$/.test(window.location.pathname);
 
