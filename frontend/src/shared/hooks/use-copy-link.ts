@@ -12,11 +12,14 @@ export function useCopyLink(url?: string) {
 
   useEffect(() => {
     mounted.current = true;
+    setStatus('idle');
     return () => {
       mounted.current = false;
+      // A completion belongs to the URL that initiated it, not a new share target.
+      attempt.current += 1;
       window.clearTimeout(timer.current);
     };
-  }, []);
+  }, [url]);
 
   const copy = useCallback(async () => {
     const currentAttempt = ++attempt.current;
