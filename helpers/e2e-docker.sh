@@ -12,11 +12,11 @@
 #   helpers/e2e-docker.sh tests/smoke.spec.ts   # extra args go to `playwright test`
 #
 # On Docker Desktop the container cannot reach the shell's localhost (a
-# --network host container shares the Docker VM's network, not WSL's), so the
-# browser resolves `localhost` to host.docker.internal via a Chrome resolver rule
-# (E2E_HOST_MAP, read by e2e/playwright.config.ts). The page itself stays on
-# `localhost`, which matters: the site's CSP upgrades non-localhost http
-# subresources to https and the page would break.
+# --network host container shares the Docker VM's network, not WSL's). A tiny
+# forwarder (helpers/e2e-proxy.cjs) inside the container makes localhost:PORT reach
+# the host, so the browser AND Playwright's Node-side API client both see a real
+# `localhost`, as in CI. That matters: the site's CSP upgrades non-localhost http
+# subresources to https, and the API client ignores Chrome's resolver rules.
 # Results are written inside the container (/tmp), never into the checkout.
 set -euo pipefail
 
@@ -34,8 +34,10 @@ if [ ! -d "${ROOT}/e2e/node_modules/@playwright/test" ]; then
   exit 1
 fi
 
+PORT="$(node -p "new URL(process.argv[1]).port || (process.argv[1].startsWith('https') ? 443 : 80)" "${BASE_URL}")"
+
 exec docker run --rm --ipc=host --add-host=host.docker.internal:host-gateway \
-  -v "${ROOT}/e2e:/work:ro" -w /work \
-  -e E2E_BASE_URL="${BASE_URL}" -e E2E_HOST_MAP=host.docker.internal \
+  -v "${ROOT}/e2e:/work:ro" -v "${ROOT}/helpers/e2e-proxy.cjs:/proxy.cjs:ro" -w /work \
+  -e E2E_BASE_URL="${BASE_URL}" \
   "${IMAGE}" \
-  npx playwright test --reporter=list --output=/tmp/pw-results "$@"
+  sh -c 'node /proxy.cjs "$0" host.docker.internal & exec npx playwright test --reporter=list --output=/tmp/pw-results "$@"' "${PORT}" "$@"

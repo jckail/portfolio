@@ -5,7 +5,7 @@ test('gopilot replay: flags build the command and the stepper reaches the diff',
   await page.goto('/gopilot');
 
   await expect(page.getByRole('heading', { level: 1, name: /goPilot/ })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText(/illustrative/i);
+  await expect(page.locator('main').getByRole('note')).toContainText(/illustrative/i);
 
   await page.getByRole('button', { name: 'All defaults' }).click();
   await page.getByLabel(/Run tests/).check();

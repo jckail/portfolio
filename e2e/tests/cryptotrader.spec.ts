@@ -3,7 +3,7 @@ import { test, expect } from './fixtures';
 test('crypto trader demo: disclaimers, controls and backtest output', async ({ page }) => {
   await page.goto('/cryptotrader');
   await expect(page.getByRole('heading', { level: 1, name: 'Algo Crypto' })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('not financial advice');
+  await expect(page.locator('.ct-notice')).toContainText('not financial advice');
   await expect(page.getByRole('img')).toHaveCount(3);
 
   const returns = page.locator('dt:text("Strategy return") + dd');
