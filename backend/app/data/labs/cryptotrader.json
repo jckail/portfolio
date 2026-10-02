@@ -2,10 +2,10 @@
   "slug": "cryptotrader",
   "project_key": "lit_crypto",
   "title": "Algo Crypto: an interactive trading-rule demo (synthetic data)",
-  "description": "Archived 2017-2018 Python, Pandas and AWS crypto data project, with an educational backtest of a moving-average rule on generated prices.",
+  "description": "Historical 2017-2018 Python, Pandas and AWS crypto data project, with an educational backtest of a moving-average rule on generated prices.",
   "intro": [
-    "Algo Crypto began as a side project in 2017 and 2018 to study how cryptocurrency prices relate to other data: social mentions, metals prices and US stock prices. The public repository is archived and written in Python 3.6.",
-    "Its working part collects data from public web APIs (CryptoCompare, CoinMarketCap, Alpha Vantage and Quandl) with multithreaded Pandas code, stores gzipped JSON in Amazon S3 using boto3, and makes it queryable with AWS Glue and Athena. The machine-learning part was never finished in the public repository.",
+    "Algo Crypto began as a side project in 2017 and 2018 to study how cryptocurrency prices relate to other data: social mentions, metals prices and US stock prices. The public repository contains the historical Python 3.6 implementation.",
+    "Its working part collects data from public web APIs (CryptoCompare, CoinMarketCap, Alpha Vantage and Quandl) with multithreaded Pandas code, stores gzipped JSON in Amazon S3 using boto3, and makes it queryable with AWS Glue and Athena. The repository includes regression experiments, while the machine-learning component remains unfinished.",
     "This page is an educational illustration only: you can adjust a moving-average or momentum rule and backtest it on seeded, generated prices. It is not the original project's algorithm, uses no live data, and is not financial advice."
   ],
   "features": [
@@ -17,5 +17,5 @@
   ],
   "repo": "https://github.com/jckail/crypto_trader",
   "demo_notice": "All prices and results are synthetic and generated in your browser from a seed. Nothing is sent anywhere. Educational only, not financial advice; no live data and no trading.",
-  "updated": "2026-10-01"
+  "updated": "2026-10-02"
 }
