@@ -131,6 +131,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
           {sections.map((section) => (
             <button
               key={section.id}
+              aria-current={currentSection === section.id ? 'location' : undefined}
               onClick={() => handleNavClick(section.id)}
               className={`nav-item ${currentSection === section.id ? 'active' : ''}`}
             >

@@ -7,8 +7,8 @@ import { NotFound, isKnownPath } from './not-found';
 afterEach(() => cleanup());
 
 describe('isKnownPath', () => {
-  it.each(['/', '/admin'])('serves %s', path => expect(isKnownPath(path)).toBe(true));
-  it.each(['/nope', '/admin/', '/api/x', '/index.html'])('rejects %s', path =>
+  it.each(['/', '/admin', '/index.html'])('serves %s', path => expect(isKnownPath(path)).toBe(true));
+  it.each(['/nope', '/admin/', '/api/x'])('rejects %s', path =>
     expect(isKnownPath(path)).toBe(false)
   );
 });

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import '../../styles/components/not-found.css';
 
 /** Paths the server answers with 200 (see SPA_ROUTES in backend/app/spa.py). */
-const KNOWN_PATHS = new Set(['/', '/admin']);
+const KNOWN_PATHS = new Set(['/', '/index.html', '/admin']);
 
 export const isKnownPath = (pathname: string): boolean => KNOWN_PATHS.has(pathname);
 

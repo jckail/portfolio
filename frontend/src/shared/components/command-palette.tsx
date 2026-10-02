@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { openDoodle } from '../utils/open-doodle';
 import { scrollToSection } from '../utils/scroll-utils';
 import { setQueryParam } from '../utils/url-params';
 import { useChatAvailable } from '../hooks/use-chat-available';
@@ -42,9 +43,7 @@ function buildCommands(onClose: () => void): Command[] {
       label: 'Open doodle board',
       keywords: 'draw party easter',
       run: () => {
-        window.history.pushState(null, '', '#doodle');
-        window.dispatchEvent(new PopStateEvent('popstate'));
-        scrollToSection('doodle');
+        openDoodle();
         onClose();
       },
     },
@@ -123,6 +122,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
     setActive(0);
   }, [query]);
 
+  const activeId = filtered[active] ? `command-option-${filtered[active].id}` : undefined;
+
+  useEffect(() => {
+    if (open && activeId) {
+      document.getElementById(activeId)?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [open, activeId]);
+
   if (!open) return null;
 
   const onKeyDown = (event: React.KeyboardEvent) => {
@@ -149,6 +156,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
         ref={inputRef}
         className="command-palette-input"
         type="search"
+        role="combobox"
+        aria-expanded={open}
+        aria-activedescendant={activeId}
         id="command-palette-search"
         name="command-palette-search"
         aria-label="Search commands"
@@ -166,12 +176,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
       />
       <ul id="command-palette-list" className="command-palette-list" role="listbox">
         {filtered.length === 0 && (
-          <li className="command-palette-empty">No matches</li>
+          <li role="presentation" className="command-palette-empty">No matches</li>
         )}
         {filtered.map((cmd, index) => (
-          <li key={cmd.id} role="option" aria-selected={index === active}>
+          <li key={cmd.id} role="presentation">
             <button
               type="button"
+              role="option"
+              id={`command-option-${cmd.id}`}
+              aria-selected={index === active}
+              tabIndex={-1}
               className={`command-palette-item${index === active ? ' is-active' : ''}`}
               onClick={cmd.run}
               onMouseEnter={() => setActive(index)}

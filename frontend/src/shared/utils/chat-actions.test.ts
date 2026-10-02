@@ -16,6 +16,15 @@ describe('executeChatAction', () => {
     Element.prototype.scrollIntoView = vi.fn();
   });
 
+  it('requests doodle visibility from its page owner', () => {
+    const reveal = vi.fn();
+    window.addEventListener('portfolio:open-doodle', reveal);
+    expect(executeChatAction({ action: 'navigate', target: 'doodle' })).toBe('Opened doodle');
+    expect(reveal).toHaveBeenCalledOnce();
+    expect(window.location.hash).toBe('#doodle');
+    window.removeEventListener('portfolio:open-doodle', reveal);
+  });
+
   it('navigates to a known section', () => {
     const label = executeChatAction({ action: 'navigate', target: 'projects' });
     expect(label).toBe('Opened projects');

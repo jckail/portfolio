@@ -138,6 +138,11 @@ const dataset: ArchitectureDataset = {
 afterEach(cleanup);
 
 describe('architecture workbench', () => {
+  it('uses a level-three heading for task detail below the workflow section', () => {
+    render(<Architecture dataset={dataset} />);
+    expect(screen.getByRole('heading', { name: tasks[0].name, level: 3 })).toHaveAttribute('id', 'lab-task-title');
+  });
+
   it('routes rank-skipping dependencies above every box without crossing intermediate nodes', () => {
     const { positions, edges } = dependencyRoutes([
       { id: 'products', name: 'Products', depends_on: [] },

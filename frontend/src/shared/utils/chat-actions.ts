@@ -1,3 +1,4 @@
+import { openDoodle } from './open-doodle';
 import { scrollToSection } from './scroll-utils';
 import { setQueryParam } from './url-params';
 import { saveContactDraft, type ContactDraft } from './contact-draft';
@@ -27,10 +28,9 @@ export function executeChatAction(payload: ChatAction): string | null {
     const target = payload.target?.toLowerCase();
     if (!SECTION_IDS.has(target)) return null;
     if (target === 'doodle') {
-      window.history.pushState(null, '', '#doodle');
-      window.dispatchEvent(new PopStateEvent('popstate'));
+      openDoodle();
     }
-    scrollToSection(target);
+    if (target !== 'doodle') scrollToSection(target);
     return `Opened ${target}`;
   }
 
