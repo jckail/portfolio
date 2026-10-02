@@ -176,18 +176,7 @@ jobs:
           echo "Could not resolve the tagged revision URL for $TAG"
           exit 1
         fi
-        echo "Verifying new revision at: $CANARY_URL"
-        for i in $(seq 1 12); do
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$CANARY_URL/api/health" || true)
-          if [ "$STATUS" = "200" ]; then
-            echo "Health check passed"
-            exit 0
-          fi
-          echo "Attempt $i: health returned $STATUS; retrying in 5s..."
-          sleep 5
-        done
-        echo "Health check failed — leaving traffic on the previous revision"
-        exit 1
+        python3 helpers/verify_runtime.py --url "$CANARY_URL" --sha "$GITHUB_SHA"
 
     - name: Recheck current main and CI immediately before promotion
       env:
@@ -205,12 +194,9 @@ jobs:
         URL=$(gcloud run services describe "$SERVICE" \
           --project "$PROJECT_ID" --region "$REGION" \
           --format 'value(status.url)')
-        STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$URL/api/health" || true)
-        if [ "$STATUS" != "200" ]; then
-          echo "Production health check failed after promotion ($STATUS)"
-          exit 1
-        fi
-        echo "Production healthy at $URL"
+        # Traffic changes can take time to reach every request. Retry with a
+        # bounded probe, and accept only the immutable commit we promoted.
+        python3 helpers/verify_runtime.py --url "$URL" --sha "$GITHUB_SHA"
 
     - name: Remove stale automated revision tags after verified promotion
       run: python3 helpers/cleanup_revision_tags.py
