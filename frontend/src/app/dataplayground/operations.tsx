@@ -732,6 +732,19 @@ function SQLConsole({ state }: { state: RuntimeState }) {
       </form>
       {result && (
         <>
+          {result.result.data_revision == null || state.data_revision == null ? (
+            <p className="lab-note">
+              Query freshness is unavailable because the recorded or current data revision is
+              missing. Run query to request new evidence.
+            </p>
+          ) : result.result.data_revision !== state.data_revision ? (
+            <p className="lab-note">
+              These query results are historical: recorded at data revision{' '}
+              {result.result.data_revision}; the current workspace is at revision{' '}
+              {state.data_revision}. Run query to inspect the current data. Downloads preserve the
+              recorded result.
+            </p>
+          ) : null}
           {(sql !== result.sql || rowLimit !== result.rowLimit) && (
             <p className="lab-note">
               The editor or row limit differs from the last executed query. Run query to update

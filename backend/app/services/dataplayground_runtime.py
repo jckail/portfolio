@@ -322,8 +322,8 @@ class Workspace:
     def dag(self, failure: str) -> None:
         self.dag_trace, self.dag_published, self.fingerprint = [], False, None
         self.dag_input_revision = self.data_revision
-        self.model_runs = []
-        self.model_input_revision = None
+        # Existing materializations remain queryable if this run never reaches
+        # analytics. Keep their input revision and contracts until models rebuild.
         statuses: dict[str, str] = {}
         tasks = [
             ("generate", []),
@@ -556,7 +556,7 @@ class Workspace:
                     if isinstance(value, bytes):
                         value = "[binary value omitted]"
                     elif isinstance(value, str) and len(value) > 2000:
-                        value = value[:2000] + "…"
+                        value = value[:1999] + "…"
                         truncated = True
                     elif isinstance(value, float) and not math.isfinite(value):
                         value = None
