@@ -176,6 +176,20 @@ Build SQL models or rerun the DAG to verify current inputs; streaming progress d
 not automatically rerun either operation. Reset replaces the workspace and increments
 its generation, independently of its new data revision.
 
+Named run snapshots preserve up to six observed workspace states in the current
+browser tab. Capture a named state before a controlled change, execute the change,
+then capture another state and compare their record counts, partition offsets,
+accepted-data revisions, task attempts, model contracts, and publication evidence.
+Captured values remain unchanged when the live workspace refreshes. Failed attempts
+and replay consumption attempts retain their own accounting boundaries; they are
+not additional accepted warehouse rows. A numerical difference shows what was
+observed at the two captures, not proof that a particular action caused it.
+
+Snapshot JSON downloads use an explicit allowlist of lab evidence. They contain no
+workspace capability, provider credentials, copilot conversation, raw event payloads,
+or private provider state. Snapshots clear when the workspace is replaced or reset;
+they are not server-side run history, durable storage, or an offline replay log.
+
 This is a local educational scheduler and event log with SQLite transformations;
 Airflow, Kafka, and dbt daemons are not deployed. State lives on one serving process,
 is limited to 32 visitor workspaces, and expires after 20 minutes without a visitor
@@ -259,10 +273,10 @@ adapters preserving the current bounded controls and result contracts. It would
 extend the running local scheduler, event log, and SQL transformations; those tools
 already execute real work without native daemons.
 
-Bounded named run comparison could preserve failure, repair, contract, and publication
-evidence across investigations. Portable investigation evidence and offline action
-replay could extend today's local SQL-result JSON exports, with explicit versions,
-input provenance, and limits. These capabilities are not implemented. Representative
+Portable investigation evidence and offline action replay could extend today's
+bounded run snapshots and SQL-result JSON exports, with explicit implementation
+versions, input provenance, action order, and limits. Durable run history and offline
+action replay are not implemented. Representative
 scale measurements, query plans, index tradeoffs, and compute/retention costs would
 provide evidence before selecting larger storage or execution systems. The graph and
 handcrafted vector dataset and their exploration are already implemented; native

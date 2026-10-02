@@ -297,3 +297,84 @@ test('an ambiguous copilot confirmation retires its card and invites fresh inspe
   await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the current consumer state.');
   await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
 });
+
+test('named snapshots compare controlled counts, preserve observations and exclude private state', async ({ page }) => {
+  await page.goto('/dataplayground');
+  const allocation = page.waitForResponse(response => response.url().endsWith('/api/dataplayground/runtime/session') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  const capability = (await (await allocation).json()).token as string;
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByRole('button', { name: 'Stop producer', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause consumer', exact: true }).click();
+  const snapshots = page.getByRole('region', { name: 'Observed-state snapshots', exact: true });
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('Before');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  await page.getByLabel('Batch size', { exact: true }).fill('20');
+  await page.getByLabel('Duplicate fraction', { exact: true }).fill('0');
+  await page.getByLabel('Invalid fraction', { exact: true }).fill('0');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Run workspace DAG', exact: true }).click();
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('After');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  await snapshots.getByLabel('Before snapshot', { exact: true }).selectOption({ label: 'Before' });
+  await snapshots.getByLabel('After snapshot', { exact: true }).selectOption({ label: 'After' });
+  const differences = snapshots.getByRole('region', { name: 'Snapshot counter differences', exact: true });
+  const inserted = differences.getByRole('row').filter({ has: page.getByRole('rowheader', { name: 'Inserted records', exact: true }) });
+  await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+
+  async function downloadComparison() {
+    const downloading = page.waitForEvent('download');
+    await snapshots.getByRole('button', { name: 'Download comparison evidence', exact: true }).click();
+    const stream = await (await downloading).createReadStream();
+    if (!stream) throw new Error('Comparison evidence download was unavailable');
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  }
+  const evidence = await downloadComparison();
+  expect(Object.keys(evidence).sort()).toEqual(['after', 'before', 'comparison', 'kind', 'schema_version', 'scope']);
+  expect(evidence.kind).toBe('dataplayground_run_comparison');
+  expect(evidence.before.label).toBe('Before');
+  expect(evidence.before.streaming.counters.inserted).toBe(0);
+  expect(evidence.after.label).toBe('After');
+  expect(evidence.after.streaming.counters.inserted).toBe(20);
+  expect(evidence.comparison.compatible).toBe(true);
+  expect(evidence.comparison.metrics).toContainEqual({ name: 'data_revision', before: 0, after: 20, delta: 20 });
+  const beforeEvents = evidence.before.tables.find((table: { name: string }) => table.name === 'events').row_count;
+  expect(evidence.comparison.tables).toContainEqual({ name: 'events', before: beforeEvents, after: beforeEvents + 20, delta: 20 });
+  expect(evidence.after.dag.published).toBe(true);
+  expect(evidence.after.dag.stale).toBe(false);
+  expect(evidence.after.dag.trace).toHaveLength(6);
+  expect(evidence.after.models.runs).toHaveLength(4);
+  expect(JSON.stringify(evidence)).not.toContain(capability);
+  const forbidden = new Set(['token', 'authorization', 'history', 'logs', 'events', 'payload', 'provider_state', 'sql']);
+  function inspectKeys(value: unknown) {
+    if (Array.isArray(value)) value.forEach(inspectKeys);
+    else if (value !== null && typeof value === 'object') {
+      for (const [key, child] of Object.entries(value)) {
+        expect(forbidden.has(key)).toBe(false);
+        inspectKeys(child);
+      }
+    }
+  }
+  inspectKeys(evidence);
+
+  // Change live state again, then refresh: both captures must remain historical.
+  await page.getByLabel('Batch size', { exact: true }).fill('5');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Refresh workspace', exact: true }).click();
+  await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+  expect(await downloadComparison()).toEqual(evidence);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (let theme = 0; theme < 2; theme++) {
+    await page.getByRole('button', { name: /Use .* theme/ }).click();
+    await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+    await expect(snapshots.getByRole('button', { name: 'Download comparison evidence', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.getByRole('button', { name: 'Reset workspace', exact: true }).click();
+  await expect(snapshots.getByText('No snapshots captured in this workspace.', { exact: true })).toBeVisible();
+  await expect(snapshots.getByRole('region', { name: 'Snapshot counter differences', exact: true })).toHaveCount(0);
+});

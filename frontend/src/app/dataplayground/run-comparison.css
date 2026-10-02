@@ -1,0 +1,81 @@
+.lab-run-comparison {
+  min-width: 0;
+}
+.lab-run-comparison p,
+.lab-run-comparison code,
+.lab-run-comparison time {
+  overflow-wrap: anywhere;
+}
+.lab-run-comparison form {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.lab-run-comparison form label {
+  grid-column: 1 / -1;
+}
+.lab-snapshot-list {
+  padding: 0;
+  list-style: none;
+}
+.lab-snapshot-list li {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.lab-snapshot-list li > div {
+  min-width: 0;
+}
+.lab-snapshot-list p {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.lab-snapshot-list button {
+  flex-shrink: 0;
+}
+.lab-comparison-selectors,
+.lab-comparison-executions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.lab-comparison-selectors select {
+  display: block;
+  margin-top: 8px;
+}
+.lab-comparison-executions article {
+  min-width: 0;
+  border-left: 2px solid var(--rail-color);
+  padding-left: 12px;
+}
+.lab-comparison-executions p {
+  font-size: 12px;
+  margin: 12px 0;
+}
+.lab-comparison-executions ul {
+  font-size: 12px;
+  padding-left: 18px;
+}
+.lab-comparison-controls {
+  font-size: 13px;
+}
+.lab-comparison-controls > div {
+  margin: 12px 0;
+}
+.lab-comparison-controls dd {
+  margin: 6px 0;
+}
+@media (max-width: 600px) {
+  .lab-run-comparison form,
+  .lab-comparison-selectors,
+  .lab-comparison-executions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lab-run-comparison form button {
+    justify-self: start;
+  }
+}
