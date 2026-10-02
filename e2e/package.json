@@ -6,6 +6,9 @@
   "scripts": {
     "test": "playwright test"
   },
+  "engines": {
+    "node": ">=22.19"
+  },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.49.1"
@@ -13,6 +16,14 @@
   "overrides": {
     "tmp": "^0.2.6",
     "uuid": "^11.1.1",
-    "qs": "^6.16.0"
+    "qs": "^6.16.0",
+    "@lhci/cli": {
+      "lighthouse": "13.5.0",
+      "proxy-agent": "8.0.1",
+      "basic-ftp": "6.2.1"
+    },
+    "@lhci/utils": {
+      "lighthouse": "13.5.0"
+    }
   }
 }
