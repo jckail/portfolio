@@ -255,7 +255,11 @@ def test_lab_home_and_bare_variants_do_not_share_cache(document_spa):
     lab = client.get("/dataplayground", headers=HTML)
     admin = client.get("/admin", headers=HTML)
     assert len({r.headers["etag"] for r in (home, lab, admin)}) == 3
-    assert set(files._index) == {"home", "lab", "bare"}
+    # Hosted demo labs add their own namespaced entries ("hosted:<slug>"); nothing
+    # else may appear, and none of them may collide with the three base variants.
+    keys = set(files._index)
+    assert {"home", "lab", "bare"} <= keys
+    assert all(k.startswith("hosted:") for k in keys - {"home", "lab", "bare"})
     assert 'id="home-snapshot"' in home.text
     assert '"@type":"ProfilePage"' in home.text
     assert 'id="seo-snapshot"' not in admin.text
