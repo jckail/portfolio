@@ -23,6 +23,8 @@ _sessions = SlidingWindowLimiter(max_events=6, window_seconds=60, global_max_eve
 _operations = SlidingWindowLimiter(max_events=90, window_seconds=60, global_max_events=600, name="lab-operations")
 _chat = SlidingWindowLimiter(max_events=4, window_seconds=60, global_max_events=12, name="lab-copilot")
 _HEADERS = {"Cache-Control": "no-store"}
+_BUSY_HEADERS = {**_HEADERS, "Retry-After": "1"}
+_BUSY_DETAIL = "The previous investigation is still finishing. Retry shortly."
 
 
 def capability(request: Request) -> str:
@@ -103,8 +105,12 @@ async def copilot_status(response: Response):
 @router.post("/copilot/chat", response_model=CopilotResponse)
 async def copilot_chat(request: Request, response: Response):
     response.headers.update(_HEADERS)
-    enforce_rate_limit(_chat, request, headers=_HEADERS)
     token = capability(request)
+    # A stopped turn keeps its capability occupied until provider/process cleanup
+    # finishes. Checking first avoids charging polling retries as new model turns.
+    if copilot.workspace_busy(token):
+        raise HTTPException(409, _BUSY_DETAIL, headers=_BUSY_HEADERS)
+    enforce_rate_limit(_chat, request, headers=_HEADERS)
     config = await body(request, CopilotRequest, 56000)
     task = asyncio.create_task(copilot.chat(token, config))
     try:
@@ -115,6 +121,8 @@ async def copilot_chat(request: Request, response: Response):
         return await task
     except KeyError:
         raise HTTPException(410, "Your workspace expired. Create another to continue.", headers=_HEADERS) from None
+    except copilot.CopilotBusy:
+        raise HTTPException(409, _BUSY_DETAIL, headers=_BUSY_HEADERS) from None
     except copilot.CopilotUnavailable:
         raise HTTPException(503, "Data Copilot is temporarily unavailable. The lab tools still work.", headers=_HEADERS) from None
     finally:

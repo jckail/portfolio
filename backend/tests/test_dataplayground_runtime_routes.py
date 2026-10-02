@@ -190,3 +190,34 @@ def test_runtime_capacity_errors_are_private(runtime_client):
     response = client.post(ROOT + "/runtime/session", json={})
     assert response.status_code in {422, 429}
     assert response.headers["cache-control"] == "no-store" and "capacity" in response.json()["detail"].lower()
+
+
+def test_cleanup_busy_retries_are_409_without_consuming_model_turn_limit(runtime_client):
+    client, _, _ = runtime_client
+    headers, first = create(client)
+    with copilot._guard:
+        copilot._active_workspaces.add(first.token)
+    try:
+        for _ in range(6):
+            response = client.post(ROOT + "/copilot/chat", headers=headers, json={"message": "New investigation"})
+            assert response.status_code == 409
+            assert response.headers["retry-after"] == "1" and response.headers["cache-control"] == "no-store"
+            assert "previous investigation" in response.json()["detail"]
+    finally:
+        with copilot._guard:
+            copilot._active_workspaces.discard(first.token)
+    # Busy preflight never starts a model turn. The original four-turn limit is
+    # intact after cleanup, including genuine provider-unavailable attempts.
+    for _ in range(4):
+        assert client.post(ROOT + "/copilot/chat", headers=headers, json={"message": "Now ready"}).status_code == 503
+    assert client.post(ROOT + "/copilot/chat", headers=headers, json={"message": "Fifth turn"}).status_code == 429
+
+
+def test_busy_acquisition_race_maps_to_409_not_provider_unavailability(runtime_client, monkeypatch):
+    client, _, _ = runtime_client
+    headers, _ = create(client)
+    monkeypatch.setattr(copilot, "workspace_busy", lambda token: False)
+    monkeypatch.setattr(copilot, "chat", AsyncMock(side_effect=copilot.CopilotBusy))
+    response = client.post(ROOT + "/copilot/chat", headers=headers, json={"message": "New investigation"})
+    assert response.status_code == 409
+    assert response.headers["retry-after"] == "1" and response.headers["cache-control"] == "no-store"

@@ -35,6 +35,16 @@ class CopilotUnavailable(Exception):
     """Safe public failure, without provider responses or subprocess output."""
 
 
+class CopilotBusy(Exception):
+    """The previous investigation still owns this workspace, including cleanup."""
+
+
+def workspace_busy(token: str) -> bool:
+    """Read-only preflight; chat repeats the check while acquiring its slot."""
+    with _guard:
+        return token in _active_workspaces
+
+
 def _encode(value) -> bytes:
     return json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":")).encode()
 
@@ -242,10 +252,14 @@ async def _cleanup(process, provider) -> None:
 
 async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
     await asyncio.to_thread(get_runtime().state, token)
+    if workspace_busy(token):
+        raise CopilotBusy
     if not available():
         raise CopilotUnavailable
     with _guard:
-        if token in _active_workspaces or not _slots.acquire(blocking=False):
+        if token in _active_workspaces:
+            raise CopilotBusy
+        if not _slots.acquire(blocking=False):
             raise CopilotUnavailable
         _active_workspaces.add(token)
     provider = process = None

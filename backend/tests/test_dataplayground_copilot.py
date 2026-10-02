@@ -271,7 +271,7 @@ def test_cancellation_kills_actual_pi_process_closes_provider_and_releases_slots
     async def execute():
         task = asyncio.create_task(copilot.chat(token, CopilotRequest(message="Wait")))
         await started.wait()
-        with pytest.raises(copilot.CopilotUnavailable):
+        with pytest.raises(copilot.CopilotBusy):
             await copilot.chat(token, CopilotRequest(message="Concurrent same workspace"))
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
@@ -474,6 +474,57 @@ def test_partial_usage_retains_conservative_reservation(setup, usage):
     reservation = len(copilot._encode(request)) + 1024
     asyncio.run(copilot._model(provider, request))
     assert copilot._tokens_used == reservation
+    assert copilot._tokens_reserved == 0
+
+
+def test_cancelled_turn_remains_busy_until_cleanup_then_accepts_new_turn(setup, monkeypatch):
+    runtime, _ = setup
+    spawned = asyncio.Event()
+    cleanup_started = asyncio.Event()
+    release_cleanup = asyncio.Event()
+    spawn_count = 0
+
+    class WaitingProcess(FakeProcess):
+        async def readline(self):
+            await asyncio.Future()
+
+    class DelayedCloseProvider(FakeProvider):
+        async def aclose(self):
+            cleanup_started.set()
+            await release_cleanup.wait()
+            self.closed = True
+
+    provider = DelayedCloseProvider([])
+    use_provider(monkeypatch, provider)
+
+    async def spawn(*args, **kwargs):
+        nonlocal spawn_count
+        spawn_count += 1
+        spawned.set()
+        return WaitingProcess([]) if spawn_count == 1 else FakeProcess([{"type": "done", "ok": True}])
+
+    monkeypatch.setattr(copilot.asyncio, "create_subprocess_exec", spawn)
+    token = session(runtime)
+
+    async def execute():
+        first = asyncio.create_task(copilot.chat(token, CopilotRequest(message="Wait")))
+        await spawned.wait()
+        first.cancel()
+        await cleanup_started.wait()
+        assert copilot.workspace_busy(token)
+        with pytest.raises(copilot.CopilotBusy):
+            await copilot.chat(token, CopilotRequest(message="Restart during cleanup"))
+        assert spawn_count == 1
+        release_cleanup.set()
+        with pytest.raises(asyncio.CancelledError):
+            await first
+        assert not copilot.workspace_busy(token)
+        use_provider(monkeypatch, FakeProvider([]))
+        result = await copilot.chat(token, CopilotRequest(message="Restart after cleanup"))
+        assert result.text == "" and spawn_count == 2
+
+    asyncio.run(execute())
+    assert provider.closed and not copilot._active_workspaces
     assert copilot._tokens_reserved == 0
 
 

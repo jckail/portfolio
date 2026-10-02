@@ -28,12 +28,16 @@ test('lab deep link explores generated scenarios, pipeline, events, and SQL', as
 
 test('lab supports mobile, keyboard entry, and both themes without page overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const response = await page.goto('/dataplayground/#workbench-lifecycle');
+  // Test entry from the top of the document. A native fragment deep link
+  // intentionally moves the browser's sequential focus starting point.
+  const response = await page.goto('/dataplayground/');
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole('button', { name: 'Baseline', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Overview', exact: true })).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to experiments' })).toBeFocused();
   await page.keyboard.press('Enter');
+  await page.getByRole('link', { name: 'Lifecycle', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Baseline', exact: true })).toBeVisible();
   const initialTheme = await page.locator('html').getAttribute('data-theme');
   await page.getByRole('button', { name: /Use .* theme/ }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme === 'dark' ? 'light' : 'dark');

@@ -116,6 +116,95 @@ describe('visitor runtime state', () => {
       expect.objectContaining({ headers: { Authorization: `Bearer ${session.token}` } })
     );
   });
+  it('preserves the existing workspace and latest results when replacement allocation fails', async () => {
+    const { result } = renderHook(useRuntime, { wrapper });
+    await act(async () => result.current.create('baseline'));
+    const latest = { ...state, streaming: { ...state.streaming, produced: 10 } };
+    vi.mocked(postJson).mockResolvedValueOnce(latest);
+    await act(async () => result.current.action({ action: 'produce', batch_size: 10 }));
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(429, 'Workspace capacity reached'));
+    await act(async () => result.current.create('acquisition'));
+    expect(result.current.session?.token).toBe(session.token);
+    expect(result.current.state).toEqual(latest);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBe('Workspace capacity reached');
+    expect(
+      vi.mocked(postJson).mock.calls.filter(([path]) => path === endpoints.dataPlaygroundClose)
+    ).toHaveLength(0);
+    await act(async () => result.current.refresh());
+    expect(getJson).toHaveBeenCalledWith(
+      endpoints.dataPlaygroundState,
+      expect.objectContaining({ headers: { Authorization: `Bearer ${session.token}` } })
+    );
+  });
+  it('closes the previous workspace only after a successful replacement is allocated', async () => {
+    const { result } = renderHook(useRuntime, { wrapper });
+    await act(async () => result.current.create('baseline'));
+    let finish!: (value: RuntimeSession) => void;
+    vi.mocked(postJson).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    let replacement!: Promise<void>;
+    act(() => {
+      replacement = result.current.create('acquisition');
+    });
+    expect(result.current.session?.token).toBe(session.token);
+    expect(result.current.state).toEqual(state);
+    expect(
+      vi.mocked(postJson).mock.calls.filter(([path]) => path === endpoints.dataPlaygroundClose)
+    ).toHaveLength(0);
+    const next = {
+      ...session,
+      token: 'allocated-replacement',
+      state: { ...state, scenario_id: 'acquisition' },
+    };
+    await act(async () => {
+      finish(next);
+      await replacement;
+    });
+    expect(result.current.session?.token).toBe(next.token);
+    expect(result.current.state).toEqual(next.state);
+    expect(postJson).toHaveBeenCalledWith(
+      endpoints.dataPlaygroundClose,
+      undefined,
+      expect.objectContaining({ headers: { Authorization: `Bearer ${session.token}` } })
+    );
+  });
+  it('keeps the existing workspace after a newer replacement fails and closes a stale allocation', async () => {
+    const { result } = renderHook(useRuntime, { wrapper });
+    await act(async () => result.current.create('baseline'));
+    let finish!: (value: RuntimeSession) => void;
+    vi.mocked(postJson).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    let first!: Promise<void>;
+    act(() => {
+      first = result.current.create('acquisition');
+    });
+    vi.mocked(postJson).mockRejectedValueOnce(new Error('Replacement unavailable'));
+    await act(async () => result.current.create('retention'));
+    await act(async () => {
+      finish({ ...session, token: 'orphan-allocation' });
+      await first;
+    });
+    expect(result.current.session?.token).toBe(session.token);
+    expect(result.current.state).toEqual(state);
+    expect(result.current.error).toBe('Replacement unavailable');
+    expect(result.current.loading).toBe(false);
+    const closed = vi
+      .mocked(postJson)
+      .mock.calls.filter(([path]) => path === endpoints.dataPlaygroundClose);
+    expect(closed).toHaveLength(1);
+    expect(closed[0][2]).toEqual(
+      expect.objectContaining({ headers: { Authorization: 'Bearer orphan-allocation' } })
+    );
+  });
   it('does not let a stale polling snapshot overwrite a newer action result', async () => {
     const { result } = renderHook(useRuntime, { wrapper });
     await act(async () => result.current.create('baseline'));
@@ -140,6 +229,32 @@ describe('visitor runtime state', () => {
       await poll;
     });
     expect(result.current.state?.streaming.produced).toBe(10);
+  });
+  it('cleans up both the retained workspace and a replacement allocated after unmount', async () => {
+    const { result, unmount } = renderHook(useRuntime, { wrapper });
+    await act(async () => result.current.create('baseline'));
+    let finish!: (value: RuntimeSession) => void;
+    vi.mocked(postJson).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    let replacement!: Promise<void>;
+    act(() => {
+      replacement = result.current.create('acquisition');
+    });
+    unmount();
+    await act(async () => {
+      finish({ ...session, token: 'late-allocation' });
+      await replacement;
+    });
+    const closed = vi
+      .mocked(postJson)
+      .mock.calls.filter(([path]) => path === endpoints.dataPlaygroundClose);
+    expect(
+      closed.map(([, , init]) => (init?.headers as Record<string, string>).Authorization)
+    ).toEqual([`Bearer ${session.token}`, 'Bearer late-allocation']);
   });
   it('serializes copilot confirmation with manual mutations and ignores older polling state', async () => {
     const { result } = renderHook(useRuntime, { wrapper });

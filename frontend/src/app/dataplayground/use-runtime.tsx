@@ -76,42 +76,42 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
     };
   }, []);
 
-  const create = useCallback(
-    async (scenarioId: string) => {
-      const expected = ++generation.current;
-      revision.current += 1;
-      const previous = current.current;
-      current.current = null;
-      setSession(null);
-      setState(null);
-      setLoading(true);
-      busy.current = true;
-      setError('');
-      if (previous) void close(previous.token);
-      try {
-        const next = await postJson<RuntimeSession>(
-          endpoints.dataPlaygroundSession,
-          { scenario_id: scenarioId },
-          { cache: 'no-store' }
-        );
-        if (!mounted.current || expected !== generation.current) {
-          void close(next.token);
-          return;
-        }
-        current.current = next;
-        setSession(next);
-        setState(next.state);
-      } catch (cause) {
-        fail(cause, expected);
-      } finally {
-        if (mounted.current && expected === generation.current) {
-          busy.current = false;
-          setLoading(false);
-        }
+  const create = useCallback(async (scenarioId: string) => {
+    const expected = ++generation.current;
+    revision.current += 1;
+    const previous = current.current;
+    setLoading(true);
+    busy.current = true;
+    setError('');
+    try {
+      const next = await postJson<RuntimeSession>(
+        endpoints.dataPlaygroundSession,
+        { scenario_id: scenarioId },
+        { cache: 'no-store' }
+      );
+      if (!mounted.current || expected !== generation.current) {
+        void close(next.token);
+        return;
       }
-    },
-    [fail]
-  );
+      current.current = next;
+      setSession(next);
+      setState(next.state);
+      if (previous && previous.token !== next.token) void close(previous.token);
+    } catch (cause) {
+      // An allocation error concerns the proposed replacement, not the
+      // capability or latest state of the workspace that remains open.
+      if (mounted.current && expected === generation.current) {
+        setError(
+          cause instanceof Error ? cause.message : 'The workspace could not be created. Try again.'
+        );
+      }
+    } finally {
+      if (mounted.current && expected === generation.current) {
+        busy.current = false;
+        setLoading(false);
+      }
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
     const allocated = current.current;

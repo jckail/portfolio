@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { endpoints, getJson, postJson } from '../../shared/utils/api';
+import { ApiError, endpoints, getJson, postJson } from '../../shared/utils/api';
 import { ChatMarkdown } from '../components/chat/components/ChatMarkdown';
 import { useRuntime } from './use-runtime';
 import './data-copilot.css';
@@ -30,6 +30,24 @@ interface Message extends Partial<Reply> {
   role: 'user' | 'assistant';
   text: string;
 }
+function waitForCleanup(signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException('Investigation stopped', 'AbortError'));
+      return;
+    }
+    const cancel = () => {
+      clearTimeout(timer);
+      reject(new DOMException('Investigation stopped', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener('abort', cancel);
+      resolve();
+    }, 1000);
+    signal.addEventListener('abort', cancel, { once: true });
+  });
+}
+
 const starters = [
   'Inspect my workspace and explain how records move through it.',
   'Query revenue by event date and explain the SQL.',
@@ -49,6 +67,7 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
   const tokenRef = useRef(session?.token);
   tokenRef.current = session?.token;
   const abortRef = useRef<AbortController | null>(null);
+  const stoppedWorkspaceRef = useRef<string | null>(null);
 
   useEffect(() => {
     const abort = new AbortController();
@@ -62,6 +81,7 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
 
   useEffect(() => {
     abortRef.current?.abort();
+    stoppedWorkspaceRef.current = null;
     setMessages([]);
     setResolved({});
     setBusy(false);
@@ -75,7 +95,10 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
     if (!token || !message.trim() || busy || !available) return;
     const abort = new AbortController();
     abortRef.current = abort;
+    const retryCleanup = stoppedWorkspaceRef.current === token;
+    stoppedWorkspaceRef.current = null;
     const history = messages
+      .filter(({ text }) => text.trim().length > 0)
       .slice(-12)
       .map(({ role, text }) => ({ role, text: text.slice(0, 4000) }));
     setMessages((previous) => [...previous.slice(-18), { role: 'user', text: message }]);
@@ -83,11 +106,29 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
     setBusy(true);
     setError('');
     try {
-      const reply = await postJson<Reply>(
-        endpoints.dataPlaygroundCopilotChat,
-        { message, history },
-        { signal: abort.signal, headers: { Authorization: `Bearer ${token}` } }
-      );
+      let reply: Reply;
+      for (let attempt = 0; ; attempt += 1) {
+        if (abort.signal.aborted || tokenRef.current !== token) return;
+        try {
+          reply = await postJson<Reply>(
+            endpoints.dataPlaygroundCopilotChat,
+            { message, history },
+            { signal: abort.signal, headers: { Authorization: `Bearer ${token}` } }
+          );
+          break;
+        } catch (failure) {
+          // Only an explicit Stop permits retrying the workspace cleanup conflict.
+          // Provider failures and request rate limits are left for the visitor.
+          if (
+            !retryCleanup ||
+            attempt >= 3 ||
+            !(failure instanceof ApiError) ||
+            failure.status !== 409
+          )
+            throw failure;
+          await waitForCleanup(abort.signal);
+        }
+      }
       if (tokenRef.current !== token || abort.signal.aborted) return;
       setMessages((previous) => [...previous, { role: 'assistant', ...reply }]);
     } catch (failure) {
@@ -266,6 +307,7 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
           <button
             type="button"
             onClick={() => {
+              stoppedWorkspaceRef.current = session?.token ?? null;
               abortRef.current?.abort();
               abortRef.current = null;
               setBusy(false);

@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { endpoints, getJson, postJson } from '../../shared/utils/api';
+import { ApiError, endpoints, getJson, postJson } from '../../shared/utils/api';
 import { DataCopilot } from './data-copilot';
 import { useRuntime } from './use-runtime';
 
@@ -36,6 +36,8 @@ beforeEach(() => {
   workspace();
   vi.mocked(getJson).mockResolvedValue({ available: true });
 });
+
+afterEach(() => vi.useRealTimers());
 
 describe('Data Copilot', () => {
   it('requires a workspace and explains model availability without inventing a reply', async () => {
@@ -72,6 +74,40 @@ describe('Data Copilot', () => {
     fireEvent.click(screen.getByText('query sql'));
     expect(screen.getByText(/"backlog"/)).toBeVisible();
   });
+
+  it.each([false, true])(
+    'excludes a tool-only empty reply from subsequent history (limited=%s)',
+    async (limited) => {
+      vi.mocked(postJson)
+        .mockResolvedValueOnce({
+          text: '',
+          limited,
+          proposals: [],
+          events: [{ type: 'tool_result', tool: 'query_sql', result: { rows: [[48]] } }],
+        })
+        .mockResolvedValueOnce({
+          text: 'Next investigation completed.',
+          limited: false,
+          events: [],
+          proposals: [],
+        });
+      render(<DataCopilot catalog={catalog} />);
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled()
+      );
+      fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+      await screen.findByText('query sql');
+      fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+        target: { value: 'Investigate the next question' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+      await screen.findByText('Next investigation completed.');
+      expect(vi.mocked(postJson).mock.calls[1][1]).toEqual({
+        message: 'Investigate the next question',
+        history: [{ role: 'user', text: startersLabel }],
+      });
+    }
+  );
 
   it('requires Apply before mutation and dismisses another proposal without an API call', async () => {
     const proposal = {
@@ -154,6 +190,118 @@ describe('Data Copilot', () => {
       pending[1]({ text: 'Current response', events: [], proposals: [], limited: false })
     );
     expect(screen.getByText('Current response')).toBeVisible();
+  });
+  it('retries only cleanup conflicts after Stop, without adding duplicate turns', async () => {
+    vi.mocked(postJson).mockImplementationOnce(() => new Promise(() => {}));
+    render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    vi.useFakeTimers();
+    vi.mocked(postJson)
+      .mockRejectedValueOnce(
+        new ApiError(409, 'The previous investigation is still finishing. Retry shortly.')
+      )
+      .mockResolvedValueOnce({
+        text: 'Follow-up completed.',
+        proposals: [],
+        events: [],
+        limited: false,
+      });
+    fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+      target: { value: 'A follow-up question' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+    await act(async () => {});
+    expect(postJson).toHaveBeenCalledTimes(2);
+    await act(async () => vi.advanceTimersByTimeAsync(1000));
+    expect(postJson).toHaveBeenCalledTimes(3);
+    expect(screen.getByText('Follow-up completed.')).toBeVisible();
+    expect(screen.getAllByText('A follow-up question')).toHaveLength(1);
+    expect(vi.mocked(postJson).mock.calls[2][1]).toEqual(vi.mocked(postJson).mock.calls[1][1]);
+  });
+
+  it.each([429, 503])('does not retry HTTP %s after Stop', async (status) => {
+    vi.mocked(postJson).mockImplementationOnce(() => new Promise(() => {}));
+    render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    vi.useFakeTimers();
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(status, 'Temporarily unavailable'));
+    fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+      target: { value: 'Follow up' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(postJson).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('alert')).toHaveTextContent('Temporarily unavailable');
+  });
+
+  it('bounds cleanup retries to three additional attempts', async () => {
+    vi.mocked(postJson).mockImplementationOnce(() => new Promise(() => {}));
+    render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    vi.useFakeTimers();
+    vi.mocked(postJson).mockRejectedValue(new ApiError(409, 'Still finishing'));
+    fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+      target: { value: 'Follow up' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(postJson).toHaveBeenCalledTimes(5);
+    expect(screen.getByRole('alert')).toHaveTextContent('Still finishing');
+    expect(screen.queryByText('Investigating with lab tools…')).not.toBeInTheDocument();
+  });
+
+  it('cancels a cleanup retry delay when the workspace changes', async () => {
+    vi.mocked(postJson).mockImplementationOnce(() => new Promise(() => {}));
+    const { rerender } = render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    vi.useFakeTimers();
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(409, 'Still finishing'));
+    fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+      target: { value: 'Follow up' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+    await act(async () => {});
+    workspace('new-workspace');
+    rerender(<DataCopilot catalog={catalog} />);
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(postJson).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+  it.each(['Stop', 'unmount'])('cancels a cleanup retry delay on %s', async (operation) => {
+    vi.mocked(postJson).mockImplementationOnce(() => new Promise(() => {}));
+    const { unmount } = render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    vi.useFakeTimers();
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(409, 'Still finishing'));
+    fireEvent.change(screen.getByLabelText('Ask about this workspace'), {
+      target: { value: 'Follow up' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Investigate' }));
+    await act(async () => {});
+    if (operation === 'Stop') fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    else unmount();
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(postJson).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('does not retry a workspace conflict without an explicit local Stop', async () => {
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(409, 'Still finishing'));
+    render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    await screen.findByRole('alert');
+    expect(postJson).toHaveBeenCalledTimes(1);
   });
 });
 const startersLabel = 'Inspect my workspace and explain how records move through it.';
