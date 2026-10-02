@@ -354,7 +354,7 @@ a {
    #00ffff skill chip measured 2.66:1 and #aaff00 on the #ff00ff website
    button 2.54:1. */
 .theme-party .skm-chip,
-.theme-party .visit-website-btn,
+.theme-party .visit-website-btn:not(.project-modal-secondary),
 .theme-party .party-pinned,
 .theme-party .party-pinned * {
   color: var(--party-pinned-fg) !important;
