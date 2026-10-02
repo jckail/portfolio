@@ -2,6 +2,8 @@
 export const endpoints = {
   dataPlayground: '/api/dataplayground',
   dataPlaygroundSimulate: '/api/dataplayground/simulate',
+  /** Hosted lab demos: list, and `/<slug>` for one (backend/app/api/labs_routes.py). */
+  labs: '/api/labs',
   aboutMe: '/api/aboutme',
   experience: '/api/experience',
   skills: '/api/skills',

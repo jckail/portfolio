@@ -1,0 +1,95 @@
+/* Shared chrome for hosted labs. Colours come from theme tokens only. */
+.lab-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  color: var(--text-color);
+  background: var(--page-bg);
+}
+
+.lab-shell-skip {
+  position: absolute;
+  left: var(--spacing-sm);
+  top: -4rem;
+  z-index: var(--z-overlay);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--on-primary-text);
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+}
+.lab-shell-skip:focus {
+  top: var(--spacing-sm);
+}
+
+.lab-shell-nav {
+  padding: var(--spacing-sm) var(--page-gutter);
+}
+
+.lab-shell-back,
+.lab-shell-footer a,
+.lab-coming-soon a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+.lab-shell-back {
+  text-decoration: none;
+  font-family: var(--font-display);
+}
+
+.lab-shell a:focus-visible,
+.lab-shell [tabindex]:focus-visible,
+.lab-coming-soon a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lab-shell-content:focus {
+  outline: none;
+}
+
+.lab-shell-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lab-shell-loading {
+  padding: var(--spacing-lg) var(--page-gutter);
+}
+
+.lab-shell-footer {
+  padding: var(--spacing-md) var(--page-gutter) var(--spacing-xl);
+  border-top: 1px solid var(--hairline);
+  color: var(--text-secondary);
+}
+.lab-shell-footer p {
+  margin: var(--spacing-xs) 0;
+  max-width: var(--measure);
+}
+.lab-shell-notice {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.lab-coming-soon {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--page-gutter);
+  color: var(--text-color);
+  background: var(--page-bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.lab-coming-soon h1 {
+  font-family: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-shell * {
+    scroll-behavior: auto;
+    transition: none;
+    animation: none;
+  }
+}
