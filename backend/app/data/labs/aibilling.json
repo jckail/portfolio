@@ -1,0 +1,22 @@
+{
+  "slug": "aibilling",
+  "project_key": "ai_billing",
+  "title": "AI Chat Billing System: interactive demo",
+  "description": "Interactive synthetic demo of an AI chat billing pipeline: token metering, cost by thread and model, and an invoice builder.",
+  "intro": [
+    "The AI Chat Billing System is a proof-of-concept for tracking and billing AI chat thread interactions with real-time cost metrics and analytics. It addresses the challenge of monitoring and billing AI model usage in chat-based applications, where understanding cost is critical for business planning.",
+    "The project provides token usage tracking and cost calculation, thread and message level cost breakdown, invoices, and an analytics dashboard with a 15-second refresh target. It is built from a FastAPI backend, an event collector, a Streamlit dashboard, Kafka, Redis and SQLite.",
+    "This page is an interactive demo of those ideas. It uses clearly labelled synthetic data and runs entirely in your browser."
+  ],
+  "features": [
+    "Simulated chat threads with token counts per message",
+    "Editable per-model price table",
+    "Metering pipeline view: ingest, aggregate, dashboard",
+    "Cost by hour, thread and model with accessible tables",
+    "Steady, spike and runaway-thread scenarios with a seed",
+    "Invoice builder with CSV export and print view"
+  ],
+  "repo": "https://github.com/jckail/ai_chat_billing_app",
+  "demo_notice": "All data is synthetic and the demo runs entirely in your browser; nothing is sent anywhere. Figures are not the project's real metrics.",
+  "updated": "2026-10-01"
+}
