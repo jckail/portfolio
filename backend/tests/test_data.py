@@ -140,3 +140,26 @@ def test_pointup_describes_the_typescript_monorepo():
     assert "Selenium" not in pointup.tech_stack
     assert "Next.js" in pointup.tech_stack
     assert "legacy" in pointup.description_detail.lower()
+
+
+def test_sabbatical_entry_needs_no_company_and_photos_exist():
+    experience = get_all_models()["experience"].root
+    role = experience["sabbatical"]
+    assert role.link is None and role.logoPath is None and role.tech_stack == []
+    for key, item in experience.items():
+        for photo in item.photos:
+            path = os.path.join(REPO_ROOT, "frontend", "public", photo.src.lstrip("/"))
+            assert os.path.isfile(path), f"{key}: photo missing: {photo.src}"
+            assert photo.alt.strip()
+
+
+def test_photo_src_must_be_a_site_image_path():
+    import pytest
+    from pydantic import ValidationError
+
+    from backend.app.models.experience import ExperiencePhoto
+
+    ExperiencePhoto(src="/images/sabbatical/a.webp", alt="x")
+    for bad in ("https://evil.example/a.png", "/etc/passwd", "../a.png", "javascript:1"):
+        with pytest.raises(ValidationError):
+            ExperiencePhoto(src=bad, alt="x")

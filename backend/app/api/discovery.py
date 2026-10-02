@@ -218,7 +218,7 @@ def snapshot_html() -> bytes:
     parts.append('<section id="seo-experience"><h2>Experience</h2>')
     for index, (_, job) in enumerate(_experience()):
         parts.append("<article>")
-        parts.append(f"<h3>{escape(job.title)}, {_a(str(job.link), job.company)}</h3>")
+        parts.append(f"<h3>{escape(job.title)}, {_a(str(job.link), job.company) if job.link else escape(job.company)}</h3>")
         parts.append(f"<p>{_date_range_html(job)} &middot; {escape(job.location)}</p>")
         parts.append(f"<p>{escape(job.company_description)}</p>")
         parts.append("<ul>" + "".join(f"<li>{escape(h)}</li>" for h in _visible_highlights(index, job)) + "</ul>")
@@ -301,7 +301,8 @@ def jsonld_graph() -> dict:
         job = next((j for _, j in _experience() if j.company == company), None)
         works_for: dict = {"@type": "Organization", "name": company}
         if job is not None:
-            works_for["url"] = str(job.link)
+            if job.link:
+                works_for["url"] = str(job.link)
         person["worksFor"] = works_for
 
     modified = last_modified_date()
@@ -387,7 +388,8 @@ def llms_txt() -> bytes:
         "",
     ]
     for _, job in _experience():
-        lines.append(f"- [{job.company}]({job.link}): {job.title}, {job.date}, {job.location}")
+        name = f"[{job.company}]({job.link})" if job.link else job.company
+        lines.append(f"- {name}: {job.title}, {job.date}, {job.location}")
     lines += ["", "## Projects", ""]
     for project in load_projects().root.values():
         lines.append(f"- [{project.title.strip()}]({project.link}): {project.description}")
@@ -418,7 +420,7 @@ def llms_full_txt() -> bytes:
         lines += [
             f"### {job.title}, {job.company}",
             "",
-            f"{job.date} | {job.location} | {job.link}",
+            " | ".join(part for part in (job.date, job.location, str(job.link) if job.link else "") if part),
             "",
             job.company_description,
             "",
@@ -468,10 +470,11 @@ def resume_json() -> bytes:
         item: dict = {
             "name": job.company,
             "location": job.location,
-            "position": job.title,
-            "url": str(job.link),
+            "position": job.resume_title or job.title,
             "highlights": _visible_highlights(index, job),
         }
+        if job.link:
+            item["url"] = str(job.link)
         if rng.start:
             item["startDate"] = rng.start
         if rng.end:

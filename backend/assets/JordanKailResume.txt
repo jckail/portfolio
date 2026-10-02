@@ -22,6 +22,10 @@ Prove Identity — Staff Software Engineer - Data — Denver, CO
 • Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.
 • Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds.
 
+Sabbatical — Career break (digital nomad) — Location independent
+10/2022 – 05/2023
+• Stepped away from corporate life to live a digital nomad life with my wife.
+
 Meta (Facebook) — Senior Data Engineer — Seattle, WA; Menlo Park, CA; Remote, USA
 01/2021 – 09/2022
 • Built AI/ML classifiers and the data, feature and evaluation pipelines around them.

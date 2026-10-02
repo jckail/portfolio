@@ -297,7 +297,7 @@ _STOPWORDS = frozenset(
 _TERM_RE = re.compile(r"[a-z0-9][a-z0-9.+#-]*")
 _TITLE_FIELDS = ("company", "title", "display_name", "name")
 _SKIP_FIELDS = frozenset({
-    "link", "weblink", "image", "logoPath", "full_portrait", "resume_name", "last_commit", "phone", "email",
+    "link", "weblink", "image", "logoPath", "src", "full_portrait", "resume_name", "last_commit", "phone", "email",
 })
 _COLLECTION_ORDER = ("experience", "projects", "skills", "about_me")
 

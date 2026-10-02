@@ -2,6 +2,13 @@
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 
+class ExperiencePhoto(BaseModel):
+    """One gallery image. `src` is a path under frontend/public/ (see docs/sabbatical-photos.md)."""
+    src: str = Field(..., min_length=1, pattern=r"^/images/[A-Za-z0-9._/-]+$", description="Site-relative image path")
+    alt: str = Field(..., min_length=1, description="Alternative text describing the image")
+    caption: str | None = Field(None, description="Optional visible caption")
+
+
 class ExperienceHighlight(BaseModel):
     """Model for experience highlights with detailed information."""
     company: str = Field(..., description="Name of the company")
@@ -9,11 +16,16 @@ class ExperienceHighlight(BaseModel):
     date: str = Field(..., description="Employment duration")
     location: str = Field(..., description="Job location")
     highlights: list[str] = Field(..., description="Key achievements and responsibilities")
-    link: HttpUrl = Field(..., description="Company website URL")
-    logoPath: str = Field(..., description="Path to company logo")
+    link: HttpUrl | None = Field(None, description="Company website URL; omitted for entries with no company (a career break)")
+    logoPath: str | None = Field(None, description="Path to company logo; omitted for entries with no company logo")
     company_description: str = Field(..., description="Brief description of the company")
-    tech_stack: list[str] = Field(..., description="Technologies used")
+    tech_stack: list[str] = Field(default_factory=list, description="Technologies used")
     more_highlights: list[str] = Field(..., description="Detailed list of achievements and responsibilities")
+    resume_title: str | None = Field(
+        None, description="Title the ATS resume (PDF, text, JSON Resume) uses instead of `title`, e.g. to label a career break"
+    )
+    photos: list["ExperiencePhoto"] = Field(default_factory=list, description="Optional gallery shown in the role dialog")
+
 
 class Experience(RootModel[dict[str, ExperienceHighlight]]):
     """All professional experiences, keyed by company slug.
