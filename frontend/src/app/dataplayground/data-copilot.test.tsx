@@ -307,6 +307,39 @@ describe('Data Copilot', () => {
 const startersLabel = 'Inspect my workspace and explain how records move through it.';
 
 describe('structured investigation evidence', () => {
+  it.each(['rejected execution', 'unknown network outcome'])(
+    'retires the single-use proposal after %s and directs fresh inspection',
+    async (outcome) => {
+      if (outcome === 'rejected execution') confirm.mockResolvedValueOnce(false);
+      else confirm.mockRejectedValueOnce(new Error('Connection interrupted'));
+      vi.mocked(postJson).mockResolvedValue({
+        text: 'Inspect this proposed change.',
+        limited: false,
+        events: [],
+        proposals: [
+          {
+            id: 'consumed-proposal',
+            action: { action: 'produce', partitions: 4 },
+            reason: 'Change partitions.',
+            expires_in_seconds: 600,
+          },
+        ],
+      });
+      render(<DataCopilot catalog={catalog} />);
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled()
+      );
+      fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Apply change' }));
+      await screen.findByText(/Outcome not confirmed/);
+      expect(screen.queryByRole('button', { name: 'Apply change' })).not.toBeInTheDocument();
+      expect(screen.getByText(/Outcome not confirmed/)).toHaveTextContent(
+        'Inspect the current workspace before requesting a new proposal'
+      );
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled();
+    }
+  );
   it('ignores a late confirmation failure after a same-token reset', async () => {
     let rejectConfirmation!: (reason: Error) => void;
     confirm.mockImplementationOnce(

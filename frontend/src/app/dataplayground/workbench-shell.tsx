@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import './workbench-shell.css';
 
@@ -79,7 +79,22 @@ export default function WorkbenchShell({
   };
   const [active, setActive] = useState<WorkbenchView>(resolveView);
   const [copilotOpen, setCopilotOpen] = useState(window.innerWidth >= 1180);
+  const copilotRail = useRef<HTMLElement>(null);
+  const copilotToggle = useRef<HTMLButtonElement>(null);
+  const explicitDisclosure = useRef<boolean | null>(null);
   const section = sections.find((item) => item.id === active)!;
+
+  useLayoutEffect(() => {
+    const requested = explicitDisclosure.current;
+    if (requested === null) return;
+    explicitDisclosure.current = null;
+    if (requested) {
+      copilotRail.current?.focus();
+      copilotRail.current?.scrollIntoView?.({ block: 'start', behavior: 'auto' });
+    } else {
+      copilotToggle.current?.focus();
+    }
+  }, [copilotOpen]);
 
   useEffect(() => {
     const navigate = () => {
@@ -136,9 +151,13 @@ export default function WorkbenchShell({
           </div>
           {copilot && (
             <button
+              ref={copilotToggle}
               aria-expanded={copilotOpen}
               aria-controls="workbench-copilot"
-              onClick={() => setCopilotOpen((value) => !value)}
+              onClick={() => {
+                explicitDisclosure.current = !copilotOpen;
+                setCopilotOpen(!copilotOpen);
+              }}
             >
               {copilotOpen ? 'Hide copilot' : 'Show copilot'}
             </button>
@@ -172,10 +191,12 @@ export default function WorkbenchShell({
       </div>
       {copilot && (
         <aside
+          ref={copilotRail}
           id="workbench-copilot"
           className="lab-workbench-copilot"
           aria-label="Data copilot"
           hidden={!copilotOpen}
+          tabIndex={-1}
         >
           {copilot}
         </aside>

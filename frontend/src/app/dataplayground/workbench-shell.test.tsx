@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import WorkbenchShell, { viewForHash } from './workbench-shell';
 
@@ -25,6 +25,8 @@ function navigate(hash: string) {
 beforeEach(() => window.history.replaceState(null, '', '/dataplayground'));
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   window.history.replaceState(null, '', '/dataplayground');
 });
 
@@ -76,5 +78,66 @@ describe('workbench navigation', () => {
       'aria-expanded',
       'true'
     );
+  });
+  it('focuses and scrolls an explicitly revealed mobile copilot, then returns focus on Hide', () => {
+    vi.stubGlobal('innerWidth', 390);
+    const scroll = vi.spyOn(Element.prototype, 'scrollIntoView');
+    const view = render(
+      <WorkbenchShell views={views} copilot={<input aria-label="Copilot prompt" />} />
+    );
+    const show = screen.getByRole('button', { name: 'Show copilot' });
+    show.focus();
+    fireEvent.click(show);
+    const rail = screen.getByRole('complementary', { name: 'Data copilot' });
+    expect(rail).toHaveFocus();
+    expect(rail).toHaveAttribute('tabindex', '-1');
+    expect(scroll).toHaveBeenCalledWith({ block: 'start', behavior: 'auto' });
+    expect(scroll.mock.instances).toContain(rail);
+    const prompt = screen.getByRole('textbox', { name: 'Copilot prompt' });
+    prompt.focus();
+    scroll.mockClear();
+    // New copilot content must not repeat the explicit disclosure's handoff.
+    view.rerender(
+      <WorkbenchShell
+        views={views}
+        copilot={
+          <>
+            <input aria-label="Copilot prompt" />
+            <p>New investigation evidence</p>
+          </>
+        }
+      />
+    );
+    const updatedPrompt = screen.getByRole('textbox', { name: 'Copilot prompt' });
+    updatedPrompt.focus();
+    view.rerender(
+      <WorkbenchShell
+        views={views}
+        copilot={
+          <>
+            <input aria-label="Copilot prompt" />
+            <p>Updated investigation evidence</p>
+          </>
+        }
+      />
+    );
+    expect(updatedPrompt).toHaveFocus();
+    expect(scroll).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Hide copilot' }));
+    expect(screen.getByRole('button', { name: 'Show copilot' })).toHaveFocus();
+    expect(screen.queryByRole('complementary', { name: 'Data copilot' })).not.toBeInTheDocument();
+  });
+  it('does not hijack focus or scroll when the desktop copilot starts open', () => {
+    vi.stubGlobal('innerWidth', 1280);
+    const scroll = vi.spyOn(Element.prototype, 'scrollIntoView');
+    const outside = document.createElement('button');
+    outside.textContent = 'Existing focus';
+    document.body.append(outside);
+    outside.focus();
+    render(<WorkbenchShell views={views} copilot={<p>Copilot content</p>} />);
+    expect(screen.getByRole('complementary', { name: 'Data copilot' })).toBeVisible();
+    expect(outside).toHaveFocus();
+    expect(scroll).not.toHaveBeenCalled();
+    outside.remove();
   });
 });

@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IncidentGuide } from './incident-guide';
@@ -99,6 +100,90 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('manual incident investigations', () => {
+  it('hands keyboard focus to each next action and the final observed status', async () => {
+    const user = userEvent.setup();
+    action.mockImplementation(async (request) => {
+      if (request.action === 'producer_stop')
+        return receipt({ ...state, streaming: { ...state.streaming, producer_running: false } });
+      if (request.action === 'consumer_pause')
+        return receipt({ ...state, streaming: { ...state.streaming, consumer_paused: true } });
+      if (request.action === 'produce')
+        return receipt({ ...state, streaming: { ...state.streaming, produced: 10, backlog: 10 } });
+      return receipt({ ...state, streaming: { ...state.streaming, consumed: 10, backlog: 0 } });
+    });
+    render(<IncidentGuide />);
+    open();
+    screen.getByRole('button', { name: 'Guide: stop producer' }).focus();
+    const nextActions = [
+      'Guide: pause consumer',
+      'Guide: produce lag batch',
+      'Guide: drain recovery batch',
+    ];
+    for (const name of nextActions) {
+      await user.keyboard('{Enter}');
+      await waitFor(() => expect(screen.getByRole('button', { name })).toHaveFocus());
+    }
+    await user.keyboard('{Enter}');
+    await waitFor(() => expect(screen.getByRole('status')).toHaveFocus());
+    expect(screen.getByRole('status')).toHaveTextContent('Investigation complete');
+    expect(action).toHaveBeenCalledTimes(4);
+  });
+  it('preserves focus moved elsewhere while an action is awaiting its receipt', async () => {
+    const user = userEvent.setup();
+    let resolve!: (value: RuntimeState) => void;
+    action.mockReturnValue(
+      new Promise<RuntimeState>((done) => {
+        resolve = done;
+      })
+    );
+    render(
+      <>
+        <button>Another control</button>
+        <IncidentGuide />
+      </>
+    );
+    open();
+    screen.getByRole('button', { name: 'Guide: stop producer' }).focus();
+    await user.keyboard('{Enter}');
+    const elsewhere = screen.getByRole('button', { name: 'Another control' });
+    elsewhere.focus();
+    await act(async () => {
+      resolve(receipt({ ...state, streaming: { ...state.streaming, producer_running: false } }));
+    });
+    expect(elsewhere).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Guide: pause consumer' })).toBeInTheDocument();
+  });
+  it('handles body focus after disabling the action but respects an intentional outside click', async () => {
+    const user = userEvent.setup();
+    let resolve!: (value: RuntimeState) => void;
+    action.mockImplementation(
+      () =>
+        new Promise<RuntimeState>((done) => {
+          resolve = done;
+        })
+    );
+    render(<IncidentGuide />);
+    open();
+    const origin = screen.getByRole('button', { name: 'Guide: stop producer' });
+    origin.focus();
+    await user.keyboard('{Enter}');
+    // Some browsers blur a button when it becomes disabled during the request.
+    origin.blur();
+    expect(document.body).toHaveFocus();
+    await act(async () => {
+      resolve(receipt({ ...state, streaming: { ...state.streaming, producer_running: false } }));
+    });
+    const next = screen.getByRole('button', { name: 'Guide: pause consumer' });
+    expect(next).toHaveFocus();
+    await user.keyboard('{Enter}');
+    next.blur();
+    fireEvent.pointerDown(document.body);
+    await act(async () => {
+      resolve(receipt({ ...state, streaming: { ...state.streaming, consumer_paused: true } }));
+    });
+    expect(document.body).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Guide: produce lag batch' })).not.toHaveFocus();
+  });
   it('makes one action per click and verifies lag and recovery from returned evidence', async () => {
     action.mockImplementation(async (request) => {
       if (request.action === 'producer_stop')
@@ -210,9 +295,7 @@ describe('manual incident investigations', () => {
     context();
     view.rerender(<IncidentGuide />);
     fireEvent.click(screen.getByRole('button', { name: 'Guide: drain recovery batch' }));
-    await waitFor(() =>
-      expect(screen.getByRole('status')).toHaveTextContent('Checkpoint not met')
-    );
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Checkpoint not met'));
     expect(screen.getAllByText(/Observed checkpoint:/)).toHaveLength(3);
     state = { ...state, streaming: { ...state.streaming, consumer_paused: true } };
     context();

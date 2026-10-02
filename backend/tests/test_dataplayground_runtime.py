@@ -294,3 +294,125 @@ def test_shutdown_helper_never_initializes_an_unused_runtime():
     assert service.get_runtime.cache_info().currsize == 0
     with pytest.raises(KeyError):
         manager.state(token)
+
+
+@pytest.fixture()
+def budget_client(monkeypatch, runtime):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from backend.app.api import dataplayground_runtime_routes as routes
+    from backend.app.services import dataplayground_copilot as copilot
+    from backend.app.utils.rate_limit import SlidingWindowLimiter
+
+    monkeypatch.setattr(routes, "get_runtime", lambda: runtime)
+
+    def prohibit_provider(*args, **kwargs):
+        raise AssertionError("Budget regression tests must not call a model provider")
+
+    monkeypatch.setattr(copilot, "build_provider", prohibit_provider)
+    for name in ("_sessions", "_operations", "_chat"):
+        monkeypatch.setattr(
+            routes, name, SlidingWindowLimiter(max_events=2, window_seconds=60, global_max_events=2, name="test-budget")
+        )
+    token = session(runtime)
+    app = FastAPI()
+    app.include_router(routes.router, prefix="/api")
+    with TestClient(app) as client:
+        yield client, {"Authorization": "Bearer " + token}, routes
+
+
+@pytest.mark.parametrize("operation", ["action", "query"])
+@pytest.mark.parametrize("invalid", ["json", "contract", "oversized", "content_type"])
+def test_mutation_invalid_bodies_consume_request_budget(budget_client, operation, invalid):
+    client, headers, routes = budget_client
+    url = "/api/dataplayground/runtime/" + operation
+    inputs = {
+        "json": {"content": b"{", "headers": {**headers, "Content-Type": "application/json"}},
+        "contract": {"json": {"unknown": 1}, "headers": headers},
+        "oversized": {
+            "content": iter([b" " * 30000, b" " * 30000]),
+            "headers": {**headers, "Content-Type": "application/json"},
+        },
+        "content_type": {"content": b"{}", "headers": {**headers, "Content-Type": "text/plain"}},
+    }
+    expected = {"json": 422, "contract": 422, "oversized": 413, "content_type": 415}[invalid]
+    for _ in range(2):
+        inputs["oversized"]["content"] = iter([b" " * 30000, b" " * 30000])
+        response = client.post(url, **inputs[invalid])
+        assert response.status_code == expected and response.headers["cache-control"] == "no-store"
+    blocked = client.post(url, headers=headers, json={})
+    assert blocked.status_code == 429 and blocked.headers["cache-control"] == "no-store"
+    assert len(routes._operations._global) == 2
+
+
+@pytest.mark.parametrize("operation", ["action", "query"])
+def test_mutation_authorization_precedes_body_and_is_budgeted(budget_client, monkeypatch, operation):
+    client, _, routes = budget_client
+
+    async def prohibit_body(*args, **kwargs):
+        raise AssertionError("Unauthorized or rate-limited requests must not read their body")
+
+    monkeypatch.setattr(routes, "body", prohibit_body)
+    url = "/api/dataplayground/runtime/" + operation
+    for _ in range(2):
+        response = client.post(url, content=b"malformed")
+        assert response.status_code == 401 and response.headers["cache-control"] == "no-store"
+    assert client.post(url, content=b"malformed").status_code == 429
+    assert len(routes._operations._global) == 2
+
+
+@pytest.mark.parametrize(
+    "suffix,limiter_name",
+    [("/runtime/session", "_sessions"), ("/copilot/chat", "_chat"), ("/copilot/confirm", "_operations")],
+)
+def test_other_mutation_paths_already_budget_invalid_contracts(budget_client, suffix, limiter_name):
+    client, headers, routes = budget_client
+    for _ in range(2):
+        assert client.post("/api/dataplayground" + suffix, headers=headers, json={"unknown": 1}).status_code == 422
+    assert client.post("/api/dataplayground" + suffix, headers=headers, json={"unknown": 1}).status_code == 429
+    assert len(getattr(routes, limiter_name)._global) == 2
+
+
+def test_valid_mutations_charge_once_and_share_read_close_budget(budget_client):
+    client, headers, routes = budget_client
+    routes._operations.max_events = routes._operations.global_max_events = 4
+    root = "/api/dataplayground/runtime"
+    assert client.post(root + "/action", headers=headers, json={"action": "produce"}).status_code == 200
+    assert client.post(root + "/query", headers=headers, json={"sql": "SELECT COUNT(*) FROM events"}).status_code == 200
+    assert client.get(root + "/state", headers=headers).status_code == 200
+    assert client.post(root + "/close", headers=headers).status_code == 200
+    assert len(routes._operations._global) == 4
+    assert client.get(root + "/state", headers=headers).status_code == 429
+
+
+def test_streamed_body_rejects_chunk_before_copying_into_accumulator(monkeypatch):
+    import asyncio
+    from types import SimpleNamespace
+
+    from fastapi import HTTPException
+
+    from backend.app.api import dataplayground_runtime_routes as routes
+
+    buffers = []
+
+    class BoundedAccumulator(bytearray):
+        def __init__(self):
+            super().__init__()
+            buffers.append(self)
+
+        def extend(self, chunk):
+            assert len(self) + len(chunk) <= 4, "Oversized input must be rejected before copying"
+            super().extend(chunk)
+
+    async def chunks():
+        yield b"abc"
+        yield b"de"
+
+    monkeypatch.setattr(routes, "bytearray", BoundedAccumulator, raising=False)
+    request = SimpleNamespace(headers={"content-type": "application/json"}, stream=chunks)
+    with pytest.raises(HTTPException) as caught:
+        asyncio.run(routes.body(request, QueryRequest, max_bytes=4))
+    assert caught.value.status_code == 413
+    assert caught.value.headers["Cache-Control"] == "no-store"
+    assert bytes(buffers[0]) == b"abc"

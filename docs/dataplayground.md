@@ -126,6 +126,9 @@ commands use bounded, seven-day synthetic inputs and perform no external I/O.
 The workbench now has focused Overview, Operations, SQL console, Lifecycle,
 Architecture, and Explore views. Legacy section links still reveal the right view;
 changing views preserves the selected scenario, query, and exploration state.
+Explicitly showing the copilot focuses and scrolls to its landmark, including when
+the mobile layout places it below the active panel. Hiding it returns focus to the
+toggle; initial desktop opening and later evidence updates do not move focus.
 
 Create workspace explicitly allocates a visitor-specific SQLite database. The initial
 warehouse contains the saved **event sample**, not the full lifecycle run. Independent
@@ -159,6 +162,10 @@ stops production, pauses consumption, produces one controlled batch, and drains 
 publication, then reruns without the injected fault and checks publication and SQL
 contracts. Checkpoints record action responses rather than continuing health checks.
 Restart guide clears those checkpoints; it does not reset data or controls.
+After an observed checkpoint, keyboard focus moves to the next action or the final
+status when the originating button still owns focus. Moving focus or clicking
+elsewhere during the request cancels that handoff; workspace replacement or unmount
+also clears it.
 
 The execution summary distinguishes failed attempts, successful retries, blocked
 tasks, publication, and model contract outcomes. Accepted warehouse inserts advance
@@ -219,6 +226,12 @@ ceiling; omitted samples and shortened SQL are marked explicitly.
 Proposed changes are workspace-bound,
 expire, and require a separate Apply click. Dismiss performs no write. Confirmations
 are consumed atomically once; the model never applies a proposal itself.
+Once the server consumes a confirmation, it stays consumed even if execution fails.
+The browser retires an attempted confirmation. If the response is lost, it cannot
+establish whether the change ran; it marks the outcome unknown rather than offering
+another Apply for the same confirmation. Inspect the current workspace before
+requesting a fresh proposal. An unsuccessful or uncertain confirmation is not
+evidence that no mutation occurred.
 Proposals also bind to their workspace generation. Confirmation rejects an old
 proposal after reset before applying its action. Investigations retain their starting
 generation across tool calls and stop safely when reset replaces the workspace.
@@ -237,3 +250,20 @@ Offline verification includes the genuine Pi loop with a fake provider, opaque
 provider tool-state round trips, query evidence, proposal isolation/single use,
 cancellation, budgets, SQL limits, lifecycle cleanup, UI races, and browser controls.
 CI audits and tests the Node package as well as the normal Python/frontend checks.
+
+## Optional next capabilities
+
+Native Airflow, Kafka, and dbt integration remains deferred. A reproducible isolated
+stack would need explicit connection status, server-controlled configuration, and
+adapters preserving the current bounded controls and result contracts. It would
+extend the running local scheduler, event log, and SQL transformations; those tools
+already execute real work without native daemons.
+
+Bounded named run comparison could preserve failure, repair, contract, and publication
+evidence across investigations. Portable investigation evidence and offline action
+replay could extend today's local SQL-result JSON exports, with explicit versions,
+input provenance, and limits. These capabilities are not implemented. Representative
+scale measurements, query plans, index tradeoffs, and compute/retention costs would
+provide evidence before selecting larger storage or execution systems. The graph and
+handcrafted vector dataset and their exploration are already implemented; native
+graph/vector stores and learned embeddings are separate optional directions.
