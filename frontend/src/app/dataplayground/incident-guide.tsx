@@ -159,7 +159,6 @@ function Guide() {
   const focusOwnership = useRef<{
     origin: HTMLButtonElement;
     owned: boolean;
-    advance: boolean;
   } | null>(null);
   const guide = guides[incident];
   const current = checkpoints.length;
@@ -183,7 +182,7 @@ function Guide() {
   }, []);
   useLayoutEffect(() => {
     const ownership = focusOwnership.current;
-    if (!ownership?.advance) return;
+    if (pending || loading || !ownership) return;
     focusOwnership.current = null;
     // Disabling or removing the old button may leave body focused. A move to
     // another control or a pointer click elsewhere gives up the handoff.
@@ -192,13 +191,12 @@ function Guide() {
       (document.activeElement === ownership.origin || document.activeElement === document.body)
     )
       (actionButton.current || status.current)?.focus();
-  }, [current]);
+  }, [current, pending, loading]);
   async function runStep(origin: HTMLButtonElement) {
     if (!state || loading || pending || current >= guide.steps.length) return;
     const ownership = {
       origin,
       owned: document.activeElement === origin,
-      advance: false,
     };
     focusOwnership.current = ownership;
     const step = guide.steps[current];
@@ -215,7 +213,6 @@ function Guide() {
       }
       const observed = step.observe(state, after);
       if (observed.complete) {
-        ownership.advance = true;
         setCheckpoints((previous) => [...previous, observed.detail]);
       } else
         setFeedback(
@@ -224,7 +221,6 @@ function Guide() {
     } catch {
       setFeedback('The action could not finish. Review the workspace error and retry this step.');
     } finally {
-      if (!ownership.advance && focusOwnership.current === ownership) focusOwnership.current = null;
       setPending(false);
     }
   }

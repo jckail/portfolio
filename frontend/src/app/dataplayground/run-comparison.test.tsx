@@ -138,12 +138,8 @@ describe('observed-state comparison', () => {
     });
     expect(screen.getByText('Select two distinct snapshots.')).toBeInTheDocument();
     selectPair();
-    expect(screen.getByRole('combobox', { name: 'Before snapshot' })).toHaveValue(
-      'before'
-    );
-    expect(screen.getByRole('combobox', { name: 'After snapshot' })).toHaveValue(
-      'after'
-    );
+    expect(screen.getByRole('combobox', { name: 'Before snapshot' })).toHaveValue('before');
+    expect(screen.getByRole('combobox', { name: 'After snapshot' })).toHaveValue('after');
     const counters = screen.getByRole('region', { name: 'Snapshot counter differences' });
     expect(
       within(counters).getByRole('row', { name: 'Inserted records 0 10 +10' })
@@ -208,5 +204,92 @@ describe('observed-state comparison', () => {
     expect(
       data.comparison.metrics.find((metric: { name: string }) => metric.name === 'inserted').delta
     ).toBe(10);
+  });
+  it('disambiguates duplicate names in options, deletion controls, and displayed captures without renaming unique snapshots', () => {
+    const duplicateBefore = { ...before, label: 'Checkpoint' };
+    const duplicateAfter = { ...after, label: 'Checkpoint' };
+    const unique = { ...before, id: 'unique', label: 'Unique capture' };
+    vi.mocked(useRunSnapshots).mockReturnValue({
+      snapshots: [duplicateBefore, duplicateAfter, unique],
+      capture,
+      remove,
+      clear,
+    });
+    render(<RunComparison />);
+    const selector = screen.getByLabelText('Before snapshot', { exact: true });
+    expect(within(selector).getByRole('option', { name: 'Checkpoint (before)' })).toHaveValue(
+      'before'
+    );
+    expect(within(selector).getByRole('option', { name: 'Checkpoint (after)' })).toHaveValue(
+      'after'
+    );
+    expect(within(selector).getByRole('option', { name: 'Unique capture' })).toHaveValue('unique');
+    expect(screen.getByText('Checkpoint (before)', { selector: 'strong' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete snapshot Checkpoint (after)' }));
+    expect(remove).toHaveBeenCalledWith('after');
+    expect(
+      screen.getByRole('button', { name: 'Delete snapshot Unique capture' })
+    ).toBeInTheDocument();
+    selectPair();
+    const executions = screen
+      .getByRole('region', { name: 'Observed-state snapshots' })
+      .querySelector<HTMLElement>('.lab-comparison-executions');
+    expect(executions).toBeInTheDocument();
+    expect(
+      within(executions!).getByRole('heading', { name: 'Checkpoint (before)' })
+    ).toBeInTheDocument();
+  });
+  it('explains absent model executions instead of rendering an empty model comparison table', () => {
+    const unexecuted = { ...before, id: 'after', label: 'After' };
+    vi.mocked(useRunSnapshots).mockReturnValue({
+      snapshots: [before, unexecuted],
+      capture,
+      remove,
+      clear,
+    });
+    render(<RunComparison />);
+    selectPair();
+    expect(
+      screen.getByText('No SQL model executions recorded in either snapshot.')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: 'Snapshot model contracts' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Inspect recorded contract tests')).not.toBeInTheDocument();
+  });
+  it('distinguishes empty tests from passed tests and exposes the recorded before/after contract evidence', () => {
+    const noTests = {
+      ...before,
+      models: { ...after.models, runs: [{ ...after.models.runs[0], tests: [] }] },
+    };
+    const failedTest = {
+      ...after,
+      models: {
+        ...after.models,
+        runs: [
+          {
+            ...after.models.runs[0],
+            status: 'failed' as const,
+            tests: [{ name: 'grain', status: 'fail' as const, failed_rows: 7 }],
+          },
+        ],
+      },
+    };
+    vi.mocked(useRunSnapshots).mockReturnValue({
+      snapshots: [noTests, failedTest],
+      capture,
+      remove,
+      clear,
+    });
+    render(<RunComparison />);
+    selectPair();
+    const summary = screen.getByRole('region', { name: 'Snapshot model contracts' });
+    expect(summary).toHaveTextContent('No recorded contract tests · success');
+    expect(summary).not.toHaveTextContent('0 / 0 pass');
+    fireEvent.click(screen.getByText('Inspect recorded contract tests'));
+    expect(screen.getByText('No recorded contract tests.')).toBeVisible();
+    const evidence = screen.getByRole('region', { name: 'After runtime_daily contract evidence' });
+    expect(within(evidence).getByRole('row', { name: 'grain fail 7' })).toBeVisible();
+    expect(capture).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { parseQueryEvidence, QueryEvidence, queryEvidenceDocument } from './query-evidence';
 
@@ -12,6 +12,11 @@ const result = {
   workspace_generation: 2,
   data_revision: 7,
 };
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('query evidence', () => {
   it('distinguishes the displayed sample, returned limit and exact execution provenance', () => {
@@ -71,5 +76,41 @@ describe('query evidence', () => {
       result,
     });
     expect(JSON.stringify(document)).not.toContain('never-export');
+  });
+  it('renders and downloads a clipped cell at the shared text bound without suggesting a larger row limit', async () => {
+    const clipped = 'x'.repeat(1999) + '…';
+    const toolResult = {
+      sql: "SELECT 'long text' AS value",
+      columns: ['value'],
+      rows: [[clipped]],
+      row_count: 1,
+      truncated: true,
+      row_limit: 100,
+      workspace_generation: 1,
+      data_revision: 0,
+    };
+    const parsed = parseQueryEvidence(toolResult);
+    expect(parsed).not.toBeNull();
+    expect(parseQueryEvidence({ ...toolResult, rows: [[clipped + 'x']] })).toBeNull();
+    expect(parseQueryEvidence({ ...toolResult, rows: [['🧪'.repeat(1999) + '…']] })).not.toBeNull();
+    expect(parseQueryEvidence({ ...toolResult, rows: [['🧪'.repeat(2001)]] })).toBeNull();
+    const makeUrl = vi.fn<(value: Blob) => string>(() => 'blob:clipped-query');
+    vi.stubGlobal('URL', { createObjectURL: makeUrl, revokeObjectURL: vi.fn() });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    render(<QueryEvidence {...parsed!} />);
+    expect(screen.getByRole('cell')).toHaveTextContent(clipped);
+    expect(screen.getByText(/row, cell text, or output-size limits/)).toBeVisible();
+    expect(screen.queryByText(/increase the row limit/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Download query evidence' }));
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(click.mock.instances[0]).toHaveAttribute('download', 'dataplayground-query-evidence.json');
+    const reader = new FileReader();
+    reader.readAsText(makeUrl.mock.calls[0][0]);
+    await waitFor(() => expect(reader.readyState).toBe(FileReader.DONE));
+    const document = JSON.parse(String(reader.result));
+    expect(document.result.rows).toEqual([[clipped]]);
+    expect(document.result.rows[0][0]).toHaveLength(2000);
+    expect(document.result.truncated).toBe(true);
+    expect(document.result.row_count).toBe(1);
   });
 });

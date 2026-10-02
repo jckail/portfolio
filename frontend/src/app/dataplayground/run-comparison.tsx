@@ -38,7 +38,9 @@ const difference = (value: number | null) =>
   value === null ? 'Not comparable' : `${value > 0 ? '+' : ''}${value.toLocaleString('en-US')}`;
 const contracts = (model: RunSnapshot['models']['runs'][number] | null) =>
   model
-    ? `${model.tests.filter((test) => test.status === 'pass').length} / ${model.tests.length} pass · ${model.status}`
+    ? model.tests.length
+      ? `${model.tests.filter((test) => test.status === 'pass').length} / ${model.tests.length} pass · ${model.status}`
+      : `No recorded contract tests · ${model.status}`
     : 'Not present';
 
 function Comparison({
@@ -50,6 +52,10 @@ function Comparison({
 }) {
   const { snapshots, capture, remove, clear } = store;
   const selectorId = useId();
+  const snapshotLabel = (snapshot: RunSnapshot) =>
+    snapshots.some((other) => other.id !== snapshot.id && other.label === snapshot.label)
+      ? `${snapshot.label} (${snapshot.id})`
+      : snapshot.label;
   const [label, setLabel] = useState('');
   const [beforeId, setBeforeId] = useState('');
   const [afterId, setAfterId] = useState('');
@@ -132,7 +138,7 @@ function Comparison({
             {snapshots.map((snapshot) => (
               <li key={snapshot.id}>
                 <div>
-                  <strong>{snapshot.label}</strong>
+                  <strong>{snapshotLabel(snapshot)}</strong>
                   <p>
                     <time dateTime={snapshot.capturedAt}>{snapshot.capturedAt}</time> ·{' '}
                     {snapshot.scenario_id} · Generation {snapshot.workspace_generation ?? 'Unknown'}{' '}
@@ -140,10 +146,10 @@ function Comparison({
                   </p>
                 </div>
                 <button
-                  aria-label={`Delete snapshot ${snapshot.label}`}
+                  aria-label={`Delete snapshot ${snapshotLabel(snapshot)}`}
                   onClick={() => {
                     remove(snapshot.id);
-                    setNotice(`Deleted ${snapshot.label}.`);
+                    setNotice(`Deleted ${snapshotLabel(snapshot)}.`);
                     nameInput.current?.focus();
                   }}
                 >
@@ -174,7 +180,7 @@ function Comparison({
                 <option value="">Choose a before observation</option>
                 {snapshots.map((snapshot) => (
                   <option key={snapshot.id} value={snapshot.id}>
-                    {snapshot.label}
+                    {snapshotLabel(snapshot)}
                   </option>
                 ))}
               </select>
@@ -189,7 +195,7 @@ function Comparison({
                 <option value="">Choose an after observation</option>
                 {snapshots.map((snapshot) => (
                   <option key={snapshot.id} value={snapshot.id}>
-                    {snapshot.label}
+                    {snapshotLabel(snapshot)}
                   </option>
                 ))}
               </select>
@@ -336,7 +342,7 @@ function Comparison({
                 <div className="lab-comparison-executions">
                   {[before, after].map((snapshot) => (
                     <article key={snapshot.id}>
-                      <h5>{snapshot.label}</h5>
+                      <h5>{snapshotLabel(snapshot)}</h5>
                       <p>
                         DAG:{' '}
                         {snapshot.dag.trace.length
@@ -368,7 +374,7 @@ function Comparison({
                     </article>
                   ))}
                 </div>
-                {pair.compatible && (
+                {pair.compatible && pair.models.length > 0 && (
                   <div
                     className="lab-table-scroll"
                     role="region"
@@ -401,6 +407,60 @@ function Comparison({
                       </tbody>
                     </table>
                   </div>
+                )}
+                {!before.models.runs.length && !after.models.runs.length ? (
+                  <p>No SQL model executions recorded in either snapshot.</p>
+                ) : (
+                  <details className="lab-comparison-contract-evidence">
+                    <summary>Inspect recorded contract tests</summary>
+                    <p className="lab-note">
+                      Read-only tests recorded at capture. Evidence is limited to the captured model
+                      and test entries; freshness and any omitted entries are disclosed above.
+                    </p>
+                    {[before, after].map((snapshot) => (
+                      <article key={snapshot.id}>
+                        <h5>{snapshotLabel(snapshot)}</h5>
+                        {!snapshot.models.runs.length && <p>No recorded SQL model runs.</p>}
+                        {snapshot.models.runs.map((model) => (
+                          <div key={model.name}>
+                            <h6>{model.name}</h6>
+                            {!model.tests.length ? (
+                              <p>No recorded contract tests.</p>
+                            ) : (
+                              <div
+                                className="lab-table-scroll"
+                                role="region"
+                                aria-label={`${snapshotLabel(snapshot)} ${model.name} contract evidence`}
+                                tabIndex={0}
+                              >
+                                <table>
+                                  <caption>
+                                    {snapshotLabel(snapshot)}: {model.name} recorded contracts
+                                  </caption>
+                                  <thead>
+                                    <tr>
+                                      <th scope="col">Contract</th>
+                                      <th scope="col">Status</th>
+                                      <th scope="col">Failed rows</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {model.tests.map((test, index) => (
+                                      <tr key={`${test.name}-${index}`}>
+                                        <th scope="row">{test.name}</th>
+                                        <td>{test.status}</td>
+                                        <td>{number(test.failed_rows)}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </article>
+                    ))}
+                  </details>
                 )}
                 <button onClick={exportPair}>Download comparison evidence</button>
               </>

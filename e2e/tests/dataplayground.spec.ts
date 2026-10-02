@@ -275,7 +275,11 @@ test('guided incidents verify recovery and downloaded SQL retains execution prov
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('an ambiguous copilot confirmation retires its card and invites fresh inspection', async ({ page }) => {
+test('ambiguous confirmations retire and workspace loss clears evidence before fresh recreation', async ({ page }) => {
+  let queryRequests = 0;
+  page.on('request', request => {
+    if (request.url().endsWith('/api/dataplayground/runtime/query') && request.method() === 'POST') queryRequests++;
+  });
   await page.route('**/api/dataplayground/copilot/status', route => route.fulfill({ json: { available: true } }));
   await page.route('**/api/dataplayground/copilot/chat', route => route.fulfill({ json: {
     text: 'Inspect state before applying this consumer change.', events: [], limited: false,
@@ -287,7 +291,9 @@ test('an ambiguous copilot confirmation retires its card and invites fresh inspe
     await route.abort('failed');
   });
   await page.goto('/dataplayground');
+  const allocation = page.waitForResponse(response => response.url().endsWith('/api/dataplayground/runtime/session') && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  const capability = (await (await allocation).json()).token as string;
   await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the consumer and propose a pause.');
   await page.getByRole('button', { name: 'Investigate', exact: true }).click();
   await page.getByRole('button', { name: 'Apply change', exact: true }).click();
@@ -295,6 +301,56 @@ test('an ambiguous copilot confirmation retires its card and invites fresh inspe
   await expect(page.getByRole('button', { name: 'Apply change', exact: true })).toHaveCount(0);
   expect(confirmations).toBe(1);
   await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the current consumer state.');
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  const snapshots = page.getByRole('region', { name: 'Observed-state snapshots', exact: true });
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('Before workspace loss');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  await expect(snapshots.getByRole('button', { name: 'Delete snapshot Before workspace loss', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  await page.getByLabel('SQL query', { exact: true }).fill('SELECT 17 AS before_workspace_loss');
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  const queryResults = page.getByRole('region', { name: 'SQL query results', exact: true });
+  await expect(queryResults).toContainText('before_workspace_loss');
+  await expect(queryResults.getByRole('cell')).toHaveText('17');
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByRole('button', { name: 'Stop producer', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause consumer', exact: true }).click();
+  await page.getByLabel('Batch size', { exact: true }).fill('3');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  await expect(page.getByText(/^These query results are historical:/)).toContainText('recorded at data revision 0');
+  await expect(page.getByText(/^These query results are historical:/)).toContainText('current workspace is at revision 3');
+  await expect(queryResults.getByRole('cell')).toHaveText('17');
+  expect(queryRequests).toBe(1);
+  await expect(page.getByText(/^Outcome not confirmed/)).toBeVisible();
+  // Prevent an interval refresh from racing the explicit workspace-loss check.
+  await page.evaluate(() => Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' }));
+  const lost = page.waitForResponse(response => response.url().endsWith('/api/dataplayground/runtime/state') && response.status() === 410);
+  const closed = await page.request.post('/api/dataplayground/runtime/close', { headers: { Authorization: `Bearer ${capability}` } });
+  expect(closed.status()).toBe(200);
+  await page.getByRole('button', { name: 'Refresh workspace', exact: true }).click();
+  await lost;
+  await expect(page.getByRole('alert').first()).toContainText('workspace expired');
+  await expect(queryResults).toHaveCount(0);
+  await expect(page.getByText(/^Outcome not confirmed/)).toHaveCount(0);
+  await expect(page.getByText('Inspect state before applying this consumer change.', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Apply change', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeDisabled();
+  await expect(page.getByText(/^These query results are historical:/)).toHaveCount(0);
+  await page.evaluate(() => Reflect.deleteProperty(document, 'visibilityState'));
+  const replacement = page.waitForResponse(response => response.url().endsWith('/api/dataplayground/runtime/session') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  const fresh = await (await replacement).json();
+  expect(fresh.token).not.toBe(capability);
+  expect(fresh.state.workspace_generation).toBe(1);
+  expect(fresh.state.data_revision).toBe(0);
+  expect(fresh.state.streaming.produced).toBe(0);
+  await expect(queryResults).toHaveCount(0);
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await expect(snapshots.getByText('No snapshots captured in this workspace.', { exact: true })).toBeVisible();
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect my new workspace.');
   await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
 });
 
@@ -367,6 +423,29 @@ test('named snapshots compare controlled counts, preserve observations and exclu
   await page.getByRole('button', { name: 'Refresh workspace', exact: true }).click();
   await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
   expect(await downloadComparison()).toEqual(evidence);
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('Before');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  const beforeSelection = snapshots.getByLabel('Before snapshot', { exact: true });
+  const duplicateOptions = beforeSelection.getByRole('option', { name: /^Before \(snapshot-\d+\)$/ });
+  await expect(duplicateOptions).toHaveCount(2);
+  const duplicateIds = await duplicateOptions.evaluateAll(options => options.map(option => (option as HTMLOptionElement).value));
+  expect(duplicateIds).toContain(evidence.before.id);
+  expect(await duplicateOptions.allTextContents()).toEqual(duplicateIds.map(id => `Before (${id})`));
+  await expect(beforeSelection).toHaveValue(evidence.before.id);
+  await expect(snapshots.getByLabel('After snapshot', { exact: true })).toHaveValue(evidence.after.id);
+  for (const id of duplicateIds) {
+    await expect(snapshots.getByRole('button', { name: `Delete snapshot Before (${id})`, exact: true })).toBeVisible();
+  }
+  await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+  expect(await downloadComparison()).toEqual(evidence);
+  await snapshots.getByText('Inspect recorded contract tests', { exact: true }).click();
+  const recordedModel = evidence.after.models.runs[0];
+  const recordedContracts = snapshots.getByRole('region', { name: `After ${recordedModel.name} contract evidence`, exact: true });
+  await expect(recordedContracts).toBeVisible();
+  for (const contract of recordedModel.tests) {
+    const row = recordedContracts.getByRole('row').filter({ has: page.getByRole('rowheader', { name: contract.name, exact: true }) });
+    await expect(row.getByRole('cell')).toHaveText([contract.status, String(contract.failed_rows)]);
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   for (let theme = 0; theme < 2; theme++) {
     await page.getByRole('button', { name: /Use .* theme/ }).click();

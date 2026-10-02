@@ -323,7 +323,8 @@ def test_readonly_sql_unknown_tools_expired_capabilities_and_bounded_samples(set
 
 def test_provider_auth_failure_and_unknown_exception_are_public_safe(setup, monkeypatch):
     runtime, _ = setup
-    for failure in [ProviderAuthError("SECRET provider response"), RuntimeError("SECRET provider exception")]:
+    for failure in [ProviderAuthError("SECRET provider response"), RuntimeError("SECRET provider exception"),
+                    KeyError("SECRET provider key")]:
         provider = FakeProvider([[failure]])
         use_provider(monkeypatch, provider)
         with pytest.raises(copilot.CopilotUnavailable) as caught:
@@ -331,6 +332,34 @@ def test_provider_auth_failure_and_unknown_exception_are_public_safe(setup, monk
         assert str(caught.value) == "" and "SECRET" not in str(caught.value)
         assert provider.closed and not copilot._active_workspaces
         assert copilot._tokens_reserved == 0
+
+
+@pytest.mark.parametrize("lifecycle", ["close", "expire"])
+def test_mid_investigation_workspace_loss_retains_410_classification_and_cleanup(setup, monkeypatch, lifecycle):
+    runtime, _ = setup
+    now = [runtime.clock()]
+    monkeypatch.setattr(runtime, "clock", lambda: now[0])
+    token = session(runtime)
+
+    class WorkspaceLossProvider(FakeProvider):
+        async def stream(self, request):
+            if lifecycle == "close":
+                runtime.delete(token)
+            else:
+                now[0] += runtime.ttl + 1
+            async for event in super().stream(request):
+                yield event
+
+    provider = WorkspaceLossProvider([
+        [ToolCall("call_0", "inspect_workspace", {}), Usage(5, 5), Finish("tool_use")],
+    ])
+    use_provider(monkeypatch, provider)
+    with pytest.raises(copilot.CopilotWorkspaceExpired) as failure:
+        run_chat(token)
+    assert isinstance(failure.value, KeyError)  # Existing route maps capability failures to HTTP 410.
+    assert token not in str(failure.value)
+    assert provider.closed and not copilot._active_workspaces
+    assert copilot._tokens_reserved == 0 and not copilot._pending
 
 
 def test_budget_reservation_blocks_provider_before_spend_and_usage_count_is_cumulative(setup, monkeypatch):
