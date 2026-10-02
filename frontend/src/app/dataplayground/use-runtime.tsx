@@ -3,7 +3,9 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { ReactNode } from 'react';
 
 import { ApiError, endpoints, getJson, postJson } from '../../shared/utils/api';
+import { createRunSnapshot, MAX_SNAPSHOTS } from './run-snapshots';
 
+import type { RunSnapshot } from './run-snapshots';
 import type {
   QueryRequest,
   QueryResult,
@@ -24,7 +26,13 @@ interface RuntimeContextValue {
   refresh: () => Promise<void>;
   confirm: (proposalId: string) => Promise<boolean>;
 }
-const RuntimeContext = createContext<RuntimeContextValue | null>(null);
+interface SnapshotContextValue {
+  snapshots: readonly RunSnapshot[];
+  capture: (label: string) => boolean;
+  remove: (id: string) => void;
+  clear: () => void;
+}
+const RuntimeContext = createContext<(RuntimeContextValue & SnapshotContextValue) | null>(null);
 const authorization = (token: string) => ({
   headers: { Authorization: `Bearer ${token}` },
   cache: 'no-store' as const,
@@ -46,12 +54,99 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
   const busy = useRef(false);
   const mounted = useRef(true);
   const polling = useRef(false);
+  const acceptedState = useRef<RuntimeState | null>(null);
+  const storedSnapshots = useRef<{
+    token: string;
+    workspaceGeneration: number | undefined;
+    values: readonly RunSnapshot[];
+  } | null>(null);
+  const snapshotSequence = useRef(0);
+  const [, renderSnapshots] = useState(0);
+  const displayedState = useRef(state);
+  displayedState.current = state;
+  const displayedGeneration = generation.current;
+  const clear = useCallback(() => {
+    if (
+      !mounted.current ||
+      current.current?.token !== session?.token ||
+      generation.current !== displayedGeneration ||
+      acceptedState.current?.workspace_generation !== state?.workspace_generation
+    )
+      return;
+    storedSnapshots.current = null;
+    renderSnapshots((value) => value + 1);
+  }, [session?.token, state?.workspace_generation, displayedGeneration]);
+  const capture = useCallback(
+    (label: string) => {
+      const name = label.trim();
+      if (
+        !mounted.current ||
+        busy.current ||
+        !session ||
+        !state ||
+        !name ||
+        name.length > 60 ||
+        current.current?.token !== session.token ||
+        generation.current !== displayedGeneration ||
+        displayedState.current !== state ||
+        acceptedState.current !== state
+      )
+        return false;
+      const previous = storedSnapshots.current;
+      const values =
+        previous?.token === session.token &&
+        previous.workspaceGeneration === state.workspace_generation
+          ? previous.values
+          : [];
+      if (values.length >= MAX_SNAPSHOTS) return false;
+      const snapshot = createRunSnapshot(state, name, {
+        id: `snapshot-${++snapshotSequence.current}`,
+        capturedAt: new Date().toISOString(),
+      });
+      storedSnapshots.current = {
+        token: session.token,
+        workspaceGeneration: state.workspace_generation,
+        values: [...values, snapshot],
+      };
+      renderSnapshots((value) => value + 1);
+      return true;
+    },
+    [session, state, displayedGeneration]
+  );
+  const remove = useCallback(
+    (id: string) => {
+      if (
+        !mounted.current ||
+        current.current?.token !== session?.token ||
+        generation.current !== displayedGeneration ||
+        acceptedState.current?.workspace_generation !== state?.workspace_generation
+      )
+        return;
+      const stored = storedSnapshots.current;
+      if (!stored) return;
+      storedSnapshots.current = {
+        ...stored,
+        values: stored.values.filter((snapshot) => snapshot.id !== id),
+      };
+      renderSnapshots((value) => value + 1);
+    },
+    [session?.token, state?.workspace_generation, displayedGeneration]
+  );
+  const snapshots =
+    session &&
+    state &&
+    storedSnapshots.current?.token === session.token &&
+    storedSnapshots.current.workspaceGeneration === state.workspace_generation
+      ? storedSnapshots.current.values
+      : [];
 
   const fail = useCallback((cause: unknown, expectedGeneration: number) => {
     if (!mounted.current || generation.current !== expectedGeneration) return;
     if (cause instanceof ApiError && cause.status === 410) {
       generation.current += 1;
       current.current = null;
+      acceptedState.current = null;
+      storedSnapshots.current = null;
       setSession(null);
       setState(null);
       setError('Your workspace expired. Create a workspace to continue.');
@@ -73,6 +168,8 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
       generation.current += 1;
       if (current.current) void close(current.current.token);
       current.current = null;
+      acceptedState.current = null;
+      storedSnapshots.current = null;
     };
   }, []);
 
@@ -94,6 +191,8 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
         return;
       }
       current.current = next;
+      acceptedState.current = next.state;
+      storedSnapshots.current = null;
       setSession(next);
       setState(next.state);
       if (previous && previous.token !== next.token) void close(previous.token);
@@ -124,8 +223,12 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
         endpoints.dataPlaygroundState,
         authorization(allocated.token)
       );
-      if (mounted.current && expected === generation.current && version === revision.current)
+      if (mounted.current && expected === generation.current && version === revision.current) {
+        acceptedState.current = next;
+        if (storedSnapshots.current?.workspaceGeneration !== next.workspace_generation)
+          storedSnapshots.current = null;
         setState(next);
+      }
     } catch (cause) {
       if (version === revision.current) fail(cause, expected);
     } finally {
@@ -158,6 +261,12 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
       try {
         const next = await postJson<RuntimeState>(path, request, authorization(allocated.token));
         if (mounted.current && expected === generation.current && version === revision.current) {
+          acceptedState.current = next;
+          if (
+            ('action' in request && request.action === 'reset') ||
+            storedSnapshots.current?.workspaceGeneration !== next.workspace_generation
+          )
+            storedSnapshots.current = null;
           setState(next);
           return next;
         }
@@ -217,15 +326,36 @@ export function RuntimeProvider({ children }: { catalog: Catalog; children: Reac
 
   return (
     <RuntimeContext.Provider
-      value={{ session, state, loading, error, create, action, query, refresh, confirm }}
+      value={{
+        session,
+        state,
+        loading,
+        error,
+        create,
+        action,
+        query,
+        refresh,
+        confirm,
+        snapshots,
+        capture,
+        remove,
+        clear,
+      }}
     >
       {children}
     </RuntimeContext.Provider>
   );
 }
 
-export function useRuntime() {
+export function useRuntime(): RuntimeContextValue {
   const value = useContext(RuntimeContext);
   if (!value) throw new Error('Runtime tools must be inside RuntimeProvider.');
   return value;
+}
+
+export function useRunSnapshots(): SnapshotContextValue | null {
+  const value = useContext(RuntimeContext);
+  if (!value) return null;
+  const { snapshots, capture, remove, clear } = value;
+  return { snapshots, capture, remove, clear };
 }

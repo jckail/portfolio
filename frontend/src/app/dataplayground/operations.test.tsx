@@ -7,7 +7,7 @@ import { useRuntime } from './use-runtime';
 import type { RuntimeState } from './runtime-types';
 import type { Catalog } from './types';
 
-vi.mock('./use-runtime', () => ({ useRuntime: vi.fn() }));
+vi.mock('./use-runtime', () => ({ useRuntime: vi.fn(), useRunSnapshots: () => null }));
 const state: RuntimeState = {
   scenario_id: 'baseline',
   workspace_generation: 1,

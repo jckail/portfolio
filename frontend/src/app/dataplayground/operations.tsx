@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from 'react';
 
 import { IncidentGuide } from './incident-guide';
 import { QueryEvidence } from './query-evidence';
+import { RunComparison } from './run-comparison';
 import { useRuntime } from './use-runtime';
 import './operations.css';
 
@@ -837,6 +838,7 @@ export function Operations({
               state={state}
             />
             <Executions state={state} />
+            <RunComparison key={`${session?.token}-${state.workspace_generation}`} />
             <details className="lab-runtime-logs">
               <summary>Workspace activity ({state.logs.length} entries)</summary>
               <ol>

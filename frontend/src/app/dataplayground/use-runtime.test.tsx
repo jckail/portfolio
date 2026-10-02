@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 
 import { ApiError, endpoints, getJson, postJson } from '../../shared/utils/api';
-import { RuntimeProvider, useRuntime } from './use-runtime';
+import { RuntimeProvider, useRunSnapshots, useRuntime } from './use-runtime';
 
 import type { RuntimeSession, RuntimeState } from './runtime-types';
 import type { Catalog } from './types';
@@ -377,5 +377,103 @@ describe('mutation receipts for guided investigations', () => {
     expect(receipt).toBeUndefined();
     expect(result.current.state).toEqual(produced);
     expect(result.current.error).toBe('Unable to drain this batch.');
+  });
+});
+
+describe('workspace-scoped observed snapshots', () => {
+  const useObservedRuntime = () => ({ runtime: useRuntime(), evidence: useRunSnapshots()! });
+  it('captures immutable displayed observations without requests, enforces six atomically, and permits removal', async () => {
+    const { result, rerender } = renderHook(useObservedRuntime, { wrapper });
+    expect(result.current.evidence.capture('Before creation')).toBe(false);
+    await act(async () => result.current.runtime.create('baseline'));
+    const requests = vi.mocked(postJson).mock.calls.length;
+    act(() => {
+      for (let index = 0; index < 6; index++)
+        expect(result.current.evidence.capture(`Observation ${index}`)).toBe(true);
+    });
+    expect(result.current.evidence.snapshots).toHaveLength(6);
+    expect(result.current.evidence.capture('Overflow')).toBe(false);
+    expect(result.current.evidence.capture(' '.repeat(5))).toBe(false);
+    expect(result.current.evidence.capture('x'.repeat(61))).toBe(false);
+    expect(vi.mocked(postJson).mock.calls).toHaveLength(requests);
+    expect(getJson).not.toHaveBeenCalled();
+    const first = result.current.evidence.snapshots[0];
+    expect(Object.isFrozen(first.streaming.counters)).toBe(true);
+    rerender();
+    expect(result.current.evidence.snapshots[0]).toBe(first);
+    act(() => result.current.evidence.remove(first.id));
+    act(() => expect(result.current.evidence.capture('Replacement observation')).toBe(true));
+    expect(result.current.evidence.snapshots).toHaveLength(6);
+    act(() => result.current.evidence.clear());
+    expect(result.current.evidence.snapshots).toHaveLength(0);
+  });
+  it('rejects retained captures after a new observation and before a reset render can accept old evidence', async () => {
+    const { result } = renderHook(useObservedRuntime, { wrapper });
+    await act(async () => result.current.runtime.create('baseline'));
+    const oldCapture = result.current.evidence.capture;
+    vi.mocked(getJson).mockResolvedValueOnce({
+      ...state,
+      workspace_generation: 1,
+      streaming: { ...state.streaming, produced: 10 },
+    });
+    await act(async () => result.current.runtime.refresh());
+    expect(oldCapture('Stale display')).toBe(false);
+    act(() => expect(result.current.evidence.capture('Before reset')).toBe(true));
+    const preReset = result.current.evidence;
+    vi.mocked(postJson).mockResolvedValueOnce({ ...state, workspace_generation: 2 });
+    await act(async () => {
+      await result.current.runtime.action({ action: 'reset' });
+      expect(preReset.capture('Late old generation')).toBe(false);
+      preReset.clear();
+    });
+    expect(result.current.evidence.snapshots).toHaveLength(0);
+    act(() => expect(result.current.evidence.capture('After reset')).toBe(true));
+    act(() => preReset.clear());
+    expect(result.current.evidence.snapshots[0].label).toBe('After reset');
+    expect(result.current.evidence.snapshots[0].workspace_generation).toBe(2);
+  });
+  it('retains captures on failed replacement, clears on successful replacement, and isolates old clear callbacks', async () => {
+    const { result } = renderHook(useObservedRuntime, { wrapper });
+    await act(async () => result.current.runtime.create('baseline'));
+    act(() => result.current.evidence.capture('Retained'));
+    const old = result.current.evidence;
+    vi.mocked(postJson).mockRejectedValueOnce(new ApiError(429, 'Workspace capacity reached'));
+    await act(async () => result.current.runtime.create('baseline'));
+    expect(result.current.evidence.snapshots[0].label).toBe('Retained');
+    vi.mocked(postJson).mockResolvedValueOnce({ ...session, token: 'new-workspace' });
+    await act(async () => result.current.runtime.create('baseline'));
+    expect(result.current.evidence.snapshots).toHaveLength(0);
+    act(() => result.current.evidence.capture('New scope'));
+    act(() => {
+      old.clear();
+      old.remove(result.current.evidence.snapshots[0].id);
+    });
+    expect(result.current.evidence.snapshots[0].label).toBe('New scope');
+    expect(old.capture('Late capture')).toBe(false);
+  });
+  it('rejects captures while a request is busy and removes all evidence on expiry', async () => {
+    const { result } = renderHook(useObservedRuntime, { wrapper });
+    await act(async () => result.current.runtime.create('baseline'));
+    act(() => result.current.evidence.capture('Before expiry'));
+    let complete!: (value: RuntimeState) => void;
+    vi.mocked(postJson).mockReturnValueOnce(
+      new Promise<RuntimeState>((resolve) => {
+        complete = resolve;
+      })
+    );
+    let request!: Promise<RuntimeState | undefined>;
+    act(() => {
+      request = result.current.runtime.action({ action: 'producer_stop' });
+    });
+    expect(result.current.evidence.capture('During request')).toBe(false);
+    await act(async () => {
+      complete(state);
+      await request;
+    });
+    const capture = result.current.evidence.capture;
+    vi.mocked(getJson).mockRejectedValueOnce(new ApiError(410, 'Expired'));
+    await act(async () => result.current.runtime.refresh());
+    expect(result.current.evidence.snapshots).toHaveLength(0);
+    expect(capture('Late expired capture')).toBe(false);
   });
 });
