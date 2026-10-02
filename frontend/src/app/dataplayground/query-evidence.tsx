@@ -41,7 +41,8 @@ export function parseQueryEvidence(value: unknown): ParsedQueryEvidence | null {
         row.every(
           (cell) =>
             cell === null ||
-            (typeof cell === 'string' && cell.length <= 2000) ||
+            // Match Python's Unicode code-point bound, including astral text.
+            (typeof cell === 'string' && Array.from(cell).length <= 2000) ||
             (typeof cell === 'number' && Number.isFinite(cell))
         )
     )
@@ -152,8 +153,8 @@ export function QueryEvidence({
       )}
       {result.truncated && (
         <p>
-          Result truncated; narrow the query or increase the row limit. The returned count is not
-          the total matching count.
+          Result truncated by row, cell text, or output-size limits. Narrow the selected data to
+          inspect omitted values. The returned count is not the total matching count.
         </p>
       )}
       {result.workspace_generation != null && result.data_revision != null && (

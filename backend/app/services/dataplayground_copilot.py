@@ -39,6 +39,17 @@ class CopilotBusy(Exception):
     """The previous investigation still owns this workspace, including cleanup."""
 
 
+class CopilotWorkspaceExpired(KeyError):
+    """A runtime capability disappeared; routes map this safe failure to 410."""
+
+
+def _workspace_call(method, *args, **kwargs):
+    try:
+        return method(*args, **kwargs)
+    except KeyError:
+        raise CopilotWorkspaceExpired("Workspace expired or unavailable.") from None
+
+
 def workspace_busy(token: str) -> bool:
     """Read-only preflight; chat repeats the check while acquiring its slot."""
     with _guard:
@@ -83,18 +94,18 @@ def _tool(token: str, name: str, args: dict, created: set[str] | None = None,
     runtime = get_runtime()
     if name == "inspect_incident":
         _arguments(args, set())
-        result = runtime.diagnostics(token)  # Inspect evidence without advancing background work.
+        result = _workspace_call(runtime.diagnostics, token)  # Inspect without advancing background work.
         if expected_generation is not None and result["workspace_generation"] != expected_generation:
             raise CopilotUnavailable
         return result
-    state = runtime.state(token, expected_generation=expected_generation)  # Guard before advancing background work.
+    state = _workspace_call(runtime.state, token, expected_generation=expected_generation)
     if expected_generation is not None and state.workspace_generation != expected_generation:
         raise CopilotUnavailable
     if name == "inspect_workspace":
         _arguments(args, set())
         return state.model_dump()
     if name == "query_sql":
-        return runtime.query(token, QueryRequest.model_validate(args), expected_generation=state.workspace_generation).model_dump()
+        return _workspace_call(runtime.query, token, QueryRequest.model_validate(args), expected_generation=state.workspace_generation).model_dump()
     if name == "inspect_run":
         _arguments(args, {"run_id"})
         run_id = args.get("run_id")
@@ -337,7 +348,7 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                         raise CopilotUnavailable
                     try:
                         result = await asyncio.to_thread(_tool, token, frame["tool"], frame["args"], created_proposals, cancelled, generation)
-                        current = await asyncio.to_thread(get_runtime().diagnostics, token)
+                        current = await asyncio.to_thread(_workspace_call, get_runtime().diagnostics, token)
                         if current["workspace_generation"] != generation:
                             raise CopilotUnavailable
                         if not isinstance(result, dict) or len(_encode(result)) > MAX_TOOL_BYTES:
@@ -346,8 +357,10 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                             created_proposals.add(result["proposal"]["id"])
                         events.append(_evidence(frame["tool"], frame["args"], result))
                         await send({"type": "tool_result", "id": frame["id"], "result": result})
+                    except CopilotWorkspaceExpired:
+                        raise
                     except (ValueError, KeyError):
-                        current = await asyncio.to_thread(get_runtime().diagnostics, token)
+                        current = await asyncio.to_thread(_workspace_call, get_runtime().diagnostics, token)
                         if current["workspace_generation"] != generation:
                             raise CopilotUnavailable
                         await send({"type": "tool_error", "id": frame["id"], "kind": "error"})
@@ -386,12 +399,12 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                     raise CopilotUnavailable
             else:
                 raise CopilotUnavailable
-            current = await asyncio.to_thread(get_runtime().diagnostics, token)
+            current = await asyncio.to_thread(_workspace_call, get_runtime().diagnostics, token)
             if current["workspace_generation"] != generation:
                 raise CopilotUnavailable
             returned = True
             return CopilotResponse(text="".join(text_parts), events=events, proposals=proposals, limited=limited)
-    except CopilotUnavailable:
+    except (CopilotUnavailable, CopilotWorkspaceExpired):
         raise
     except Exception:
         raise CopilotUnavailable from None
