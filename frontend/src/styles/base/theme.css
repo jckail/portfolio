@@ -65,6 +65,9 @@
   --elevation-1: 0 1px 2px rgba(10, 10, 40, 0.06), 0 2px 8px -4px rgba(10, 10, 40, 0.08);
   --elevation-2: 0 0 0 1px rgba(4, 3, 255, 0.18), 0 14px 32px -16px rgba(4, 3, 255, 0.35);
   --particles-opacity: 0.55;
+  /* Party-only pinned colours; defined in every theme so the sets match. */
+  --party-pinned-fg: #000000;
+  --party-hint-text: #ff80ff;
 }
 
 .theme-dark {
@@ -125,6 +128,9 @@
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
   --elevation-2: 0 0 0 1px rgba(139, 138, 255, 0.28), 0 16px 40px -18px rgba(4, 3, 255, 0.7);
   --particles-opacity: 0.6;
+  /* Party-only pinned colours; defined in every theme so the sets match. */
+  --party-pinned-fg: #000000;
+  --party-hint-text: #ff80ff;
 }
 
 .theme-party {
