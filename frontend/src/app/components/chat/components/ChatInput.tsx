@@ -80,6 +80,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       />
       <Button
         variant="contained"
+        className="party-pinned"
         onClick={handleSendMessage}
         disabled={!message.trim() || isLoading}
         // Icon-only control: without this it announces as an unnamed button.

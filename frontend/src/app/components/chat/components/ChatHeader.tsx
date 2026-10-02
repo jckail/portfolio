@@ -10,6 +10,7 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => {
   return (
     <DialogTitle 
+      className="party-pinned"
       sx={{ 
         m: 0, 
         p: 1, 
