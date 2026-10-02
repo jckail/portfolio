@@ -78,8 +78,9 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
   const currentSection = useCurrentSection();
   // The drawer is modal while open: useFocusTrap keeps Tab inside it, closes it
   // on Escape, locks page scroll, focuses the first item, and restores focus on
-  // close. The inert toggle is a layout effect so it runs before the trap's effect and the drawer is
-  // already interactive when the trap moves focus into it.
+  // close. The trap strips `inert` from its container when it tears down, so
+  // the inert toggle below must be a passive effect declared after the hook:
+  // all cleanups run before any effect, which lets it re-apply `inert` last.
   const navRef = useFocusTrap(isOpen, onClose) as unknown as React.MutableRefObject<HTMLElement | null>;
   const wasOpenRef = React.useRef(isOpen);
 
@@ -87,7 +88,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
   // of the tab order and the accessibility tree. (React 18 has no inert prop.)
   // On close, focus goes back to the opener unless the visitor has already
   // moved focus somewhere else on the page (the trap restores it in the common case).
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     const nav = navRef.current;
     nav?.toggleAttribute('inert', !isOpen);
     const wasOpen = wasOpenRef.current;
