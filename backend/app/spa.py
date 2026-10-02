@@ -219,6 +219,21 @@ def _is_html_navigation(scope: Scope) -> bool:
     return False
 
 
+def _accepts_any_document(scope: Scope) -> bool:
+    """True for a missing Accept or one that lists ``*/*`` without asking for JSON.
+
+    Many crawlers and link unfurlers send ``*/*`` (or nothing). The home page
+    already answers them because StaticFiles serves ``/`` directly; this lets
+    the known client routes do the same. An explicit JSON preference (an API
+    client such as ``application/json, */*``) is not a document request.
+    """
+    for name, value in scope.get("headers", []):
+        if name == b"accept":
+            accept = value.lower()
+            return b"*/*" in accept and b"json" not in accept
+    return True
+
+
 def spa_fallback_status(route_path: str) -> int:
     # Exact match: main-content.tsx opens the admin login only when
     # pathname === "/admin", so "/admin/" renders the plain homepage and must
@@ -423,4 +438,8 @@ class SPAStaticFiles(StaticFiles):
         route_path = get_route_path(scope)
         if route_path in NO_FALLBACK_EXACT or route_path.startswith(NO_FALLBACK_PREFIXES):
             return False
-        return _is_html_navigation(scope)
+        if _is_html_navigation(scope):
+            return True
+        # Wildcard or missing Accept: only the routes the SPA really serves.
+        # Unknown paths keep the plain JSON 404 for these clients.
+        return _accepts_any_document(scope) and spa_fallback_status(route_path) == 200
