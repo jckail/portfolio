@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 
 // Vitest stubs CSS imports, so read the stylesheet from disk.
 const css = readFileSync(resolve(__dirname, 'base/theme.css'), 'utf8');
+const modalCss = readFileSync(resolve(__dirname, 'components/modal.css'), 'utf8');
 
 describe('party theme performance contract', () => {
   it('never animates every element (one animation per node froze Lighthouse)', () => {
@@ -62,6 +63,16 @@ describe('party theme performance contract', () => {
       for (const sel of ['.skm-chip', '.visit-website-btn', '.doodle-hint', '.party-pinned']) {
         expect(notRule.slice(0, notRule.indexOf('color: inherit'))).toContain(sel);
       }
+    });
+
+    it('keeps the transparent secondary project link readable in party mode', () => {
+      const pinnedRule = /([^{}]+)\{\s*color:\s*var\(--party-pinned-fg\)\s*!important;\s*\}/.exec(css);
+      expect(pinnedRule?.[1]).toContain('.visit-website-btn:not(.project-modal-secondary)');
+      const secondaryRule = /\.project-modal-secondary\s*\{([^}]*)\}/.exec(modalCss)?.[1] ?? '';
+      // Transparent !important also wins over the primary button's hover fill.
+      expect(secondaryRule).toMatch(/background:\s*transparent\s*!important/);
+      expect(secondaryRule).toMatch(/color:\s*var\(--text-color\)\s*!important/);
+      expect(ratio(token('--text-color'), token('--surface-opaque'))).toBeGreaterThanOrEqual(4.5);
     });
   });
 });
