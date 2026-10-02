@@ -1,0 +1,24 @@
+.agent-evidence {
+  margin: var(--spacing-xl) auto;
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  max-width: 900px;
+  color: inherit;
+}
+.agent-evidence form label { display: block; margin-bottom: var(--spacing-sm); }
+.agent-evidence-input, .agent-evidence-suggestions {
+  display: flex; gap: var(--spacing-sm); flex-wrap: wrap; margin: var(--spacing-sm) 0;
+}
+.agent-evidence input { min-width: 0; flex: 1; padding: var(--spacing-sm); font: inherit; }
+.agent-evidence button { padding: var(--spacing-sm) var(--spacing-md); cursor: pointer; font: inherit; }
+.agent-evidence button:disabled { cursor: wait; opacity: .65; }
+.agent-evidence input, .agent-evidence button {
+  background: var(--input-background); color: inherit; border: 1px solid currentColor; border-radius: var(--radius-sm);
+}
+.agent-evidence :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.agent-evidence summary { cursor: pointer; padding: var(--spacing-sm) 0; font-weight: bold; }
+.agent-evidence pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.agent-evidence details > input { box-sizing: border-box; width: 100%; }
+.agent-evidence blockquote { margin: var(--spacing-md); padding-left: var(--spacing-md); border-left: 2px solid currentColor; }
+.agent-evidence-mode { font-size: .85rem; }
