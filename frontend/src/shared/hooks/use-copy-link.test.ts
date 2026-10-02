@@ -144,4 +144,35 @@ describe('useCopyLink', () => {
     });
     expect(result.current.copied).toBe(false);
   });
+  it('resets copy feedback when the share target changes', async () => {
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
+    const { result, rerender } = renderHook(({ url }) => useCopyLink(url), {
+      initialProps: { url: 'https://example.com/?skill=python' },
+    });
+    await act(async () => { await result.current.copy(); });
+    expect(result.current.copied).toBe(true);
+    rerender({ url: 'https://example.com/?skill=rust' });
+    expect(result.current.copied).toBe(false);
+    expect(result.current.failed).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+    await act(async () => { await result.current.copy(); });
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith('https://example.com/?skill=rust');
+    expect(result.current.copied).toBe(true);
+  });
+
+  it('ignores an old target copy that completes after navigation', async () => {
+    let resolveCopy!: () => void;
+    const pending = new Promise<void>(resolve => { resolveCopy = resolve; });
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn(() => pending) } });
+    const { result, rerender } = renderHook(({ url }) => useCopyLink(url), {
+      initialProps: { url: 'https://example.com/?skill=python' },
+    });
+    let oldAttempt!: Promise<void>;
+    act(() => { oldAttempt = result.current.copy(); });
+    rerender({ url: 'https://example.com/?skill=rust' });
+    await act(async () => { resolveCopy(); await oldAttempt; });
+    expect(result.current.copied).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
 });
