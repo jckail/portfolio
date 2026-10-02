@@ -1,0 +1,195 @@
+.lab-runtime-workspace {
+  padding: 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg);
+}
+.lab-runtime-workspace > div > p {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.lab-runtime-create {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  margin-top: 16px;
+  align-items: end;
+}
+.lab-runtime-create label {
+  grid-column: 1 / -1;
+}
+.lab-runtime-create .lab-primary {
+  margin: 0;
+}
+.lab-runtime-create > button:last-child:not(.lab-primary) {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.lab-runtime-workspace > p {
+  margin-top: 16px;
+}
+.lab-runtime-scope {
+  margin-top: 10px;
+  font-size: 12px;
+}
+.lab-runtime-scope p {
+  margin-top: 10px;
+}
+.lab-overview-metrics dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 0;
+}
+.lab-overview-metrics dl > div {
+  padding-left: 12px;
+  border-left: 2px solid var(--rail-color);
+  min-width: 0;
+}
+.lab-overview-metrics dt {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.lab-overview-metrics dd {
+  margin: 5px 0 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.lab-operations {
+  min-width: 0;
+}
+.lab-operations p,
+.lab-operations code {
+  overflow-wrap: anywhere;
+}
+.lab-ops-section {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.lab-ops-section > p {
+  margin: 12px 0 20px;
+  font-size: 13px;
+}
+.lab-ops-section h4 {
+  margin: 24px 0 12px;
+}
+.lab-ops-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.lab-operations fieldset {
+  border: 1px solid var(--hairline);
+  margin: 20px 0;
+  padding: 20px;
+  min-width: 0;
+}
+.lab-operations legend {
+  font-size: 13px;
+  padding: 0 8px;
+}
+.lab-operations form .lab-note {
+  margin-top: 16px;
+}
+.lab-ops-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+.lab-runtime-status {
+  padding-left: 14px;
+  border-left: 2px solid var(--rail-color);
+}
+.lab-runtime-schema details,
+.lab-runtime-models details {
+  border-top: 1px solid var(--hairline);
+  padding: 12px 0;
+}
+.lab-runtime-models p,
+.lab-runtime-schema p {
+  margin: 12px 0;
+  font-size: 12px;
+}
+.lab-runtime-logs li {
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.lab-runtime-logs p {
+  margin-top: 6px;
+}
+.data-lab .lab-operations textarea {
+  width: 100%;
+  max-width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  color: var(--text-color);
+  background: var(--input-background);
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 8px 0 16px;
+  box-sizing: border-box;
+}
+.lab-operations #runtime-row-limit {
+  max-width: 160px;
+  margin-top: 8px;
+  display: block;
+}
+.lab-operations .lab-table-scroll {
+  margin: 16px 0;
+}
+.data-lab .lab-operations td:last-child {
+  white-space: normal;
+  min-width: 100px;
+}
+.lab-flow-scroll {
+  overflow: auto;
+  margin-top: 18px;
+}
+.lab-flow-scroll svg {
+  display: block;
+  width: 100%;
+  min-width: 640px;
+}
+.lab-flow-scroll text {
+  font: 12px var(--font-body);
+  fill: var(--text-color);
+}
+.lab-flow-band {
+  fill: var(--accent-text);
+  opacity: 0.45;
+}
+.lab-flow-band-1 {
+  fill: var(--text-secondary);
+  opacity: 0.5;
+}
+.lab-flow-band-2 {
+  fill: var(--rail-color);
+  opacity: 0.8;
+}
+.lab-flow-node {
+  fill: var(--text-color);
+}
+@media (max-width: 600px) {
+  .lab-overview-metrics dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+  .lab-runtime-create,
+  .lab-ops-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lab-runtime-workspace {
+    padding: 16px;
+  }
+  .lab-runtime-create button {
+    justify-self: start;
+  }
+  .lab-operations fieldset {
+    padding: 14px;
+  }
+}

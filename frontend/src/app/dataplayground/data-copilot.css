@@ -1,0 +1,105 @@
+.lab-copilot {
+  color: var(--text-color);
+  font-size: var(--text-sm);
+  min-width: 0;
+}
+.lab-copilot h2 {
+  margin: 0.35rem 0;
+  font-size: var(--text-lg);
+}
+.lab-copilot p {
+  line-height: 1.55;
+}
+.lab-copilot-heading > p,
+.lab-copilot-note {
+  color: var(--text-secondary);
+}
+.lab-copilot-context {
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--input-background);
+}
+.lab-copilot-context div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.3rem 0;
+}
+.lab-copilot-context dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.lab-copilot-starters {
+  display: grid;
+  gap: 0.5rem;
+}
+.lab-copilot-starters button {
+  text-align: left;
+  font-size: inherit;
+  padding: 0.7rem;
+}
+.lab-copilot-messages {
+  max-height: 55vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  margin: 1rem 0;
+}
+.lab-copilot-message {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.lab-copilot-user {
+  padding: 0.75rem;
+  background: var(--input-background);
+  border-radius: var(--radius-md);
+}
+.lab-copilot pre {
+  max-width: 100%;
+  overflow: auto;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.lab-copilot summary {
+  cursor: pointer;
+  padding: 0.45rem 0;
+}
+.lab-copilot-evidence {
+  margin: 0.35rem 0;
+  color: var(--text-secondary);
+}
+.lab-copilot-proposal {
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+  border: 1px solid var(--accent-text);
+  border-radius: var(--radius-md);
+}
+.lab-copilot-proposal button {
+  margin: 0.4rem 0.4rem 0 0;
+}
+.lab-copilot form {
+  display: grid;
+  gap: 0.5rem;
+}
+.lab-copilot textarea {
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem;
+  color: var(--text-color);
+  background: var(--input-background);
+  font: inherit;
+}
+.lab-copilot button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.lab-copilot :is(button, textarea, summary):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}

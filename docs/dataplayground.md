@@ -120,3 +120,76 @@ python -m playground orchestrate --failure validation-permanent
 
 `--output path.json` writes a trace with the same atomic artifact writer. These
 commands use bounded, seven-day synthetic inputs and perform no external I/O.
+
+## Visitor operating workspaces
+
+The workbench now has focused Overview, Operations, SQL console, Lifecycle,
+Architecture, and Explore views. Legacy section links still reveal the right view;
+changing views preserves the selected scenario, query, and exploration state.
+
+Create workspace explicitly allocates a visitor-specific SQLite database. The initial
+warehouse contains the saved **event sample**, not the full lifecycle run. Independent
+commerce, graph, and handcrafted vector fixtures are also queryable. The inventory
+exposes exact row counts and schemas. No real customer records are involved.
+
+Operations runs a partitioned in-memory event log with real producer/consumer state:
+batch size, batches per second, partitions, deterministic duplicate/invalid injection,
+consumer batch size/rate, pause/resume, drain, and replay. Changing partitions requires
+resetting an existing log. Producer log capacity is 2,000 rows. Consumer offsets and
+backlog are observed state. Replaying attempts increases attempt counts while primary
+keys prevent duplicate warehouse inserts. Quarantine rows retain rejection reasons.
+
+Flow diagrams use proportional record counts and exact tables. Produced-record
+accounting and consumer-attempt accounting have separate boundaries, because replay
+can produce more consumption attempts than original records. Materialized model rows
+have different grains and do not pretend to be additional event throughput.
+
+Build SQL models executes four transformations and SQL contracts: runtime_customers,
+runtime_daily, runtime_cohorts, and product_sales. Run workspace DAG executes callbacks
+over current tables, supports transient analytics and permanent validation faults,
+blocks dependent tasks, and publishes a reproducible in-memory fingerprint only after
+reconciliation. The Architecture view retains the full source-qualified saved DAG
+and model descriptions as a separate explanation.
+
+This is a local educational scheduler and event log with SQLite transformations;
+Airflow, Kafka, and dbt daemons are not deployed. State lives on one serving process,
+is limited to 32 visitor workspaces, and expires after 20 minutes without a visitor
+request. A restart or replica change can lose the workspace. The page explains how
+to create another. The guarded deployment enables best-effort Cloud Run session
+affinity to keep sequential visitor requests together; it does not make memory
+durable. Background progress is best effort while the instance has CPU;
+requests advance at most one due batch instead of inventing a catch-up burst.
+
+SQL accepts a single SELECT/WITH query against allowlisted lab tables. A SQLite
+read-only authorizer, restricted functions, execution deadline/step ceiling, bounded
+rows/columns/cells/output, and two query slots constrain work. Results identify
+truncation and elapsed query time. Workspace capabilities travel only in bearer
+headers, remain in browser memory, and never appear in URLs. All runtime and copilot
+responses are no-store.
+
+## Data Copilot
+
+The private `copilot/` package uses the actual Pi Agent SDK, pinned in its npm lockfile.
+Each investigation creates a private Node process. Python owns the existing Vertex
+or Anthropic provider connection; Node receives no credentials, HOME, host sessions,
+shell tools, filesystem tools, or cloud tools. The production image contains Node
+and the locked package; no separate public service is exposed.
+
+Five custom tools inspect the catalog, inspect the workspace, inspect runs, execute
+read-only SQL, and propose runtime changes. The UI shows bounded tool evidence,
+including SQL and sampled query results. Proposed changes are workspace-bound,
+expire, and require a separate Apply click. Dismiss performs no write. Confirmations
+are consumed atomically once; the model never applies a proposal itself.
+
+The copilot shares the configured model provider but has an independent per-instance
+UTC-day token ceiling, `DATAPLAYGROUND_COPILOT_DAILY_TOKENS` (default 40,000; zero
+disables it). Per-client/global rate limits, two concurrent investigations, one per
+workspace, capped tool rounds/calls, bounded history and outputs, and deadlines limit
+cost and work. Provider usage is reconciled against reservations. Stop aborts the
+request and the server cancels/reaps the private agent process. Missing credentials,
+SDK, or budget disables the copilot while all direct lab tools keep working.
+
+Offline verification includes the genuine Pi loop with a fake provider, opaque
+provider tool-state round trips, query evidence, proposal isolation/single use,
+cancellation, budgets, SQL limits, lifecycle cleanup, UI races, and browser controls.
+CI audits and tests the Node package as well as the normal Python/frontend checks.

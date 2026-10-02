@@ -10,6 +10,32 @@ import {
 import { COOKIE_CONSENT_KEY } from './cookie-consent';
 
 describe('analytics', () => {
+  it('does not poll without consent and can wait for gtag after consent is granted', async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    const fresh = await import('./analytics');
+    const polling = vi.spyOn(globalThis, 'setInterval');
+    try {
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
+      // @ts-expect-error simulate the script that is not loaded before consent
+      window.gtag = undefined;
+      await fresh.trackModalView('demo', 'project', 'Demo');
+      expect(polling).not.toHaveBeenCalled();
+
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+      const pending = fresh.initializeAnalytics();
+      expect(polling).toHaveBeenCalledTimes(1);
+      window.gtag = vi.fn();
+      await vi.advanceTimersByTimeAsync(100);
+      await pending;
+      await fresh.trackModalView('demo', 'project', 'Demo');
+      expect(window.gtag).toHaveBeenCalledWith('event', 'modal_view', expect.objectContaining({ modal_id: 'demo' }));
+    } finally {
+      polling.mockRestore();
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
+  });
   beforeEach(() => {
     sessionStorage.clear();
     localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');

@@ -85,6 +85,20 @@ jobs:
         cache: 'pip'
         cache-dependency-path: requirements-dev.lock.txt
 
+    - name: Use Node.js 24 for Pi Agent SDK
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+        cache-dependency-path: copilot/package-lock.json
+
+    - name: Install and verify Data Copilot
+      working-directory: copilot
+      run: |
+        npm ci --ignore-scripts
+        npm audit --omit=dev --audit-level=high
+        npm test
+
     # Same hash-verified pins the production image installs, plus the test
     # tools (requirements-dev.lock.txt is constrained by the production lock,
     # so every shared package resolves to the same version).

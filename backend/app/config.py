@@ -85,6 +85,7 @@ class Settings:
     access_log_enabled: bool = True
     # Optional independent Python lab. Empty keeps the generated catalog available.
     dataplayground_api_url: str = ""
+    dataplayground_copilot_daily_tokens: int = 40000
 
     @property
     def chat_available(self) -> bool:
@@ -164,6 +165,7 @@ def get_settings() -> Settings:
         service_name=os.getenv("K_SERVICE", "").strip() or "quickresume",
         access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),
         dataplayground_api_url=os.getenv("DATAPLAYGROUND_API_URL", "").strip(),
+        dataplayground_copilot_daily_tokens=max(0, int(os.getenv("DATAPLAYGROUND_COPILOT_DAILY_TOKENS", "40000"))),
         on_cloud_run=on_cloud_run,
         trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
         trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),

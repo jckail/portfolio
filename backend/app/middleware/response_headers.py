@@ -22,7 +22,7 @@ from ..utils.request_context import clear_request_id, set_request_id
 # container probe and the external uptime check, where a cached result is
 # actively harmful.
 PRIVATE_API_PREFIXES = ("/api/admin", "/api/logs")
-NEVER_CACHE_PREFIXES = ("/api/health",)
+NEVER_CACHE_PREFIXES = ("/api/health", "/api/dataplayground/runtime", "/api/dataplayground/copilot")
 # Scripts served from the dist root without a content hash in the filename.
 UNHASHED_SCRIPTS = frozenset({"/ga-init.js"})
 
