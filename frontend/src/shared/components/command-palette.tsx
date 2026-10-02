@@ -89,7 +89,7 @@ function buildCommands(onClose: () => void): Command[] {
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const [query, setQuery] = useState('');
-  const [active, setActive] = useState(0);
+  const [activeCommand, setActiveCommand] = useState<string | undefined>();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const chatAvailable = useChatAvailable();
@@ -107,10 +107,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
     });
   }, [commands, query]);
 
+  // Availability can remove an option while the palette is open. Track the
+  // command identity so that Enter still runs the option the visitor chose.
+  const active = Math.max(0, filtered.findIndex(cmd => cmd.id === activeCommand));
+
   useEffect(() => {
     if (!open) {
       setQuery('');
-      setActive(0);
+      setActiveCommand(undefined);
       return;
     }
     // Focus after paint
@@ -119,8 +123,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   }, [open]);
 
   useEffect(() => {
-    setActive(0);
+    setActiveCommand(undefined);
   }, [query]);
+
+  useEffect(() => {
+    if (activeCommand && !filtered.some(cmd => cmd.id === activeCommand)) {
+      setActiveCommand(undefined);
+    }
+  }, [activeCommand, filtered]);
 
   const activeId = filtered[active] ? `command-option-${filtered[active].id}` : undefined;
 
@@ -135,10 +145,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setActive(i => Math.min(i + 1, Math.max(filtered.length - 1, 0)));
+      setActiveCommand(filtered[Math.min(active + 1, Math.max(filtered.length - 1, 0))]?.id);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      setActive(i => Math.max(i - 1, 0));
+      setActiveCommand(filtered[Math.max(active - 1, 0)]?.id);
     } else if (event.key === 'Enter') {
       event.preventDefault();
       filtered[active]?.run();
@@ -188,7 +198,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
               tabIndex={-1}
               className={`command-palette-item${index === active ? ' is-active' : ''}`}
               onClick={cmd.run}
-              onMouseEnter={() => setActive(index)}
+              onMouseEnter={() => setActiveCommand(cmd.id)}
             >
               <span>{cmd.label}</span>
               {cmd.hint && <kbd>{cmd.hint}</kbd>}
