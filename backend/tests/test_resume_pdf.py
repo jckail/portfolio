@@ -87,3 +87,11 @@ def test_pdf_contains_every_bullet_and_is_two_pages_at_most(content):
             assert _squash(bullet) in text, f"{role['company']}: bullet missing from the PDF, regenerate"
     assert "jckail13@gmail.com" in text
     assert reader.metadata.title == "Jordan Kail — Resume"
+
+
+def test_career_break_is_labelled_for_ats_parsers(content):
+    role = next(r for r in content["roles"] if r["key"] == "sabbatical")
+    assert role["title"] == "Career break (digital nomad)"
+    assert role["dates"] == "10/2022 – 05/2023"
+    text = builder.resume_text(content)
+    assert "Sabbatical — Career break (digital nomad) — Location independent" in text

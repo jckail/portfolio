@@ -113,7 +113,7 @@ def load_content() -> dict:
                 "key": key,
                 "company": pretty_company(r["company"]),
                 "raw_company": r["company"],
-                "title": r["title"],
+                "title": r.get("resume_title") or r["title"],
                 "dates": pretty_dates(r["date"]),
                 "raw_dates": r["date"],
                 "location": pretty_location(r["location"]),

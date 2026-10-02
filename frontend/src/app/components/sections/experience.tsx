@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useDeepLink } from '../../../shared/hooks/use-deep-link';
 import { getOwn } from '../../../shared/utils/lookup';
 import '../../../styles/components/sections/experience.css';
+import { ExperienceMark } from './experience/ExperienceMark';
 import { useExperience } from './experience/hooks/useExperience';
 import { SkillModalHost, prefetchSkillModal } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
@@ -26,6 +27,7 @@ const prefetchExperienceModal = () => import('./modals/ExperienceModal');
 const SLUG_TO_KEY = new Map<string, string>([
   ['together-ai', 'together_ai'],
   ['prove-identity', 'prove'],
+  ['sabbatical', 'sabbatical'],
   ['meta-facebook', 'meta'],
   ['deloitte', 'deloitte'],
   ['wide-open-west', 'wide_open_west'],
@@ -69,7 +71,7 @@ const ExperienceTimeline = memo(({
         return (
           <li key={key} className={`timeline-item${isCurrent ? ' is-current' : ''}`}>
             <div className="timeline-header-wrapper">
-              {item.logoPath && (
+              {item.logoPath ? (
                 <div
                   className={`logo-link${isMarkOnlyLogo(item.logoPath) ? ' logo-link--mark' : ''}`}
                   onMouseEnter={prefetchExperienceModal}
@@ -85,6 +87,16 @@ const ExperienceTimeline = memo(({
                     className="company-logo"
                   />
                   <span className="sr-only">{`View ${item.company} experience details`}</span>
+                </div>
+              ) : (
+                <div
+                  className="logo-link logo-link--mark"
+                  data-testid="experience-mark"
+                  onMouseEnter={prefetchExperienceModal}
+                  {...buttonize(() => onSelectExperience(key))}
+                >
+                  <ExperienceMark className="company-logo" />
+                  <span className="sr-only">{`View ${item.company} details`}</span>
                 </div>
               )}
               <div className="timeline-header">
@@ -106,12 +118,16 @@ const ExperienceTimeline = memo(({
             )}
 
             <div className="timeline-footer">
-              <TechStackTags
-                tags={item.tech_stack}
-                skillsData={skillsData}
-                onSelectSkill={onSelectSkill}
-                onSkillHover={prefetchSkillModal}
-              />
+              {(item.tech_stack?.length ?? 0) > 0 ? (
+                <TechStackTags
+                  tags={item.tech_stack ?? []}
+                  skillsData={skillsData}
+                  onSelectSkill={onSelectSkill}
+                  onSkillHover={prefetchSkillModal}
+                />
+              ) : (
+                <span />
+              )}
               <button
                 type="button"
                 className="btn-link timeline-more"

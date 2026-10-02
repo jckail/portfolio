@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from .api import api_router, content, ws_router
 from .config import get_settings, missing_required_vars
 from .middleware.access_log import AccessLogMiddleware
+from .middleware.canonical_host import CanonicalHostMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
 from .middleware.response_headers import ResponseHeadersMiddleware
 from .services.dataplayground_runtime import close_cached_runtime
@@ -96,6 +97,7 @@ app.add_middleware(
     expose_headers=["X-Request-ID"]
 )
 app.add_middleware(SelectiveGZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
+app.add_middleware(CanonicalHostMiddleware, settings=settings)  # opt-in; no-op unless ALIAS_HOSTS is set
 app.add_middleware(ResponseHeadersMiddleware, settings=settings)
 # Outermost: sets the Cloud Trace context for every log line the request
 # produces and writes the one structured access-log line.

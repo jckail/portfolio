@@ -113,3 +113,53 @@ def test_project_link_label_defaults_and_override():
     assert root["qr_for_groups"].link_label == "Read coverage"
     others = [p.link_label for k, p in root.items() if k != "qr_for_groups"]
     assert others and all(label == "View project" for label in others)
+
+
+def test_project_secondary_links_and_labels():
+    from backend.app.models import load_projects
+
+    root = load_projects().root
+    assert root["qr_for_groups"].link2_label == "Live demo"  # default
+    for key, slug in {
+        "ai_billing": "aibilling",
+        "jobbr": "jobbr",
+        "go_pilot": "gopilot",
+        "lit_crypto": "cryptotrader",
+    }.items():
+        assert str(root[key].link2) == f"https://www.jckail.com/{slug}"
+        assert root[key].link2_label == "Interactive demo"
+    assert str(root["super_teacher"].link2) == "https://www.the-super-teacher.com/"
+    assert str(root["pointup"].link2) == "https://www.pointup.io/"
+    assert root["super_teacher"].link2_label == root["pointup"].link2_label == "Open app"
+
+
+def test_pointup_describes_the_typescript_monorepo():
+    from backend.app.models import load_projects
+
+    pointup = load_projects().root["pointup"]
+    assert "Selenium" not in pointup.tech_stack
+    assert "Next.js" in pointup.tech_stack
+    assert "legacy" in pointup.description_detail.lower()
+
+
+def test_sabbatical_entry_needs_no_company_and_photos_exist():
+    experience = get_all_models()["experience"].root
+    role = experience["sabbatical"]
+    assert role.link is None and role.logoPath is None and role.tech_stack == []
+    for key, item in experience.items():
+        for photo in item.photos:
+            path = os.path.join(REPO_ROOT, "frontend", "public", photo.src.lstrip("/"))
+            assert os.path.isfile(path), f"{key}: photo missing: {photo.src}"
+            assert photo.alt.strip()
+
+
+def test_photo_src_must_be_a_site_image_path():
+    import pytest
+    from pydantic import ValidationError
+
+    from backend.app.models.experience import ExperiencePhoto
+
+    ExperiencePhoto(src="/images/sabbatical/a.webp", alt="x")
+    for bad in ("https://evil.example/a.png", "/etc/passwd", "../a.png", "javascript:1"):
+        with pytest.raises(ValidationError):
+            ExperiencePhoto(src=bad, alt="x")
