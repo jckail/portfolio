@@ -29,6 +29,22 @@ describe('Doodle', () => {
     expect(drawImage.mock.calls[1].slice(-2)).toEqual([700, 300]);
   });
 
+  it('defers navigation until the revealed layout and dialog cleanup have settled', () => {
+    const navigate = vi.fn();
+    Element.prototype.scrollIntoView = navigate;
+    let frame: FrameRequestCallback | undefined;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { frame = callback; return 1; });
+    render(<Doodle isVisible isPartyMode={false} />);
+    expect(navigate).not.toHaveBeenCalled();
+    frame?.(0);
+    expect(navigate).toHaveBeenCalledOnce();
+    navigate.mockClear();
+    fireEvent(window, new CustomEvent('portfolio:open-doodle'));
+    expect(navigate).not.toHaveBeenCalled();
+    frame?.(1);
+    expect(navigate).toHaveBeenCalledOnce();
+  });
+
   it('is inert while hidden so its Clear button is not focusable', () => {
     const { container, rerender } = render(<Doodle isVisible={false} isPartyMode={false} />);
     const section = container.querySelector('#doodle')!;

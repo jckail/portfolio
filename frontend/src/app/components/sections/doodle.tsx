@@ -69,9 +69,20 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
   useEffect(() => {
     if (!active) return;
     resize();
-    scrollToSection('doodle');
+    // Wait for modal cleanup and the revealed board's layout before navigating.
+    let frame = 0;
+    const navigate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => scrollToSection('doodle'));
+    };
+    navigate();
+    window.addEventListener('portfolio:open-doodle', navigate);
     window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('portfolio:open-doodle', navigate);
+      window.removeEventListener('resize', resize);
+    };
   }, [active, resize]);
 
   const getPoint = (event: React.PointerEvent<HTMLCanvasElement>): Point => {

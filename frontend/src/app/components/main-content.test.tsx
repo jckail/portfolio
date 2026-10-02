@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, act } from '@testing-library/react';
 
 import MainContent from './main-content';
+import { CommandPalette } from '../../shared/components/command-palette';
+import { isScrollLocked } from '../../shared/hooks/use-scroll-lock';
 import { executeChatAction } from '../../shared/utils/chat-actions';
 import { useThemeStore } from '../../shared/stores/theme-store';
 
@@ -27,6 +29,27 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 describe('home doodle visibility owner', () => {
+  it('navigates to the revealed board after the command dialog releases its scroll lock', async () => {
+    let frame: FrameRequestCallback | undefined;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { frame = callback; return 1; });
+    const Page = () => {
+      const [open, setOpen] = React.useState(true);
+      return <><MainContent />{open && <CommandPalette open onClose={() => setOpen(false)} />}</>;
+    };
+    const { container } = render(<Page />);
+    await waitFor(() => expect(container.querySelector('#doodle')).toHaveAttribute('inert'));
+    expect(isScrollLocked()).toBe(true);
+    const navigate = vi.fn();
+    Element.prototype.scrollIntoView = navigate;
+    fireEvent.click(screen.getByRole('option', { name: 'Open doodle board' }));
+    await screen.findByLabelText('Drawing canvas');
+    expect(isScrollLocked()).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+    act(() => frame?.(0));
+    expect(navigate).toHaveBeenCalledOnce();
+    expect(navigate.mock.contexts[0]).toBe(container.querySelector('#doodle'));
+  });
+
   it('reveals the actual board after an assistant navigation action', async () => {
     const { container } = render(<MainContent />);
     await waitFor(() => expect(container.querySelector('#doodle')).toHaveAttribute('inert'));
@@ -40,6 +63,6 @@ describe('home doodle visibility owner', () => {
     render(<MainContent />);
     fireEvent.click(screen.getByRole('button', { name: 'Reveal doodle' }));
     await screen.findByLabelText('Drawing canvas');
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' });
+    await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' }));
   });
 });

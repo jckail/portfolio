@@ -90,8 +90,6 @@ const MainContentInner: React.FC = () => {
     const reveal = () => {
       setShowDoodle(true);
       setDoodleClickCount(1);
-      // If already mounted, opening again still navigates to the board.
-      if (document.querySelector('#doodle canvas')) scrollToSection('doodle');
     };
     window.addEventListener('portfolio:open-doodle', reveal);
     return () => window.removeEventListener('portfolio:open-doodle', reveal);
