@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ApiError, endpoints, getJson, postJson } from '../../shared/utils/api';
 import { ChatMarkdown } from '../components/chat/components/ChatMarkdown';
 import { useRuntime } from './use-runtime';
+import { parseQueryEvidence, QueryEvidence } from './query-evidence';
 import './data-copilot.css';
 
 import type { Catalog } from './types';
@@ -29,6 +30,31 @@ interface Reply {
 interface Message extends Partial<Reply> {
   role: 'user' | 'assistant';
   text: string;
+}
+function ToolEvidence({ event }: { event: ToolEvent }) {
+  const query = event.tool === 'query_sql' ? parseQueryEvidence(event.result) : null;
+  if (event.result === undefined)
+    return <p>Tool execution {event.ok === false ? 'failed' : 'completed'} in this workspace.</p>;
+  let raw = 'Evidence could not be formatted.';
+  try {
+    raw = JSON.stringify(event.result, null, 2).slice(0, 12000);
+  } catch {
+    /* Keep the safe fallback. */
+  }
+  if (!query) return <pre>{raw}</pre>;
+  return (
+    <>
+      <QueryEvidence
+        {...query}
+        regionLabel="Copilot SQL evidence"
+        caption="Query evidence from this investigation"
+      />
+      <details>
+        <summary>Raw tool evidence</summary>
+        <pre>{raw}</pre>
+      </details>
+    </>
+  );
 }
 function waitForCleanup(signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -66,6 +92,8 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
   const [resolved, setResolved] = useState<Record<string, string>>({});
   const tokenRef = useRef(session?.token);
   tokenRef.current = session?.token;
+  const generationRef = useRef(state?.workspace_generation);
+  generationRef.current = state?.workspace_generation;
   const abortRef = useRef<AbortController | null>(null);
   const stoppedWorkspaceRef = useRef<string | null>(null);
 
@@ -88,10 +116,11 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
     setApplying(false);
     setError('');
     return () => abortRef.current?.abort();
-  }, [session?.token]);
+  }, [session?.token, state?.workspace_generation]);
 
   async function ask(message = input) {
     const token = session?.token;
+    const generation = state?.workspace_generation;
     if (!token || !message.trim() || busy || !available) return;
     const abort = new AbortController();
     abortRef.current = abort;
@@ -108,7 +137,12 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
     try {
       let reply: Reply;
       for (let attempt = 0; ; attempt += 1) {
-        if (abort.signal.aborted || tokenRef.current !== token) return;
+        if (
+          abort.signal.aborted ||
+          tokenRef.current !== token ||
+          generationRef.current !== generation
+        )
+          return;
         try {
           reply = await postJson<Reply>(
             endpoints.dataPlaygroundCopilotChat,
@@ -129,16 +163,30 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
           await waitForCleanup(abort.signal);
         }
       }
-      if (tokenRef.current !== token || abort.signal.aborted) return;
+      if (
+        tokenRef.current !== token ||
+        generationRef.current !== generation ||
+        abort.signal.aborted
+      )
+        return;
       setMessages((previous) => [...previous, { role: 'assistant', ...reply }]);
     } catch (failure) {
-      if (tokenRef.current === token && abortRef.current === abort && !abort.signal.aborted) {
+      if (
+        tokenRef.current === token &&
+        generationRef.current === generation &&
+        abortRef.current === abort &&
+        !abort.signal.aborted
+      ) {
         setError(
           failure instanceof Error ? failure.message : 'The copilot could not reply. Try again.'
         );
       }
     } finally {
-      if (tokenRef.current === token && abortRef.current === abort) {
+      if (
+        tokenRef.current === token &&
+        generationRef.current === generation &&
+        abortRef.current === abort
+      ) {
         abortRef.current = null;
         setBusy(false);
       }
@@ -147,21 +195,22 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
 
   async function apply(proposal: Proposal) {
     const token = session?.token;
+    const generation = state?.workspace_generation;
     if (!token || busy || resolved[proposal.id]) return;
     setBusy(true);
     setApplying(true);
     setError('');
     try {
       const applied = await confirm(proposal.id);
-      if (tokenRef.current !== token) return;
+      if (tokenRef.current !== token || generationRef.current !== generation) return;
       if (applied)
         setResolved((previous) => ({ ...previous, [proposal.id]: 'Applied to this workspace.' }));
       else setError('The change could not be applied. Review the workspace status and try again.');
     } catch (failure) {
-      if (tokenRef.current === token)
+      if (tokenRef.current === token && generationRef.current === generation)
         setError(failure instanceof Error ? failure.message : 'Could not apply the change.');
     } finally {
-      if (tokenRef.current === token) {
+      if (tokenRef.current === token && generationRef.current === generation) {
         setApplying(false);
         setBusy(false);
       }
@@ -220,21 +269,17 @@ export function DataCopilot({ catalog }: { catalog: Catalog }) {
             <strong>{message.role === 'user' ? 'You' : 'Data Copilot'}</strong>
             <ChatMarkdown text={message.text} />
             {message.events
-              ?.filter((event) => event.type !== 'tool_start')
+              ?.filter(
+                (event) =>
+                  event.type === 'tool_result' || (event.type === 'tool_end' && event.ok === false)
+              )
               .map((event, eventIndex) => (
                 <details key={eventIndex} className="lab-copilot-evidence">
                   <summary>
                     {event.tool.replaceAll('_', ' ')}
                     {event.ok === false ? ' · failed' : ''}
                   </summary>
-                  {event.result !== undefined ? (
-                    <pre>{JSON.stringify(event.result, null, 2)}</pre>
-                  ) : (
-                    <p>
-                      Tool execution {event.ok === false ? 'failed' : 'completed'} in this
-                      workspace.
-                    </p>
-                  )}
+                  <ToolEvidence event={event} />
                 </details>
               ))}
             {message.proposals?.map((proposal) => (

@@ -21,8 +21,8 @@ MAX_EVIDENCE_BYTES = 12000
 MAX_PROVIDER_BYTES = 524288
 MAX_OUTPUT_CHARS = 96000
 TOTAL_TIMEOUT = 65
-_TOOL_NAMES = {"inspect_catalog", "inspect_workspace", "query_sql", "inspect_run", "propose_runtime_change"}
-_pending: dict[str, tuple[str, float, RuntimeAction, str]] = {}
+_TOOL_NAMES = {"inspect_catalog", "inspect_workspace", "inspect_incident", "query_sql", "inspect_run", "propose_runtime_change"}
+_pending: dict[str, tuple[str, float, RuntimeAction, str, int]] = {}
 _guard = threading.RLock()
 _slots = threading.BoundedSemaphore(2)
 _active_workspaces: set[str] = set()
@@ -68,7 +68,7 @@ def available() -> bool:
 def _prune() -> None:
     """Caller holds _guard; discard expired pending confirmations."""
     now = time.monotonic()
-    for key, (_, expires, _, _) in list(_pending.items()):
+    for key, (_, expires, _, _, _) in list(_pending.items()):
         if expires <= now:
             del _pending[key]
 
@@ -79,14 +79,22 @@ def _arguments(args: dict, allowed: set[str]) -> None:
 
 
 def _tool(token: str, name: str, args: dict, created: set[str] | None = None,
-          cancelled: threading.Event | None = None) -> dict:
+          cancelled: threading.Event | None = None, expected_generation: int | None = None) -> dict:
     runtime = get_runtime()
-    state = runtime.state(token)  # Verify workspace capability and expiry for every tool.
+    if name == "inspect_incident":
+        _arguments(args, set())
+        result = runtime.diagnostics(token)  # Inspect evidence without advancing background work.
+        if expected_generation is not None and result["workspace_generation"] != expected_generation:
+            raise CopilotUnavailable
+        return result
+    state = runtime.state(token, expected_generation=expected_generation)  # Guard before advancing background work.
+    if expected_generation is not None and state.workspace_generation != expected_generation:
+        raise CopilotUnavailable
     if name == "inspect_workspace":
         _arguments(args, set())
         return state.model_dump()
     if name == "query_sql":
-        return runtime.query(token, QueryRequest.model_validate(args)).model_dump()
+        return runtime.query(token, QueryRequest.model_validate(args), expected_generation=state.workspace_generation).model_dump()
     if name == "inspect_run":
         _arguments(args, {"run_id"})
         run_id = args.get("run_id")
@@ -99,7 +107,11 @@ def _tool(token: str, name: str, args: dict, created: set[str] | None = None,
             return {"id": run.id, "scenario": run.scenario.model_dump(), "summary": run.summary.model_dump(),
                     "pipeline": [p.model_dump() for p in run.pipeline]}
         return {"dag_trace": [task.model_dump() for task in state.dag_trace], "published": state.dag_published,
-                "fingerprint": state.dag_fingerprint, "logs": [log.model_dump() for log in state.logs]}
+                "fingerprint": state.dag_fingerprint, "model_runs": [run.model_dump() for run in state.model_runs],
+                "workspace_generation": state.workspace_generation, "data_revision": state.data_revision,
+                "dag_input_revision": state.dag_input_revision, "model_input_revision": state.model_input_revision,
+                "dag_stale": state.dag_stale, "models_stale": state.models_stale,
+                "logs": [log.model_dump() for log in state.logs]}
     if name == "inspect_catalog":
         _arguments(args, {"section"})
         section = args.get("section", "summary")
@@ -129,7 +141,7 @@ def _tool(token: str, name: str, args: dict, created: set[str] | None = None,
             if len(_pending) >= 160 or sum(item[0] == token for item in _pending.values()) >= 5:
                 raise ValueError("Proposal limit reached")
             proposal_id = secrets.token_urlsafe(24)
-            _pending[proposal_id] = (token, time.monotonic() + 600, action, reason)
+            _pending[proposal_id] = (token, time.monotonic() + 600, action, reason, state.workspace_generation)
             if created is not None:
                 created.add(proposal_id)
         return {"proposal": {"id": proposal_id, "action": action.model_dump(), "reason": reason,
@@ -139,25 +151,31 @@ def _tool(token: str, name: str, args: dict, created: set[str] | None = None,
 
 def confirm(token: str, proposal_id: str):
     runtime = get_runtime()
-    runtime.state(token)
+    runtime.diagnostics(token)  # Capability/expiry preflight must not advance a replacement workspace.
     with _guard:
         _prune()
         item = _pending.get(proposal_id)
         if item is None or not secrets.compare_digest(item[0], token):
             raise ValueError("This proposal expired or belongs to another workspace.")
         del _pending[proposal_id]  # Atomic consume, including when the operation fails.
-    return runtime.action(token, item[2])
+    return runtime.action(token, item[2], expected_generation=item[4])
 
 
 def _evidence(name: str, args: dict, result: dict) -> dict:
     """Bounded visitor-visible evidence; private provider state never enters here."""
     if name == "query_sql":
         evidence = {"sql": args["sql"][:4000], "columns": result["columns"],
-                    "row_count": result["row_count"], "truncated": result["truncated"], "rows": result["rows"][:10]}
+                    "sql_truncated": len(args["sql"]) > 4000,
+                    "row_count": result["row_count"], "truncated": result["truncated"], "rows": result["rows"][:10],
+                    "row_limit": args.get("row_limit", 100), "elapsed_ms": result["elapsed_ms"],
+                    "sampled_row_count": min(10, len(result["rows"])),
+                    "sample_truncated": len(result["rows"]) > 10}
+        evidence.update({key: result[key] for key in ("workspace_generation", "data_revision") if key in result})
     elif name == "inspect_workspace":
         evidence = {"scenario_id": result["scenario_id"],
                     "tables": [{"name": row["name"], "row_count": row["row_count"]} for row in result["tables"]],
-                    "streaming": result["streaming"]}
+                    "streaming": result["streaming"],
+                    **{key: result[key] for key in ("workspace_generation", "data_revision", "dag_stale", "models_stale")}}
     elif name == "inspect_run":
         evidence = {key: value for key, value in result.items() if key != "logs"}
     elif name == "propose_runtime_change":
@@ -168,6 +186,8 @@ def _evidence(name: str, args: dict, result: dict) -> dict:
     if len(_encode(evidence)) > MAX_EVIDENCE_BYTES:
         # Preserve useful fields while excluding oversized row samples/metadata.
         evidence = {key: value for key, value in evidence.items() if key not in {"rows", "architecture", "dag_trace"}}
+        if name == "query_sql":
+            evidence.update(sampled_row_count=0, sample_truncated=result["row_count"] > 0)
         evidence["evidence_truncated"] = True
         if len(_encode(evidence)) > MAX_EVIDENCE_BYTES:
             evidence = {"evidence_truncated": True}
@@ -251,7 +271,8 @@ async def _cleanup(process, provider) -> None:
 
 
 async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
-    await asyncio.to_thread(get_runtime().state, token)
+    starting_state = await asyncio.to_thread(get_runtime().state, token)
+    generation = starting_state.workspace_generation
     if workspace_busy(token):
         raise CopilotBusy
     if not available():
@@ -315,7 +336,10 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                     if tool_calls > 8 or frame.get("tool") not in _TOOL_NAMES:
                         raise CopilotUnavailable
                     try:
-                        result = await asyncio.to_thread(_tool, token, frame["tool"], frame["args"], created_proposals, cancelled)
+                        result = await asyncio.to_thread(_tool, token, frame["tool"], frame["args"], created_proposals, cancelled, generation)
+                        current = await asyncio.to_thread(get_runtime().diagnostics, token)
+                        if current["workspace_generation"] != generation:
+                            raise CopilotUnavailable
                         if not isinstance(result, dict) or len(_encode(result)) > MAX_TOOL_BYTES:
                             raise ValueError("Tool result limit")
                         if frame["tool"] == "propose_runtime_change":
@@ -323,6 +347,9 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                         events.append(_evidence(frame["tool"], frame["args"], result))
                         await send({"type": "tool_result", "id": frame["id"], "result": result})
                     except (ValueError, KeyError):
+                        current = await asyncio.to_thread(get_runtime().diagnostics, token)
+                        if current["workspace_generation"] != generation:
+                            raise CopilotUnavailable
                         await send({"type": "tool_error", "id": frame["id"], "kind": "error"})
                 elif kind == "delta":
                     text = frame.get("text")
@@ -358,6 +385,9 @@ async def chat(token: str, request: CopilotRequest) -> CopilotResponse:
                 else:
                     raise CopilotUnavailable
             else:
+                raise CopilotUnavailable
+            current = await asyncio.to_thread(get_runtime().diagnostics, token)
+            if current["workspace_generation"] != generation:
                 raise CopilotUnavailable
             returned = True
             return CopilotResponse(text="".join(text_parts), events=events, proposals=proposals, limited=limited)

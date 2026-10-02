@@ -198,7 +198,7 @@ test('copilot exposes query evidence and requires an explicit change confirmatio
   let confirmations = 0;
   await page.route('**/api/dataplayground/copilot/chat', route => route.fulfill({ json: {
     text: 'The SQL tool found records in your warehouse. Pause the consumer to inspect lag.',
-    events: [{ type: 'tool_result', tool: 'query_sql', result: { sql: 'SELECT COUNT(*) FROM events', columns: ['count'], rows: [[80]], row_count: 1 } }],
+    events: [{ type: 'tool_result', tool: 'query_sql', result: { sql: 'SELECT COUNT(*) FROM events', columns: ['count'], rows: [[80]], row_count: 1, truncated: false, row_limit: 25, workspace_generation: 1, data_revision: 0 } }],
     proposals: [{ id: 'browser-fixture-proposal', action: { action: 'consumer_pause' }, reason: 'Observe backlog in an isolated workspace.', expires_in_seconds: 600 }], limited: false,
   } }));
   await page.route('**/api/dataplayground/copilot/confirm', async route => {
@@ -216,10 +216,50 @@ test('copilot exposes query evidence and requires an explicit change confirmatio
   await expect(page.getByText('The SQL tool found records in your warehouse.', { exact: false })).toBeVisible();
   await page.getByText('query sql', { exact: true }).click();
   await expect(page.locator('.lab-copilot-evidence')).toContainText('SELECT COUNT(*) FROM events');
+  await expect(page.getByRole('region', { name: 'Copilot SQL evidence', exact: true })).toContainText('80');
   expect(confirmations).toBe(0);
   await page.getByRole('button', { name: 'Apply change', exact: true }).click();
   await expect(page.getByText('Applied to this workspace.', { exact: true })).toBeVisible();
   expect(confirmations).toBe(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('guided incidents verify recovery and downloaded SQL retains execution provenance', async ({ page }) => {
+  await page.goto('/dataplayground');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByText('Guided incident investigations', { exact: true }).click();
+  for (const name of ['Guide: stop producer', 'Guide: pause consumer', 'Guide: produce lag batch', 'Guide: drain recovery batch']) {
+    await page.getByRole('button', { name, exact: true }).click();
+  }
+  await expect(page.locator('.lab-incident-guide')).toContainText('Investigation complete');
+  await expect(page.locator('.lab-incident-checkpoint')).toHaveCount(4);
+  await page.getByLabel('Investigation', { exact: true }).selectOption('publication');
+  await page.getByRole('button', { name: 'Guide: run failing DAG', exact: true }).click();
+  await expect(page.locator('.lab-incident-checkpoint')).toContainText('Publication not published');
+  await page.getByRole('button', { name: 'Guide: run repaired DAG', exact: true }).click();
+  await expect(page.locator('.lab-incident-guide')).toContainText('Investigation complete');
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  const executedSql = 'SELECT COUNT(*) AS accepted_rows FROM events';
+  await page.getByLabel('SQL query', { exact: true }).fill(executedSql);
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'SQL query results', exact: true })).toContainText('accepted_rows');
+  await page.getByLabel('SQL query', { exact: true }).fill('SELECT 999 AS edited_but_not_executed');
+  await expect(page.locator('.lab-query-evidence')).toContainText('Last executed query');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download query evidence', exact: true }).click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  if (!stream) throw new Error('Query evidence download was unavailable');
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+  const evidence = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  expect(evidence.sql).toBe(executedSql);
+  expect(evidence.result.workspace_generation).toBe(1);
+  expect(evidence.result.data_revision).toBeGreaterThan(0);
+  expect(evidence.result.row_count).toBe(1);
+  expect(Object.keys(evidence).sort()).toEqual(['kind', 'result', 'row_limit', 'sampled', 'schema_version', 'scope', 'sql', 'sql_truncated']);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

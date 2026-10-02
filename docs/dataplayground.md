@@ -151,6 +151,24 @@ blocks dependent tasks, and publishes a reproducible in-memory fingerprint only 
 reconciliation. The Architecture view retains the full source-qualified saved DAG
 and model descriptions as a separate explanation.
 
+Guided incident investigations offer two manual experiments: consumer lag and recovery,
+and failed publication and repair. Each button performs one bounded workspace action;
+the guide advances only after its returned state meets the checkpoint. Lag recovery
+stops production, pauses consumption, produces one controlled batch, and drains up to
+500 records per click. Publication repair observes failed validation and blocked
+publication, then reruns without the injected fault and checks publication and SQL
+contracts. Checkpoints record action responses rather than continuing health checks.
+Restart guide clears those checkpoints; it does not reset data or controls.
+
+The execution summary distinguishes failed attempts, successful retries, blocked
+tasks, publication, and model contract outcomes. Accepted warehouse inserts advance
+the data revision; producing backlog, rejecting invalid records, and deduplicating
+replay do not. Models and the latest DAG record their input revisions. New accepted
+rows mark older results stale while retaining their historical status and fingerprint.
+Build SQL models or rerun the DAG to verify current inputs; streaming progress does
+not automatically rerun either operation. Reset replaces the workspace and increments
+its generation, independently of its new data revision.
+
 This is a local educational scheduler and event log with SQLite transformations;
 Airflow, Kafka, and dbt daemons are not deployed. State lives on one serving process,
 is limited to 32 visitor workspaces, and expires after 20 minutes without a visitor
@@ -167,6 +185,16 @@ truncation and elapsed query time. Workspace capabilities travel only in bearer
 headers, remain in browser memory, and never appear in URLs. All runtime and copilot
 responses are no-store.
 
+SQL results display the executed query, columns, returned rows, elapsed time, limit
+truncation, and the workspace generation/data revision observed during locked query
+execution. Returned row counts are bounded query output, not counts of all matching
+rows. Download query evidence creates a local JSON file with this query, bounded
+result and provenance; it contains no workspace capability or provider credentials.
+The same evidence table and download are available for copilot SQL results. Those
+may display a smaller sample of the returned rows, with explicit sample and shortened
+SQL notices. Downloads preserve the evidence actually shown rather than fetching
+additional records or publishing a dataset.
+
 ## Data Copilot
 
 The private `copilot/` package uses the actual Pi Agent SDK, pinned in its npm lockfile.
@@ -175,11 +203,27 @@ or Anthropic provider connection; Node receives no credentials, HOME, host sessi
 shell tools, filesystem tools, or cloud tools. The production image contains Node
 and the locked package; no separate public service is exposed.
 
-Five custom tools inspect the catalog, inspect the workspace, inspect runs, execute
-read-only SQL, and propose runtime changes. The UI shows bounded tool evidence,
-including SQL and sampled query results. Proposed changes are workspace-bound,
+Six custom tools are registered: `inspect_catalog`, `inspect_workspace`,
+`inspect_run`, `inspect_incident`, `query_sql`, and `propose_runtime_change`.
+Incident inspection reads partition lag, cumulative replay counters, up to ten
+stored quarantine reasons, current run contracts/freshness, and twenty recent logs
+without advancing background execution. Replay can increase quarantine attempt
+counts while stored quarantine records remain deduplicated. Named run inspection
+selects saved catalog runs; without a name it inspects the latest workspace run.
+The UI shows bounded tool evidence, including SQL and sampled query results.
+SQL evidence includes elapsed time, requested limit, returned row count, sample
+count, limit/sample truncation flags, and locked-query generation/data revision.
+At most ten sample rows and 4,000 SQL characters are shown, under a 12 KB evidence
+ceiling; omitted samples and shortened SQL are marked explicitly.
+
+Proposed changes are workspace-bound,
 expire, and require a separate Apply click. Dismiss performs no write. Confirmations
 are consumed atomically once; the model never applies a proposal itself.
+Proposals also bind to their workspace generation. Confirmation rejects an old
+proposal after reset before applying its action. Investigations retain their starting
+generation across tool calls and stop safely when reset replaces the workspace.
+The browser clears old conversations, proposals, query results, and incident
+checkpoints when the generation changes.
 
 The copilot shares the configured model provider but has an independent per-instance
 UTC-day token ceiling, `DATAPLAYGROUND_COPILOT_DAILY_TOKENS` (default 40,000; zero

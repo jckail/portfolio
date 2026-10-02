@@ -99,7 +99,7 @@ async def runtime_close(request: Request, response: Response):
 async def copilot_status(response: Response):
     response.headers.update(_HEADERS)
     return {"available": await asyncio.to_thread(copilot.available), "engine": "Pi Agent SDK",
-            "tools": ["inspect_catalog", "inspect_workspace", "inspect_run", "query_sql", "propose_runtime_change"]}
+            "tools": ["inspect_catalog", "inspect_workspace", "inspect_incident", "inspect_run", "query_sql", "propose_runtime_change"]}
 
 
 @router.post("/copilot/chat", response_model=CopilotResponse)

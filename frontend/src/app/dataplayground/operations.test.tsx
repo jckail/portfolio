@@ -10,6 +10,12 @@ import type { Catalog } from './types';
 vi.mock('./use-runtime', () => ({ useRuntime: vi.fn() }));
 const state: RuntimeState = {
   scenario_id: 'baseline',
+  workspace_generation: 1,
+  data_revision: 0,
+  dag_input_revision: null,
+  model_input_revision: null,
+  dag_stale: false,
+  models_stale: false,
   runtime: 'Local SQLite and event log.',
   source: 'Saved sample',
   expires_in_seconds: 1200,
@@ -182,9 +188,91 @@ describe('runtime workbench views', () => {
       })
     );
     expect(await screen.findByRole('status')).toHaveTextContent('1.25 ms measured by the server');
-    expect(screen.getByRole('status')).toHaveTextContent('Result truncated');
+    expect(screen.getByText(/Result truncated/)).toBeInTheDocument();
     expect(screen.getByLabelText('SQL NULL')).toBeInTheDocument();
     fireEvent.click(screen.getByText('events · 5 rows'));
     expect(screen.getByRole('region', { name: 'events schema' })).toHaveTextContent('primary');
+  });
+  it('shows actual cumulative outcomes and distinguishes retry recovery and stale execution evidence', () => {
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: {
+        ...state,
+        dag_published: true,
+        dag_stale: true,
+        models_stale: true,
+        dag_trace: [
+          { task_id: 'analytics', attempt: 1, status: 'failed', detail: 'Transient.' },
+          { task_id: 'analytics', attempt: 2, status: 'success', detail: 'Recovered.' },
+          { task_id: 'publish', attempt: 1, status: 'success', detail: 'Published.' },
+        ],
+      },
+    });
+    render(<Operations catalog={catalog} view="operations" />);
+    const outcomes = screen.getByLabelText('Consumer outcomes');
+    for (const [label, value] of [
+      ['Consumer attempts', '9'],
+      ['Inserted', '5'],
+      ['Deduplicated', '3'],
+      ['Quarantined', '1'],
+    ]) {
+      expect(within(outcomes).getByText(label).parentElement).toHaveTextContent(value);
+    }
+    const execution = screen.getByLabelText('Workspace execution outcomes');
+    expect(execution).toHaveTextContent(
+      'Tasks with failed attempts: analytics · Retried: analytics · Blocked: None'
+    );
+    expect(execution).toHaveTextContent('DAG evidence is stale');
+    expect(execution).toHaveTextContent('Model contracts are stale');
+    expect(screen.getByText(/Historical publication evidence/)).toBeInTheDocument();
+  });
+  it('preserves submitted SQL and row limit when the editor changes, then clears evidence on replacement', async () => {
+    query.mockResolvedValue({
+      columns: ['event_count'],
+      rows: [[5]],
+      row_count: 1,
+      elapsed_ms: 2,
+      truncated: false,
+    });
+    const view = render(<Operations catalog={catalog} view="sql" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await screen.findByRole('region', { name: 'SQL query results' });
+    fireEvent.click(screen.getByRole('button', { name: 'Purchase relationships' }));
+    fireEvent.change(screen.getByLabelText('Result row limit'), { target: { value: '25' } });
+    expect(screen.getByText(/The editor or row limit differs/)).toBeInTheDocument();
+    expect(
+      screen.getByText('SELECT COUNT(*) AS event_count FROM events;', { selector: 'code' })
+    ).toBeInTheDocument();
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('status')).toHaveTextContent('Requested limit 100');
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      session: { token: 'replacement', expires_in_seconds: 1200, state },
+    });
+    view.rerender(<Operations catalog={catalog} view="sql" />);
+    expect(screen.queryByRole('region', { name: 'SQL query results' })).not.toBeInTheDocument();
+  });
+  it('clears SQL evidence on an in-place reset and reports model contracts not run', async () => {
+    query.mockResolvedValue({
+      columns: ['event_count'],
+      rows: [[5]],
+      row_count: 1,
+      elapsed_ms: 2,
+      truncated: false,
+    });
+    const view = render(<Operations catalog={catalog} view="sql" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await screen.findByRole('region', { name: 'SQL query results' });
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, workspace_generation: 2, model_runs: [], dag_trace: [] },
+    });
+    view.rerender(<Operations catalog={catalog} view="sql" />);
+    expect(screen.queryByRole('region', { name: 'SQL query results' })).not.toBeInTheDocument();
+    view.rerender(<Operations catalog={catalog} view="operations" />);
+    expect(screen.getByLabelText('Workspace execution outcomes')).toHaveTextContent('DAG not run');
+    expect(screen.getByLabelText('Workspace execution outcomes')).toHaveTextContent(
+      'Model contracts: Not run'
+    );
   });
 });

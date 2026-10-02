@@ -77,6 +77,7 @@ schemas are exported as `TOOL_SCHEMAS` from `agent.mjs`:
 | --- | --- | --- |
 | `inspect_catalog` | Optional section: summary, architecture, exploration, runs | Bounded catalog metadata |
 | `inspect_workspace` | Empty object | Current private workspace schema/counts/state |
+| `inspect_incident` | Empty object | Bounded partition lag, cumulative replay counters, quarantine reasons, latest run contracts/freshness and twenty recent logs; does not advance background execution |
 | `query_sql` | sql <=20,000 characters; optional row_limit 1..500 | Bounded read-only SQL, independently validated by Python |
 | `inspect_run` | Optional run_id <=100 characters | Latest runtime trace or a named saved catalog run |
 | `propose_runtime_change` | Runtime action parameters plus reason <=500 characters | Create a pending confirmation; never apply a mutation |
@@ -109,12 +110,22 @@ does not terminate promptly. These local bounds supplement backend per-workspace
 limits, provider token budgets, authentication, request rate limits and SQL guards.
 
 The Python bridge adds bounded `tool_result` evidence to its HTTP response: SQL,
-columns, row count and at most ten sample rows; workspace table counts/backlog;
-and actual run publication/trace metadata. Evidence is capped at 12 KiB per tool.
+columns, elapsed time, requested row limit, returned row count and at most ten
+sample rows; workspace table counts/backlog; bounded incident diagnostics; and
+actual run publication/trace/freshness metadata. SQL `row_count` counts returned
+rows, not all matching rows. `truncated` describes the query limit, while
+`sampled_row_count` and `sample_truncated` describe the displayed evidence sample.
+`sql_truncated` marks SQL shortened to 4,000 characters. Query generation and data
+revision come from locked execution, not a preceding workspace observation.
+Evidence is capped at 12 KiB per tool; dropping rows resets the sample count to zero.
 It serializes one turn per workspace and at most two turns per process. Provider
 spend reserves a conservative request-byte input ceiling plus 1,024 output tokens
 before each round, then settles known cumulative usage once; unknown failure usage
 retains the reservation charge. The UTC daily budget is process-local, not a
 site-wide or billing-provider quota. Confirmation IDs are workspace-bound, expire
 after ten minutes, and are atomically single-use even when the action fails.
+They also bind to the workspace generation: reset rotates the generation, and
+confirmation checks it atomically before applying the action. Each investigation
+retains its starting generation across tool calls and fails safely if reset replaces
+the workspace; it never silently continues an old investigation against fresh state.
 Cancelled/failed turns remove proposals that were never delivered to the visitor.

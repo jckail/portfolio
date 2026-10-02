@@ -111,11 +111,15 @@ class RuntimeError(ValueError):
 
 
 class Workspace:
-    def __init__(self, catalog: LabCatalog, scenario_id: str, now: float):
+    def __init__(self, catalog: LabCatalog, scenario_id: str, now: float, *, generation: int = 1):
         run = next((run for run in catalog.runs if run.scenario.id == scenario_id), None)
         if run is None:
             raise RuntimeError("Unknown saved scenario.")
         self.scenario_id = scenario_id
+        self.generation = generation
+        self.data_revision = 0
+        self.dag_input_revision: int | None = None
+        self.model_input_revision: int | None = None
         self.last_seen = now
         self.lock = threading.RLock()
         self.db = sqlite3.connect(":memory:", check_same_thread=False)
@@ -248,6 +252,7 @@ class Workspace:
                         event,
                     )
                     self.inserted += cursor.rowcount
+                    self.data_revision += cursor.rowcount
                     self.duplicates += 1 - cursor.rowcount
                 self.offsets[partition] += 1
                 self.consumed += 1
@@ -267,6 +272,7 @@ class Workspace:
 
     def models(self) -> None:
         self.model_runs = []
+        self.model_input_revision = self.data_revision
         for name, sql in MODEL_SQL.items():
             self.db.execute(f'DROP TABLE IF EXISTS "{name}"')
             self.db.execute(f'CREATE TABLE "{name}" AS {sql}')
@@ -315,7 +321,9 @@ class Workspace:
 
     def dag(self, failure: str) -> None:
         self.dag_trace, self.dag_published, self.fingerprint = [], False, None
+        self.dag_input_revision = self.data_revision
         self.model_runs = []
+        self.model_input_revision = None
         statuses: dict[str, str] = {}
         tasks = [
             ("generate", []),
@@ -463,6 +471,12 @@ class Workspace:
         backlog = sum(p.backlog for p in partitions)
         return RuntimeState(
             scenario_id=self.scenario_id,
+            workspace_generation=self.generation,
+            data_revision=self.data_revision,
+            dag_input_revision=self.dag_input_revision,
+            model_input_revision=self.model_input_revision,
+            dag_stale=self.dag_input_revision is not None and self.dag_input_revision != self.data_revision,
+            models_stale=self.model_input_revision is not None and self.model_input_revision != self.data_revision,
             expires_in_seconds=max(0, math.ceil(ttl - (now - self.last_seen))),
             tables=tables,
             streaming=StreamingState(
@@ -557,6 +571,8 @@ class Workspace:
             cursor.close()
             self.log("sql", "success", f"Read-only query returned {len(rows)} rows; no SQL text logged.")
             return QueryResult(
+                workspace_generation=self.generation,
+                data_revision=self.data_revision,
                 columns=columns,
                 rows=rows,
                 row_count=len(rows),
@@ -611,7 +627,7 @@ class RuntimeManager:
             self.tick()
 
     @contextmanager
-    def _workspace(self, token: str):
+    def _workspace(self, token: str, *, advance: bool = True, expected_generation: int | None = None):
         with self.lock:
             now = self.clock()
             self._expire(now)
@@ -621,9 +637,14 @@ class RuntimeManager:
             workspace.lock.acquire()
             workspace.last_seen = now
         try:
+            if expected_generation is not None and (
+                type(expected_generation) is not int or expected_generation != workspace.generation
+            ):
+                raise RuntimeError("Workspace changed after this action was proposed. Inspect it and try again.")
             # Cloud Run may throttle CPU between HTTP requests. Advance at most
             # one bounded batch here as well; idle wall time is never synthesized.
-            workspace.tick(now)
+            if advance:
+                workspace.tick(now)
             yield workspace
         finally:
             workspace.lock.release()
@@ -639,29 +660,67 @@ class RuntimeManager:
             self.sessions[token] = workspace
             return SessionResponse(token=token, expires_in_seconds=self.ttl, state=workspace.state(now, self.ttl))
 
-    def state(self, token: str) -> RuntimeState:
-        with self._workspace(token) as workspace:
+    def state(self, token: str, *, expected_generation: int | None = None) -> RuntimeState:
+        with self._workspace(token, expected_generation=expected_generation) as workspace:
             return workspace.state(self.clock(), self.ttl)
 
-    def query(self, token: str, request: QueryRequest) -> QueryResult:
+    def query(
+        self, token: str, request: QueryRequest, *, expected_generation: int | None = None
+    ) -> QueryResult:
         if not self.query_slots.acquire(blocking=False):
             raise RuntimeError("Two workspace queries are already running. Try again shortly.")
         try:
-            with self._workspace(token) as workspace:
+            with self._workspace(token, expected_generation=expected_generation) as workspace:
                 return workspace.query(request)
         finally:
             self.query_slots.release()
 
-    def action(self, token: str, request: RuntimeAction) -> RuntimeState:
-        if request.action == "reset":
-            with self.lock, self._workspace(token) as workspace:
-                replacement = Workspace(self.catalog, workspace.scenario_id, self.clock())
+    def action(
+        self, token: str, request: RuntimeAction, *, expected_generation: int | None = None
+    ) -> RuntimeState:
+        # Keep lookup, generation validation and replacement under the same locks.
+        # A rejected stale proposal must not advance background work first.
+        with self.lock, self._workspace(token, advance=False, expected_generation=expected_generation) as workspace:
+            if request.action == "reset":
+                replacement = Workspace(
+                    self.catalog, workspace.scenario_id, self.clock(), generation=workspace.generation + 1
+                )
                 self.sessions[token] = replacement
                 workspace.close()
                 return replacement.state(self.clock(), self.ttl)
-        with self._workspace(token) as workspace:
+            workspace.tick(self.clock())
             workspace.action(request, self.clock())
             return workspace.state(self.clock(), self.ttl)
+
+    def diagnostics(self, token: str) -> dict:
+        """Inspect bounded run and quality evidence without advancing execution."""
+        with self._workspace(token, advance=False) as workspace:
+            state = workspace.state(self.clock(), self.ttl)
+            rows = workspace.db.execute(
+                "SELECT partition,offset,event_id,reason FROM quarantine ORDER BY partition,offset LIMIT 10"
+            ).fetchall()
+            total = workspace.db.execute("SELECT COUNT(*) FROM quarantine").fetchone()[0]
+            return {
+                "workspace_generation": state.workspace_generation,
+                "data_revision": state.data_revision,
+                "streaming": state.streaming.model_dump(),
+                "quarantine": {
+                    "total_rows": total,
+                    "sample": [dict(row) for row in rows],
+                    "sample_truncated": total > len(rows),
+                },
+                "run": {
+                    "dag_trace": [entry.model_dump() for entry in state.dag_trace],
+                    "dag_published": state.dag_published,
+                    "dag_fingerprint": state.dag_fingerprint,
+                    "dag_input_revision": state.dag_input_revision,
+                    "dag_stale": state.dag_stale,
+                    "model_input_revision": state.model_input_revision,
+                    "models_stale": state.models_stale,
+                    "model_runs": [entry.model_dump() for entry in state.model_runs],
+                },
+                "logs": [entry.model_dump() for entry in state.logs[-20:]],
+            }
 
     def delete(self, token: str) -> None:
         with self.lock:

@@ -41,6 +41,8 @@ class RuntimeAction(RuntimeContract):
 
 
 class QueryResult(RuntimeContract):
+    workspace_generation: int | None = Field(default=None, ge=1)
+    data_revision: int | None = Field(default=None, ge=0)
     columns: list[str]
     rows: list[list[str | int | float | None]]
     row_count: int
@@ -127,6 +129,12 @@ class FlowLink(RuntimeContract):
 
 class RuntimeState(RuntimeContract):
     scenario_id: str
+    workspace_generation: int = Field(ge=1)
+    data_revision: int = Field(ge=0)
+    dag_input_revision: int | None
+    model_input_revision: int | None
+    dag_stale: bool
+    models_stale: bool
     runtime: str = (
         "Process-local educational runtime: SQLite and a partitioned event log; no Kafka daemon or dbt service."
     )

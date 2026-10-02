@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- Named overflow regions support keyboard scrolling. */
 import { useEffect, useId, useState } from 'react';
 
+import { IncidentGuide } from './incident-guide';
+import { QueryEvidence } from './query-evidence';
 import { useRuntime } from './use-runtime';
 import './operations.css';
 
@@ -245,6 +247,7 @@ function OverviewMetrics({ state }: { state: RuntimeState }) {
             {tests.length
               ? `${tests.filter((test) => test.status === 'pass').length} / ${tests.length} pass`
               : 'Not run'}
+            {state.models_stale && ' · Stale; rebuild models'}
           </dd>
         </div>
       </dl>
@@ -298,6 +301,30 @@ function StreamingControls({ state }: { state: RuntimeState }) {
         {stream.consumer_paused ? 'paused' : 'running'} · {format(stream.backlog)} records waiting ·{' '}
         {format(stream.produced)} / {format(stream.capacity)} log capacity
       </p>
+      <dl className="lab-ops-outcomes" aria-label="Consumer outcomes">
+        {[
+          ['Consumer attempts', stream.consumed],
+          ['Inserted', stream.inserted],
+          ['Deduplicated', stream.duplicates],
+          ['Quarantined', stream.quarantined],
+        ].map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{format(value as number)}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="lab-note">
+        These are cumulative processing outcomes, including replay attempts. Warehouse rows also
+        include the saved sample; deduplication and quarantine do not add rows.
+      </p>
+      <button
+        onClick={() =>
+          document.getElementById('runtime-partition-offsets')?.scrollIntoView({ block: 'start' })
+        }
+      >
+        Inspect partition offsets and backlog
+      </button>
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -447,7 +474,13 @@ function StreamingControls({ state }: { state: RuntimeState }) {
           </div>
         </fieldset>
       </form>
-      <div className="lab-table-scroll" role="region" aria-label="Partition offsets" tabIndex={0}>
+      <div
+        id="runtime-partition-offsets"
+        className="lab-table-scroll"
+        role="region"
+        aria-label="Partition offsets"
+        tabIndex={0}
+      >
         <table>
           <caption>Current offsets and remaining backlog by partition.</caption>
           <thead>
@@ -477,6 +510,18 @@ function StreamingControls({ state }: { state: RuntimeState }) {
 function Executions({ state }: { state: RuntimeState }) {
   const { action, loading } = useRuntime();
   const [failure, setFailure] = useState<NonNullable<RuntimeAction['failure']>>('none');
+  const tests = state.model_runs.flatMap((model) => model.tests);
+  const failedTasks = [
+    ...new Set(
+      state.dag_trace.filter((task) => task.status === 'failed').map((task) => task.task_id)
+    ),
+  ];
+  const blockedTasks = state.dag_trace
+    .filter((task) => task.status === 'blocked')
+    .map((task) => task.task_id);
+  const retriedTasks = [
+    ...new Set(state.dag_trace.filter((task) => task.attempt > 1).map((task) => task.task_id)),
+  ];
   return (
     <section className="lab-ops-section" aria-labelledby="runtime-execution-title">
       <h3 id="runtime-execution-title">Execute the current workspace</h3>
@@ -484,6 +529,50 @@ function Executions({ state }: { state: RuntimeState }) {
         These callbacks operate on current SQLite rows. They are separate from the saved
         architecture traces and the lifecycle experiment.
       </p>
+      <div className="lab-execution-summary" aria-label="Workspace execution outcomes">
+        <p>
+          <strong>Publication:</strong>{' '}
+          {state.dag_trace.length
+            ? state.dag_published
+              ? 'Published in memory'
+              : 'Not published'
+            : 'DAG not run'}
+          {state.dag_stale && ' · Stale, historical outcome'}
+        </p>
+        {state.dag_trace.length > 0 && (
+          <p>
+            Tasks with failed attempts: {failedTasks.join(', ') || 'None'} · Retried:{' '}
+            {retriedTasks.join(', ') || 'None'} · Blocked: {blockedTasks.join(', ') || 'None'}. A
+            failed attempt can recover on retry; publication reflects the final outcome.
+          </p>
+        )}
+        <p>
+          <strong>Model contracts:</strong>{' '}
+          {tests.length
+            ? `${tests.filter((test) => test.status === 'pass').length} / ${tests.length} pass`
+            : 'Not run'}
+          {tests.some((test) => test.status === 'fail')
+            ? ` · ${tests.filter((test) => test.status === 'fail').length} failed`
+            : ''}
+          {state.models_stale && ' · Stale'}
+        </p>
+        <p className="lab-note">
+          These are the latest executed outcomes. Producing or consuming more records does not
+          automatically rebuild SQL models or rerun the DAG.
+        </p>
+        {state.dag_stale && (
+          <p className="lab-note">
+            DAG evidence is stale: event rows changed since execution. Rerun the workspace DAG
+            before treating its publication as current.
+          </p>
+        )}
+        {state.models_stale && (
+          <p className="lab-note">
+            Model contracts are stale: event rows changed since materialization. Build SQL models to
+            check the current inputs.
+          </p>
+        )}
+      </div>
       <label htmlFor="runtime-dag-failure">DAG failure injection</label>
       <select
         id="runtime-dag-failure"
@@ -508,6 +597,7 @@ function Executions({ state }: { state: RuntimeState }) {
           <p>
             Publication: {state.dag_published ? 'published in memory' : 'not published'}.
             Fingerprint: <code>{state.dag_fingerprint || 'None'}</code>
+            {state.dag_stale && ' · Historical publication evidence; inputs have changed.'}
           </p>
           <div
             className="lab-table-scroll"
@@ -546,6 +636,7 @@ function Executions({ state }: { state: RuntimeState }) {
           <details key={model.name}>
             <summary>
               {model.name}: {model.status} · {format(model.row_count)} rows
+              {state.models_stale && ' · Stale'}
             </summary>
             <p>Source: {model.source}</p>
             <pre>
@@ -584,8 +675,12 @@ function SQLConsole({ state }: { state: RuntimeState }) {
   const { query, loading, session } = useRuntime();
   const [sql, setSql] = useState(presets[0].sql);
   const [rowLimit, setRowLimit] = useState(100);
-  const [result, setResult] = useState<QueryResult | null>(null);
-  useEffect(() => setResult(null), [session?.token]);
+  const [result, setResult] = useState<{
+    sql: string;
+    rowLimit: number;
+    result: QueryResult;
+  } | null>(null);
+  useEffect(() => setResult(null), [session?.token, state.workspace_generation]);
   return (
     <section className="lab-ops-section" aria-labelledby="runtime-sql-title">
       <h3 id="runtime-sql-title">Query SQLite</h3>
@@ -604,8 +699,9 @@ function SQLConsole({ state }: { state: RuntimeState }) {
         onSubmit={(event) => {
           event.preventDefault();
           setResult(null);
-          void query({ sql, row_limit: rowLimit }).then((next) => {
-            if (next) setResult(next);
+          const submitted = { sql, rowLimit };
+          void query({ sql: submitted.sql, row_limit: submitted.rowLimit }).then((next) => {
+            if (next) setResult({ ...submitted, result: next });
           });
         }}
       >
@@ -635,44 +731,13 @@ function SQLConsole({ state }: { state: RuntimeState }) {
       </form>
       {result && (
         <>
-          <p role="status">
-            {result.row_count} rows returned · {result.elapsed_ms.toFixed(2)} ms measured by the
-            server
-            {result.truncated
-              ? ' · Result truncated; narrow the query or increase the row limit.'
-              : ''}
-          </p>
-          <div
-            className="lab-table-scroll"
-            role="region"
-            aria-label="SQL query results"
-            tabIndex={0}
-          >
-            <table>
-              <caption>Current query result</caption>
-              <thead>
-                <tr>
-                  {result.columns.map((column, index) => (
-                    <th scope="col" key={`${column}-${index}`}>
-                      {column}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {result.rows.map((row, index) => (
-                  <tr key={index}>
-                    {row.map((value, column) => (
-                      <td key={column}>
-                        {value === null ? <span aria-label="SQL NULL">NULL</span> : String(value)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!result.rows.length && <p>The query returned no rows.</p>}
-          </div>
+          {(sql !== result.sql || rowLimit !== result.rowLimit) && (
+            <p className="lab-note">
+              The editor or row limit differs from the last executed query. Run query to update
+              these results.
+            </p>
+          )}
+          <QueryEvidence sql={result.sql} rowLimit={result.rowLimit} result={result.result} />
         </>
       )}
       <h4>Workspace schema</h4>
@@ -766,7 +831,11 @@ export function Operations({
           </>
         ) : view === 'operations' ? (
           <>
-            <StreamingControls key={session?.token} state={state} />
+            <IncidentGuide />
+            <StreamingControls
+              key={`${session?.token}-${state.workspace_generation}`}
+              state={state}
+            />
             <Executions state={state} />
             <details className="lab-runtime-logs">
               <summary>Workspace activity ({state.logs.length} entries)</summary>

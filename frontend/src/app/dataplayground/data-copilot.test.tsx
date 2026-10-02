@@ -305,3 +305,108 @@ describe('Data Copilot', () => {
   });
 });
 const startersLabel = 'Inspect my workspace and explain how records move through it.';
+
+describe('structured investigation evidence', () => {
+  it('ignores a late confirmation failure after a same-token reset', async () => {
+    let rejectConfirmation!: (reason: Error) => void;
+    confirm.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectConfirmation = reject;
+        })
+    );
+    vi.mocked(postJson).mockResolvedValue({
+      text: 'Review the consumer change.',
+      limited: false,
+      events: [],
+      proposals: [
+        {
+          id: 'old-generation-proposal',
+          action: { action: 'consumer_pause' },
+          reason: 'Inspect lag.',
+          expires_in_seconds: 600,
+        },
+      ],
+    });
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, workspace_generation: 1 },
+    });
+    const { rerender } = render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Apply change' }));
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, workspace_generation: 2 },
+    });
+    rerender(<DataCopilot catalog={catalog} />);
+    await act(async () => rejectConfirmation(new Error('Old confirmation failed')));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByText('Review the consumer change.')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Investigate' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled();
+  });
+  it('renders SQL samples with their actual query provenance and retains raw evidence', async () => {
+    vi.mocked(postJson).mockResolvedValue({
+      text: 'Eight bounded rows were returned.',
+      limited: false,
+      proposals: [],
+      events: [
+        {
+          type: 'tool_result',
+          tool: 'query_sql',
+          result: {
+            sql: 'SELECT event_id FROM events',
+            columns: ['event_id'],
+            rows: [['event-1']],
+            row_count: 8,
+            row_limit: 8,
+            truncated: true,
+            elapsed_ms: 2,
+            sampled_row_count: 1,
+            sample_truncated: true,
+            workspace_generation: 1,
+            data_revision: 5,
+          },
+        },
+      ],
+    });
+    render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    await screen.findByText('Eight bounded rows were returned.');
+    fireEvent.click(screen.getByText('query sql'));
+    expect(screen.getByRole('region', { name: 'Copilot SQL evidence' })).toBeVisible();
+    expect(screen.getByText(/1 rows shown from 8 returned/)).toBeVisible();
+    expect(screen.getByText(/generation 1, data revision 5/)).toBeVisible();
+    fireEvent.click(screen.getByText('Raw tool evidence'));
+    expect(screen.getByText(/"sampled_row_count": 1/)).toBeVisible();
+  });
+  it('clears a conversation and ignores old investigation results after a same-token reset', async () => {
+    let finish!: (reply: unknown) => void;
+    vi.mocked(postJson).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, workspace_generation: 1 },
+    });
+    const { rerender } = render(<DataCopilot catalog={catalog} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: startersLabel })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: startersLabel }));
+    vi.mocked(useRuntime).mockReturnValue({
+      ...useRuntime(),
+      state: { ...state, workspace_generation: 2 },
+    });
+    rerender(<DataCopilot catalog={catalog} />);
+    await act(async () =>
+      finish({ text: 'Old workspace answer', events: [], proposals: [], limited: false })
+    );
+    expect(screen.queryByText('Old workspace answer')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Stop' })).not.toBeInTheDocument();
+  });
+});
