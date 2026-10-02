@@ -138,10 +138,10 @@ describe('observed-state comparison', () => {
     });
     expect(screen.getByText('Select two distinct snapshots.')).toBeInTheDocument();
     selectPair();
-    expect(screen.getByRole('combobox', { name: 'Before snapshot', exact: true })).toHaveValue(
+    expect(screen.getByRole('combobox', { name: 'Before snapshot' })).toHaveValue(
       'before'
     );
-    expect(screen.getByRole('combobox', { name: 'After snapshot', exact: true })).toHaveValue(
+    expect(screen.getByRole('combobox', { name: 'After snapshot' })).toHaveValue(
       'after'
     );
     const counters = screen.getByRole('region', { name: 'Snapshot counter differences' });
