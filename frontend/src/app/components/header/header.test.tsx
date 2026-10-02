@@ -13,6 +13,14 @@ vi.mock('../../providers/data-provider', () => ({
 vi.mock('../../../shared/utils/scroll-utils', () => ({ scrollToSection: vi.fn() }));
 vi.mock('../../../shared/utils/analytics', () => ({ trackThemeChange: vi.fn() }));
 
+// jsdom has no layout, so offsetParent is always null; the drawer's focus trap filters on it.
+Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+  configurable: true,
+  get() {
+    return this.parentNode;
+  },
+});
+
 const renderHeader = () => render(<Header />);
 
 beforeEach(() => {

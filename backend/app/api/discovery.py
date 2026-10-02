@@ -525,25 +525,15 @@ def resume_json() -> bytes:
 # --- sitemap.xml -----------------------------------------------------------------
 
 
-def _resume_pdf_date() -> str | None:
-    try:
-        path = Path(__file__).parent.parent.parent / "assets" / load_aboutme().resume_name
-        return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).strftime("%Y-%m-%d")
-    except OSError:
-        return None
-
-
 @cache
 def sitemap_xml() -> bytes:
+    # HTML pages only. llms.txt, resume.json and the PDF stay discoverable via
+    # robots.txt, llms.txt and the Link header on the home page.
     modified = last_modified_date()
     entries = [
         ("/", modified, "monthly", "1.0"),
         ("/dataplayground", modified, "monthly", "0.8"),
         *((f"/{lab.slug}", lab.updated, "monthly", "0.7") for lab in load_catalog().labs.values()),
-        ("/llms.txt", modified, "monthly", "0.5"),
-        ("/llms-full.txt", modified, "monthly", "0.5"),
-        ("/resume.json", modified, "monthly", "0.6"),
-        (RESUME_PDF_PATH, _resume_pdf_date() or modified, "monthly", "0.6"),
     ]
     rows = [
         f"  <url>\n    <loc>{escape(absolute(path))}</loc>\n    <lastmod>{lastmod}</lastmod>\n"

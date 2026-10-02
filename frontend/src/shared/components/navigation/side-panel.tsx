@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { scrollToSection } from '../../utils/scroll-utils';
-import { useEscapeKey } from '../../hooks/use-escape-key';
+import { useFocusTrap } from '../../hooks/use-focus-trap';
 import '../../../styles/components/navigation/side-panel.css';
 
 interface SidePanelProps {
@@ -76,33 +76,29 @@ const useCurrentSection = () => {
 
 const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }) => {
   const currentSection = useCurrentSection();
-  const navRef = React.useRef<HTMLElement | null>(null);
+  // The drawer is modal while open: useFocusTrap keeps Tab inside it, closes it
+  // on Escape, locks page scroll, focuses the first item, and restores focus on
+  // close. The trap strips `inert` from its container when it tears down, so
+  // the inert toggle below must be a passive effect declared after the hook:
+  // all cleanups run before any effect, which lets it re-apply `inert` last.
+  const navRef = useFocusTrap(isOpen, onClose) as unknown as React.MutableRefObject<HTMLElement | null>;
   const wasOpenRef = React.useRef(isOpen);
 
   // Closed, the drawer only slides off-screen; inert keeps its buttons out
   // of the tab order and the accessibility tree. (React 18 has no inert prop.)
-  // On open, focus moves to the first item; on close, back to the opener,
-  // unless the visitor has already moved focus somewhere else on the page.
+  // On close, focus goes back to the opener unless the visitor has already
+  // moved focus somewhere else on the page (the trap restores it in the common case).
   React.useEffect(() => {
     const nav = navRef.current;
     nav?.toggleAttribute('inert', !isOpen);
     const wasOpen = wasOpenRef.current;
     wasOpenRef.current = isOpen;
-    if (!nav || wasOpen === isOpen) return;
-    if (isOpen) {
-      nav.querySelector<HTMLElement>('.nav-item')?.focus();
-      return;
-    }
+    if (!nav || wasOpen === isOpen || isOpen) return;
     const active = document.activeElement;
     if (!active || active === document.body || nav.contains(active)) {
       returnFocusRef?.current?.focus();
     }
-  }, [isOpen, returnFocusRef]);
-
-  const closeOnEscape = React.useCallback(() => {
-    if (isOpen) onClose();
-  }, [isOpen, onClose]);
-  useEscapeKey(closeOnEscape);
+  }, [isOpen, returnFocusRef, navRef]);
 
   const sections = [
     { id: 'about', label: 'About' },

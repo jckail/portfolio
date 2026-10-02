@@ -171,11 +171,8 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
         "https://www.jckail.com/",
         "https://www.jckail.com/dataplayground",
         *(f"https://www.jckail.com/{slug}" for slug in load_labs()),
-        "https://www.jckail.com/llms.txt",
-        "https://www.jckail.com/llms-full.txt",
-        "https://www.jckail.com/resume.json",
-        "https://www.jckail.com/api/resume",
     ]
+    assert not any(loc.endswith((".txt", ".json")) or "/api/" in loc for loc in locs)
     for url in root.findall("s:url", ns):
         assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", url.findtext("s:lastmod", namespaces=ns))
 
