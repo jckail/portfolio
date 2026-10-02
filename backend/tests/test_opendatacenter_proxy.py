@@ -37,7 +37,7 @@ def gateway(client, monkeypatch):
         app.dependency_overrides.pop(get_settings, None)
 
 
-@pytest.mark.parametrize("path", ["/opendatacenter/", "/opendatacenter/v1/organizations", "/opendatacenter/v1/entities/entity-1"])
+@pytest.mark.parametrize("path", ["/opendatacenter/", "/opendatacenter/v1/organizations", "/opendatacenter/v1/entities/entity-1", "/opendatacenter/v1/entities/entity-1/history"])
 def test_unconfigured_gateway_is_not_public(client, path):
     assert client.get(path, headers={"accept": "text/html"}).status_code == 404
 
@@ -57,7 +57,7 @@ def test_public_reads_preserve_subpath_query_and_drop_credentials(gateway):
 
 
 @pytest.mark.parametrize("method", ["GET", "HEAD"])
-@pytest.mark.parametrize("path", ["organizations?q=Acme&limit=20&cursor=opaque", "entities/entity-1"])
+@pytest.mark.parametrize("path", ["organizations?q=Acme&limit=20&cursor=opaque", "entities/entity-1", "entities/entity-1/history?limit=2&cursor=opaque&predicate=power"])
 def test_organization_and_entity_reads_preserve_route_and_strip_credentials(gateway, method, path):
     client, seen = gateway
     response = client.request(
@@ -75,10 +75,25 @@ def test_organization_and_entity_reads_preserve_route_and_strip_credentials(gate
 
 
 @pytest.mark.parametrize("method", ["POST", "PUT", "PATCH", "DELETE"])
-@pytest.mark.parametrize("path", ["organizations", "entities/entity-1"])
+@pytest.mark.parametrize("path", ["organizations", "entities/entity-1", "entities/entity-1/history"])
 def test_organization_and_entity_writes_never_reach_upstream(gateway, method, path):
     client, seen = gateway
     assert client.request(method, f"/opendatacenter/v1/{path}", json={"name": "forged"}).status_code == 404
+    assert not seen
+
+
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+@pytest.mark.parametrize("path", [
+    "entities/entity-1/history-admin",
+    "entities/entity-1/history/extra",
+    "entities/entity-1/admin",
+    "entities//history",
+    "entities/entity%5C1/history",
+    "entities/entity%201/history",
+])
+def test_entity_history_lookalikes_never_reach_upstream(gateway, method, path):
+    client, seen = gateway
+    assert client.request(method, f"/opendatacenter/v1/{path}").status_code == 404
     assert not seen
 
 
