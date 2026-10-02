@@ -64,7 +64,10 @@ complete result text is emitted once. Provider errors use
 `{type:"provider_error",id,kind}` with a short safe label, never an exception,
 response body, key, URL or raw provider text. Opaque `provider_state` (including
 Gemini thought signatures) is retained unchanged on the private request channel
-between Pi rounds; it never appears in browser events or local session files.
+between Pi rounds. Tool IDs are normalized to round-scoped Pi IDs, so providers
+that restart fallback IDs each response cannot collide with earlier calls. Matching
+call/result IDs and their individual signatures stay paired; duplicate provider IDs
+within one response are still rejected. Provider state never appears in browser events or local session files.
 
 Tools use `{type:"tool_request",id,tool,args}` and receive
 `{type:"tool_result",id,result}` or `{type:"tool_error",id,kind}`. Registered

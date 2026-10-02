@@ -101,10 +101,14 @@ export async function runCopilot({ request, bridge, emit, signal, limits = LIMIT
         requestedCalls += calls.length;
         const seen = new Set();
         for (const call of calls) {
-          if (!isObject(call) || typeof call.id !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(call.id) || seen.has(call.id) || providerStates.has(call.id) || typeof call.name !== 'string' || !TOOL_SCHEMAS.some(tool => tool.name === call.name) || !isObject(call.args) || size(call.args) > limits.argsBytes || !isObject(call.provider_state ?? {}) || size(call.provider_state ?? {}) > 65536) throw new SafeError('protocol');
+          if (!isObject(call) || typeof call.id !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(call.id) || seen.has(call.id) || typeof call.name !== 'string' || !TOOL_SCHEMAS.some(tool => tool.name === call.name) || !isObject(call.args) || size(call.args) > limits.argsBytes || !isObject(call.provider_state ?? {}) || size(call.provider_state ?? {}) > 65536) throw new SafeError('protocol');
           seen.add(call.id);
-          providerStates.set(call.id, structuredClone(call.provider_state ?? {}));
-          const block = { type: 'toolCall', id: call.id, name: call.name, arguments: call.args };
+          // Providers may restart fallback IDs (Vertex uses call_0) each round.
+          // Pi's transcript needs a turn-unique ID for each call/result pair;
+          // signatures remain opaque and belong to the corresponding Pi ID.
+          const piId = `pi_${rounds}_${seen.size}`;
+          providerStates.set(piId, structuredClone(call.provider_state ?? {}));
+          const block = { type: 'toolCall', id: piId, name: call.name, arguments: call.args };
           if (typeof call.provider_state?.thoughtSignature === 'string') block.thoughtSignature = call.provider_state.thoughtSignature;
           const contentIndex = message.content.length;
           message.content.push(block);
