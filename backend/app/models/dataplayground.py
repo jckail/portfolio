@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .dataplayground_architecture import Architecture
 from .dataplayground_exploration import Exploration
 
 Count = Annotated[int, Field(ge=0, strict=True)]
@@ -131,6 +132,7 @@ class LabCatalog(Contract):
     source: ArtifactSource
     runs: Annotated[list[SimulationRun], Field(min_length=1, max_length=10)]
     exploration: Exploration | None = None
+    architecture: Architecture | None = None
 
 
 class PublicLabCatalog(LabCatalog):

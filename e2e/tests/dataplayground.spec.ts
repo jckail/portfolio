@@ -91,3 +91,46 @@ test('commerce dataset connects product filtering, graph traversal, and vector e
     }
   }
 });
+
+test('engineering workbench replays dependency failures and exposes data model contracts', async ({ page }) => {
+  await page.goto('/dataplayground');
+  const workflow = page.getByRole('region', { name: 'Workflow execution', exact: true });
+  await expect(workflow).toBeVisible();
+  await page.getByLabel('Saved execution', { exact: true }).selectOption('normal');
+  await workflow.getByRole('button', { name: 'Show complete trace', exact: true }).click();
+  const normalFingerprint = await workflow.locator('.lab-recorded-outcome code').textContent();
+  expect(normalFingerprint).toMatch(/^[a-f0-9]{64}$/);
+  await page.getByLabel('Saved execution', { exact: true }).selectOption('analytics-retry');
+  await workflow.getByRole('button', { name: 'Show complete trace', exact: true }).click();
+  await expect(workflow.locator('.lab-recorded-outcome code')).toHaveText(normalFingerprint!);
+  await workflow.getByRole('button', { name: /Aggregate in SQLite/ }).click();
+  await expect(workflow.locator('.lab-architecture-detail')).toContainText('Up to 2 attempts');
+  await expect(workflow.locator('.lab-architecture-detail')).toContainText('attempt 2');
+  await workflow.getByText(/^View complete execution trace/).click();
+  const trace = page.getByRole('region', { name: 'Recorded execution trace', exact: true });
+  await expect(trace.locator('tbody tr')).toHaveCount(7);
+  await expect(trace).toContainText('failed');
+  await page.getByLabel('Saved execution', { exact: true }).selectOption('validation-failure');
+  await workflow.getByRole('button', { name: 'Show complete trace', exact: true }).click();
+  await expect(workflow.locator('.lab-recorded-outcome')).toContainText('Not published');
+  await workflow.getByRole('button', { name: /Build commerce features/ }).click();
+  await expect(workflow.locator('.lab-architecture-detail')).toContainText('success');
+  await workflow.getByRole('button', { name: /Reconcile contracts/ }).click();
+  await expect(workflow.locator('.lab-architecture-detail')).toContainText('blocked');
+  await page.getByLabel('Data model', { exact: true }).selectOption('customers');
+  const models = page.getByRole('region', { name: 'Data models', exact: true });
+  await expect(models.locator('.lab-architecture-detail')).toContainText('One lifecycle user including non-paying users');
+  await expect(page.getByRole('region', { name: 'Model columns', exact: true })).toContainText('first_payment');
+  await expect(page.getByRole('region', { name: 'Derived lifecycle customers SQL definition', exact: true })).toContainText('GROUP BY user_id');
+  await page.getByLabel('Data model', { exact: true }).selectOption('purchases');
+  await expect(models.locator('.lab-architecture-detail')).toContainText('One purchase row');
+  await expect(page.getByRole('region', { name: 'Model columns', exact: true })).toContainText('foreign key');
+  await expect(page.getByRole('region', { name: 'Engineering decisions', exact: true })).toContainText('Production proposal');
+  await page.getByLabel('Saved execution', { exact: true }).selectOption('analytics-retry');
+  await workflow.getByRole('button', { name: 'Show complete trace', exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (let theme = 0; theme < 2; theme++) {
+    await page.getByRole('button', { name: /Use .* theme/ }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});

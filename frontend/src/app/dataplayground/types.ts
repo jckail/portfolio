@@ -62,12 +62,74 @@ export interface RunResult {
   lineage: { metric: string; definition: string; source: string; sql: string }[];
 }
 export interface Catalog {
+  architecture?: ArchitectureDataset | null;
   exploration?: ExplorationDataset | null;
   schema_version: number;
   engine_version: string;
   source: { repository: string; command: string };
   live_simulation: boolean;
   runs: RunResult[];
+}
+
+export interface ArchitectureTask {
+  id: string;
+  name: string;
+  depends_on: string[];
+  description: string;
+  source: string;
+  output: string;
+  max_attempts: number;
+  idempotency: string;
+}
+export interface ArchitectureRun {
+  id: string;
+  name: string;
+  description: string;
+  trace: {
+    task_id: string;
+    attempt: number;
+    status: 'success' | 'failed' | 'blocked';
+    detail: string;
+  }[];
+  published: boolean;
+  fingerprint: string | null;
+}
+export interface ArchitectureModel {
+  id: string;
+  name: string;
+  kind: 'table' | 'view' | 'artifact';
+  description: string;
+  grain: string;
+  materialization: string;
+  source: string;
+  columns: {
+    name: string;
+    type: string;
+    nullable: boolean;
+    key: 'primary' | 'foreign' | 'none';
+    description: string;
+  }[];
+  depends_on: string[];
+  sql: string;
+  contracts: string[];
+}
+export interface ArchitectureDataset {
+  dags: {
+    id: string;
+    name: string;
+    description: string;
+    tasks: ArchitectureTask[];
+    runs: ArchitectureRun[];
+  }[];
+  models: ArchitectureModel[];
+  decisions: {
+    id: string;
+    title: string;
+    choice: string;
+    tradeoff: string;
+    evidence: string;
+    production_path: string;
+  }[];
 }
 
 export interface ExplorationProduct {

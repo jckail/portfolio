@@ -1,4 +1,710 @@
 {
+  "architecture": {
+    "dags": [
+      {
+        "description": "Executable local dependency scheduler with independent branches, bounded transient retry and contract-gated in-memory publication. Injected faults are demonstrations, not production incidents.",
+        "id": "lifecycle-exploration",
+        "name": "Lifecycle and commerce publication",
+        "runs": [
+          {
+            "description": "All six callbacks execute successfully in deterministic dependency order.",
+            "fingerprint": "1ec84897a1a886b1ecc940e4f3cb6c99a895316e3005fe8b9d455d5a0f710b16",
+            "id": "normal",
+            "name": "Normal execution",
+            "published": true,
+            "trace": [
+              {
+                "attempt": 1,
+                "detail": "Generated 67 raw events with seed 42.",
+                "status": "success",
+                "task_id": "generate"
+              },
+              {
+                "attempt": 1,
+                "detail": "Accepted 66 events; rejected records remain quarantine, not task retries.",
+                "status": "success",
+                "task_id": "validate"
+              },
+              {
+                "attempt": 1,
+                "detail": "Executed SQLite aggregation from accepted events.",
+                "status": "success",
+                "task_id": "analytics"
+              },
+              {
+                "attempt": 1,
+                "detail": "Built independent 48-product, 32-shopper commerce branch.",
+                "status": "success",
+                "task_id": "exploration"
+              },
+              {
+                "attempt": 1,
+                "detail": "Lifecycle revenue and purchase-edge quantities reconcile.",
+                "status": "success",
+                "task_id": "reconcile"
+              },
+              {
+                "attempt": 1,
+                "detail": "Canonical payload published in memory; SHA-256 1ec84897a1a886b1ecc940e4f3cb6c99a895316e3005fe8b9d455d5a0f710b16",
+                "status": "success",
+                "task_id": "publish"
+              }
+            ]
+          },
+          {
+            "description": "Only an explicitly transient task fault retries. Final publication equals the normal run.",
+            "fingerprint": "1ec84897a1a886b1ecc940e4f3cb6c99a895316e3005fe8b9d455d5a0f710b16",
+            "id": "analytics-retry",
+            "name": "Transient analytics retry",
+            "published": true,
+            "trace": [
+              {
+                "attempt": 1,
+                "detail": "Generated 67 raw events with seed 42.",
+                "status": "success",
+                "task_id": "generate"
+              },
+              {
+                "attempt": 1,
+                "detail": "Accepted 66 events; rejected records remain quarantine, not task retries.",
+                "status": "success",
+                "task_id": "validate"
+              },
+              {
+                "attempt": 1,
+                "detail": "Injected transient analytics availability fault before aggregation; retry is safe.",
+                "status": "failed",
+                "task_id": "analytics"
+              },
+              {
+                "attempt": 2,
+                "detail": "Executed SQLite aggregation from accepted events.",
+                "status": "success",
+                "task_id": "analytics"
+              },
+              {
+                "attempt": 1,
+                "detail": "Built independent 48-product, 32-shopper commerce branch.",
+                "status": "success",
+                "task_id": "exploration"
+              },
+              {
+                "attempt": 1,
+                "detail": "Lifecycle revenue and purchase-edge quantities reconcile.",
+                "status": "success",
+                "task_id": "reconcile"
+              },
+              {
+                "attempt": 1,
+                "detail": "Canonical payload published in memory; SHA-256 1ec84897a1a886b1ecc940e4f3cb6c99a895316e3005fe8b9d455d5a0f710b16",
+                "status": "success",
+                "task_id": "publish"
+              }
+            ]
+          },
+          {
+            "description": "Permanent task failure blocks dependent tasks while independent commerce exploration still executes.",
+            "fingerprint": null,
+            "id": "validation-failure",
+            "name": "Permanent validation failure",
+            "published": false,
+            "trace": [
+              {
+                "attempt": 1,
+                "detail": "Generated 67 raw events with seed 42.",
+                "status": "success",
+                "task_id": "generate"
+              },
+              {
+                "attempt": 1,
+                "detail": "Injected permanent validation task contract failure after record validation; no retry.",
+                "status": "failed",
+                "task_id": "validate"
+              },
+              {
+                "attempt": 0,
+                "detail": "Unmet dependencies: validate",
+                "status": "blocked",
+                "task_id": "analytics"
+              },
+              {
+                "attempt": 1,
+                "detail": "Built independent 48-product, 32-shopper commerce branch.",
+                "status": "success",
+                "task_id": "exploration"
+              },
+              {
+                "attempt": 0,
+                "detail": "Unmet dependencies: analytics",
+                "status": "blocked",
+                "task_id": "reconcile"
+              },
+              {
+                "attempt": 0,
+                "detail": "Unmet dependencies: reconcile",
+                "status": "blocked",
+                "task_id": "publish"
+              }
+            ]
+          }
+        ],
+        "tasks": [
+          {
+            "depends_on": [],
+            "description": "Seeded lifecycle source records.",
+            "id": "generate",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 1,
+            "name": "Generate events",
+            "output": "Raw event list",
+            "source": "playground.simulation.generate_events"
+          },
+          {
+            "depends_on": [
+              "generate"
+            ],
+            "description": "Deduplicate, validate and quarantine record defects.",
+            "id": "validate",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 1,
+            "name": "Validate lifecycle",
+            "output": "Accepted events, quarantine sample and quality counts",
+            "source": "playground.pipeline.validate_events"
+          },
+          {
+            "depends_on": [
+              "validate"
+            ],
+            "description": "Load accepted events and execute SQL in ephemeral SQLite.",
+            "id": "analytics",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 2,
+            "name": "Aggregate in SQLite",
+            "output": "Summary, daily, funnel, cohorts and SQL lineage",
+            "source": "playground.analytics.aggregate"
+          },
+          {
+            "depends_on": [],
+            "description": "Independent seeded graph and product feature vectors.",
+            "id": "exploration",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 1,
+            "name": "Build commerce features",
+            "output": "Products, shoppers, purchases, graph and vectors",
+            "source": "playground.exploration.build_exploration"
+          },
+          {
+            "depends_on": [
+              "analytics",
+              "exploration"
+            ],
+            "description": "Check lifecycle revenue and commerce graph quantities before publishing.",
+            "id": "reconcile",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 1,
+            "name": "Reconcile contracts",
+            "output": "Validated in-memory publication payload",
+            "source": "playground.architecture.reconcile"
+          },
+          {
+            "depends_on": [
+              "reconcile"
+            ],
+            "description": "Canonical JSON hash; no files, cloud calls or production writes.",
+            "id": "publish",
+            "idempotency": "Same seed, configuration, source and engine version produce the same output; no external side effects.",
+            "max_attempts": 1,
+            "name": "Publish in memory",
+            "output": "SHA-256 content fingerprint",
+            "source": "playground.architecture.fingerprint_payload"
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "choice": "Demo uses small ephemeral SQLite tables and no partitions.",
+        "evidence": "aggregate opens :memory: and creates user_events and customer_cohort indexes.",
+        "id": "partitioning",
+        "production_path": "Proposal: durable event storage partitioned by UTC date, with bounded late-arrival windows and measured query plans.",
+        "title": "Partitioning and storage",
+        "tradeoff": "Simple reproducibility; full scans and per-day queries become expensive at scale."
+      },
+      {
+        "choice": "Demo regenerates from seed/config and hashes canonical in-memory output.",
+        "evidence": "Normal and transient-retry runs publish the same SHA-256; failed runs do not publish.",
+        "id": "replay",
+        "production_path": "Proposal: content-addressed versioned artifacts, durable task keys and atomic publish pointers; external side effects need deduplication.",
+        "title": "Replay and idempotence",
+        "tradeoff": "Repeatability holds for the same code/version; no durable exactly-once guarantees."
+      },
+      {
+        "choice": "Validate records, reconcile aggregates, and block descendants of failed tasks.",
+        "evidence": "validate_events runs record checks; the scheduler retries RetryableTaskError and records blocked descendants.",
+        "id": "contracts",
+        "production_path": "Proposal: versioned schemas, migration compatibility, referential tests and publish gates in an orchestrator.",
+        "title": "Contracts and dependencies",
+        "tradeoff": "Record quarantine handles bad rows; task retry handles only explicitly transient execution faults."
+      },
+      {
+        "choice": "Deterministic attempt/status traces and record-quality counts expose local execution.",
+        "evidence": "All trace entries come from executed callbacks or dependency blocking; no fabricated elapsed times.",
+        "id": "observability",
+        "production_path": "Proposal: durable run IDs, structured logs, latency metrics, lineage, freshness SLOs and failure alerts.",
+        "title": "Observability",
+        "tradeoff": "No timings, distributed logs, alerting or persistent run history are implemented."
+      },
+      {
+        "choice": "Demo runs bounded synthetic records locally with SQLite and transparent vectors.",
+        "evidence": "Architecture runs use seven days and five daily signups; commerce contains 48 products and 160 purchases.",
+        "id": "cost-scale",
+        "production_path": "Proposal: profile representative loads before adopting columnar analytics, graph storage or a vector index; budget compute and retention explicitly.",
+        "title": "Cost and scale",
+        "tradeoff": "No provider bills; graph and vector inspection scans tiny arrays and does not benchmark production workloads."
+      }
+    ],
+    "models": [
+      {
+        "columns": [
+          {
+            "description": "Unique accepted event identifier.",
+            "key": "primary",
+            "name": "event_id",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Validated UTC timestamp within the observation window.",
+            "key": "none",
+            "name": "occurred_at",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Lifecycle user identifier; signup precedes downstream events.",
+            "key": "none",
+            "name": "user_id",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "signup, activation, payment or churn.",
+            "key": "none",
+            "name": "event_type",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Bounded integer cents; payment amounts match plan.",
+            "key": "none",
+            "name": "amount_cents",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Validated acquisition channel.",
+            "key": "none",
+            "name": "channel",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Validated subscription plan.",
+            "key": "none",
+            "name": "plan",
+            "nullable": false,
+            "type": "TEXT"
+          }
+        ],
+        "contracts": [
+          "Unique non-null event IDs after validation",
+          "Valid enums and non-null fields checked in Python",
+          "Signup, activation, payment and churn order checked in Python"
+        ],
+        "depends_on": [],
+        "description": "Actual in-memory SQLite table; only event_id PRIMARY KEY is enforced by SQLite. Other contracts run in Python before loading.",
+        "grain": "One accepted event",
+        "id": "events",
+        "kind": "table",
+        "materialization": "Ephemeral SQLite table and user_events(user_id,event_type) index",
+        "name": "Accepted lifecycle events",
+        "source": "playground.analytics.aggregate / playground.pipeline.validate_events",
+        "sql": "CREATE TABLE events(event_id TEXT PRIMARY KEY, occurred_at TEXT, user_id TEXT, event_type TEXT, amount_cents INTEGER, channel TEXT, plan TEXT)"
+      },
+      {
+        "columns": [
+          {
+            "description": "Grouping key from accepted events.",
+            "key": "foreign",
+            "name": "user_id",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "UTC first-payment date; null for non-payers.",
+            "key": "none",
+            "name": "first_payment",
+            "nullable": true,
+            "type": "TEXT"
+          },
+          {
+            "description": "UTC churn date; null when no churn.",
+            "key": "none",
+            "name": "churn_date",
+            "nullable": true,
+            "type": "TEXT"
+          }
+        ],
+        "contracts": [
+          "Every user originates in accepted events",
+          "Non-payers have nullable first_payment"
+        ],
+        "depends_on": [
+          "events"
+        ],
+        "description": "Actual CREATE TEMP TABLE AS result; grouped user_id is unique by derivation, not a declared SQLite primary key.",
+        "grain": "One lifecycle user including non-paying users",
+        "id": "customers",
+        "kind": "table",
+        "materialization": "Ephemeral SQLite temporary table; customer_cohort(first_payment) index",
+        "name": "Derived lifecycle customers",
+        "source": "playground.analytics.CUSTOMERS_SQL",
+        "sql": "CREATE TEMP TABLE customers AS\n SELECT user_id, MIN(CASE WHEN event_type='payment' THEN substr(occurred_at,1,10) END) AS first_payment,\n MIN(CASE WHEN event_type='churn' THEN substr(occurred_at,1,10) END) AS churn_date\n FROM events GROUP BY user_id"
+      },
+      {
+        "columns": [
+          {
+            "description": "Observation day.",
+            "key": "primary",
+            "name": "date",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "signups",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "activations",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "payments",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "churns",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "revenue_cents",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Daily count or collected cents.",
+            "key": "none",
+            "name": "active_customers",
+            "nullable": false,
+            "type": "INTEGER"
+          }
+        ],
+        "contracts": [
+          "One row per configured day",
+          "Daily collected cents sum to summary revenue"
+        ],
+        "depends_on": [
+          "events"
+        ],
+        "description": "Exported SELECT results filled across the observation window, with active-customer balance appended in Python; no SQL view is created.",
+        "grain": "One UTC observation day",
+        "id": "daily",
+        "kind": "artifact",
+        "materialization": "JSON query-result artifact",
+        "name": "Daily lifecycle metrics",
+        "source": "playground.analytics.DAILY_SQL / BALANCE_SQL / aggregate",
+        "sql": "SELECT substr(occurred_at,1,10) AS date,\n SUM(event_type='signup') AS signups, SUM(event_type='activation') AS activations,\n SUM(event_type='payment') AS payments, SUM(event_type='churn') AS churns,\n SUM(CASE WHEN event_type='payment' THEN amount_cents ELSE 0 END) AS revenue_cents\nFROM events GROUP BY date ORDER BY date"
+      },
+      {
+        "columns": [
+          {
+            "description": "First-payment UTC date.",
+            "key": "primary",
+            "name": "cohort",
+            "nullable": false,
+            "type": "TEXT"
+          },
+          {
+            "description": "Ever-paying users in cohort.",
+            "key": "none",
+            "name": "size",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "13 weekly fractions; future observations are null.",
+            "key": "none",
+            "name": "retention",
+            "nullable": false,
+            "type": "ARRAY[NUMBER|null]"
+          }
+        ],
+        "contracts": [
+          "Cohort sizes sum to ever-paying users",
+          "Unobserved ages are null, not zero"
+        ],
+        "depends_on": [
+          "customers"
+        ],
+        "description": "Exported cohort SQL results with censored weekly retention computed by parameterized queries; no SQL view is created.",
+        "grain": "One first-payment date cohort",
+        "id": "cohorts",
+        "kind": "artifact",
+        "materialization": "JSON query-result artifact",
+        "name": "Payment cohort retention",
+        "source": "playground.analytics.COHORT_SQL / RETENTION_SQL / aggregate",
+        "sql": "SELECT first_payment AS cohort, COUNT(*) AS size FROM customers\nWHERE first_payment IS NOT NULL GROUP BY first_payment ORDER BY first_payment"
+      },
+      {
+        "columns": [
+          {
+            "description": "Stable product ID.",
+            "key": "primary",
+            "name": "id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Invented product name.",
+            "key": "none",
+            "name": "name",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "One of six category labels.",
+            "key": "none",
+            "name": "category",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Transparent feature input description.",
+            "key": "none",
+            "name": "description",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Positive invented price in integer cents.",
+            "key": "none",
+            "name": "price_cents",
+            "nullable": false,
+            "type": "INTEGER"
+          },
+          {
+            "description": "Eight nonnegative unit-normalized handcrafted features.",
+            "key": "none",
+            "name": "vector",
+            "nullable": false,
+            "type": "ARRAY[NUMBER]"
+          }
+        ],
+        "contracts": [
+          "48 unique product IDs",
+          "Positive integer cents",
+          "Exactly eight finite nonnegative unit-vector coordinates"
+        ],
+        "depends_on": [],
+        "description": "Invented products independent of lifecycle scenarios; no commerce SQL tables are created.",
+        "grain": "One product",
+        "id": "products",
+        "kind": "artifact",
+        "materialization": "Seeded in-memory records exported as JSON",
+        "name": "Synthetic products",
+        "source": "playground.exploration.PRODUCTS / build_exploration",
+        "sql": ""
+      },
+      {
+        "columns": [
+          {
+            "description": "Stable shopper ID.",
+            "key": "primary",
+            "name": "id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Synthetic display name.",
+            "key": "none",
+            "name": "name",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Primary category interest.",
+            "key": "none",
+            "name": "segment",
+            "nullable": false,
+            "type": "STRING"
+          }
+        ],
+        "contracts": [
+          "32 unique shopper IDs",
+          "Independent identity domain from lifecycle users"
+        ],
+        "depends_on": [],
+        "description": "Commerce identities are not joined to lifecycle users.",
+        "grain": "One synthetic shopper",
+        "id": "shoppers",
+        "kind": "artifact",
+        "materialization": "Seeded in-memory records exported as JSON",
+        "name": "Synthetic commerce shoppers",
+        "source": "playground.exploration.build_exploration",
+        "sql": ""
+      },
+      {
+        "columns": [
+          {
+            "description": "Unique purchase row ID.",
+            "key": "primary",
+            "name": "id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "References shoppers.id.",
+            "key": "foreign",
+            "name": "customer_id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "References products.id.",
+            "key": "foreign",
+            "name": "product_id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Purchased units, from 1 to 3.",
+            "key": "none",
+            "name": "quantity",
+            "nullable": false,
+            "type": "INTEGER"
+          }
+        ],
+        "contracts": [
+          "160 unique purchase IDs",
+          "References resolve to shoppers and products",
+          "Positive integer quantities"
+        ],
+        "depends_on": [
+          "products",
+          "shoppers"
+        ],
+        "description": "Five seeded rows per shopper, including a deliberate repeated product; no timestamps or lifecycle revenue reconciliation.",
+        "grain": "One purchase row",
+        "id": "purchases",
+        "kind": "artifact",
+        "materialization": "Seeded in-memory records exported as JSON",
+        "name": "Synthetic purchase rows",
+        "source": "playground.exploration.build_exploration",
+        "sql": ""
+      },
+      {
+        "columns": [
+          {
+            "description": "Unique customer/product/category nodes.",
+            "key": "none",
+            "name": "nodes",
+            "nullable": false,
+            "type": "ARRAY[OBJECT]"
+          },
+          {
+            "description": "purchased sums quantity; belongs_to has weight 1.",
+            "key": "none",
+            "name": "edges",
+            "nullable": false,
+            "type": "ARRAY[OBJECT]"
+          }
+        ],
+        "contracts": [
+          "All edge endpoints exist",
+          "Purchase edges reconcile to summed units, not transaction count",
+          "Every product has exactly one category edge"
+        ],
+        "depends_on": [
+          "products",
+          "shoppers",
+          "purchases"
+        ],
+        "description": "86 typed nodes plus weighted directed relationships derived from purchases and categories.",
+        "grain": "One graph envelope; node ID and (source,target,relation) identify nested records",
+        "id": "graph",
+        "kind": "artifact",
+        "materialization": "JSON graph artifact; no graph database",
+        "name": "Commerce relationship graph",
+        "source": "playground.exploration.build_exploration",
+        "sql": ""
+      },
+      {
+        "columns": [
+          {
+            "description": "Projection of products.id.",
+            "key": "foreign",
+            "name": "product_id",
+            "nullable": false,
+            "type": "STRING"
+          },
+          {
+            "description": "Ordered category, portability and premium dimension labels.",
+            "key": "none",
+            "name": "dimensions",
+            "nullable": false,
+            "type": "ARRAY[STRING]"
+          },
+          {
+            "description": "Projection of products.vector.",
+            "key": "none",
+            "name": "vector",
+            "nullable": false,
+            "type": "ARRAY[NUMBER]"
+          }
+        ],
+        "contracts": [
+          "Eight named dimensions",
+          "Finite nonnegative unit vectors",
+          "Cosine equals dot product within floating-point tolerance"
+        ],
+        "depends_on": [
+          "products"
+        ],
+        "description": "Logical projection of products.vector with shared dimension names, not a second stored vector index or learned embedding.",
+        "grain": "One eight-coordinate vector per product",
+        "id": "vectors",
+        "kind": "artifact",
+        "materialization": "Nested JSON feature projection; no vector database",
+        "name": "Product feature vectors",
+        "source": "playground.exploration.DIMENSIONS / PRODUCTS / build_exploration",
+        "sql": ""
+      }
+    ]
+  },
   "engine_version": "1.0.0",
   "exploration": {
     "customers": [

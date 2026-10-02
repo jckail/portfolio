@@ -85,3 +85,38 @@ required for this small reproducible example.
 Backend validation checks IDs, references, vector dimensions and normalization, and
 graph consistency before serving the artifact. Frontend and browser tests cover
 selection, product search, graph neighborhoods, similarity rankings, and mobile layout.
+
+## Orchestration and data models
+
+The engineering workbench is exported under the optional `architecture` field.
+It connects actual Python callbacks to dependency edges and saved execution traces.
+The browser replays recorded traces; it does not start an Airflow job or execute SQL.
+Normal execution, a transient analytics failure, and a permanent validation failure
+show bounded retries, dependency blocking, and an independent branch continuing.
+Successful retry and normal runs must produce the same publication fingerprint.
+Publication in this demonstration is an in-memory candidate; catalog file export
+still uses the existing atomic writer.
+
+Model inspection exposes grain, fields, logical keys, contracts, dependencies,
+materialization, source paths, and SQL. Lifecycle warehouse tables and query-result
+artifacts are distinct from the independent shopping graph/vector dataset. Logical
+relationships enforced in Python are identified separately from physical SQLite
+constraints. No warehouse, dbt project, or scheduler is implied to be provisioned.
+
+Decision records explain current choices, evidence, and costs alongside proposed
+production changes. The principal engineering examples focus on deterministic replay,
+contract boundaries, failure isolation, reproducible publication, and choosing storage
+and orchestration to fit the workload. Proposed partitioning, distributed execution,
+service-level objectives, and larger storage systems remain design directions unless
+explicitly implemented and verified.
+
+Reproduce the DAG locally from the engine checkout:
+
+```bash
+python -m playground orchestrate --failure none
+python -m playground orchestrate --failure analytics-transient
+python -m playground orchestrate --failure validation-permanent
+```
+
+`--output path.json` writes a trace with the same atomic artifact writer. These
+commands use bounded, seven-day synthetic inputs and perform no external I/O.
