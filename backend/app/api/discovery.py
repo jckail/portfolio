@@ -26,6 +26,7 @@ from functools import cache
 from html import escape
 from pathlib import Path
 
+from ..labs import load_catalog
 from ..models.data_loader import DATA_DIR, load_aboutme, load_contact, load_experience, load_projects, load_skills
 from ..models.experience import ExperienceHighlight
 from ..models.skills import SkillDetail
@@ -341,6 +342,21 @@ def jsonld_json() -> bytes:
 # --- llms.txt --------------------------------------------------------------------
 
 
+def _demo_lines() -> list[str]:
+    """"Interactive demos": hosted labs (canonical URL) and forwarded apps (their own URL)."""
+    catalog = load_catalog()
+    if not catalog.labs and not catalog.forwards:
+        return []
+    projects = load_projects().root
+    lines = ["## Interactive demos", ""]
+    for lab in catalog.labs.values():
+        lines.append(f"- [{lab.title}]({absolute('/' + lab.slug)}): {lab.description} (synthetic data, runs in the browser)")
+    for forward in catalog.forwards.values():
+        project = projects[forward.project_key]
+        lines.append(f"- [{project.title.strip()}]({forward.target}): {project.description}")
+    return [*lines, ""]
+
+
 def _llms_header() -> list[str]:
     about = load_aboutme()
     contact = load_contact()
@@ -375,7 +391,7 @@ def llms_txt() -> bytes:
     lines += ["", "## Projects", ""]
     for project in load_projects().root.values():
         lines.append(f"- [{project.title.strip()}]({project.link}): {project.description}")
-    lines += ["", "## Profiles", ""]
+    lines += ["", *_demo_lines(), "## Profiles", ""]
     for network, _, url in _profiles():
         lines.append(f"- [{network}]({url})")
     lines += [
@@ -418,6 +434,7 @@ def llms_full_txt() -> bytes:
         if project.tech_stack:
             lines.append(f"Technologies: {', '.join(project.tech_stack)}")
         lines.append("")
+    lines += _demo_lines()
     lines += ["## Skills", ""]
     for category, skills in _skills_by_category().items():
         lines += [f"### {category}", ""]
@@ -519,6 +536,7 @@ def sitemap_xml() -> bytes:
     entries = [
         ("/", modified, "monthly", "1.0"),
         ("/dataplayground", modified, "monthly", "0.8"),
+        *((f"/{lab.slug}", lab.updated, "monthly", "0.7") for lab in load_catalog().labs.values()),
         ("/llms.txt", modified, "monthly", "0.5"),
         ("/llms-full.txt", modified, "monthly", "0.5"),
         ("/resume.json", modified, "monthly", "0.6"),
