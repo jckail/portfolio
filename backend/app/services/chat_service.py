@@ -51,6 +51,8 @@ settings = get_settings()
 
 MAX_RESPONSE_TOKENS = settings.chat_max_tokens
 
+# Matches the trusted note _note_outcome appends to an assistant turn.
+_SITE_NOTE_RE = re.compile(r"\[Site note:[^\]]*\]")
 # Keep conversations bounded so long sessions don't grow token usage unbounded.
 MAX_HISTORY_MESSAGES = 20
 # Page context is scraped from the DOM and can be very large; keep a useful slice.
@@ -281,7 +283,10 @@ class ConnectionManager:
 
     def is_ip_rate_limited(self, ip: str) -> bool:
         """Peer-keyed message limit; survives reconnects by design."""
-        return not self.ip_limiter.allow(ip)
+        blocked = not self.ip_limiter.allow(ip)
+        if blocked:
+            log_event("rate_limit.blocked", limiter="chat_ip")
+        return blocked
 
     def reset_limits(self) -> None:
         """Clear rate-limit state (used by tests)."""
@@ -293,6 +298,7 @@ class ConnectionManager:
         timestamps = self.message_timestamps.setdefault(client_id, [])
         timestamps[:] = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW_SECONDS]
         if len(timestamps) >= RATE_LIMIT_MAX_MESSAGES:
+            log_event("rate_limit.blocked", limiter="chat_connection")
             return True
         timestamps.append(now)
         return False
@@ -346,6 +352,10 @@ class ConnectionManager:
             if role not in ("user", "assistant") or not isinstance(content, str):
                 continue
             text = content.strip()
+            if role == "assistant":
+                # "[Site note: ...]" is trusted server text (see _note_outcome).
+                # A replayed transcript is client-supplied, so it may not carry one.
+                text = _SITE_NOTE_RE.sub("", text).strip()
             if not text:
                 continue
             if role == "user" and len(text) > MAX_USER_MESSAGE_CHARS:

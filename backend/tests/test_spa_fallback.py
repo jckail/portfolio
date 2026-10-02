@@ -68,6 +68,35 @@ def test_non_html_requests_do_not_fall_back(spa):
     assert response.json() == {"detail": "Not Found"}
 
 
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}, {"accept": "*/*;q=0.8"}])
+@pytest.mark.parametrize("path", ["/admin", "/dataplayground", "/jobbr", "/gopilot", "/aibilling", "/cryptotrader"])
+def test_wildcard_or_missing_accept_gets_known_routes(spa, path, accept):
+    """Crawlers that send */* or no Accept are served like the home page."""
+    response = spa.get(path, headers={**accept, "accept-encoding": "identity"})
+    assert response.status_code == 200
+    assert "<title>spa</title>" in response.text
+
+
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}])
+def test_home_serves_for_wildcard_or_missing_accept(spa, accept):
+    assert spa.get("/", headers=accept).status_code == 200
+
+
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}])
+@pytest.mark.parametrize("path", ["/does-not-exist", "/admin/", "/api/nope", "/ws/nope", "/assets/app-deadbeef.js"])
+def test_wildcard_accept_keeps_unknown_and_api_paths_404(spa, path, accept):
+    response = spa.get(path, headers=accept)
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+@pytest.mark.parametrize("accept", ["application/json", "application/json, */*", "application/json, text/plain, */*"])
+def test_explicit_json_requests_do_not_get_lab_documents(spa, accept):
+    response = spa.get("/jobbr", headers={"accept": accept})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
 def test_non_get_methods_do_not_fall_back(spa):
     assert spa.post("/admin", headers=HTML).status_code == 405
 
@@ -255,7 +284,11 @@ def test_lab_home_and_bare_variants_do_not_share_cache(document_spa):
     lab = client.get("/dataplayground", headers=HTML)
     admin = client.get("/admin", headers=HTML)
     assert len({r.headers["etag"] for r in (home, lab, admin)}) == 3
-    assert set(files._index) == {"home", "lab", "bare"}
+    # Hosted demo labs add their own namespaced entries ("hosted:<slug>"); nothing
+    # else may appear, and none of them may collide with the three base variants.
+    keys = set(files._index)
+    assert {"home", "lab", "bare"} <= keys
+    assert all(k.startswith("hosted:") for k in keys - {"home", "lab", "bare"})
     assert 'id="home-snapshot"' in home.text
     assert '"@type":"ProfilePage"' in home.text
     assert 'id="seo-snapshot"' not in admin.text

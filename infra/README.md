@@ -304,3 +304,41 @@ also run inside lint and test), refuses a Terraform-managed API key or
 service-account key, and uploads Lighthouse and Playwright results. Lighthouse
 byte budgets are errors; score and timing budgets in `e2e/lighthouserc.json`
 are warnings until measured on the production image.
+
+## Host canonicalization
+
+`www.jckail.com`, `jckail.com`, `jordan-kail.com` and `www.jordan-kail.com` are
+all mapped to the `quickresume` service and serve the same content, while the
+canonical tags, sitemap and JSON-LD name `https://www.jckail.com` (audit I-9).
+`backend/app/middleware/canonical_host.py` can 301 the alias hosts to the
+canonical host. It is off by default and does nothing until `ALIAS_HOSTS` is set.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `CANONICAL_HOST` | `www.jckail.com` | Redirect target. A bare hostname. |
+| `ALIAS_HOSTS` | empty (off) | Comma list of hosts that redirect. Never include the canonical host. |
+
+Rules: only `GET`/`HEAD` redirect, only when the `Host` header (port stripped,
+case-insensitive) is listed. `/api/health*` and `/ws/` are never redirected, so
+the `extra_uptime_hosts` checks in `observability.tf` keep probing each host
+directly. `*.run.app`, tagged canary URLs, localhost and unknown hosts are never
+listed, so they are never touched. `X-Forwarded-Host` is ignored. Invalid values
+(scheme, path, port, IP, `*.run.app`, canonical inside the alias list) stop the
+process at boot, so rehearse a value before applying it.
+
+Enabling later (option A in `docs/host-canonicalization-decision.md`):
+
+1. Safest, no Terraform apply: `gcloud run services update quickresume
+   --region us-central1 --update-env-vars ALIAS_HOSTS=jordan-kail.com,www.jordan-kail.com`.
+   This creates a new revision at 100% traffic; check it first with a tagged
+   `--no-traffic` revision and `curl -sI -H 'Host: jordan-kail.com' <tagged-url>/`.
+   Do not pass `--set-env-vars` (it would drop the other variables).
+2. Persist it by adding `ALIAS_HOSTS` to `local.plain_env` in `infra/main.tf`.
+   Read the "terraform apply reverts production" section of `HANDOFF.md` before
+   any apply, or the next apply will drop a hand-set variable.
+3. Verify with `curl -sI https://jordan-kail.com/anything?x=1`: expect `301` and
+   `location: https://www.jckail.com/anything?x=1`. Roll back by clearing the
+   variable (`--remove-env-vars ALIAS_HOSTS`).
+
+Nothing in `deploy.yml` breaks: it verifies the tagged revision URL
+(`*.run.app`) and the service URL at `/api/health`, neither is an alias host.

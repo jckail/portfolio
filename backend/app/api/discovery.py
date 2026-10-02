@@ -26,6 +26,7 @@ from functools import cache
 from html import escape
 from pathlib import Path
 
+from ..labs import load_catalog
 from ..models.data_loader import DATA_DIR, load_aboutme, load_contact, load_experience, load_projects, load_skills
 from ..models.experience import ExperienceHighlight
 from ..models.skills import SkillDetail
@@ -217,7 +218,7 @@ def snapshot_html() -> bytes:
     parts.append('<section id="seo-experience"><h2>Experience</h2>')
     for index, (_, job) in enumerate(_experience()):
         parts.append("<article>")
-        parts.append(f"<h3>{escape(job.title)}, {_a(str(job.link), job.company)}</h3>")
+        parts.append(f"<h3>{escape(job.title)}, {_a(str(job.link), job.company) if job.link else escape(job.company)}</h3>")
         parts.append(f"<p>{_date_range_html(job)} &middot; {escape(job.location)}</p>")
         parts.append(f"<p>{escape(job.company_description)}</p>")
         parts.append("<ul>" + "".join(f"<li>{escape(h)}</li>" for h in _visible_highlights(index, job)) + "</ul>")
@@ -300,7 +301,8 @@ def jsonld_graph() -> dict:
         job = next((j for _, j in _experience() if j.company == company), None)
         works_for: dict = {"@type": "Organization", "name": company}
         if job is not None:
-            works_for["url"] = str(job.link)
+            if job.link:
+                works_for["url"] = str(job.link)
         person["worksFor"] = works_for
 
     modified = last_modified_date()
@@ -341,6 +343,21 @@ def jsonld_json() -> bytes:
 # --- llms.txt --------------------------------------------------------------------
 
 
+def _demo_lines() -> list[str]:
+    """"Interactive demos": hosted labs (canonical URL) and forwarded apps (their own URL)."""
+    catalog = load_catalog()
+    if not catalog.labs and not catalog.forwards:
+        return []
+    projects = load_projects().root
+    lines = ["## Interactive demos", ""]
+    for lab in catalog.labs.values():
+        lines.append(f"- [{lab.title}]({absolute('/' + lab.slug)}): {lab.description} (synthetic data, runs in the browser)")
+    for forward in catalog.forwards.values():
+        project = projects[forward.project_key]
+        lines.append(f"- [{project.title.strip()}]({forward.target}): {project.description}")
+    return [*lines, ""]
+
+
 def _llms_header() -> list[str]:
     about = load_aboutme()
     contact = load_contact()
@@ -371,11 +388,12 @@ def llms_txt() -> bytes:
         "",
     ]
     for _, job in _experience():
-        lines.append(f"- [{job.company}]({job.link}): {job.title}, {job.date}, {job.location}")
+        name = f"[{job.company}]({job.link})" if job.link else job.company
+        lines.append(f"- {name}: {job.title}, {job.date}, {job.location}")
     lines += ["", "## Projects", ""]
     for project in load_projects().root.values():
         lines.append(f"- [{project.title.strip()}]({project.link}): {project.description}")
-    lines += ["", "## Profiles", ""]
+    lines += ["", *_demo_lines(), "## Profiles", ""]
     for network, _, url in _profiles():
         lines.append(f"- [{network}]({url})")
     lines += [
@@ -402,7 +420,7 @@ def llms_full_txt() -> bytes:
         lines += [
             f"### {job.title}, {job.company}",
             "",
-            f"{job.date} | {job.location} | {job.link}",
+            " | ".join(part for part in (job.date, job.location, str(job.link) if job.link else "") if part),
             "",
             job.company_description,
             "",
@@ -418,6 +436,7 @@ def llms_full_txt() -> bytes:
         if project.tech_stack:
             lines.append(f"Technologies: {', '.join(project.tech_stack)}")
         lines.append("")
+    lines += _demo_lines()
     lines += ["## Skills", ""]
     for category, skills in _skills_by_category().items():
         lines += [f"### {category}", ""]
@@ -451,10 +470,11 @@ def resume_json() -> bytes:
         item: dict = {
             "name": job.company,
             "location": job.location,
-            "position": job.title,
-            "url": str(job.link),
+            "position": job.resume_title or job.title,
             "highlights": _visible_highlights(index, job),
         }
+        if job.link:
+            item["url"] = str(job.link)
         if rng.start:
             item["startDate"] = rng.start
         if rng.end:
@@ -505,24 +525,15 @@ def resume_json() -> bytes:
 # --- sitemap.xml -----------------------------------------------------------------
 
 
-def _resume_pdf_date() -> str | None:
-    try:
-        path = Path(__file__).parent.parent.parent / "assets" / load_aboutme().resume_name
-        return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).strftime("%Y-%m-%d")
-    except OSError:
-        return None
-
-
 @cache
 def sitemap_xml() -> bytes:
+    # HTML pages only. llms.txt, resume.json and the PDF stay discoverable via
+    # robots.txt, llms.txt and the Link header on the home page.
     modified = last_modified_date()
     entries = [
         ("/", modified, "monthly", "1.0"),
         ("/dataplayground", modified, "monthly", "0.8"),
-        ("/llms.txt", modified, "monthly", "0.5"),
-        ("/llms-full.txt", modified, "monthly", "0.5"),
-        ("/resume.json", modified, "monthly", "0.6"),
-        (RESUME_PDF_PATH, _resume_pdf_date() or modified, "monthly", "0.6"),
+        *((f"/{lab.slug}", lab.updated, "monthly", "0.7") for lab in load_catalog().labs.values()),
     ]
     rows = [
         f"  <url>\n    <loc>{escape(absolute(path))}</loc>\n    <lastmod>{lastmod}</lastmod>\n"

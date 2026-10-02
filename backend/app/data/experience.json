@@ -75,6 +75,23 @@
             "Migrated computationally intensive SQL queries from RDS to Spark DataFrames, improving query performance by 70% and reducing compute costs by 30%. Enabled seamless processing of large datasets for business-critical applications."
         ]
     },
+    "sabbatical": {
+        "company": "Sabbatical",
+        "title": "Digital nomad life",
+        "resume_title": "Career break (digital nomad)",
+        "date": "10/2022 - 05/2023",
+        "location": "Location independent",
+        "highlights": [
+            "Stepped away from corporate life to live a digital nomad life with my wife."
+        ],
+        "company_description": "A deliberate career break between Meta and Prove Identity: time away from corporate life, spent living a digital nomad life with my wife.",
+        "tech_stack": [],
+        "more_highlights": [
+            "Took time away from corporate life after Meta.",
+            "Lived a digital nomad life with my wife.",
+            "Returned to full-time work at Prove Identity."
+        ]
+    },
     "meta": {
         "company": "Meta | Facebook",
         "title": "Senior Data Engineer",

@@ -11,7 +11,10 @@
 # ---------------------------------------------------------------------------
 
 locals {
-  vertex_services = ["aiplatform.googleapis.com", "apikeys.googleapis.com"]
+  # Only the inference API. apikeys.googleapis.com is deliberately not listed:
+  # keys are created with gcloud (see above), and `terraform plan` showed the
+  # import of that service fails here because it is not an enabled service.
+  vertex_services = ["aiplatform.googleapis.com"]
 }
 
 import {

@@ -28,7 +28,7 @@ jobs:
         persist-credentials: false
 
     - name: Use Node.js 22
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: '22'
         cache: 'npm'
@@ -79,11 +79,25 @@ jobs:
         persist-credentials: false
 
     - name: Use Python 3.12
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.12'
         cache: 'pip'
         cache-dependency-path: requirements-dev.lock.txt
+
+    - name: Use Node.js 24 for Pi Agent SDK
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+        cache-dependency-path: copilot/package-lock.json
+
+    - name: Install and verify Data Copilot
+      working-directory: copilot
+      run: |
+        npm ci --ignore-scripts
+        npm audit --omit=dev --audit-level=high
+        npm test
 
     # Same hash-verified pins the production image installs, plus the test
     # tools (requirements-dev.lock.txt is constrained by the production lock,
@@ -135,7 +149,7 @@ jobs:
       with:
         persist-credentials: false
 
-    - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+    - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
       with:
         terraform_version: '1.9.8'
 
@@ -182,7 +196,7 @@ jobs:
     - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
     - name: Build image (no push)
-      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
       with:
         context: .
         file: helpers/Dockerfile.prod
@@ -220,7 +234,7 @@ jobs:
         exit 1
 
     - name: Use Node.js 22
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: '22'
         cache: 'npm'

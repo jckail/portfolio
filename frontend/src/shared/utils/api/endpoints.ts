@@ -2,6 +2,16 @@
 export const endpoints = {
   dataPlayground: '/api/dataplayground',
   dataPlaygroundSimulate: '/api/dataplayground/simulate',
+  dataPlaygroundSession: '/api/dataplayground/runtime/session',
+  dataPlaygroundState: '/api/dataplayground/runtime/state',
+  dataPlaygroundAction: '/api/dataplayground/runtime/action',
+  dataPlaygroundQuery: '/api/dataplayground/runtime/query',
+  dataPlaygroundClose: '/api/dataplayground/runtime/close',
+  dataPlaygroundCopilotStatus: '/api/dataplayground/copilot/status',
+  dataPlaygroundCopilotChat: '/api/dataplayground/copilot/chat',
+  dataPlaygroundCopilotConfirm: '/api/dataplayground/copilot/confirm',
+  /** Hosted lab demos: list, and `/<slug>` for one (backend/app/api/labs_routes.py). */
+  labs: '/api/labs',
   aboutMe: '/api/aboutme',
   experience: '/api/experience',
   skills: '/api/skills',

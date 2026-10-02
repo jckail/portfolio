@@ -42,6 +42,8 @@ backend/tests
 .claude
 .codex
 .cursor
+.superdesign
+copilot/node_modules
 
 # Local environment and logs
 .env

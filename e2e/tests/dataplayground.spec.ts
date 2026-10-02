@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('lab deep link explores generated scenarios, pipeline, events, and SQL', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  const response = await page.goto('/dataplayground');
+  const response = await page.goto('/dataplayground#workbench-lifecycle');
   expect(response?.status()).toBe(200);
   await expect(page).toHaveTitle('Data Playground | Jordan Kail');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://www.jckail.com/dataplayground');
@@ -28,12 +28,16 @@ test('lab deep link explores generated scenarios, pipeline, events, and SQL', as
 
 test('lab supports mobile, keyboard entry, and both themes without page overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  // Test entry from the top of the document. A native fragment deep link
+  // intentionally moves the browser's sequential focus starting point.
   const response = await page.goto('/dataplayground/');
   expect(response?.status()).toBe(200);
-  await expect(page.getByRole('button', { name: 'Baseline', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Overview', exact: true })).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to experiments' })).toBeFocused();
   await page.keyboard.press('Enter');
+  await page.getByRole('link', { name: 'Lifecycle', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Baseline', exact: true })).toBeVisible();
   const initialTheme = await page.locator('html').getAttribute('data-theme');
   await page.getByRole('button', { name: /Use .* theme/ }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme === 'dark' ? 'light' : 'dark');
@@ -41,6 +45,12 @@ test('lab supports mobile, keyboard entry, and both themes without page overflow
   await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme === 'dark' ? 'dark' : 'light');
   const dimensions = await page.evaluate(() => ({ width: innerWidth, content: document.documentElement.scrollWidth }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.width);
+  await page.getByRole('button', { name: 'Show copilot', exact: true }).click();
+  const copilot = page.getByRole('complementary', { name: 'Data copilot', exact: true });
+  await expect(copilot).toBeFocused();
+  await expect(copilot).toBeInViewport();
+  await page.getByRole('button', { name: 'Hide copilot', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Show copilot', exact: true })).toBeFocused();
 });
 
 test('every saved scenario has browser-valid custom parameters, including fractional churn', async ({ page }) => {
@@ -48,7 +58,7 @@ test('every saved scenario has browser-valid custom parameters, including fracti
     const response = await route.fetch();
     await route.fulfill({ json: { ...await response.json(), live_simulation: true } });
   });
-  await page.goto('/dataplayground');
+  await page.goto('/dataplayground#workbench-lifecycle');
   await page.getByText('Inspect parameters & run your own', { exact: true }).click();
   for (const name of ['Baseline', 'Acquisition surge', 'Stronger retention', 'Data quality incident']) {
     await page.getByRole('button', { name, exact: true }).click();
@@ -59,7 +69,7 @@ test('every saved scenario has browser-valid custom parameters, including fracti
 });
 
 test('commerce dataset connects product filtering, graph traversal, and vector explanations', async ({ page }) => {
-  await page.goto('/dataplayground');
+  await page.goto('/dataplayground#workbench-exploration');
   const exploration = page.getByRole('region', { name: 'One catalog. Two ways to explore.' });
   await expect(exploration).toBeVisible();
   await page.getByLabel('Search products', { exact: true }).fill('Travel tripod');
@@ -93,7 +103,7 @@ test('commerce dataset connects product filtering, graph traversal, and vector e
 });
 
 test('engineering workbench replays dependency failures and exposes data model contracts', async ({ page }) => {
-  await page.goto('/dataplayground');
+  await page.goto('/dataplayground#workbench-architecture');
   const workflow = page.getByRole('region', { name: 'Workflow execution', exact: true });
   await expect(workflow).toBeVisible();
   await page.getByLabel('Saved execution', { exact: true }).selectOption('normal');
@@ -133,4 +143,238 @@ test('engineering workbench replays dependency failures and exposes data model c
     await page.getByRole('button', { name: /Use .* theme/ }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+});
+
+test('isolated workbench controls move records and SQL observes the resulting warehouse', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/dataplayground');
+  await expect(page.getByRole('button', { name: 'Create workspace', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Data movement counts', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause consumer', exact: true }).click();
+  await page.getByLabel('Batch size', { exact: true }).fill('20');
+  await page.getByLabel('Duplicate fraction', { exact: true }).fill('0.2');
+  await page.getByLabel('Invalid fraction', { exact: true }).fill('0.1');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  const offsets = page.getByRole('region', { name: 'Partition offsets', exact: true });
+  await expect(offsets.locator('tbody tr')).toHaveCount(3);
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByLabel('DAG failure injection', { exact: true }).selectOption('transient');
+  await page.getByRole('button', { name: 'Run workspace DAG', exact: true }).click();
+  const trace = page.getByRole('region', { name: 'Workspace DAG trace', exact: true });
+  await expect(trace.locator('tbody tr')).toHaveCount(7);
+  await expect(trace).toContainText('failed');
+  await page.getByLabel('DAG failure injection', { exact: true }).selectOption('permanent');
+  await page.getByRole('button', { name: 'Run workspace DAG', exact: true }).click();
+  await expect(trace).toContainText('blocked');
+  await page.getByRole('button', { name: 'Build SQL models', exact: true }).click();
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  await page.getByLabel('SQL query', { exact: true }).fill('SELECT COUNT(*) AS accepted_rows FROM events');
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  const results = page.getByRole('region', { name: 'SQL query results', exact: true });
+  await expect(results).toContainText('accepted_rows');
+  const beforeReplay = await results.locator('tbody td').first().textContent();
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByRole('button', { name: 'Replay consumer log', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  await expect(results.locator('tbody td').first()).toHaveText(beforeReplay!);
+  await page.getByLabel('SQL query', { exact: true }).fill('DELETE FROM events');
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  await expect(page.getByRole('alert').first()).toContainText('SELECT');
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
+  await expect(page.getByRole('img', { name: 'Produced records: 20 total', exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Consumer attempts: 40 total', exact: true })).toBeVisible();
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (let theme = 0; theme < 2; theme++) {
+      await page.getByRole('button', { name: /Use .* theme/ }).click();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
+test('copilot exposes query evidence and requires an explicit change confirmation', async ({ page }) => {
+  // Provider calls stay offline in CI; the actual Pi loop has Node/Python integration tests.
+  await page.route('**/api/dataplayground/copilot/status', route => route.fulfill({ json: { available: true } }));
+  let confirmations = 0;
+  await page.route('**/api/dataplayground/copilot/chat', route => route.fulfill({ json: {
+    text: 'The SQL tool found records in your warehouse. Pause the consumer to inspect lag.',
+    events: [{ type: 'tool_result', tool: 'query_sql', result: { sql: 'SELECT COUNT(*) FROM events', columns: ['count'], rows: [[80]], row_count: 1, truncated: false, row_limit: 25, workspace_generation: 1, data_revision: 0 } }],
+    proposals: [{ id: 'browser-fixture-proposal', action: { action: 'consumer_pause' }, reason: 'Observe backlog in an isolated workspace.', expires_in_seconds: 600 }], limited: false,
+  } }));
+  await page.route('**/api/dataplayground/copilot/confirm', async route => {
+    confirmations++;
+    const result = await page.request.post('/api/dataplayground/runtime/action', {
+      headers: { Authorization: route.request().headers()['authorization'] }, data: { action: 'consumer_pause' },
+    });
+    await route.fulfill({ response: result });
+  });
+  await page.goto('/dataplayground');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Hide copilot', exact: true })).toBeVisible();
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Count records and propose pausing the consumer.');
+  await page.getByRole('button', { name: 'Investigate', exact: true }).click();
+  await expect(page.getByText('The SQL tool found records in your warehouse.', { exact: false })).toBeVisible();
+  await page.getByText('query sql', { exact: true }).click();
+  await expect(page.locator('.lab-copilot-evidence')).toContainText('SELECT COUNT(*) FROM events');
+  await expect(page.getByRole('region', { name: 'Copilot SQL evidence', exact: true })).toContainText('80');
+  expect(confirmations).toBe(0);
+  await page.getByRole('button', { name: 'Apply change', exact: true }).click();
+  await expect(page.getByText('Applied to this workspace.', { exact: true })).toBeVisible();
+  expect(confirmations).toBe(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('guided incidents verify recovery and downloaded SQL retains execution provenance', async ({ page }) => {
+  await page.goto('/dataplayground');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByText('Guided incident investigations', { exact: true }).click();
+  const steps = ['Guide: stop producer', 'Guide: pause consumer', 'Guide: produce lag batch', 'Guide: drain recovery batch'];
+  for (let index = 0; index < steps.length; index++) {
+    const button = page.getByRole('button', { name: steps[index], exact: true });
+    await button.focus();
+    await page.keyboard.press('Enter');
+    if (index + 1 < steps.length) await expect(page.getByRole('button', { name: steps[index + 1], exact: true })).toBeFocused();
+  }
+  await expect(page.locator('.lab-incident-guide')).toContainText('Investigation complete');
+  await expect(page.locator('.lab-incident-guide [role="status"]')).toBeFocused();
+  await expect(page.locator('.lab-incident-checkpoint')).toHaveCount(4);
+  await page.getByLabel('Investigation', { exact: true }).selectOption('publication');
+  await page.getByRole('button', { name: 'Guide: run failing DAG', exact: true }).click();
+  await expect(page.locator('.lab-incident-checkpoint')).toContainText('Publication not published');
+  await page.getByRole('button', { name: 'Guide: run repaired DAG', exact: true }).click();
+  await expect(page.locator('.lab-incident-guide')).toContainText('Investigation complete');
+  await page.getByRole('link', { name: 'SQL console', exact: true }).click();
+  const executedSql = 'SELECT COUNT(*) AS accepted_rows FROM events';
+  await page.getByLabel('SQL query', { exact: true }).fill(executedSql);
+  await page.getByRole('button', { name: 'Run query', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'SQL query results', exact: true })).toContainText('accepted_rows');
+  await page.getByLabel('SQL query', { exact: true }).fill('SELECT 999 AS edited_but_not_executed');
+  await expect(page.locator('.lab-query-evidence')).toContainText('Last executed query');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download query evidence', exact: true }).click();
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  if (!stream) throw new Error('Query evidence download was unavailable');
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+  const evidence = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  expect(evidence.sql).toBe(executedSql);
+  expect(evidence.result.workspace_generation).toBe(1);
+  expect(evidence.result.data_revision).toBeGreaterThan(0);
+  expect(evidence.result.row_count).toBe(1);
+  expect(Object.keys(evidence).sort()).toEqual(['kind', 'result', 'row_limit', 'sampled', 'schema_version', 'scope', 'sql', 'sql_truncated']);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('an ambiguous copilot confirmation retires its card and invites fresh inspection', async ({ page }) => {
+  await page.route('**/api/dataplayground/copilot/status', route => route.fulfill({ json: { available: true } }));
+  await page.route('**/api/dataplayground/copilot/chat', route => route.fulfill({ json: {
+    text: 'Inspect state before applying this consumer change.', events: [], limited: false,
+    proposals: [{ id: 'ambiguous-confirmation', action: { action: 'consumer_pause' }, reason: 'Observe lag.', expires_in_seconds: 600 }],
+  } }));
+  let confirmations = 0;
+  await page.route('**/api/dataplayground/copilot/confirm', async route => {
+    confirmations++;
+    await route.abort('failed');
+  });
+  await page.goto('/dataplayground');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the consumer and propose a pause.');
+  await page.getByRole('button', { name: 'Investigate', exact: true }).click();
+  await page.getByRole('button', { name: 'Apply change', exact: true }).click();
+  await expect(page.getByText(/^Outcome not confirmed/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Apply change', exact: true })).toHaveCount(0);
+  expect(confirmations).toBe(1);
+  await page.getByLabel('Ask about this workspace', { exact: true }).fill('Inspect the current consumer state.');
+  await expect(page.getByRole('button', { name: 'Investigate', exact: true })).toBeEnabled();
+});
+
+test('named snapshots compare controlled counts, preserve observations and exclude private state', async ({ page }) => {
+  await page.goto('/dataplayground');
+  const allocation = page.waitForResponse(response => response.url().endsWith('/api/dataplayground/runtime/session') && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Create workspace', exact: true }).click();
+  const capability = (await (await allocation).json()).token as string;
+  await page.getByRole('link', { name: 'Operations', exact: true }).click();
+  await page.getByRole('button', { name: 'Stop producer', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause consumer', exact: true }).click();
+  const snapshots = page.getByRole('region', { name: 'Observed-state snapshots', exact: true });
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('Before');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  await page.getByLabel('Batch size', { exact: true }).fill('20');
+  await page.getByLabel('Duplicate fraction', { exact: true }).fill('0');
+  await page.getByLabel('Invalid fraction', { exact: true }).fill('0');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Run workspace DAG', exact: true }).click();
+  await snapshots.getByLabel('Snapshot name', { exact: true }).fill('After');
+  await snapshots.getByRole('button', { name: 'Capture snapshot', exact: true }).click();
+  await snapshots.getByLabel('Before snapshot', { exact: true }).selectOption({ label: 'Before' });
+  await snapshots.getByLabel('After snapshot', { exact: true }).selectOption({ label: 'After' });
+  const differences = snapshots.getByRole('region', { name: 'Snapshot counter differences', exact: true });
+  const inserted = differences.getByRole('row').filter({ has: page.getByRole('rowheader', { name: 'Inserted records', exact: true }) });
+  await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+
+  async function downloadComparison() {
+    const downloading = page.waitForEvent('download');
+    await snapshots.getByRole('button', { name: 'Download comparison evidence', exact: true }).click();
+    const stream = await (await downloading).createReadStream();
+    if (!stream) throw new Error('Comparison evidence download was unavailable');
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  }
+  const evidence = await downloadComparison();
+  expect(Object.keys(evidence).sort()).toEqual(['after', 'before', 'comparison', 'kind', 'schema_version', 'scope']);
+  expect(evidence.kind).toBe('dataplayground_run_comparison');
+  expect(evidence.before.label).toBe('Before');
+  expect(evidence.before.streaming.counters.inserted).toBe(0);
+  expect(evidence.after.label).toBe('After');
+  expect(evidence.after.streaming.counters.inserted).toBe(20);
+  expect(evidence.comparison.compatible).toBe(true);
+  expect(evidence.comparison.metrics).toContainEqual({ name: 'data_revision', before: 0, after: 20, delta: 20 });
+  const beforeEvents = evidence.before.tables.find((table: { name: string }) => table.name === 'events').row_count;
+  expect(evidence.comparison.tables).toContainEqual({ name: 'events', before: beforeEvents, after: beforeEvents + 20, delta: 20 });
+  expect(evidence.after.dag.published).toBe(true);
+  expect(evidence.after.dag.stale).toBe(false);
+  expect(evidence.after.dag.trace).toHaveLength(6);
+  expect(evidence.after.models.runs).toHaveLength(4);
+  expect(JSON.stringify(evidence)).not.toContain(capability);
+  const forbidden = new Set(['token', 'authorization', 'history', 'logs', 'events', 'payload', 'provider_state', 'sql']);
+  function inspectKeys(value: unknown) {
+    if (Array.isArray(value)) value.forEach(inspectKeys);
+    else if (value !== null && typeof value === 'object') {
+      for (const [key, child] of Object.entries(value)) {
+        expect(forbidden.has(key)).toBe(false);
+        inspectKeys(child);
+      }
+    }
+  }
+  inspectKeys(evidence);
+
+  // Change live state again, then refresh: both captures must remain historical.
+  await page.getByLabel('Batch size', { exact: true }).fill('5');
+  await page.getByRole('button', { name: 'Produce one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Drain one batch', exact: true }).click();
+  await page.getByRole('button', { name: 'Refresh workspace', exact: true }).click();
+  await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+  expect(await downloadComparison()).toEqual(evidence);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (let theme = 0; theme < 2; theme++) {
+    await page.getByRole('button', { name: /Use .* theme/ }).click();
+    await expect(inserted.getByRole('cell')).toHaveText(['0', '20', '+20']);
+    await expect(snapshots.getByRole('button', { name: 'Download comparison evidence', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.getByRole('button', { name: 'Reset workspace', exact: true }).click();
+  await expect(snapshots.getByText('No snapshots captured in this workspace.', { exact: true })).toBeVisible();
+  await expect(snapshots.getByRole('region', { name: 'Snapshot counter differences', exact: true })).toHaveCount(0);
 });

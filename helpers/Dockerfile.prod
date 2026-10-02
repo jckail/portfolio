@@ -14,6 +14,12 @@ COPY frontend/ ./
 ENV NODE_ENV=production
 RUN npm run build
 
+FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS copilot-build
+WORKDIR /app/copilot
+COPY copilot/package*.json ./
+RUN npm ci --ignore-scripts --omit=dev
+COPY copilot/*.mjs ./
+
 # Backend setup
 FROM python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
 
@@ -31,6 +37,9 @@ WORKDIR /app
 
 # Copy the frontend build (Vite already copies public/, favicons included)
 COPY --from=frontend-build /app/frontend/dist/ /app/frontend/dist/
+COPY --from=copilot-build /usr/local/bin/node /usr/local/bin/node
+COPY --from=copilot-build /app/copilot /app/copilot
+RUN node --input-type=module -e "await import('/app/copilot/agent.mjs')"
 
 # Install backend dependencies from the fully-pinned, hash-verified
 # lockfile (requirements.lock.txt, regenerated via

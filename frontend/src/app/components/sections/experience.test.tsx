@@ -19,7 +19,18 @@ const experienceData = {
     tech_stack: ['python'],
     more_highlights: [],
   },
-};
+  // No link, logo or tech stack: a career break must render without them.
+  sabbatical: {
+    company: 'Sabbatical',
+    title: 'Digital nomad life',
+    date: '10/2022 - 05/2023',
+    location: 'Location independent',
+    highlights: ['Time away from corporate life.'],
+    company_description: 'A career break.',
+    more_highlights: ['More detail.'],
+    photos: [] as { src: string; alt: string; caption?: string }[],
+  },
+} as Record<string, import('../../../types/resume').ExperienceItem>;
 const skillsData = {
   python: {
     display_name: 'Python',
@@ -165,6 +176,45 @@ describe('Experience timeline', () => {
       delete data.prove;
       current.highlights = originalHighlights;
       current.date = originalDate;
+    }
+  });
+});
+
+describe('Experience entry without a company (sabbatical)', () => {
+  it('shows a mark tile and opens the dialog without a company link or tech stack', async () => {
+    render(<Experience />);
+    const tile = screen.getByRole('button', { name: 'View Sabbatical details' });
+    expect(tile.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByRole('heading', { name: 'Sabbatical' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View Sabbatical details' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Sabbatical' });
+    expect(new URLSearchParams(window.location.search).get('company')).toBe('sabbatical');
+    expect(within(dialog).queryByRole('link', { name: /sabbatical/i })).toBeNull();
+    expect(within(dialog).queryByText('Tech Stack:')).toBeNull();
+    expect(within(dialog).getByText('More detail.')).toBeInTheDocument();
+    expect(within(dialog).queryByText('Photos:')).toBeNull();
+    expect(within(dialog).queryByRole('img')).toBeNull();
+  });
+
+  it('opens from ?company=sabbatical', async () => {
+    window.history.replaceState({}, '', '/?company=sabbatical');
+    render(<Experience />);
+    await screen.findByRole('dialog', { name: 'Sabbatical' });
+  });
+
+  it('renders an accessible gallery only when photos exist', async () => {
+    const role = experienceData.sabbatical;
+    role.photos = [{ src: '/images/sabbatical/a.webp', alt: 'A beach at dawn', caption: 'Dawn' }];
+    try {
+      window.history.replaceState({}, '', '/?company=sabbatical');
+      render(<Experience />);
+      const dialog = await screen.findByRole('dialog', { name: 'Sabbatical' });
+      const img = within(dialog).getByRole('img', { name: 'A beach at dawn' });
+      expect(img).toHaveAttribute('src', '/images/sabbatical/a.webp');
+      expect(within(dialog).getByText('Dawn')).toBeInTheDocument();
+    } finally {
+      role.photos = [];
     }
   });
 });

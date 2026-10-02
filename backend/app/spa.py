@@ -29,6 +29,8 @@ from starlette.staticfiles import NotModifiedResponse, StaticFiles
 from starlette.types import Scope
 
 from .dataplayground_document import LAB_PATHS, LAB_URL, render_document
+from .labs import hosted_lab_slug, load_labs
+from .labs_document import lab_url, render_lab_document
 from .middleware.compression import GZIP_MINIMUM_SIZE
 
 logger = logging.getLogger(__name__)
@@ -217,11 +219,26 @@ def _is_html_navigation(scope: Scope) -> bool:
     return False
 
 
+def _accepts_any_document(scope: Scope) -> bool:
+    """True for a missing Accept or one that lists ``*/*`` without asking for JSON.
+
+    Many crawlers and link unfurlers send ``*/*`` (or nothing). The home page
+    already answers them because StaticFiles serves ``/`` directly; this lets
+    the known client routes do the same. An explicit JSON preference (an API
+    client such as ``application/json, */*``) is not a document request.
+    """
+    for name, value in scope.get("headers", []):
+        if name == b"accept":
+            accept = value.lower()
+            return b"*/*" in accept and b"json" not in accept
+    return True
+
+
 def spa_fallback_status(route_path: str) -> int:
     # Exact match: main-content.tsx opens the admin login only when
     # pathname === "/admin", so "/admin/" renders the plain homepage and must
     # not be served as a 200 duplicate of it.
-    return 200 if route_path in SPA_ROUTES else 404
+    return 200 if route_path in SPA_ROUTES or hosted_lab_slug(route_path) else 404
 
 
 class SPAStaticFiles(StaticFiles):
@@ -270,12 +287,16 @@ class SPAStaticFiles(StaticFiles):
                     self._index_entry(stat_result, home=True)
                     self._index_entry(stat_result, home=False)
                     self._index_entry(stat_result, lab=True)
+                    for slug in load_labs():
+                        self._index_entry(stat_result, hosted=slug)
                 except OSError:
                     pass
 
-    def _index_entry(self, stat_result: os.stat_result, home: bool = False, lab: bool = False) -> IndexEntry | None:
+    def _index_entry(
+        self, stat_result: os.stat_result, home: bool = False, lab: bool = False, hosted: str | None = None
+    ) -> IndexEntry | None:
         """index.html with the bootstrap block, rebuilt only when the file changes."""
-        variant = "lab" if lab else "home" if home else "bare"
+        variant = f"hosted:{hosted}" if hosted else "lab" if lab else "home" if home else "bare"
         entry = self._index.get(variant)
         if entry is not None and (entry.mtime_ns, entry.size) == (stat_result.st_mtime_ns, stat_result.st_size):
             return entry
@@ -286,7 +307,9 @@ class SPAStaticFiles(StaticFiles):
             return None
         if len(raw) != stat_result.st_size:
             return None  # rewritten mid-read (local rebuild)
-        if lab:
+        if hosted:
+            raw = render_lab_document(raw, load_labs()[hosted])
+        elif lab:
             raw = render_document(raw)
         elif self._jsonld is not None:
             raw = inject_jsonld(raw, self._jsonld())
@@ -315,7 +338,8 @@ class SPAStaticFiles(StaticFiles):
             return None
         home = status_code == 200 and get_route_path(scope) in HOME_PATHS
         lab = status_code == 200 and get_route_path(scope) in LAB_PATHS
-        entry = self._index_entry(stat_result, home=home, lab=lab)
+        hosted = hosted_lab_slug(get_route_path(scope)) if status_code == 200 else None
+        entry = self._index_entry(stat_result, home=home, lab=lab, hosted=hosted)
         if entry is None:
             return None
         wants_gzip = _accepts_gzip(scope)
@@ -329,6 +353,8 @@ class SPAStaticFiles(StaticFiles):
             headers["link"] = _link_header()
         elif lab:
             headers["link"] = f'<{LAB_URL}>; rel="canonical"'
+        elif hosted:
+            headers["link"] = f'<{lab_url(hosted)}>; rel="canonical"'
         else:
             headers["x-robots-tag"] = "noindex"
         if status_code == 200 and self.is_not_modified(Headers(headers), Headers(scope=scope)):
@@ -412,4 +438,8 @@ class SPAStaticFiles(StaticFiles):
         route_path = get_route_path(scope)
         if route_path in NO_FALLBACK_EXACT or route_path.startswith(NO_FALLBACK_PREFIXES):
             return False
-        return _is_html_navigation(scope)
+        if _is_html_navigation(scope):
+            return True
+        # Wildcard or missing Accept: only the routes the SPA really serves.
+        # Unknown paths keep the plain JSON 404 for these clients.
+        return _accepts_any_document(scope) and spa_fallback_status(route_path) == 200

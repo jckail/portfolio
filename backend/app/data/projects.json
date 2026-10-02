@@ -14,26 +14,32 @@
             "Supabase",
             "Docker"
         ],
-        "last_commit": "February 2025"
+        "last_commit": "February 2025",
+        "link2": "https://www.jckail.com/aibilling",
+        "link2_label": "Interactive demo"
     },
     "super_teacher": {
         "title": "Super Teacher",
-        "description": "AI assistant to help teachers manage their classroom and create personalized lesson plans for students. Made with Python, FastAPI, and Pydantic.",
+        "description": "A classroom copilot that answers 'who needs me today, and why?' with a ranked needs-attention list, a gradebook, attendance, and a streaming Claude assistant grounded in the class data.",
         "link": "https://github.com/jckail/superteacher",
         "link2": "https://www.the-super-teacher.com/",
-        "description_detail": "Developed Super Teacher, an AI-powered web application that revolutionizes lesson planning for educators by providing personalized lesson plans tailored to individual student needs.",
+        "description_detail": "Super Teacher is a classroom copilot for teachers. A Today view ranks the students who need attention with plain-language reasons; a roster, gradebook, and one-tap attendance feed the same computed averages, trends, and risk, so every screen agrees. Reports cover per-assignment class statistics, a CSV gradebook export, and AI-drafted parent updates the teacher edits before sending. An Ask AI chat streams from Claude with tools that query the real roster data, and per-student insight cards fall back to rule-based text when no API key is set. Built with a FastAPI backend on SQLAlchemy 2 and SQLite with Alembic migrations, and a React and Vite front end.",
         "logoPath": "super-teacher.svg",
         "tech_stack": [
             "Python",
             "FastAPI",
-            "React",
             "Pydantic",
             "SQLAlchemy",
-            "Supabase",
+            "SQLite",
+            "Alembic",
+            "React",
+            "TypeScript",
+            "Anthropic Claude",
             "Docker",
             "GCP"
         ],
-        "last_commit": "November 2024"
+        "last_commit": "October 2026",
+        "link2_label": "Open app"
     },
     "qr_for_groups": {
         "title": "Join Group via QR",
@@ -45,7 +51,7 @@
         "last_commit": "January 2022"
     },
     "jobbr": {
-        "title": " Jobbr",
+        "title": "Jobbr",
         "description": "Agentic AI job matching a resume to available jobs at tech companies. Scrapes 100,000 jobs in under 15 minutes, using Python, Langchain, FastAPI and OpenAI.",
         "link": "https://github.com/jckail/Jobbr",
         "description_detail": "Developed Jobbr, an AI-powered web application that transforms recruitment by matching job postings with candidates' skills and resumes for greater efficiency and accuracy. Leveraged GPT-4 and Anthropic’s Claude to parse job postings from raw HTML into structured JSON, aligning job descriptions with resumes using advanced NLP techniques. Integrated SQLModel and SQLAlchemy for efficient data management, with Alembic migrations to ensure smooth database updates and version control. Deployed the platform using Docker to maintain consistent environments and follow DevOps best practices. Implemented a FastAPI-based modular API with private endpoints, Supabase authentication, and AI-powered role parsing and URL scraping to promote code reusability and scalability. Used LangChain for document embedding and similarity analysis, enhancing job matching precision with advanced AI capabilities. Followed CI/CD workflows with comprehensive testing to ensure code reliability and seamless deployments. Prioritized security through token management, Supabase authentication, and password hashing with Python-JOSE and Passlib, alongside email validation to ensure strong user management. Employed Pandas, BeautifulSoup4, lxml, and NumPy for data processing and parsing job postings efficiently. Demonstrated proficiency across AI/ML, web development, data engineering, and cloud integration, solving real-world recruitment challenges with an AI-first approach. Tech Stack: Python 3.9+, FastAPI, SQLAlchemy, Pydantic, Supabase, Docker",
@@ -57,7 +63,9 @@
             "OpenAI",
             "Web Scraping"
         ],
-        "last_commit": "September 2024"
+        "last_commit": "September 2024",
+        "link2": "https://www.jckail.com/jobbr",
+        "link2_label": "Interactive demo"
     },
     "portfolio": {
         "title": "Portfolio Website",
@@ -78,25 +86,29 @@
             "Supabase",
             "Anthropic Claude"
         ],
-        "last_commit": "September 2026"
+        "last_commit": "October 2026"
     },
     "pointup": {
-        "title": "Pointup.io",
-        "description": "An AI web app to manage 'All of your loyalty points in one place,' powered by a Selenium-WebDriver agent in AWS via elastic beanstalk, lambda, and s3. ",
+        "title": "PointUp",
+        "description": "Track airline miles, hotel points, and credit card rewards in one place. A TypeScript monorepo with a Next.js web app, PostgreSQL, Clerk accounts, and an AWS Bedrock Claude assistant.",
         "link": "https://github.com/jckail/point_bot",
         "link2": "https://www.pointup.io/",
-        "description_detail": "Created PointUp, a loyalty management tool designed to centralize and optimize points from credit cards, airlines, and hotel programs. Engineered a backend system using Python and Selenium for web scraping, overcoming anti-bot protections with NordVPN IP rotation and human behavior simulation. Deployed the system on AWS EC2 with secure data storage in S3, ensuring scalability and reliability. Integrated Auth0 for user authentication and encrypted sensitive data, ensuring secure handling of user credentials. Designed modular bot classes for easy integration of new loyalty programs, enhancing extensibility and user experience. Overcame complex anti-scraping challenges while maintaining ethical considerations around automation. Demonstrated expertise in Python development, cloud infrastructure, and secure web scraping through a real-world solution.",
+        "description_detail": "PointUp tracks airline miles, hotel points, credit card rewards, and other loyalty points in one place. It is a fully typed TypeScript monorepo built around a framework-agnostic core with a domain-driven, hexagonal architecture: a Next.js App Router web app with React and Tailwind, Drizzle ORM on PostgreSQL, Clerk for user management, a typed API client shared with a Chrome extension, a background worker for scheduled syncs and digests, and a chat bot surface. An AWS Bedrock Claude assistant is wired in, and the infrastructure is defined as code with AWS CDK. It is the modernised successor to the original Python and Selenium PointBot, which survives in the repository as legacy code.",
         "logoPath": "pointup.svg",
         "tech_stack": [
-            "Python",
             "TypeScript",
-            "Selenium",
-            "AWS Lambda",
-            "AWS S3",
-            "Elastic Beanstalk",
-            "Docker"
+            "Next.js",
+            "React",
+            "Tailwind CSS",
+            "PostgreSQL",
+            "Drizzle ORM",
+            "Clerk",
+            "AWS Bedrock",
+            "AWS CDK",
+            "Vitest"
         ],
-        "last_commit": "July 2026"
+        "last_commit": "October 2026",
+        "link2_label": "Open app"
     },
     "lit_crypto": {
         "title": "Algo Crypto",
@@ -111,7 +123,9 @@
             "AWS",
             "SageMaker"
         ],
-        "last_commit": "May 2018"
+        "last_commit": "May 2018",
+        "link2": "https://www.jckail.com/cryptotrader",
+        "link2_label": "Interactive demo"
     },
     "go_pilot": {
         "title": "goPilot",
@@ -125,7 +139,9 @@
             "OpenAI API",
             "CLI"
         ],
-        "last_commit": "September 2024"
+        "last_commit": "September 2024",
+        "link2": "https://www.jckail.com/gopilot",
+        "link2_label": "Interactive demo"
     },
     "data_playground": {
         "title": "Data Playground",

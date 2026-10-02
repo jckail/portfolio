@@ -120,3 +120,164 @@ python -m playground orchestrate --failure validation-permanent
 
 `--output path.json` writes a trace with the same atomic artifact writer. These
 commands use bounded, seven-day synthetic inputs and perform no external I/O.
+
+## Visitor operating workspaces
+
+The workbench now has focused Overview, Operations, SQL console, Lifecycle,
+Architecture, and Explore views. Legacy section links still reveal the right view;
+changing views preserves the selected scenario, query, and exploration state.
+Explicitly showing the copilot focuses and scrolls to its landmark, including when
+the mobile layout places it below the active panel. Hiding it returns focus to the
+toggle; initial desktop opening and later evidence updates do not move focus.
+
+Create workspace explicitly allocates a visitor-specific SQLite database. The initial
+warehouse contains the saved **event sample**, not the full lifecycle run. Independent
+commerce, graph, and handcrafted vector fixtures are also queryable. The inventory
+exposes exact row counts and schemas. No real customer records are involved.
+
+Operations runs a partitioned in-memory event log with real producer/consumer state:
+batch size, batches per second, partitions, deterministic duplicate/invalid injection,
+consumer batch size/rate, pause/resume, drain, and replay. Changing partitions requires
+resetting an existing log. Producer log capacity is 2,000 rows. Consumer offsets and
+backlog are observed state. Replaying attempts increases attempt counts while primary
+keys prevent duplicate warehouse inserts. Quarantine rows retain rejection reasons.
+
+Flow diagrams use proportional record counts and exact tables. Produced-record
+accounting and consumer-attempt accounting have separate boundaries, because replay
+can produce more consumption attempts than original records. Materialized model rows
+have different grains and do not pretend to be additional event throughput.
+
+Build SQL models executes four transformations and SQL contracts: runtime_customers,
+runtime_daily, runtime_cohorts, and product_sales. Run workspace DAG executes callbacks
+over current tables, supports transient analytics and permanent validation faults,
+blocks dependent tasks, and publishes a reproducible in-memory fingerprint only after
+reconciliation. The Architecture view retains the full source-qualified saved DAG
+and model descriptions as a separate explanation.
+
+Guided incident investigations offer two manual experiments: consumer lag and recovery,
+and failed publication and repair. Each button performs one bounded workspace action;
+the guide advances only after its returned state meets the checkpoint. Lag recovery
+stops production, pauses consumption, produces one controlled batch, and drains up to
+500 records per click. Publication repair observes failed validation and blocked
+publication, then reruns without the injected fault and checks publication and SQL
+contracts. Checkpoints record action responses rather than continuing health checks.
+Restart guide clears those checkpoints; it does not reset data or controls.
+After an observed checkpoint, keyboard focus moves to the next action or the final
+status when the originating button still owns focus. Moving focus or clicking
+elsewhere during the request cancels that handoff; workspace replacement or unmount
+also clears it.
+
+The execution summary distinguishes failed attempts, successful retries, blocked
+tasks, publication, and model contract outcomes. Accepted warehouse inserts advance
+the data revision; producing backlog, rejecting invalid records, and deduplicating
+replay do not. Models and the latest DAG record their input revisions. New accepted
+rows mark older results stale while retaining their historical status and fingerprint.
+Build SQL models or rerun the DAG to verify current inputs; streaming progress does
+not automatically rerun either operation. Reset replaces the workspace and increments
+its generation, independently of its new data revision.
+
+Named run snapshots preserve up to six observed workspace states in the current
+browser tab. Capture a named state before a controlled change, execute the change,
+then capture another state and compare their record counts, partition offsets,
+accepted-data revisions, task attempts, model contracts, and publication evidence.
+Captured values remain unchanged when the live workspace refreshes. Failed attempts
+and replay consumption attempts retain their own accounting boundaries; they are
+not additional accepted warehouse rows. A numerical difference shows what was
+observed at the two captures, not proof that a particular action caused it.
+
+Snapshot JSON downloads use an explicit allowlist of lab evidence. They contain no
+workspace capability, provider credentials, copilot conversation, raw event payloads,
+or private provider state. Snapshots clear when the workspace is replaced or reset;
+they are not server-side run history, durable storage, or an offline replay log.
+
+This is a local educational scheduler and event log with SQLite transformations;
+Airflow, Kafka, and dbt daemons are not deployed. State lives on one serving process,
+is limited to 32 visitor workspaces, and expires after 20 minutes without a visitor
+request. A restart or replica change can lose the workspace. The page explains how
+to create another. The guarded deployment enables best-effort Cloud Run session
+affinity to keep sequential visitor requests together; it does not make memory
+durable. Background progress is best effort while the instance has CPU;
+requests advance at most one due batch instead of inventing a catch-up burst.
+
+SQL accepts a single SELECT/WITH query against allowlisted lab tables. A SQLite
+read-only authorizer, restricted functions, execution deadline/step ceiling, bounded
+rows/columns/cells/output, and two query slots constrain work. Results identify
+truncation and elapsed query time. Workspace capabilities travel only in bearer
+headers, remain in browser memory, and never appear in URLs. All runtime and copilot
+responses are no-store.
+
+SQL results display the executed query, columns, returned rows, elapsed time, limit
+truncation, and the workspace generation/data revision observed during locked query
+execution. Returned row counts are bounded query output, not counts of all matching
+rows. Download query evidence creates a local JSON file with this query, bounded
+result and provenance; it contains no workspace capability or provider credentials.
+The same evidence table and download are available for copilot SQL results. Those
+may display a smaller sample of the returned rows, with explicit sample and shortened
+SQL notices. Downloads preserve the evidence actually shown rather than fetching
+additional records or publishing a dataset.
+
+## Data Copilot
+
+The private `copilot/` package uses the actual Pi Agent SDK, pinned in its npm lockfile.
+Each investigation creates a private Node process. Python owns the existing Vertex
+or Anthropic provider connection; Node receives no credentials, HOME, host sessions,
+shell tools, filesystem tools, or cloud tools. The production image contains Node
+and the locked package; no separate public service is exposed.
+
+Six custom tools are registered: `inspect_catalog`, `inspect_workspace`,
+`inspect_run`, `inspect_incident`, `query_sql`, and `propose_runtime_change`.
+Incident inspection reads partition lag, cumulative replay counters, up to ten
+stored quarantine reasons, current run contracts/freshness, and twenty recent logs
+without advancing background execution. Replay can increase quarantine attempt
+counts while stored quarantine records remain deduplicated. Named run inspection
+selects saved catalog runs; without a name it inspects the latest workspace run.
+The UI shows bounded tool evidence, including SQL and sampled query results.
+SQL evidence includes elapsed time, requested limit, returned row count, sample
+count, limit/sample truncation flags, and locked-query generation/data revision.
+At most ten sample rows and 4,000 SQL characters are shown, under a 12 KB evidence
+ceiling; omitted samples and shortened SQL are marked explicitly.
+
+Proposed changes are workspace-bound,
+expire, and require a separate Apply click. Dismiss performs no write. Confirmations
+are consumed atomically once; the model never applies a proposal itself.
+Once the server consumes a confirmation, it stays consumed even if execution fails.
+The browser retires an attempted confirmation. If the response is lost, it cannot
+establish whether the change ran; it marks the outcome unknown rather than offering
+another Apply for the same confirmation. Inspect the current workspace before
+requesting a fresh proposal. An unsuccessful or uncertain confirmation is not
+evidence that no mutation occurred.
+Proposals also bind to their workspace generation. Confirmation rejects an old
+proposal after reset before applying its action. Investigations retain their starting
+generation across tool calls and stop safely when reset replaces the workspace.
+The browser clears old conversations, proposals, query results, and incident
+checkpoints when the generation changes.
+
+The copilot shares the configured model provider but has an independent per-instance
+UTC-day token ceiling, `DATAPLAYGROUND_COPILOT_DAILY_TOKENS` (default 40,000; zero
+disables it). Per-client/global rate limits, two concurrent investigations, one per
+workspace, capped tool rounds/calls, bounded history and outputs, and deadlines limit
+cost and work. Provider usage is reconciled against reservations. Stop aborts the
+request and the server cancels/reaps the private agent process. Missing credentials,
+SDK, or budget disables the copilot while all direct lab tools keep working.
+
+Offline verification includes the genuine Pi loop with a fake provider, opaque
+provider tool-state round trips, query evidence, proposal isolation/single use,
+cancellation, budgets, SQL limits, lifecycle cleanup, UI races, and browser controls.
+CI audits and tests the Node package as well as the normal Python/frontend checks.
+
+## Optional next capabilities
+
+Native Airflow, Kafka, and dbt integration remains deferred. A reproducible isolated
+stack would need explicit connection status, server-controlled configuration, and
+adapters preserving the current bounded controls and result contracts. It would
+extend the running local scheduler, event log, and SQL transformations; those tools
+already execute real work without native daemons.
+
+Portable investigation evidence and offline action replay could extend today's
+bounded run snapshots and SQL-result JSON exports, with explicit implementation
+versions, input provenance, action order, and limits. Durable run history and offline
+action replay are not implemented. Representative
+scale measurements, query plans, index tradeoffs, and compute/retention costs would
+provide evidence before selecting larger storage or execution systems. The graph and
+handcrafted vector dataset and their exploration are already implemented; native
+graph/vector stores and learned embeddings are separate optional directions.

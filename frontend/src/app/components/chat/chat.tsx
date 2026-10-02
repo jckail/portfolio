@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Dialog, DialogContent, Typography, useTheme, useMediaQuery } from '@mui/material';
 
 import { ChatButton } from './components/ChatButton';
@@ -29,6 +29,12 @@ const Chat: React.FC<ChatProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // The launcher unmounts while the dialog is open, so MUI has nothing to
+  // return focus to. Put it back on the launcher once the dialog has left.
+  const focusLauncher = () => containerRef.current?.querySelector('button')?.focus();
+
   const handleClickOpen = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -41,7 +47,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   return (
-    <div style={{ position: 'fixed', zIndex: 9999, width: '100%', height: '100%' }}>
+    <div ref={containerRef} style={{ position: 'fixed', zIndex: 9999, width: '100%', height: '100%' }}>
       {!open && <ChatButton onClick={handleClickOpen} />}
 
       <Dialog
@@ -51,6 +57,7 @@ const Chat: React.FC<ChatProps> = ({
             handleClose();
           }
         }}
+        TransitionProps={{ onExited: focusLauncher }}
         maxWidth={false}
         fullScreen={isMobile}
         disableScrollLock
