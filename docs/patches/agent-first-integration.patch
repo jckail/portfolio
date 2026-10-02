@@ -2,7 +2,7 @@
 +++ b/backend/app/api/__init__.py
 @@ -1,6 +1,7 @@
  from fastapi import APIRouter
- 
+
  from .admin_routes import router as admin_router
 +from .assistant_evidence_routes import router as assistant_evidence_router
  from .chat_routes import router as chat_router
@@ -33,13 +33,13 @@
  import '../../styles/components/loading.css';
 +
 +const AgentEvidence = React.lazy(() => import('./agent-evidence'));
- 
+
  // Lazy load components below the fold
  const TechnicalSkills = React.lazy(() => import('./sections/skills'));
 @@ -140,6 +142,10 @@
              <TLDR />
            </ErrorBoundary>
- 
+
 +          <ErrorBoundary>
 +            <Suspense fallback={<LoadingSpinner />}><AgentEvidence /></Suspense>
 +          </ErrorBoundary>
@@ -62,19 +62,19 @@
 +++ b/frontend/src/app/components/agent-evidence.tsx
 @@ -1,14 +1,14 @@
  import React, { useEffect, useRef, useState } from 'react';
- 
+
  import { postJson } from '../../shared/utils/api';
 -import { assistantEndpoints } from '../../shared/utils/api/assistant-endpoints';
 +import { endpoints } from '../../shared/utils/api/endpoints';
  import '../../styles/components/agent-evidence.css';
- 
+
  interface Source { id: string; title: string; url: string; snippets: string[] }
  interface Answer { mode: string; answer: string; sources: Source[] }
- 
+
  const suggestions = ['agent systems', 'data platforms', 'machine learning'];
 -const endpoint = '/api/mcp';
 +const endpoint = endpoints.publicMcp;
- 
+
  export default function AgentEvidence() {
    const [query, setQuery] = useState('');
 @@ -37,7 +37,7 @@
