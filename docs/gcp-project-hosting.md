@@ -27,9 +27,18 @@ read-only CLI audit enumerated all 11 projects accessible to the active account:
 Cloud DNS returned complete empty zone lists in `portfolio-383615` and `web3data`;
 the other nine projects reported disabled Cloud DNS APIs. Cloud Domains returned
 a complete empty registration list in `portfolio-383615`; its API was disabled
-in the other ten projects. Disabled APIs leave those inventories unverified;
-none were enabled for discovery. Other accounts or inaccessible projects remain
-outside this audit's coverage.
+in the other ten projects. These initial disabled-API responses were not empty
+inventories. After the release coordinator enabled only the Cloud Asset API in
+`portfolio-383615`, a scoped Cloud Asset search using that explicit consumer and
+billing project returned zero ManagedZone assets in each of the 11 accessible
+projects, without a domain/name filter. This establishes empty indexed zone
+inventory at request time; it does not establish the domain-management account
+or exclude indexing delays. Direct Cloud DNS and Cloud Domains probes against
+`linksaver-445700`, with `portfolio-383615` as the billing project, still returned
+`SERVICE_DISABLED` for the resource project; the broader direct scan was stopped.
+A billing-project flag did not make those inventories reachable. No Cloud DNS
+or Cloud Domains API was enabled for these reads. Other accounts or inaccessible
+projects remain outside coverage.
 
 Public DNS confirms `jckail.com` nameservers
 `ns-cloud-d1.googledomains.com` through `ns-cloud-d4.googledomains.com`.
