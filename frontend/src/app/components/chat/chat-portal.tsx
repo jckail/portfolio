@@ -11,8 +11,18 @@ import { ChatButton } from './components/ChatButton';
 const importPanel = () => import('./chat-panel');
 const ChatPanel = lazy(importPanel);
 
-/** Skip speculative downloads for visitors on data-saver or 2G connections. */
-function shouldPrefetchOnIdle(): boolean {
+/** Phones: the panel (MUI + chat state) is ~56KB the visitor may never open. */
+const SMALL_VIEWPORT_QUERY = '(max-width: 767px)';
+
+/**
+ * Skip speculative downloads for visitors on data-saver or 2G connections and
+ * on small viewports. Clicking the launcher (or touching/focusing it, via
+ * onIntent) still loads the panel on demand.
+ */
+export function shouldPrefetchOnIdle(): boolean {
+  if (typeof window.matchMedia === 'function' && window.matchMedia(SMALL_VIEWPORT_QUERY).matches) {
+    return false;
+  }
   const connection = (navigator as Navigator & {
     connection?: { saveData?: boolean; effectiveType?: string };
   }).connection;

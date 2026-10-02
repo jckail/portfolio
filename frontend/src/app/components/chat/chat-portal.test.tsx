@@ -16,12 +16,28 @@ vi.mock('../../../shared/utils/api', () => ({
 }));
 vi.mock('../../../shared/utils/analytics', () => ({ trackChatOpen: vi.fn(() => Promise.resolve()) }));
 // Idle prefetch is exercised separately; keep it from firing here.
-vi.mock('../../utils/run-when-idle', () => ({ runWhenIdle: vi.fn(() => () => {}) }));
+const runWhenIdle = vi.fn((_cb: () => void, _opts?: unknown) => () => {});
+vi.mock('../../utils/run-when-idle', () => ({ runWhenIdle: (...a: [() => void, unknown]) => runWhenIdle(...a) }));
 
 import ChatPortal from './chat-portal';
 import { isChatAvailable, setChatAvailable } from '../../../shared/utils/chat-availability';
 
+function mockViewport(small: boolean) {
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: small,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    onchange: null,
+    dispatchEvent: vi.fn(),
+  })) as unknown as typeof window.matchMedia;
+}
+
 beforeEach(() => {
+  runWhenIdle.mockClear();
+  mockViewport(false);
   window.history.replaceState({}, '', '/');
   getJson.mockResolvedValue({ available: true });
   setChatAvailable(true);
@@ -89,5 +105,22 @@ describe('ChatPortal launcher', () => {
     const params = new URLSearchParams(window.location.search);
     expect(params.get('ai_chat')).toBeNull();
     expect(params.get('theme')).toBe('light');
+  });
+});
+
+describe('ChatPortal idle prefetch', () => {
+  it('schedules the idle prefetch on a desktop viewport', async () => {
+    render(<ChatPortal />);
+    await act(async () => {});
+    expect(runWhenIdle).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the idle prefetch on a small viewport but still opens on click', async () => {
+    mockViewport(true);
+    render(<ChatPortal />);
+    await act(async () => {});
+    expect(runWhenIdle).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Chat with AI' }));
+    expect(await screen.findByTestId('chat-panel')).toBeInTheDocument();
   });
 });
