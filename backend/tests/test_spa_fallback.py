@@ -27,7 +27,7 @@ def spa(tmp_path):
     return TestClient(app)
 
 
-@pytest.mark.parametrize("path", ["/", "/admin"])
+@pytest.mark.parametrize("path", ["/", "/admin", "/dataplayground", "/dataplayground/"])
 def test_known_client_route_serves_index_with_200(spa, path):
     response = spa.get(path, headers=HTML)
     assert response.status_code == 200
@@ -193,3 +193,104 @@ def test_gzip_cache_respects_its_byte_budget(tmp_path):
     entry = cache.get(str(path), path.stat())
     assert entry is not None and entry.body  # still served...
     assert cache._entries == {}  # ...but not retained
+
+
+@pytest.fixture()
+def document_spa(tmp_path):
+    from pathlib import Path
+
+    source = Path(__file__).parents[2] / "frontend" / "index.html"
+    (tmp_path / "index.html").write_bytes(source.read_bytes())
+    files = SPAStaticFiles(
+        directory=str(tmp_path), html=True, bootstrap=lambda: b'{"ready":true}',
+        snapshot=lambda: b'<main id="home-snapshot">Home</main>',
+        jsonld=lambda: b'{"@type":"ProfilePage"}',
+    )
+    app = FastAPI()
+    app.mount("/", files)
+    return TestClient(app), files
+
+
+@pytest.mark.parametrize("path", ["/dataplayground", "/dataplayground/"])
+def test_lab_document_has_own_metadata_snapshot_and_canonical(document_spa, path):
+    import json
+    import re
+    from html import escape
+
+    from backend.app.models.data_loader import load_projects
+
+    client, _ = document_spa
+    project = load_projects().root["data_playground"]
+    response = client.get(path, headers=HTML)
+    assert response.status_code == 200
+    assert "x-robots-tag" not in response.headers
+    assert response.headers["link"] == '<https://www.jckail.com/dataplayground>; rel="canonical"'
+    assert f"<title>{escape(project.title.strip())} | Jordan Kail</title>" in response.text
+    assert f'<meta name="description" content="{escape(project.description, quote=True)}"' in response.text
+    assert '<link rel="canonical" href="https://www.jckail.com/dataplayground"' in response.text
+    assert '<meta property="og:type" content="website"' in response.text
+    assert '<meta property="og:url" content="https://www.jckail.com/dataplayground"' in response.text
+    assert '<meta name="twitter:url" content="https://www.jckail.com/dataplayground"' in response.text
+    assert 'property="profile:' not in response.text
+    assert 'id="seo-snapshot"' in response.text
+    assert 'id="home-snapshot"' not in response.text
+    assert "All data is synthetic" in response.text
+    assert 'id="bootstrap-data"' in response.text
+    graph = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', response.text, re.S)[1])
+    assert graph["@type"] == "WebApplication"
+    assert graph["name"] == project.title.strip()
+    assert graph["url"] == "https://www.jckail.com/dataplayground"
+    assert "aggregateRating" not in graph
+    head = client.head(path, headers=HTML)
+    assert head.status_code == 200
+    assert head.content == b""
+    assert head.headers["link"] == response.headers["link"]
+    assert head.headers["etag"] == response.headers["etag"]
+
+
+def test_lab_home_and_bare_variants_do_not_share_cache(document_spa):
+    client, files = document_spa
+    files.warm_gzip_cache()
+    home = client.get("/", headers=HTML)
+    lab = client.get("/dataplayground", headers=HTML)
+    admin = client.get("/admin", headers=HTML)
+    assert len({r.headers["etag"] for r in (home, lab, admin)}) == 3
+    assert set(files._index) == {"home", "lab", "bare"}
+    assert 'id="home-snapshot"' in home.text
+    assert '"@type":"ProfilePage"' in home.text
+    assert 'id="seo-snapshot"' not in admin.text
+    assert admin.headers["x-robots-tag"] == "noindex"
+    assert client.get("/dataplayground", headers={**HTML, "if-none-match": home.headers["etag"]}).status_code == 200
+    assert client.get("/dataplayground", headers={**HTML, "if-none-match": lab.headers["etag"]}).status_code == 304
+    plain = client.get("/dataplayground", headers={**HTML, "accept-encoding": "identity"})
+    assert plain.text == lab.text
+    assert plain.headers["etag"] != lab.headers["etag"]
+    missing = client.get("/dataplayground/missing", headers=HTML)
+    assert missing.status_code == 404
+    assert missing.headers["x-robots-tag"] == "noindex"
+    assert missing.headers["etag"] == admin.headers["etag"]
+    assert client.get("/", headers=HTML).text == home.text
+
+
+def test_lab_document_escapes_project_content(monkeypatch):
+    import json
+    import re
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    from backend.app import dataplayground_document as document
+    from backend.app.models.data_loader import load_projects
+
+    project = load_projects().root["data_playground"].model_copy(update={
+        "title": '<script>alert("title")</script>',
+        "description": '</script><script>alert("description")</script>',
+        "description_detail": '<img src=x onerror="alert(1)">',
+    })
+    monkeypatch.setattr(document, "load_projects", lambda: SimpleNamespace(root={"data_playground": project}))
+    source = Path(__file__).parents[2] / "frontend" / "index.html"
+    html = document.render_document(source.read_bytes()).decode()
+    assert '<script>alert("title")</script>' not in html
+    assert '<img src=x onerror=' not in html
+    assert "&lt;img" in html
+    graph = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)[1])
+    assert graph["description"] == project.description

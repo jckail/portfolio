@@ -1,5 +1,7 @@
 /** Canonical backend endpoint paths (relative, same-origin). */
 export const endpoints = {
+  dataPlayground: '/api/dataplayground',
+  dataPlaygroundSimulate: '/api/dataplayground/simulate',
   aboutMe: '/api/aboutme',
   experience: '/api/experience',
   skills: '/api/skills',

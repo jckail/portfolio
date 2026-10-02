@@ -128,17 +128,22 @@
         "last_commit": "September 2024"
     },
     "data_playground": {
-        "title": "Data Playground ",
-        "description": "An app designed to produce data to build data pipelines via an emulated ECommerce Store. Made with FastAPI, Streamlit, and Docker.",
+        "title": "Data Playground",
+        "description": "An interactive data-engineering lab for pipeline DAGs, data models, SQL analytics, graphs, and vector similarity.",
         "link": "https://github.com/jckail/data_playground",
-        "description_detail": "Developed a data-driven e-commerce platform mimicking real-world e-commerce workflows, focusing on analytics, API development, and data pipelines. Used PostgreSQL for data management and FastAPI for asynchronous API development to enable seamless backend operations. Implemented Docker-based containerization for smooth deployment and independent service scaling. Designed efficient data partitioning (hourly and daily) to optimize querying and ensure scalability under heavy workloads. Leveraged Prometheus for monitoring and built pipelines for future Grafana dashboard integration to improve observability. Demonstrated proficiency in asynchronous operations, microservices architecture, and backend development for data-intensive applications. Created an interactive platform with optional Streamlit visualizations for insight generation, targeting both developers and data engineers.",
+        "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. A separate synthetic commerce dataset connects products, customers, and purchases in a relationship graph and explains cosine similarity over handcrafted product feature vectors. An engineering workbench exposes executable dependency DAGs, retry and failure traces, model grains and contracts, and architecture decisions grounded in the implementation. The original PostgreSQL and Streamlit experiment remains in the source repository.",
         "logoPath": "playground-icon.svg",
         "tech_stack": [
             "Python",
+            "SQL",
+            "SQLite",
             "FastAPI",
-            "Streamlit",
+            "Pydantic",
+            "React",
+            "TypeScript",
             "Docker"
         ],
-        "last_commit": "November 2024"
+        "last_commit": "October 2026",
+        "link2": "https://jckail.com/dataplayground"
     }
 }

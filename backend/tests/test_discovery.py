@@ -168,6 +168,7 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
     locs = [u.findtext("s:loc", namespaces=ns) for u in root.findall("s:url", ns)]
     assert locs == [
         "https://www.jckail.com/",
+        "https://www.jckail.com/dataplayground",
         "https://www.jckail.com/llms.txt",
         "https://www.jckail.com/llms-full.txt",
         "https://www.jckail.com/resume.json",
