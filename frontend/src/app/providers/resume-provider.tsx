@@ -48,7 +48,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const error = 'Resume filename not available';
       console.error(error);
       setError(error);
-      return;
+      throw new Error(error);
     }
 
     try {
@@ -62,8 +62,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to download resume: ${errorText}`);
+        throw new Error('Failed to download resume. Please try again.');
       }
 
       const blob = await response.blob();
@@ -77,11 +76,11 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
-      setPdfUrl(url);
     } catch (err) {
       console.error('Error in download process:', err);
-      setError(err instanceof Error ? err.message : 'Failed to download resume');
+      const failure = err instanceof Error ? err : new Error('Failed to download resume');
+      setError(failure.message);
+      throw failure;
     }
   };
 

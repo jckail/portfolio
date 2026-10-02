@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import '../../../styles/components/doodle.css';
 
 interface DoodleProps {
@@ -39,6 +40,11 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
     const dpr = window.devicePixelRatio || 1;
     const width = parent.clientWidth;
     const height = parent.clientHeight;
+    if (!width || !height) return;
+    const previous = document.createElement('canvas');
+    previous.width = canvas.width;
+    previous.height = canvas.height;
+    previous.getContext('2d')?.drawImage(canvas, 0, 0);
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     canvas.style.width = `${width}px`;
@@ -48,6 +54,7 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      ctx.drawImage(previous, 0, 0, previous.width, previous.height, 0, 0, width, height);
     }
   }, []);
 
@@ -62,6 +69,7 @@ const Doodle: React.FC<DoodleProps> = ({ isVisible, isPartyMode }) => {
   useEffect(() => {
     if (!active) return;
     resize();
+    scrollToSection('doodle');
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, [active, resize]);

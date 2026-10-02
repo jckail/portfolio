@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 import Doodle from './doodle';
 
@@ -14,6 +14,21 @@ afterEach(() => {
 });
 
 describe('Doodle', () => {
+  it('preserves the drawing bitmap when its viewport resizes', () => {
+    const drawImage = vi.fn();
+    const context = { drawImage, setTransform: vi.fn() };
+    vi.mocked(HTMLCanvasElement.prototype.getContext).mockReturnValue(context as unknown as CanvasRenderingContext2D);
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(500);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(300);
+    render(<Doodle isVisible isPartyMode={false} />);
+    drawImage.mockClear();
+    width.mockReturnValue(700);
+    fireEvent(window, new Event('resize'));
+    // Copy the existing canvas before resetting its dimensions, then restore it.
+    expect(drawImage).toHaveBeenCalledTimes(2);
+    expect(drawImage.mock.calls[1].slice(-2)).toEqual([700, 300]);
+  });
+
   it('is inert while hidden so its Clear button is not focusable', () => {
     const { container, rerender } = render(<Doodle isVisible={false} isPartyMode={false} />);
     const section = container.querySelector('#doodle')!;

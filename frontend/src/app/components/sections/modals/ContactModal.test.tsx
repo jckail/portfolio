@@ -1,8 +1,14 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 import ContactModal from './ContactModal';
+import { postJson } from '../../../../shared/utils/api';
+
+vi.mock('../../../../shared/utils/api', async importOriginal => ({
+  ...await importOriginal<typeof import('../../../../shared/utils/api')>(),
+  postJson: vi.fn(),
+}));
 
 vi.mock('../../../../shared/utils/analytics', () => ({
   trackContactOpened: vi.fn(),
@@ -45,5 +51,18 @@ describe('ContactModal phone', () => {
     expect(dialog.querySelector('a[href^="tel:"]')).toBeNull();
     expect(screen.getByText(/Phone: available on request/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Show phone number' })).toBeInTheDocument();
+  });
+});
+
+describe('ContactModal submission announcements', () => {
+  it.each([true, false])('announces successful or failed submission (success=%s)', async success => {
+    if (success) vi.mocked(postJson).mockResolvedValue({});
+    else vi.mocked(postJson).mockRejectedValue(new Error('Please try again'));
+    renderModal();
+    fireEvent.change(screen.getByLabelText('Your Email:'), { target: { value: 'visitor@example.com' } });
+    fireEvent.change(screen.getByLabelText('Subject:'), { target: { value: 'Hello' } });
+    fireEvent.change(screen.getByLabelText('Send me a message:'), { target: { value: 'Hello Jordan' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Send Message' }).closest('form')!);
+    expect(await screen.findByRole(success ? 'status' : 'alert')).toHaveTextContent(success ? 'Message sent successfully!' : 'Please try again');
   });
 });
