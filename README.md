@@ -32,12 +32,19 @@ assistant on Vertex AI Gemini (Anthropic Claude is a supported alternative).
   `?project=`, `?skill=`, `?company=`)
 - ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections;
   `Ctrl/Cmd+K` command palette
-- 🎨 Interactive doodle canvas (footer easter egg) + party mode (Konami /
-  `?party=1`)
+- 🎨 Interactive doodle canvas (footer easter egg) + party mode. Party mode
+  has several triggers: ten theme toggles within five seconds, the Konami
+  code, `?party=1` or `#party`, the second footer doodle click, and the chat
+  `set_theme` tool
 - 🍪 Cookie consent (denied by default, reopenable from the footer); analytics, including a first-party anonymous event stream, run only after opt-in
 - 📱 Responsive design for all devices
 - ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
 - 🌓 Light/dark mode — and a hidden party mode 🎉
+
+### Hosted demos and forwards
+- 🧪 Some projects have an interactive, browser-only demo served by this site
+  at `/<slug>` (synthetic data, server-rendered document for crawlers); others
+  answer a `302` to their own domain. See [docs/labs.md](./docs/labs.md)
 
 ### Professional Network
 - 🔗 [LinkedIn](https://www.linkedin.com/in/jckail/)
@@ -86,13 +93,13 @@ portfolio/
 │   │   ├── services/  # Chat service, tools, and the llm/ provider layer
 │   │   ├── config.py  # Centralized typed settings (all env access)
 │   │   ├── models/    # Pydantic models + data loaders
-│   │   ├── data/      # Portfolio content (JSON)
+│   │   ├── data/      # Portfolio content (JSON), including labs/ and forwards.json
 │   │   └── utils/     # Logging, Supabase client
 │   ├── assets/        # Generated resume (PDF, text, manifest), party sprites
 │   └── tests/         # Pytest suite (runs offline, no credentials needed)
 │
 ├── e2e/               # Playwright smoke tests against the built image
-├── docs/adr/          # Architecture decision records
+├── docs/              # Architecture decision records (adr/), labs platform (labs.md)
 ├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
 ├── helpers/           # Dockerfiles, local dev tooling, e2e-in-Docker, resume generator
 └── .github/workflows/ # CI + automatic Cloud Run deploys
@@ -170,6 +177,7 @@ revision to 100% traffic after a health check against the new revision.
 - [Deployment tooling](./helpers/README.md)
 - [Infrastructure (Terraform)](./infra/README.md)
 - [Architecture decisions](./docs/adr/README.md)
+- [Hosted labs and forwards](./docs/labs.md)
 - [Improvement roadmap](./ROADMAP.md)
 - API reference: `/docs` on a running backend
 
