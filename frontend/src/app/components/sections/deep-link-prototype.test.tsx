@@ -42,6 +42,7 @@ describe('prototype keys in deep links', () => {
     render(<TechnicalSkills />);
     await flush();
     expect(screen.queryByRole('dialog')).toBeNull();
+    expect(window.location.search).toBe('');
   });
 
   it.each(['__proto__', 'constructor', 'hasOwnProperty'])('?project=%s opens nothing', async key => {

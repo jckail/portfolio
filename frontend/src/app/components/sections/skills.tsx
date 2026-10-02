@@ -1,6 +1,8 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
+import { useDeepLink } from '../../../shared/hooks/use-deep-link';
+import { getOwn } from '../../../shared/utils/lookup';
 import { skillSearchText } from '../../../shared/utils/skills';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
 import { useSkill } from './skills/hooks/useSkill';
@@ -97,6 +99,15 @@ const TechnicalSkills: React.FC = () => {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const closeSkill = useCallback(() => setSelectedSkill(null), [setSelectedSkill]);
+
+  useDeepLink({
+    param: 'skill',
+    value: selectedSkill,
+    ready: !!skillsData,
+    valid: !!getOwn(skillsData, selectedSkill),
+    sectionId: 'skills',
+    clear: closeSkill,
+  });
 
   const normalizedQuery = query.trim().toLowerCase();
 

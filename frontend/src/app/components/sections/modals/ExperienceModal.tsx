@@ -53,11 +53,12 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="experience-modal-logo-link"
+            aria-label={`${experience.company} website`}
           >
             <CompanyLogo
               name={experience.logoPath}
               size={64}
-              aria-label={`${experience.company} logo`}
+              aria-hidden
               className={`experience-modal-company-logo${isMarkOnlyLogo(experience.logoPath) ? ' experience-modal-company-logo--mark' : ''}`}
             />
           </a>
