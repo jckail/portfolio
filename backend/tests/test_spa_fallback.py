@@ -68,6 +68,85 @@ def test_non_html_requests_do_not_fall_back(spa):
     assert response.json() == {"detail": "Not Found"}
 
 
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}, {"accept": "*/*;q=0.8"}])
+@pytest.mark.parametrize("path", ["/admin", "/dataplayground", "/jobbr", "/gopilot", "/aibilling", "/cryptotrader"])
+def test_wildcard_or_missing_accept_gets_known_routes(spa, path, accept):
+    """Crawlers that send */* or no Accept are served like the home page."""
+    response = spa.get(path, headers={**accept, "accept-encoding": "identity"})
+    assert response.status_code == 200
+    assert "<title>spa</title>" in response.text
+
+
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}])
+def test_home_serves_for_wildcard_or_missing_accept(spa, accept):
+    assert spa.get("/", headers=accept).status_code == 200
+
+
+@pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}])
+@pytest.mark.parametrize("path", ["/does-not-exist", "/admin/", "/api/nope", "/ws/nope", "/assets/app-deadbeef.js"])
+def test_wildcard_accept_keeps_unknown_and_api_paths_404(spa, path, accept):
+    response = spa.get(path, headers=accept)
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+@pytest.mark.parametrize("accept", ["application/json", "application/json, */*", "application/json, text/plain, */*"])
+def test_explicit_json_requests_do_not_get_lab_documents(spa, accept):
+    response = spa.get("/jobbr", headers={"accept": accept})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+@pytest.mark.parametrize("accept", ["*/*;q=0", "*/*;q=0.000", "text/plain, */*;q=0"])
+def test_refused_wildcard_does_not_enable_document_fallback(spa, method, accept):
+    response = spa.request(method, "/jobbr", headers={"accept": accept})
+    assert response.status_code == 404
+    assert response.headers["content-type"].startswith("application/json")
+
+
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+@pytest.mark.parametrize("accept", [
+    "application/json;q=0, */*;q=1",
+    "application/problem+json; q=0.000, */*; q=0.8",
+    "APPLICATION/JSON;Q=0, */*;Q=0.001",
+])
+def test_refused_json_does_not_veto_accepted_wildcard(spa, method, accept):
+    response = spa.request(method, "/jobbr", headers={"accept": accept})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+
+
+@pytest.mark.parametrize("accept", ["application/json;q=0.001, */*", "application/problem+json;q=0.5, */*"])
+def test_positive_json_weight_keeps_json_client_out_of_spa(spa, accept):
+    response = spa.get("/jobbr", headers={"accept": accept})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+def test_genuinely_absent_accept_serves_only_known_routes(spa):
+    # TestClient otherwise supplies */*, so an empty headers dict is not a
+    # regression test for a truly absent Accept header.
+    del spa.headers["accept"]
+    assert spa.get("/jobbr").status_code == 200
+    response = spa.get("/does-not-exist")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+@pytest.mark.parametrize("path", ["/does-not-exist", "/api/nope", "/ws/nope", "/assets/missing.js"])
+def test_refused_json_wildcard_still_never_masks_a_missing_route(spa, path):
+    response = spa.get(path, headers={"accept": "application/json;q=0, */*"})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+def test_explicit_html_navigation_keeps_its_existing_precedence(spa):
+    response = spa.get("/jobbr", headers={"accept": "application/json, text/html, */*"})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+
+
 def test_non_get_methods_do_not_fall_back(spa):
     assert spa.post("/admin", headers=HTML).status_code == 405
 
