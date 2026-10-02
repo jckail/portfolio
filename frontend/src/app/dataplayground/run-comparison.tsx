@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex -- Named overflow regions support keyboard scrolling. */
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import { compareRunSnapshots, MAX_SNAPSHOTS, snapshotPairDocument } from './run-snapshots';
 import { useRunSnapshots, useRuntime } from './use-runtime';
@@ -49,6 +49,7 @@ function Comparison({
   loading: boolean;
 }) {
   const { snapshots, capture, remove, clear } = store;
+  const selectorId = useId();
   const [label, setLabel] = useState('');
   const [beforeId, setBeforeId] = useState('');
   const [afterId, setAfterId] = useState('');
@@ -163,9 +164,10 @@ function Comparison({
             Clear snapshots
           </button>
           <div className="lab-comparison-selectors">
-            <label>
-              Before snapshot
+            <div>
+              <label htmlFor={`${selectorId}-before`}>Before snapshot</label>
               <select
+                id={`${selectorId}-before`}
                 value={before?.id || ''}
                 onChange={(event) => setBeforeId(event.target.value)}
               >
@@ -176,10 +178,14 @@ function Comparison({
                   </option>
                 ))}
               </select>
-            </label>
-            <label>
-              After snapshot
-              <select value={after?.id || ''} onChange={(event) => setAfterId(event.target.value)}>
+            </div>
+            <div>
+              <label htmlFor={`${selectorId}-after`}>After snapshot</label>
+              <select
+                id={`${selectorId}-after`}
+                value={after?.id || ''}
+                onChange={(event) => setAfterId(event.target.value)}
+              >
                 <option value="">Choose an after observation</option>
                 {snapshots.map((snapshot) => (
                   <option key={snapshot.id} value={snapshot.id}>
@@ -187,7 +193,7 @@ function Comparison({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
           </div>
           {!before || !after ? (
             <p>Choose two snapshots explicitly to compare.</p>

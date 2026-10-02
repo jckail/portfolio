@@ -97,8 +97,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 function selectPair() {
-  fireEvent.change(screen.getByLabelText('Before snapshot'), { target: { value: 'before' } });
-  fireEvent.change(screen.getByLabelText('After snapshot'), { target: { value: 'after' } });
+  fireEvent.change(screen.getByLabelText('Before snapshot', { exact: true }), {
+    target: { value: 'before' },
+  });
+  fireEvent.change(screen.getByLabelText('After snapshot', { exact: true }), {
+    target: { value: 'after' },
+  });
 }
 
 describe('observed-state comparison', () => {
@@ -126,10 +130,20 @@ describe('observed-state comparison', () => {
     expect(
       screen.queryByRole('region', { name: 'Snapshot counter differences' })
     ).not.toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Before snapshot'), { target: { value: 'before' } });
-    fireEvent.change(screen.getByLabelText('After snapshot'), { target: { value: 'before' } });
+    fireEvent.change(screen.getByLabelText('Before snapshot', { exact: true }), {
+      target: { value: 'before' },
+    });
+    fireEvent.change(screen.getByLabelText('After snapshot', { exact: true }), {
+      target: { value: 'before' },
+    });
     expect(screen.getByText('Select two distinct snapshots.')).toBeInTheDocument();
     selectPair();
+    expect(screen.getByRole('combobox', { name: 'Before snapshot', exact: true })).toHaveValue(
+      'before'
+    );
+    expect(screen.getByRole('combobox', { name: 'After snapshot', exact: true })).toHaveValue(
+      'after'
+    );
     const counters = screen.getByRole('region', { name: 'Snapshot counter differences' });
     expect(
       within(counters).getByRole('row', { name: 'Inserted records 0 10 +10' })
