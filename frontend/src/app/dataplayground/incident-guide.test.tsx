@@ -154,35 +154,44 @@ describe('manual incident investigations', () => {
     expect(screen.getByRole('button', { name: 'Guide: pause consumer' })).toBeInTheDocument();
   });
   it('handles body focus after disabling the action but respects an intentional outside click', async () => {
-    const user = userEvent.setup();
-    let resolve!: (value: RuntimeState) => void;
-    action.mockImplementation(
-      () =>
-        new Promise<RuntimeState>((done) => {
-          resolve = done;
-        })
-    );
-    render(<IncidentGuide />);
-    open();
-    const origin = screen.getByRole('button', { name: 'Guide: stop producer' });
-    origin.focus();
-    await user.keyboard('{Enter}');
-    // Some browsers blur a button when it becomes disabled during the request.
-    origin.blur();
-    expect(document.body).toHaveFocus();
-    await act(async () => {
-      resolve(receipt({ ...state, streaming: { ...state.streaming, producer_running: false } }));
-    });
-    const next = screen.getByRole('button', { name: 'Guide: pause consumer' });
-    expect(next).toHaveFocus();
-    await user.keyboard('{Enter}');
-    next.blur();
-    fireEvent.pointerDown(document.body);
-    await act(async () => {
-      resolve(receipt({ ...state, streaming: { ...state.streaming, consumer_paused: true } }));
-    });
-    expect(document.body).toHaveFocus();
-    expect(screen.getByRole('button', { name: 'Guide: produce lag batch' })).not.toHaveFocus();
+    const originalTabIndex = document.body.getAttribute('tabindex');
+    document.body.tabIndex = -1;
+    try {
+      const user = userEvent.setup();
+      let resolve!: (value: RuntimeState) => void;
+      action.mockImplementation(
+        () =>
+          new Promise<RuntimeState>((done) => {
+            resolve = done;
+          })
+      );
+      render(<IncidentGuide />);
+      open();
+      const origin = screen.getByRole('button', { name: 'Guide: stop producer' });
+      origin.focus();
+      await user.keyboard('{Enter}');
+      // Some browsers blur a button when it becomes disabled during the request.
+      // jsdom does not blur an already disabled button; explicitly model the
+      // browser's fallback focus on body without changing the product code.
+      document.body.focus();
+      expect(document.body).toHaveFocus();
+      await act(async () => {
+        resolve(receipt({ ...state, streaming: { ...state.streaming, producer_running: false } }));
+      });
+      const next = screen.getByRole('button', { name: 'Guide: pause consumer' });
+      expect(next).toHaveFocus();
+      await user.keyboard('{Enter}');
+      document.body.focus();
+      fireEvent.pointerDown(document.body);
+      await act(async () => {
+        resolve(receipt({ ...state, streaming: { ...state.streaming, consumer_paused: true } }));
+      });
+      expect(document.body).toHaveFocus();
+      expect(screen.getByRole('button', { name: 'Guide: produce lag batch' })).not.toHaveFocus();
+    } finally {
+      if (originalTabIndex === null) document.body.removeAttribute('tabindex');
+      else document.body.setAttribute('tabindex', originalTabIndex);
+    }
   });
   it('makes one action per click and verifies lag and recovery from returned evidence', async () => {
     action.mockImplementation(async (request) => {
