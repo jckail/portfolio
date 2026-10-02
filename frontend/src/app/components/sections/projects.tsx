@@ -83,7 +83,7 @@ const ProjectCard = memo(({
             rel="noopener noreferrer"
             className="project-link secondary btn btn-sm"
           >
-            Live demo
+            {project.link2_label || 'Live demo'}
           </a>
         )}
       </div>

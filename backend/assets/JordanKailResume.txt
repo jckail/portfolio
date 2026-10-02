@@ -66,22 +66,22 @@ Development Tools: Figma, Linux, Playwright, Selenium, Retool
 PROJECTS
 
 Super Teacher — github.com/jckail/superteacher, the-super-teacher.com
-AI assistant to help teachers manage their classroom and create personalized lesson plans for students.
+A classroom copilot that answers 'who needs me today, and why?' with a ranked needs-attention list, a gradebook, attendance, and a streaming Claude assistant grounded in the class data.
 
-Jobbr — github.com/jckail/Jobbr
+Jobbr — github.com/jckail/Jobbr, jckail.com/jobbr
 Agentic AI job matching a resume to available jobs at tech companies.
 
-goPilot — github.com/jckail/goPilot
+goPilot — github.com/jckail/goPilot, jckail.com/gopilot
 Agentic AI developer assistant and cli tool to help debug, develop, and compile apps written in GO.
 
-AI Billing System — github.com/jckail/ai_chat_billing_app
+AI Billing System — github.com/jckail/ai_chat_billing_app, jckail.com/aibilling
 A proof-of-concept application for tracking and billing AI chat thread interactions with real-time cost metrics and analytics.
 
 Portfolio Website — github.com/jckail/portfolio
 A fully custom-built portfolio site showcasing my skills and work.
 
-Pointup.io — github.com/jckail/point_bot, pointup.io
-An AI web app to manage 'All of your loyalty points in one place,' powered by a Selenium-WebDriver agent in AWS via elastic beanstalk, lambda, and s3.
+PointUp — github.com/jckail/point_bot, pointup.io
+Track airline miles, hotel points, and credit card rewards in one place.
 
 Join Group via QR — techcrunch.com
 Featured on TechCrunch - Won internal hackathon and created the ability for Facebook group admins to invite users to their groups by generating a QR Code.

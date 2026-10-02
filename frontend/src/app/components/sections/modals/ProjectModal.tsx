@@ -120,7 +120,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               rel="noopener noreferrer"
               className="visit-website-btn project-modal-secondary"
             >
-              Live demo
+              {project.link2_label || 'Live demo'}
             </a>
           )}
           <CopyLinkButton url={shareUrl('project', projectKey)} />
