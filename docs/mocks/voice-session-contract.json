@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "status": "proposed-unmounted-contract",
+  "liveEnabled": false,
+  "clientRequestExample": {
+    "provider": "elevenlabs",
+    "mode": "voice",
+    "question": "What agent systems has Jordan built?",
+    "idempotencyKey": "example-not-a-live-session"
+  },
+  "clientConstraints": {
+    "providers": ["elevenlabs", "openai-realtime"],
+    "questionMaxCharacters": 200,
+    "forbiddenInputs": ["credential", "authenticatedSubject", "budget", "tool", "privateSource"]
+  },
+  "serverRequiredBeforeLive": [
+    "existing-auth-verified-subject",
+    "durable-atomic-global-and-subject-budget-reservation",
+    "idempotency-and-concurrency-enforcement",
+    "reviewed-provider-credit-quota",
+    "public-evidence-allowlist",
+    "server-duration-output-and-disconnect-termination",
+    "approved-server-only-secret-storage"
+  ],
+  "fixtures": [
+    {"state": "ready", "status": "mock", "session": "offline-stock-audio", "credentials": null},
+    {"state": "mic-denied", "status": "denied", "fallback": "text", "credentials": null},
+    {"state": "auth-canceled", "status": "denied", "credentials": null},
+    {"state": "quota", "status": "denied", "fallback": "public-sources", "credentials": null},
+    {"state": "provider-error", "status": "unavailable", "fallback": "text", "credentials": null},
+    {"state": "missing-config", "status": "disabled", "credentials": null}
+  ]
+}
