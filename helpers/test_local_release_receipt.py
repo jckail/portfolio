@@ -112,6 +112,26 @@ class ReceiptTests(unittest.TestCase):
             self.reject()
         self.doc["stages"] = original
 
+    def test_browser_requires_explicit_e2e_environment_evidence(self):
+        # A complete old policy without CI's E2E install/browser runtime must
+        # fail even when evidence matches every caller-admitted old stage.
+        self.assertIn("e2e-environment", dict(self.expected.stages))
+        self.doc["stages"] = [stage for stage in self.doc["stages"] if stage["id"] != "e2e-environment"]
+        self.repin_receipt()
+        old_policy = replace(self.expected, stages=tuple(
+            pair for pair in self.expected.stages if pair[0] != "e2e-environment"))
+        with self.assertRaisesRegex(gate.ReceiptError, "stage-pins"):
+            self.evaluate(expected=old_policy)
+
+    def test_e2e_environment_cannot_be_admitted_after_browser(self):
+        pins = list(self.expected.stages)
+        environment = next(pair for pair in pins if pair[0] == "e2e-environment")
+        pins.remove(environment)
+        browser_index = next(index for index, pair in enumerate(pins) if pair[0] == "browser")
+        pins.insert(browser_index + 1, environment)
+        with self.assertRaisesRegex(gate.ReceiptError, "stage-dependencies"):
+            self.evaluate(expected=replace(self.expected, stages=tuple(pins)))
+
     def test_closed_schema_duplicate_keys_nonfinite_depth_and_malformed(self):
         raws = (b'{"schema":1,"schema":2}', b'{"x":NaN}', b'[]', b'{', b'[' * 20 + b'0' + b']' * 20)
         for raw in raws:

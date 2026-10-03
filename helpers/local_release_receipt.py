@@ -21,7 +21,7 @@ REQUIRED_STAGE_IDS = frozenset({
     "python-audit", "dev-audit", "deploy-helper", "tags-helper", "backend-lint",
     "backend-compile", "backend-coverage", "auth-floor", "terraform-key-guard",
     "terraform-fmt", "terraform-init", "terraform-validate", "image-build",
-    "image-scan", "image-smoke", "browser", "lighthouse",
+    "image-scan", "image-smoke", "e2e-environment", "browser", "lighthouse",
 })
 CHUNK_BYTES = 1024 * 1024
 JSON_BYTES = CHUNK_BYTES
@@ -262,6 +262,9 @@ def _evaluate(receipt_path, *, expected, trusted_now, rootdirfd):
     admitted_order = [name for name, _ in expected.stages]
     image_order = ["image-build", "image-scan", "image-smoke", "browser", "lighthouse"]
     _require([name for name in admitted_order if name in image_order] == image_order, "stage-dependencies")
+    # ci.yml installs the candidate's E2E lock and matching Chromium/runtime
+    # before the full suite; scoped frontend fixtures cannot replace this.
+    _require(admitted_order.index("e2e-environment") < admitted_order.index("browser"), "stage-dependencies")
     for pin in stage_pins.values():
         _require(type(pin) is StagePin and pin.cwd in (".", "frontend", "copilot", "infra", "e2e"), "stage-pin")
         _require(type(pin.argv) is tuple and 0 < len(pin.argv) <= 64
