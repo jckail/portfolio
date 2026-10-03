@@ -1,42 +1,55 @@
 # JCK-201 agent-first portfolio review
 
-Review branch: `feat/agent-first-mcp-jck201`. Frozen accepted base: `184a0058e74acb788e03902d5bce173eeb081d54`.
+Review branch: `feat/agent-first-mcp-jck201`. Accepted base: `184a0058e74acb788e03902d5bce173eeb081d54`. Local review only; no push, publication, deployment or paid provider call.
 
-## Working, local implementation
+## Working implementation
 
-- An onsite evidence assistant displays exact passages and canonical links from the existing curated JSON search.
-- A stateless Streamable HTTP MCP server provides one bounded, read-only `search_public_evidence` tool. It shares the onsite evidence service, validates arguments and origins, bounds request bytes, and rate-limits requests. It performs no provider calls.
-- The component provides a Claude Code command, OpenAI Responses API MCP configuration, a remote URL, and fallback public documents. Copy feedback is truthful; missing evidence produces a clear limitation instead of an achievement.
-- Existing project content, authentication, paid chatbot providers, browser actions and confirmation tools are unchanged.
-- Richer email-gated demos are explicitly unavailable. Checking access performs no authentication, email, credential or model operation.
+The portfolio now prominently mounts a lazy-loaded evidence assistant after About and before Experience. Existing project, resume, skills and experience sections remain available. It displays exact passages and canonical source links from the existing curated public JSON retrieval.
 
-## Integration ownership blocker
+Both mounted endpoints share that retrieval:
 
-The AgentMon coordinator explicitly held existing paths in message 2303 pending the original Portfolio owner's current-base and path receipt. New-file work was acknowledged. Requests 2254, 2267, 2278, 2339 and 2396 document reconciliation and concrete implementation evidence.
+- `POST /api/assistant/evidence`: bounded public query and source-backed deterministic answer.
+- `POST /api/mcp`: stateless, JSON-only Streamable HTTP with one read-only `search_public_evidence` tool.
 
-`patches/agent-first-integration.patch` is an **unapplied** proposal: mount both new API routers under /api; lazy-load the assistant after About; add paths to the canonical endpoints map; point the component at that map. The current production entrypoints do not mount the new experience. Do not describe this branch as a completed site upgrade until integration and integrated checks pass.
+The connector panel supplies the current-origin MCP URL, a copyable Claude Code command, OpenAI Responses API MCP configuration with a single allowed tool and required approval, and public document fallbacks. Each visitor's own assistant provider may charge for its model calls; the portfolio MCP endpoint performs no provider calls. Missing evidence yields an explicit limitation rather than a fabricated achievement.
 
-## Agents SDK assessment
+Queries are limited to 200 characters and allowlisted public collections. MCP requests are capped at 8 KiB before extending the request buffer, validate JSON-RPC arguments and origins, and reject unsupported protocol versions, batching, private/tool-execution inputs and unknown tools. Request rate limits apply per IP and per instance. These are abuse controls for unpaid retrieval, not distributed spending limits.
 
-The accepted app already has a provider-neutral streaming interface, grounded search and bounded confirmation tools. Replacing it wholesale would discard useful contracts and increase this change's scope. This branch therefore includes an **unmounted, optional SDK draft adapter**, separate from the working unpaid evidence experience.
+Existing chat, authentication, configuration, contact and dialog implementations are unchanged. Richer demos have a truthful unavailable state; checking access performs no sign-in, email, credential or paid operation. There is no arbitrary code execution, shell access, private repository access or environment-variable tool.
 
-The adapter requires explicit approval, a verified subject supplied by the existing auth boundary, a durable shared token ledger and an explicit OpenAI client with retries disabled. It reserves a conservative worst-case input/output budget before importing or invoking the SDK, allows one model turn, caps output at 512 tokens, disables tracing, applies a 20-second timeout and supplies no tools or handoffs. Failed/uncertain/canceled calls stay reserved. Ledger failures deny dispatch. Auth alone cannot enable spending.
+## Ownership and integration
 
-No SDK dependency was added, no provider client/credentials were created, and no SDK/live-model run occurred. Mock SDK tests validate the admission and invocation contract only. Before activation: approve and hash-pin the runtime dependency through the repo lock workflow; configure the approved provider in Settings; implement and verify atomic daily global + per-subject reservations across every instance/restart; enforce the existing verified-email access boundary; test billing and model limits without opening public execution. Generated SDK text remains a review draft, not authoritative evidence.
+The original portfolio owner approved scope 92 in AgentMon message 2572 after checking the accepted base and three vacant mount paths. The coordinator granted it in message 2588. The earlier hold is resolved.
 
-Coding-agent demos remain deferred scaffolding. No arbitrary code execution, shell access, filesystem tools, private repositories or environment variables are exposed.
+The mounted shared paths are limited to `backend/app/api/__init__.py`, `frontend/src/app/components/main-content.tsx` and `frontend/src/shared/utils/api/endpoints.ts`. The component uses the canonical shared HTTP client and endpoint map. Both routers are registered on the actual application. `patches/agent-first-integration.patch` is retained as the historical review proposal; its intended integration is now applied. The redundant new endpoint helper was removed.
+
+Release/deploy ownership stays with the existing release captain. The parent thread remains the sole writer for Linear JCK-201.
+
+## Agents SDK assessment and remaining live configuration
+
+The existing chatbot already has a provider-neutral streaming interface, grounded search and confirmation tools. Replacing it wholesale would discard useful contracts and expand the authorized change. This branch adds an **optional, unmounted SDK draft adapter** sharing the curated public evidence, while the working onsite and MCP experiences remain unpaid.
+
+The adapter requires explicit approval, a verified subject from the existing auth boundary, an atomic durable shared token ledger, and an explicitly supplied OpenAI client with retries disabled. It reserves a conservative worst-case token budget before importing or calling the SDK, allows one turn, caps output at 512 tokens, disables tracing, times out after 20 seconds, and provides no tools or handoffs. Failures and cancellation retain their reservations; storage errors deny dispatch. Authentication alone cannot unlock spending. Generated SDK text is a review draft; source passages remain authoritative.
+
+No SDK dependency or provider client/credentials was added, and no live SDK/model call occurred. Tests mock the SDK. Before activation, Jordan must approve the new runtime dependency/provider configuration; implementation must add and verify atomic daily global and per-subject reservations across instances/restarts, enforce the existing verified-email boundary, and qualify real provider billing and limits. No public route currently enables this adapter.
+
+Email-gated rich demos and coding-agent sessions remain unavailable scaffolding. No new authentication flow is claimed implemented or tested.
 
 ## Verification
 
-Focused backend tests: 22 passed. Focused frontend tests: 4 passed. Backend Ruff, frontend focused ESLint and full TypeScript checks passed.
+Final integrated local qualification passed against source commit `3ac6f5b409532b280911f061dc591a1a25d5710d`. Logs and browser artifacts are under `.local/` in this review worktree, outside the commit.
 
-The existing official JavaScript MCP SDK client initialized, listed and called the local server against actual curated sources. Local Chromium tested light/dark evidence lookup and links, connect instructions, clipboard outcome, denied richer-demo access, mobile overflow and cancellation. Quota/error UI used synthetic browser responses; backend repetition/quota paths used offline tests. Zero browser page errors. Screenshots and runtime receipt are local in `.local/`.
+Full frontend suite: **96 files / 663 tests passed**; coverage statements **83.48%**, branches **76.8%**, functions **83.23%**, lines **84.87%**. The production build passed.
 
-SDK behavior is **mocked**, including denial on missing approval/identity/ledger, quota exhaustion, ledger failure, default retry rejection and interruption. Authentication is preserved; no new sign-in or email-verification flow is implemented or claimed tested.
+The existing official JavaScript MCP SDK initialized, listed and called the actual mounted application, returning five real sources. Chromium tested the built production bundle in light and dark themes: evidence lookup, source links and skill deep-link dialogs, connector configuration, clipboard outcome, disabled demo access and existing project cards. Mobile width, cancellation and a synthetic quota response passed. **Zero browser page errors.** Actual request repetition/rate exhaustion and source isolation were tested offline in the backend suite. The final browser-only shared-gate job `3867902` exited 0; receipt: `.local/agent-integrated-results.json`; log: `.local/integrated-browser-diagnostic-3.log`; screenshots: `.local/agent-integrated-light.png` and `.local/agent-integrated-dark.png`. The harness was corrected to select assistant articles rather than existing project cards, and to give the cancellation fixture a bounded 2-second delay. No product fix was needed. All own preview servers stopped; ports 8087 and 5203 were clear.
 
-Full frontend lint, type-check and coverage suite: 96 files / 663 tests passed; statements83.48%, branches76.8%, functions83.22%, lines84.87%. Full backend: 1130 passed, 8 skipped, 1 deselected, 44 setup errors caused by absent existing Pi Node dependencies in the fresh worktree. Coverage91.47%; auth surface95%. The Pi package lock exactly matches the reusable local installation, now linked into this worktree. The corrected broad rerun was denied by the shared gate after its bounded wait (exit75); no unchanged retry. Thus the full backend suite is not claimed green. Ruff over all backend passed. Shared code indexing was not refreshed for this branch; an existing graph refresh owner occupied the gate. Docker/Terraform/hosted CI/deployment were not run. Hosted Actions allowance/payment admission is a reported independent risk; no billing, runner or security settings were changed.
+Integrated backend suite: **1,175 passed, 8 skipped, 1 deselected**, coverage **95.22%**; authentication/admin coverage **95%**. Backend Ruff, full frontend lint and TypeScript checks passed. Focused new backend tests: 23; new frontend tests: 4.
 
-All preview servers were stopped. Nothing was pushed, published or deployed.
+The offline tests cover identical onsite/MCP sources, missing evidence, public collection isolation, malformed/oversized/deep JSON, origin/protocol/accept validation, repeated requests and rate exhaustion, cancellation/stale responses, clipboard denial, disabled demo access, missing spending admission, ledger failure/quota exhaustion, disabled retries and interrupted SDK reservations. SDK invocation is mocked. Authentication is preserved; checking unavailable demo access does not begin authentication.
+
+Dependencies were reused locally without installation or lock changes. Tests use Python 3.12 and existing Node 24.20.0; the repository's expected Node runtime is 22. The reusable Pi package lock exactly matches this checkout.
+
+Docker, Terraform, hosted CI, live provider billing and deployment are outside these local checks. Hosted Actions billing/admission is an independent reported concern; no runner, billing or security settings were changed. Source indexing coverage for the new worktree remains a separate coordination item and is not claimed refreshed.
 
 ## Official references
 
