@@ -105,14 +105,16 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         )}
 
         <div className="project-modal-actions">
-          <a
-            href={project.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="visit-website-btn"
-          >
-            {project.link_label || 'View project'}
-          </a>
+          {project.link && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="visit-website-btn"
+            >
+              {project.link_label || 'View project'}
+            </a>
+          )}
           {project.link2 && (
             <a
               href={project.link2}

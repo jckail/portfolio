@@ -2,7 +2,7 @@ export interface Project {
   title: string;
   description: string;
   description_detail: string;
-  link: string;
+  link?: string | null;
   link2?: string;
   link2_label?: string;
   logoPath?: string;
