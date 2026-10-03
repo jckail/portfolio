@@ -5,6 +5,7 @@ import { useDeepLink } from '../../../shared/hooks/use-deep-link';
 import { getOwn } from '../../../shared/utils/lookup';
 import { skillSearchText } from '../../../shared/utils/skills';
 import SkillIcon from '../../../shared/components/skill-icon/SkillIcon';
+import { DataError } from '../../../shared/components/data-error';
 import { useSkill } from './skills/hooks/useSkill';
 import { SkillModalHost, prefetchSkillModal as prefetchModal } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
@@ -150,7 +151,7 @@ const TechnicalSkills: React.FC = () => {
       };
     }, [skillsData, normalizedQuery, activeCategory]);
 
-  if (error) return <div className="error-message">Error: {error}</div>;
+  if (error) return <DataError what="the skills section" />;
 
   if (isLoading || !skillsData) {
     return <SectionPlaceholder id="skills" />;
