@@ -170,3 +170,26 @@ def test_project_titles_have_no_stray_whitespace():
     projects = get_all_models()["projects"].root
     for key, project in projects.items():
         assert project.title == project.title.strip(), f"{key} title has stray whitespace"
+
+
+def test_project_without_public_links_is_valid():
+    from backend.app.models.projects import ProjectDetail
+
+    project = ProjectDetail(
+        title="Unreleased project",
+        description="Public app access is not available yet.",
+        description_detail="In development.",
+        logoPath="",
+        last_commit="",
+    )
+    assert project.link is None
+    assert project.link2 is None
+
+
+def test_opendatacenter_has_details_without_unavailable_public_links():
+    from backend.app.models import load_projects
+
+    project = load_projects().root["opendatacenter"]
+    assert project.title == "OpenDataCenter"
+    assert "not available yet" in project.description
+    assert project.link is None and project.link2 is None

@@ -54,3 +54,19 @@ describe('ProjectModal secondary link label', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 });
+
+
+it('keeps unlinked projects readable without an unavailable external button', () => {
+  renderModal({ ...base, link: null, description_detail: 'Public app access is not available yet.' });
+  expect(screen.getByText('Public app access is not available yet.')).toBeTruthy();
+  expect(screen.queryByRole('link')).toBeNull();
+  expect(screen.queryByRole('link', { name: 'View project' })).toBeNull();
+});
+
+
+it('preserves a secondary-only project action and its honest label', () => {
+  renderModal({ ...base, link: undefined, link2: 'https://example.com/earlier', link2_label: 'Earlier version' });
+  expect(screen.queryByRole('link', { name: 'View project' })).toBeNull();
+  expect(screen.getAllByRole('link')).toHaveLength(1);
+  expect(screen.getByRole('link', { name: 'Earlier version' }).getAttribute('href')).toBe('https://example.com/earlier');
+});

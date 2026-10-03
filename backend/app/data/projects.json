@@ -91,6 +91,14 @@
         ],
         "last_commit": "October 2026"
     },
+    "opendatacenter": {
+        "title": "OpenDataCenter",
+        "description": "In development. Public app access is not available yet.",
+        "description_detail": "OpenDataCenter is in development. A public app link will be added when access is available.",
+        "logoPath": "",
+        "tech_stack": [],
+        "last_commit": ""
+    },
     "pointup": {
         "title": "PointUp",
         "description": "Track airline miles, hotel points, and credit card rewards in one place. A TypeScript monorepo with a Next.js web app, PostgreSQL, Clerk accounts, and an AWS Bedrock Claude assistant.",

@@ -233,10 +233,11 @@ def snapshot_html() -> bytes:
         parts.append(f"<h3>{escape(project.title.strip())}</h3>")
         parts.append(f"<p>{escape(project.description)}</p>")
         parts.append(f"<p>{escape(project.description_detail)}</p>")
-        links = [_a(str(project.link), "Project link")]
+        links = [_a(str(project.link), project.link_label)] if project.link else []
         if project.link2:
-            links.append(_a(str(project.link2), "Live site"))
-        parts.append("<p>" + " | ".join(links) + "</p>")
+            links.append(_a(str(project.link2), project.link2_label))
+        if links:
+            parts.append("<p>" + " | ".join(links) + "</p>")
         if project.tech_stack:
             parts.append(f"<p>Technologies: {escape(', '.join(project.tech_stack))}</p>")
         parts.append("</article>")
@@ -392,7 +393,8 @@ def llms_txt() -> bytes:
         lines.append(f"- {name}: {job.title}, {job.date}, {job.location}")
     lines += ["", "## Projects", ""]
     for project in load_projects().root.values():
-        lines.append(f"- [{project.title.strip()}]({project.link}): {project.description}")
+        name = f"[{project.title.strip()}]({project.link})" if project.link else project.title.strip()
+        lines.append(f"- {name}: {project.description}")
     lines += ["", *_demo_lines(), "## Profiles", ""]
     for network, _, url in _profiles():
         lines.append(f"- [{network}]({url})")
@@ -432,7 +434,11 @@ def llms_full_txt() -> bytes:
     lines += ["## Projects", ""]
     for project in load_projects().root.values():
         lines += [f"### {project.title.strip()}", "", project.description, "", project.description_detail, ""]
-        lines.append(f"Link: {project.link}" + (f" | Live: {project.link2}" if project.link2 else ""))
+        links = [f"{project.link_label}: {project.link}"] if project.link else []
+        if project.link2:
+            links.append(f"{project.link2_label}: {project.link2}")
+        if links:
+            lines.append(" | ".join(links))
         if project.tech_stack:
             lines.append(f"Technologies: {', '.join(project.tech_stack)}")
         lines.append("")
@@ -489,7 +495,7 @@ def resume_json() -> bytes:
                 "description": project.description,
                 "highlights": [project.description_detail],
                 "keywords": list(project.tech_stack),
-                "url": str(project.link),
+                **({"url": str(project.link)} if project.link else {}),
             }
         )
 
