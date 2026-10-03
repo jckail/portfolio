@@ -56,6 +56,8 @@ RUN pip install --no-cache-dir --upgrade "pip>=25" "setuptools>=78.1.1" "wheel>=
 
 # Copy the backend code
 COPY backend /app/backend/
+# Only this reviewed fictional package; never an ODC application or data tree.
+COPY static-demos/opendatacenter/ /app/opendatacenter-demo/
 # Public synthetic catalog must remain readable by the nonroot runtime user.
 COPY --chmod=644 backend/app/data/dataplayground.json /app/backend/app/data/dataplayground.json
 

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "fictional-offline-demo",
+  "source_repository": "jckail/opendatacenter",
+  "source_base_commit": "38480d96b1f43d95790f6e66365029cf71b5c955",
+  "source_composite_sha256": "4970ef35c2c3e51a5804d0d5522a0564d69bd237ac2832bc260cf339e4704442",
+  "source_committed": false,
+  "canonical_path": "/opendatacenter/",
+  "files": {
+    "index.html": {
+      "sha256": "45c99c35317b83a8602a351034494a78e5842ab2fb91219b7455b8147661641f",
+      "bytes": 5636,
+      "mime_type": "text/html; charset=utf-8"
+    },
+    "styles.css": {
+      "sha256": "7efb437bcadf9dd771a88460987bbc9cdb9b94ecf6250fbd668f8c35bb846984",
+      "bytes": 7468,
+      "mime_type": "text/css; charset=utf-8"
+    },
+    "app.js": {
+      "sha256": "00d001d4e361c0079a1c07bab37a952cf8d78d8528095f9ccdc77579c5c63b25",
+      "bytes": 9734,
+      "mime_type": "text/javascript; charset=utf-8"
+    }
+  },
+  "public_files": [
+    "index.html",
+    "styles.css",
+    "app.js"
+  ],
+  "manifest_public": false,
+  "real_atlas_data": false,
+  "requires_database": false,
+  "source_review_receipt": "odc-offline-synthetic-demo-review-20261002.json",
+  "node_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "browser_qualified": false,
+  "portfolio_route_qualified": false,
+  "release_authorized": false
+}

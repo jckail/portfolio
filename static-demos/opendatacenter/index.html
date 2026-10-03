@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An offline OpenDataCenter interface demo with entirely fictional records.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>OpenDataCenter — synthetic demo</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to fictional records</a>
+  <header class="site-header">
+    <a class="wordmark" href="./" aria-label="OpenDataCenter demo home">OpenDataCenter<span>Discovery / demo</span></a>
+    <nav aria-label="Demo views">
+      <button id="explore-view" type="button" aria-pressed="true">Explore examples</button>
+      <button id="saved-view" type="button" aria-pressed="false">Saved <span id="saved-count">0</span></button>
+    </nav>
+  </header>
+  <div class="demo-notice"><strong>Synthetic demo — fictional records, no live atlas data</strong><span>No real sites, capacity, installations or citations are represented.</span></div>
+  <main id="main" tabindex="-1">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">A research interface, illustrated</p><h1 id="page-title">Explore with uncertainty<br class="desktop-break"> in plain sight.</h1><p class="lede">Try searching, inspecting a record and saving a shortlist. These six examples are invented for this demo; missing measurements stay unknown.</p></div>
+      <aside class="scope-note" aria-label="Demo scope"><span class="eyebrow">What's included</span><strong>6 fictional sites</strong><p>Local filters and a browser-only shortlist.<br>No accounts, maps or live data services.</p><a href="#about">How this demo works</a></aside>
+    </section>
+    <section class="explorer" aria-labelledby="results-title">
+      <form id="filters" role="search" aria-label="Filter fictional records">
+        <label class="search-field" for="query">Search examples<input id="query" type="search" placeholder="Name, fictional region or description" maxlength="200" autocomplete="off"></label>
+        <label for="status">Fictional status<select id="status"><option value="all">All statuses</option><option value="concept">Concept</option><option value="operating">Operating (fictional)</option><option value="review">Under review</option></select></label>
+        <label for="category">Category<select id="category"><option value="all">All categories</option><option value="campus">Campus</option><option value="edge">Edge site</option><option value="lab">Research lab</option></select></label>
+        <button id="reset" type="button" class="quiet">Reset filters</button>
+      </form>
+      <div class="results-header"><div><h2 id="results-title">Fictional site directory</h2><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p></div><span class="legend">Unknown is not zero</span></div>
+      <p id="storage-note" class="storage-note" role="status" aria-live="polite">Saved examples stay in this browser, separate from the atlas.</p>
+      <ul id="records" class="records" aria-label="Fictional sites"></ul>
+      <div id="empty" class="empty" hidden><h3 id="empty-title">No examples match</h3><p id="empty-description">Try another search or reset the filters.</p><button id="empty-reset" type="button">Reset filters</button></div>
+    </section>
+    <section class="about" id="about" aria-labelledby="about-title"><div><p class="eyebrow">An honest boundary</p><h2 id="about-title">A demo of the interface.<br>No claims about the world.</h2></div><div><p>All names, regional labels, categories and statuses here were authored as fictional examples. Capacity and coordinates are unknown. There are no supporting source documents or citations to inspect.</p><p>Your shortlist uses a separate demo storage key on this browser. If browser storage is unavailable, it still works until you leave this page. Nothing is sent to a server.</p></div></section>
+  </main>
+  <footer><span>OpenDataCenter / synthetic demo</span><span>Live atlas, API, MCP and sign-in are not enabled.</span></footer>
+  <dialog id="evidence-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-notice">
+    <div class="dialog-top"><span class="eyebrow">Fictional record</span><form method="dialog"><button type="submit" aria-label="Close fictional record">Close</button></form></div>
+    <h2 id="dialog-title" tabindex="-1"></h2>
+    <p id="dialog-notice" class="dialog-notice"><strong>Synthetic demo — fictional records, no live atlas data.</strong> This record is an authored interface example, not a real facility.</p>
+    <p id="dialog-description"></p>
+    <dl id="dialog-facts" class="dialog-facts"></dl>
+    <section class="provenance" aria-labelledby="provenance-title"><h3 id="provenance-title">What supports this example?</h3><p>Only the fictional demo fixture included with this page. No evidence was gathered, reviewed or verified. There are no source documents, real-world citations or reported measurements.</p><p>Unknown capacity does not mean zero capacity. No equipment installation, manufacturing origin or precise location can be inferred.</p></section>
+    <div class="dialog-actions"><button id="dialog-save" type="button" aria-pressed="false">Save example</button><span id="dialog-save-state" role="status" aria-live="polite"></span></div>
+  </dialog>
+  <noscript><p class="noscript">This demo uses JavaScript for local filtering and saving. All examples are fictional; no live atlas data is included.</p></noscript>
+</body>
+</html>
