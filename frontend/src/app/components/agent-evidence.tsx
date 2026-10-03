@@ -72,7 +72,7 @@ export default function AgentEvidence() {
   };
 
   return (
-    <section className="agent-evidence" aria-labelledby="agent-evidence-heading">
+    <section id="agent-evidence" className="agent-evidence" aria-labelledby="agent-evidence-heading">
       <h2 id="agent-evidence-heading">Ask about my work</h2>
       <p>Explore public project and resume evidence, with source links for every match.</p>
       <form onSubmit={event => { event.preventDefault(); void search(query); }}>

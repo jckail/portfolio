@@ -101,3 +101,32 @@
     height: 2.75rem;
   }
 }
+
+/* A small entry point to the public evidence assistant, using existing tokens. */
+.agent-entry-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--accent-text);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.agent-entry-link:hover { border-color: var(--accent-text); }
+.agent-entry-link:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.agent-entry-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.agent-entry-short { display: none; }
+@media (max-width: 480px) {
+  .nav-right { gap: var(--spacing-sm); }
+  .agent-entry-link { padding: 8px 10px; gap: 6px; font-size: 12px; }
+  .agent-entry-label { display: none; }
+  .agent-entry-short { display: inline; }
+}

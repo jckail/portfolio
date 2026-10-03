@@ -105,6 +105,12 @@ const Header: React.FC = memo(() => {
             </div>
           </div>
           <div className="nav-right">
+            <a className="agent-entry-link" href="#agent-evidence" onClick={handleCloseSidePanel} aria-label="Ask my portfolio">
+              <span className="agent-entry-dot" aria-hidden="true" />
+              <span className="agent-entry-label">Ask my portfolio</span>
+              <span className="agent-entry-short">Ask</span>
+              <span aria-hidden="true">↓</span>
+            </a>
             {!isToggleHidden && (
               <button
                 type="button"

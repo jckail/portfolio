@@ -128,6 +128,16 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
         className={`side-panel ${isOpen ? 'open' : ''}`}
       >
         <div className="side-panel-content">
+          <button
+            type="button"
+            aria-label="Ask my portfolio"
+            aria-current={currentSection === 'agent-evidence' ? 'location' : undefined}
+            onClick={() => handleNavClick('agent-evidence')}
+            className={`nav-item nav-agent ${currentSection === 'agent-evidence' ? 'active' : ''}`}
+          >
+            <span>Ask my portfolio</span>
+            <span className="nav-agent-caption">Public sources + connect your assistant</span>
+          </button>
           {sections.map((section) => (
             <button
               key={section.id}
