@@ -64,9 +64,20 @@ const $=id=>document.getElementById(id);
 $('header-name').textContent=data.name;$('name').textContent=data.name;$('greeting').textContent=data.greeting;
 $('role').textContent=data.role;$('description').textContent=data.description;$('bio').textContent=data.bio;
 for(const project of data.projects){const card=document.createElement('article');card.className='project';const h=document.createElement('h3');h.textContent=project.title;const p=document.createElement('p');p.textContent=project.description;const a=document.createElement('a');a.href=project.url;a.textContent='View project →';card.append(h,p,a);$('projects-list').append(card);}
-function setDrawer(open){$('drawer').classList.toggle('open',open);$('scrim').classList.toggle('open',open);$('menu').setAttribute('aria-expanded',String(open));if(open)$('drawer').querySelector('button:not([hidden])').focus();}
+function drawerItems(){return [...$('drawer').querySelectorAll('button')].filter(item=>item.offsetParent!==null);}
+function setDrawer(open){const wasOpen=$('drawer').classList.contains('open');$('drawer').classList.toggle('open',open);$('drawer').toggleAttribute('inert',!open);$('scrim').classList.toggle('open',open);$('menu').setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':'';if(open)drawerItems()[0]?.focus();else if(wasOpen)$('menu').focus();}
 $('menu').onclick=()=>setDrawer(!$('drawer').classList.contains('open'));$('scrim').onclick=()=>setDrawer(false);
-document.addEventListener('keydown',event=>{if(event.key==='Escape'){setDrawer(false);$('menu').focus();}});
+document.addEventListener('keydown',event=>{
+ if(!$('drawer').classList.contains('open'))return;
+ if(event.key==='Escape'){event.preventDefault();setDrawer(false);return;}
+ if(event.key!=='Tab')return;
+ const items=drawerItems(),first=items[0],last=items.at(-1);
+ if(!first)return;
+ if(!items.includes(document.activeElement)){event.preventDefault();(event.shiftKey?last:first).focus();}
+ else if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+ else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+});
+setDrawer(false);
 $('drawer').onclick=event=>{const button=event.target.closest('[data-target]');if(!button)return;const target=$(button.dataset.target);setDrawer(false);if(target){target.scrollIntoView();history.replaceState(null,'','#'+button.dataset.target);}};
 document.querySelector('.agent-link').onclick=()=>setDrawer(false);
 $('theme').onclick=()=>{const light=document.documentElement.dataset.theme!=='light';document.documentElement.dataset.theme=light?'light':'dark';$('theme').setAttribute('aria-label','Switch to '+(light?'dark':'light')+' mode');$('theme').innerHTML=light?"<svg\n    width=\"24\"\n    height=\"24\"\n    viewBox=\"-6 -6 36 36\"\n    fill=\"currentColor\"\n    stroke=\"none\"\n    stroke-width=\"2\"\n    stroke-linecap=\"round\"\n    stroke-linejoin=\"round\"\n  >\n    <path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\" />\n  </svg>":"<svg\n    width=\"24\"\n    height=\"24\"\n    viewBox=\"-6 -6 36 36\"\n    fill=\"none\"\n    stroke=\"currentColor\"\n    stroke-width=\"1.5\"\n    stroke-linecap=\"round\"\n    stroke-linejoin=\"round\"\n  >\n    <circle cx=\"12\" cy=\"12\" r=\"5\" />\n    <line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" />\n    <line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" />\n    <line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" />\n    <line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" />\n    <line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" />\n    <line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" />\n    <line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\" />\n    <line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\" />\n  </svg>";};
@@ -75,4 +86,8 @@ function search(query){$('question').value=query;$('answer').replaceChildren();c
 $('question-form').onsubmit=event=>{event.preventDefault();search($('question').value);};
 for(const button of document.querySelectorAll('[data-query]'))button.onclick=()=>search(button.dataset.query);
 $('connect').onclick=()=>{const open=$('connection').hidden;$('connection').hidden=!open;$('connect').setAttribute('aria-expanded',String(open));};
+const preview=new URLSearchParams(location.search);
+const placement=preview.get('placement');
+if(['header','sidebar','both'].includes(placement))document.querySelector('.preview-controls button[data-placement="'+placement+'"]').click();
+if(preview.get('theme')==='light')$('theme').click();
 </script></body></html>
