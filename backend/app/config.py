@@ -81,6 +81,13 @@ class Settings:
     trust_forwarded_for: bool
     trusted_proxy_hops: int
 
+    # Fictional static demo only; real atlas proxy remains separately gated.
+    opendatacenter_synthetic_demo: bool = False
+
+    def __post_init__(self) -> None:
+        if self.opendatacenter_synthetic_demo and self.opendatacenter_upstream_url:
+            raise ValueError("Synthetic demo and atlas upstream are mutually exclusive")
+
     # Observability (defaulted so a Settings built by hand in a test still works)
     gcp_project_id: str = "portfolio-383615"
     service_name: str = "quickresume"
@@ -139,6 +146,13 @@ def _parse_bool(raw: str) -> bool:
     return raw.lower() in ("1", "true", "yes")
 
 
+def _parse_demo_flag(raw: str) -> bool:
+    value = raw.strip().lower()
+    if value not in ("", "0", "false", "no", "1", "true", "yes"):
+        raise ValueError("OPENDATACENTER_SYNTHETIC_DEMO must be a boolean")
+    return value in ("1", "true", "yes")
+
+
 def _forwarded_for_trust(on_cloud_run: bool) -> bool:
     """Whether X-Forwarded-For can be used to identify the client.
 
@@ -190,6 +204,7 @@ def get_settings() -> Settings:
         git_commit=os.getenv("GIT_COMMIT", ""),
         dev_mode=_parse_bool(os.getenv("DEV_MODE", "")),
         opendatacenter_upstream_url=os.getenv("OPENDATACENTER_UPSTREAM_URL", ""),
+        opendatacenter_synthetic_demo=_parse_demo_flag(os.getenv("OPENDATACENTER_SYNTHETIC_DEMO", "")),
         gcp_project_id=os.getenv("GCP_PROJECT_ID", "").strip() or "portfolio-383615",
         service_name=os.getenv("K_SERVICE", "").strip() or "quickresume",
         access_log_enabled=_parse_bool(os.getenv("ACCESS_LOG", "true")),

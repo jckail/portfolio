@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 
 import '../../../../styles/components/modal.css';
 import { DialogShell } from '../../../../shared/components/dialog-shell';
@@ -6,8 +6,11 @@ import { trackContactOpened, trackContactMessage } from '../../../../shared/util
 import { postJson, endpoints } from '../../../../shared/utils/api';
 import {
   CONTACT_DRAFT_EVENT,
+  CONTACT_SUBJECT_LIMIT,
+  captureContactDraft,
   clearContactDraft,
   loadContactDraft,
+  normalizeContactDraft,
   type ContactDraft,
 } from '../../../../shared/utils/contact-draft';
 import PhoneReveal from './PhoneReveal';
@@ -23,7 +26,7 @@ interface ContactModalProps {
 // (EmailStr itself rejects addresses over 254 characters).
 const CONTACT_LIMITS = {
   from_email: 254,
-  subject: 150,
+  subject: CONTACT_SUBJECT_LIMIT,
   message: 5000,
 } as const;
 
@@ -34,6 +37,7 @@ const DEFAULT_FORM = {
 };
 
 function mergeDraft(draft: ContactDraft | null) {
+  draft = normalizeContactDraft(draft);
   if (!draft) return { ...DEFAULT_FORM };
   return {
     from_email: draft.from_email ?? DEFAULT_FORM.from_email,
@@ -51,18 +55,30 @@ const ContactModal: React.FC<ContactModalProps> = ({
   const [formData, setFormData] = useState(() => mergeDraft(loadContactDraft()));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState<'sent' | 'draft-kept' | null>(null);
+  const revision = useRef(0);
+  const pending = useRef(false);
+  const session = useRef({ mounted: false, generation: 0 });
   const [fromAssistant, setFromAssistant] = useState(() => Boolean(loadContactDraft()));
 
   // URL sync (?contact=open and back-button behavior) is owned entirely by
   // the useContact hook; this modal only reports analytics.
   useEffect(() => {
+    const activeSession = session.current;
+    activeSession.mounted = true;
+    activeSession.generation += 1;
     trackContactOpened();
+    return () => {
+      activeSession.mounted = false;
+      activeSession.generation += 1;
+    };
   }, []);
 
   useEffect(() => {
     const onDraft = (event: Event) => {
       const detail = (event as CustomEvent<ContactDraft>).detail;
+      revision.current += 1;
+      setSuccess(null);
       setFormData(mergeDraft(detail ?? null));
       setFromAssistant(true);
     };
@@ -74,6 +90,8 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    revision.current += 1;
+    setSuccess(null);
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -82,24 +100,38 @@ const ContactModal: React.FC<ContactModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pending.current) return;
+    pending.current = true;
+    const submitted = Object.freeze({ ...formData });
+    const submittedRevision = revision.current;
+    const submittedSession = session.current.generation;
+    const storedDraft = captureContactDraft();
+    const isCurrentSession = () => session.current.mounted &&
+      session.current.generation === submittedSession;
     setIsLoading(true);
     setError(null);
-    setSuccess(false);
+    setSuccess(null);
 
     try {
-      await postJson(endpoints.sendEmail, formData);
+      await postJson(endpoints.sendEmail, submitted);
+      trackContactMessage(submitted.message.length);
+      if (!isCurrentSession()) return;
 
-      // Track successful message submission
-      trackContactMessage(formData.message.length);
-
-      setSuccess(true);
-      clearContactDraft();
-      setFromAssistant(false);
-      setFormData({ ...DEFAULT_FORM });
+      if (revision.current === submittedRevision) {
+        clearContactDraft(storedDraft);
+        setFromAssistant(false);
+        setFormData({ ...DEFAULT_FORM });
+        setSuccess('sent');
+      } else {
+        setSuccess('draft-kept');
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      if (isCurrentSession()) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
     } finally {
-      setIsLoading(false);
+      pending.current = false;
+      if (isCurrentSession()) setIsLoading(false);
     }
   };
 
@@ -178,7 +210,11 @@ const ContactModal: React.FC<ContactModalProps> = ({
             </div>
 
             {error && <div className="contact-error-message" role="alert">{error}</div>}
-            {success && <div className="contact-success-message" role="status">Message sent successfully!</div>}
+            {success && <div className="contact-success-message" role="status">
+              {success === 'draft-kept'
+                ? 'Your earlier message was sent. Your current draft has been kept.'
+                : 'Message sent successfully!'}
+            </div>}
 
             <button
               type="submit"

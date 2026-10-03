@@ -27,6 +27,11 @@ NEVER_CACHE_PREFIXES = ("/api/health", "/api/dataplayground/runtime", "/api/data
 UNHASHED_SCRIPTS = frozenset({"/ga-init.js"})
 ATLAS_PREFIX = "/opendatacenter"
 ATLAS_MAP_CONNECT = "https://demotiles.maplibre.org"
+DEMO_CSP = (
+    "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; "
+    "font-src 'self'; connect-src 'none'; worker-src 'none'; object-src 'none'; "
+    "base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'"
+)
 
 # A client-supplied X-Request-ID is echoed in the response and stamped on
 # every log line, so only accept short, boring values; anything else gets a
@@ -160,6 +165,7 @@ class ResponseHeadersMiddleware:
 
     def __init__(self, app: ASGIApp, settings: Settings) -> None:
         self.app = app
+        self.synthetic_demo = settings.opendatacenter_synthetic_demo
         self.csp_default = build_csp(settings)
         self.csp_frameable = build_csp(settings, "'self'")
         self.csp_atlas = build_csp(settings, extra_connect=f" {ATLAS_MAP_CONNECT}")
@@ -183,7 +189,9 @@ class ResponseHeadersMiddleware:
             if message["type"] == "http.response.start":
                 headers = MutableHeaders(scope=message)
                 headers["X-Request-ID"] = request_id
-                if path.startswith(ATLAS_PREFIX + "/v1/") or path.startswith(ATLAS_PREFIX + "/mcp"):
+                if self.synthetic_demo and (path == ATLAS_PREFIX or path.startswith(ATLAS_PREFIX + "/")):
+                    headers["Cache-Control"] = "no-cache" if message["status"] in (200, 308) else "no-store"
+                elif path.startswith(ATLAS_PREFIX + "/v1/") or path.startswith(ATLAS_PREFIX + "/mcp"):
                     headers["Cache-Control"] = "no-store"
                 elif path.startswith(ATLAS_PREFIX + "/assets/") and message["status"] not in (200, 304):
                     headers["Cache-Control"] = "no-store"
@@ -197,7 +205,8 @@ class ResponseHeadersMiddleware:
                     headers[name] = value
                 headers["X-Frame-Options"] = "SAMEORIGIN" if frameable else "DENY"
                 headers["Content-Security-Policy"] = (
-                    self.csp_frameable if frameable else self.csp_atlas
+                    DEMO_CSP if self.synthetic_demo and (path == ATLAS_PREFIX or path.startswith(ATLAS_PREFIX + "/"))
+                    else self.csp_frameable if frameable else self.csp_atlas
                     if path == ATLAS_PREFIX or path.startswith(ATLAS_PREFIX + "/")
                     else self.csp_default
                 )

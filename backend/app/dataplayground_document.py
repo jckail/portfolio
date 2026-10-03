@@ -60,13 +60,16 @@ def render_document(html: bytes) -> bytes:
         "isPartOf": {"@id": f"{CANONICAL_ORIGIN}/#website"},
     }
     body = inject_jsonld(text.encode("utf-8"), script_safe(json.dumps(graph).encode("utf-8")))
+    source_link = (
+        f'<a href="{escape(str(project.link), quote=True)}">Source and reproduction instructions</a> · '
+        if project.link else ""
+    )
     snapshot = (
         f'<main id="{SNAPSHOT_ID}" class="{SNAPSHOT_ID}">'
         f"<h1>{escape(name)}</h1><p>{escape(description)}</p>"
         f"<p>{escape(project.description_detail)}</p>"
         "<p>All data is synthetic. Enable JavaScript to compare reproducible scenarios, "
         "inspect quality checks, and trace metrics to events and SQL.</p>"
-        f'<p><a href="{escape(str(project.link), quote=True)}">Source and reproduction instructions</a>'
-        ' · <a href="/">Back to portfolio</a></p></main>'
+        f'<p>{source_link}<a href="/">Back to portfolio</a></p></main>'
     )
     return inject_root_content(body, snapshot.encode("utf-8"))

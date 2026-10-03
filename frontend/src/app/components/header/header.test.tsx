@@ -53,7 +53,7 @@ describe('Side panel focus', () => {
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
     expect(nav()).not.toHaveAttribute('inert');
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'About' }));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ask my portfolio' }));
 
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -66,7 +66,7 @@ describe('Side panel focus', () => {
     const toggle = screen.getByRole('button', { name: 'Toggle navigation menu' });
     fireEvent.click(toggle);
     const item = screen.getByRole('button', { name: 'Projects' });
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'About' }));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ask my portfolio' }));
     item.focus();
     fireEvent.click(item);
     expect(nav()).toHaveAttribute('inert');
@@ -93,4 +93,9 @@ describe('Theme toggle', () => {
     renderHeader();
     expect(screen.queryByRole('button', { name: /^Switch to/ })).toBeNull();
   });
+});
+
+it('links the header cue directly to public agent evidence', () => {
+  renderHeader();
+  expect(screen.getByRole('link', { name: 'Ask my portfolio' })).toHaveAttribute('href', '#agent-evidence');
 });
