@@ -51,6 +51,9 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     };
     const onFocusOut = (event: FocusEvent) => {
       if (!isTopDialog(id) || !(event.target instanceof Node) || !node.contains(event.target)) return;
+      // Native Tab focusout can expose BODY before the pending control becomes
+      // active. Its relatedTarget already proves focus is staying in this dialog.
+      if (event.relatedTarget instanceof Node && node.contains(event.relatedTarget)) return;
       // History navigation can move focus to the body without a Tab key. Wait
       // for the destination, and never reclaim focus after teardown or stacking.
       queueMicrotask(() => {

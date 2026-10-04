@@ -14,6 +14,7 @@ from .middleware.access_log import AccessLogMiddleware
 from .middleware.canonical_host import CanonicalHostMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
 from .middleware.response_headers import ResponseHeadersMiddleware
+from .opendatacenter_proxy import load_synthetic_demo
 from .opendatacenter_proxy import router as opendatacenter_router
 from .services.dataplayground_runtime import close_cached_runtime
 from .spa import SPAStaticFiles
@@ -45,6 +46,8 @@ FRONTEND_DIST = os.path.abspath(os.path.join(APP_DIR, "..", "..", "frontend", "d
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown."""
     logger.info("Starting up the application...")
+
+    app.state.opendatacenter_demo = await asyncio.to_thread(load_synthetic_demo, settings)
 
     # Start shipping buffered logs to Supabase now that the event loop exists
     supabase_handler = get_supabase_handler()

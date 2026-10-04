@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from .admin_routes import router as admin_router
+from .assistant_evidence_routes import router as assistant_evidence_router
 from .chat_routes import router as chat_router
 from .chat_routes import status_router as chat_status_router
 from .contact_routes import router as contact_router
@@ -13,6 +14,7 @@ from .events_routes import router as events_router
 from .health_routes import router as health_router
 from .labs_routes import forwards_router
 from .labs_routes import router as labs_router
+from .public_mcp_routes import router as public_mcp_router
 from .resume_routes import router as resume_router
 from .telemetry_routes import router as telemetry_router
 from .zuni_routes import router as zuni_router
@@ -20,6 +22,8 @@ from .zuni_routes import router as zuni_router
 # Every public HTTP route lives under /api. Route paths do not overlap, so
 # inclusion order only sets the order of the (dev-only) OpenAPI listing.
 api_router = APIRouter(prefix="/api")
+api_router.include_router(assistant_evidence_router)
+api_router.include_router(public_mcp_router)
 api_router.include_router(dataplayground_router)
 api_router.include_router(dataplayground_runtime_router)
 api_router.include_router(labs_router)

@@ -25,7 +25,7 @@
         "title": "Super Teacher",
         "description": "A classroom copilot that answers 'who needs me today, and why?' with a ranked needs-attention list, a gradebook, attendance, and a streaming Claude assistant grounded in the class data.",
         "link": "https://github.com/jckail/superteacher",
-        "link2": "https://www.the-super-teacher.com/",
+        "link2": "https://www.jckail.com/superteacher/",
         "description_detail": "Super Teacher is a classroom copilot for teachers. A Today view ranks the students who need attention with plain-language reasons; a roster, gradebook, and one-tap attendance feed the same computed averages, trends, and risk, so every screen agrees. Reports cover per-assignment class statistics, a CSV gradebook export, and AI-drafted parent updates the teacher edits before sending. An Ask AI chat streams from Claude with tools that query the real roster data, and per-student insight cards fall back to rule-based text when no API key is set. Built with a FastAPI backend on SQLAlchemy 2 and SQLite with Alembic migrations, and a React and Vite front end.",
         "logoPath": "super-teacher.svg",
         "tech_stack": [
@@ -90,6 +90,14 @@
             "Anthropic Claude"
         ],
         "last_commit": "October 2026"
+    },
+    "opendatacenter": {
+        "title": "OpenDataCenter",
+        "description": "In development. Public app access is not available yet.",
+        "description_detail": "OpenDataCenter is in development. A public app link will be added when access is available.",
+        "logoPath": "",
+        "tech_stack": [],
+        "last_commit": ""
     },
     "pointup": {
         "title": "PointUp",

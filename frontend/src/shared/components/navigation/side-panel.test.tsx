@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
+import { scrollToSection } from '../../utils/scroll-utils';
 import SidePanel from './side-panel';
 
 vi.mock('../../utils/scroll-utils', () => ({ scrollToSection: vi.fn() }));
@@ -44,7 +45,7 @@ describe('SidePanel focus management', () => {
     expect(nav).toHaveAttribute('inert');
     openDrawer();
     expect(nav).not.toHaveAttribute('inert');
-    expect(document.activeElement).toBe(screen.getByText('About'));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ask my portfolio' }));
   });
 
   it('wraps Tab and Shift+Tab inside the open drawer', () => {
@@ -52,7 +53,7 @@ describe('SidePanel focus management', () => {
     openDrawer();
     screen.getByText('Resume').focus();
     fireEvent.keyDown(document, { key: 'Tab' });
-    expect(document.activeElement).toBe(screen.getByText('About'));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ask my portfolio' }));
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
     expect(document.activeElement).toBe(screen.getByText('Resume'));
   });
@@ -62,7 +63,7 @@ describe('SidePanel focus management', () => {
     openDrawer();
     screen.getByText('outside').focus();
     fireEvent.keyDown(document, { key: 'Tab' });
-    expect(document.activeElement).toBe(screen.getByText('About'));
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ask my portfolio' }));
   });
 
   it('closes on Escape and returns focus to the menu toggle', () => {
@@ -88,4 +89,18 @@ describe('SidePanel current location', () => {
     expect(screen.getByRole('button', { name: 'Projects' })).toHaveAttribute('aria-current', 'location');
     expect(screen.getByRole('button', { name: 'About' })).not.toHaveAttribute('aria-current');
   });
+});
+
+it('opens public agent evidence and closes the drawer', () => {
+  render(<Harness />);
+  const toggle = openDrawer();
+  fireEvent.click(screen.getByRole('button', { name: 'Ask my portfolio' }));
+  expect(scrollToSection).toHaveBeenCalledWith('agent-evidence');
+  expect(document.getElementById('side-panel')).toHaveAttribute('inert');
+  expect(document.activeElement).toBe(toggle);
+});
+it('announces the agent evidence section as current', () => {
+  window.history.replaceState({}, '', '/#agent-evidence');
+  render(<SidePanel isOpen onClose={() => {}} />);
+  expect(screen.getByRole('button', { name: 'Ask my portfolio' })).toHaveAttribute('aria-current', 'location');
 });

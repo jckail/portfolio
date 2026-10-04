@@ -88,7 +88,7 @@ def test_llms_txt_follows_the_convention(client):
     for job in load_experience().root.values():
         assert (f"[{job.company}]" if job.link else f"- {job.company}:") in text
     for project in load_projects().root.values():
-        assert f"[{project.title.strip()}]" in text
+        assert (f"[{project.title.strip()}]" if project.link else f"- {project.title.strip()}:") in text
     # every link target is an absolute http(s) URL
     for target in re.findall(r"\]\(([^)]+)\)", text):
         assert target.startswith("https://"), target
@@ -151,7 +151,9 @@ def test_resume_json_matches_the_json_resume_shape(client):
     assert current["name"] == "Together AI" and "endDate" not in current
 
     for project in doc["projects"]:
-        assert project["name"] and project["url"].startswith("http")
+        assert project["name"]
+        if "url" in project:
+            assert project["url"].startswith("http")
         assert isinstance(project.get("keywords", []), list)
 
     assert doc["skills"] and all(s["name"] and s["keywords"] for s in doc["skills"])
@@ -222,3 +224,55 @@ def test_sabbatical_is_an_explained_gap_not_an_unknown_employer(client):
     assert "None" not in html.split('id="seo-experience"')[1].split("</section>")[0]
     full = client.get("/llms-full.txt").text
     assert "### Digital nomad life, Sabbatical" in full and "10/2022 - 05/2023 | Location independent\n" in full
+
+
+@pytest.mark.parametrize("primary", [{}, {"link": None}])
+def test_unlinked_and_secondary_only_projects_remain_truthful(monkeypatch, primary):
+    import json
+
+    from backend.app.models.projects import ProjectDetail, Projects
+
+    existing = load_projects().root
+    unlinked = ProjectDetail(
+        title="Unreleased synthetic project",
+        description="Synthetic availability description.",
+        description_detail="Public app access is not available yet.",
+        logoPath="",
+        last_commit="",
+        **primary,
+    )
+    secondary = unlinked.model_copy(update={
+        "title": "Synthetic earlier project",
+        "link2": "https://example.com/earlier",
+        "link2_label": "Earlier version",
+    })
+    projects = Projects({**existing, "unlinked": unlinked, "secondary": secondary})
+    monkeypatch.setattr(discovery, "load_projects", lambda: projects)
+    html = discovery.snapshot_html.__wrapped__().decode()
+    summary = discovery.llms_txt.__wrapped__().decode()
+    full = discovery.llms_full_txt.__wrapped__().decode()
+    resume = json.loads(discovery.resume_json.__wrapped__())
+    for text in (html, summary, full):
+        assert unlinked.title in text
+        assert unlinked.description in text
+        assert "None" not in text
+    assert "href=\"None\"" not in html
+    assert "(None)" not in summary
+    assert 'href="https://example.com/earlier"' in html
+    assert '>Earlier version</a>' in html
+    assert 'Earlier version: https://example.com/earlier' in full
+    assert 'Live site' not in html
+    assert 'Live:' not in full
+    assert unlinked.description_detail in html and unlinked.description_detail in full
+    by_name = {p["name"]: p for p in resume["projects"]}
+    for name in (unlinked.title, secondary.title):
+        assert "url" not in by_name[name]
+        assert by_name[name]["description"] == unlinked.description
+    for project in existing.values():
+        if project.link:
+            assert by_name[project.title.strip()]["url"] == str(project.link)
+            assert str(project.link) in html
+            assert f"({project.link})" in summary
+        else:
+            assert "url" not in by_name[project.title.strip()]
+            assert f"- {project.title.strip()}:" in summary
