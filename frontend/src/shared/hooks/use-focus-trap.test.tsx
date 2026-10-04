@@ -88,6 +88,27 @@ describe('useFocusTrap escaped focus', () => {
     expect(document.activeElement).toBe(button);
   });
 
+  it('does not reclaim focus during an intra-dialog focus transition', async () => {
+    render(<Dialog name="admin" onClose={() => {}}>
+      <input aria-label="Email" /><input aria-label="Password" />
+    </Dialog>);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    const password = screen.getByRole('textbox', { name: 'Password' });
+    act(() => email.focus());
+    const recoverFocus = vi.spyOn(email, 'focus');
+    // Native focusout can run while activeElement is temporarily BODY. Its
+    // relatedTarget still identifies the pending control inside the dialog.
+    const activeElement = vi.spyOn(document, 'activeElement', 'get')
+      .mockReturnValue(document.body);
+    try {
+      act(() => fireEvent.focusOut(email, { relatedTarget: password }));
+      await act(async () => { await Promise.resolve(); });
+      expect(recoverFocus).not.toHaveBeenCalled();
+    } finally {
+      activeElement.mockRestore();
+    }
+  });
+
   it('does not recover after closing, preserving the page opener', async () => {
     const opener = document.createElement('button');
     document.body.append(opener);
