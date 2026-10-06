@@ -24,6 +24,8 @@ class ExperienceHighlight(BaseModel):
     resume_title: str | None = Field(
         None, description="Title the ATS resume (PDF, text, JSON Resume) uses instead of `title`, e.g. to label a career break"
     )
+    resume_highlights: list[str] | None = Field(None, description="Concise achievements for the generated resume")
+    resume_location: str | None = Field(None, description="Resume location override; empty omits the location")
     photos: list["ExperiencePhoto"] = Field(default_factory=list, description="Optional gallery shown in the role dialog")
 
 

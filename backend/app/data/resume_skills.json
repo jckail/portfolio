@@ -1,0 +1,78 @@
+{
+    "groups": [
+        {
+            "label": "AI & Agent Engineering",
+            "items": [
+                "Agent runtimes & harnesses",
+                "Multi-agent orchestration",
+                "Tool execution & MCP",
+                "Context & memory",
+                "Agent/LLM evaluation",
+                "Tracing & replay",
+                "RAG"
+            ]
+        },
+        {
+            "label": "Software Engineering",
+            "items": [
+                "Python",
+                "SQL",
+                "Go",
+                "Rust",
+                "TypeScript",
+                "API & SDK design",
+                "Distributed systems"
+            ]
+        },
+        {
+            "label": "Agent Tools & Frameworks",
+            "items": [
+                "Claude Code",
+                "Codex",
+                "Cursor",
+                "Pi",
+                "LangChain",
+                "Custom agent frameworks"
+            ]
+        },
+        {
+            "label": "Knowledge & Graph Systems",
+            "items": [
+                "Graphify",
+                "Knowledge graphs",
+                "Graph traversal",
+                "Neo4j",
+                "PostgreSQL",
+                "SQLite",
+                "Vector search"
+            ]
+        },
+        {
+            "label": "Cloud & Platform",
+            "items": [
+                "Kubernetes",
+                "Docker",
+                "Linux",
+                "AWS",
+                "Google Cloud",
+                "Terraform",
+                "OpenTelemetry",
+                "Prometheus"
+            ]
+        },
+        {
+            "label": "Data Infrastructure",
+            "items": [
+                "Kafka",
+                "Flink",
+                "Spark",
+                "Airflow",
+                "dbt",
+                "Iceberg",
+                "Snowflake",
+                "Databricks",
+                "BigQuery"
+            ]
+        }
+    ]
+}

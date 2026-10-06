@@ -40,5 +40,10 @@ describe('About hero heading', () => {
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent('Jordan Kail');
     expect(h1s[0]).toHaveClass('about-name');
+    expect(screen.queryByText('Hi there')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Connect your assistant' })).toHaveAttribute(
+      'href',
+      '/agents.html'
+    );
   });
 });

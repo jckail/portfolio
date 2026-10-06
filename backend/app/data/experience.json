@@ -1,12 +1,12 @@
 {
     "together_ai": {
         "company": "Together AI",
-        "title": "Staff Software Engineer",
+        "title": "Staff Software Engineer, Agent Platform",
         "date": "02/2025 - Present",
         "location": "San Francisco, CA",
         "highlights": [
             "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-            "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
+            "Created the agents platform team after getting the data engineering team off the ground; built the agent harness and internal agents factory to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
             "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
             "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
             "Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship."
@@ -27,7 +27,7 @@
         ],
         "more_highlights": [
             "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-            "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
+            "Created the agents platform team after getting the data engineering team off the ground; built the agent harness and internal agents factory to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
             "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
             "Build tracing, replay, and regression-testing harnesses for LLM agents, giving internal teams a repeatable way to evaluate agentic features before they ship.",
             "Own core data platform services for inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
@@ -35,11 +35,19 @@
             "Design data infrastructure for large-scale training and inference workloads, covering dataset curation, lineage, and quality controls for open-model work.",
             "Partner with research, infrastructure, and product teams to standardize data contracts and lineage for training-data and evaluation workflows.",
             "Mentor engineers and set technical direction for the data platform and agents platform architecture."
+        ],
+        "resume_highlights": [
+            "Created the Agent Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
+            "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+            "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
+            "Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.",
+            "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions.",
+            "Contributed to multiple patent-pending innovations in agent systems."
         ]
     },
     "prove": {
         "company": "Prove Identity",
-        "title": "Staff Software Engineer - Data",
+        "title": "Staff Software Engineer",
         "date": "06/2023 - 01/2025",
         "location": "Denver, CO",
         "highlights": [
@@ -73,32 +81,46 @@
             "Established robust data governance frameworks with Apache Atlas, ensuring full GDPR and SOC2 compliance. Implemented metadata standards, lineage tracking, and access policies, reducing audit preparation times by 30%.",
             "Optimized CI/CD pipelines for Apache Beam and Kubernetes deployments, resolving bottlenecks and reducing deployment times by 30%. Improved release frequency to support faster feature rollouts and iterative development cycles.",
             "Migrated computationally intensive SQL queries from RDS to Spark DataFrames, improving query performance by 70% and reducing compute costs by 30%. Enabled seamless processing of large datasets for business-critical applications."
+        ],
+        "resume_highlights": [
+            "Built agent frameworks and harnesses for statistical model governance in identity verification and fraud resolution.",
+            "Built RAG chatbots with Airflow, LangChain, and OpenAI, automating 150+ hours of manual work per week.",
+            "Led the company-wide migration from Java/Oracle to Go/PostgreSQL, cutting API response times from 40s to 12ms and operating costs by 95%.",
+            "Moved 1,200+ batch jobs to real-time Go, Kafka, and Flink pipelines, reducing data latency from days to seconds."
         ]
     },
     "sabbatical": {
         "company": "Sabbatical",
-        "title": "Digital nomad life",
-        "resume_title": "Career break (digital nomad)",
+        "title": "Digital nomad experiment",
+        "resume_title": "Digital nomad experiment",
         "date": "10/2022 - 05/2023",
         "location": "Location independent",
         "highlights": [
-            "Stepped away from corporate life to live a digital nomad life with my wife."
+            "Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.",
+            "Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.",
+            "Traveled through Europe, spent time with family members in need, and relocated back to Denver from California."
         ],
-        "company_description": "A deliberate career break between Meta and Prove Identity: time away from corporate life, spent living a digital nomad life with my wife.",
+        "company_description": "Made up for lost time during COVID-19 by exploring the world, chasing outdoor adventures, and spending time with family.",
         "tech_stack": [],
         "more_highlights": [
-            "Took time away from corporate life after Meta.",
-            "Lived a digital nomad life with my wife.",
-            "Returned to full-time work at Prove Identity."
+            "Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.",
+            "Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.",
+            "Traveled through Europe, spent time with family members in need, and relocated back to Denver from California."
+        ],
+        "resume_location": "",
+        "resume_highlights": [
+            "Made up for lost time during COVID-19 by road-tripping across the USA and Europe.",
+            "Moved back to Colorado to tend to family."
         ]
     },
     "meta": {
         "company": "Meta | Facebook",
         "title": "Senior Data Engineer",
         "date": "01/2021 - 09/2022",
-        "location": "Seattle, WA + Menlo Park, CA + Remote, USA",
+        "location": "Menlo Park, CA",
         "highlights": [
             "Built AI/ML classifiers and the data, feature and evaluation pipelines around them.",
+            "Served as liaison between Facebook Messenger, Groups, and an early precursor to the Llama project, fine-tuning models for automated group management.",
             "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
             "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.",
             "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.",
@@ -106,7 +128,7 @@
         ],
         "link": "https://about.fb.com/",
         "logoPath": "meta.svg",
-        "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com—today's Facebook, a popular global social networking service.",
+        "company_description": "Meta Platforms, Inc. is an American multinational technology conglomerate based in Menlo Park, California. It was founded by Mark Zuckerberg, along with his college roommates and fellow Harvard University students Eduardo Saverin, Andrew McCollum, Dustin Moskovitz and Chris Hughes, originally as TheFacebook.com\u2014today's Facebook, a popular global social networking service.",
         "tech_stack": [
             "python",
             "sql",
@@ -129,6 +151,13 @@
             "Created from scratch QR code group invites, increasing join rates by 50%. Enabled offline engagement in multilingual regions, facilitating family reconnections and shelter logistics coordination during humanitarian efforts. Featured on Tech Crunch.",
             "Designed KPI dashboards to monitor DAUs, MAUs, and engagement trends using tools such as Tableau and internal data visualization frameworks. Enabled real-time insights, increasing engagement by 10% and retention by 12%.",
             "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%. Overcame orchestration challenges, improving resource utilization and processing times."
+        ],
+        "resume_highlights": [
+            "Built AI/ML classifiers and 100+ NLP and computer vision pipelines with Airflow, Spark, and PyTorch, supporting ad targeting and personalized notifications for billions of users.",
+            "Partnered with Messenger, Groups, and an early precursor to the Llama project to fine-tune models for automated group management.",
+            "Led 10+ engineers on data systems for Facebook Public Groups, Community Chats, and cross-platform initiatives.",
+            "Built a framework generating thousands of asynchronous Spark pipelines, improving compute efficiency by 66%.",
+            "Redesigned petabyte-scale data models, cutting storage costs by 25%."
         ]
     },
     "deloitte": {
@@ -166,6 +195,11 @@
             "Built predictive analytics models for server uptime using time-series forecasting techniques, improving video delivery reliability by 30% and enhancing user experience through proactive maintenance.",
             "Revamped A/B testing frameworks for billions of daily users, resolving data inconsistencies and enabling more precise feature rollouts. Accelerated data-driven decision-making with improved statistical significance tracking.",
             "Leveraged Python, SQL, Java, TensorFlow, PyTorch, Spark, Airflow, Docker, and Kubernetes to develop and deploy scalable technical solutions. Delivered projects across machine learning, real-time analytics, and data pipeline automation for Fortune 50 clients."
+        ],
+        "resume_highlights": [
+            "Automated approximately 31% of manually processed healthcare claims with transformer models, saving 250,000+ hours annually.",
+            "Optimized exabyte-scale video reliability metrics, cutting daily processing time by 90% while expanding coverage.",
+            "Led 20+ consultants delivering AI and analytics systems for Fortune 50 clients."
         ]
     },
     "wide_open_west": {
@@ -197,6 +231,10 @@
             "Created a sales funnel dashboard with Tableau to monitor add-on targets, conversions, and installations. Identified millions in unrealized losses, leading to strategic reallocations and improved market performance.",
             "Applied machine learning models and geospatial analytics to optimize network NUC performance, reducing infrastructure build-out costs by 25%. Implemented continuous deployment with GitHub, ensuring code quality through design principles and best practices.",
             "Technologies Used: Python, Java, JavaScript, SQL, Flask, AWS (SageMaker, S3, EC2, Redshift, Athena), Apache Kafka, SendGrid, GIS tools."
+        ],
+        "resume_highlights": [
+            "Built classification and churn models that increased customer package upgrades by 22% year over year.",
+            "Led 5 data practitioners delivering BI and analytics to sales, product, and engineering teams."
         ]
     },
     "common_spirit_health": {
@@ -232,6 +270,10 @@
             "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 5 days, optimized surgical room usage by 3000%, and enabled predictive staffing to improve patient care.",
             "Worked with orchestration tools similar to Airflow and utilized cloud technologies (Microsoft Azure and AWS) for data infrastructure, achieving seamless cloud operations and reducing deployment times.",
             "Leveraged strong Python and SQL expertise for ETL/ELT processes, developing scalable solutions with continuous improvement and adhering to best coding practices."
+        ],
+        "resume_highlights": [
+            "Built REST APIs and data lakes, reducing processing time for partner data products from 7 days to 5 minutes.",
+            "Built Python and SQL forecasting pipelines for hospital procedures, billing, and staffing; cut billing turnaround from 14 to 7 days."
         ]
     },
     "acustream": {
@@ -266,6 +308,10 @@
             "Developed fault-tolerant systems with Spring Boot, implementing state consistency mechanisms such as transaction rollbacks. Reduced system fault impact by 35%, ensuring high availability during critical operations.",
             "Supported pre-sales efforts and customer onboarding with on-site integrations, accelerating implementation timelines by 20% and enhancing customer satisfaction.",
             "Technologies Used: Python, Java, JavaScript, SQL, Django, Flask, Celery, AWS (RDS, EC2, IAM), Apache Kafka, Spring Boot, PostgreSQL."
+        ],
+        "resume_highlights": [
+            "Built a rules-based and ML invoicing system supporting $300M+ in annual revenue.",
+            "Replaced SFTP transfers with real-time Flask and Kafka APIs, cutting data delivery time by 50%."
         ]
     }
 }

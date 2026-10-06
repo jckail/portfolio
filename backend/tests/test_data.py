@@ -147,6 +147,11 @@ def test_sabbatical_entry_needs_no_company_and_photos_exist():
     experience = get_all_models()["experience"].root
     role = experience["sabbatical"]
     assert role.link is None and role.logoPath is None and role.tech_stack == []
+    assert role.date == "10/2022 - 05/2023"
+    assert role.highlights == ['Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.', 'Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.', 'Traveled through Europe, spent time with family members in need, and relocated back to Denver from California.']
+    assert experience["meta"].location == "Menlo Park, CA"
+    assert role.company_description == "Made up for lost time during COVID-19 by exploring the world, chasing outdoor adventures, and spending time with family."
+    assert role.more_highlights == ["Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.", "Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.", "Traveled through Europe, spent time with family members in need, and relocated back to Denver from California."]
     for key, item in experience.items():
         for photo in item.photos:
             path = os.path.join(REPO_ROOT, "frontend", "public", photo.src.lstrip("/"))

@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .api import api_router, content, ws_router
+from .api.agent_routes import agent_lifespan, context_payload, mcp_route
+from .api.agent_routes import router as agent_router
 from .config import get_settings, missing_required_vars
 from .middleware.access_log import AccessLogMiddleware
 from .middleware.canonical_host import CanonicalHostMiddleware
@@ -55,6 +57,7 @@ async def lifespan(app: FastAPI):
         initialize_supabase()
         # Parse, serialize and gzip the portfolio content once, off the loop.
         await asyncio.to_thread(content.warm)
+        await asyncio.to_thread(context_payload)
         logger.info("Data preloaded successfully")
         frontend = mount_static_files()
         if frontend is not None:
@@ -64,7 +67,8 @@ async def lifespan(app: FastAPI):
         logger.exception("Startup error")
         raise
 
-    yield
+    async with agent_lifespan():
+        yield
 
     logger.info("Shutting down the application...")
     await asyncio.to_thread(close_cached_runtime)
@@ -94,8 +98,8 @@ app.add_middleware(
     # never needed.
     allow_credentials=False,
     allow_methods=["*"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
-    expose_headers=["X-Request-ID"]
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID", "MCP-Protocol-Version", "MCP-Session-ID"],
+    expose_headers=["X-Request-ID", "MCP-Session-ID"]
 )
 app.add_middleware(SelectiveGZipMiddleware, minimum_size=GZIP_MINIMUM_SIZE)
 app.add_middleware(CanonicalHostMiddleware, settings=settings)  # opt-in; no-op unless ALIAS_HOSTS is set
@@ -108,6 +112,8 @@ app.add_middleware(AccessLogMiddleware, settings=settings)
 app.include_router(api_router)
 app.include_router(ws_router)
 app.include_router(opendatacenter_router)
+app.include_router(agent_router)
+app.router.routes.append(mcp_route)
 
 
 def initialize_supabase() -> None:

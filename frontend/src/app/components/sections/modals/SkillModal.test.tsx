@@ -32,8 +32,18 @@ const skillsData = {
 } as unknown as SkillsData;
 
 const experienceData = {
-  together_ai: { company: 'Together AI', title: 'Staff Engineer', date: '02/2025 - Present', tech_stack: ['python'] },
-  meta: { company: 'Meta', title: 'Data Engineer', date: '2019 - 2022', tech_stack: ['Python', 'kafka'] },
+  together_ai: {
+    company: 'Together AI',
+    title: 'Staff Engineer',
+    date: '02/2025 - Present',
+    tech_stack: ['python'],
+  },
+  meta: {
+    company: 'Meta',
+    title: 'Data Engineer',
+    date: '2019 - 2022',
+    tech_stack: ['Python', 'kafka'],
+  },
   old: { company: 'Old Co', title: 'Dev', date: '2013', tech_stack: ['go'] },
 };
 const projectsData = { qr: { title: 'QR Project', tech_stack: ['python'] } };
@@ -44,9 +54,13 @@ vi.mock('../../../providers/data-provider', () => ({ useData: () => dataState })
 vi.mock('../../../../shared/utils/analytics', () => ({ trackModalView: vi.fn() }));
 vi.mock('../../../../shared/components/skill-icon/SkillIcon', () => ({ default: () => null }));
 
-const Harness = ({ initial = 'python', onClose = () => {} }: { initial?: string | null; onClose?: () => void }) => (
-  <SkillModalHost skillsData={skillsData} skillKey={initial} onClose={onClose} />
-);
+const Harness = ({
+  initial = 'python',
+  onClose = () => {},
+}: {
+  initial?: string | null;
+  onClose?: () => void;
+}) => <SkillModalHost skillsData={skillsData} skillKey={initial} onClose={onClose} />;
 
 beforeEach(() => {
   dataState = { experienceData, projectsData, isLoading: false };
@@ -68,7 +82,10 @@ describe('SkillModal', () => {
     expect(within(dialog).getByText('Python description')).toBeInTheDocument();
     expect(within(dialog).getByText('Programming Languages')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
-    expect(within(dialog).getByRole('link', { name: /Python docs/ })).toHaveAttribute('href', 'https://example.com/docs');
+    expect(within(dialog).getByRole('link', { name: /Python docs/ })).toHaveAttribute(
+      'href',
+      'https://example.com/docs'
+    );
   });
 
   it('does not add a banner landmark while open', async () => {
@@ -80,8 +97,10 @@ describe('SkillModal', () => {
   it('derives roles and projects from the data at render time', async () => {
     render(<Harness />);
     const dialog = await screen.findByRole('dialog', { name: 'Python' });
-    const roles = within(within(dialog).getByRole('list', { name: 'Roles' })).getAllByRole('button');
-    expect(roles.map(r => r.textContent)).toEqual([
+    const roles = within(within(dialog).getByRole('list', { name: 'Roles' })).getAllByRole(
+      'button'
+    );
+    expect(roles.map((r) => r.textContent)).toEqual([
       'Together AIStaff Engineer02/2025 - Present (opens role details)',
       'MetaData Engineer2019 - 2022 (opens role details)',
     ]);
@@ -123,10 +142,19 @@ describe('SkillModal', () => {
 
   it('lists only related skills that exist and navigates to one in place', async () => {
     const onNavigate = vi.fn();
-    render(<SkillModalHost skillsData={skillsData} skillKey="python" onClose={() => {}} onNavigate={onNavigate} />);
+    render(
+      <SkillModalHost
+        skillsData={skillsData}
+        skillKey="python"
+        onClose={() => {}}
+        onNavigate={onNavigate}
+      />
+    );
     const dialog = await screen.findByRole('dialog', { name: 'Python' });
-    const related = within(within(dialog).getByRole('heading', { name: 'Related skills' }).parentElement as HTMLElement);
-    expect(related.getAllByRole('button').map(b => b.textContent)).toEqual(['Kafka']);
+    const related = within(
+      within(dialog).getByRole('heading', { name: 'Related skills' }).parentElement as HTMLElement
+    );
+    expect(related.getAllByRole('button').map((b) => b.textContent)).toEqual(['Kafka']);
     fireEvent.click(related.getByRole('button', { name: 'Kafka' }));
     expect(onNavigate).toHaveBeenCalledWith('kafka');
     expect(await screen.findByRole('dialog', { name: 'Kafka' })).toBeInTheDocument();
@@ -201,7 +229,22 @@ describe('SkillModal', () => {
       setChatAvailable(false);
       render(<Harness />);
       await screen.findByRole('dialog', { name: 'Python' });
-      await waitFor(() => expect(screen.queryByRole('button', { name: 'Ask the assistant about this' })).toBeNull());
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: 'Ask the assistant about this' })).toBeNull()
+      );
     });
   });
+});
+
+it('shows hands-on use without inventing a duration when years are unspecified', async () => {
+  const previousYears = skillsData.python.years_of_experience;
+  skillsData.python.years_of_experience = 0;
+  try {
+    render(<Harness />);
+    const dialog = await screen.findByRole('dialog', { name: 'Python' });
+    expect(within(dialog).getByText('Hands-on use')).toBeInTheDocument();
+    expect(within(dialog).queryByText('0 years')).not.toBeInTheDocument();
+  } finally {
+    skillsData.python.years_of_experience = previousYears;
+  }
 });

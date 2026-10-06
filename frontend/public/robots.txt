@@ -1,5 +1,6 @@
 # jckail.com welcomes search engines and AI crawlers. Machine-readable
-# renditions of the site: /llms.txt, /llms-full.txt, /resume.json.
+# renditions: /llms.txt, /llms-full.txt, /resume.json, /context.json.
+# Read-only agent interfaces: /mcp (Streamable HTTP), /graphql (queries).
 # A crawler that matches a named group ignores the "*" group, so the two
 # Disallow lines are repeated in each.
 

@@ -131,6 +131,20 @@ def _tech_labels(keys: list[str]) -> str:
     return ", ".join(skills[k].display_name if k in skills else k for k in keys)
 
 
+@cache
+def _resume_data(name: str) -> dict:
+    """Resume-only editorial fields share the PDF generator's source files."""
+    return json.loads((Path(DATA_DIR) / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def _education() -> list[dict]:
+    return _resume_data("education")["entries"]
+
+
+def _curated_skills() -> list[dict]:
+    return _resume_data("resume_skills")["groups"]
+
+
 def _skills_by_category() -> dict[str, list[SkillDetail]]:
     groups: dict[str, list[SkillDetail]] = {}
     for skill in load_skills().root.values():
@@ -206,7 +220,8 @@ def snapshot_html() -> bytes:
     parts: list[str] = [f'<main id="{SNAPSHOT_ID}" class="{SNAPSHOT_ID}">']
 
     parts.append("<header>")
-    parts.append(f"<p>{escape(about.greeting)}</p>")
+    if about.greeting.strip():
+        parts.append(f"<p>{escape(about.greeting)}</p>")
     parts.append(f"<h1>{escape(_full_name())}</h1>")
     parts.append(f"<p>{escape(_headline())}</p>")
     parts.append(f"<p>{escape(contact.location)}, {escape(contact.country)}</p>")
@@ -248,12 +263,22 @@ def snapshot_html() -> bytes:
         parts.append("<ul>" + "".join(f"<li>{escape(s.display_name)}</li>" for s in skills) + "</ul>")
     parts.append("</section>")
 
+    parts.append('<section id="seo-education"><h2>Education</h2>')
+    for entry in _education():
+        parts.append(f"<h3>{escape(entry['institution'])}</h3>")
+        parts.append(f"<p>{escape(entry['study'])} &middot; {escape(entry['date'])}</p>")
+    parts.append("</section>")
+
     parts.append('<section id="seo-contact"><h2>Links</h2><ul>')
     for network, _, url in _profiles():
         parts.append(f"<li>{_a(url, network, 'me noopener')}</li>")
     parts.append(f"<li>{_a(RESUME_PDF_PATH, 'Resume (PDF)')}</li>")
     parts.append(f"<li>{_a('/resume.json', 'Resume (JSON Resume)')}</li>")
     parts.append(f"<li>{_a('/llms.txt', 'Summary for language models (llms.txt)')}</li>")
+    for path, label in (("/context.json", "Public portfolio context (JSON)"),
+                        ("/mcp", "Read-only Model Context Protocol endpoint"),
+                        ("/graphql", "Read-only GraphQL endpoint")):
+        parts.append(f"<li>{_a(path, label)}</li>")
     parts.append("</ul></section>")
 
     parts.append("</main>")
@@ -271,13 +296,8 @@ def jsonld_graph() -> dict:
     city, region = _city_region()
     person_id = absolute("/#person")
 
-    # Primary skills first, then every professional skill, each once.
-    seen: set[str] = set()
-    knows: list[str] = []
-    for name in [*about.primary_skills, *(s.display_name for s in load_skills().root.values() if s.professional_experience)]:
-        if name.lower() not in seen:
-            seen.add(name.lower())
-            knows.append(name)
+    # Curated public capabilities use human-readable labels, never internal keys.
+    knows = list(dict.fromkeys(item for group in _curated_skills() for item in group["items"]))
 
     person: dict = {
         "@type": "Person",
@@ -296,6 +316,7 @@ def jsonld_graph() -> dict:
         },
         "sameAs": [url for _, _, url in _profiles()],
         "knowsAbout": knows,
+        "alumniOf": [{"@type": "CollegeOrUniversity", "name": entry["institution"]} for entry in _education()],
     }
     if company:
         job = next((j for _, j in _experience() if j.company == company), None)
@@ -384,6 +405,12 @@ def llms_txt() -> bytes:
         f"- [Resume as PDF]({absolute(RESUME_PDF_PATH)}): the downloadable resume",
         f"- [Portfolio website]({absolute('/')}): the interactive site",
         "",
+        "## Agent interfaces",
+        "",
+        f"- [Public context (JSON)]({absolute('/context.json')}): profile, experience, projects, education and curated skills; no authentication required",
+        f"- [MCP endpoint]({absolute('/mcp')}): read-only Model Context Protocol over Streamable HTTP; initialize a client, then list tools and resources",
+        f"- [GraphQL endpoint]({absolute('/graphql')}): read-only queries over the same public context; schema introspection supported",
+        "",
         "## Experience",
         "",
     ]
@@ -443,6 +470,13 @@ def llms_full_txt() -> bytes:
         for skill in skills:
             lines.append(f"- **{skill.display_name}** ({skill.sub_category}): {skill.description}")
         lines.append("")
+    lines += ["## Education", ""]
+    for entry in _education():
+        lines += [f"- {entry['institution']}: {entry['study']}, {entry['date']}"]
+    lines += ["", "## Agent interfaces", "",
+              f"- Public context (JSON): {absolute('/context.json')}",
+              f"- MCP (read-only Streamable HTTP): {absolute('/mcp')}",
+              f"- GraphQL (queries only): {absolute('/graphql')}", ""]
     lines += ["## Links", ""]
     for network, _, url in _profiles():
         lines.append(f"- {network}: {url}")
@@ -465,13 +499,15 @@ def resume_json() -> bytes:
     about = load_aboutme()
     city, region = _city_region()
     work = []
-    for index, (_, job) in enumerate(_experience()):
+    raw_experience = _resume_data("experience")
+    for key, job in _experience():
+        raw_job = raw_experience[key]
         rng = parse_date_range(job.date)
         item: dict = {
             "name": job.company,
-            "location": job.location,
+            "location": raw_job.get("resume_location", job.location),
             "position": job.resume_title or job.title,
-            "highlights": _visible_highlights(index, job),
+            "highlights": raw_job.get("resume_highlights", job.highlights),
         }
         if job.link:
             item["url"] = str(job.link)
@@ -482,20 +518,21 @@ def resume_json() -> bytes:
         work.append(item)
 
     projects = []
-    for project in load_projects().root.values():
+    raw_projects = _resume_data("projects")
+    for key, project in load_projects().root.items():
         projects.append(
             {
                 "name": project.title.strip(),
                 "description": project.description,
-                "highlights": [project.description_detail],
+                "highlights": [raw_projects[key].get("resume_description", project.description_detail)],
                 "keywords": list(project.tech_stack),
                 "url": str(project.link),
             }
         )
 
     skills = [
-        {"name": category, "keywords": [s.display_name for s in group]}
-        for category, group in _skills_by_category().items()
+        {"name": group["label"], "keywords": group["items"]}
+        for group in _curated_skills()
     ]
 
     document = {
@@ -506,11 +543,17 @@ def resume_json() -> bytes:
             "image": _headshot_url(),
             "email": contact.email,
             "url": absolute("/"),
-            "summary": about.description,
+            "summary": _resume_data("aboutme").get("resume_summary", about.description),
             "location": {"city": city, "region": region, "countryCode": "US"},
             "profiles": [{"network": n, "username": u, "url": url} for n, u, url in _profiles()],
         },
         "work": work,
+        "education": [
+            {"institution": entry["institution"], "area": entry["study"],
+             "startDate": parse_date_range(entry["date"]).start,
+             "endDate": parse_date_range(entry["date"]).end}
+            for entry in _education()
+        ],
         "projects": projects,
         "skills": skills,
         "meta": {

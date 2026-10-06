@@ -6,13 +6,9 @@ import { DataProvider } from './providers/data-provider';
 import { ResumeProvider } from './providers/resume-provider';
 import { useThemeStore } from '../shared/stores/theme-store';
 import { useKeyboardShortcuts } from '../shared/hooks/use-keyboard-shortcuts';
-import { useLocation } from '../shared/hooks/use-location';
 import { useEasterEggs } from '../shared/hooks/use-easter-eggs';
 import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
-import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared/utils/analytics';
-import { useAnalyticsTracker } from '../shared/analytics';
-import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
 import { CommandPaletteHost } from '../shared/components/command-palette-host';
 import ReadingProgress from '../shared/components/reading-progress';
 import ChatPortal from './components/chat/chat-portal';
@@ -26,42 +22,14 @@ import '../styles/base/app.css';
  * subtree (anything inside that cares reads the store itself).
  */
 const ThemedParticles: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const theme = useThemeStore(state => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const config = useMemo(() => getThemeConfig(theme), [theme]);
   return <ParticlesProvider config={config}>{children}</ParticlesProvider>;
 };
 
-/**
- * Page-view analytics. Its own component so a navigation re-renders nothing
- * but this.
- *
- * Exactly one event fires per navigation, not both: trackAnchorChange already
- * sends its own page_view (needed since useScrollSpy calls it directly,
- * bypassing this effect), so also calling trackPageView for the same location
- * would double-count the pageview in GA4.
- */
-const NavigationAnalytics: React.FC = () => {
-  const { pathname, hash } = useLocation();
-
-  useEffect(() => {
-    Promise.resolve(initializeAnalytics()).catch(error => {
-      console.error('Failed to initialize analytics:', error);
-    });
-  }, []);
-
-  useEffect(() => {
-    const track = hash ? trackAnchorChange(hash.slice(1)) : trackPageView(pathname);
-    Promise.resolve(track).catch(error => {
-      console.error('Failed to track navigation:', error);
-    });
-  }, [pathname, hash]);
-
-  return null;
-};
-
 /** Theme changes requested from outside React (chat tool actions, palette). */
 function useThemeEvents() {
-  const setTheme = useThemeStore(state => state.setTheme);
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   useEffect(() => {
     const onSetTheme = (event: Event) => {
@@ -82,7 +50,6 @@ const App: React.FC = () => {
   useKeyboardShortcuts();
   useEasterEggs();
   useThemeEvents();
-  useAnalyticsTracker();
 
   return (
     <ErrorBoundary>
@@ -112,15 +79,11 @@ const App: React.FC = () => {
               {/* Tiny launcher; the chat panel itself is lazy-loaded inside */}
               <ChatPortal />
 
-              <CookieConsentPortal />
               <CommandPaletteHost />
             </div>
           </ThemedParticles>
         </ResumeProvider>
       </DataProvider>
-      {/* After the page so its effects run after the page's own (scroll-spy
-          reports the initial anchor first), as when this lived in App. */}
-      <NavigationAnalytics />
     </ErrorBoundary>
   );
 };

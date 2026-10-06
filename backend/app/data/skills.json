@@ -1442,7 +1442,7 @@
         "description": "Native graph database queried with Cypher, optimised for relationship-heavy data. Used for entity resolution, recommendations and knowledge graphs.",
         "weblink": "https://neo4j.com/",
         "examples": {},
-        "general_category": "Databases",
+        "general_category": "Knowledge & Graph Systems",
         "sub_category": "Graph Database",
         "related": [
             "sql",
@@ -2645,6 +2645,126 @@
             "pinecone",
             "chroma",
             "llm_evaluation"
+        ]
+    },
+    "claude_code": {
+        "display_name": "Claude Code",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "ai",
+            "coding-agent",
+            "developer-tools"
+        ],
+        "description": "AI-assisted software engineering with Claude Code, repository instructions, tools, and reusable skills.",
+        "weblink": "https://code.claude.com/docs/",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agent Tools & Frameworks",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation"
+        ]
+    },
+    "codex": {
+        "display_name": "Codex",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "ai",
+            "coding-agent",
+            "developer-tools"
+        ],
+        "description": "AI-assisted coding, tool execution, and repository workflows with Codex.",
+        "weblink": "https://developers.openai.com/codex/",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agent Tools & Frameworks",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation"
+        ]
+    },
+    "cursor": {
+        "display_name": "Cursor",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "ai",
+            "coding-agent",
+            "developer-tools"
+        ],
+        "description": "AI-assisted software engineering and repository workflows with Cursor.",
+        "weblink": "https://cursor.com/",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agent Tools & Frameworks",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation"
+        ]
+    },
+    "pi": {
+        "display_name": "Pi",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "ai",
+            "agent-framework",
+            "agent-runtime"
+        ],
+        "description": "Agent-core and model-provider libraries used by the portfolio copilot, plus hands-on work with extensible coding-agent runtimes.",
+        "weblink": "https://github.com/earendil-works/pi",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agent Tools & Frameworks",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation"
+        ]
+    },
+    "mcp": {
+        "display_name": "MCP",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "ai",
+            "protocol",
+            "tool-execution"
+        ],
+        "description": "Model Context Protocol integrations for exposing tools and context to agents; API contracts and safe tool-execution boundaries.",
+        "weblink": "https://modelcontextprotocol.io/",
+        "examples": {},
+        "general_category": "Artificial Intelligence",
+        "sub_category": "Agent Tools & Frameworks",
+        "related": [
+            "agent_harnesses",
+            "agent_evaluation"
+        ]
+    },
+    "graphify": {
+        "display_name": "Graphify",
+        "image": "automl.svg",
+        "professional_experience": false,
+        "years_of_experience": 0,
+        "tags": [
+            "knowledge-graph",
+            "code-context",
+            "graph-retrieval"
+        ],
+        "description": "Hands-on code and knowledge graph indexing, source-grounded retrieval, and graph traversal with Graphify in shared agent workflows.",
+        "weblink": "https://github.com/Graphify-Labs/graphify",
+        "examples": {},
+        "general_category": "Knowledge & Graph Systems",
+        "sub_category": "Graph Retrieval",
+        "related": [
+            "neo4j",
+            "rag"
         ]
     }
 }

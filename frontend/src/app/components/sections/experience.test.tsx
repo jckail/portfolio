@@ -22,12 +22,19 @@ const experienceData = {
   // No link, logo or tech stack: a career break must render without them.
   sabbatical: {
     company: 'Sabbatical',
-    title: 'Digital nomad life',
+    title: 'Digital nomad experiment',
     date: '10/2022 - 05/2023',
     location: 'Location independent',
-    highlights: ['Time away from corporate life.'],
-    company_description: 'A career break.',
-    more_highlights: ['More detail.'],
+    highlights: [
+      'Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.',
+    ],
+    company_description:
+      'Made up for lost time during COVID-19 by exploring the world, chasing outdoor adventures, and spending time with family.',
+    more_highlights: [
+      'Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.',
+      'Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.',
+      'Traveled through Europe, spent time with family members in need, and relocated back to Denver from California.',
+    ],
     photos: [] as { src: string; alt: string; caption?: string }[],
   },
 } as Record<string, import('../../../types/resume').ExperienceItem>;
@@ -67,7 +74,7 @@ describe('resolveExperienceKey', () => {
 
   it.each(['constructor', '__proto__', 'hasOwnProperty', 'toString', 'nope'])(
     'rejects %s',
-    slug => {
+    (slug) => {
       expect(resolveExperienceKey(experienceData, slug)).toBeUndefined();
     }
   );
@@ -76,12 +83,12 @@ describe('resolveExperienceKey', () => {
 describe('Experience deep links', () => {
   it.each(['constructor', '__proto__', 'hasOwnProperty'])(
     'opens no modal for ?company=%s',
-    async slug => {
+    async (slug) => {
       window.history.replaceState({}, '', `/?company=${encodeURIComponent(slug)}`);
       render(<Experience />);
       expect(screen.getByRole('heading', { name: 'Experience' })).toBeInTheDocument();
       // Give any lazy modal a chance to resolve before asserting absence
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
       expect(screen.queryByRole('dialog')).toBeNull();
     }
   );
@@ -194,7 +201,14 @@ describe('Experience entry without a company (sabbatical)', () => {
     expect(new URLSearchParams(window.location.search).get('company')).toBe('sabbatical');
     expect(within(dialog).queryByRole('link', { name: /sabbatical/i })).toBeNull();
     expect(within(dialog).queryByText('Tech Stack:')).toBeNull();
-    expect(within(dialog).getByText('More detail.')).toBeInTheDocument();
+    for (const text of [
+      'Made up for lost time during COVID-19 with a road trip through Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.',
+      'Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.',
+      'Traveled through Europe, spent time with family members in need, and relocated back to Denver from California.',
+    ]) {
+      expect(within(dialog).getByText(text)).toBeInTheDocument();
+    }
+    expect(within(dialog).getByText('10/2022 - 05/2023')).toBeInTheDocument();
     expect(within(dialog).queryByText('Photos:')).toBeNull();
     expect(within(dialog).queryByRole('img')).toBeNull();
   });

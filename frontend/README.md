@@ -26,12 +26,12 @@ src/
 │
 ├── shared/                  # Cross-cutting code
 │   ├── analytics/           # Consent-gated typed events (core, tracker, events list)
-│   ├── components/          # Header, navigation, cookie banner, command palette, etc.
+│   ├── components/          # Header, navigation, command palette, etc.
 │   ├── stores/              # Zustand stores
 │   ├── hooks/               # useScrollSpy, useMediaQuery, useEscapeKey, ...
 │   └── utils/
 │       ├── api/             # Typed API client (getJson/postJson) + endpoint registry
-│       ├── analytics.ts     # GA4 helpers (page views, sections, chat, theme)
+│       ├── analytics.ts     # Retired analytics compatibility APIs
 │       ├── bootstrap-data.ts # Reads the content the server inlined into index.html
 │       └── a11y.ts          # buttonize(): keyboard support for styled elements
 │
@@ -87,14 +87,12 @@ is the resume PDF download, which needs a raw `fetch` for the blob.
 
 ### Navigation & Analytics
 
-- `useScrollSpy` (owned by `MainContent`) syncs the URL hash with the visible
-  section and reports section views to GA4.
-- Product analytics are a typed, closed event set (`shared/analytics/events.ts`).
-  `track()` sends batched, anonymous events to `POST /api/events` and mirrors
-  some to GA4, but only after the visitor accepts analytics; withdrawing
-  consent (footer "Cookie settings") stops the tracker and empties the queue.
-  The backend keeps its own copy of the names and a test asserts they match.
-  Props are low-cardinality and validated; never send free text.
+- `useScrollSpy` (owned by `MainContent`) syncs the URL hash with the visible section.
+- Visitor analytics is retired. Both the legacy helpers and typed `track()`
+  API are inert: no GA loader, first-party events, observers, queues, timers,
+  or analytics session identifiers. Saved consent cannot enable tracking.
+  Existing feature calls remain compatible without collecting visitor activity.
+  Chat uses its independent per-tab session and retains the backend wire field.
 - Modals (experience, skills, projects, contact) are lazy loaded and
   deep-linkable via query params (`?skill=`, `?project=`, `?company=`). Deep
   links must not use a raw bracket lookup on a parsed object.

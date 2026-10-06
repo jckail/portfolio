@@ -2,7 +2,7 @@
   "generated_by": "helpers/build_resume_pdf.py",
   "pdf": "JordanKailResume.pdf",
   "current_company": "Together AI",
-  "current_title": "Staff Software Engineer",
+  "current_title": "Staff Software Engineer, Agent Platform",
   "current_dates": "02/2025 - Present",
   "companies": [
     "Together AI",
@@ -18,73 +18,83 @@
     {
       "company": "Together AI",
       "bullets": [
-        "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-        "Tech lead for the agents platform: created the agent harness, built an internal agents factory and used it to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
-        "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
-        "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
-        "Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship."
+        "Created the Agent Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
+        "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+        "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
+        "Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.",
+        "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions.",
+        "Contributed to multiple patent-pending innovations in agent systems."
       ]
     },
     {
       "company": "Prove Identity",
       "bullets": [
-        "Built agents and harnesses that govern the statistical models used for identity and fraud resolution; these became core frameworks.",
-        "Built AI-driven Retrieval-Augmented Generation (RAG) chatbots with Airflow, LangChain, and OpenAI, automating 150+ human-hours weekly.",
-        "Led company-wide migration from legacy Java/Oracle infrastructure to cloud-native Go/PostgreSQL stack, improving API response times from 40s to 12ms and slashing operational costs by 95%.",
-        "Deployed an event-driven data streaming platform with Go, Kafka, and Flink, transitioning 1,200+ batch jobs to real-time processing. Reduced data availability lag from days to seconds."
+        "Built agent frameworks and harnesses for statistical model governance in identity verification and fraud resolution.",
+        "Built RAG chatbots with Airflow, LangChain, and OpenAI, automating 150+ hours of manual work per week.",
+        "Led the company-wide migration from Java/Oracle to Go/PostgreSQL, cutting API response times from 40s to 12ms and operating costs by 95%.",
+        "Moved 1,200+ batch jobs to real-time Go, Kafka, and Flink pipelines, reducing data latency from days to seconds."
       ]
     },
     {
       "company": "Sabbatical",
       "bullets": [
-        "Stepped away from corporate life to live a digital nomad life with my wife."
+        "Made up for lost time during COVID-19 by road-tripping across the USA and Europe.",
+        "Moved back to Colorado to tend to family."
       ]
     },
     {
       "company": "Meta | Facebook",
       "bullets": [
-        "Built AI/ML classifiers and the data, feature and evaluation pipelines around them.",
-        "Designed and deployed 100+ ML pipelines using Airflow, Spark, and PyTorch, integrating NLP and computer vision models. Improved ad targeting precision and personalized notifications, driving higher engagement across billions of users.",
-        "Lead data engineer for Facebook Public Groups, Community Chats, and cross-platform initiatives, leading 10+ engineers.",
-        "Engineered an automated framework for generating thousands of asynchronous Spark data pipelines, increasing compute efficiency by 66%.",
-        "Re-architected petabyte-scale data models, reducing storage costs by 25%."
+        "Built AI/ML classifiers and 100+ NLP and computer vision pipelines with Airflow, Spark, and PyTorch, supporting ad targeting and personalized notifications for billions of users.",
+        "Partnered with Messenger, Groups, and an early precursor to the Llama project to fine-tune models for automated group management.",
+        "Led 10+ engineers on data systems for Facebook Public Groups, Community Chats, and cross-platform initiatives.",
+        "Built a framework generating thousands of asynchronous Spark pipelines, improving compute efficiency by 66%.",
+        "Redesigned petabyte-scale data models, cutting storage costs by 25%."
       ]
     },
     {
       "company": "Deloitte",
       "bullets": [
-        "Automated approximately 31% of human processed healthcare claims using transformer machine learning models, saving 250,000+ hours annually.",
-        "Optimized exabyte-scale video reliability metrics, reducing daily processing time by 90% while expanding metric coverage.",
-        "Led teams of 20+ consultants on high-profile Fortune 50 engagements, delivering advanced technical solutions aligned with client needs."
+        "Automated approximately 31% of manually processed healthcare claims with transformer models, saving 250,000+ hours annually.",
+        "Optimized exabyte-scale video reliability metrics, cutting daily processing time by 90% while expanding coverage.",
+        "Led 20+ consultants delivering AI and analytics systems for Fortune 50 clients."
       ]
     },
     {
       "company": "Wide Open West",
       "bullets": [
-        "Built Machine Learning applications using custom classification and churn models, driving a 22% YoY increase in customer package upgrades.",
-        "Led a team of 5 data practitioners, providing BI and data insights to sales, product, and engineering teams company-wide."
+        "Built classification and churn models that increased customer package upgrades by 22% year over year.",
+        "Led 5 data practitioners delivering BI and analytics to sales, product, and engineering teams."
       ]
     },
     {
       "company": "Common Spirit Health",
       "bullets": [
-        "Architected and delivered new rest APIs and data lakes, improving data processing time for external partner data products from 7 days to 5 minutes.",
-        "Developed machine learning pipelines using Python and SQL to forecast hospital procedures, billing, and staffing. Reduced billing turnaround from 14 to 7 days."
+        "Built REST APIs and data lakes, reducing processing time for partner data products from 7 days to 5 minutes.",
+        "Built Python and SQL forecasting pipelines for hospital procedures, billing, and staffing; cut billing turnaround from 14 to 7 days."
       ]
     },
     {
       "company": "AcuStream | R1",
       "bullets": [
-        "Built a custom invoicing system leveraging rule-based algorithms and machine learning, driving over $300M in annual revenue.",
-        "Migrated clients from SFTP to real-time APIs with Flask and Apache Kafka, reducing data delivery times by 50%."
+        "Built a rules-based and ML invoicing system supporting $300M+ in annual revenue.",
+        "Replaced SFTP transfers with real-time Flask and Kafka APIs, cutting data delivery time by 50%."
       ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of Colorado Boulder",
+      "study": "Computer Science",
+      "date": "08/2011 - 03/2013"
     }
   ],
   "sections": [
     "Summary",
     "Experience",
+    "Education",
     "Skills",
     "Projects"
   ],
-  "text_sha256": "fd5a7b9a8d2f5f0b71b420f66254727ae420571ab3285c049b3a700b3bd0dc00"
+  "text_sha256": "376a1fa1e1978baeaad547e3c035f05ebc36f4fe591717c6bdf802acfb619378"
 }

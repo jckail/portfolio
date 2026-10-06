@@ -1,11 +1,11 @@
 {
     "firstName": "Jordan",
-    "lastName": "Kail", 
+    "lastName": "Kail",
     "title": "Staff Software Engineer",
     "email": "jckail13@gmail.com",
     "website": "https://jordan-kail.com/",
-    "location": "Denver, CO",
-    "country": "United States", 
+    "location": "San Francisco, CA",
+    "country": "United States",
     "github": "https://github.com/jckail",
     "linkedin": "https://www.linkedin.com/in/jckail/"
 }

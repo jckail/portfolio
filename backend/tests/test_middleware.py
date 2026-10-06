@@ -148,12 +148,13 @@ def test_html_is_not_cached(client):
     not os.path.isfile(os.path.join(FRONTEND_DIST, "ga-init.js")),
     reason="frontend not built",
 )
-def test_unhashed_consent_bootstrap_revalidates(client):
-    """ga-init.js has no content hash, so without an explicit header browsers
-    cached it heuristically and kept a stale consent default after a change."""
+def test_retired_analytics_stub_revalidates(client):
+    """Cached HTML can request the inert stub; it must revalidate after retirement."""
     response = client.get("/ga-init.js")
     assert response.status_code == 200
     assert response.headers["Cache-Control"] == "no-cache"
+    assert "document.createElement" not in response.text
+    assert "googletagmanager" not in response.text
 
 
 @pytest.mark.skipif(

@@ -1,194 +1,52 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  getSessionId,
-  trackPageView,
-  trackAnchorChange,
-  trackSectionView,
-  trackChatOpen,
-} from './analytics';
+import * as analytics from './analytics';
 import { COOKIE_CONSENT_KEY } from './cookie-consent';
 
-describe('analytics', () => {
-  it('does not poll without consent and can wait for gtag after consent is granted', async () => {
-    vi.useFakeTimers();
-    vi.resetModules();
-    const fresh = await import('./analytics');
-    const polling = vi.spyOn(globalThis, 'setInterval');
-    try {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
-      // @ts-expect-error simulate the script that is not loaded before consent
-      window.gtag = undefined;
-      await fresh.trackModalView('demo', 'project', 'Demo');
-      expect(polling).not.toHaveBeenCalled();
-
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-      const pending = fresh.initializeAnalytics();
-      expect(polling).toHaveBeenCalledTimes(1);
-      window.gtag = vi.fn();
-      await vi.advanceTimersByTimeAsync(100);
-      await pending;
-      await fresh.trackModalView('demo', 'project', 'Demo');
-      expect(window.gtag).toHaveBeenCalledWith('event', 'modal_view', expect.objectContaining({ modal_id: 'demo' }));
-    } finally {
-      polling.mockRestore();
-      vi.clearAllTimers();
-      vi.useRealTimers();
-    }
-  });
+describe('retired legacy analytics', () => {
   beforeEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-    window.history.replaceState({}, '', '/');
     window.gtag = vi.fn();
   });
-
-  describe('getSessionId', () => {
-    it('generates a session id and persists it for the session', () => {
-      const first = getSessionId();
-      expect(first).toMatch(/^sid_/);
-      expect(getSessionId()).toBe(first);
-    });
-
-    it('generates a new id when session storage is cleared', () => {
-      const first = getSessionId();
-      sessionStorage.clear();
-      expect(getSessionId()).not.toBe(first);
-    });
-  });
-
-  describe('trackPageView', () => {
-    it('sends a page_view event with the given path', async () => {
-      await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
-    });
-
-    it('appends the current hash when the path has none', async () => {
-      window.history.replaceState({}, '', '/#about');
-      await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/#about' })
-      );
-    });
-
-    it('does not double-append a hash already in the path', async () => {
-      window.history.replaceState({}, '', '/#about');
-      await trackPageView('/#about');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/#about' })
-      );
-    });
-
-    it('skips events when cookie consent is denied', async () => {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
-      await trackPageView('/');
-      expect(window.gtag).not.toHaveBeenCalled();
-    });
-
-    it('does not throw when gtag is unavailable', async () => {
-      // @ts-expect-error simulating gtag not loaded
-      window.gtag = undefined;
-      // waitForGtag polls, so advance fake timers past its 5s timeout
-      vi.useFakeTimers();
-      const pending = trackPageView('/');
-      await vi.advanceTimersByTimeAsync(6000);
-      await expect(pending).resolves.toBeUndefined();
-      vi.useRealTimers();
-    });
-  });
-
-  describe('page_view double-counting', () => {
-    // trackAnchorChange and trackSectionView are always called together
-    // for the same section transition (see useScrollSpy); only one of
-    // them should ever send a page_view, or GA4 pageview counts get
-    // inflated ~2x for every scroll-driven section change.
-
-    it('trackAnchorChange sends exactly one page_view', async () => {
-      await trackAnchorChange('projects', 'about');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(1);
-    });
-
-    it('trackSectionView does not send its own page_view', async () => {
-      await trackSectionView('projects');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(0);
-    });
-
-    it('one section transition (both functions called together) sends exactly one page_view', async () => {
-      await trackAnchorChange('projects', 'about');
-      await trackSectionView('projects');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(1);
-    });
-  });
-
-  describe('consent gating of the session id', () => {
-    it('does not create a session id when consent is denied', async () => {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
-      await trackChatOpen();
+  it.each([null, 'accepted', 'denied', 'malformed'])(
+    'all feature calls stay inert with saved state %s',
+    async (state) => {
+      if (state) localStorage.setItem(COOKIE_CONSENT_KEY, state);
+      const fetch = vi.spyOn(globalThis, 'fetch');
+      const interval = vi.spyOn(globalThis, 'setInterval');
+      await analytics.initializeAnalytics();
+      await analytics.trackPageView('/?company=sabbatical');
+      await analytics.trackAnchorChange('experience', 'about');
+      await analytics.trackSectionView('experience');
+      await analytics.trackModalView('sabbatical', 'experience', 'Sabbatical');
+      await analytics.trackModalClose('sabbatical', 'experience', 1000);
+      await analytics.trackThemeChange('dark', 'light');
+      await analytics.trackSocialClick('github', 'visit', 'https://github.com/jckail');
+      await analytics.trackResumeView('pdf', 'resume');
+      await analytics.trackResumeDownload('pdf', 'current', 'resume');
+      await analytics.trackChatOpen();
+      await analytics.trackChatMessage('sent', 20);
+      await analytics.trackContactOpened();
+      await analytics.trackContactMessage(20);
+      expect(analytics.getSessionId()).toBe('');
       expect(sessionStorage.getItem('ga_session_id')).toBeNull();
       expect(window.gtag).not.toHaveBeenCalled();
+      expect(fetch).not.toHaveBeenCalled();
+      expect(interval).not.toHaveBeenCalled();
+      fetch.mockRestore();
+      interval.mockRestore();
+    }
+  );
+  it('works without storage or a GA global', async () => {
+    const storage = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
     });
-  });
-
-  describe('anchor allowlist', () => {
-    // URL fragments are attacker-controlled; only known section ids may
-    // reach GA, so a crafted link cannot plant arbitrary strings (or PII)
-    // in reports.
-    const calls = () => (window.gtag as ReturnType<typeof vi.fn>).mock.calls;
-
-    it('drops an unknown anchor from page_path', async () => {
-      window.history.replaceState({}, '', '/#someone@example.com');
-      await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
-      expect(JSON.stringify(calls())).not.toContain('example.com');
-    });
-
-    it('drops an unknown anchor passed in the path', async () => {
-      await trackPageView('/#evil-payload');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
-    });
-
-    it('skips anchor_change for an unknown anchor', async () => {
-      await trackAnchorChange('someone@example.com', 'about');
-      expect(window.gtag).not.toHaveBeenCalled();
-    });
-
-    it('nulls an unknown previous anchor', async () => {
-      await trackAnchorChange('projects', 'junk-value');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'anchor_change',
-        expect.objectContaining({ new_anchor: 'projects', previous_anchor: null })
-      );
-    });
-
-    it('skips section_view for an unknown section', async () => {
-      await trackSectionView('not-a-section');
-      expect(window.gtag).not.toHaveBeenCalled();
-    });
+    // @ts-expect-error simulate no GA bootstrap
+    window.gtag = undefined;
+    await expect(analytics.trackPageView('/')).resolves.toBeUndefined();
+    expect(analytics.getSessionId()).toBe('');
+    expect(storage).not.toHaveBeenCalled();
+    storage.mockRestore();
   });
 });

@@ -156,8 +156,8 @@ def test_resume_json_matches_the_json_resume_shape(client):
 
     assert doc["skills"] and all(s["name"] and s["keywords"] for s in doc["skills"])
     names = {k for s in doc["skills"] for k in s["keywords"]}
-    assert names == {s.display_name for s in load_skills().root.values()}
-    assert set(doc) <= {"$schema", "basics", "work", "projects", "skills", "meta"}
+    assert names == {item for group in discovery._curated_skills() for item in group["items"]}
+    assert set(doc) <= {"$schema", "basics", "work", "projects", "skills", "education", "meta"}
 
 
 # --- sitemap.xml -----------------------------------------------------------------
@@ -213,12 +213,42 @@ def test_sabbatical_is_an_explained_gap_not_an_unknown_employer(client):
 
     work = {w["name"]: w for w in client.get("/resume.json").json()["work"]}
     item = work["Sabbatical"]
-    assert item["position"] == "Career break (digital nomad)"
+    assert item["position"] == "Digital nomad experiment"
     assert (item["startDate"], item["endDate"]) == ("2022-10", "2023-05")
     assert "url" not in item
+    assert item["highlights"] == [
+        "Made up for lost time during COVID-19 by road-tripping across the USA and Europe.",
+        "Moved back to Colorado to tend to family.",
+    ]
 
     html = discovery.snapshot_html().decode()
-    assert "<h3>Digital nomad life, Sabbatical</h3>" in html
+    assert "<h3>Digital nomad experiment, Sabbatical</h3>" in html
     assert "None" not in html.split('id="seo-experience"')[1].split("</section>")[0]
     full = client.get("/llms-full.txt").text
-    assert "### Digital nomad life, Sabbatical" in full and "10/2022 - 05/2023 | Location independent\n" in full
+    assert "### Digital nomad experiment, Sabbatical" in full and "10/2022 - 05/2023 | Location independent\n" in full
+
+
+def test_resume_json_preserves_approved_resume_edits(client):
+    doc = client.get("/resume.json").json()
+    assert doc["basics"]["location"] == {"city": "San Francisco", "region": "CA", "countryCode": "US"}
+    assert doc["education"] == [{"institution": "University of Colorado Boulder", "area": "Computer Science",
+                                 "startDate": "2011-08", "endDate": "2013-03"}]
+    assert "studyType" not in doc["education"][0]  # no degree claimed
+    assert doc["basics"]["summary"] == discovery._resume_data("aboutme")["resume_summary"]
+    by_name = {entry["name"]: entry for entry in doc["work"]}
+    assert by_name["Sabbatical"]["location"] == ""
+    assert by_name["Together AI"]["highlights"] == discovery._resume_data("experience")["together_ai"]["resume_highlights"]
+    assert "Java" not in {item for group in doc["skills"] for item in group["keywords"]}
+
+
+def test_agents_can_discover_read_only_interfaces_without_javascript(client):
+    for path in ("/llms.txt", "/llms-full.txt"):
+        text = client.get(path).text
+        for endpoint in ("/mcp", "/graphql", "/context.json"):
+            assert discovery.absolute(endpoint) in text
+        assert "read-only" in text
+    html = discovery.snapshot_html().decode()
+    for endpoint in ("/mcp", "/graphql", "/context.json"):
+        assert f'href="{endpoint}"' in html
+    assert "University of Colorado Boulder" in html
+    assert "Computer Science" in client.get("/llms-full.txt").text

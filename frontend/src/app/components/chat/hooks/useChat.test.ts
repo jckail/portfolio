@@ -181,9 +181,10 @@ describe('useChat', () => {
       expect(getChatSessionId()).toBe(id);
     });
 
-    it('uses the analytics session id once analytics consent is given', () => {
+    it('keeps an independent chat session even with saved analytics acceptance', () => {
       localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-      expect(getChatSessionId()).toBe('sid_test');
+      expect(getChatSessionId()).toMatch(/^chat_/);
+      expect(sessionStorage.getItem('ga_session_id')).toBeNull();
     });
 
     it('sends the chat id in the ga_session_id field the backend reads', async () => {

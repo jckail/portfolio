@@ -127,7 +127,7 @@ def test_the_home_page_carries_the_snapshot_inside_root(home):
 
 def test_the_snapshot_has_the_current_role_and_every_job_and_bullet(home):
     page = parse(home.text)
-    assert "Staff Software Engineer at Together AI" in home.text
+    assert "Staff Software Engineer, Agent Platform at Together AI" in home.text
     headings = [text for tag, text in page.headings if tag == "h3"]
     for index, job in enumerate(load_experience().root.values()):
         assert f"{job.title}, {job.company}" in headings
@@ -220,11 +220,13 @@ def test_canonical_social_cards_and_alternates(home):
     assert meta(page, name="twitter:image")["content"] == image
     assert meta(page, property="og:image:width")["content"] == "1200"
     assert meta(page, name="twitter:card")["content"] == "summary_large_image"
-    alternates = {lk["type"]: lk["href"] for lk in page.links if lk.get("rel") == "alternate"}
+    alternates = {(lk["type"], lk["href"]) for lk in page.links if lk.get("rel") == "alternate"}
     assert alternates == {
-        "text/plain": "https://www.jckail.com/llms.txt",
-        "application/json": "https://www.jckail.com/resume.json",
-        "application/pdf": "https://www.jckail.com/api/resume",
+        ("text/plain", "https://www.jckail.com/llms.txt"),
+        ("text/plain", "https://www.jckail.com/llms-full.txt"),
+        ("application/json", "https://www.jckail.com/resume.json"),
+        ("application/json", "https://www.jckail.com/context.json"),
+        ("application/pdf", "https://www.jckail.com/api/resume"),
     }
 
 
@@ -236,7 +238,7 @@ def test_json_ld_parses_and_describes_the_person(home):
     by_type = {node["@type"]: node for node in graph}
     assert set(by_type) == {"WebSite", "ProfilePage", "Person"}
     person = by_type["Person"]
-    assert person["jobTitle"] == "Staff Software Engineer"
+    assert person["jobTitle"] == "Staff Software Engineer, Agent Platform"
     assert person["worksFor"]["name"] == "Together AI"
     assert "https://github.com/jckail" in person["sameAs"]
     assert {"Python", "Go", "SQL"} <= set(person["knowsAbout"])
@@ -280,3 +282,23 @@ def test_visible_bullet_rule_matches_the_timeline_component():
     assert discovery._visible_highlights(0, current)[: len(current.highlights)] == [h.strip() for h in current.highlights if h.strip()]
     shown = discovery._visible_highlights(len(jobs) - 1, older)
     assert all(h in shown for h in older.highlights[: discovery.OLDER_ROLE_HIGHLIGHTS])
+
+
+def test_profile_structured_data_uses_readable_capabilities_and_current_location():
+    person = next(node for node in discovery.jsonld_graph()["@graph"] if node["@type"] == "Person")
+    assert person["address"]["addressLocality"] == "San Francisco"
+    assert person["address"]["addressRegion"] == "CA"
+    assert "Agent runtimes & harnesses" in person["knowsAbout"]
+    assert "agent_harnesses" not in person["knowsAbout"]
+    assert person["alumniOf"] == [{"@type": "CollegeOrUniversity", "name": "University of Colorado Boulder"}]
+
+
+def test_static_shell_matches_current_identity_and_discovers_agent_interfaces():
+    with open(INDEX_SOURCE, encoding="utf-8") as source:
+        html = source.read()
+    page = parse(html)
+    assert "San Francisco" in meta(page, name="description")["content"]
+    assert '"addressLocality": "Denver"' not in html
+    assert meta(page, name="keywords") is None  # avoid an unhelpful keyword list
+    for path in ("/context.json", "/mcp", "/graphql"):
+        assert any(link.get("href") == discovery.absolute(path) for link in page.links)

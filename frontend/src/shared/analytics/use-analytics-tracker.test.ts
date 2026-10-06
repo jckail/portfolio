@@ -1,54 +1,23 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { setCookieConsent } from '../utils/cookie-consent';
-import { flush, resetForTests } from './core';
-import { resetTrackerForTests } from './tracker';
+import { COOKIE_CONSENT_KEY } from '../utils/cookie-consent';
 import { useAnalyticsTracker } from './use-analytics-tracker';
 
-const beacon = vi.fn((_url: string, _body?: unknown) => true);
-
-// jsdom cannot navigate; the tracker has already seen the click by now.
-const noNav = (e: Event) => e.preventDefault();
-
-describe('useAnalyticsTracker', () => {
-  beforeEach(() => {
-    document.addEventListener('click', noNav);
-    localStorage.clear();
-    resetForTests();
-    resetTrackerForTests();
-    beacon.mockClear();
-    Object.defineProperty(navigator, 'sendBeacon', { value: beacon, configurable: true });
-  });
-  afterEach(() => {
-    document.body.innerHTML = '';
-    document.removeEventListener('click', noNav);
-  });
-
-  it('is inert until Accept, and stops the moment consent is withdrawn', async () => {
+describe('retired analytics hook', () => {
+  it('installs no observers, listeners or timers even with saved acceptance', () => {
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+    const listener = vi.spyOn(window, 'addEventListener');
+    const timer = vi.spyOn(globalThis, 'setTimeout');
+    const observer = vi.spyOn(globalThis, 'MutationObserver');
     const { unmount } = renderHook(() => useAnalyticsTracker());
-    window.dispatchEvent(new CustomEvent('portfolio:track', { detail: { event: 'chat_open' } }));
-    flush();
-    expect(beacon).not.toHaveBeenCalled();
-
-    setCookieConsent('accepted');
-    window.dispatchEvent(
-      new CustomEvent('portfolio:track', {
-        detail: { event: 'chat_action_confirmed', props: { tool: 'contact_jordan', email: 'a@b.co' } },
-      })
-    );
-    flush();
-    expect(beacon).toHaveBeenCalledTimes(1);
-
-    setCookieConsent('denied');
-    beacon.mockClear();
-    const link = document.createElement('a');
-    link.href = 'https://example.org/';
-    document.body.appendChild(link);
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    window.dispatchEvent(new CustomEvent('portfolio:track', { detail: { event: 'chat_open' } }));
-    flush();
-    expect(beacon).not.toHaveBeenCalled();
     unmount();
+    expect(listener).not.toHaveBeenCalled();
+    expect(timer).not.toHaveBeenCalled();
+    expect(observer).not.toHaveBeenCalled();
+    listener.mockRestore();
+    timer.mockRestore();
+    observer.mockRestore();
+    localStorage.removeItem(COOKIE_CONSENT_KEY);
   });
 });

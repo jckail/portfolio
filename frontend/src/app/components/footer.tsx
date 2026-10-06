@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { buttonize } from '../../shared/utils/a11y';
-import { openCookieSettings } from '../../shared/utils/cookie-consent';
 import '../../styles/components/footer.css';
 
 interface FooterProps {
@@ -15,8 +14,8 @@ const scrollToTop = () => scrollToSection('about');
 
 const Footer: React.FC<FooterProps> = memo(({ onDoodleToggle, doodleClickCount, isPartyMode }) => {
   const getDoodleText = () => {
-    if (isPartyMode) return "Click to end the party";
-    return doodleClickCount === 0 ? "Click To Doodle with Dots" : "Click To Doodle with Doodles";
+    if (isPartyMode) return 'Click to end the party';
+    return doodleClickCount === 0 ? 'Click To Doodle with Dots' : 'Click To Doodle with Doodles';
   };
 
   return (
@@ -25,19 +24,10 @@ const Footer: React.FC<FooterProps> = memo(({ onDoodleToggle, doodleClickCount, 
         <div className="footer-links">
           {/* The API docs are served only when the backend runs in dev mode */}
           {import.meta.env.DEV && (
-            <a
-              href="/docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link"
-            >
+            <a href="/docs" target="_blank" rel="noopener noreferrer" className="footer-link">
               OpenAPI Doc
             </a>
           )}
-
-          <span className="footer-link" {...buttonize(openCookieSettings)}>
-            Cookie settings
-          </span>
 
           <span className="footer-link" {...buttonize(scrollToTop)}>
             Scroll to top
@@ -46,7 +36,6 @@ const Footer: React.FC<FooterProps> = memo(({ onDoodleToggle, doodleClickCount, 
             {getDoodleText()}
           </span>
         </div>
-
       </div>
     </footer>
   );

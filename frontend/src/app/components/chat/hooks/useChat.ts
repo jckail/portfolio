@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-import { trackChatMessage, getSessionId } from '../../../../shared/utils/analytics';
-import { hasAnalyticsConsent } from '../../../../shared/utils/cookie-consent';
+import { trackChatMessage } from '../../../../shared/utils/analytics';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 import {
   executeChatAction,
@@ -42,12 +41,10 @@ const CHAT_SESSION_KEY = 'chat_session_id';
 
 /**
  * ID the backend stores chat turns under (sent as `ga_session_id`, the
- * field name the server expects). It is only joined to the analytics session
- * when the visitor has accepted analytics cookies; otherwise it is a random
- * per-tab ID with no link to GA.
+ * field name the server expects). It is an independent random
+ * per-tab ID with no link to visitor analytics.
  */
 export function getChatSessionId(): string {
-  if (hasAnalyticsConsent()) return getSessionId();
   try {
     let id = sessionStorage.getItem(CHAT_SESSION_KEY);
     if (!id) {

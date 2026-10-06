@@ -16,6 +16,7 @@ import '../../../styles/components/sections/skills.css';
 const CATEGORY_ORDER = [
   'Artificial Intelligence',
   'Programming Languages',
+  'Knowledge & Graph Systems',
   'Data Engineering',
 ];
 const FEATURED_CATEGORY = 'Artificial Intelligence';
@@ -30,67 +31,69 @@ function compareCategories(a: string, b: string): number {
   return a.localeCompare(b);
 }
 
-const SkillItem = memo(({
-  skill,
-  onSelect,
-}: {
-  skill: Skill & { key: string };
-  onSelect: (key: string) => void;
-}) => (
-  <li>
-    <button
-      type="button"
-      className="skill-chip"
-      onMouseEnter={prefetchModal}
-      onFocus={prefetchModal}
-      title={`${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`}
-      aria-label={`View ${skill.display_name} details`}
-      onClick={() => onSelect(skill.key)}
-    >
-      <SkillIcon
-        name={skill.image}
-        className="skill-chip-icon"
-        size={20}
-        aria-label={skill.display_name}
-      />
-      <span className="skill-name">{skill.display_name}</span>
-    </button>
-  </li>
-));
+const SkillItem = memo(
+  ({ skill, onSelect }: { skill: Skill & { key: string }; onSelect: (key: string) => void }) => (
+    <li>
+      <button
+        type="button"
+        className="skill-chip"
+        onMouseEnter={prefetchModal}
+        onFocus={prefetchModal}
+        title={
+          skill.years_of_experience > 0
+            ? `${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`
+            : 'Hands-on use'
+        }
+        aria-label={`View ${skill.display_name} details`}
+        onClick={() => onSelect(skill.key)}
+      >
+        <SkillIcon
+          name={skill.image}
+          className="skill-chip-icon"
+          size={20}
+          aria-label={skill.display_name}
+        />
+        <span className="skill-name">{skill.display_name}</span>
+      </button>
+    </li>
+  )
+);
 SkillItem.displayName = 'SkillItem';
 
-const SkillCategory = memo(({
-  category,
-  skillList,
-  onSkillSelect,
-}: {
-  category: string;
-  skillList: (Skill & { key: string })[];
-  onSkillSelect: (key: string) => void;
-}) => (
-  <div className={`skill-category${category === FEATURED_CATEGORY ? ' is-featured' : ''}`}>
-    <h3>
-      {category}
-      <span className="skill-category-count">
-        <span className="sr-only">, </span>
-        {skillList.length}
-        <span className="sr-only"> skills</span>
-      </span>
-    </h3>
-    <ul className="skill-list">
-      {skillList.map(skill => (
-        <SkillItem key={skill.key} skill={skill} onSelect={onSkillSelect} />
-      ))}
-    </ul>
-  </div>
-));
+const SkillCategory = memo(
+  ({
+    category,
+    skillList,
+    onSkillSelect,
+  }: {
+    category: string;
+    skillList: (Skill & { key: string })[];
+    onSkillSelect: (key: string) => void;
+  }) => (
+    <div className={`skill-category${category === FEATURED_CATEGORY ? ' is-featured' : ''}`}>
+      <h3>
+        {category}
+        <span className="skill-category-count">
+          <span className="sr-only">, </span>
+          {skillList.length}
+          <span className="sr-only"> skills</span>
+        </span>
+      </h3>
+      <ul className="skill-list">
+        {skillList.map((skill) => (
+          <SkillItem key={skill.key} skill={skill} onSelect={onSkillSelect} />
+        ))}
+      </ul>
+    </div>
+  )
+);
 SkillCategory.displayName = 'SkillCategory';
 
 // Name, description, category, tags and the names of related skills.
 function matchesQuery(skillsData: SkillsData, skill: Skill, query: string): boolean {
   if (!query) return true;
   const text = skillSearchText(skillsData, skill);
-  return query.split(/\s+/).every(word => text.includes(word));
+  return query.split(/\s+/).every((word) => text.includes(word));
 }
 
 const TechnicalSkills: React.FC = () => {
@@ -111,44 +114,43 @@ const TechnicalSkills: React.FC = () => {
 
   const normalizedQuery = query.trim().toLowerCase();
 
-  const { sortedCategories, categorizedSkills, allCategories, totalVisible } =
-    useMemo(() => {
-      if (!skillsData) {
-        return {
-          sortedCategories: [] as string[],
-          categorizedSkills: {} as Record<string, (Skill & { key: string })[]>,
-          allCategories: [] as string[],
-          totalVisible: 0,
-        };
-      }
-
-      const categorized: Record<string, (Skill & { key: string })[]> = {};
-      let visible = 0;
-
-      for (const [key, skill] of Object.entries(skillsData)) {
-        if (activeCategory && skill.general_category !== activeCategory) {
-          continue;
-        }
-        if (!matchesQuery(skillsData, skill, normalizedQuery)) continue;
-        const category = skill.general_category;
-        if (!categorized[category]) categorized[category] = [];
-        categorized[category].push({ key, ...skill });
-        visible += 1;
-      }
-
-      const categories = Object.keys(categorized).sort(compareCategories);
-
-      const all = Array.from(
-        new Set(Object.values(skillsData).map(s => s.general_category))
-      ).sort(compareCategories);
-
+  const { sortedCategories, categorizedSkills, allCategories, totalVisible } = useMemo(() => {
+    if (!skillsData) {
       return {
-        sortedCategories: categories,
-        categorizedSkills: categorized,
-        allCategories: all,
-        totalVisible: visible,
+        sortedCategories: [] as string[],
+        categorizedSkills: {} as Record<string, (Skill & { key: string })[]>,
+        allCategories: [] as string[],
+        totalVisible: 0,
       };
-    }, [skillsData, normalizedQuery, activeCategory]);
+    }
+
+    const categorized: Record<string, (Skill & { key: string })[]> = {};
+    let visible = 0;
+
+    for (const [key, skill] of Object.entries(skillsData)) {
+      if (activeCategory && skill.general_category !== activeCategory) {
+        continue;
+      }
+      if (!matchesQuery(skillsData, skill, normalizedQuery)) continue;
+      const category = skill.general_category;
+      if (!categorized[category]) categorized[category] = [];
+      categorized[category].push({ key, ...skill });
+      visible += 1;
+    }
+
+    const categories = Object.keys(categorized).sort(compareCategories);
+
+    const all = Array.from(new Set(Object.values(skillsData).map((s) => s.general_category))).sort(
+      compareCategories
+    );
+
+    return {
+      sortedCategories: categories,
+      categorizedSkills: categorized,
+      allCategories: all,
+      totalVisible: visible,
+    };
+  }, [skillsData, normalizedQuery, activeCategory]);
 
   if (error) return <div className="error-message">Error: {error}</div>;
 
@@ -172,7 +174,7 @@ const TechnicalSkills: React.FC = () => {
             className="skills-search-input"
             placeholder="Search by name, tag, related skill or category…"
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             autoComplete="off"
           />
           <div className="skills-category-filters" role="group" aria-label="Filter by category">
@@ -184,15 +186,13 @@ const TechnicalSkills: React.FC = () => {
             >
               All
             </button>
-            {allCategories.map(category => (
+            {allCategories.map((category) => (
               <button
                 key={category}
                 type="button"
                 className={`skills-filter-chip${activeCategory === category ? ' is-active' : ''}`}
                 aria-pressed={activeCategory === category}
-                onClick={() =>
-                  setActiveCategory(prev => (prev === category ? null : category))
-                }
+                onClick={() => setActiveCategory((prev) => (prev === category ? null : category))}
               >
                 {category}
               </button>
@@ -212,7 +212,7 @@ const TechnicalSkills: React.FC = () => {
           <p className="skills-empty">No skills match that filter. Try another search.</p>
         ) : (
           <div className="skills-grid">
-            {sortedCategories.map(category => (
+            {sortedCategories.map((category) => (
               <SkillCategory
                 key={category}
                 category={category}
