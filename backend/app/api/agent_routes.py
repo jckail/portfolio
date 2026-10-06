@@ -131,7 +131,7 @@ async def context_document(request: Request):
 
 settings = get_settings()
 # Exact production/local origins; no arbitrary wildcard host or Origin trust.
-origins = {PUBLIC_URL, "https://jckail.com", *settings.allowed_origins}
+origins = {PUBLIC_URL, "https://jckail.com", "https://jordankail.ai", "https://www.jordankail.ai", *settings.allowed_origins}
 if settings.production_url:
     origins.add(settings.production_url.rstrip("/"))
 hosts = {urlsplit(origin).netloc for origin in origins}

@@ -115,6 +115,11 @@ def test_mcp_protocol_initialization_tools_resources_and_privacy(client):
     denied = client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
                          headers={"Origin": "https://evil.example", "Accept": "application/json, text/event-stream"})
     assert denied.status_code == 403
+    for domain in ("jordankail.ai", "www.jordankail.ai"):
+        allowed = client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
+                              headers={"Host": domain, "Origin": f"https://{domain}",
+                                       "Accept": "application/json, text/event-stream"})
+        assert allowed.status_code == 200
     assert client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
                        headers={"Host": "evil.example", "Accept": "application/json, text/event-stream"}).status_code == 421
     client.base_url = "http://testserver"
