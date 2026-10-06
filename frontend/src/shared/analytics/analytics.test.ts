@@ -8,14 +8,6 @@ import { reportDeepLinks, resetTrackerForTests, startTracker } from './tracker';
 
 const beacon = vi.fn((_url: string, _body?: BodyInit | null) => true);
 
-function sent(): { event: string; props: Record<string, unknown> }[] {
-  return beacon.mock.calls.map(call => {
-    const blob = call[1] as Blob;
-    // Blob text is async in jsdom; the tests stash the raw string instead.
-    return JSON.parse((blob as unknown as { __body: string }).__body);
-  });
-}
-
 class FakeBlob {
   __body: string;
   constructor(parts: string[]) {
@@ -45,51 +37,17 @@ describe('product analytics', () => {
     document.removeEventListener('click', noNav);
   });
 
-  it('sends nothing before consent', () => {
-    track('chat_open');
-    void trackThemeChange('dark', 'light');
-    void trackSectionView('about');
-    flush();
-    vi.advanceTimersByTime(10_000);
-    expect(beacon).not.toHaveBeenCalled();
-  });
-
-  it('batches after consent and flushes on the timer', () => {
-    setCookieConsent('accepted');
-    track('chat_open');
-    expect(beacon).not.toHaveBeenCalled();
-    vi.advanceTimersByTime(3500);
-    expect(sent()).toEqual([{ event: 'chat_open', props: {} }]);
-    expect(beacon.mock.calls[0][0]).toBe('/api/events');
-  });
-
-  it('drops queued events when consent is withdrawn', () => {
-    setCookieConsent('accepted');
-    track('chat_open');
-    setCookieConsent('denied');
-    vi.advanceTimersByTime(10_000);
-    flush();
-    expect(beacon).not.toHaveBeenCalled();
-  });
-
-  it('collapses an immediate duplicate', () => {
+  it('sends nothing when a prior accept is stored', async () => {
     setCookieConsent('accepted');
     track('chat_open');
     track('chat_open');
-    flush();
-    expect(beacon).toHaveBeenCalledTimes(1);
-  });
-
-  it('routes legacy helpers without free text', async () => {
-    setCookieConsent('accepted');
+    await trackThemeChange('dark', 'light');
+    await trackSectionView('about');
     await trackChatMessage('sent', 120);
-    await trackThemeChange('party', 'dark');
     flush();
-    const events = sent();
-    expect(events).toContainEqual({ event: 'chat_message_sent', props: { len: '51-200' } });
-    expect(events.map(e => e.event)).toEqual(
-      expect.arrayContaining(['theme_change', 'party_mode'])
-    );
+    vi.advanceTimersByTime(10_000);
+    expect(beacon).not.toHaveBeenCalled();
+    expect(window.gtag).not.toHaveBeenCalled();
   });
 
   it('allowlists and bounds props', () => {
@@ -117,14 +75,11 @@ describe('product analytics', () => {
     expect(slugify('Together AI')).toBe('together-ai');
   });
 
-  it('reports deep links from the arrival URL', () => {
+  it('does not report deep links', () => {
     setCookieConsent('accepted');
     reportDeepLinks('?skill=Python&ai_chat=open&theme=dark', '#projects');
     flush();
-    const events = sent();
-    expect(events).toContainEqual({ event: 'deep_link_open', props: { param: 'skill', skill: 'python' } });
-    expect(events).toContainEqual({ event: 'deep_link_open', props: { param: 'ai_chat' } });
-    expect(events).toContainEqual({ event: 'deep_link_open', props: { param: 'hash', section: 'projects' } });
+    expect(beacon).not.toHaveBeenCalled();
   });
 
   it('observes dialogs, outbound links and phone form; stops cleanly', () => {
@@ -156,16 +111,8 @@ describe('product analytics', () => {
       dialog.remove();
       await new Promise(r => queueMicrotask(() => r(null)));
       flush();
-      const events = sent();
-      const names = events.map(e => e.event);
-      expect(names).toEqual(
-        expect.arrayContaining(['modal_open', 'outbound_click', 'phone_reveal_requested', 'modal_close'])
-      );
-      expect(events).toContainEqual({ event: 'modal_open', props: { kind: 'experience', company: 'together-ai' } });
-      expect(events).toContainEqual({ event: 'outbound_click', props: { host: 'github.com' } });
-      expect(events).toContainEqual({ event: 'outbound_click', props: { host: 'mailto' } });
-      expect(JSON.stringify(events)).not.toContain('example.com');
-      expect(JSON.stringify(events)).not.toContain('secret');
+      expect(beacon).not.toHaveBeenCalled();
+      expect(window.gtag).not.toHaveBeenCalled();
 
       stop();
       beacon.mockClear();
@@ -182,9 +129,7 @@ describe('product analytics', () => {
       window.dispatchEvent(new ErrorEvent('error', { error: new Error(`boom ${i} user@example.com`) }));
     }
     flush();
-    const errors = sent().filter(e => e.event === 'client_error');
-    expect(errors.length).toBe(5);
-    expect(JSON.stringify(errors)).not.toContain('user@example.com');
+    expect(beacon).not.toHaveBeenCalled();
     stop();
   });
 });

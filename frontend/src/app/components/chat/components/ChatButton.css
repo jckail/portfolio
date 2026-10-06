@@ -2,8 +2,6 @@
    pinned to the bottom so the button lines up with the content column. */
 .chat-fab-dock {
   position: fixed;
-  /* --cookie-banner-height is published by the cookie banner while it shows,
-     so the launcher stays reachable above it. */
   bottom: calc(16px + var(--cookie-banner-height, 0px));
   left: 50%;
   transform: translateX(-50%);

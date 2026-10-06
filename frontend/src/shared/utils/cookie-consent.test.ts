@@ -6,6 +6,7 @@ import {
   setCookieConsent,
   hasAnalyticsConsent,
   clearAnalyticsCookies,
+  disableBrowserAnalytics,
   openCookieSettings,
   OPEN_COOKIE_SETTINGS_EVENT,
 } from './cookie-consent';
@@ -15,22 +16,32 @@ describe('cookie-consent', () => {
     localStorage.clear();
   });
 
-  it('starts with no consent', () => {
+  it('does not grant analytics for a missing, denied, or previously accepted choice', () => {
     expect(getCookieConsent()).toBeNull();
     expect(hasAnalyticsConsent()).toBe(false);
-  });
 
-  it('persists accept/deny', () => {
-    setCookieConsent('accepted');
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
     expect(getCookieConsent()).toBe('accepted');
-    expect(hasAnalyticsConsent()).toBe(true);
-    expect(localStorage.getItem(COOKIE_CONSENT_KEY)).toBe('accepted');
+    expect(hasAnalyticsConsent()).toBe(false);
 
-    setCookieConsent('denied');
+    localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
     expect(hasAnalyticsConsent()).toBe(false);
   });
 
-  describe('GA integration', () => {
+  it('does not throw when storage is blocked', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    expect(hasAnalyticsConsent()).toBe(false);
+    expect(() => getCookieConsent()).not.toThrow();
+    expect(() => setCookieConsent('accepted')).not.toThrow();
+    expect(() => disableBrowserAnalytics()).not.toThrow();
+  });
+
+  describe('GA stays off', () => {
     beforeEach(() => {
       window.gtag = vi.fn();
       window.loadGoogleAnalytics = vi.fn();
@@ -40,35 +51,19 @@ describe('cookie-consent', () => {
       delete window.loadGoogleAnalytics;
     });
 
-    it('sends all Consent Mode v2 signals on every update', () => {
+    it('does not update consent mode or load gtag.js when a choice is stored', () => {
       setCookieConsent('accepted');
-      expect(window.gtag).toHaveBeenCalledWith('consent', 'update', {
-        analytics_storage: 'granted',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-      });
       setCookieConsent('denied');
-      expect(window.gtag).toHaveBeenLastCalledWith('consent', 'update', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-      });
-    });
-
-    it('loads gtag.js only on accept', () => {
-      setCookieConsent('denied');
+      expect(window.gtag).not.toHaveBeenCalled();
       expect(window.loadGoogleAnalytics).not.toHaveBeenCalled();
-      setCookieConsent('accepted');
-      expect(window.loadGoogleAnalytics).toHaveBeenCalledTimes(1);
+      expect(hasAnalyticsConsent()).toBe(false);
     });
 
-    it('clears GA cookies when consent is denied or withdrawn', () => {
+    it('clears GA cookies without removing unrelated cookies', () => {
       document.cookie = '_ga=GA1.1.123; path=/';
       document.cookie = '_ga_2X0WFK46K5=GS1.1.456; path=/';
       document.cookie = 'unrelated=keep; path=/';
-      setCookieConsent('denied');
+      disableBrowserAnalytics();
       expect(document.cookie).not.toMatch(/_ga/);
       expect(document.cookie).toContain('unrelated=keep');
       document.cookie = 'unrelated=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
@@ -77,6 +72,19 @@ describe('cookie-consent', () => {
 
   it('clearAnalyticsCookies is a no-op without GA cookies', () => {
     expect(() => clearAnalyticsCookies()).not.toThrow();
+  });
+
+  it('does not throw when reading cookies fails', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get() {
+        throw new Error('blocked');
+      },
+    });
+    expect(() => clearAnalyticsCookies()).not.toThrow();
+    if (descriptor) Object.defineProperty(Document.prototype, 'cookie', descriptor);
+    else delete (document as { cookie?: string }).cookie;
   });
 
   it('openCookieSettings dispatches the reopen event', () => {

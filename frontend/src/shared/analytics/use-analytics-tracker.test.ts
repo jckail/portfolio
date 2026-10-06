@@ -25,12 +25,8 @@ describe('useAnalyticsTracker', () => {
     document.removeEventListener('click', noNav);
   });
 
-  it('is inert until Accept, and stops the moment consent is withdrawn', async () => {
+  it('stays inert for a prior accept and after that choice is withdrawn', async () => {
     const { unmount } = renderHook(() => useAnalyticsTracker());
-    window.dispatchEvent(new CustomEvent('portfolio:track', { detail: { event: 'chat_open' } }));
-    flush();
-    expect(beacon).not.toHaveBeenCalled();
-
     setCookieConsent('accepted');
     window.dispatchEvent(
       new CustomEvent('portfolio:track', {
@@ -38,10 +34,9 @@ describe('useAnalyticsTracker', () => {
       })
     );
     flush();
-    expect(beacon).toHaveBeenCalledTimes(1);
+    expect(beacon).not.toHaveBeenCalled();
 
     setCookieConsent('denied');
-    beacon.mockClear();
     const link = document.createElement('a');
     link.href = 'https://example.org/';
     document.body.appendChild(link);

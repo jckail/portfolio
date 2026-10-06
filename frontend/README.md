@@ -88,13 +88,12 @@ is the resume PDF download, which needs a raw `fetch` for the blob.
 ### Navigation & Analytics
 
 - `useScrollSpy` (owned by `MainContent`) syncs the URL hash with the visible
-  section and reports section views to GA4.
-- Product analytics are a typed, closed event set (`shared/analytics/events.ts`).
-  `track()` sends batched, anonymous events to `POST /api/events` and mirrors
-  some to GA4, but only after the visitor accepts analytics; withdrawing
-  consent (footer "Cookie settings") stops the tracker and empties the queue.
-  The backend keeps its own copy of the names and a test asserts they match.
-  Props are low-cardinality and validated; never send free text.
+  section. It does not send those views to Google Analytics.
+- Product event names remain a typed, closed set (`shared/analytics/events.ts`).
+  The browser does not send them to `POST /api/events` or GA4, including when
+  `localStorage` still says the visitor accepted analytics. The backend keeps
+  its own copy of the names and a test asserts they match. Props stay
+  low-cardinality; never send free text.
 - Modals (experience, skills, projects, contact) are lazy loaded and
   deep-linkable via query params (`?skill=`, `?project=`, `?company=`). Deep
   links must not use a raw bracket lookup on a parsed object.
@@ -149,7 +148,7 @@ the riskiest client logic:
   malformed frames, unmount cleanup, URL sync
 - `ConfirmActionCard` and `chat-confirm` — draft validation, email gate,
   confirm and cancel frames
-- `shared/analytics` — consent gating, queueing, de-duplication, tracker
+- `shared/analytics` — browser analytics stay off, including a stored accept
 - `useSkill` — `?skill=` deep links, back/forward navigation
 - `analytics` — session ids, page-view hash de-duplication
 - `theme-store` — toggling, persistence, party mode

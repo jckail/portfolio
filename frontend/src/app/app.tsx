@@ -12,7 +12,6 @@ import { getThemeConfig } from '../shared/utils/theme/get-theme-config';
 import { ErrorBoundary } from './components/error-boundary';
 import { initializeAnalytics, trackPageView, trackAnchorChange } from '../shared/utils/analytics';
 import { useAnalyticsTracker } from '../shared/analytics';
-import CookieConsentPortal from '../shared/components/cookie/cookie-consent-portal';
 import { CommandPaletteHost } from '../shared/components/command-palette-host';
 import ReadingProgress from '../shared/components/reading-progress';
 import ChatPortal from './components/chat/chat-portal';
@@ -112,7 +111,6 @@ const App: React.FC = () => {
               {/* Tiny launcher; the chat panel itself is lazy-loaded inside */}
               <ChatPortal />
 
-              <CookieConsentPortal />
               <CommandPaletteHost />
             </div>
           </ThemedParticles>

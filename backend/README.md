@@ -340,7 +340,7 @@ rather than calling `os.getenv` in feature code.
   `KNOWN_EVENTS` is the closed list; the Terraform metrics in `infra/` filter on it. Fields are sanitised; emails, addresses, message text
   and secrets are dropped. Name every `SlidingWindowLimiter` (`name=`) so
   `rate_limit.blocked` carries a label.
-- `POST /api/events` (204) takes `{event, props}` from the SPA after consent.
+- `POST /api/events` (204) still accepts `{event, props}`. The SPA does not call it.
   The name must be in `EVENT_NAMES` (mirrors `frontend/src/shared/analytics/events.ts`;
   a test keeps them equal) and props are an allowlist validated against the data.
 - `GET /api/admin/analytics` and `/api/admin/health` return process-local

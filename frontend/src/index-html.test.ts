@@ -10,13 +10,11 @@ const html = readFileSync(resolve(root, 'index.html'), 'utf8');
 const publicPath = (url: string) => resolve(root, 'public', url.replace(/^\//, ''));
 
 describe('index.html', () => {
-  it('loads the GA bootstrap deferred, ahead of the app module', () => {
-    const ga = html.match(/<script[^>]*src="\/ga-init\.js"[^>]*>/)?.[0] ?? '';
-    expect(ga).toMatch(/\sdefer[\s>]/);
-    expect(ga).not.toMatch(/\sasync[\s>]/);
-    // Deferred classic and module scripts run in document order, so ga-init
-    // defines window.loadGoogleAnalytics before cookie-consent can call it.
-    expect(html.indexOf('/ga-init.js')).toBeLessThan(html.indexOf('type="module"'));
+  it('does not load Google Analytics', () => {
+    expect(html).not.toMatch(/ga-init\.js|googletagmanager|google-analytics/);
+    const bootstrap = readFileSync(publicPath('/ga-init.js'), 'utf8');
+    expect(bootstrap).not.toMatch(/googletagmanager|google-analytics|analytics_storage|localStorage/);
+    expect(bootstrap).toMatch(/loadGoogleAnalytics/);
   });
 
   it('does not depend on Google Fonts', () => {

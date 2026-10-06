@@ -36,7 +36,7 @@ assistant on Vertex AI Gemini (Anthropic Claude is a supported alternative).
   has several triggers: ten theme toggles within five seconds, the Konami
   code, `?party=1` or `#party`, the second footer doodle click, and the chat
   `set_theme` tool
-- 🍪 Cookie consent (denied by default, reopenable from the footer); analytics, including a first-party anonymous event stream, run only after opt-in
+- 🔒 No cookie-consent banner and no browser analytics. Theme, chat, and contact work without a stored analytics choice
 - 📱 Responsive design for all devices
 - ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
 - 🌓 Light/dark mode — and a hidden party mode 🎉

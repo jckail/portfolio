@@ -10,26 +10,21 @@ import {
 import { COOKIE_CONSENT_KEY } from './cookie-consent';
 
 describe('analytics', () => {
-  it('does not poll without consent and can wait for gtag after consent is granted', async () => {
+  it('does not poll or call gtag when a prior accept is stored', async () => {
     vi.useFakeTimers();
     vi.resetModules();
     const fresh = await import('./analytics');
     const polling = vi.spyOn(globalThis, 'setInterval');
     try {
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
-      // @ts-expect-error simulate the script that is not loaded before consent
-      window.gtag = undefined;
+      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+      window.gtag = vi.fn();
+      const pending = fresh.trackPageView('/');
+      await vi.advanceTimersByTimeAsync(6000);
+      await pending;
+      await fresh.initializeAnalytics();
       await fresh.trackModalView('demo', 'project', 'Demo');
       expect(polling).not.toHaveBeenCalled();
-
-      localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-      const pending = fresh.initializeAnalytics();
-      expect(polling).toHaveBeenCalledTimes(1);
-      window.gtag = vi.fn();
-      await vi.advanceTimersByTimeAsync(100);
-      await pending;
-      await fresh.trackModalView('demo', 'project', 'Demo');
-      expect(window.gtag).toHaveBeenCalledWith('event', 'modal_view', expect.objectContaining({ modal_id: 'demo' }));
+      expect(window.gtag).not.toHaveBeenCalled();
     } finally {
       polling.mockRestore();
       vi.clearAllTimers();
@@ -58,33 +53,16 @@ describe('analytics', () => {
   });
 
   describe('trackPageView', () => {
-    it('sends a page_view event with the given path', async () => {
+    it('sends no page_view when a prior accept is stored', async () => {
       await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
+      expect(window.gtag).not.toHaveBeenCalled();
     });
 
-    it('appends the current hash when the path has none', async () => {
+    it('sends no page_view for a hashed path', async () => {
       window.history.replaceState({}, '', '/#about');
       await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/#about' })
-      );
-    });
-
-    it('does not double-append a hash already in the path', async () => {
-      window.history.replaceState({}, '', '/#about');
       await trackPageView('/#about');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/#about' })
-      );
+      expect(window.gtag).not.toHaveBeenCalled();
     });
 
     it('skips events when cookie consent is denied', async () => {
@@ -111,34 +89,17 @@ describe('analytics', () => {
     // them should ever send a page_view, or GA4 pageview counts get
     // inflated ~2x for every scroll-driven section change.
 
-    it('trackAnchorChange sends exactly one page_view', async () => {
-      await trackAnchorChange('projects', 'about');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(1);
-    });
-
-    it('trackSectionView does not send its own page_view', async () => {
-      await trackSectionView('projects');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(0);
-    });
-
-    it('one section transition (both functions called together) sends exactly one page_view', async () => {
+    it('a section transition sends no page_view', async () => {
       await trackAnchorChange('projects', 'about');
       await trackSectionView('projects');
-      const pageViewCalls = (window.gtag as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[1] === 'page_view'
-      );
-      expect(pageViewCalls).toHaveLength(1);
+      expect(window.gtag).not.toHaveBeenCalled();
     });
   });
 
   describe('consent gating of the session id', () => {
-    it('does not create a session id when consent is denied', async () => {
+    it('does not create a session id for a prior accept or a denial', async () => {
+      await trackChatOpen();
+      expect(sessionStorage.getItem('ga_session_id')).toBeNull();
       localStorage.setItem(COOKIE_CONSENT_KEY, 'denied');
       await trackChatOpen();
       expect(sessionStorage.getItem('ga_session_id')).toBeNull();
@@ -152,24 +113,12 @@ describe('analytics', () => {
     // in reports.
     const calls = () => (window.gtag as ReturnType<typeof vi.fn>).mock.calls;
 
-    it('drops an unknown anchor from page_path', async () => {
+    it('does not send an unknown anchor', async () => {
       window.history.replaceState({}, '', '/#someone@example.com');
       await trackPageView('/');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
-      expect(JSON.stringify(calls())).not.toContain('example.com');
-    });
-
-    it('drops an unknown anchor passed in the path', async () => {
       await trackPageView('/#evil-payload');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'page_view',
-        expect.objectContaining({ page_path: '/' })
-      );
+      expect(window.gtag).not.toHaveBeenCalled();
+      expect(JSON.stringify(calls())).not.toContain('example.com');
     });
 
     it('skips anchor_change for an unknown anchor', async () => {
@@ -177,13 +126,9 @@ describe('analytics', () => {
       expect(window.gtag).not.toHaveBeenCalled();
     });
 
-    it('nulls an unknown previous anchor', async () => {
+    it('does not send an anchor change', async () => {
       await trackAnchorChange('projects', 'junk-value');
-      expect(window.gtag).toHaveBeenCalledWith(
-        'event',
-        'anchor_change',
-        expect.objectContaining({ new_anchor: 'projects', previous_anchor: null })
-      );
+      expect(window.gtag).not.toHaveBeenCalled();
     });
 
     it('skips section_view for an unknown section', async () => {
