@@ -9,8 +9,8 @@ Layout rules, chosen for applicant-tracking systems and LLM resume parsers
 (Ashby, Greenhouse, Lever, Workday, iCIMS):
 
     * US Letter, a single column, linear reading order
-    * headings: Summary, Experience, Skills, Projects (no Education section:
-      the repo has no education data and none is invented)
+    * headings: Summary, Experience, Education, Skills, Projects; education
+      is sourced from education.json without inferring a degree
     * real selectable text in an embedded, subsetted TrueType font with a
       Unicode map; no images, no tables, no header/footer content
     * "Company - Title - Location" line, then "MM/YYYY - MM/YYYY | Present"
@@ -42,22 +42,6 @@ PDF_NAME = "JordanKailResume.pdf"
 DASH = "–"  # en dash in date ranges
 SEP = "—"  # em dash in "Company - Title - Location"
 BULLET = "•"
-
-# Display order of skill categories (general_category in skills.json): the AI
-# work leads, matching the rest of the site. Unlisted categories follow.
-CATEGORY_ORDER = [
-    "Artificial Intelligence",
-    "Programming Languages",
-    "Data Engineering",
-    "Big Data",
-    "Data Science",
-    "Databases",
-    "Cloud Computing",
-    "DevOps",
-    "Web Development",
-    "Development Tools",
-]
-CATEGORY_LABEL = {"Artificial Intelligence": "AI & Machine Learning"}
 
 # Projects shown on the resume, in order. Text comes from projects.json.
 PROJECT_KEYS = ["super_teacher", "jobbr", "go_pilot", "ai_billing", "portfolio", "pointup", "qr_for_groups"]
@@ -104,7 +88,7 @@ def first_sentence(text: str) -> str:
 def load_content() -> dict:
     """Everything the resume says, derived from the data files."""
     contact, about = _load("contact"), _load("aboutme")
-    exp, skills, projects = _load("experience"), _load("skills"), _load("projects")
+    exp, projects = _load("experience"), _load("projects")
 
     roles = []
     for key, r in exp.items():
@@ -116,17 +100,13 @@ def load_content() -> dict:
                 "title": r.get("resume_title") or r["title"],
                 "dates": pretty_dates(r["date"]),
                 "raw_dates": r["date"],
-                "location": pretty_location(r["location"]),
-                "bullets": list(r["highlights"]),
+                "location": pretty_location(r.get("resume_location", r["location"])),
+                "bullets": list(r.get("resume_highlights", r["highlights"])),
             }
         )
 
-    grouped: dict[str, list[str]] = {}
-    for s in skills.values():
-        if s.get("professional_experience"):
-            grouped.setdefault(s["general_category"], []).append(s["display_name"])
-    order = [c for c in CATEGORY_ORDER if c in grouped] + [c for c in grouped if c not in CATEGORY_ORDER]
-    skill_groups = [(CATEGORY_LABEL.get(c, c), grouped[c]) for c in order]
+    # The PDF is a curated skills summary, not the entire site's technology catalog.
+    skill_groups = [(group["label"], group["items"]) for group in _load("resume_skills")["groups"]]
 
     projs = []
     for k in PROJECT_KEYS:
@@ -135,7 +115,7 @@ def load_content() -> dict:
         projs.append(
             {
                 "title": p["title"].strip(),
-                "description": first_sentence(p["description"]),
+                "description": first_sentence(p.get("resume_description", p["description"])),
                 "links": links,
                 "urls": [u for u in (p.get("link"), p.get("link2")) if u],
             }
@@ -152,11 +132,17 @@ def load_content() -> dict:
             (bare_url(contact["github"]), contact["github"]),
             (bare_url(contact["website"]), contact["website"]),
         ],
-        "summary": " ".join(about["description"].split()),
+        "summary": " ".join(about.get("resume_summary", about["description"]).split()),
         "roles": roles,
+        "education": _load("education")["entries"],
         "skills": skill_groups,
         "projects": projs,
     }
+
+
+def role_heading(role: dict) -> str:
+    """Omit empty resume-only fields rather than printing dangling separators."""
+    return f" {SEP} ".join(role[field] for field in ("company", "title", "location") if role[field])
 
 
 def resume_text(c: dict | None = None) -> str:
@@ -166,8 +152,11 @@ def resume_text(c: dict | None = None) -> str:
     out.append(f"{c['location']} | {c['email']} | " + " | ".join(label for label, _ in c["links"]))
     out += ["", "SUMMARY", c["summary"], "", "EXPERIENCE"]
     for r in c["roles"]:
-        out += ["", f"{r['company']} {SEP} {r['title']} {SEP} {r['location']}", r["dates"]]
+        out += ["", role_heading(r), r["dates"]]
         out += [f"{BULLET} {b}" for b in r["bullets"]]
+    out += ["", "EDUCATION"]
+    for entry in c["education"]:
+        out += ["", f"{entry['institution']} {SEP} {entry['study']}", pretty_dates(entry["date"])]
     out += ["", "SKILLS"]
     out += [f"{label}: {', '.join(items)}" for label, items in c["skills"]]
     out += ["", "PROJECTS"]
@@ -187,7 +176,8 @@ def manifest(c: dict, text: str) -> dict:
         "current_dates": cur["raw_dates"],
         "companies": [r["raw_company"] for r in c["roles"]],
         "roles": [{"company": r["raw_company"], "bullets": r["bullets"]} for r in c["roles"]],
-        "sections": ["Summary", "Experience", "Skills", "Projects"],
+        "education": c["education"],
+        "sections": ["Summary", "Experience", "Education", "Skills", "Projects"],
         "text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
     }
 
@@ -205,7 +195,7 @@ def build_pdf(c: dict, out: Path) -> None:
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.pdfgen import canvas as rl_canvas
-    from reportlab.platypus import HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate, Spacer
+    from reportlab.platypus import HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate
 
     for name, fname in [("Roboto", "Roboto-Regular"), ("Roboto-Bold", "Roboto-Bold"),
                         ("Roboto-Italic", "Roboto-Italic"), ("Roboto-BoldItalic", "Roboto-BoldItalic")]:
@@ -225,12 +215,12 @@ def build_pdf(c: dict, out: Path) -> None:
     s_name = style("name", fontName="Roboto-Bold", fontSize=22, leading=26, textColor=accent)
     s_head = style("headline", fontName="Roboto-Bold", fontSize=11, leading=14, textColor=ink)
     s_contact = style("contact", fontSize=9, leading=12.5, textColor=muted)
-    s_sec = style("sec", fontName="Roboto-Bold", fontSize=11.5, leading=14, textColor=accent, spaceBefore=9, spaceAfter=1)
+    s_sec = style("sec", fontName="Roboto-Bold", fontSize=11.5, leading=14, textColor=accent, spaceBefore=6, spaceAfter=1)
     s_body = style("body", spaceAfter=2)
-    s_role = style("role", fontName="Roboto-Bold", fontSize=10, leading=13, spaceBefore=6)
+    s_role = style("role", fontName="Roboto-Bold", fontSize=10, leading=13, spaceBefore=4)
     s_dates = style("dates", fontSize=8.8, leading=11, textColor=muted, spaceAfter=1.2)
-    s_bullet = style("bullet", leftIndent=12, bulletIndent=2, bulletFontName="Roboto", bulletFontSize=9, spaceAfter=1.6)
-    s_skill = style("skill", spaceAfter=2.2)
+    s_bullet = style("bullet", leftIndent=12, bulletIndent=2, bulletFontName="Roboto", bulletFontSize=9, spaceAfter=0.5)
+    s_skill = style("skill", spaceAfter=1.2)
     s_proj = style("proj", fontName="Roboto-Bold", fontSize=9.4, leading=12.5, spaceBefore=3)
 
     def link(label: str, url: str) -> str:
@@ -249,11 +239,19 @@ def build_pdf(c: dict, out: Path) -> None:
 
     story += section("Experience")
     for r in c["roles"]:
-        head = [Paragraph(escape(f"{r['company']} {SEP} {r['title']} {SEP} {r['location']}"), s_role),
+        head = [Paragraph(escape(role_heading(r)), s_role),
                 Paragraph(escape(r["dates"]), s_dates)]
-        first, rest = r["bullets"][0], r["bullets"][1:]
-        story.append(KeepTogether(head + [Paragraph(escape(first), s_bullet, bulletText=BULLET)]))
-        story += [Paragraph(escape(b), s_bullet, bulletText=BULLET) for b in rest]
+        # Keep a role together so a short entry never leaves a lone bullet on the next page.
+        story.append(KeepTogether(head + [
+            Paragraph(escape(b), s_bullet, bulletText=BULLET) for b in r["bullets"]
+        ]))
+
+    story += section("Education")
+    for entry in c["education"]:
+        story.append(KeepTogether([
+            Paragraph(escape(f"{entry['institution']} {SEP} {entry['study']}"), s_role),
+            Paragraph(escape(pretty_dates(entry["date"])), s_dates),
+        ]))
 
     story += section("Skills")
     for label, items in c["skills"]:
@@ -264,7 +262,6 @@ def build_pdf(c: dict, out: Path) -> None:
         bits = [link(label, url) for label, url in zip(p["links"], p["urls"], strict=True)]
         title = escape(p["title"]) + (f" {SEP} " + ", ".join(bits) if bits else "")
         story.append(KeepTogether([Paragraph(title, s_proj), Paragraph(escape(p["description"]), s_body)]))
-    story.append(Spacer(1, 2))
 
     class Canvas(rl_canvas.Canvas):
         def __init__(self, *a, **kw):

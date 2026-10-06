@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connect your assistant — Jordan Kail</title><meta name="description" content="Read Jordan Kail's public portfolio through MCP, GraphQL, JSON, and plain text."><link rel="canonical" href="https://www.jckail.com/agents.html"><style>body{font:17px/1.6 system-ui,sans-serif;max-width:760px;margin:3rem auto;padding:0 1.5rem;color:#17243a;background:#fafbff}a{color:#3535b8}h1,h2{line-height:1.2}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef0f7;border:1px solid #d0d5e4;border-radius:8px;padding:1rem}code{font-size:.9em}li{margin:.5rem 0}</style></head>
+<body><main><a href="/">← Jordan Kail's portfolio</a><h1>Connect your assistant</h1><p>Give your assistant direct access to my public experience, projects, education, and skills. These interfaces are read-only and use the same portfolio content as this site. No API key is required.</p>
+<h2>MCP</h2><p>In a client that supports remote MCP over Streamable HTTP, add this server URL:</p><pre>https://www.jckail.com/mcp</pre><p>Client support varies; this server provides public tools and resources without OAuth. If your client requires OAuth or does not support Streamable HTTP, use the JSON or plain-text links below.</p><p>Example configuration for clients that accept an HTTP MCP server:</p><pre>{
+  "mcpServers": {
+    "jordan-kail": {
+      "type": "http",
+      "url": "https://www.jckail.com/mcp"
+    }
+  }
+}</pre><ul><li><code>get_portfolio_context</code> — all context or one section.</li><li><code>search_portfolio</code> — search public facts, returning up to 10 matches.</li><li><code>portfolio://jordan-kail/context</code> — public context resource.</li></ul><p>Try: “Summarize Jordan's agent-platform experience and link to the source projects.”</p>
+<h2>GraphQL</h2><p>Send a query to <a href="/graphql">/graphql</a>. The schema supports queries and introspection; mutations and subscriptions are unavailable.</p><pre>curl https://www.jckail.com/graphql \
+  -H 'Content-Type: application/json' \
+  --data '{"query":"{ profile { name title location summary } experience { company title highlights } projects { title url } education { institution study date } skillGroups { name items } }"}'</pre>
+<h2>Direct documents</h2><ul><li><a href="/context.json">Portfolio context JSON</a></li><li><a href="/resume.json">JSON Resume</a></li><li><a href="/api/resume">Resume PDF</a></li><li><a href="/llms.txt">LLM discovery index</a></li><li><a href="/llms-full.txt">Full portfolio text</a></li></ul><p>These endpoints describe public portfolio facts. They cannot send messages, access private contact details, run code, or query the database. Requests and query complexity are limited to keep the service available.</p></main></body></html>

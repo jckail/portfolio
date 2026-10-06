@@ -12,3 +12,9 @@ httpx==0.28.1
 # pyjwt <2.15.0 (CVE-2026 batch), via supabase-auth.
 anyio>=4.14.2
 pyjwt>=2.15.0
+# Read-only public agent context (official MCP SDK and GraphQL execution engine).
+mcp==1.30.0
+graphql-core==3.2.8
+# Existing CI audit blockers: fixed upstream transitive versions.
+multidict>=6.9.1,<7
+werkzeug>=3.1.9

@@ -188,6 +188,9 @@ def _link_header() -> str:
             f'<{CANONICAL_ORIGIN}/>; rel="canonical"',
             f'<{CANONICAL_ORIGIN}/llms.txt>; rel="alternate"; type="text/plain"',
             f'<{CANONICAL_ORIGIN}/resume.json>; rel="alternate"; type="application/json"',
+            f'<{CANONICAL_ORIGIN}/context.json>; rel="alternate"; type="application/json"',
+            f'<{CANONICAL_ORIGIN}/mcp>; rel="service"; type="application/json"',
+            f'<{CANONICAL_ORIGIN}/graphql>; rel="service"; type="application/json"',
             f'<{CANONICAL_ORIGIN}{RESUME_PDF_PATH}>; rel="alternate"; type="application/pdf"',
         )
     )

@@ -40,7 +40,13 @@ const isTypingTarget = (target: EventTarget | null) =>
 
 // URL sync (the ?skill= param and back-button behavior) belongs to whichever
 // section owns the selection (useSkill in Skills, local state elsewhere).
-const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, onClose, onNavigate }) => {
+const SkillModal: React.FC<SkillModalProps> = ({
+  skill,
+  skillKey,
+  skillsData,
+  onClose,
+  onNavigate,
+}) => {
   const titleId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -74,7 +80,14 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
   // Left/Right step through the category while focus is inside the dialog.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (
+        event.defaultPrevented ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      )
+        return;
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       if (isTypingTarget(event.target)) return;
       // The dialog, not just the content: the close button is its sibling
@@ -114,8 +127,14 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
               {skill.sub_category && <span className="skm-subcategory">{skill.sub_category}</span>}
             </p>
             <p className="skm-experience">
-              <strong>{yearsLabel(skill.years_of_experience)}</strong>
-              {skill.professional_experience ? ' · Professional experience' : ' · Personal and project experience'}
+              <strong>
+                {skill.years_of_experience > 0
+                  ? yearsLabel(skill.years_of_experience)
+                  : 'Hands-on use'}
+              </strong>
+              {skill.professional_experience
+                ? ' · Professional experience'
+                : ' · Personal and project experience'}
             </p>
           </div>
         </div>
@@ -124,7 +143,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
 
         {skill.tags.length > 0 && (
           <ul className="skm-tags" aria-label="Tags">
-            {skill.tags.map(tag => (
+            {skill.tags.map((tag) => (
               <li key={tag} className="skill-tag">
                 {formatTag(tag)}
               </li>
@@ -151,8 +170,8 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
             </p>
           ) : !hasUsage ? (
             <p className="skm-muted skm-empty">
-              Not tied to a specific role or project on this site yet. The description above is general background
-              on the technology.
+              Not tied to a specific role or project on this site yet. The description above is
+              general background on the technology.
             </p>
           ) : (
             <>
@@ -163,7 +182,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
               )}
               {usage.roles.length > 0 && (
                 <ul className="skm-roles" aria-label="Roles">
-                  {usage.roles.map(role => (
+                  {usage.roles.map((role) => (
                     <li key={role.key}>
                       <button
                         type="button"
@@ -186,7 +205,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
               )}
               {usage.projects.length > 0 && (
                 <ul className="skm-chips" aria-label="Projects">
-                  {usage.projects.map(project => (
+                  {usage.projects.map((project) => (
                     <li key={project.key}>
                       <button
                         type="button"
@@ -208,7 +227,7 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
           <section className="skm-section" aria-labelledby={`${titleId}-related`}>
             <h3 id={`${titleId}-related`}>Related skills</h3>
             <ul className="skm-chips">
-              {related.map(key => {
+              {related.map((key) => {
                 const other = getOwn(skillsData, key);
                 if (!other) return null;
                 return (
@@ -241,7 +260,11 @@ const SkillModal: React.FC<SkillModalProps> = ({ skill, skillKey, skillsData, on
               {skill.display_name} docs<span className="sr-only"> (opens in a new tab)</span>
             </a>
           )}
-          <CopyLinkButton url={shareUrl('skill', skillKey)} label="Copy link" className="copy-link-button skm-copy" />
+          <CopyLinkButton
+            url={shareUrl('skill', skillKey)}
+            label="Copy link"
+            className="copy-link-button skm-copy"
+          />
         </div>
 
         {position && position.total > 1 && (

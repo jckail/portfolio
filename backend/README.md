@@ -69,7 +69,7 @@ GET /api/resume_file_name           # Resume file name
 The PDF, a plain-text copy and a manifest (`backend/assets/JordanKailResume.*`)
 are generated from `backend/app/data/*.json` by `helpers/build_resume_pdf.py`
 (single column, ATS-shaped, no phone number). They are never edited by hand;
-`test_resume_pdf.py` fails when they drift from the data.
+`test_resume_pdf.py` fails when they drift from the data. Optional `resume_highlights` and `resume_location` in experience data customize the generated PDF/text without removing website detail. Education comes from `education.json`; list studies and attendance dates without inferring a degree.
 
 ### AI assistant
 
@@ -340,9 +340,34 @@ rather than calling `os.getenv` in feature code.
   `KNOWN_EVENTS` is the closed list; the Terraform metrics in `infra/` filter on it. Fields are sanitised; emails, addresses, message text
   and secrets are dropped. Name every `SlidingWindowLimiter` (`name=`) so
   `rate_limit.blocked` carries a label.
-- `POST /api/events` (204) takes `{event, props}` from the SPA after consent.
+- `POST /api/events` (204) retains its existing backend contract for compatibility;
+  the SPA has retired visitor analytics and never sends events to it.
   The name must be in `EVENT_NAMES` (mirrors `frontend/src/shared/analytics/events.ts`;
   a test keeps them equal) and props are an allowlist validated against the data.
 - `GET /api/admin/analytics` and `/api/admin/health` return process-local
   counters (`utils/metrics.py`): one instance since it started, not site totals.
 - Access lines and events are not shipped to the Supabase `logs` table.
+
+## Resume content
+
+`helpers/build_resume_pdf.py` derives PDF, text, and metadata from the profile data. `resume_skills.json` provides the ordered, curated resume skills independently of the detailed website catalogue in `skills.json`. Education comes from `education.json`; experience entries can override PDF highlights and location through `resume_highlights` and `resume_location`. `resume_summary` in `aboutme.json` and `resume_description` in `projects.json` provide concise resume copy while retaining expanded website content. New tools with no asserted duration use zero years in the catalogue and display “Hands-on use” in the website.
+
+### Public agent context
+
+`GET /context.json` returns allowlisted profile, experience, projects, education,
+and curated skills, with ETag caching. `GET` or `POST /graphql` exposes these
+same sections through a query-only schema; POST accepts an application/json
+body with query, variables and operationName. Introspection is available. Queries
+are limited to 8192 characters, depth 8 and 200 expanded selections; streamed
+request bodies are limited to 16 KiB. MCP and GraphQL share rate limits.
+
+`POST /mcp` implements the official MCP SDK's stateless Streamable HTTP transport.
+It offers get_portfolio_context, search_portfolio and the JSON resource
+portfolio://jordan-kail/context. No standalone SSE stream or session deletion
+is offered (GET/DELETE return 405). Host and Origin validation permits the
+configured production origins and local development hosts. These endpoints
+require no API key and expose no private contact, chat, account or database data.
+
+The `/agents.html` connection page provides the canonical MCP URL, a client
+configuration example, a GraphQL query and direct JSON/text/PDF alternatives.
+Client configuration varies; this service does not implement OAuth.

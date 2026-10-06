@@ -8,12 +8,9 @@ async function stubTelemetry(page: Page) {
   await page.route('**/api/events', r => r.fulfill({ status: 204, body: '' }));
 }
 
-/**
- * `consent: 'denied'` (default) pre-answers the cookie banner so it does not
- * cover the page; tests of the banner itself pass `null`.
- */
+/** Optional legacy state only for regression checks; fresh visits by default. */
 export const test = base.extend<{ consent: 'denied' | 'accepted' | null }>({
-  consent: ['denied', { option: true }],
+  consent: [null, { option: true }],
   page: async ({ page, consent }, use) => {
     // Never reach Google, whatever a test does.
     await page.route('https://www.googletagmanager.com/**', r => r.abort());

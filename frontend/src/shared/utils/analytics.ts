@@ -1,428 +1,64 @@
-import { track } from '../analytics/core';
-import { lengthBucket } from '../analytics/events';
-import { TRACKABLE_ANCHORS } from './analytics-anchors';
-import { hasAnalyticsConsent } from './cookie-consent';
-
+/** Retired visitor analytics. Keep feature call signatures without tracking. */
 type GtagParams = Record<string, unknown>;
-
 declare global {
   interface Window {
-    gtag: (
-      command: string,
-      action: string,
-      params?: GtagParams
-    ) => void;
+    gtag: (command: string, action: string, params?: GtagParams) => void;
     dataLayer: unknown[];
   }
 }
+export { TRACKABLE_ANCHORS } from './analytics-anchors';
 
-const DEBUG = import.meta.env.DEV;
-const debugLog = (message: string, data?: unknown) => {
-  if (DEBUG) {
-    console.log(`[Analytics] ${message}`, data ? JSON.stringify(data) : '');
-  }
-};
+export const getSessionId = (): string => '';
 
-const isGtagLoaded = (): boolean => {
-  return typeof window.gtag === 'function';
-};
+export const trackThemeChange = async (
+  _newTheme: string,
+  _previousTheme: string
+): Promise<void> => {};
 
-// Wait for gtag to be available.
-//
-// Memoized deliberately: every track* call awaits this, and section changes
-// fire one on each scroll-spy transition. Building a fresh Promise per call
-// spun up a new 100ms interval plus a 5s timeout each time — with an ad
-// blocker (gtag never loads) that meant dozens of concurrent timers during
-// ordinary scrolling.
-let gtagReady: Promise<void> | null = null;
-
-const waitForGtag = (): Promise<void> => {
-  // Without consent gtag.js is never requested. Do not leave readiness timers
-  // running for events that safeGtagCall will drop, or memoize that early exit:
-  // a later consent grant must still be able to wait for the script.
-  if (!hasAnalyticsConsent()) return Promise.resolve();
-  if (gtagReady) return gtagReady;
-
-  gtagReady = new Promise((resolve) => {
-    if (isGtagLoaded()) {
-      resolve();
-      return;
-    }
-
-    const checkInterval = setInterval(() => {
-      if (isGtagLoaded()) {
-        clearInterval(checkInterval);
-        clearTimeout(timeoutId);
-        resolve();
-      }
-    }, 100);
-
-    // Timeout after 5 seconds
-    const timeoutId = setTimeout(() => {
-      clearInterval(checkInterval);
-      debugLog('Warning: gtag not loaded after 5 seconds');
-      resolve();
-    }, 5000);
-  });
-
-  return gtagReady;
-};
-
-// Generate a unique session ID
-const generateSessionId = (): string => {
-  return 'sid_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-};
-
-// Get or create session ID
-export const getSessionId = (): string => {
-  let sessionId = sessionStorage.getItem('ga_session_id');
-  if (!sessionId) {
-    sessionId = generateSessionId();
-    sessionStorage.setItem('ga_session_id', sessionId);
-    debugLog('Generated new session ID:', sessionId);
-  }
-  return sessionId;
-};
-
-// Session ID for event params, created only once the visitor has consented.
-// Without consent every event is dropped by safeGtagCall anyway, so this
-// avoids writing a tracking-style ID to sessionStorage for nothing.
-const analyticsSessionId = (): string =>
-  hasAnalyticsConsent() ? getSessionId() : '';
-
-// Safe wrapper for gtag calls — no-ops until the visitor accepts cookies
-const safeGtagCall = (
-  command: string,
-  action: string,
-  params?: GtagParams
-): void => {
-  try {
-    if (!hasAnalyticsConsent()) {
-      debugLog('analytics consent not granted, skipping event:', action);
-      return;
-    }
-    if (!isGtagLoaded()) {
-      debugLog('gtag not available, skipping event:', action);
-      return;
-    }
-    window.gtag(command, action, params);
-    debugLog(`Event tracked: ${action}`, params);
-  } catch (error) {
-    debugLog('Error tracking event:', error);
-  }
-};
-
-// Section metadata for analytics
-const sectionMetadata: Record<string, Record<string, string>> = {
-  about: {
-    title: 'About Me',
-    category: 'Profile Section',
-    type: 'Introduction'
-  },
-  experience: {
-    title: 'Work Experience',
-    category: 'Career Section',
-    type: 'Professional History'
-  },
-  projects: {
-    title: 'Projects',
-    category: 'Portfolio Section',
-    type: 'Work Samples'
-  },
-  skills: {
-    title: 'Technical Skills',
-    category: 'Skills Section',
-    type: 'Capabilities'
-  },
-  resume: {
-    title: 'Resume',
-    category: 'Document Section',
-    type: 'Career Summary'
-  }
-};
-
-export { TRACKABLE_ANCHORS };
-
-const trackableAnchor = (anchor: string | null | undefined): string | null => {
-  const id = (anchor ?? '').replace(/^#/, '');
-  return TRACKABLE_ANCHORS.has(id) ? id : null;
-};
-
-// Get full page path including hash, keeping only allowlisted anchors
-const getFullPagePath = (): string => {
-  const pathname = window.location.pathname;
-  const anchor = trackableAnchor(window.location.hash);
-  return anchor ? `${pathname}#${anchor}` : pathname;
-};
-
-// Track theme change
-export const trackThemeChange = async (newTheme: string, previousTheme: string): Promise<void> => {
-  // First-party stream only: GA gets its own theme_change_<name> event below.
-  track('theme_change', { theme: newTheme, from: previousTheme });
-  if (newTheme === 'party') track('party_mode');
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', `theme_change_${newTheme}`, {
-    event_category: 'Theme',
-    event_action: 'Change',
-    new_theme: newTheme,
-    previous_theme: previousTheme,
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
-
-// Track URL anchor change
 export const trackAnchorChange = async (
-  newAnchor: string,
-  oldAnchor: string | null = null
-): Promise<void> => {
-  const anchor = trackableAnchor(newAnchor);
-  if (!anchor) {
-    debugLog('anchor not in allowlist, skipping');
-    return;
-  }
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  const fullPath = getFullPagePath();
-  
-  safeGtagCall('event', 'anchor_change', {
-    new_anchor: anchor,
-    previous_anchor: trackableAnchor(oldAnchor),
-    page_path: fullPath,
-    session_id: sessionId
-  });
+  _newAnchor: string,
+  _oldAnchor: string | null = null
+): Promise<void> => {};
 
-  // Also send a page_view event to ensure it shows up in GA realtime
-  safeGtagCall('event', 'page_view', {
-    page_path: fullPath,
-    page_title: document.title,
-    session_id: sessionId
-  });
-};
-
-// Track modal view
 export const trackModalView = async (
-  modalId: string,
-  modalType: string,
-  modalTitle: string
-): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  const fullPath = getFullPagePath();
-  
-  safeGtagCall('event', 'modal_view', {
-    modal_id: modalId,
-    modal_type: modalType,
-    modal_title: modalTitle,
-    page_path: fullPath,
-    session_id: sessionId
-  });
+  _modalId: string,
+  _modalType: string,
+  _modalTitle: string
+): Promise<void> => {};
 
-  // Also send a page_view event to ensure it shows up in GA realtime
-  safeGtagCall('event', 'page_view', {
-    page_path: fullPath,
-    page_title: modalTitle,
-    session_id: sessionId
-  });
-};
-
-// Track modal close
 export const trackModalClose = async (
-  modalId: string,
-  modalType: string,
-  duration: number
-): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'modal_close', {
-    modal_id: modalId,
-    modal_type: modalType,
-    view_duration: duration,
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
+  _modalId: string,
+  _modalType: string,
+  _duration: number
+): Promise<void> => {};
 
-// Track page view
-export const trackPageView = async (path: string): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  // Use the caller's hash if it has one, else the current one; either way
-  // only an allowlisted anchor survives.
-  const [base, hash] = path.includes('#')
-    ? [path.slice(0, path.indexOf('#')), path.slice(path.indexOf('#'))]
-    : [path, window.location.hash];
-  const anchor = trackableAnchor(hash);
-  const fullPath = anchor ? `${base}#${anchor}` : base;
+export const trackPageView = async (_path: string): Promise<void> => {};
 
-  safeGtagCall('event', 'page_view', {
-    page_path: fullPath,
-    page_title: document.title,
-    session_id: sessionId
-  });
-};
+export const trackSectionView = async (_sectionId: string): Promise<void> => {};
 
-// Track section view
-//
-// Deliberately does NOT also send a page_view: this is always called
-// together with trackAnchorChange for the same section transition
-// (see useScrollSpy), which already sends one for the same page_path.
-// A duplicate here was inflating GA4 pageview counts.
-export const trackSectionView = async (sectionId: string): Promise<void> => {
-  if (!trackableAnchor(sectionId)) return;
-  track('section_view', { section: sectionId });
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  const metadata = sectionMetadata[sectionId] || {
-    title: sectionId,
-    category: 'Unknown Section',
-    type: 'Custom Section'
-  };
-
-  safeGtagCall('event', 'section_view', {
-    section_id: sectionId,
-    section_title: metadata.title,
-    section_category: metadata.category,
-    section_type: metadata.type,
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
-
-// Track social link click
 export const trackSocialClick = async (
-  platform: string,
-  action: string = 'visit',
-  url: string
-): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  
-  // Send platform-specific event
-  const eventName = `${platform}_clicked`;
-  safeGtagCall('event', eventName, {
-    event_category: 'Social Links',
-    event_action: 'Click',
-    platform: platform,
-    destination_url: url,
-    session_id: sessionId
-  });
+  _platform: string,
+  _action: string = 'visit',
+  _url: string
+): Promise<void> => {};
 
-  // Also send the general social_interaction event for backwards compatibility
-  safeGtagCall('event', 'social_interaction', {
-    platform: platform,
-    action: action,
-    destination_url: url,
-    interaction_type: 'outbound',
-    session_id: sessionId
-  });
-};
-
-// Track resume download
 export const trackResumeDownload = async (
-  format: string,
-  version: string,
-  source: string
-): Promise<void> => {
-  if (!source.endsWith('_error')) track('resume_download', { source });
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'resume_download', {
-    format: format,
-    version: version,
-    source: source,
-    download_type: 'direct',
-    session_id: sessionId
-  });
-};
+  _format: string,
+  _version: string,
+  _source: string
+): Promise<void> => {};
 
-// Track resume view
-export const trackResumeView = async (
-  format: string,
-  source: string
-): Promise<void> => {
-  track('resume_preview', { source });
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  
-  // Send specific clicked_resume event
-  safeGtagCall('event', 'clicked_resume', {
-    event_category: 'Resume',
-    event_action: 'Click',
-    format: format,
-    source: source,
-    session_id: sessionId
-  });
+export const trackResumeView = async (_format: string, _source: string): Promise<void> => {};
 
-  // Also send the general resume_view event for backwards compatibility
-  safeGtagCall('event', 'resume_view', {
-    format: format,
-    source: source,
-    view_type: 'inline',
-    session_id: sessionId
-  });
-};
+export const trackChatOpen = async (): Promise<void> => {};
 
-// Track chat open
-export const trackChatOpen = async (): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'chat_open', {
-    event_category: 'Chat',
-    event_action: 'Open',
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
-
-// Track chat message
 export const trackChatMessage = async (
-  messageType: 'sent' | 'received',
-  messageLength: number
-): Promise<void> => {
-  if (messageType === 'sent') track('chat_message_sent', { len: lengthBucket(messageLength) });
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'chat_message', {
-    event_category: 'Chat',
-    event_action: 'Message',
-    message_type: messageType,
-    message_length: messageLength,
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
+  _messageType: 'sent' | 'received',
+  _messageLength: number
+): Promise<void> => {};
 
-// Track contact modal opened
-export const trackContactOpened = async (): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'contact_opened', {
-    event_category: 'Contact',
-    event_action: 'Open',
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
+export const trackContactOpened = async (): Promise<void> => {};
 
-// Track contact message submitted
-export const trackContactMessage = async (messageLength: number): Promise<void> => {
-  await waitForGtag();
-  const sessionId = analyticsSessionId();
-  safeGtagCall('event', 'contact_message', {
-    event_category: 'Contact',
-    event_action: 'Submit',
-    message_length: messageLength,
-    page_path: getFullPagePath(),
-    session_id: sessionId
-  });
-};
+export const trackContactMessage = async (_messageLength: number): Promise<void> => {};
 
-// Initialize analytics. The initial page view and anchor are tracked by the
-// router-aware effect in App, so tracking them here too would double-count.
-export const initializeAnalytics = async (): Promise<void> => {
-  debugLog('Initializing analytics...');
-  await waitForGtag();
-  debugLog('Analytics initialized');
-};
+export const initializeAnalytics = async (): Promise<void> => {};

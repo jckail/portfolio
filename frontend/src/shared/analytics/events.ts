@@ -2,8 +2,8 @@ import { TRACKABLE_ANCHORS } from '../utils/analytics-anchors';
 import { isTheme } from '../../types/theme';
 
 /**
- * The closed set of product-analytics events. The first-party endpoint
- * (POST /api/events) and GA4 both receive only these names.
+ * Legacy event contract retained for backend compatibility and pure validators.
+ * The SPA no longer sends these events.
  */
 export const EVENT_NAMES = [
   'section_view',

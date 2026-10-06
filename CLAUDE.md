@@ -23,7 +23,7 @@ Known stale claims, so you do not "fix" the code to match them:
 - `ROADMAP.md` once marked a Terraform plan workflow done. `HANDOFF.md` says that workflow was removed (`29c45e5`) because the planner could read the state bucket. Do not restore it.
 - `helpers/deploy.sh` still exists and `helpers/README.md` and `DEPLOYMENT.md` mention it. `HANDOFF.md` says it replaces Secret Manager bindings with plaintext env vars and skips the canary. Do not run it.
 - Older ADRs (0001 to 0004) and the audit documents name Anthropic as the chat model. Chat now goes through a provider layer; the default provider is Vertex AI Gemini when `VERTEX_API_KEY` is set (ADR 0005).
-- The audit's F-5 (consent cannot be withdrawn) is partly fixed: the footer has a "Cookie settings" control (`openCookieSettings`). Consent Mode v2 signals are a separate open question in the audit.
+- The audit's F-5 describes historical consent UI. Visitor analytics and that UI are now retired.
 - `GET /api/admin/analytics` and `GET /api/admin/health` are no longer zero stubs. They return process-local counters from `utils/metrics.py` (one instance since it started, not site totals). Do not present them as site-wide numbers.
 - The resume PDF is generated from `backend/app/data/*.json` by `helpers/build_resume_pdf.py`. It is not an Enhancv export and it is not hand-edited.
 - The system prompt is `backend/app/prompts/portfoliosystemprompt.md`, not under `backend/assets/`.
@@ -188,8 +188,7 @@ Ruff (`pyproject.toml`): pycodestyle, pyflakes, isort, bugbear, pyupgrade, async
 - Deep links (`?skill=`, `?project=`, `?company=`) must not use a raw bracket lookup on a parsed object. `obj["constructor"]` is truthy and crashes the section (audit F-2). Use `Object.prototype.hasOwnProperty.call` or a null-prototype object.
 - Theme tokens live in `frontend/src/styles/base/variables.css`. Spacing tokens that exist are `xs/sm/md/lg/xl`. `--spacing-s` and `--spacing-m` are undefined; using them drops the whole declaration. Do not invent a parallel set of color variables.
 - CSS files sit next to the component under `styles/components/` or are imported from the component. Do not add a CSS-in-JS library. MUI is for the chat dialog only.
-- Analytics go through `shared/utils/analytics.ts` after consent. Do not call `gtag` directly. Page views: `trackPageView` and `trackAnchorChange` must not both fire for the same navigation (that double-counted GA4).
-- Cookie consent defaults to denied. Do not load analytics, and do not start the first-party event tracker (`shared/analytics/`), before the choice; stop it when consent is withdrawn. The footer's "Cookie settings" reopens the choice; keep it. New product events are added to `EVENT_NAMES` in `shared/analytics/events.ts` and the backend list together.
+- Visitor analytics is retired. Keep analytics compatibility APIs inert: no GA loader, /api/events requests, identifiers, consent UI, or settings controls, regardless of saved consent. Chat uses its independent chat_session_id; preserve the legacy ga_session_id wire field.
 - Tests sit next to the code as `*.test.ts` / `*.test.tsx`. Vitest, jsdom, Testing Library. Setup mocks are in `src/test/setup.ts`. Follow `useChat.test.ts` for sockets: fake the WebSocket, assert frames, do not open a real one.
 - User-visible UI changes need to be exercised in a browser (click, type, deep link, both themes), not only by a screenshot or a unit test.
 

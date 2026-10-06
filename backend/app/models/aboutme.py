@@ -6,6 +6,7 @@ class AboutMe(BaseModel):
     """Model for about me information."""
     greeting: str = Field(..., description="Greeting message")
     description: str = Field(..., description="Brief professional description")
+    resume_summary: str | None = Field(None, description="Concise summary for the generated resume")
     aidetails: str = Field(..., description="AI assistant prompt")
     brief_bio: str = Field(..., description="Detailed biography")
     full_portrait: str = Field(..., description="Path to portrait image")

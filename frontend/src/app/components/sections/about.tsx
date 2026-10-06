@@ -34,7 +34,7 @@ export function findCurrentRole(
   experienceData: ExperienceData | null | undefined,
   fallbackTitle?: string
 ): CurrentRole | null {
-  const current = Object.values(experienceData ?? {}).find(item =>
+  const current = Object.values(experienceData ?? {}).find((item) =>
     /\bpresent\b/i.test(item?.date ?? '')
   );
   if (current?.title) {
@@ -44,159 +44,170 @@ export function findCurrentRole(
 }
 
 const isApplePlatform = () =>
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+  typeof navigator !== 'undefined' &&
+  /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
 
 /** Opens the command palette by replaying the shortcut its host listens for. */
 const openCommandPalette = () => {
   window.dispatchEvent(
-    new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: isApplePlatform(), bubbles: true })
+    new KeyboardEvent('keydown', {
+      key: 'k',
+      ctrlKey: true,
+      metaKey: isApplePlatform(),
+      bubbles: true,
+    })
   );
 };
 
-const TLDRContent = memo(({
-  aboutMeData,
-  contactData,
-  currentRole,
-  skillsData,
-  onResumeClick,
-  onContactSelect,
-  onSkillSelect,
-}: {
-  aboutMeData: AboutMe;
-  contactData: Contact;
-  currentRole: CurrentRole | null;
-  skillsData: SkillsData;
-  onResumeClick: () => void;
-  onContactSelect: () => void;
-  onSkillSelect: (key: string) => void;
-}) => {
-  // Hidden when the assistant is unavailable: the launcher it clicks is gone.
-  const chatAvailable = useChatAvailable();
-  const handleAIClick = () => {
-    const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
-    if (chatButton) {
-      chatButton.click();
-    }
-  };
+const TLDRContent = memo(
+  ({
+    aboutMeData,
+    contactData,
+    currentRole,
+    skillsData,
+    onResumeClick,
+    onContactSelect,
+    onSkillSelect,
+  }: {
+    aboutMeData: AboutMe;
+    contactData: Contact;
+    currentRole: CurrentRole | null;
+    skillsData: SkillsData;
+    onResumeClick: () => void;
+    onContactSelect: () => void;
+    onSkillSelect: (key: string) => void;
+  }) => {
+    // Hidden when the assistant is unavailable: the launcher it clicks is gone.
+    const chatAvailable = useChatAvailable();
+    const handleAIClick = () => {
+      const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
+      if (chatButton) {
+        chatButton.click();
+      }
+    };
 
-  const bioParagraphs = useMemo(
-    () =>
-      aboutMeData.brief_bio
-        .split(/\n\n+/)
-        .map(p => p.trim())
-        .filter(Boolean),
-    [aboutMeData.brief_bio]
-  );
+    const bioParagraphs = useMemo(
+      () =>
+        aboutMeData.brief_bio
+          .split(/\n\n+/)
+          .map((p) => p.trim())
+          .filter(Boolean),
+      [aboutMeData.brief_bio]
+    );
 
-  const fullName = [contactData.firstName, contactData.lastName].filter(Boolean).join(' ');
-  const shortcutModifier = isApplePlatform() ? '⌘' : 'Ctrl';
+    const fullName = [contactData.firstName, contactData.lastName].filter(Boolean).join(' ');
+    const shortcutModifier = isApplePlatform() ? '⌘' : 'Ctrl';
 
-  return (
-    <div className="about-section panel">
-      <div className="about-hero">
-        <div className="about-hero-copy">
-          <p className="about-eyebrow">{aboutMeData.greeting}</p>
-          <h1 className="about-name">{fullName || aboutMeData.greeting}</h1>
-          {currentRole && (
-            <p className="about-role">
-              {currentRole.title}
-              {currentRole.company && (
-                <>
-                  {' '}<span className="about-role-at">at</span>{' '}
-                  <span className="about-role-company">{currentRole.company}</span>
-                </>
-              )}
-            </p>
-          )}
-          <p className="about-description">{aboutMeData.description}</p>
-        </div>
-
-        <div className="headshot-container">
-          <img
-            src={aboutMeData.full_portrait}
-            srcSet={buildHeadshotSrcSet(aboutMeData.full_portrait)}
-            alt="Profile headshot"
-            className="headshot"
-            loading="eager"
-            width="200"
-            height="200"
-          />
-        </div>
-
-        <div className="about-actions">
-          <ErrorBoundary>
-            <SocialLinks
-              github={contactData.github}
-              linkedin={contactData.linkedin}
-              email={contactData.email}
-              onResumeClick={onResumeClick}
-              onContactSelect={onContactSelect}
-            />
-          </ErrorBoundary>
-          <button
-            type="button"
-            className="about-shortcut-hint"
-            onClick={openCommandPalette}
-            title={`Quick navigation (${shortcutModifier}+K)`}
-            aria-keyshortcuts={isApplePlatform() ? 'Meta+K' : 'Control+K'}
-          >
-            <kbd>{shortcutModifier}</kbd>
-            <kbd>K</kbd>
-            <span className="about-shortcut-label">Quick nav</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="about-details">
-        <div className="brief-bio">
-          {bioParagraphs.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-          {chatAvailable && (
-            <p>
-              Ask my{' '}
-              <span className="ai-highlight" {...buttonize(handleAIClick)}>
-                AI Assistant 🤖
-              </span>{' '}
-              below for more details about me.
-            </p>
-          )}
-        </div>
-
-        {aboutMeData.primary_skills?.length > 0 && (
-          <div className="about-skill-icons" aria-label="Primary skills">
-            {aboutMeData.primary_skills.map(name => {
-              const skillKey = findSkillKey(skillsData, name);
-              const skill = getOwn(skillsData, skillKey);
-              return (
-                <div
-                  key={name}
-                  className={`about-skill-item${skillKey ? ' is-interactive' : ''}`}
-                  title={name}
-                  {...(skillKey
-                    ? buttonize(() => onSkillSelect(skillKey))
-                    : {})}
-                >
-                  {skill ? (
-                    <SkillIcon
-                      name={skill.image}
-                      className="about-skill-icon"
-                      size={28}
-                      aria-label={name}
-                    />
-                  ) : (
-                    <span className="about-skill-fallback" aria-hidden="true">{name.slice(0, 2)}</span>
-                  )}
-                  <span className="about-skill-name">{name}</span>
-                </div>
-              );
-            })}
+    return (
+      <div className="about-section panel">
+        <div className="about-hero">
+          <div className="about-hero-copy">
+            <h1 className="about-name">{fullName || aboutMeData.greeting}</h1>
+            {currentRole && (
+              <p className="about-role">
+                {currentRole.title}
+                {currentRole.company && (
+                  <>
+                    {' '}
+                    <span className="about-role-at">at</span>{' '}
+                    <span className="about-role-company">{currentRole.company}</span>
+                  </>
+                )}
+              </p>
+            )}
+            <p className="about-description">{aboutMeData.description}</p>
           </div>
-        )}
+
+          <div className="headshot-container">
+            <img
+              src={aboutMeData.full_portrait}
+              srcSet={buildHeadshotSrcSet(aboutMeData.full_portrait)}
+              alt="Profile headshot"
+              className="headshot"
+              loading="eager"
+              width="200"
+              height="200"
+            />
+          </div>
+
+          <div className="about-actions">
+            <ErrorBoundary>
+              <SocialLinks
+                github={contactData.github}
+                linkedin={contactData.linkedin}
+                email={contactData.email}
+                onResumeClick={onResumeClick}
+                onContactSelect={onContactSelect}
+              />
+            </ErrorBoundary>
+            <a className="btn" href="/agents.html">
+              Connect your assistant
+            </a>
+            <button
+              type="button"
+              className="about-shortcut-hint"
+              onClick={openCommandPalette}
+              title={`Quick navigation (${shortcutModifier}+K)`}
+              aria-keyshortcuts={isApplePlatform() ? 'Meta+K' : 'Control+K'}
+            >
+              <kbd>{shortcutModifier}</kbd>
+              <kbd>K</kbd>
+              <span className="about-shortcut-label">Quick nav</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="about-details">
+          <div className="brief-bio">
+            {bioParagraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+            {chatAvailable && (
+              <p>
+                Ask my{' '}
+                <span className="ai-highlight" {...buttonize(handleAIClick)}>
+                  AI Assistant 🤖
+                </span>{' '}
+                below for more details about me.
+              </p>
+            )}
+          </div>
+
+          {aboutMeData.primary_skills?.length > 0 && (
+            <div className="about-skill-icons" aria-label="Primary skills">
+              {aboutMeData.primary_skills.map((name) => {
+                const skillKey = findSkillKey(skillsData, name);
+                const skill = getOwn(skillsData, skillKey);
+                return (
+                  <div
+                    key={name}
+                    className={`about-skill-item${skillKey ? ' is-interactive' : ''}`}
+                    title={name}
+                    {...(skillKey ? buttonize(() => onSkillSelect(skillKey)) : {})}
+                  >
+                    {skill ? (
+                      <SkillIcon
+                        name={skill.image}
+                        className="about-skill-icon"
+                        size={28}
+                        aria-label={name}
+                      />
+                    ) : (
+                      <span className="about-skill-fallback" aria-hidden="true">
+                        {name.slice(0, 2)}
+                      </span>
+                    )}
+                    <span className="about-skill-name">{name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 TLDRContent.displayName = 'TLDRContent';
 
 const handleResumeClick = () => scrollToSection('resume');

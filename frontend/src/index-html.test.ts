@@ -10,13 +10,8 @@ const html = readFileSync(resolve(root, 'index.html'), 'utf8');
 const publicPath = (url: string) => resolve(root, 'public', url.replace(/^\//, ''));
 
 describe('index.html', () => {
-  it('loads the GA bootstrap deferred, ahead of the app module', () => {
-    const ga = html.match(/<script[^>]*src="\/ga-init\.js"[^>]*>/)?.[0] ?? '';
-    expect(ga).toMatch(/\sdefer[\s>]/);
-    expect(ga).not.toMatch(/\sasync[\s>]/);
-    // Deferred classic and module scripts run in document order, so ga-init
-    // defines window.loadGoogleAnalytics before cookie-consent can call it.
-    expect(html.indexOf('/ga-init.js')).toBeLessThan(html.indexOf('type="module"'));
+  it('does not bootstrap visitor analytics', () => {
+    expect(html).not.toMatch(/ga-init|googletagmanager|google-analytics/);
   });
 
   it('does not depend on Google Fonts', () => {
@@ -24,7 +19,7 @@ describe('index.html', () => {
   });
 
   it('self-hosts every @font-face source, with font-display: swap', () => {
-    const faces = [...html.matchAll(/@font-face\s*{([^}]*)}/g)].map(m => m[1]);
+    const faces = [...html.matchAll(/@font-face\s*{([^}]*)}/g)].map((m) => m[1]);
     expect(faces.length).toBeGreaterThan(0);
     for (const face of faces) {
       expect(face).toMatch(/font-display:\s*swap/);
@@ -35,7 +30,9 @@ describe('index.html', () => {
   });
 
   it('preloads only fonts that an @font-face uses, with crossorigin', () => {
-    const preloads = [...html.matchAll(/<link\s+rel="preload"\s+as="font"[^>]*>/g)].map(m => m[0]);
+    const preloads = [...html.matchAll(/<link\s+rel="preload"\s+as="font"[^>]*>/g)].map(
+      (m) => m[0]
+    );
     expect(preloads.length).toBeGreaterThan(0);
     expect(preloads.length).toBeLessThanOrEqual(2);
     for (const tag of preloads) {
