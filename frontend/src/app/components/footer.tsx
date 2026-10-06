@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 
 import { scrollToSection } from '../../shared/utils/scroll-utils';
 import { buttonize } from '../../shared/utils/a11y';
-import { openCookieSettings } from '../../shared/utils/cookie-consent';
 import '../../styles/components/footer.css';
 
 interface FooterProps {
@@ -34,10 +33,6 @@ const Footer: React.FC<FooterProps> = memo(({ onDoodleToggle, doodleClickCount, 
               OpenAPI Doc
             </a>
           )}
-
-          <span className="footer-link" {...buttonize(openCookieSettings)}>
-            Cookie settings
-          </span>
 
           <span className="footer-link" {...buttonize(scrollToTop)}>
             Scroll to top

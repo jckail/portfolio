@@ -1,41 +1,45 @@
+import type { Page } from '@playwright/test';
+
 import { test, expect, CONSENT_KEY } from './fixtures';
 
+function watchAnalytics(page: Page) {
+  const gaRequests: string[] = [];
+  const eventRequests: string[] = [];
+  page.on('request', r => {
+    if (r.url().includes('googletagmanager.com') || r.url().includes('google-analytics.com')) {
+      gaRequests.push(r.url());
+    }
+    if (r.url().includes('/api/events')) eventRequests.push(r.url());
+  });
+  return { gaRequests, eventRequests };
+}
 
-test.describe('cookie banner', () => {
+test.describe('analytics stay off without a stored choice', () => {
   test.use({ consent: null });
 
-  test('Deny stores denied and never requests analytics', async ({ page }) => {
-    const gaRequests: string[] = [];
-    page.on('request', r => {
-      if (r.url().includes('googletagmanager.com')) gaRequests.push(r.url());
-    });
+  test('shows no banner and requests no analytics', async ({ page }) => {
+    const seen = watchAnalytics(page);
     await page.goto('/');
-    const banner = page.getByRole('region', { name: 'Cookie consent' });
-    await expect(banner).toBeVisible();
-    await banner.getByRole('button', { name: /deny/i }).click();
-    await expect(banner).toBeHidden();
-    expect(await page.evaluate(k => localStorage.getItem(k), CONSENT_KEY)).toBe('denied');
+    await expect(page.getByRole('region', { name: 'Cookie consent' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Cookie settings' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Scroll to top' })).toBeVisible();
     expect(await page.locator('script[src*="googletagmanager"]').count()).toBe(0);
-    expect(gaRequests).toEqual([]);
-  });
-
-  test('Accept requests gtag, and the footer link reopens the banner', async ({ page }) => {
-    const attempted = page.waitForRequest(r => r.url().includes('googletagmanager.com/gtag/js'));
-    await page.goto('/');
-    const banner = page.getByRole('region', { name: 'Cookie consent' });
-    await banner.getByRole('button', { name: /accept/i }).click();
-    await attempted; // the route in fixtures aborts it; we only assert it was attempted
-    expect(await page.evaluate(k => localStorage.getItem(k), CONSENT_KEY)).toBe('accepted');
-    await expect(banner).toBeHidden();
-
-    await page.getByText('Cookie settings').click();
-    await expect(banner).toBeVisible();
+    expect(seen.gaRequests).toEqual([]);
+    expect(seen.eventRequests).toEqual([]);
   });
 });
 
-test('Cookie settings reopens the banner after a prior Deny', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('region', { name: 'Cookie consent' })).toBeHidden();
-  await page.getByText('Cookie settings').click();
-  await expect(page.getByRole('region', { name: 'Cookie consent' })).toBeVisible();
+test.describe('analytics stay off after a prior accept', () => {
+  test.use({ consent: 'accepted' });
+
+  test('does not reload Google Analytics or the first-party event stream', async ({ page }) => {
+    const seen = watchAnalytics(page);
+    await page.goto('/');
+    await expect(page.getByRole('region', { name: 'Cookie consent' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Cookie settings' })).toHaveCount(0);
+    expect(await page.evaluate(k => localStorage.getItem(k), CONSENT_KEY)).toBe('accepted');
+    expect(await page.locator('script[src*="googletagmanager"]').count()).toBe(0);
+    expect(seen.gaRequests).toEqual([]);
+    expect(seen.eventRequests).toEqual([]);
+  });
 });

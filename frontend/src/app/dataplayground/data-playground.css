@@ -691,11 +691,3 @@
   gap: 7px;
 }
 
-.data-lab .lab-cookie-settings {
-  background: transparent;
-  color: var(--text-secondary);
-  min-height: 44px;
-  font: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}

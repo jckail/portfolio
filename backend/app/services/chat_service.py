@@ -489,8 +489,7 @@ class ConnectionManager:
 
         Uses the existing flexible `logs` table (via `session_uuid` +
         `metadata`) rather than a new table/columns — `client_id` is used
-        as the session key instead of the GA session id since it's always
-        present, unlike GA (gated behind cookie consent).
+        as the session key. The site does not collect a browser analytics id.
         """
         await supabase.store_log(
             level="INFO",

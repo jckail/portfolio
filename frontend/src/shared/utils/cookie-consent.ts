@@ -10,7 +10,7 @@ export type CookieConsent = 'accepted' | 'denied';
 
 declare global {
   interface Window {
-    /** Defined by public/ga-init.js; injects gtag.js once consent is given. */
+    /** Kept as a no-op on /ga-init.js so a cached page cannot load gtag.js. */
     loadGoogleAnalytics?: () => void;
   }
 }
@@ -31,26 +31,30 @@ export function getCookieConsent(): CookieConsent | null {
  * .jordan-kail.com), so clearing only the current host would leave them.
  */
 export function clearAnalyticsCookies(): void {
-  if (typeof document === 'undefined') return;
-  const names = document.cookie
-    .split(';')
-    .map(part => part.split('=')[0].trim())
-    .filter(name => /^(_ga|_gid|_gat)/.test(name));
-  if (names.length === 0) return;
+  try {
+    if (typeof document === 'undefined') return;
+    const names = document.cookie
+      .split(';')
+      .map(part => part.split('=')[0].trim())
+      .filter(name => /^(_ga|_gid|_gat)/.test(name));
+    if (names.length === 0) return;
 
-  const labels = window.location.hostname.split('.');
-  const domains: (string | null)[] = [null];
-  for (let i = 0; i < labels.length - 1; i += 1) {
-    domains.push(labels.slice(i).join('.'));
-  }
-
-  const expired = 'expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-  for (const name of names) {
-    for (const domain of domains) {
-      document.cookie = domain
-        ? `${name}=; ${expired}; domain=.${domain}`
-        : `${name}=; ${expired}`;
+    const labels = window.location.hostname.split('.');
+    const domains: (string | null)[] = [null];
+    for (let i = 0; i < labels.length - 1; i += 1) {
+      domains.push(labels.slice(i).join('.'));
     }
+
+    const expired = 'expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    for (const name of names) {
+      for (const domain of domains) {
+        document.cookie = domain
+          ? `${name}=; ${expired}; domain=.${domain}`
+          : `${name}=; ${expired}`;
+      }
+    }
+  } catch {
+    // Cookie access can throw when the browser blocks storage.
   }
 }
 
@@ -60,27 +64,23 @@ export function setCookieConsent(value: CookieConsent): void {
   } catch {
     // ignore
   }
-  const granted = value === 'accepted';
-  // Notify GA consent mode. Ad signals stay denied: the site runs no ads.
-  if (typeof window.gtag === 'function') {
-    window.gtag('consent', 'update', {
-      analytics_storage: granted ? 'granted' : 'denied',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-    });
+  // A stored choice cannot enable analytics. Clear leftover GA cookies either way.
+  clearAnalyticsCookies();
+  try {
+    window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
+  } catch {
+    // ignore
   }
-  if (granted) {
-    // No-op if gtag.js is already on the page
-    window.loadGoogleAnalytics?.();
-  } else {
-    clearAnalyticsCookies();
-  }
-  window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
 }
 
+/** Browser analytics stay off, including when an older visit stored "accepted". */
 export function hasAnalyticsConsent(): boolean {
-  return getCookieConsent() === 'accepted';
+  return false;
+}
+
+/** Expire leftover GA cookies. Does not read consent and cannot enable tracking. */
+export function disableBrowserAnalytics(): void {
+  clearAnalyticsCookies();
 }
 
 /** Reopen the consent banner so the visitor can change or withdraw consent. */
