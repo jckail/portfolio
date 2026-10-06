@@ -6,13 +6,13 @@
     "full_portrait": "/images/headshot/headshot.webp",
     "resume_name": "JordanKailResume.pdf",
     "primary_skills": [
-        "python",
-        "sql",
-        "go",
-        "rust",
-        "agent_platforms",
-        "agent_harnesses",
-        "kubernetes"
+        "Python",
+        "SQL",
+        "Go",
+        "Rust",
+        "Agent Platforms",
+        "Agent Harnesses",
+        "Kubernetes"
     ],
     "resume_summary": "Staff Software Engineer with 13+ years of experience and deep expertise in AI agents and distributed data systems. Established Together AI's data engineering team, then created its Agent Platform team. Built production agent harnesses and evaluation infrastructure, AI/ML classifiers at Meta, and model governance frameworks at Prove Identity."
 }
