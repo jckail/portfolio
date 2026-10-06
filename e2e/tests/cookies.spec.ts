@@ -33,7 +33,16 @@ for (const state of states) {
         await page.goto('/?company=sabbatical');
         const dialog = page.getByRole('dialog', { name: 'Sabbatical' });
         await expect(dialog).toBeVisible();
-        for (const text of ['A cross-country road trip.', 'Travel to Europe.', 'Time taking care of family.', '10/2022 - 05/2023']) await expect(dialog).toContainText(text);
+        for (const text of [
+          'Digital nomad experiment',
+          'Made up for lost time during COVID-19 by exploring the world, chasing outdoor adventures, and spending time with family.',
+          'Seattle, Portland, San Francisco, Austin, New York, Washington, DC, Chicago, Los Angeles, and San Diego.',
+          'Spent 50 nights camping and hiking, and skied 100 days that season in Colorado and Utah.',
+          'Traveled through Europe, spent time with family members in need, and relocated back to Denver from California.',
+          '10/2022 - 05/2023',
+        ]) await expect(dialog).toContainText(text);
+        await expect(dialog).not.toContainText('Meta');
+        await expect(dialog).not.toContainText('Prove');
         await page.keyboard.press('Escape');
         await expect(dialog).toHaveCount(0);
         await page.goBack();
