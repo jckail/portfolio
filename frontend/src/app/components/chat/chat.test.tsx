@@ -48,14 +48,14 @@ describe('Chat launcher focus', () => {
   it('returns focus to the launcher after the dialog closes', async () => {
     const { rerender } = render(<Chat {...props(false)} />);
     rerender(<Chat {...props(true)} />);
-    expect(screen.queryByRole('button', { name: 'Chat with AI' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Chat with my Agent' })).toBeNull();
 
     rerender(<Chat {...props(false)} />);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Chat with AI' })).toHaveFocus());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Chat with my Agent' })).toHaveFocus());
   });
 
   it('does not steal focus on first render', () => {
     render(<Chat {...props(false)} />);
-    expect(screen.getByRole('button', { name: 'Chat with AI' })).not.toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Chat with my Agent' })).not.toHaveFocus();
   });
 });

@@ -45,6 +45,7 @@ test('two-message preview introduces the visitor before continuing in the right 
   await launcher.click();
   const pane = page.getByRole('dialog', { name: 'Chat with my Agent' });
   await expect(pane).toBeVisible();
+  expect(await pane.evaluate(element => getComputedStyle(element).backgroundColor)).toMatch(/^rgb\(/);
   await expect(page.getByLabel('Your email', { exact: true })).toHaveCount(0);
   for (const [index, question] of ['What agent platforms has Jordan built?', 'Which Jordan projects use Python?'].entries()) {
     await page.getByLabel('Message the AI assistant').fill(question);
@@ -63,4 +64,29 @@ test('two-message preview introduces the visitor before continuing in the right 
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   await expect.poll(() => frames.filter(frame => frame.type === 'message').length).toBe(3);
   await expect(pane.getByText('Published portfolio answer 2.')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(pane).toBeHidden();
+  await expect(launcher).toBeFocused();
+});
+
+test('mobile pane keeps the introduction reachable without horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/chat/status', route => route.fulfill({ json: { available: true } }));
+  await page.route('**/api/agent/trial', route => route.fulfill({ json: {
+    token: 'synthetic-mobile-trial', mode: 'trial', remaining_messages: 2,
+    expires_at: new Date(Date.now() + 3600000).toISOString(),
+  } }));
+  await page.routeWebSocket(/\/ws\//, ws => ws.onMessage(raw => {
+    if (JSON.parse(String(raw)).type === 'access') ws.send(JSON.stringify({ type: 'access_status', mode: 'trial', remaining_messages: 0 }));
+  }));
+  await page.goto('/?theme=light');
+  await page.getByRole('button', { name: 'Chat with my Agent', exact: true }).click();
+  const pane = page.getByRole('dialog', { name: 'Chat with my Agent' });
+  await expect(pane).toBeVisible();
+  await page.getByLabel('Your email', { exact: true }).fill('synthetic-mobile@example.com');
+  await page.getByLabel('Company or organization').fill('Synthetic mobile company');
+  await expect(pane.getByRole('button', { name: /Continue the conversation/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await pane.getByRole('button', { name: 'Close Agent chat' }).click();
+  await expect(pane).toBeHidden();
 });

@@ -11,7 +11,7 @@ import './agent-page.css';
 import type { AccessReceipt } from './access';
 
 /** Shared conversation: full page and drawer use the same server-authoritative access flow. */
-export function AgentConversation() {
+export function AgentConversation({ embedded = false }: { embedded?: boolean }) {
   const [receipt, setReceipt] = useState<AccessReceipt | null>(null);
   const [checking, setChecking] = useState(true);
   const [required, setRequired] = useState(false);
@@ -73,8 +73,8 @@ export function AgentConversation() {
   };
 
   return <section className="agent-conversation" aria-label="Conversation with Jordan's Agent" data-no-chat-context>
-    <div className="agent-conversation-heading"><h2>Chat with my Agent</h2>
-      <span className="agent-muted">Grounded in Jordan’s portfolio</span></div>
+    {!embedded && <div className="agent-conversation-heading"><h2>Chat with my Agent</h2>
+      <span className="agent-muted">Grounded in Jordan’s portfolio</span></div>}
     <p className="agent-disclosure">Ask about Jordan’s work, skills, or your opportunity. AI answers can be mistaken.
       Chat messages are stored; avoid confidential information. Review and confirm any message or meeting before it is sent.</p>
     {receipt?.mode === 'trial' && !gate && <p className="agent-trial-status" role="status">
