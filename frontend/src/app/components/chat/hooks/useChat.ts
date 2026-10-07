@@ -70,8 +70,10 @@ const CONTEXT_EXCLUDE_SELECTOR = [
   '[data-no-chat-context]',
 ].join(', ');
 
-export const useChat = (options: { accessToken?: string; fullPage?: boolean; onAccessExpired?: () => void } = {}) => {
-  const { accessToken, fullPage = false, onAccessExpired } = options;
+export const useChat = (options: { accessToken?: string; fullPage?: boolean; enabled?: boolean; onAccessExpired?: () => void; onAccessStatus?: (remaining: number) => void; onAccessRequired?: () => void } = {}) => {
+  const { accessToken, fullPage = false, enabled = true, onAccessExpired } = options;
+  const accessCallbacks = useRef(options);
+  accessCallbacks.current = options;
   const [open, setOpen] = useState(() => fullPage || getQueryParam('ai_chat') === 'open');
   const [portfolioCards, setPortfolioCards] = useState<{ kind: string; data: unknown }[]>([]);
   const [message, setMessage] = useState('');
@@ -180,6 +182,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
 
   const initializeChat = useCallback(() => {
     const existing = wsRef.current;
+    if (!enabled) return;
     if (
       existing &&
       (existing.readyState === WebSocket.OPEN ||
@@ -197,7 +200,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
     wsRef.current = ws;
 
     ws.onopen = () => {
-      if (!isMounted.current) {
+      if (!isMounted.current || connectionGeneration.current !== generation) {
         ws.close();
         return;
       }
@@ -250,7 +253,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
     };
 
     ws.onmessage = event => {
-      if (!isMounted.current) return;
+      if (!isMounted.current || connectionGeneration.current !== generation) return;
 
       let data: {
         type?: string;
@@ -268,11 +271,25 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
         ok?: boolean;
         phone?: string;
         data?: unknown;
+        remaining_messages?: number;
       };
       try {
         data = JSON.parse(event.data);
       } catch {
         console.error('Received malformed chat message:', event.data);
+        return;
+      }
+
+      if (data.type === 'access_status') {
+        if (Number.isInteger(data.remaining_messages) && data.remaining_messages! >= 0 && data.remaining_messages! <= 2)
+          accessCallbacks.current.onAccessStatus?.(data.remaining_messages!);
+        return;
+      }
+      if (data.type === 'access_required') {
+        accessCallbacks.current.onAccessRequired?.();
+        finalizeStreamingMessage();
+        currentStreamingMessage.current = '';
+        setIsLoading(false);
         return;
       }
 
@@ -393,7 +410,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
 
     ws.onerror = error => {
       console.error('WebSocket Error:', error);
-      if (!isMounted.current) return;
+      if (!isMounted.current || connectionGeneration.current !== generation) return;
       finalizeStreamingMessage();
       setMessages(prev => [
         ...prev,
@@ -446,7 +463,22 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
         )
       );
     };
-  }, [finalizeStreamingMessage, accessToken, onAccessExpired]);
+  }, [finalizeStreamingMessage, accessToken, onAccessExpired, enabled]);
+
+  // Upgrade the existing conversation without losing transcript or draft.
+  useEffect(() => {
+    connectionGeneration.current += 1;
+    accessCheck.current?.abort();
+    const previous = wsRef.current;
+    wsRef.current = null;
+    previous?.close();
+    // A closing connection may still occupy its server slot when the upgraded
+    // socket arrives. New credentials get a new transport ID; history replays
+    // separately and the durable trial quota remains bound to its receipt.
+    if (previous) clientId.current = createClientId();
+    setPendingActions(prev => prev.map(p => p.status === 'pending' || p.status === 'submitting'
+      ? { ...p, status: 'expired', resultMessage: 'Please request a new draft after introducing yourself.' } : p));
+  }, [accessToken]);
 
   // Expire cards locally when the server's 10 minute window passes.
   useEffect(() => {

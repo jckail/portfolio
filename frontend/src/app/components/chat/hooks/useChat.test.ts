@@ -462,6 +462,42 @@ describe('gated full-page chat protocol', () => {
     FakeWebSocket.instances = []; vi.stubGlobal('WebSocket', FakeWebSocket);
   });
   afterEach(() => vi.unstubAllGlobals());
+  it('waits for a credential and handles trial quota frames without treating them as replies', async () => {
+    const onAccessStatus = vi.fn(); const onAccessRequired = vi.fn();
+    const { result, rerender } = renderHook(({ enabled }) => useChat({ fullPage: true, accessToken: 'trial', enabled, onAccessStatus, onAccessRequired }), { initialProps: { enabled: false } });
+    expect(FakeWebSocket.instances).toHaveLength(0);
+    rerender({ enabled: true });
+    const ws = FakeWebSocket.instances[0]; act(() => ws.simulateOpen());
+    await act(async () => result.current.handleSuggestedPrompt('Tell me about Jordan'));
+    act(() => ws.simulateMessage({ type: 'access_status', mode: 'trial', remaining_messages: 0 }));
+    expect(onAccessStatus).toHaveBeenCalledWith(0);
+    expect(result.current.isLoading).toBe(true);
+    act(() => ws.simulateMessage({ type: 'message', message: 'Jordan builds agent platforms.' }));
+    expect(result.current.isLoading).toBe(false);
+    act(() => ws.simulateMessage({ type: 'access_required' }));
+    expect(onAccessRequired).toHaveBeenCalledOnce();
+    expect(result.current.messages.at(-1)?.text).toBe('Jordan builds agent platforms.');
+  });
+  it('upgrades credentials preserving draft and history while retiring connection-bound confirmations', async () => {
+    const { result, rerender } = renderHook(({ token }) => useChat({ fullPage: true, accessToken: token }), { initialProps: { token: 'trial' } });
+    const old = FakeWebSocket.instances[0]; act(() => old.simulateOpen());
+    await act(async () => result.current.handleSuggestedPrompt('Connect me with Jordan'));
+    act(() => {
+      old.simulateMessage({ message: 'Here is a draft.' });
+      old.simulateMessage({ type: 'confirm_action', id: 'trial-proposal', tool: 'contact_jordan', args: { subject: 'Intro', message: 'Hi' } });
+      result.current.setMessage('Keep this draft');
+    });
+    rerender({ token: 'full' });
+    expect(old.readyState).toBe(3);
+    expect(result.current.message).toBe('Keep this draft');
+    expect(result.current.pendingActions[0].status).toBe('expired');
+    const upgraded = FakeWebSocket.instances[1]; act(() => upgraded.simulateOpen());
+    expect(upgraded.url).not.toBe(old.url);
+    expect(JSON.parse(upgraded.sent[0])).toEqual({ type: 'access', token: 'full' });
+    expect(upgraded.sent.some(frame => JSON.parse(frame).type === 'history')).toBe(true);
+    act(() => old.simulateMessage({ message: 'Stale old reply' }));
+    expect(result.current.messages.at(-1)?.text).toBe('Here is a draft.');
+  });
   it.each([401, 200, 503])('checks access after a dropped close frame (HTTP %s)', async status => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status }));
     vi.stubGlobal('fetch', fetchMock);

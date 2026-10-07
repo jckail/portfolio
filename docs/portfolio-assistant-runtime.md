@@ -1,6 +1,6 @@
 # Portfolio assistant runtime and acceptance
 
-The dedicated `/agent?theme=dark` page is the primary assistant surface. A visitor enters email and company; the server notifies the configured owner inbox and then issues an eight-hour access receipt. Entry information is self-reported, not verified employment or email ownership. Receipts carry no email/company and must be sent as the first WebSocket frame, never in a URL. Model messages, transcript replay and actions are refused without valid access when `AGENT_ACCESS_REQUIRED=true` (the default).
+The dedicated `/agent?theme=dark` page and the right-side pane share one conversation interface. The bottom-right “Chat with my Agent” launcher opens the pane. Visitors receive a two-message anonymous preview, then enter email and company to continue; the server notifies the configured owner inbox before issuing an eight-hour full-access receipt. Entry information is self-reported, not verified employment or email ownership. Receipts carry no email/company and must be sent as the first WebSocket frame, never in a URL. Model messages, transcript replay and actions are refused without a valid trial or full receipt when `AGENT_ACCESS_REQUIRED=true` (the default). Trial visitors cannot execute contact or calendar actions.
 
 OpenAI Agents SDK 0.23.1 runs actual `Agent`, `Runner` and `FunctionTool` orchestration. `PortfolioModel` bridges the existing Vertex/Anthropic provider, preserving fallback and streaming. This does not switch models to OpenAI. Tracing is disabled. Read tools use published portfolio data; retrieved briefs, projects, role evidence, contact options and calendar availability generate typed UI cards. Generated HTML and arbitrary web/code tools are excluded.
 
@@ -9,6 +9,18 @@ Contact and calendar tools only propose reviewed cards. Visitor confirmation is 
 ## Access configuration
 
 `AGENT_ACCESS_SECRET` is a dedicated random signing secret of at least 32 characters, provisioned in Secret Manager as `portfolio-agent-access`, version 1, and with a secret-accessor binding for the Cloud Run runtime account. Contents must never be committed, logged or copied into Terraform state. Deploy binds the secret when staging the new immutable revision. The owner inbox must match the user-selected address; notification failure grants no access. Requests are limited to 3 per IP per hour and 60 per instance per hour. Existing limits are per instance, not a durable service-wide spending ledger.
+
+## Anonymous preview and abuse controls
+
+Apply `backend/migrations/20261007_agent_trials.sql` to the deployed portfolio Supabase project before releasing trial-enabled source. This additive migration creates only quota tables and service-role-only RPCs; RLS blocks public table access. `POST /api/agent/trial` issues a 24-hour signed trial receipt after durable admission. Each trial reserves at most two inference turns under a database row lock, before calling a provider. Reconnects and competing application instances consult the same row. Database failures do not fall back to an in-memory or browser counter. Reserved turns are not refunded on provider failure, to avoid retry races and repeated spending.
+
+Admission allows one trial per HMAC address bucket per UTC day and 300 trials across the service per UTC day (at most 600 anonymous inference turns). Quota tables store no messages, email/company, or raw address. Address bucketing may group visitors on a shared network; missing/lost receipts and exhausted budgets fall back to the introduction form. Existing paid-chat rate limits still apply. These trial limits do not establish durable spending limits for introduced visitors, who retain the existing per-instance controls.
+
+The first socket frame accepts either a full receipt or a distinct signed trial receipt. The server emits `access_status` on trial admission and after each reservation. A third message or anonymous contact confirmation receives `access_required` without inference or execution. The UI waits for the second response to finish before showing the inline introduction, retains the transcript during upgrade, and retires connection-bound confirmation cards on reconnect.
+
+Production admission also checks purpose before inference. Obvious unrelated tasks and instruction-override requests receive a local portfolio-scope refusal without spending a trial turn. Published employer/project/technology names and relevant recruiter questions remain supported. This filter supplements the system policy, bounded SDK loop, tool allowlist, and server confirmation boundary; it does not guarantee detection of every adversarial prompt.
+
+`helpers/verify_agent_trial_sql.py` exercises the actual migration in an isolated local PostgreSQL container, including competing turn reservations and daily peer admissions. Run through the shared heavy-check wrapper. It never connects to Supabase, sends mail, or calls a model.
 
 ## Calendar connection
 
@@ -21,7 +33,7 @@ Google OAuth creation/consent through browser UI requires action-time confirmati
 ## Verification required before completion
 
 - Gate: success follows notification acceptance; failure issues no receipt; invalid/tampered/expired receipts cause no model request; receipts survive instances without exposing personal details.
-- Interface: dedicated route dark/light and mobile; no chat before access; expiry returns to gate; generated evidence cards show actual tool results and safe source links; contact review/edit/cancel/confirm.
+- Interface: dedicated route and right-side pane in dark/light and mobile; two anonymous messages then introduction; expiry returns to gate; generated evidence cards show actual tool results and safe source links; contact review/edit/cancel/confirm.
 - Calendar: no booking before confirmation; returned slot binding, busy recheck, duplicate/replay rejection, DST handling and sanitized failures; real OAuth connection plus verified live availability and authorized booking acceptance remain separate from mocks.
 - Release: full lint/typechecks/tests/coverage/build and protected CI, immutable canary deployment, exact SHA verification across live domains. Respect the shared verification lock.
 

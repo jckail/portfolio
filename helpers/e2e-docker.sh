@@ -3,8 +3,8 @@
 #
 # Why: the host (WSL) lacks Chromium's system libraries (libnspr4 and friends)
 # and installing them needs sudo. The Playwright image ships all of them, so
-# anyone with Docker gets a fast, hermetic headless browser, and several agents
-# or shells can run suites in parallel against different servers.
+# anyone with Docker gets a hermetic headless browser. Coordinate expensive
+# suites through agent-heavy-check, including suites in sibling worktrees.
 #
 # Usage:
 #   helpers/e2e-docker.sh                       # suite vs http://localhost:8080
@@ -35,9 +35,14 @@ if [ ! -d "${ROOT}/e2e/node_modules/@playwright/test" ]; then
 fi
 
 PORT="$(node -p "new URL(process.argv[1]).port || (process.argv[1].startsWith('https') ? 443 : 80)" "${BASE_URL}")"
+# Worktrees may reuse cached dependencies through a symlink outside ROOT.
+# Mount the resolved directory explicitly so it also exists inside /work.
+E2E_MODULES="$(readlink -f "${ROOT}/e2e/node_modules")"
 
 exec docker run --rm --ipc=host --add-host=host.docker.internal:host-gateway \
-  -v "${ROOT}/e2e:/work:ro" -v "${ROOT}/helpers/e2e-proxy.cjs:/proxy.cjs:ro" -w /work \
+  -v "${ROOT}/e2e:/work:ro" -v "${E2E_MODULES}:/work/node_modules:ro" \
+  -v "${ROOT}/backend/assets:/backend/assets:ro" \
+  -v "${ROOT}/helpers/e2e-proxy.cjs:/proxy.cjs:ro" -w /work \
   -e E2E_BASE_URL="${BASE_URL}" \
   "${IMAGE}" \
-  sh -c 'node /proxy.cjs "$0" host.docker.internal & exec npx playwright test --reporter=list --output=/tmp/pw-results "$@"' "${PORT}" "$@"
+  sh -c 'node /proxy.cjs "$0" host.docker.internal & exec npx --no-install playwright test --reporter=list --output=/tmp/pw-results "$@"' "${PORT}" "$@"

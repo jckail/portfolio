@@ -1,17 +1,13 @@
-/* Mirrors the previous MUI <Fab> layout: a full-width, 1440px-capped dock
-   pinned to the bottom so the button lines up with the content column. */
+/* Anchor the launcher to the viewport corner, including on wide screens. */
 .chat-fab-dock {
   position: fixed;
   bottom: max(16px, env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
+  right: max(16px, env(safe-area-inset-right));
   z-index: 9999;
-  width: 100%;
-  max-width: 1440px;
-  padding: 0 24px;
+  width: auto;
   box-sizing: border-box;
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   pointer-events: none;
 }
 

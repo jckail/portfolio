@@ -16,6 +16,8 @@ from pydantic import BaseModel
 
 from backend.app.config import get_settings
 from backend.app.services.agent_access import verify_access
+from backend.app.services.agent_scope import SCOPE_REFUSAL, portfolio_question_allowed
+from backend.app.services.agent_trial import TrialUnavailable, trial_remaining, verify_trial
 from backend.app.services.chat_service import (
     IDLE_TIMEOUT_SECONDS,
     MAX_USER_MESSAGE_CHARS,
@@ -105,7 +107,8 @@ def _origin_allowed(websocket: WebSocket) -> bool:
     return bool(origin_netloc) and origin_netloc.lower() == host.lower()
 
 
-async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict, ip: str):
+async def handle_websocket_message(websocket: WebSocket, client_id: str, data: dict, ip: str,
+                                   trial_id: str | None = None):
     try:
         if data.get("type") == "context":
             manager.store_context(client_id, data.get("content", ""))
@@ -120,6 +123,9 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
             return
 
         if data.get("type") == "confirm_action":
+            if trial_id:
+                await websocket.send_json({"type": "access_required", "reason": "contact_required"})
+                return
             await manager.handle_confirm(client_id, data, ip)
             return
 
@@ -150,6 +156,22 @@ async def handle_websocket_message(websocket: WebSocket, client_id: str, data: d
                 is_chunk=False
             )
             return
+
+        if get_settings().agent_access_required and not portfolio_question_allowed(data["content"]):
+            await manager.send_message(SCOPE_REFUSAL, client_id, is_chunk=False)
+            return
+
+        if trial_id:
+            try:
+                remaining = await trial_remaining(trial_id, consume=True)
+            except TrialUnavailable:
+                await manager.send_message("Trial access is temporarily unavailable. Please try again or introduce yourself.",
+                                           client_id, is_chunk=False)
+                return
+            if remaining is None:
+                await websocket.send_json({"type": "access_required", "reason": "trial_exhausted"})
+                return
+            await websocket.send_json({"type": "access_status", "mode": "trial", "remaining_messages": remaining})
 
         # Store user message in Supabase
         ga_session_id = data.get('ga_session_id')
@@ -192,13 +214,25 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
     try:
         access_expires = None
+        trial_id = None
         if get_settings().agent_access_required:
             try:
                 access_frame = json.loads(await asyncio.wait_for(websocket.receive_text(), timeout=10))
                 if isinstance(access_frame, dict) and access_frame.get("type") == "access":
                     access_expires = verify_access(access_frame.get("token"))
+                    if access_expires is None:
+                        trial = verify_trial(access_frame.get("token"))
+                        if trial:
+                            remaining = await trial_remaining(trial[0])
+                            if remaining is not None:
+                                trial_id, access_expires = trial
+                                await websocket.send_json({"type": "access_status", "mode": "trial",
+                                                           "remaining_messages": remaining})
             except (TimeoutError, ValueError):
                 pass
+            except TrialUnavailable:
+                await websocket.close(code=1013, reason="Trial access temporarily unavailable")
+                return
             if access_expires is None:
                 await websocket.close(code=1008, reason="Agent access required")
                 return
@@ -223,7 +257,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     await websocket.close(code=1008, reason="Agent access expired")
                     break
 
-            await handle_websocket_message(websocket, client_id, parsed_data, ip)
+            await handle_websocket_message(websocket, client_id, parsed_data, ip, trial_id)
 
     except WebSocketDisconnect:
         pass

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { SidePanel } from '../../../shared/components/navigation';
 import { getQueryParam, setQueryParam } from '../../../shared/utils/url-params';
 import { useThemeStore } from '../../../shared/stores/theme-store';
+import { openAgent } from '../../../shared/utils/agent-link';
 import { useData } from '../../providers/data-provider';
 import {
   MoonIcon,
@@ -105,7 +106,7 @@ const Header: React.FC = memo(() => {
             </div>
           </div>
           <div className="nav-right">
-            <a className="header-agent-link" href={`/agent?theme=${theme}`}>Ask my assistant</a>
+            <a className="header-agent-link" href={`/agent?theme=${theme}`} onClick={event => { event.preventDefault(); openAgent(); }}>Chat with my Agent</a>
             {!isToggleHidden && (
               <button
                 type="button"

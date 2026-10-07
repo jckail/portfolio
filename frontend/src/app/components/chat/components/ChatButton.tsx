@@ -16,7 +16,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, onIntent }) => 
     <button
       type="button"
       className="chat-fab"
-      aria-label="Chat with AI"
+      aria-label="Chat with my Agent"
       aria-haspopup="dialog"
       onClick={onClick}
       onPointerEnter={onIntent}
@@ -24,7 +24,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, onIntent }) => 
     >
       <span aria-hidden="true">🤖</span>
       <span className="chat-fab-label" aria-hidden="true">
-        Chat with AI
+        Chat with my Agent
       </span>
     </button>
   </div>
