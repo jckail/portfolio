@@ -29,6 +29,14 @@ _FOLLOWUP = re.compile(
     r"^(?:hi|hello|hey|thanks|thank you|yes|no|please continue|continue|tell me more|"
     r"what else|why|how so|can you elaborate|summarize that|give me an example|"
     r"what can you do|what do you do)[.!? ]*$", re.I)
+# Recruiters commonly address the portfolio agent as "you" without repeating
+# Jordan's name. Match personal profile questions, not these nouns in any context.
+_PROFILE = re.compile(
+    r"\b(?:(?:your|his)\s+(?:(?:current|professional)\s+)?(?:title|location|degree)|"
+    r"where\s+(?:(?:are you|is he)\s+(?:currently\s+)?(?:based|located)|"
+    r"(?:do you|does he)\s+live)|"
+    r"(?:do you|does he)\s+(?:have|hold)\s+(?:a|an)\s+"
+    r"(?:(?:college|university|bachelor['’]?s|master['’]?s)\s+)?degree)\b", re.I)
 
 
 @cache
@@ -49,4 +57,5 @@ def _published_terms() -> re.Pattern:
 def portfolio_question_allowed(message: str) -> bool:
     if _INJECTION.search(message) or _UNRELATED.search(message):
         return False
-    return bool(_PURPOSE.search(message) or _FOLLOWUP.fullmatch(message.strip()) or _published_terms().search(message))
+    return bool(_PURPOSE.search(message) or _PROFILE.search(message)
+                or _FOLLOWUP.fullmatch(message.strip()) or _published_terms().search(message))
