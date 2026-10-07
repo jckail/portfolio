@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from .admin_routes import router as admin_router
+from .agent_access_routes import router as agent_access_router
 from .chat_routes import router as chat_router
 from .chat_routes import status_router as chat_status_router
 from .contact_routes import router as contact_router
@@ -32,6 +33,7 @@ api_router.include_router(content_router)  # aboutme, skills, experience, projec
 api_router.include_router(contact_router, tags=["contact"])
 api_router.include_router(zuni_router, tags=["zuni"])
 api_router.include_router(chat_status_router, tags=["chat"])
+api_router.include_router(agent_access_router, tags=["agent"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 # /llms.txt, /resume.json and friends live at the site root, not under /api.
 # Appending the routes (rather than include_router, which would prefix them)

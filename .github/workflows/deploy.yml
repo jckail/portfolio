@@ -152,6 +152,7 @@ jobs:
           --region "$REGION" \
           --image "$DEPLOY_IMAGE" \
           --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
+          --update-secrets "AGENT_ACCESS_SECRET=portfolio-agent-access:latest" \
           --cpu-boost \
           --session-affinity \
           --startup-probe="httpGet.path=/api/health,httpGet.port=8080,initialDelaySeconds=5,periodSeconds=5,failureThreshold=24,timeoutSeconds=3" \

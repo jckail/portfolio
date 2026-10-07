@@ -23,9 +23,11 @@ const HEADINGS: Record<ConfirmTool, string> = {
   contact_jordan: 'Send this message to Jordan?',
   request_phone: "Request Jordan's phone number?",
   request_meeting: 'Request a call with Jordan?',
+  book_meeting: 'Book this meeting with Jordan?',
 };
 
 const EXPLAINERS: Record<ConfirmTool, string> = {
+  book_meeting: 'Review the selected time, topic and company. Confirm asks Google Calendar to book the meeting and email an invitation. The meeting is booked only after a successful result.',
   contact_jordan:
     'Review and edit the message. It is only sent when you press Confirm, and Jordan will reply to the email you enter.',
   request_phone:
@@ -167,7 +169,7 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
           </>
         )}
 
-        {tool === 'request_meeting' && !settled && (
+        {(tool === 'request_meeting' || tool === 'book_meeting') && !settled && (
           <>
             <TextField
               fullWidth
@@ -182,7 +184,15 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
               inputProps={{ maxLength: TOPIC_MAX }}
               sx={{ ...fieldSx, mb: 1.5 }}
             />
-            <TextField
+            {tool === 'book_meeting' ? <>
+              <Typography component="p" sx={{ mb: 1.5 }}>Selected time: {args.start && Number.isFinite(Date.parse(args.start))
+                ? new Date(args.start).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' }) : 'Slot unavailable'}
+                {' (your local timezone)'}</Typography>
+              <TextField fullWidth size="small" label="Company or organization" name="company"
+                value={args.company ?? ''} onChange={setArg('company')} disabled={!editable}
+                error={Boolean(errors.company)} helperText={errors.company || undefined}
+                inputProps={{ maxLength: 120 }} sx={{ ...fieldSx, mb: 1.5 }} />
+            </> : <TextField
               fullWidth
               multiline
               minRows={2}
@@ -197,7 +207,7 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
               helperText={errors.preferred_times || undefined}
               inputProps={{ maxLength: TIMES_MAX }}
               sx={{ ...fieldSx, mb: 1.5 }}
-            />
+            />}
           </>
         )}
 
@@ -217,7 +227,7 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
             }}
             disabled={!editable}
             error={Boolean(errors.email)}
-            helperText={errors.email || 'Used only to reply to you. Never shared.'}
+            helperText={errors.email || 'Used for Jordan’s reply or meeting invitation.'}
             inputRef={emailRef}
             inputProps={{ maxLength: EMAIL_MAX }}
             sx={{ ...fieldSx, mb: 1.5 }}

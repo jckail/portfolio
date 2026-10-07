@@ -20,6 +20,8 @@ locals {
 
   # event name => labels extracted from jsonPayload.<label>
   app_events = {
+    "agent.access_granted"   = []
+    "agent.access_failed"    = []
     "auth.login_failed"      = []
     "auth.login_succeeded"   = []
     "rate_limit.blocked"     = ["limiter"]
@@ -49,7 +51,7 @@ locals {
   # Secrets whose access should only ever come from the runtime service account.
   runtime_secret_ids = concat(
     [for s in local.secret_names : replace(s, "_", "-")],
-    ["contact-phone", "vertex-api-key"],
+    ["contact-phone", "vertex-api-key", "portfolio-agent-access"],
   )
 }
 

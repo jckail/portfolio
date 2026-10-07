@@ -1,29 +1,39 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Box, Button } from '@mui/material';
 
-/** Base prompts plus a couple that exercise chat navigation tools. */
-const BASE_PROMPTS = [
-  'What is Jordan working on at Together AI?',
-  'Summarize his AI and ML experience',
-  'What are his strongest technical skills?',
-  'Tell me about his open-source projects',
+/** Stable entry points: the label scans quickly; the request sets useful boundaries. */
+const PROMPTS = [
+  {
+    label: 'Recruiter brief',
+    prompt:
+      'Give me a concise recruiter brief on Jordan: scope, strongest engineering evidence, and relevant portfolio links. Flag anything the portfolio does not establish.',
+  },
+  {
+    label: 'Compare a role',
+    prompt:
+      'Help me assess Jordan for a role. Ask me to paste the job description, then compare the requirements with portfolio evidence and identify gaps or questions to ask him.',
+  },
+  {
+    label: 'Agent engineering',
+    prompt:
+      "Explain Jordan's agent engineering experience using specific portfolio evidence and links. Distinguish his responsibilities from team outcomes.",
+  },
+  {
+    label: 'Explore projects',
+    prompt:
+      "Help me explore Jordan's most relevant engineering projects. Summarize the problem, his contribution, and available links without inventing results.",
+  },
+  {
+    label: 'Draft an introduction',
+    prompt:
+      'Help me draft a recruiting introduction to Jordan. Ask for the role and context first, then let me review the message in a confirmation card before anything is sent.',
+  },
+  {
+    label: 'Request a meeting',
+    prompt:
+      'Help me request a meeting with Jordan. Ask for the purpose and proposed time with timezone, then show a confirmation card. Treat this as a request, not a confirmed booking.',
+  },
 ] as const;
-
-const ACTION_PROMPTS = [
-  'Show me his resume',
-  'Open the Super Teacher project',
-  'Take me to his experience at Together AI',
-  "Request Jordan's phone number",
-  'Set up a call with Jordan',
-] as const;
-
-function pickPrompts(): string[] {
-  // Rotate action prompts so the empty state feels fresh across visits
-  const hour = new Date().getHours();
-  const action = ACTION_PROMPTS[hour % ACTION_PROMPTS.length];
-  // 'Contact Jordan for me' is always offered so the email-gated tools are discoverable.
-  return [...BASE_PROMPTS.slice(0, 2), 'Contact Jordan for me', action];
-}
 
 interface SuggestedPromptsProps {
   onSelect: (prompt: string) => void;
@@ -34,8 +44,6 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({
   onSelect,
   disabled = false,
 }) => {
-  const prompts = useMemo(() => pickPrompts(), []);
-
   return (
     <Box
       sx={{
@@ -48,9 +56,9 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({
       role="group"
       aria-label="Suggested questions"
     >
-      {prompts.map(prompt => (
+      {PROMPTS.map(({ label, prompt }) => (
         <Button
-          key={prompt}
+          key={label}
           size="small"
           variant="outlined"
           disabled={disabled}
@@ -73,7 +81,7 @@ export const SuggestedPrompts: React.FC<SuggestedPromptsProps> = ({
             },
           }}
         >
-          {prompt}
+          {label}
         </Button>
       ))}
     </Box>

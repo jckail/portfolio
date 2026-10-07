@@ -56,7 +56,7 @@ def aio(fn):
 
 def test_registry_kinds_and_strict_schemas():
     kinds = chat_tools.TOOL_KINDS
-    assert {n for n, k in kinds.items() if k == "execute"} == {"contact_jordan", "request_phone", "request_meeting"}
+    assert {n for n, k in kinds.items() if k == "execute"} == {"contact_jordan", "request_phone", "request_meeting", "book_meeting"}
     assert {"open_modal", "navigate_section", "set_theme", "download_resume", "search_portfolio"} <= {
         n for n, k in kinds.items() if k == "read"
     }

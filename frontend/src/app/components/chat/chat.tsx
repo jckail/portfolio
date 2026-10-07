@@ -47,11 +47,16 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   return (
-    <div ref={containerRef} style={{ position: 'fixed', zIndex: 9999, width: '100%', height: '100%' }}>
+    <div
+      ref={containerRef}
+      style={{ position: 'fixed', zIndex: 9999, width: '100%', height: '100%' }}
+    >
       {!open && <ChatButton onClick={handleClickOpen} />}
 
       <Dialog
         open={open}
+        aria-labelledby="portfolio-assistant-title"
+        aria-describedby="portfolio-assistant-disclosure"
         onClose={(_, reason) => {
           if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
             handleClose();
@@ -64,20 +69,20 @@ const Chat: React.FC<ChatProps> = ({
         hideBackdrop={!isMobile}
         PaperProps={{
           sx: {
-            width: isMobile ? '100%' : '500px',
-            height: isMobile ? '100dvh' : '100vh',
-            maxHeight: isMobile ? '100dvh' : '100vh',
+            width: isMobile ? '100%' : 'min(520px, calc(100vw - 32px))',
+            height: isMobile ? '100dvh' : 'min(760px, calc(100dvh - 32px))',
+            maxHeight: isMobile ? '100dvh' : 'calc(100dvh - 32px)',
             borderRadius: isMobile ? 0 : 5,
-            margin: isMobile ? 0 : '1vh 0 15vh 0',
+            margin: 0,
             display: 'flex',
             flexDirection: 'column',
             position: isMobile ? 'relative' : 'fixed',
-            left: isMobile ? 'auto' : 0,
-            top: isMobile ? 'auto' : 0,
+            left: isMobile ? 'auto' : 16,
+            bottom: isMobile ? 'auto' : 16,
             bgcolor: 'var(--surface-color)',
             color: 'var(--text-color)',
             backdropFilter: 'blur(30px)',
-            background: isMobile ? 'var(--solid-color)':'var(--surface-color)',
+            background: isMobile ? 'var(--solid-color)' : 'var(--surface-color)',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
             overflowY: 'hidden',
             // Translucent blur surfaces are dropped in forced colors; use system colors
@@ -87,7 +92,7 @@ const Chat: React.FC<ChatProps> = ({
               color: 'CanvasText',
               border: '1px solid CanvasText',
             },
-          }
+          },
         }}
         sx={{
           position: 'fixed',
@@ -97,14 +102,14 @@ const Chat: React.FC<ChatProps> = ({
             justifyContent: 'flex-start',
           },
           '& .MuiBackdrop-root': {
-            position: 'fixed'
-          }
+            position: 'fixed',
+          },
         }}
       >
         <ChatHeader onClose={handleClose} isMobile={isMobile} />
 
-        <DialogContent 
-          sx={{ 
+        <DialogContent
+          sx={{
             display: 'flex',
             flexDirection: 'column',
             flexGrow: 1,
@@ -112,22 +117,25 @@ const Chat: React.FC<ChatProps> = ({
             overflow: 'hidden',
             bgcolor: 'var(--background-color)',
             position: 'relative',
-            p: '16px !important'
+            p: '16px !important',
           }}
         >
           <Typography
             variant="caption"
             component="p"
+            id="portfolio-assistant-disclosure"
             sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
           >
-            Conversations are logged to improve the assistant. Please don&apos;t share sensitive info.
+            AI answers can be mistaken. Chat messages are stored; avoid confidential or sensitive
+            information.
           </Typography>
           <Typography
             variant="caption"
             component="p"
             sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
           >
-            I can also contact Jordan for you once you give me an email. Nothing is sent until you confirm.
+            To contact Jordan, review the draft and enter your email in the confirmation card.
+            Nothing is sent until you confirm.
           </Typography>
 
           <ChatMessages

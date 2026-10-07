@@ -9,25 +9,28 @@ interface ChatHeaderProps {
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => {
   return (
-    <DialogTitle 
+    <DialogTitle
+      id="portfolio-assistant-title"
       className="party-pinned"
-      sx={{ 
-        m: 0, 
-        p: 1, 
-        display: 'flex', 
-        alignItems: 'center', 
+      sx={{
+        m: 0,
+        p: 1.5,
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         bgcolor: 'var(--primary-border)',
         color: 'white',
         flexShrink: 0,
       }}
     >
-      <div style={{ 
-        fontSize: '1.5rem',
-        fontWeight: 600,
-        fontFamily: '"Quantico",sans-serif'
-      }}>
-             Jordan&apos;s AI Assistant 🤖
+      <div
+        style={{
+          fontSize: isMobile ? '1.1rem' : '1.25rem',
+          fontWeight: 600,
+          fontFamily: '"Quantico",sans-serif',
+        }}
+      >
+        Jordan&apos;s AI portfolio assistant
       </div>
       <IconButton
         aria-label="close"
@@ -37,10 +40,10 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isMobile }) => 
           padding: '12px',
           '&:hover': {
             bgcolor: 'var(--primary)',
-          }
+          },
         }}
       >
-        <CloseIcon sx={{ fontSize: isMobile ? 35 : 35 }} />
+        <CloseIcon sx={{ fontSize: 28 }} />
       </IconButton>
     </DialogTitle>
   );

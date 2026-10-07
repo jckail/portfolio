@@ -27,7 +27,7 @@ def spa(tmp_path):
     return TestClient(app)
 
 
-@pytest.mark.parametrize("path", ["/", "/admin", "/dataplayground", "/dataplayground/"])
+@pytest.mark.parametrize("path", ["/", "/admin", "/agent", "/agent/", "/dataplayground", "/dataplayground/"])
 def test_known_client_route_serves_index_with_200(spa, path):
     response = spa.get(path, headers=HTML)
     assert response.status_code == 200
@@ -69,7 +69,7 @@ def test_non_html_requests_do_not_fall_back(spa):
 
 
 @pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}, {"accept": "*/*;q=0.8"}])
-@pytest.mark.parametrize("path", ["/admin", "/dataplayground", "/jobbr", "/gopilot", "/aibilling", "/cryptotrader"])
+@pytest.mark.parametrize("path", ["/admin", "/agent", "/agent/", "/dataplayground", "/jobbr", "/gopilot", "/aibilling", "/cryptotrader"])
 def test_wildcard_or_missing_accept_gets_known_routes(spa, path, accept):
     """Crawlers that send */* or no Accept are served like the home page."""
     response = spa.get(path, headers={**accept, "accept-encoding": "identity"})

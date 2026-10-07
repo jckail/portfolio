@@ -17,6 +17,7 @@ locals {
     ANTHROPIC_API_KEY     = google_secret_manager_secret.secrets["anthropic_api_key"].secret_id
     SENDGRID_API_KEY      = google_secret_manager_secret.secrets["sendgrid_api_key"].secret_id
     CONTACT_PHONE         = google_secret_manager_secret.contact_phone.secret_id
+    AGENT_ACCESS_SECRET   = google_secret_manager_secret.agent_access.secret_id
     # Optional in the app (chat falls back to Anthropic without it). The
     # container and its binding live in vertex.tf; the value is written out of
     # band, never through Terraform.

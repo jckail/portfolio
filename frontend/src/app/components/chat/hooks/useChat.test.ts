@@ -22,7 +22,7 @@ class FakeWebSocket {
   onopen: (() => void) | null = null;
   onmessage: ((event: { data: string }) => void) | null = null;
   onerror: ((error: unknown) => void) | null = null;
-  onclose: (() => void) | null = null;
+  onclose: ((event: { code: number; reason: string }) => void) | null = null;
 
   constructor(url: string) {
     this.url = url;
@@ -35,7 +35,7 @@ class FakeWebSocket {
 
   close() {
     this.readyState = 3;
-    this.onclose?.();
+    this.onclose?.({ code: 1000, reason: '' });
   }
 
   /** Test helpers */
@@ -453,5 +453,36 @@ describe('useChat', () => {
         vi.useRealTimers();
       }
     });
+  });
+});
+
+describe('gated full-page chat protocol', () => {
+  beforeEach(() => {
+    sessionStorage.clear(); window.history.replaceState({}, '', '/agent?theme=dark');
+    FakeWebSocket.instances = []; vi.stubGlobal('WebSocket', FakeWebSocket);
+  });
+  afterEach(() => vi.unstubAllGlobals());
+  it('sends the receipt before context and message without putting it in the URL', async () => {
+    const { result } = renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access' }));
+    await act(async () => { await result.current.handleSuggestedPrompt('Show projects'); });
+    const ws = FakeWebSocket.instances[0];
+    act(() => ws.simulateOpen());
+    expect(ws.url).not.toContain('signed-access');
+    expect(ws.sent.map(frame => JSON.parse(frame).type)).toEqual(['access', 'context', 'message']);
+    expect(JSON.parse(ws.sent[0])).toEqual({ type: 'access', token: 'signed-access' });
+    expect(window.location.search).toBe('?theme=dark');
+  });
+  it('accepts only allowlisted portfolio card kinds and re-gates expired access', () => {
+    const onAccessExpired = vi.fn();
+    const { result } = renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access', onAccessExpired }));
+    const ws = FakeWebSocket.instances[0];
+    act(() => {
+      ws.simulateOpen();
+      ws.simulateMessage({ type: 'portfolio_card', kind: 'calendar_availability', data: { status: 'unavailable' } });
+      ws.simulateMessage({ type: 'portfolio_card', kind: 'arbitrary_html', data: { html: '<script>' } });
+    });
+    expect(result.current.portfolioCards).toHaveLength(1);
+    act(() => ws.onclose?.({ code: 1008, reason: 'Agent access expired' }));
+    expect(onAccessExpired).toHaveBeenCalledOnce();
   });
 });

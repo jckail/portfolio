@@ -16,6 +16,7 @@ export const CONFIRM_TOOLS: readonly ConfirmTool[] = [
   'contact_jordan',
   'request_phone',
   'request_meeting',
+  'book_meeting',
 ];
 
 export function isConfirmTool(tool: unknown): tool is ConfirmTool {
@@ -40,12 +41,17 @@ export function validateArgs(tool: ConfirmTool, args: ConfirmArgs): Record<strin
     if (!args.message?.trim()) errors.message = 'Add a message.';
     else if (args.message.length > MESSAGE_MAX) errors.message = `Keep the message under ${MESSAGE_MAX} characters.`;
   }
-  if (tool === 'request_meeting') {
+  if ((tool === 'request_meeting' || tool === 'book_meeting')) {
     if (!args.topic?.trim()) errors.topic = 'Add a topic.';
     else if (args.topic.length > TOPIC_MAX) errors.topic = `Keep the topic under ${TOPIC_MAX} characters.`;
     if ((args.preferred_times ?? '').length > TIMES_MAX) {
       errors.preferred_times = `Keep this under ${TIMES_MAX} characters.`;
     }
+  }
+  if (tool === 'book_meeting') {
+    if (!args.start || !/T/.test(args.start) || !Number.isFinite(Date.parse(args.start))) errors.start = 'Ask the assistant for an available slot again.';
+    if (!args.company?.trim()) errors.company = 'Add your company or organization.';
+    else if (args.company.length > 120) errors.company = 'Keep the company under 120 characters.';
   }
   return errors;
 }
@@ -66,6 +72,10 @@ export function sanitizeArgs(raw: unknown): ConfirmArgs {
   if (message !== undefined) out.message = message.slice(0, MESSAGE_MAX);
   if (topic !== undefined) out.topic = topic.slice(0, TOPIC_MAX);
   if (times !== undefined) out.preferred_times = times.slice(0, TIMES_MAX);
+  const start = str(o.start);
+  const company = str(o.company);
+  if (start !== undefined) out.start = start.slice(0, 40);
+  if (company !== undefined) out.company = company.slice(0, 120);
   return out;
 }
 

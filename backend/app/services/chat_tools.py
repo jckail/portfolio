@@ -35,6 +35,12 @@ from backend.app.services.owner_mail import (
     owner_mail_configured,
     send_owner_mail,
 )
+from backend.app.services.recruiter_tools import (
+    get_contact_options,
+    get_project_details,
+    get_recruiter_brief,
+    match_role_requirements,
+)
 from backend.app.utils.events import log_event
 
 logger = logging.getLogger(__name__)
@@ -83,6 +89,15 @@ SEARCH_PORTFOLIO_TOOL = {
 
 EXECUTE_TOOLS: list[dict] = [
     {
+        "name": "book_meeting",
+        "description": "Propose a 30-minute Google Calendar meeting at a start returned by get_meeting_availability. Nothing is booked until the visitor reviews and confirms the card with their email. Never invent a slot.",
+        "input_schema": {"type": "object", "properties": {
+            "start": {"type": "string", "maxLength": 40},
+            "topic": {"type": "string", "minLength": 1, "maxLength": 200},
+            "company": {"type": "string", "minLength": 1, "maxLength": 120}},
+            "required": ["start", "topic", "company"], "additionalProperties": False},
+    },
+    {
         "name": "contact_jordan",
         "description": (
             "Propose sending Jordan an email on the visitor's behalf. This does NOT send anything: "
@@ -130,14 +145,59 @@ EXECUTE_TOOLS: list[dict] = [
 
 # Everything the model may call. The browser tools are validated again by
 # chat_actions.normalize_tool_action before anything reaches the SPA.
-ALL_TOOLS: list[dict] = [*CHAT_TOOLS, SEARCH_PORTFOLIO_TOOL, *EXECUTE_TOOLS]
+RECRUITER_TOOLS: list[dict] = [
+    {"name": "get_recruiter_brief",
+     "description": "Get a concise published profile, recent impact, curated skills and resume links. Optional focus finds relevant evidence.",
+     "input_schema": {"type": "object", "properties": {"focus": {"type": "string", "maxLength": 200}},
+                      "additionalProperties": False}},
+    {"name": "get_project_details",
+     "description": "Read a project's published implementation details and source links using its exact key from search_portfolio.",
+     "input_schema": {"type": "object", "properties": {"key": {"type": "string", "maxLength": 64}},
+                      "required": ["key"], "additionalProperties": False}},
+    {"name": "match_role_requirements",
+     "description": "Look up public evidence for up to eight technical job requirements. Explain partial matches and unknowns; no fit score.",
+     "input_schema": {"type": "object", "properties": {"requirements": {
+         "type": "array", "minItems": 1, "maxItems": 8,
+         "items": {"type": "string", "minLength": 1, "maxLength": 200}}},
+         "required": ["requirements"], "additionalProperties": False}},
+    {"name": "get_contact_options",
+     "description": "Get public profile, resume and contact links, and how confirmed contact or meeting requests work. Never reveals a phone.",
+     "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
+]
+
+ALL_TOOLS: list[dict] = [*CHAT_TOOLS, SEARCH_PORTFOLIO_TOOL, *RECRUITER_TOOLS, *EXECUTE_TOOLS]
+ALL_TOOLS.append({
+    "name": "get_meeting_availability",
+    "description": "Read up to ten free 30-minute meeting slots from Jordan's connected Google Calendar for a range of at most seven days. Uses the owner's configured policy; unavailable means offer a meeting request instead. Never exposes event details.",
+    "input_schema": {"type": "object", "properties": {
+        "start": {"type": "string", "maxLength": 40}, "end": {"type": "string", "maxLength": 40}},
+        "required": ["start", "end"], "additionalProperties": False},
+})
 
 TOOL_KINDS: dict[str, str] = {
+    "get_meeting_availability": KIND_READ,
     **{tool["name"]: KIND_READ for tool in CHAT_TOOLS},
     "search_portfolio": KIND_READ,
+    **{tool["name"]: KIND_READ for tool in RECRUITER_TOOLS},
     **{tool["name"]: KIND_EXECUTE for tool in EXECUTE_TOOLS},
 }
 EXECUTE_TOOL_NAMES = frozenset(name for name, kind in TOOL_KINDS.items() if kind == KIND_EXECUTE)
+
+# Runtime dispatcher shared by manual compatibility and SDK orchestration.
+READ_TOOL_HANDLERS = {
+    "search_portfolio": lambda args: search_portfolio(args.get("query")),
+    "get_recruiter_brief": lambda args: get_recruiter_brief(args.get("focus", "")),
+    "get_project_details": lambda args: get_project_details(args.get("key")),
+    "match_role_requirements": lambda args: match_role_requirements(args.get("requirements")),
+    "get_contact_options": lambda args: get_contact_options(),
+}
+
+
+def run_read_tool(name: str, args: object) -> dict:
+    handler = READ_TOOL_HANDLERS.get(name)
+    if handler is None:
+        return {"status": "rejected", "note": "Unknown public evidence tool."}
+    return handler(args if isinstance(args, dict) else {})
 
 # ---------------------------------------------------------------------------
 # Argument validation
@@ -191,6 +251,10 @@ def validate_execute_args(tool: str, raw: object, *, truncate: bool) -> dict | N
     payload = raw if isinstance(raw, dict) else {}
     if tool == "request_phone":
         return {}
+    if tool == "book_meeting":
+        fields = {name: _text_field(payload, name, limit, single_line=True, truncate=False, required=True)
+                  for name, limit in (("start", 40), ("topic", 200), ("company", 120))}
+        return fields if all(value is not None for value in fields.values()) else None
     if tool == "contact_jordan":
         subject = _text_field(payload, "subject", MAX_SUBJECT_CHARS, single_line=True, truncate=truncate, required=True)
         message = _text_field(payload, "message", MAX_MESSAGE_CHARS, single_line=False, truncate=truncate, required=True)
@@ -432,7 +496,7 @@ def _limiters():
     return contact_routes._email_limiter, contact_routes._phone_limiter
 
 
-async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str) -> ActionOutcome:
+async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str, *, confirmation_id: str = "") -> ActionOutcome:
     """Run an execute-type tool the visitor confirmed. Never raises."""
     email = validate_email(email_raw)
     if email is None:
@@ -449,6 +513,19 @@ async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str) -
 
     if tool == "request_phone":
         return await _execute_phone(email)
+    if tool == "book_meeting":
+        from backend.app.services.calendar_runtime import calendar_service
+        from backend.app.services.calendar_service import CalendarSlotUnavailable, CalendarUnavailable
+        try:
+            booking = await calendar_service().book_confirmed(
+                start=clean["start"], topic=clean["topic"], visitor_company=clean["company"],
+                visitor_email=email, confirmation_id=confirmation_id,
+            )
+        except CalendarSlotUnavailable:
+            return ActionOutcome(False, "That slot is no longer available. Please choose another time.", note="the slot was unavailable; no new booking was confirmed")
+        except CalendarUnavailable:
+            return ActionOutcome(False, "Calendar booking is unavailable. Please send Jordan a meeting request instead.", note="calendar booking could not be confirmed")
+        return ActionOutcome(True, f"Calendar invitation created for {booking['start']} ({booking['timezone']}). Jordan has not personally accepted it yet.", note="Google Calendar confirmed the event creation; personal acceptance is unknown")
     return await _execute_mail(tool, clean, email)
 
 

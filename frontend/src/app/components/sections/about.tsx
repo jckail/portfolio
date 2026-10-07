@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, memo, useCallback, useMemo, useState } from 'react';
 
+import { useThemeStore } from '../../../shared/stores/theme-store';
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import { buttonize } from '../../../shared/utils/a11y';
@@ -79,12 +80,7 @@ const TLDRContent = memo(
   }) => {
     // Hidden when the assistant is unavailable: the launcher it clicks is gone.
     const chatAvailable = useChatAvailable();
-    const handleAIClick = () => {
-      const chatButton = document.querySelector('[aria-label="Chat with AI"]') as HTMLButtonElement;
-      if (chatButton) {
-        chatButton.click();
-      }
-    };
+    const agentTheme = useThemeStore(state => state.theme);
 
     const bioParagraphs = useMemo(
       () =>
@@ -165,10 +161,10 @@ const TLDRContent = memo(
             {chatAvailable && (
               <p>
                 Ask my{' '}
-                <span className="ai-highlight" {...buttonize(handleAIClick)}>
+                <a className="ai-highlight" href={`/agent?theme=${agentTheme}`}>
                   AI Assistant 🤖
-                </span>{' '}
-                below for more details about me.
+                </a>{' '}
+                for more details about me.
               </p>
             )}
           </div>

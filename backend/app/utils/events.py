@@ -18,6 +18,8 @@ from . import metrics
 logger = logging.getLogger("backend.app.events")
 
 KNOWN_EVENTS = frozenset({
+    "agent.access_granted",
+    "agent.access_failed",
     "auth.login_failed",
     "auth.login_succeeded",
     "rate_limit.blocked",
