@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useState } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 import { ChatMessages } from '../components/chat/components/ChatMessages';
 import { ChatInput } from '../components/chat/components/ChatInput';
@@ -20,6 +20,7 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const id = useId();
+  const conversation = useRef<HTMLElement>(null);
   const expire = useCallback(() => {
     clearReceipt(); setReceipt(null); setRequired(true);
     setError('Your access expired. Enter your details to continue.');
@@ -35,6 +36,19 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
   const chat = useChat({ accessToken: receipt?.token, fullPage: true, enabled: !!receipt,
     onAccessExpired: expire, onAccessStatus: status, onAccessRequired: requireAccess });
   const gate = !checking && (required || !receipt || (receipt.mode === 'trial' && receipt.remaining_messages === 0 && !chat.isLoading));
+
+  useLayoutEffect(() => {
+    const section = conversation.current;
+    const focused = document.activeElement;
+    if (!embedded || !section?.getClientRects().length) return;
+    // Removing the gate or disabling Send can leave focus on the document body.
+    // Keep keyboard interaction inside the pane through every access transition.
+    if (focused === document.body || focused === section ||
+      (section.contains(focused) && focused?.matches(':disabled'))) {
+      const field = section.querySelector<HTMLElement>('input:not(:disabled), textarea:not(:disabled)');
+      (field ?? section).focus();
+    }
+  }, [embedded, checking, gate, chat.isLoading, busy]);
 
   useEffect(() => {
     let active = true;
@@ -71,8 +85,16 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
     } catch { setError('We couldn’t make your introduction. Please try again or use the contact form.'); }
     finally { setBusy(false); }
   };
+  const sendMessage = () => {
+    if (embedded) conversation.current?.focus();
+    chat.handleSendMessage();
+  };
+  const suggestedPrompt = (prompt: string) => {
+    if (embedded) conversation.current?.focus();
+    chat.handleSuggestedPrompt(prompt);
+  };
 
-  return <section className="agent-conversation" aria-label="Conversation with Jordan's Agent" data-no-chat-context>
+  return <section ref={conversation} tabIndex={-1} className="agent-conversation" aria-label="Conversation with Jordan's Agent" data-no-chat-context>
     {!embedded && <div className="agent-conversation-heading"><h2>Chat with my Agent</h2>
       <span className="agent-muted">Grounded in Jordan’s portfolio</span></div>}
     <p className="agent-disclosure">Ask about Jordan’s work, skills, or your opportunity. AI answers can be mistaken.
@@ -81,7 +103,7 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
       {receipt.remaining_messages} introductory {receipt.remaining_messages === 1 ? 'message' : 'messages'} remaining.
       Then introduce yourself to continue.</p>}
     <ChatMessages messages={chat.messages} isLoading={chat.isLoading}
-      showSuggestions={!checking && !gate && chat.showSuggestions} onSuggestedPrompt={chat.handleSuggestedPrompt}
+      showSuggestions={!checking && !gate && chat.showSuggestions} onSuggestedPrompt={suggestedPrompt}
       pendingActions={chat.pendingActions} onConfirmAction={chat.confirmAction}
       onCancelAction={chat.cancelAction} portfolioCards={chat.portfolioCards} />
     {checking ? <p role="status">Preparing your conversation…</p> : gate
@@ -99,6 +121,6 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
         <a className="agent-contact-link" href="/?contact=open">Prefer a direct message?</a>
       </form>
       : <ChatInput message={chat.message} setMessage={chat.setMessage}
-        handleSendMessage={chat.handleSendMessage} isLoading={chat.isLoading} />}
+        handleSendMessage={sendMessage} isLoading={chat.isLoading} />}
   </section>;
 }

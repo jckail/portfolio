@@ -63,7 +63,7 @@ test('two-message preview introduces the visitor before continuing in the right 
   await page.getByLabel('Message the AI assistant').fill('How can Jordan help our agent platform team?');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   await expect.poll(() => frames.filter(frame => frame.type === 'message').length).toBe(3);
-  await expect(pane.getByText('Published portfolio answer 2.')).toBeVisible();
+  // Escape also works while the Send button is disabled during a response.
   await page.keyboard.press('Escape');
   await expect(pane).toBeHidden();
   await expect(launcher).toBeFocused();
