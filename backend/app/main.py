@@ -12,7 +12,6 @@ from .api import api_router, content, ws_router
 from .api.agent_routes import agent_lifespan, context_payload, mcp_route
 from .api.agent_routes import router as agent_router
 from .config import get_settings, missing_required_vars
-from .jobdog_redirect import router as jobdog_redirect_router
 from .middleware.access_log import AccessLogMiddleware
 from .middleware.canonical_host import CanonicalHostMiddleware
 from .middleware.compression import GZIP_MINIMUM_SIZE, SelectiveGZipMiddleware
@@ -114,7 +113,6 @@ app.add_middleware(AccessLogMiddleware, settings=settings)
 # Mount API routes first; the SPA mount at "/" is added at startup.
 app.include_router(api_router)
 app.include_router(ws_router)
-app.include_router(jobdog_redirect_router)
 app.include_router(opendatacenter_router)
 app.include_router(agent_router)
 app.router.routes.append(mcp_route)
