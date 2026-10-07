@@ -114,6 +114,10 @@ project doesn't cut version tags, so entries are grouped by date instead.
   1KB compression threshold. Now picks the largest chunk.
 
 ### Added
+- `jckail.com/jobbr` (and `www`) now redirects, path and query preserved, to the
+  Jobdog app at `https://jobdog.ai/jobbr/`. It is a 302 from `backend/app/jobdog_redirect.py`,
+  not a proxy, because Jobdog's sign-in requires its own `jobdog.ai` origin and Cloud Run
+  domain mappings cannot route by path. Promote to 301 once the destination is final.
 - Terraform-managed infrastructure on GCP: Cloud Run, Artifact Registry,
   Secret Manager, Workload Identity Federation for keyless GitHub Actions
   deploys, remote state in GCS.
