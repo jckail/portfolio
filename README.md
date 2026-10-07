@@ -1,119 +1,38 @@
 ![Portfolio Banner](readMeBanner.png)
 
-# Professional Portfolio 🚀
+# Portfolio
 
-Welcome to my professional portfolio! Visit [jckail.com](https://www.jckail.com) to see it in action.
+The source for [jckail.com](https://www.jckail.com): Jordan Kail's interactive
+resume site, a React SPA and a FastAPI API served from one Cloud Run service,
+with an AI assistant that answers questions from the published portfolio data.
 
-## Overview 🎯
+**Status:** active; `main` deploys to production through GitHub Actions.
 
-This portfolio is a modern, full-stack web application showcasing my
-professional experience through an interactive and engaging interface —
-React + TypeScript on the frontend, FastAPI on the backend, and an AI
-assistant on Vertex AI Gemini (Anthropic Claude is a supported alternative).
+## What it does
 
-## Key Features ✨
+- Renders experience, skills and projects from JSON in
+  [`backend/app/data/`](./backend/app/data), with deep-linkable sections and
+  modals (`?project=`, `?skill=`, `?company=`).
+- Generates an ATS-friendly PDF resume and machine-readable surfaces
+  (`/llms.txt`, `/resume.json`, `/sitemap.xml`, JSON-LD, a crawler HTML
+  snapshot) from that same data.
+- Streams an AI assistant over WebSocket (Vertex AI Gemini by default,
+  Anthropic Claude as the alternative). It can search the portfolio and drive
+  the page; anything that sends mail, books a meeting or reveals contact
+  details runs only after the visitor reviews and confirms a card.
+- Hosts browser-only demos of other projects at `/<slug>` and forwards other
+  slugs to their own domains.
+- Ships through CI-gated, keyless, verify-before-promote deploys, with
+  infrastructure described in Terraform.
 
-### Interactive Resume Experience
-- 📝 Dynamic professional timeline with detailed experiences
-- 🛠️ Comprehensive skills showcase with proficiency levels
-- 📊 Project portfolio with live demos and descriptions
-- 📄 Downloadable ATS-friendly PDF resume, generated from the same data the site renders
-- 🔎 Machine-readable surfaces from that data: crawler HTML snapshot, JSON-LD,
-  `/llms.txt`, `/resume.json`, `/sitemap.xml`
+The full feature list, stack and architecture diagram are in
+[docs/overview.md](./docs/overview.md).
 
-### Smart Interactions
-- 🤖 AI chat assistant (streamed over WebSocket) with conversation memory,
-  page-aware context, portfolio search, and **site-navigation tools** (open
-  sections/modals, download resume). It can also draft a message to Jordan,
-  a meeting request or a phone-number request, but nothing is sent or
-  revealed until the visitor reviews the card, enters their own email and
-  confirms
-- 🔗 Deep-linkable sections, modals, projects, and chat (`?ai_chat=open`,
-  `?project=`, `?skill=`, `?company=`)
-- ⌨️ Keyboard shortcuts: `?` opens chat; `g` then `a/e/p/s/r` jumps sections;
-  `Ctrl/Cmd+K` command palette
-- 🎨 Interactive doodle canvas (footer easter egg) + party mode. Party mode
-  has several triggers: ten theme toggles within five seconds, the Konami
-  code, `?party=1` or `#party`, the second footer doodle click, and the chat
-  `set_theme` tool
-- 🍪 Cookie consent (denied by default, reopenable from the footer); analytics, including a first-party anonymous event stream, run only after opt-in
-- 📱 Responsive design for all devices
-- ♿ Fully keyboard-operable: focus-trapped dialogs, Escape-to-close
-- 🌓 Light/dark mode — and a hidden party mode 🎉
+## Quickstart
 
-### Hosted demos and forwards
-- 🧪 Some projects have an interactive, browser-only demo served by this site
-  at `/<slug>` (synthetic data, server-rendered document for crawlers); others
-  answer a `302` to their own domain. See [docs/labs.md](./docs/labs.md)
-
-### Professional Network
-- 🔗 [LinkedIn](https://www.linkedin.com/in/jckail/)
-- 💻 [GitHub](https://github.com/jckail)
-- 📧 Direct contact form (SendGrid)
-
-## Technology Stack 💻
-
-### Frontend 🎨
-- **React 18 + TypeScript** with **Vite 8** for fast dev and optimized builds
-- **Zustand** for state management
-- **MUI** + CSS custom properties for UI and theming
-- **Vitest 4** for unit tests; **Playwright** for containerized E2E smoke tests
-
-### Backend 🔧
-- **FastAPI** on **Python 3.12** with **Pydantic v2**
-- **Vertex AI Gemini** (or **Anthropic Claude**) for the streaming AI chat assistant, behind a provider interface
-- **Supabase** for auth, telemetry, and log persistence
-- **SendGrid** for contact email
-
-### Infrastructure ☁️
-- **Docker** multi-stage builds (Node 22 → Python 3.12 slim) with
-  hash-pinned Python deps (`requirements.lock.txt`)
-- **Google Cloud Run** behind **Artifact Registry**
-- **Terraform** for infrastructure as code, including keyless GitHub → GCP
-  auth via Workload Identity Federation (see [`infra/`](./infra/README.md))
-- **GitHub Actions**: CI (lint, coverage-gated tests, Trivy image scan,
-  Docker + Terraform checks) plus verify-before-promote deploys to Cloud Run
-  on `main` (see [DEPLOYMENT.md](./DEPLOYMENT.md))
-- **Cloud Logging** structured logs and events; Terraform for log-based metrics, alerts and a dashboard is written in `infra/` but not yet applied to production
-- **Dependabot** for monthly grouped dependency updates
-
-## Repository Layout 📂
-
-```
-portfolio/
-├── frontend/          # React application (see frontend/README.md)
-│   └── src/
-│       ├── app/       # Feature components & providers
-│       ├── shared/    # Stores, hooks, typed API client, shared components
-│       └── styles/    # Global CSS
-│
-├── backend/           # FastAPI server (see backend/README.md)
-│   ├── app/
-│   │   ├── api/       # API routes (REST, chat WebSocket, discovery documents)
-│   │   ├── services/  # Chat service, tools, and the llm/ provider layer
-│   │   ├── config.py  # Centralized typed settings (all env access)
-│   │   ├── models/    # Pydantic models + data loaders
-│   │   ├── data/      # Portfolio content (JSON), including labs/ and forwards.json
-│   │   └── utils/     # Logging, Supabase client
-│   ├── assets/        # Generated resume (PDF, text, manifest), party sprites
-│   └── tests/         # Pytest suite (runs offline, no credentials needed)
-│
-├── e2e/               # Playwright smoke tests against the built image
-├── docs/              # Architecture decision records (adr/), labs platform (labs.md)
-├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
-├── helpers/           # Dockerfiles, local dev tooling, e2e-in-Docker, resume generator
-└── .github/workflows/ # CI + automatic Cloud Run deploys
-```
-
-## Getting Started 🚀
-
-### Prerequisites
-- Node.js 22+ and npm (matches the production frontend build image)
-- Python 3.12+
-- A `.env` file at the repo root (see [backend/README.md](./backend/README.md)
-  for the full variable list)
-
-### Development Setup
+Prerequisites: Node.js 22+ with npm, Python 3.12+, and a `.env` file at the
+repo root (variables are listed in
+[backend/README.md](./backend/README.md#environment-variables)).
 
 ```bash
 git clone https://github.com/jckail/portfolio.git
@@ -125,68 +44,59 @@ pip install -r requirements-dev.txt   # prod deps + pytest, ruff
 ./helpers/local_test.sh
 ```
 
-Then open:
-
 - Frontend (hot reload): http://localhost:5173
 - Backend API + built frontend: http://localhost:8080
 - API documentation: http://localhost:8080/docs
 
-### Browser tests
+## Layout
 
-```bash
-E2E_BASE_URL=http://localhost:8080 ./helpers/e2e-docker.sh   # Playwright in a container
-```
+| Path | Contents |
+|---|---|
+| [`frontend/`](./frontend) | React 18 + TypeScript + Vite SPA |
+| [`backend/`](./backend) | FastAPI app, portfolio JSON, prompts, generated resume, pytest suite |
+| [`copilot/`](./copilot) | Node agent subprocess the backend starts per turn for the [Data Playground](./docs/dataplayground.md) copilot ([README](./copilot/README.md)) |
+| [`e2e/`](./e2e) | Playwright smoke tests run against the built image |
+| [`infra/`](./infra) | Terraform for GCP (Cloud Run, secrets, registry, Workload Identity Federation) |
+| [`helpers/`](./helpers) | Dockerfiles, local run script, e2e-in-Docker, resume generator, deploy verification |
+| [`docs/`](./docs) | ADRs, runbooks, audits and design notes ([index](./docs/README.md)) |
+| [`.github/workflows/`](./.github/workflows) | `ci.yml` (required checks) and `deploy.yml` |
 
-### Deployment
+## Documentation
 
-Merges to `main` deploy automatically to Cloud Run via GitHub Actions once
-the one-time setup in [DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Do not
-deploy from a laptop: `helpers/deploy.sh` is kept for reference only and is
-unsafe (see [helpers/README.md](./helpers/README.md) and `HANDOFF.md`).
-
-See [infra/README.md](./infra/README.md) for Terraform-managed infrastructure.
-
-## Architecture 🏗️
-
-```mermaid
-flowchart LR
-  Visitor -->|HTTPS| CloudRun[Cloud Run]
-  CloudRun --> FastAPI
-  FastAPI -->|static| React[React SPA]
-  FastAPI -->|REST| Content[Portfolio JSON]
-  FastAPI -->|WebSocket + tools| Model[Vertex Gemini or Anthropic]
-  FastAPI --> Supabase[(Supabase)]
-  FastAPI --> SendGrid[SendGrid]
-  GH[GitHub Actions] -->|WIF| AR[Artifact Registry]
-  AR --> CloudRun
-  TF[Terraform] --> CloudRun
-```
-
-Visitor traffic hits Cloud Run, which serves the Vite-built SPA and the
-FastAPI API (including the streaming chat WebSocket). The model can request
-validated UI actions that the SPA executes; actions that send mail or reveal
-contact data only run after the visitor confirms them. Secrets live in Secret Manager;
-deploys are keyless via Workload Identity Federation and only promote a
-revision to 100% traffic after a health check against the new revision.
-
-## Documentation 📚
-
-- [Frontend documentation](./frontend/README.md)
-- [Backend documentation](./backend/README.md)
-- [Deployment checklist (secrets & CI/CD setup)](./DEPLOYMENT.md)
-- [Deployment tooling](./helpers/README.md)
-- [Infrastructure (Terraform)](./infra/README.md)
-- [Architecture decisions](./docs/adr/README.md)
-- [Hosted labs and forwards](./docs/labs.md)
-- [Improvement roadmap](./ROADMAP.md)
+- [Docs index](./docs/README.md) — every document under `docs/`, grouped
+- [Feature and stack overview](./docs/overview.md) — full feature list, stack, architecture diagram
+- [Frontend](./frontend/README.md) and [backend](./backend/README.md) — technical docs, API reference, environment variables
+- [Assistant runtime](./docs/portfolio-assistant-runtime.md) — access gating, tools, calendar, acceptance
+- [Hosted apps and forwards](./docs/apps.md) and [labs platform](./docs/labs.md); [Data Playground](./docs/dataplayground.md)
+- [Architecture decisions](./docs/adr/README.md) — ADRs 0001-0007
+- [Deployment checklist](./DEPLOYMENT.md), [GCP hosting and release runbook](./docs/gcp-project-hosting.md), [infrastructure](./infra/README.md), [helpers](./helpers/README.md)
+- [HANDOFF.md](./HANDOFF.md) — operations runbook and production hazards
+- [Security review](./docs/security-review-2026-09-05.md), [audit](./docs/audit-2026-09-06.md) and [open findings](./docs/audit-2026-09-06-open-findings.md)
+- [ROADMAP.md](./ROADMAP.md), [CHANGELOG.md](./CHANGELOG.md)
+- [AGENTS.md](./AGENTS.md) / [CLAUDE.md](./CLAUDE.md) — conventions and non-negotiables for coding agents (and a good map for humans)
 - API reference: `/docs` on a running backend
 
-## Contributing 🤝
+## Development
 
-1. Follow the existing architecture patterns
-2. Run the checks locally:
-   - Frontend: `npm run lint && npm run type-check && npm test`
-   - Backend: `python -m ruff check backend && python -m pytest backend/tests`
-3. Write tests for new features
-4. Update documentation
-5. Submit pull requests for review
+```bash
+# Backend, from the repo root
+python -m ruff check backend
+python -m pytest backend/tests
+
+# Frontend
+cd frontend
+npm run lint && npm run type-check && npm test
+
+# Browser tests in a container, against a server you already started
+E2E_BASE_URL=http://localhost:8080 ./helpers/e2e-docker.sh
+```
+
+Backend tests run offline with dummy credentials. Write tests for new
+behaviour and update the docs alongside the change.
+
+## Deployment
+
+Merges to `main` deploy automatically to Cloud Run once the one-time setup in
+[DEPLOYMENT.md](./DEPLOYMENT.md) is complete. Do not deploy from a laptop:
+`helpers/deploy.sh` is kept for reference only and is unsafe (see
+[helpers/README.md](./helpers/README.md) and [HANDOFF.md](./HANDOFF.md)).

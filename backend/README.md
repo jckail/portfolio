@@ -191,6 +191,20 @@ GET  /api/admin/logs                # Application log files
 GET  /api/admin/health              # Uptime, version, memory, 5xx ratio for this instance
 ```
 
+### Agent access and Data Playground
+
+These routes are mounted under `/api` but documented elsewhere:
+
+- `POST /api/agent/trial`, `POST /api/agent/access` and `GET /api/agent/access`
+  issue and verify the assistant's trial and full-access receipts. See
+  [docs/portfolio-assistant-runtime.md](../docs/portfolio-assistant-runtime.md).
+- `/api/dataplayground` (catalog), `/api/dataplayground/runtime/*` (session,
+  state, action, query, close) and `/api/dataplayground/copilot/*` (status,
+  chat, confirm) back the Data Playground. The copilot routes start
+  `node copilot/server.mjs` as a subprocess per turn. See
+  [docs/dataplayground.md](../docs/dataplayground.md) and
+  [copilot/README.md](../copilot/README.md).
+
 ### Misc
 
 ```http
