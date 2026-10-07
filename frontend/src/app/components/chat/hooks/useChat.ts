@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 import { trackChatMessage } from '../../../../shared/utils/analytics';
+import { ApiError, getJson } from '../../../../shared/utils/api';
 import { getQueryParam, setQueryParam } from '../../../../shared/utils/url-params';
 import {
   executeChatAction,
@@ -85,6 +86,10 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
   const clientId = useRef(createClientId());
   const wsRef = useRef<WebSocket | null>(null);
   const isMounted = useRef(true);
+  const accessCheck = useRef<AbortController | null>(null);
+  const connectionGeneration = useRef(0);
+  const currentAccessToken = useRef(accessToken);
+  currentAccessToken.current = accessToken;
   const messageQueue = useRef<string[]>([]);
   const currentStreamingMessage = useRef<string>('');
   const pendingRef = useRef<PendingAction[]>([]);
@@ -187,6 +192,8 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
     const wsUrl = `${protocol}//${window.location.host}/ws/${clientId.current}`;
 
     const ws = new WebSocket(wsUrl);
+    accessCheck.current?.abort();
+    const generation = ++connectionGeneration.current;
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -399,7 +406,28 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
     };
 
     ws.onclose = event => {
+      if (!isMounted.current || connectionGeneration.current !== generation) return;
       if (event?.code === 1008 && accessToken && /access/i.test(event.reason)) onAccessExpired?.();
+      // Proxies can drop the policy close frame. Only an authoritative HTTP 401
+      // should re-gate access; an outage must leave a valid receipt retryable.
+      if (event?.code === 1006 && accessToken && onAccessExpired) {
+        const controller = new AbortController();
+        accessCheck.current?.abort();
+        accessCheck.current = controller;
+        const timer = setTimeout(() => controller.abort(), 5000);
+        void getJson('/api/agent/access', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          signal: controller.signal,
+        }).catch(error => {
+          if (error instanceof ApiError && error.status === 401
+            && !controller.signal.aborted && isMounted.current
+            && connectionGeneration.current === generation
+            && currentAccessToken.current === accessToken) onAccessExpired();
+        }).finally(() => {
+          clearTimeout(timer);
+          if (accessCheck.current === controller) accessCheck.current = null;
+        });
+      }
       if (wsRef.current === ws) {
         wsRef.current = null;
       }
@@ -451,6 +479,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; onA
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      accessCheck.current?.abort();
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;

@@ -462,6 +462,55 @@ describe('gated full-page chat protocol', () => {
     FakeWebSocket.instances = []; vi.stubGlobal('WebSocket', FakeWebSocket);
   });
   afterEach(() => vi.unstubAllGlobals());
+  it.each([401, 200, 503])('checks access after a dropped close frame (HTTP %s)', async status => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status }));
+    vi.stubGlobal('fetch', fetchMock);
+    const onAccessExpired = vi.fn();
+    renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access', onAccessExpired }));
+    await act(async () => FakeWebSocket.instances[0].onclose?.({ code: 1006, reason: '' }));
+    expect(fetchMock).toHaveBeenCalledWith('/api/agent/access', {
+      headers: { Authorization: 'Bearer signed-access' }, signal: expect.any(AbortSignal),
+    });
+    expect(onAccessExpired).toHaveBeenCalledTimes(status === 401 ? 1 : 0);
+  });
+  it('keeps access retryable when the verification request fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Network unavailable')));
+    const onAccessExpired = vi.fn();
+    renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access', onAccessExpired }));
+    await act(async () => FakeWebSocket.instances[0].onclose?.({ code: 1006, reason: '' }));
+    expect(onAccessExpired).not.toHaveBeenCalled();
+  });
+  it.each(['unmount', 'new connection', 'new token'])('ignores a delayed rejection after %s', async change => {
+    let resolve!: (response: Response) => void;
+    const fetchMock = vi.fn().mockImplementation(() => new Promise<Response>(done => { resolve = done; }));
+    vi.stubGlobal('fetch', fetchMock);
+    const onAccessExpired = vi.fn();
+    const { result, unmount, rerender } = renderHook(
+      ({ token }) => useChat({ fullPage: true, accessToken: token, onAccessExpired }),
+      { initialProps: { token: 'signed-access' } },
+    );
+    const ws = FakeWebSocket.instances[0];
+    act(() => { ws.readyState = 3; ws.onclose?.({ code: 1006, reason: '' }); });
+    if (change === 'unmount') unmount();
+    else if (change === 'new token') rerender({ token: 'new-access' });
+    else await act(async () => { await result.current.handleSuggestedPrompt('Show projects'); });
+    await act(async () => resolve(new Response('{}', { status: 401 })));
+    expect(onAccessExpired).not.toHaveBeenCalled();
+  });
+  it('aborts a stalled receipt check without expiring access', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn().mockReturnValue(new Promise(() => {}));
+      vi.stubGlobal('fetch', fetchMock);
+      const onAccessExpired = vi.fn();
+      const { unmount } = renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access', onAccessExpired }));
+      act(() => FakeWebSocket.instances[0].onclose?.({ code: 1006, reason: '' }));
+      act(() => vi.advanceTimersByTime(5000));
+      expect(fetchMock.mock.calls[0][1].signal.aborted).toBe(true);
+      expect(onAccessExpired).not.toHaveBeenCalled();
+      unmount();
+    } finally { vi.useRealTimers(); }
+  });
   it('sends the receipt before context and message without putting it in the URL', async () => {
     const { result } = renderHook(() => useChat({ fullPage: true, accessToken: 'signed-access' }));
     await act(async () => { await result.current.handleSuggestedPrompt('Show projects'); });
