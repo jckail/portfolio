@@ -75,7 +75,7 @@ PROJECTS
 Super Teacher — github.com/jckail/superteacher, the-super-teacher.com
 Built a classroom copilot with a streaming Claude assistant, prioritized student needs, a gradebook, and attendance.
 
-Jobbr — github.com/jckail/Jobbr, jckail.com/jobbr
+Jobbr — github.com/jckail/Jobbr, jobdog.ai/jobbr/#
 Built an AI job-matching prototype that parses postings and matches resumes using Python, LangChain, FastAPI, and OpenAI.
 
 goPilot — github.com/jckail/goPilot, jckail.com/gopilot

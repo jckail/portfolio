@@ -70,8 +70,8 @@
             "Web Scraping"
         ],
         "last_commit": "September 2024",
-        "link2": "https://www.jckail.com/jobbr",
-        "link2_label": "Interactive demo",
+        "link2": "https://jobdog.ai/jobbr/#/",
+        "link2_label": "Open app",
         "resume_description": "Built an AI job-matching prototype that parses postings and matches resumes using Python, LangChain, FastAPI, and OpenAI."
     },
     "portfolio": {
