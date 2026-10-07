@@ -121,7 +121,7 @@ const ContactModal: React.FC<ContactModalProps> = ({
             🏔️<strong>{location}</strong>
           </p>
           <p className="contact-info">
-            📧<strong>{email}</strong>
+            📧<a href={`mailto:${email}`}><strong>{email}</strong></a>
           </p>
           <p className="contact-info">
             🇺🇸<strong>{country}</strong>
@@ -177,7 +177,14 @@ const ContactModal: React.FC<ContactModalProps> = ({
               />
             </div>
 
-            {error && <div className="contact-error-message" role="alert">{error}</div>}
+            {error && (
+              <div className="contact-error-message" role="alert">
+                <p>{error}. Your message has not been sent. Your draft is still in this form.</p>
+                <a href={`mailto:${email}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(formData.message)}`}>
+                  Send this draft with your email app
+                </a>
+              </div>
+            )}
             {success && <div className="contact-success-message" role="status">Message sent successfully!</div>}
 
             <button
