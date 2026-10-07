@@ -29,14 +29,14 @@ test('chat confirmation card: validation, cancel, confirm and result', async ({ 
 
   await page.route('**/api/agent/access', route => route.fulfill({
     status: 200, contentType: 'application/json',
-    body: JSON.stringify({ token: 'mock-access', expires_at: new Date(Date.now() + 3600000).toISOString() }),
+    body: JSON.stringify({ valid: true, mode: 'full', token: 'mock-access', expires_at: new Date(Date.now() + 3600000).toISOString() }),
   }));
+  // This test starts with a synthetic, already-introduced visitor; no mail is sent.
+  await page.addInitScript(() => sessionStorage.setItem('portfolio_agent_access', JSON.stringify({
+    token: 'mock-access', mode: 'full', expires_at: new Date(Date.now() + 3600000).toISOString(),
+  })));
   const response = await page.goto('/agent?theme=dark');
   expect(response?.status()).toBe(200);
-  expect(received).toEqual([]);
-  await page.getByLabel('Your email', { exact: true }).fill('visitor@example.com');
-  await page.getByLabel('Company or organization').fill('Example organization');
-  await page.getByRole('button', { name: /Start the conversation/ }).click();
   await expect.poll(() => received[0]).toEqual({ type: 'access', token: 'mock-access' });
 
   const phoneCard = page.getByRole('group', { name: "Request Jordan's phone number?" });

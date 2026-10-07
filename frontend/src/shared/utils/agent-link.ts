@@ -3,4 +3,8 @@ import { useThemeStore } from '../stores/theme-store';
 export function agentHref(): string {
   return `/agent?theme=${encodeURIComponent(useThemeStore.getState().theme)}`;
 }
-export function openAgent() { window.location.assign(agentHref()); }
+export const OPEN_AGENT_EVENT = 'portfolio:open-agent';
+export function openAgent() {
+  if (window.location.pathname === '/agent') return;
+  window.dispatchEvent(new Event(OPEN_AGENT_EVENT));
+}

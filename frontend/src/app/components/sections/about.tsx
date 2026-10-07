@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, memo, useCallback, useMemo, useState } from 'react';
 
 import { useThemeStore } from '../../../shared/stores/theme-store';
+import { openAgent } from '../../../shared/utils/agent-link';
 import { useData } from '../../providers/data-provider';
 import { scrollToSection } from '../../../shared/utils/scroll-utils';
 import { buttonize } from '../../../shared/utils/a11y';
@@ -160,9 +161,8 @@ const TLDRContent = memo(
             ))}
             {chatAvailable && (
               <p>
-                Ask my{' '}
-                <a className="ai-highlight" href={`/agent?theme=${agentTheme}`}>
-                  AI Assistant 🤖
+                <a className="ai-highlight" href={`/agent?theme=${agentTheme}`} onClick={event => { event.preventDefault(); openAgent(); }}>
+                  Chat with my Agent 🤖
                 </a>{' '}
                 for more details about me.
               </p>

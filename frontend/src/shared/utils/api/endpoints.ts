@@ -20,6 +20,8 @@ export const endpoints = {
   sendEmail: '/api/contact/send-email',
   contactPhone: '/api/contact/phone',
   chatStatus: '/api/chat/status',
+  agentTrial: '/api/agent/trial',
+  agentAccess: '/api/agent/access',
   resumeFileName: '/api/resume_file_name',
   resumeDownload: '/api/resume?download=true',
   admin: {

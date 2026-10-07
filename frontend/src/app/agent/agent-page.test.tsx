@@ -1,60 +1,62 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import AgentPage from './agent-page';
 
 const getJson = vi.fn();
-const useChat = vi.fn((..._args: unknown[]) => ({
-  messages: [], portfolioCards: [], pendingActions: [], isLoading: false, showSuggestions: false,
-  message: '', setMessage: vi.fn(), handleSuggestedPrompt: vi.fn(), handleSendMessage: vi.fn(),
-  confirmAction: vi.fn(), cancelAction: vi.fn(),
-}));
-vi.mock('../../shared/utils/api', () => ({ getJson: (...args: unknown[]) => getJson(...args) }));
+const chat = { messages: [], portfolioCards: [], pendingActions: [], isLoading: false, showSuggestions: false,
+  message: 'Preserved draft', setMessage: vi.fn(), handleSuggestedPrompt: vi.fn(), handleSendMessage: vi.fn(),
+  confirmAction: vi.fn(), cancelAction: vi.fn() };
+const useChat = vi.fn((..._args: unknown[]) => chat);
+vi.mock('../../shared/utils/api', async importOriginal => ({ ...await importOriginal<typeof import('../../shared/utils/api')>(), getJson: (...args: unknown[]) => getJson(...args) }));
 vi.mock('../components/chat/hooks/useChat', () => ({ useChat: (...args: unknown[]) => useChat(...args) }));
 const evidence = { profile: { name: 'Jordan Kail', title: 'Engineer', location: 'USA', github: '', linkedin: '' },
   experience: [], projects: [], skillGroups: [] };
-const receipt = { token: 'test-token', expires_at: new Date(Date.now() + 3600000).toISOString() };
+const full = { token: 'full-token', expires_at: new Date(Date.now() + 3600000).toISOString() };
+const trial = { ...full, token: 'trial-token', mode: 'trial', remaining_messages: 2 };
 beforeEach(() => {
-  sessionStorage.clear(); useChat.mockClear(); getJson.mockReset();
-  getJson.mockImplementation((path: string) => path === '/context.json' ? Promise.resolve(evidence) : Promise.resolve(receipt));
+  sessionStorage.clear(); useChat.mockClear(); getJson.mockReset(); chat.isLoading = false;
+  getJson.mockImplementation((path: string) => Promise.resolve(path === '/context.json' ? evidence : path === '/api/agent/trial' ? trial : full));
 });
 afterEach(cleanup);
-
-function introduce() {
-  fireEvent.change(screen.getByLabelText('Your email'), { target: { value: 'visitor@example.com' } });
+function options() { return useChat.mock.calls.at(-1)![0] as { onAccessStatus: (n: number) => void; onAccessRequired: () => void }; }
+async function introduce() {
+  fireEvent.change(await screen.findByLabelText('Your email'), { target: { value: 'visitor@example.com' } });
   fireEvent.change(screen.getByLabelText('Company or organization'), { target: { value: 'Acme' } });
-  fireEvent.click(screen.getByRole('button', { name: /Start the conversation/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Continue the conversation/ }));
 }
-describe('assistant route gate', () => {
-  it('does not initialize chat until the introduction is accepted', async () => {
+describe('shared assistant trial flow', () => {
+  it('initializes anonymous access before connecting with its credential', async () => {
     render(<AgentPage />);
-    expect(screen.getByRole('heading', { name: /Explore what we could build/ })).toBeInTheDocument();
-    expect(useChat).not.toHaveBeenCalled();
-    introduce();
-    await screen.findByRole('region', { name: /Conversation with Jordan/ });
-    expect(useChat).toHaveBeenCalledWith(expect.objectContaining({ accessToken: 'test-token', fullPage: true }));
+    expect(useChat).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+    await screen.findByText(/2 introductory messages/);
+    expect(useChat).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true, accessToken: 'trial-token' }));
     expect(screen.queryByLabelText('Your email')).toBeNull();
   });
-  it('keeps the gate on a notification failure and allows retry', async () => {
-    getJson.mockImplementation((path: string) => path === '/context.json' ? Promise.resolve(evidence) : Promise.reject(new Error('Failed')));
-    render(<AgentPage />); introduce();
-    expect(await screen.findByRole('alert')).toHaveTextContent(/couldn’t unlock/);
-    expect(useChat).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: /Start the conversation/ })).toBeEnabled();
+  it('waits for the second reply to finish, then upgrades without resetting the draft', async () => {
+    const view = render(<AgentPage />); await screen.findByText(/2 introductory messages/);
+    chat.isLoading = true;
+    act(() => options().onAccessStatus(0));
+    expect(screen.queryByLabelText('Your email')).toBeNull();
+    chat.isLoading = false; view.rerender(<AgentPage />);
+    await introduce();
+    await waitFor(() => expect(useChat).toHaveBeenLastCalledWith(expect.objectContaining({ accessToken: 'full-token' })));
+    expect(screen.queryByLabelText('Your email')).toBeNull();
+    expect(chat.setMessage).not.toHaveBeenCalledWith('');
   });
-  it('rejects expired restored access before mounting chat', async () => {
-    sessionStorage.setItem('portfolio_agent_access', JSON.stringify(receipt));
-    getJson.mockImplementation((path: string) => path === '/context.json' ? Promise.resolve(evidence) : Promise.reject(new Error('Expired')));
-    render(<AgentPage />);
-    await waitFor(() => expect(screen.getByLabelText('Your email')).toBeInTheDocument());
-    expect(useChat).not.toHaveBeenCalled();
-    expect(sessionStorage.getItem('portfolio_agent_access')).toBeNull();
+  it('keeps the introduction form and transcript on notification failure', async () => {
+    render(<AgentPage />); await screen.findByText(/2 introductory messages/);
+    act(() => options().onAccessRequired());
+    getJson.mockRejectedValue(new Error('Notification failed'));
+    await introduce();
+    expect(await screen.findByRole('alert')).toHaveTextContent(/couldn’t make your introduction/);
+    expect(screen.getByRole('button', { name: /Continue the conversation/ })).toBeEnabled();
   });
-  it('requires both a valid email and company before sending', () => {
-    render(<AgentPage />);
-    fireEvent.click(screen.getByRole('button', { name: /Start the conversation/ }));
-    expect(screen.getByRole('alert')).toHaveTextContent(/Enter your email/);
-    expect(getJson).toHaveBeenCalledTimes(1);
+  it('restores an exhausted trial from the server without issuing another trial', async () => {
+    sessionStorage.setItem('portfolio_agent_access', JSON.stringify(trial));
+    getJson.mockImplementation((path: string) => Promise.resolve(path === '/context.json' ? evidence : { valid: true, ...trial, remaining_messages: 0 }));
+    render(<AgentPage />); await screen.findByLabelText('Your email');
+    expect(getJson.mock.calls.some(call => call[0] === '/api/agent/trial')).toBe(false);
   });
 });
