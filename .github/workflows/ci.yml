@@ -187,6 +187,7 @@ jobs:
   docker:
     name: Docker (build production image)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
     - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -249,7 +250,15 @@ jobs:
 
     - name: Install Playwright
       working-directory: e2e
+      timeout-minutes: 8
       run: |
+        # The hosted runner's Azure mirror stalled package downloads during
+        # release verification. Use Ubuntu's signed archive over HTTPS instead.
+        if [ -f /etc/apt/apt-mirrors.txt ]; then
+          printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+        fi
+        printf '%s\n' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' 'Acquire::Retries "1";' |
+          sudo tee /etc/apt/apt.conf.d/99portfolio-ci-network >/dev/null
         npm ci
         if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
           # Browser binaries are cached; system libraries are not.
