@@ -22,11 +22,12 @@ from backend.app.services.chat_tools import (
     ALL_TOOLS,
     EXECUTE_TOOL_NAMES,
     EXPIRED_ACTION,
+    READ_TOOL_HANDLERS,
     UNKNOWN_ACTION,
     PendingActions,
     execute_confirmed,
     pending_tool_result,
-    search_portfolio,
+    run_read_tool,
     validate_execute_args,
 )
 from backend.app.services.llm import (
@@ -170,6 +171,7 @@ class ConnectionManager:
         # Pending execute-type tool actions, one store per connection. Dropping
         # the store on disconnect is what binds an action id to its socket.
         self.pending_actions: dict[str, PendingActions] = {}
+        self.calendar_offers: dict[str, tuple[float, set[str]]] = {}
         self.invalid_confirms: dict[str, int] = {}
         self.ip_conn_counts: dict[str, int] = {}
         # One provider client and one portfolio-data snapshot for the application.
@@ -235,6 +237,7 @@ class ConnectionManager:
         self.conversation_histories.pop(client_id, None)
         self.message_timestamps.pop(client_id, None)
         self.pending_actions.pop(client_id, None)
+        self.calendar_offers.pop(client_id, None)
         self.invalid_confirms.pop(client_id, None)
         ip = self.connection_ips.pop(client_id, None)
         if ip is not None:
@@ -531,9 +534,29 @@ class ConnectionManager:
         labels: list[str] = []
         needs_followup = False
         for call in tool_calls:
-            if call.name == "search_portfolio":
+            if call.name == "get_meeting_availability":
+                from backend.app.services.calendar_runtime import calendar_service
+                from backend.app.services.calendar_service import CalendarSlotUnavailable, CalendarUnavailable
+                try:
+                    output = await calendar_service().available_slots(call.args.get("start"), call.args.get("end"))
+                except (CalendarSlotUnavailable, CalendarUnavailable):
+                    output = {"status": "unavailable", "note": "Calendar slots are unavailable. Offer a confirmed meeting request instead; do not invent times."}
+                self.calendar_offers[client_id] = (time.monotonic(), {
+                    slot["start"] for slot in output.get("slots", [])[:10]
+                })
+                await self.send_frame(client_id, {"type": "portfolio_card", "kind": "calendar_availability", "data": output})
+                needs_followup = True
+            elif call.name in READ_TOOL_HANDLERS:
                 log_event("chat.tool_call", tool=call.name)
-                output = search_portfolio(call.args.get("query"))
+                output = run_read_tool(call.name, call.args)
+                card_kind = {
+                    "get_recruiter_brief": "recruiter_brief",
+                    "get_project_details": "project",
+                    "match_role_requirements": "role_match",
+                    "get_contact_options": "contact_options",
+                }.get(call.name)
+                if card_kind and len(json.dumps(output)) <= 12_000:
+                    await self.send_frame(client_id, {"type": "portfolio_card", "kind": card_kind, "data": output})
                 needs_followup = True
             elif call.name in EXECUTE_TOOL_NAMES:
                 log_event("chat.tool_call", tool=call.name)
@@ -568,6 +591,10 @@ class ConnectionManager:
 
     async def _propose_action(self, client_id: str, call: ToolCall) -> dict:
         """Create a pending action and ask the browser to confirm it."""
+        if call.name == "book_meeting":
+            offered_at, starts = self.calendar_offers.get(client_id, (0, set()))
+            if time.monotonic() - offered_at > 600 or call.args.get("start") not in starts:
+                return {"status": "rejected", "note": "Retrieve current calendar availability and let the visitor choose a returned slot first."}
         args = validate_execute_args(call.name, call.args, truncate=True)
         if args is None:
             return {"status": "invalid_arguments", "note": "Required details were missing or invalid. Nothing was sent."}
@@ -616,8 +643,14 @@ class ConnectionManager:
         args = action.args
         if action.tool != "request_phone" and isinstance(data.get("args"), dict):
             args = data["args"]  # the visitor may have edited the draft
+        if action.tool == "book_meeting":
+            # Keep the actual selected slot tied to the reviewed server proposal.
+            args = {**args, "start": action.args["start"]}
         log_event("chat.confirm_accepted", tool=action.tool)
-        outcome = await execute_confirmed(action.tool, args, data.get("email"), ip)
+        if action.tool == "book_meeting":
+            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip, confirmation_id=action.id)
+        else:
+            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip)
         frame = {
             "type": "action_result",
             "id": action.id,
@@ -658,14 +691,19 @@ class ConnectionManager:
                     if isinstance(event, TextDelta):
                         if state.leading_break and not state.text:
                             await self.send_message("\n\n", client_id, is_chunk=True)
-                        await self.send_message(event.text, client_id, is_chunk=True)
-                        state.text.append(event.text)
+                        remaining = MAX_ASSISTANT_TURN_CHARS - sum(map(len, state.text))
+                        chunk = event.text[:max(remaining, 0)]
+                        if chunk:
+                            await self.send_message(chunk, client_id, is_chunk=True)
+                            state.text.append(chunk)
+                        if len(event.text) > remaining:
+                            state.output_truncated = True
                     elif isinstance(event, ToolCall):
                         state.tool_calls.append(event)
                     elif isinstance(event, Usage):
                         state.usage = event
                     elif isinstance(event, Finish):
-                        state.stop_reason = event.stop_reason
+                        state.stop_reason = STOP_MAX_TOKENS if state.output_truncated else event.stop_reason
                 return
             except (ProviderAuthError, ProviderRateLimited):
                 raise
@@ -694,60 +732,33 @@ class ConnectionManager:
         log_event("chat.message", len_bucket=_len_bucket(len(user_message)))
         self.append_to_history(client_id, "user", user_message)
 
-        extra: list[dict] = []
-        all_text: list[str] = []
-        action_labels: list[str] = []
-        proposed = False
-        stop_reason: str | None = None
+        from backend.app.services.portfolio_agent import run_portfolio_agent
 
-        for round_number in range(MAX_TOOL_ROUNDS):
-            state = _RoundState(model=self._model, leading_break=bool(all_text))
-            try:
-                # The last allowed round offers no tools, so it must answer in text.
-                tools = [] if round_number == MAX_TOOL_ROUNDS - 1 else None
-                await self._stream_with_failover(client_id, state, extra, tools)
-            except ProviderAuthError as e:
-                log_event("chat.provider_error", kind=e.kind)
-                self._trip_auth_breaker(e)
-                self._drop_pending_user_turn(client_id)
-                await self.send_message(UNAVAILABLE_MESSAGE, client_id, is_chunk=False)
-                return
-            except ProviderRateLimited as e:
-                log_event("chat.provider_error", kind=e.kind)
-                logger.warning("Chat provider rate-limited a request for client %s", client_id)
-                self._drop_pending_user_turn(client_id)
-                await self.send_message(BUSY_MESSAGE, client_id, is_chunk=False)
-                return
-            except Exception as e:
-                # Only the exception class is logged: provider errors can echo
-                # request or credential material.
-                logger.error(
-                    "Error streaming chat response for client %s: %s (%s)",
-                    client_id, type(e).__name__, getattr(e, "kind", "unknown"),
-                )
-                self._drop_pending_user_turn(client_id)
-                await self.send_message(PROBLEM_MESSAGE, client_id, is_chunk=False)
-                return
-
-            stop_reason = state.stop_reason
-            if state.usage is not None:
-                self._record_tokens(state.usage)
-                await self._log_usage(client_id, state.usage, stop_reason, state.model)
-
-            round_text = "".join(state.text)
-            if round_text:
-                all_text.append(round_text)
-
-            calls = state.tool_calls[:MAX_TOOL_CALLS_PER_ROUND]
-            results, labels, needs_followup = await self._run_tool_calls(client_id, calls)
-            action_labels.extend(labels)
-            proposed = proposed or any(c.name in EXECUTE_TOOL_NAMES for c in calls)
-
-            last_round = round_number == MAX_TOOL_ROUNDS - 1
-            if not (needs_followup and not last_round and self.is_available()):
-                break
-            extra.append({"role": "assistant", "text": round_text, "tool_calls": calls})
-            extra.append({"role": "tool", "results": results})
+        try:
+            run = await run_portfolio_agent(
+                self, client_id, _RoundState, MAX_TOOL_ROUNDS, MAX_TOOL_CALLS_PER_ROUND,
+            )
+        except ProviderAuthError as e:
+            log_event("chat.provider_error", kind=e.kind)
+            self._trip_auth_breaker(e)
+            self._drop_pending_user_turn(client_id)
+            await self.send_message(UNAVAILABLE_MESSAGE, client_id, is_chunk=False)
+            return
+        except ProviderRateLimited as e:
+            log_event("chat.provider_error", kind=e.kind)
+            self._drop_pending_user_turn(client_id)
+            await self.send_message(BUSY_MESSAGE, client_id, is_chunk=False)
+            return
+        except Exception as e:
+            logger.error("Error streaming chat response for client %s: %s (%s)",
+                         client_id, type(e).__name__, getattr(e, "kind", "unknown"))
+            self._drop_pending_user_turn(client_id)
+            await self.send_message(PROBLEM_MESSAGE, client_id, is_chunk=False)
+            return
+        all_text = run.text
+        action_labels = run.action_labels
+        proposed = run.proposed
+        stop_reason = run.state.stop_reason
 
         final_response = "".join(all_text)
 
@@ -836,6 +847,7 @@ class _RoundState:
     tool_calls: list[ToolCall] = field(default_factory=list)
     usage: Usage | None = None
     stop_reason: str | None = None
+    output_truncated: bool = False
 
 
 # Application-wide singleton shared by all WebSocket connections

@@ -122,7 +122,6 @@ def test_project_secondary_links_and_labels():
     assert root["qr_for_groups"].link2_label == "Live demo"  # default
     for key, slug in {
         "ai_billing": "aibilling",
-        "jobbr": "jobbr",
         "go_pilot": "gopilot",
         "lit_crypto": "cryptotrader",
     }.items():
@@ -130,6 +129,8 @@ def test_project_secondary_links_and_labels():
         assert root[key].link2_label == "Interactive demo"
     assert str(root["super_teacher"].link2) == "https://www.the-super-teacher.com/"
     assert str(root["pointup"].link2) == "https://www.pointup.io/"
+    assert str(root["jobbr"].link2) == "https://jobdog.ai/jobbr/#/"
+    assert root["jobbr"].link2_label == "Open app"
     assert root["super_teacher"].link2_label == "Earlier version"
     assert root["pointup"].link2_label == "Open app"
 

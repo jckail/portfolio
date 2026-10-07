@@ -2,9 +2,7 @@
    pinned to the bottom so the button lines up with the content column. */
 .chat-fab-dock {
   position: fixed;
-  /* --cookie-banner-height is published by the cookie banner while it shows,
-     so the launcher stays reachable above it. */
-  bottom: calc(16px + var(--cookie-banner-height, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -22,18 +20,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
+  gap: 10px;
+  min-width: 60px;
   height: 60px;
-  padding: 0;
+  padding: 0 18px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--btn-primary-bg);
   color: #ffffff;
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
-  box-shadow: var(--elevation-2), 0 10px 24px -8px rgba(0, 0, 0, 0.5);
-  transition: transform var(--transition-normal), background-color var(--transition-normal);
+  box-shadow:
+    var(--elevation-2),
+    0 10px 24px -8px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--transition-normal),
+    background-color var(--transition-normal);
+}
+
+.chat-fab-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .chat-fab:hover,
@@ -49,8 +59,16 @@
 
 @media (max-width: 599.95px) {
   .chat-fab {
-    width: 52px;
+    min-width: 52px;
     height: 52px;
     font-size: 1.75rem;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-fab {
+    transition: none;
+  }
+}
+
+a.chat-fab { text-decoration: none; }

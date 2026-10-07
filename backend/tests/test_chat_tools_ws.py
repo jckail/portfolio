@@ -339,15 +339,13 @@ def test_pending_cards_are_capped_per_connection(client, monkeypatch, mail):
         round_of(TextDelta("done")),
     )
     with client.websocket_connect("/ws/tool-cap-1") as ws:
-        for index in range(3):
+        for index in range(6):
             if index:
                 script(monkeypatch, round_of(*[call("request_phone")] * 3), round_of(TextDelta("done")))
             frames = say(ws, "phone please")
             cards = of_type(frames, "confirm_action")
-            if index == 0:
-                assert len(cards) == 3
-            elif index == 1:
-                assert len(cards) == 2  # 5 pending in total
+            if index < 5:
+                assert len(cards) == 1  # one per run, at most five pending in total
             else:
                 assert cards == []
     assert provider is not None
@@ -379,7 +377,7 @@ def test_a_model_that_is_talked_into_calling_execute_tools_still_sends_nothing(c
     with client.websocket_connect("/ws/tool-inject-1") as ws:
         frames = say(ws, attack)
     # Cards are shown, but nothing was executed and no result frame exists.
-    assert len(of_type(frames, "confirm_action")) == 2
+    assert len(of_type(frames, "confirm_action")) == 1
     assert not of_type(frames, "action_result") and not mail.sent
 
 

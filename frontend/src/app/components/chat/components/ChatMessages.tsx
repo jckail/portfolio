@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 
+import { PortfolioCards, type PortfolioCard } from '../../../agent/portfolio-cards';
 import { ConfirmActionCard } from './ConfirmActionCard';
 import { ChatMarkdown } from './ChatMarkdown';
 import { SuggestedPrompts } from './SuggestedPrompts';
@@ -9,6 +10,7 @@ import type { ConfirmArgs, Message, PendingAction } from '../../../../types/chat
 
 interface ChatMessagesProps {
   messages: Message[];
+  portfolioCards?: PortfolioCard[];
   isLoading: boolean;
   showSuggestions?: boolean;
   onSuggestedPrompt?: (prompt: string) => void;
@@ -19,6 +21,7 @@ interface ChatMessagesProps {
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
+  portfolioCards = [],
   isLoading,
   showSuggestions = false,
   onSuggestedPrompt,
@@ -37,7 +40,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, showSuggestions, pendingActions.length]);
+  }, [messages, showSuggestions, pendingActions.length, portfolioCards.length]);
 
   return (
     <Box
@@ -133,6 +136,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           </Paper>
         </Box>
       ))}
+
+      <PortfolioCards cards={portfolioCards} onPrompt={onSuggestedPrompt} disabled={isLoading} />
 
       {onConfirmAction &&
         onCancelAction &&

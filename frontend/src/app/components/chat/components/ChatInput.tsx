@@ -13,7 +13,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   message,
   setMessage,
   handleSendMessage,
-  isLoading
+  isLoading,
 }) => {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -23,10 +23,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        gap: 1, 
+    <Box
+      sx={{
+        display: 'flex',
+        gap: 1,
         alignItems: 'flex-end',
         // In flow (not absolutely positioned) so a growing multiline field
         // pushes the transcript up instead of covering it. The negative
@@ -50,11 +50,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         id="chat-message"
         name="message"
         autoComplete="off"
-        inputProps={{ 'aria-label': 'Message the AI assistant' }}
+        inputProps={{ 'aria-label': 'Message the AI assistant', maxLength: 2000 }}
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyPress={handleKeyPress}
-        placeholder="Ask me anything..."
+        placeholder="Ask about Jordan or paste a role description…"
         variant="outlined"
         size="small"
         disabled={isLoading}
@@ -85,8 +85,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         disabled={!message.trim() || isLoading}
         // Icon-only control: without this it announces as an unnamed button.
         aria-label="Send message"
-        sx={{ 
-          minWidth: 'auto', 
+        sx={{
+          minWidth: 'auto',
           p: 1,
           bgcolor: 'var(--primary-border)',
           '&:hover': {

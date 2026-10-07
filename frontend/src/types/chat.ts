@@ -5,7 +5,7 @@ export interface Message {
 }
 
 /** Tools that have a side effect and therefore need the visitor's confirmation. */
-export type ConfirmTool = 'contact_jordan' | 'request_phone' | 'request_meeting';
+export type ConfirmTool = 'contact_jordan' | 'request_phone' | 'request_meeting' | 'book_meeting';
 
 /** Editable arguments the server proposes for an execute-type tool. */
 export interface ConfirmArgs {
@@ -13,6 +13,8 @@ export interface ConfirmArgs {
   message?: string;
   topic?: string;
   preferred_times?: string;
+  start?: string;
+  company?: string;
 }
 
 /** Server frame: a tool call is waiting for the visitor. */

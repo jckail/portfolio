@@ -69,8 +69,10 @@ const CONTEXT_EXCLUDE_SELECTOR = [
   '[data-no-chat-context]',
 ].join(', ');
 
-export const useChat = () => {
-  const [open, setOpen] = useState(() => getQueryParam('ai_chat') === 'open');
+export const useChat = (options: { accessToken?: string; fullPage?: boolean; onAccessExpired?: () => void } = {}) => {
+  const { accessToken, fullPage = false, onAccessExpired } = options;
+  const [open, setOpen] = useState(() => fullPage || getQueryParam('ai_chat') === 'open');
+  const [portfolioCards, setPortfolioCards] = useState<{ kind: string; data: unknown }[]>([]);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
@@ -112,7 +114,9 @@ export const useChat = () => {
 
   // Listen for URL parameter changes
   useEffect(() => {
+    if (fullPage) return;
     const handleUrlChange = () => {
+      if (fullPage) return;
       const shouldBeOpen = getQueryParam('ai_chat') === 'open';
       setOpen(prev => (shouldBeOpen !== prev ? shouldBeOpen : prev));
     };
@@ -137,7 +141,7 @@ export const useChat = () => {
       history.pushState = originalPushState;
       history.replaceState = originalReplaceState;
     };
-  }, []);
+  }, [fullPage]);
 
   const getPageContext = () => {
     const mainContent = document.querySelector('#root') as HTMLElement;
@@ -191,6 +195,7 @@ export const useChat = () => {
         return;
       }
 
+      if (accessToken) ws.send(JSON.stringify({ type: 'access', token: accessToken }));
       const pageContext = getPageContext();
       ws.send(
         JSON.stringify({
@@ -255,6 +260,7 @@ export const useChat = () => {
         args?: unknown;
         ok?: boolean;
         phone?: string;
+        data?: unknown;
       };
       try {
         data = JSON.parse(event.data);
@@ -264,6 +270,10 @@ export const useChat = () => {
       }
 
       // Assistant-requested UI action (navigate / open modal / download)
+      if (data.type === 'portfolio_card' && ['recruiter_brief', 'project', 'role_match', 'contact_options', 'calendar_availability'].includes(data.kind ?? '')) {
+        setPortfolioCards(prev => [...prev.slice(-9), { kind: data.kind!, data: data.data }]);
+        return;
+      }
       if (data.type === 'action' && data.action) {
         const action = data as ChatAction;
         try {
@@ -388,7 +398,8 @@ export const useChat = () => {
       setIsLoading(false);
     };
 
-    ws.onclose = () => {
+    ws.onclose = event => {
+      if (event?.code === 1008 && accessToken && /access/i.test(event.reason)) onAccessExpired?.();
       if (wsRef.current === ws) {
         wsRef.current = null;
       }
@@ -407,7 +418,7 @@ export const useChat = () => {
         )
       );
     };
-  }, [finalizeStreamingMessage]);
+  }, [finalizeStreamingMessage, accessToken, onAccessExpired]);
 
   // Expire cards locally when the server's 10 minute window passes.
   useEffect(() => {
@@ -424,10 +435,11 @@ export const useChat = () => {
   }, [pendingActions]);
 
   useEffect(() => {
+    if (fullPage) return;
     const isOpenInUrl = getQueryParam('ai_chat') === 'open';
     if (isOpenInUrl === open) return;
     setQueryParam('ai_chat', open ? 'open' : null);
-  }, [open]);
+  }, [open, fullPage]);
 
   useEffect(() => {
     if (open) {
@@ -545,6 +557,7 @@ export const useChat = () => {
     showSuggestions,
     initializeChat,
     pendingActions,
+    portfolioCards,
     confirmAction,
     cancelAction,
   };

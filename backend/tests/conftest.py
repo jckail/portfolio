@@ -28,6 +28,14 @@ _TEST_ENV = {
     # Host canonicalization stays off in tests unless a test builds its own Settings.
     "ALIAS_HOSTS": "",
     "CANONICAL_HOST": "",
+    "AGENT_ACCESS_REQUIRED": "false",
+    "AGENT_ACCESS_SECRET": "test-agent-access-secret-only-0123456789",
+    "GOOGLE_CALENDAR_CLIENT_ID": "",
+    "GOOGLE_CALENDAR_CLIENT_SECRET": "",
+    "GOOGLE_CALENDAR_REFRESH_TOKEN": "",
+    "GOOGLE_CALENDAR_ID": "",
+    "CALENDAR_BOOKING_ENABLED": "false",
+    "CALENDAR_POLICY_CONFIRMED": "false",
 }
 
 # Assign unconditionally, never setdefault: a developer with real

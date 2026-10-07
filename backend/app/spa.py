@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # pathname check in app/components/main-content.tsx). Other unknown paths
 # still get the SPA shell so the visitor lands on the site, but with a 404
 # status so crawlers do not index junk URLs as duplicate homepages.
-SPA_ROUTES = frozenset({"/", "/admin", "/dataplayground", "/dataplayground/"})
+SPA_ROUTES = frozenset({"/", "/admin", "/agent", "/agent/", "/dataplayground", "/dataplayground/"})
 
 # Never answer these with index.html. /api and /ws keep JSON 404s for
 # clients; a missing /assets chunk must fail loudly rather than parse HTML

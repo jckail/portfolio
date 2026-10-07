@@ -4,15 +4,14 @@ export const CHAT_STORAGE_KEY = 'portfolio_chat_messages_v1';
 
 export const WELCOME_MESSAGE: Message = {
   type: 'agent',
-  text:
-    "Welcome! I'm Jordan's AI assistant. Ask me anything about his experience, skills, or projects — or pick a suggestion below.",
+  text: "I'm Jordan's AI portfolio assistant. I can build a concise recruiter brief, compare a job description with his experience, explore his engineering work, or help draft an introduction. I'll separate portfolio evidence from missing information. What would you like to find out?",
 };
 
 /** Persist only completed (non-streaming) messages. */
 export function saveChatMessages(messages: Message[]): void {
   try {
     const toStore = messages
-      .filter(m => !m.isStreaming)
+      .filter((m) => !m.isStreaming)
       .map(({ type, text }) => ({ type, text }));
     sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
   } catch {

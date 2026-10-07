@@ -17,11 +17,15 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ onClick, onIntent }) => 
       type="button"
       className="chat-fab"
       aria-label="Chat with AI"
+      aria-haspopup="dialog"
       onClick={onClick}
       onPointerEnter={onIntent}
       onFocus={onIntent}
     >
       <span aria-hidden="true">🤖</span>
+      <span className="chat-fab-label" aria-hidden="true">
+        Chat with AI
+      </span>
     </button>
   </div>
 );

@@ -8,12 +8,14 @@ import asyncio
 import json
 import logging
 import re
+import time
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 from backend.app.config import get_settings
+from backend.app.services.agent_access import verify_access
 from backend.app.services.chat_service import (
     IDLE_TIMEOUT_SECONDS,
     MAX_USER_MESSAGE_CHARS,
@@ -189,6 +191,17 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         return
 
     try:
+        access_expires = None
+        if get_settings().agent_access_required:
+            try:
+                access_frame = json.loads(await asyncio.wait_for(websocket.receive_text(), timeout=10))
+                if isinstance(access_frame, dict) and access_frame.get("type") == "access":
+                    access_expires = verify_access(access_frame.get("token"))
+            except (TimeoutError, ValueError):
+                pass
+            if access_expires is None:
+                await websocket.close(code=1008, reason="Agent access required")
+                return
         while True:
             try:
                 data = await asyncio.wait_for(
@@ -204,6 +217,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 continue
             if not isinstance(parsed_data, dict):
                 continue
+
+            if access_expires is not None:
+                if time.time() >= access_expires:
+                    await websocket.close(code=1008, reason="Agent access expired")
+                    break
 
             await handle_websocket_message(websocket, client_id, parsed_data, ip)
 

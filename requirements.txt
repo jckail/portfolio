@@ -18,3 +18,6 @@ graphql-core==3.2.8
 # Existing CI audit blockers: fixed upstream transitive versions.
 multidict>=6.9.1,<7
 werkzeug>=3.1.9
+openai-agents==0.23.1
+# Explicit tool argument validation at the agent boundary.
+jsonschema==4.26.0

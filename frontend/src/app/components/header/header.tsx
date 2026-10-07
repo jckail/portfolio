@@ -105,6 +105,7 @@ const Header: React.FC = memo(() => {
             </div>
           </div>
           <div className="nav-right">
+            <a className="header-agent-link" href={`/agent?theme=${theme}`}>Ask my assistant</a>
             {!isToggleHidden && (
               <button
                 type="button"

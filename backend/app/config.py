@@ -92,6 +92,19 @@ class Settings:
     # 301-redirected to CANONICAL_HOST. Empty alias list = feature off.
     canonical_host: str = "www.jckail.com"
     alias_hosts: tuple[str, ...] = ()
+    # A separate signing key keeps recruiter access valid across instances.
+    # Empty fails closed; never derive it from database/provider credentials.
+    agent_access_secret: str = ""
+    agent_access_required: bool = True
+    google_calendar_client_id: str = ""
+    google_calendar_client_secret: str = ""
+    google_calendar_refresh_token: str = ""
+    google_calendar_id: str = ""
+    calendar_booking_enabled: bool = False
+    calendar_policy_confirmed: bool = False
+    calendar_timezone: str = "America/Los_Angeles"
+    calendar_start_hour: int = 9
+    calendar_end_hour: int = 17
 
     @property
     def chat_available(self) -> bool:
@@ -197,6 +210,17 @@ def get_settings() -> Settings:
         dataplayground_copilot_daily_tokens=max(0, int(os.getenv("DATAPLAYGROUND_COPILOT_DAILY_TOKENS", "40000"))),
         canonical_host=canonical_host,
         alias_hosts=alias_hosts,
+        agent_access_secret=os.getenv("AGENT_ACCESS_SECRET", "").strip(),
+        agent_access_required=_parse_bool(os.getenv("AGENT_ACCESS_REQUIRED", "true")),
+        google_calendar_client_id=os.getenv("GOOGLE_CALENDAR_CLIENT_ID", "").strip(),
+        google_calendar_client_secret=os.getenv("GOOGLE_CALENDAR_CLIENT_SECRET", "").strip(),
+        google_calendar_refresh_token=os.getenv("GOOGLE_CALENDAR_REFRESH_TOKEN", "").strip(),
+        google_calendar_id=os.getenv("GOOGLE_CALENDAR_ID", "").strip(),
+        calendar_booking_enabled=_parse_bool(os.getenv("CALENDAR_BOOKING_ENABLED", "false")),
+        calendar_policy_confirmed=_parse_bool(os.getenv("CALENDAR_POLICY_CONFIRMED", "false")),
+        calendar_timezone=os.getenv("CALENDAR_TIMEZONE", "America/Los_Angeles"),
+        calendar_start_hour=int(os.getenv("CALENDAR_START_HOUR", "9")),
+        calendar_end_hour=int(os.getenv("CALENDAR_END_HOUR", "17")),
         on_cloud_run=on_cloud_run,
         trust_forwarded_for=_forwarded_for_trust(on_cloud_run),
         trusted_proxy_hops=max(0, int(os.getenv("TRUSTED_PROXY_HOPS", "") or "0")),

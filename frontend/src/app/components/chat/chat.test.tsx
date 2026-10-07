@@ -2,10 +2,11 @@ import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 
-vi.mock('./components/ChatHeader', () => ({ ChatHeader: () => null }));
 vi.mock('./components/ChatMessages', () => ({ ChatMessages: () => null }));
 vi.mock('./components/ChatInput', () => ({ ChatInput: () => null }));
-vi.mock('../../../shared/utils/analytics', () => ({ trackChatOpen: vi.fn(() => Promise.resolve()) }));
+vi.mock('../../../shared/utils/analytics', () => ({
+  trackChatOpen: vi.fn(() => Promise.resolve()),
+}));
 
 import Chat from './chat';
 
@@ -30,6 +31,20 @@ const props = (open: boolean) =>
 afterEach(() => cleanup());
 
 describe('Chat launcher focus', () => {
+  it('labels the dialog and explains AI, storage and visitor confirmation', () => {
+    render(<Chat {...props(true)} />);
+    expect(screen.getByRole('dialog', { name: "Jordan's AI portfolio assistant" })).toHaveAttribute(
+      'aria-describedby',
+      'portfolio-assistant-disclosure'
+    );
+    expect(screen.getByText(/AI answers can be mistaken/)).toHaveTextContent(
+      'Chat messages are stored'
+    );
+    expect(screen.getByText(/enter your email in the confirmation card/)).toHaveTextContent(
+      'Nothing is sent until you confirm'
+    );
+  });
+
   it('returns focus to the launcher after the dialog closes', async () => {
     const { rerender } = render(<Chat {...props(false)} />);
     rerender(<Chat {...props(true)} />);
