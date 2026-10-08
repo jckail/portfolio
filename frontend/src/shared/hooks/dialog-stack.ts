@@ -13,11 +13,18 @@ interface DialogEntry {
 }
 
 const stack: DialogEntry[] = [];
+const listeners = new Set<() => void>();
+
+export function subscribeDialogs(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
 
 function syncInert() {
   stack.forEach((entry, index) => {
     entry.node.toggleAttribute('inert', index !== stack.length - 1);
   });
+  listeners.forEach(listener => listener());
 }
 
 export function pushDialog(id: symbol, node: HTMLElement): void {

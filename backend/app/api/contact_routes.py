@@ -1,10 +1,13 @@
 import html
 import logging
 import re
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Body, HTTPException, Request, Response
-from pydantic import BaseModel, EmailStr, Field
+from fastapi.exceptions import RequestValidationError
+from fastapi.routing import APIRoute
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from ..config import get_settings
 from ..models import Contact
@@ -16,7 +19,22 @@ from .content import collection_payload, payload_response
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/contact")
+class ContactRoute(APIRoute):
+    def get_route_handler(self) -> Callable:
+        handler = super().get_route_handler()
+
+        async def no_store(request: Request) -> Response:
+            try:
+                response = await handler(request)
+            except RequestValidationError:
+                raise HTTPException(422, "Please check the contact fields.", headers={"Cache-Control": "no-store"}) from None
+            if request.method == "POST":
+                response.headers["Cache-Control"] = "no-store"
+            return response
+        return no_store
+
+
+router = APIRouter(prefix="/contact", route_class=ContactRoute)
 
 # The contact form is unauthenticated and spends real SendGrid quota, so it is
 # limited far more tightly than a read endpoint. A person filling in the form
@@ -35,15 +53,32 @@ _NO_STORE = {"Cache-Control": "no-store"}
 
 class EmailMessage(BaseModel):
     from_email: EmailStr
+    company: str = Field(default="", max_length=150)
     # Bounded so a single request cannot push an arbitrarily large payload
     # through SendGrid or into the logs.
     subject: str = Field(..., min_length=1, max_length=150)
     message: str = Field(..., min_length=1, max_length=5000)
 
+    @field_validator("company")
+    @classmethod
+    def company_is_single_line(cls, value: str) -> str:
+        value = re.sub(r"\s+", " ", value).strip()
+        if not value:
+            raise ValueError("Enter your company")
+        return value
+
+    @field_validator("subject", "message")
+    @classmethod
+    def text_is_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Enter text")
+        return value
+
 
 class EmailSent(BaseModel):
     message: str
     status_code: int
+    phone: str | None = None
 
 
 class PhoneRequest(BaseModel):
@@ -58,7 +93,7 @@ async def get_contact(request: Request) -> Response:
     return payload_response(request, collection_payload("contact"))
 
 
-@router.post("/send-email", response_model=EmailSent)
+@router.post("/send-email", response_model=EmailSent, response_model_exclude_none=True)
 async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -> EmailSent:
     """Deliver a contact-form submission to the site owner.
 
@@ -70,6 +105,7 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
     enforce_rate_limit(
         _email_limiter, request,
         detail="Too many messages sent from this location. Please try again later.",
+        headers=_NO_STORE,
     )
 
     sender = str(email_data.from_email)
@@ -77,14 +113,17 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
     # append their own SMTP headers.
     # \s also covers U+2028/U+2029/NEL, which some mail stacks treat as line breaks.
     safe_subject = re.sub(r"\s+", " ", email_data.subject).strip()
+    company_text = f"Company: {email_data.company}\n" if email_data.company else ""
+    company_html = f"<p><strong>Company:</strong> {html.escape(email_data.company)}</p>" if email_data.company else ""
     try:
         # Both bodies are built from visitor-supplied text, so the HTML
         # variant is escaped rather than interpolated raw.
         status_code = await send_owner_mail(
             subject=f"Jordan Kail: {safe_subject}",
-            plain_text=f"From: {sender}\n\n{email_data.message}",
+            plain_text=f"From: {sender}\n{company_text}\n{email_data.message}",
             html=(
                 f"<p><strong>From:</strong> {html.escape(sender)}</p>"
+                f"{company_html}"
                 f"<p>{html.escape(email_data.message)}</p>"
             ),
             reply_to=sender,
@@ -93,13 +132,13 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
     except OwnerMailNotConfigured:
         logger.error("Contact form submitted but owner mail is not configured")
         log_event("contact.failed", reason="not_configured")
-        raise HTTPException(status_code=500, detail="Email is not configured on this server")
+        raise HTTPException(status_code=500, detail="Email is not configured on this server", headers=_NO_STORE)
     except OwnerMailFailed:
         log_event("contact.failed", reason="send_failed")
-        raise HTTPException(status_code=502, detail=EMAIL_SEND_FAILED_DETAIL)
+        raise HTTPException(status_code=502, detail=EMAIL_SEND_FAILED_DETAIL, headers=_NO_STORE)
 
     log_event("contact.sent")
-    return EmailSent(message="Email sent successfully", status_code=status_code)
+    return EmailSent(message="Email sent successfully", status_code=status_code, phone=get_settings().contact_phone or None)
 
 
 @router.post("/phone", response_model=PhoneNumber)

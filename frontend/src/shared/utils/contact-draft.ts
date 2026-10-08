@@ -8,12 +8,14 @@ export const CONTACT_DRAFT_KEY = 'portfolio_contact_draft_v1';
 
 export interface ContactDraft {
   from_email?: string;
+  company?: string;
   subject?: string;
   message?: string;
 }
 
 export function saveContactDraft(draft: ContactDraft): void {
   const cleaned: ContactDraft = {};
+  if (draft.company?.trim()) cleaned.company = draft.company.trim().slice(0, 150);
   if (draft.from_email?.trim()) cleaned.from_email = draft.from_email.trim().slice(0, 200);
   if (draft.subject?.trim()) cleaned.subject = draft.subject.trim().slice(0, 200);
   if (draft.message?.trim()) cleaned.message = draft.message.trim().slice(0, 4000);

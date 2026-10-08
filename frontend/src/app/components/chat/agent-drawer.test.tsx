@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../agent/agent-conversation', () => ({
@@ -8,6 +8,7 @@ vi.mock('../../agent/agent-conversation', () => ({
 }));
 
 import AgentDrawer from './agent-drawer';
+import { pushDialog, removeDialog } from '../../../shared/hooks/dialog-stack';
 
 afterEach(() => {
   cleanup();
@@ -38,6 +39,23 @@ function renderDrawer(mobile: boolean) {
 }
 
 describe('agent drawer page interaction', () => {
+  it('yields mobile focus to a portfolio dialog and resumes after it closes', async () => {
+    renderDrawer(true);
+    await screen.findByRole('dialog', { name: 'Chat with my Agent' });
+    const modal = document.createElement('div');
+    const input = document.createElement('input');
+    modal.append(input);
+    document.body.append(modal);
+    const id = Symbol('contact');
+    act(() => pushDialog(id, modal));
+    act(() => input.focus());
+    expect(input).toHaveFocus();
+    act(() => removeDialog(id));
+    act(() => screen.getByRole('button', { name: 'Close Agent chat' }).focus());
+    act(() => input.focus());
+    expect(input).not.toHaveFocus();
+    modal.remove();
+  });
   it('leaves Contact clickable and focused while the desktop panel is open', async () => {
     renderDrawer(false);
     const dialog = await screen.findByRole('dialog', { name: 'Chat with my Agent' });
@@ -53,6 +71,7 @@ describe('agent drawer page interaction', () => {
   it('keeps the phone panel modal so it covers the page', async () => {
     renderDrawer(true);
     const dialog = await screen.findByRole('dialog', { name: 'Chat with my Agent' });
-    expect(dialog.closest('.MuiModal-root')?.parentElement).toBe(document.body);
+    expect(dialog.closest('.MuiModal-root')?.parentElement).not.toBe(document.body);
+    expect(dialog.closest('.MuiDialog-root')).toHaveClass('MuiModal-root');
   });
 });
