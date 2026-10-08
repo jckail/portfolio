@@ -6,6 +6,7 @@ anthropic==0.116.0
 pydantic==2.13.4
 email-validator==2.3.0
 sendgrid==6.12.5
+boto3==1.43.108
 httpx==0.28.1
 # Transitive floors for security fixes (not imported directly):
 # anyio <4.14.2 (CVE-2026-63374, -64847, -63349), via anthropic/httpx/starlette;

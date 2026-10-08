@@ -25,7 +25,6 @@ REQUIRED_ENV_VARS: tuple[str, ...] = (
     "ALLOWED_ORIGINS",
     "PORT",
     "ADMIN_EMAIL",
-    "SENDGRID_API_KEY",
 )
 # ANTHROPIC_API_KEY / VERTEX_API_KEY are deliberately not required: the chat
 # assistant needs one of them, and without either it reports itself
@@ -84,6 +83,9 @@ class Settings:
     # Observability (defaulted so a Settings built by hand in a test still works)
     gcp_project_id: str = "portfolio-383615"
     service_name: str = "quickresume"
+    # Explicit selection avoids duplicate mail through automatic provider fallback.
+    email_provider: str = "sendgrid"
+    ses_region: str = ""
     access_log_enabled: bool = True
     # Optional independent Python lab. Empty keeps the generated catalog available.
     dataplayground_api_url: str = ""
@@ -189,6 +191,8 @@ def get_settings() -> Settings:
         chat_max_tokens=int(os.getenv("CHAT_MAX_TOKENS", "1024")),
         chat_daily_token_budget=int(os.getenv("CHAT_DAILY_TOKEN_BUDGET", "") or "2000000"),
         sendgrid_api_key=os.getenv("SENDGRID_API_KEY", ""),
+        email_provider=os.getenv("EMAIL_PROVIDER", "sendgrid").strip().lower(),
+        ses_region=os.getenv("SES_REGION", "").strip(),
         contact_sender_email=os.getenv(
             "CONTACT_SENDER_EMAIL", "assistant@jordan-kail.com"
         ),
@@ -229,4 +233,12 @@ def get_settings() -> Settings:
 
 def missing_required_vars() -> list[str]:
     """Return required environment variables that are unset or empty."""
-    return [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    missing = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    provider = os.getenv("EMAIL_PROVIDER", "sendgrid").strip().lower()
+    if provider == "sendgrid" and not os.getenv("SENDGRID_API_KEY"):
+        missing.append("SENDGRID_API_KEY")
+    elif provider == "ses" and not os.getenv("SES_REGION", "").strip():
+        missing.append("SES_REGION")
+    elif provider not in {"sendgrid", "ses"}:
+        missing.append("EMAIL_PROVIDER")
+    return missing
