@@ -19,11 +19,35 @@ def test_settings_load_from_test_environment():
 def test_no_required_vars_missing_in_tests():
     assert missing_required_vars() == []
     # Sanity: the canonical list still contains the core credentials
-    assert "SENDGRID_API_KEY" in REQUIRED_ENV_VARS
+    assert "SENDGRID_API_KEY" not in REQUIRED_ENV_VARS  # selected provider validates its own configuration
     # Either chat key is enough; neither stops the site from booting.
     assert "ANTHROPIC_API_KEY" not in REQUIRED_ENV_VARS
     assert "VERTEX_API_KEY" not in REQUIRED_ENV_VARS
     assert "SUPABASE_SERVICE_ROLE" in REQUIRED_ENV_VARS
+
+
+def test_mail_provider_required_configuration(monkeypatch):
+    monkeypatch.setenv("SENDGRID_API_KEY", "")
+    assert "SENDGRID_API_KEY" in missing_required_vars()
+    monkeypatch.setenv("EMAIL_PROVIDER", "ses")
+    assert "SENDGRID_API_KEY" not in missing_required_vars()
+    assert "SES_REGION" in missing_required_vars()
+    monkeypatch.setenv("SES_REGION", "us-west-2")
+    assert missing_required_vars() == []
+    monkeypatch.setenv("EMAIL_PROVIDER", "typo")
+    assert "EMAIL_PROVIDER" in missing_required_vars()
+
+
+def test_ses_settings_read_from_environment(monkeypatch):
+    get_settings.cache_clear()
+    try:
+        monkeypatch.setenv("EMAIL_PROVIDER", " SES ")
+        monkeypatch.setenv("SES_REGION", " us-west-2 ")
+        settings = get_settings()
+        assert settings.email_provider == "ses" and settings.ses_region == "us-west-2"
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
 
 
 def test_parse_origins_strips_and_drops_empties():

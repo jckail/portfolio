@@ -1,5 +1,9 @@
 # Portfolio assistant runtime and acceptance
 
+For the optional AWS SES owner-notification provider, see
+[portfolio SES mail](portfolio-ses-mail.md). Production sender verification and
+runtime credentials are separate from the implemented provider adapter.
+
 The dedicated `/agent?theme=dark` page and the right-side pane share one conversation interface. The bottom-right “Chat with my Agent” launcher opens the pane. Visitors receive a two-message anonymous preview, then enter email and company to continue; the server notifies the configured owner inbox before issuing an eight-hour full-access receipt. Entry information is self-reported, not verified employment or email ownership. Receipts carry no email/company and must be sent as the first WebSocket frame, never in a URL. Model messages, transcript replay and actions are refused without a valid trial or full receipt when `AGENT_ACCESS_REQUIRED=true` (the default). Trial visitors cannot execute contact or calendar actions.
 
 OpenAI Agents SDK 0.23.1 runs actual `Agent`, `Runner` and `FunctionTool` orchestration. `PortfolioModel` bridges the existing Vertex/Anthropic provider, preserving fallback and streaming. This does not switch models to OpenAI. Tracing is disabled. Read tools use published portfolio data; retrieved briefs, projects, role evidence, contact options and calendar availability generate typed UI cards. Generated HTML and arbitrary web/code tools are excluded.
