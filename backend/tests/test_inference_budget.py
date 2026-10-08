@@ -64,3 +64,56 @@ def test_denied_admission_never_calls_provider(monkeypatch):
     with pytest.raises(budget.BudgetUnavailable):
         asyncio.run(run())
     manager.provider.stream.assert_not_called()
+
+
+def test_settlement_outage_preserves_delivered_reply(monkeypatch):
+    from backend.app.services.chat_service import ConnectionManager
+    from backend.app.services.llm import Finish, TextDelta
+    manager = ConnectionManager()
+    async def stream(request):
+        yield TextDelta("Published portfolio answer")
+        yield Usage(input_tokens=100, output_tokens=10)
+        yield Finish("end_turn")
+    manager.provider = Mock(stream=stream)
+    async def rpc(name, params):
+        if name == "portfolio_settle_inference":
+            raise budget.BudgetUnavailable
+        return {"allowed": True}
+    monkeypatch.setattr(budget, "_rpc", rpc)
+    async def collect():
+        return [event async for event in manager._budgeted_stream("synthetic", request())]
+    events = asyncio.run(collect())
+    assert events[0].text == "Published portfolio answer"
+    assert isinstance(events[-1], Finish)
+
+
+def test_default_allowance_supports_real_prompt_failover(monkeypatch):
+    from backend.app.services.chat_service import ConnectionManager, _RoundState
+    from backend.app.services.llm import Finish, TextDelta
+    from backend.app.services.llm.base import ProviderUnavailable
+    manager = ConnectionManager()
+    manager._retry_delay = 0
+    attempts = []
+    reservations = []
+    charged = 0
+    async def rpc(name, params):
+        nonlocal charged
+        if name == "portfolio_reserve_inference":
+            charged += params["p_tokens"]
+            reservations.append(params["p_tokens"])
+            return {"allowed": charged <= params["p_receipt_limit"] and charged <= params["p_global_limit"]}
+        return {"settled": True}
+    async def stream(request):
+        attempts.append(request.model)
+        if len(attempts) < 3:
+            raise ProviderUnavailable()
+        yield TextDelta("Fallback answer")
+        yield Usage(input_tokens=100, output_tokens=10)
+        yield Finish("end_turn")
+    manager.provider = Mock(stream=stream, plan_models=Mock(return_value=["primary", "primary", "fallback"]))
+    monkeypatch.setattr(budget, "_rpc", rpc)
+    state = _RoundState(model="primary")
+    asyncio.run(manager._stream_with_failover("synthetic", state, []))
+    assert attempts == ["primary", "primary", "fallback"]
+    assert len(reservations) == 3
+    assert state.text == ["Fallback answer"]

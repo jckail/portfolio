@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import json
+import logging
 from dataclasses import asdict
 from uuid import uuid4
 
@@ -59,4 +60,10 @@ async def settle(reservation: str, usage: Usage | None) -> None:
         usage.input_tokens, usage.output_tokens,
         usage.cache_creation_input_tokens, usage.cache_read_input_tokens,
     ))
-    await _rpc("portfolio_settle_inference", {"p_id": reservation, "p_tokens": tokens})
+    try:
+        await _rpc("portfolio_settle_inference", {"p_id": reservation, "p_tokens": tokens})
+    except BudgetUnavailable:
+        # Admission already charged the full reservation. Keep that charge and
+        # the successfully streamed reply; settlement failure must not rewrite
+        # a delivered answer as a provider failure or cause a retry.
+        logging.getLogger(__name__).warning("Inference settlement unavailable; reservation retained")
