@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 import TLDR from './about';
 
@@ -41,9 +41,13 @@ describe('About hero heading', () => {
     expect(h1s[0]).toHaveTextContent('Jordan Kail');
     expect(h1s[0]).toHaveClass('about-name');
     expect(screen.queryByText('Hi there')).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Connect your assistant' })).toHaveAttribute(
-      'href',
-      '/agents.html'
-    );
+    expect(screen.getByRole('button', { name: 'Connect your assistant' })).toHaveAttribute('aria-haspopup', 'dialog');
+  });
+  it('opens the connection overlay without leaving the portfolio', async () => {
+    render(<TLDR />);
+    const pathname = window.location.pathname;
+    fireEvent.click(screen.getByRole('button', { name: 'Connect your assistant' }));
+    expect(await screen.findByRole('dialog', { name: 'Connect your assistant' })).toBeInTheDocument();
+    expect(window.location.pathname).toBe(pathname);
   });
 });
