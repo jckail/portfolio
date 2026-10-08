@@ -104,7 +104,7 @@ for (const theme of ['dark', 'light']) {
         const frame = JSON.parse(String(raw));
         if (frame.type === 'access') ws.send(JSON.stringify({ type: 'access_status', mode: 'trial', remaining_messages: 2 }));
         if (frame.type === 'message') ws.send(JSON.stringify({
-          message: 'A portfolio-backed summary.\n### Engineering evidence\n- Agent evaluation and replay\n### Discuss an opportunity\n[Contact Jordan](https://jckail.com/?contact=open)',
+          message: 'A portfolio-backed summary.\n### Engineering evidence\n- Agent evaluation and replay\n### Discuss an opportunity\n[Contact Jordan](https://jckail.com/contact) and [Skills](https://jordankail.ai/skills)',
           is_chunk: false,
         }));
       }));
@@ -114,6 +114,8 @@ for (const theme of ['dark', 'light']) {
       await expect(page.getByRole('heading', { name: 'Engineering evidence', level: 3 })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Discuss an opportunity', level: 3 })).toBeVisible();
       await expect(page.getByText('Agent evaluation and replay')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Contact Jordan', exact: true }).filter({ hasText: 'Contact Jordan' }).last()).toHaveAttribute('href', 'https://jckail.com/?contact=open');
+      await expect(page.getByRole('link', { name: 'Skills', exact: true })).toHaveAttribute('href', 'https://jordankail.ai/#skills');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     });
   }
