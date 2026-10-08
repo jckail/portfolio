@@ -13,6 +13,7 @@ export default function AgentPage() {
   const setTheme = useThemeStore(state => state.setTheme);
   const [evidence, setEvidence] = useState<PortfolioEvidence | null>(null);
   const [evidenceError, setEvidenceError] = useState(false);
+  const [showEvidence, setShowEvidence] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -36,19 +37,24 @@ export default function AgentPage() {
       </header>
       <div className="agent-layout">
         <div className="agent-workspace">
-          <p className="agent-eyebrow">A conversation with context</p>
-          <h1>Explore what we could build together.</h1>
-          <p className="agent-lede">Ask about Jordan’s experience, explore projects, or bring a role or business problem.
-            This assistant connects your questions to his public portfolio and helps you take the next step.</p>
-          <div className="agent-capabilities" aria-label="What you can explore">
-            <span>Experience & skills</span><span>Projects & evidence</span><span>Your opportunity</span><span>Connect with Jordan</span>
+          <div className="agent-workspace-intro">
+            <div>
+              <h1>Chat with my Agent</h1>
+              <p className="agent-lede">Explore my work, bring an opportunity, or find out what we could build together.</p>
+            </div>
+            <button className="agent-evidence-toggle" type="button" aria-expanded={showEvidence}
+              aria-controls="agent-portfolio-evidence" onClick={() => setShowEvidence(previous => !previous)}>
+              {showEvidence ? 'Hide portfolio evidence' : 'View portfolio evidence'}
+            </button>
           </div>
           <AgentConversation />
         </div>
+        <div id="agent-portfolio-evidence" className={`agent-evidence-container ${showEvidence ? 'is-expanded' : ''}`}>
         {evidence ? <EvidencePanel evidence={evidence} /> : <aside className="agent-evidence">
           <h2>Explore the portfolio</h2><p>{evidenceError ? 'Portfolio evidence is temporarily unavailable here.' : 'Loading public portfolio evidence…'}</p>
           <a href={`/?theme=${theme}`}>Browse Jordan’s work</a>
         </aside>}
+        </div>
       </div>
     </main>
   );

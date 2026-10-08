@@ -59,4 +59,17 @@ describe('shared assistant trial flow', () => {
     render(<AgentPage />); await screen.findByLabelText('Your email');
     expect(getJson.mock.calls.some(call => call[0] === '/api/agent/trial')).toBe(false);
   });
+  it('keeps optional portfolio evidence accessible without replacing the conversation', async () => {
+    render(<AgentPage />);
+    await screen.findByText(/2 introductory messages/);
+    const conversation = screen.getByRole('region', { name: "Conversation with Jordan's Agent" });
+    const toggle = screen.getByRole('button', { name: 'View portfolio evidence' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Chat with my Agent');
+    fireEvent.click(toggle);
+    expect(screen.getByRole('button', { name: 'Hide portfolio evidence' })).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Hide portfolio evidence' }));
+    expect(screen.getByRole('region', { name: "Conversation with Jordan's Agent" })).toBe(conversation);
+    expect(screen.getByRole('textbox', { name: 'Message the AI assistant' })).toHaveValue('Preserved draft');
+  });
 });

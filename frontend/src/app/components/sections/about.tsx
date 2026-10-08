@@ -22,6 +22,7 @@ import type { AboutMe, Contact, ExperienceData } from '../../../types/resume';
 import type { SkillsData } from '../../../types/skills';
 
 const ContactModal = lazy(() => import('./modals/ContactModal'));
+const ConnectAssistantModal = lazy(() => import('./modals/ConnectAssistantModal'));
 
 export interface CurrentRole {
   title: string;
@@ -70,6 +71,7 @@ const TLDRContent = memo(
     onResumeClick,
     onContactSelect,
     onSkillSelect,
+    onConnectAssistant,
   }: {
     aboutMeData: AboutMe;
     contactData: Contact;
@@ -78,6 +80,7 @@ const TLDRContent = memo(
     onResumeClick: () => void;
     onContactSelect: () => void;
     onSkillSelect: (key: string) => void;
+    onConnectAssistant: () => void;
   }) => {
     // Hidden when the assistant is unavailable: the launcher it clicks is gone.
     const chatAvailable = useChatAvailable();
@@ -137,9 +140,9 @@ const TLDRContent = memo(
                 onContactSelect={onContactSelect}
               />
             </ErrorBoundary>
-            <a className="btn" href="/agents.html">
+            <button className="btn" type="button" onClick={onConnectAssistant} aria-haspopup="dialog">
               Connect your assistant
-            </a>
+            </button>
             <button
               type="button"
               className="about-shortcut-hint"
@@ -212,11 +215,23 @@ const TLDR: React.FC = () => {
   const { aboutMeData, contactData, experienceData, skillsData, isLoading, error } = useData();
   const { selectedContact, setSelectedContact } = useContact();
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [connectingAssistant, setConnectingAssistant] = useState(false);
 
   // Stable props so the memoised hero does not re-render when a modal opens
   const openContact = useCallback(() => setSelectedContact(true), [setSelectedContact]);
   const closeContact = useCallback(() => setSelectedContact(false), [setSelectedContact]);
   const closeSkill = useCallback(() => setSelectedSkill(null), []);
+  const openConnectAssistant = useCallback(() => {
+    setSelectedContact(false);
+    setSelectedSkill(null);
+    setConnectingAssistant(true);
+  }, [setSelectedContact]);
+  const closeConnectAssistant = useCallback(() => setConnectingAssistant(false), []);
+  const useMyAgent = useCallback(() => {
+    setConnectingAssistant(false);
+    // Let DialogShell restore the opener's focus before the agent pane mounts.
+    window.setTimeout(openAgent, 0);
+  }, []);
   const currentRole = useMemo(
     () => findCurrentRole(experienceData, contactData?.title),
     [experienceData, contactData?.title]
@@ -249,6 +264,7 @@ const TLDR: React.FC = () => {
             onResumeClick={handleResumeClick}
             onContactSelect={openContact}
             onSkillSelect={setSelectedSkill}
+            onConnectAssistant={openConnectAssistant}
           />
         </ErrorBoundary>
       </div>
@@ -265,6 +281,11 @@ const TLDR: React.FC = () => {
       )}
 
       <SkillModalHost skillsData={skillsData} skillKey={selectedSkill} onClose={closeSkill} />
+      {connectingAssistant && (
+        <Suspense fallback={<LoadingSpinner />}>
+          <ConnectAssistantModal onClose={closeConnectAssistant} onUseAgent={useMyAgent} />
+        </Suspense>
+      )}
     </section>
   );
 };

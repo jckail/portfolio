@@ -95,8 +95,8 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
   };
 
   return <section ref={conversation} tabIndex={-1} className="agent-conversation" aria-label="Conversation with Jordan's Agent" data-no-chat-context>
-    {!embedded && <div className="agent-conversation-heading"><h2>Chat with my Agent</h2>
-      <span className="agent-muted">Grounded in Jordan’s portfolio</span></div>}
+    {!embedded && <div className="agent-conversation-heading"><h2>Grounded in Jordan’s portfolio</h2>
+      <a href="/?contact=open">Contact Jordan</a></div>}
     <p className="agent-disclosure">Ask about Jordan’s work, skills, or your opportunity. AI answers can be mistaken.
       Chat messages are stored; avoid confidential information. Review and confirm any message or meeting before it is sent.</p>
     {receipt?.mode === 'trial' && !gate && <p className="agent-trial-status" role="status">
