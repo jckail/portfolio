@@ -91,7 +91,7 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
             purpose="contact form email",
         )
     except OwnerMailNotConfigured:
-        logger.error("Contact form submitted but ADMIN_EMAIL or SENDGRID_API_KEY is not set")
+        logger.error("Contact form submitted but owner mail is not configured")
         log_event("contact.failed", reason="not_configured")
         raise HTTPException(status_code=500, detail="Email is not configured on this server")
     except OwnerMailFailed:

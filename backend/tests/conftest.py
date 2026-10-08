@@ -15,6 +15,14 @@ _TEST_ENV = {
     "RESUME_FILE": "JordanKailResume.pdf",
     "ANTHROPIC_API_KEY": "test-anthropic-key",
     "SENDGRID_API_KEY": "test-sendgrid-key",
+    "EMAIL_PROVIDER": "sendgrid",
+    "SES_REGION": "",
+    # Never inherit real AWS credentials/profile or probe instance metadata in tests.
+    "AWS_ACCESS_KEY_ID": "test-aws-access-key",
+    "AWS_SECRET_ACCESS_KEY": "test-aws-secret-key",
+    "AWS_SESSION_TOKEN": "",
+    "AWS_PROFILE": "default",
+    "AWS_EC2_METADATA_DISABLED": "true",
     # Pin the provider so a developer's real Vertex key or CHAT_PROVIDER never
     # reaches a test; Vertex tests build their own provider on a mock transport.
     "VERTEX_API_KEY": "",
