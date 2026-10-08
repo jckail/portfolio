@@ -76,19 +76,19 @@ Super Teacher — github.com/jckail/superteacher, the-super-teacher.com
 Built a classroom copilot with a streaming Claude assistant, prioritized student needs, a gradebook, and attendance.
 
 Jobbr — jobdog.ai/jobbr/#
-Built an AI job-matching prototype that parses postings and matches resumes using Python, LangChain, FastAPI, and OpenAI.
+Built Jobbr, a job-search and résumé workflow within Jobdog.
 
 goPilot — github.com/jckail/goPilot, jckail.com/gopilot
-Built an agentic CLI assistant for debugging, developing, and compiling Go applications with Python, Go, and OpenAI.
+Built Python and shell helpers for Go-project context export, checks and historical assistant workflows.
 
-AI Billing System — github.com/jckail/ai_chat_billing_app, jckail.com/aibilling
-Built an AI billing prototype with real-time cost tracking for chat interactions.
+AI Thread Billing — github.com/jckail/ai_chat_billing_app, jckail.com/aibilling
+Built a prototype for per-thread AI usage metering and event-driven cost reporting.
 
-Portfolio Agent Platform — github.com/jckail/portfolio
+Portfolio Agent Platform — github.com/jckail/portfolio, jckail.com/agent
 Built this portfolio with FastAPI and React, deployed on Google Cloud Run.
 
 PointUp — github.com/jckail/point_bot, pointup.io
-Built a rewards-tracking app with Next.js, PostgreSQL, Clerk, and an AWS Bedrock Claude assistant.
+Built a loyalty portfolio with shared TypeScript workflows for web, agents and consented browser capture.
 
 Join Group via QR — techcrunch.com
-Won an internal hackathon with QR-code group invitations used by millions daily; featured in TechCrunch.
+Contributed QR-code group invitations at Meta, a feature covered by TechCrunch.

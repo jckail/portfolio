@@ -3,6 +3,7 @@ import React, { Suspense, lazy, memo, useCallback, useRef, useState } from 'reac
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
 import { buttonize } from '../../../shared/utils/a11y';
+import { StatusBadge } from '../../../shared/components/brand/StatusBadge';
 import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useDeepLink } from '../../../shared/hooks/use-deep-link';
@@ -12,7 +13,7 @@ import { SkillModalHost } from './modals/SkillModalHost';
 import { SectionPlaceholder } from './section-placeholder';
 import { TechStackTags } from './tech-stack-tags';
 
-import type { Project } from '../../../types/resume';
+import type { Project, ProjectCategory } from '../../../types/resume';
 import type { SkillsData } from '../../../types/skills';
 import '../../../styles/components/sections/projects.css';
 
@@ -24,6 +25,14 @@ const EMPTY_SKILLS: SkillsData = Object.freeze(Object.create(null));
 
 /** Tags shown on a card; the modal lists the whole stack. */
 const CARD_TAG_LIMIT = 4;
+const CATEGORIES: { id: ProjectCategory; label: string }[] = [
+  { id: 'agents', label: 'AI agents' },
+  { id: 'infrastructure', label: 'Infrastructure' },
+  { id: 'data', label: 'Data and reliability' },
+  { id: 'devtools', label: 'Developer tools' },
+  { id: 'knowledge', label: 'Knowledge graphs and AI' },
+  { id: 'experimental', label: 'Open source and experiments' },
+];
 
 const ProjectCard = memo(({
   projectKey,
@@ -57,7 +66,7 @@ const ProjectCard = memo(({
           />
         </div>
         <h3>{project.title}</h3>
-        {project.status && <span className="project-status">{project.status}</span>}
+        {project.status && <StatusBadge tone={project.status === 'Live' ? 'success' : project.status === 'In Development' ? 'warning' : 'neutral'}>{project.status}</StatusBadge>}
         <p>{project.description}</p>
         <span className="sr-only"> (view details)</span>
       </div>
@@ -98,6 +107,7 @@ const Projects: React.FC = () => {
   const { selectedProject, setSelectedProject } = useProject();
   // Local skill state (same pattern as Experience) so we don't fight the
   // Skills section's useSkill() owner of the ?skill= URL param.
+  const [category, setCategory] = useState<ProjectCategory | 'all'>('all');
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
   const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
@@ -145,6 +155,14 @@ const Projects: React.FC = () => {
   }
 
   const project = getOwn(projectsData, selectedProject);
+  const entries = Object.entries(projectsData);
+  const featured = entries.filter(([, item]) => item.featured).slice(0, 3);
+  const filtered = category === 'all' ? entries : entries.filter(([, item]) => item.categories?.includes(category));
+  const renderCard = ([key, item]: [string, Project]) => (
+    <ProjectCard key={key} projectKey={key} project={item}
+      skillsData={skillsData ?? EMPTY_SKILLS} onSelect={setSelectedProject}
+      onSelectSkill={openSkillFromProject} />
+  );
 
   return (
     <section id="projects" className="section-container">
@@ -152,19 +170,23 @@ const Projects: React.FC = () => {
         <h2>Projects</h2>
       </div>
       <div className="section-content">
-        <div className="projects-grid">
-          {/* The data objects themselves, not per-render copies, so the
-              memoised cards skip re-rendering when a modal opens. */}
-          {Object.entries(projectsData).map(([key, item]) => (
-            <ProjectCard
-              key={key}
-              projectKey={key}
-              project={item}
-              skillsData={skillsData ?? EMPTY_SKILLS}
-              onSelect={setSelectedProject}
-              onSelectSkill={openSkillFromProject}
-            />
-          ))}
+        {featured.length > 0 && (
+          <div className="featured-projects" aria-labelledby="featured-projects-title">
+            <h3 id="featured-projects-title">Featured engineering</h3>
+            <p className="project-catalogue-intro">Selected case studies: the problem, the engineering decisions, and the evidence.</p>
+            <div className="projects-grid">{featured.map(renderCard)}</div>
+          </div>
+        )}
+        <div className="project-catalogue" aria-labelledby="project-catalogue-title">
+          <h3 id="project-catalogue-title">Complete project catalogue</h3>
+          <div className="project-filters" role="group" aria-label="Filter project catalogue">
+            <button type="button" aria-pressed={category === 'all'} onClick={() => setCategory('all')}>All projects</button>
+            {CATEGORIES.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</button>)}
+          </div>
+          <p className="project-count" role="status">{filtered.length} of {entries.length} projects{category !== 'all' ? ` in ${CATEGORIES.find(item => item.id === category)?.label}` : ''}</p>
+          {filtered.length > 0 ? <div className="projects-grid">{filtered.map(renderCard)}</div> : (
+            <p className="project-empty">No projects are published in this category yet. <button type="button" onClick={() => setCategory('all')}>Show all projects</button></p>
+          )}
         </div>
       </div>
 

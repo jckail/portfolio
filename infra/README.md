@@ -371,3 +371,10 @@ Enabling later (option A in `docs/host-canonicalization-decision.md`):
 
 Nothing in `deploy.yml` breaks: it verifies the tagged revision URL
 (`*.run.app`) and the service URL at `/api/health`, neither is an alias host.
+
+
+### Read-only audit receipt — October 8, 2026
+
+After PR115 deployment, live metadata confirmed revision `quickresume-00492-deg` at 100% traffic for merge `a0844ab`. The dedicated `quickresume-run` identity has no project-level roles in the inspected project policy. Read-only policy checks confirmed the runtime identity has Secret Accessor on each of the ten referenced secrets; no secret payloads were read. Three older service-account members still have project Editor, and two service-account members retain project-wide Secret Accessor. Remove those grants only after checking their other workload dependencies and preserving a tested rollback; they are not required by the dedicated runtime identity's project policy. This review made no IAM changes.
+
+Live references: agent-access signing and both SES credential references are pinned to numeric version 1. Seven legacy secret references still resolve `latest` (SendGrid, Supabase URL/anon/service role, Anthropic, contact phone, Vertex). Revision rollback does not guarantee the same values if those aliases change. Existing mitigations are dedicated runtime/per-secret access, immutable image digests and the canary/acceptance deployment workflow. The documented secret-read monitoring plan still needs a separate live-enforcement check. Remediation is to resolve enabled version metadata at release time and pin those references after a deliberate rotation/dependency review. The retained SendGrid reference is legacy while delivery uses SES. No secret rotation, historical Terraform-state cleanup, plan or apply was performed; source changes do not erase past state exposure.

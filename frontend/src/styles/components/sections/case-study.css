@@ -1,0 +1,12 @@
+.case-study { display: grid; gap: var(--spacing-lg); margin-block: var(--spacing-lg); }
+.case-study section { min-width: 0; border-top: 1px solid var(--panel-border); padding-top: var(--spacing-md); }
+.case-study h3 { margin: 0 0 var(--spacing-sm); color: var(--text-color); font-size: var(--text-lg); }
+.case-study p, .case-study li, .case-study dd { color: var(--text-secondary); line-height: var(--leading-body); overflow-wrap: anywhere; }
+.case-study p { margin: 0; white-space: pre-line; }
+.case-study ul { margin: 0; padding-left: 1.3rem; }
+.case-study li + li { margin-top: var(--spacing-sm); }
+.case-study dl { margin: 0; }
+.case-study dt { font-weight: 700; color: var(--text-color); }
+.case-study dd { margin: var(--spacing-xs) 0 var(--spacing-md); }
+.case-study a { color: var(--accent-text); text-decoration: underline; text-underline-offset: .15em; }
+.case-study a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }

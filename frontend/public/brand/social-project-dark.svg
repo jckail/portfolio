@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Project title — editable dark social template</title><desc id="desc">1200 by 630 social card. Edit the title, description and evidence line before export.</desc>
+<!-- Keep content inside the 72px safe margin. Live text requires installed fonts; export reviewed PNG for Open Graph. -->
+<rect width="1200" height="630" fill="#08081a"/><rect x="72" y="72" width="64" height="8" rx="4" fill="#aaa9ff"/>
+<text x="72" y="143" fill="#aaa9ff" font-family="Montserrat,Arial,sans-serif" font-size="24">JORDAN KAIL · ENGINEERING</text>
+<text x="72" y="270" fill="#ffffff" font-family="Quantico,Arial,sans-serif" font-weight="700" font-size="72">Project title</text>
+<text x="72" y="350" fill="#ffffff" font-family="Montserrat,Arial,sans-serif" font-size="32">A clear engineering problem. A considered solution.</text>
+<text x="72" y="410" fill="#ffffff" font-family="Montserrat,Arial,sans-serif" font-size="26">Contribution · Architecture · Evidence</text>
+<path d="M72 485H1128" stroke="#aaa9ff" stroke-width="2"/><text x="72" y="550" fill="#aaa9ff" font-family="Montserrat,Arial,sans-serif" font-size="26">jckail.com</text>
+</svg>

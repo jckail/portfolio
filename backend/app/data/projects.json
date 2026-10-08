@@ -22,7 +22,272 @@
     "resume_description": "Built this portfolio with FastAPI and React, deployed on Google Cloud Run.",
     "status": "Live",
     "contribution": "Designed and built the agent, public context APIs, contact workflow and deployment checks.",
-    "evidence": "Public source, working agent, read-only APIs, and automated unit/browser checks."
+    "evidence": "Public source, working agent, read-only APIs, and automated unit/browser checks.",
+    "categories": [
+      "agents",
+      "infrastructure",
+      "devtools"
+    ],
+    "featured": true,
+    "link2": "https://www.jckail.com/agent",
+    "link2_label": "Try the agent",
+    "maturity_note": "Live on Cloud Run. Durable admission and contact delivery verified against release a0844ab on October 8, 2026; model answers still require judgment.",
+    "case_study": {
+      "problem": "Make professional experience easy for recruiters and their agents to inspect, while keeping model usage and contact actions bounded.",
+      "role": "Designed and built the portfolio, agent context interfaces, contact workflow and release checks.",
+      "constraints": [
+        "Public read-only context must remain separate from actions that send a message.",
+        "Multiple service instances must share inference limits.",
+        "Visitors need useful access without unrestricted model spending."
+      ],
+      "architecture": "React and TypeScript present the portfolio and agent workspace. FastAPI serves approved JSON content through the website, MCP and GraphQL, and runs the grounded agent workflow. Supabase PostgreSQL stores shared access and inference accounting. Confirmed contact actions use the delivery service; the application is packaged for Cloud Run.",
+      "decisions": [
+        {
+          "decision": "Derive website and agent interfaces from shared approved content.",
+          "tradeoff": "Consistency and inspectability take priority over unrestricted retrieval. Content still needs human maintenance.",
+          "evidence_url": "https://github.com/jckail/portfolio/blob/a0844ab0cac280b377b1e86317c887d6cc14d7f3/backend/app/services/public_context.py"
+        },
+        {
+          "decision": "Reserve inference tokens atomically before provider execution.",
+          "tradeoff": "A failed accounting service denies new inference; missing usage remains charged conservatively.",
+          "evidence_url": "https://github.com/jckail/portfolio/blob/a0844ab0cac280b377b1e86317c887d6cc14d7f3/backend/migrations/20261008_inference_budgets.sql"
+        },
+        {
+          "decision": "Require visitor review and validated identity fields for contact actions.",
+          "tradeoff": "An extra confirmation step reduces accidental sends and separates model suggestions from visitor intent.",
+          "evidence_url": "https://github.com/jckail/portfolio/blob/a0844ab0cac280b377b1e86317c887d6cc14d7f3/backend/app/services/chat_tools.py"
+        }
+      ],
+      "challenges": [
+        {
+          "challenge": "Keep public discovery useful without exposing action-capable tools.",
+          "resolution": "Publish read-only MCP and bounded GraphQL separately from confirmed agent actions."
+        },
+        {
+          "challenge": "Prevent instance restarts or concurrent replicas from resetting spending controls.",
+          "resolution": "Use durable reservation and settlement records with shared database limits."
+        }
+      ],
+      "outcomes": [
+        {
+          "statement": "The public portfolio exposes the same professional context through human-facing pages and machine-readable interfaces.",
+          "source_url": "https://www.jckail.com/agents.html"
+        },
+        {
+          "statement": "The deployed source includes regression tests for reservation denial, unavailable accounting and conservative usage settlement.",
+          "source_url": "https://github.com/jckail/portfolio/blob/a0844ab0cac280b377b1e86317c887d6cc14d7f3/backend/tests/test_inference_budget.py"
+        }
+      ],
+      "limitations": [
+        "Model-generated answers can be incorrect.",
+        "Calendar booking and arbitrary code execution are unavailable.",
+        "Automated checks do not prove immunity to every abuse pattern.",
+        "Local and release checks cover defined journeys, not every model response or workload."
+      ],
+      "evidence_links": [
+        {
+          "label": "Public source",
+          "url": "https://github.com/jckail/portfolio"
+        },
+        {
+          "label": "Agent connection guide",
+          "url": "https://www.jckail.com/agents.html"
+        },
+        {
+          "label": "Budget implementation",
+          "url": "https://github.com/jckail/portfolio/blob/a0844ab0cac280b377b1e86317c887d6cc14d7f3/backend/app/services/inference_budget.py"
+        }
+      ]
+    }
+  },
+  "pointup": {
+    "title": "PointUp",
+    "description": "A loyalty portfolio with trip goals, qualified redemption estimates and reviewable agent proposals across web, MCP and browser-extension workflows.",
+    "link": "https://github.com/jckail/point_bot",
+    "link2": "https://pointup.io/",
+    "description_detail": "PointUp organizes loyalty memberships, balances, expiry context and trip goals. Its public source defines a framework-independent TypeScript domain core shared by the Next.js web app, workers, MCP, typed API clients and browser extension. Supported balance capture requires consent; transfer and redemption values are qualified estimates, not bookable prices. The modern source does not by itself establish completion of the legacy application’s data migration.",
+    "logoPath": "pointup.svg",
+    "tech_stack": [
+      "TypeScript",
+      "Next.js",
+      "React",
+      "Tailwind CSS",
+      "PostgreSQL",
+      "Drizzle ORM",
+      "Clerk",
+      "AWS Bedrock",
+      "AWS CDK",
+      "Vitest"
+    ],
+    "last_commit": "October 2026",
+    "link2_label": "Open app",
+    "resume_description": "Built a loyalty portfolio with shared TypeScript workflows for web, agents and consented browser capture.",
+    "status": "Live",
+    "contribution": "Developed the loyalty portfolio and shared domain workflows for web and agent surfaces.",
+    "evidence": "Public source and architecture documentation; the PointUp public page was reachable on October 8, 2026.",
+    "categories": [
+      "agents",
+      "infrastructure"
+    ],
+    "featured": true,
+    "maturity_note": "Public product surface; provider sync, award data and legacy migration have separate qualification gates.",
+    "case_study": {
+      "problem": "Loyalty balances and trip goals are scattered across programs, while automated collection and redemption estimates have different trust requirements.",
+      "role": "Developed PointUp’s product and shared application workflows, evolving the earlier PointBot experiment.",
+      "constraints": [
+        "Reference coverage does not imply automatic access to every loyalty program.",
+        "Visitors must review agent-proposed changes before they affect their portfolio.",
+        "Legacy application data needs a separately accepted migration."
+      ],
+      "architecture": "A TypeScript monorepo separates framework-independent domain and application logic from infrastructure adapters. Next.js and React provide the web surface; Drizzle and PostgreSQL persist portfolio data, with Clerk identity. Shared contracts support workers, MCP, typed API clients and the Chrome extension.",
+      "decisions": [
+        {
+          "decision": "Share domain use cases across web, workers and agent interfaces.",
+          "tradeoff": "Adapter contracts require maintenance, but business rules do not need separate implementations for each surface.",
+          "evidence_url": "https://github.com/jckail/point_bot/blob/master/docs/architecture.md"
+        },
+        {
+          "decision": "Present redemption values as qualified estimates and keep agent changes reviewable.",
+          "tradeoff": "The product avoids promising automatic access or bookable prices that available sources cannot establish.",
+          "evidence_url": "https://github.com/jckail/point_bot/blob/master/docs/features.md"
+        }
+      ],
+      "challenges": [
+        {
+          "challenge": "Support multiple interaction surfaces without giving each a different balance or goal model.",
+          "resolution": "Use shared contracts and domain/application boundaries with surface-specific adapters."
+        },
+        {
+          "challenge": "Distinguish a convincing local demo from a working provider integration.",
+          "resolution": "Document seeded local data, simulated sync and configured-provider acceptance separately."
+        }
+      ],
+      "outcomes": [
+        {
+          "statement": "The public repository contains the modern PointUp application and documents its web, worker, MCP and extension boundaries.",
+          "source_url": "https://github.com/jckail/point_bot"
+        },
+        {
+          "statement": "A public PointUp product page is available; this is not proof of every authenticated or provider-dependent workflow.",
+          "source_url": "https://pointup.io/"
+        }
+      ],
+      "limitations": [
+        "Automatic sync depends on an authorized, configured adapter.",
+        "Redemption estimates are not live award inventory or bookable prices.",
+        "Source and CI evidence do not certify completion of the legacy data migration."
+      ],
+      "evidence_links": [
+        {
+          "label": "Public product",
+          "url": "https://pointup.io/"
+        },
+        {
+          "label": "Architecture",
+          "url": "https://github.com/jckail/point_bot/blob/master/docs/architecture.md"
+        },
+        {
+          "label": "Feature qualifications",
+          "url": "https://github.com/jckail/point_bot/blob/master/docs/features.md"
+        }
+      ]
+    }
+  },
+  "data_playground": {
+    "title": "Data Playground",
+    "description": "A reproducible synthetic commerce lab for event validation, SQL metrics, dependency DAGs, graphs and vector similarity.",
+    "link": "https://github.com/jckail/data_playground",
+    "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. A separate synthetic commerce dataset connects products, customers, and purchases in a relationship graph and explains cosine similarity over handcrafted product feature vectors. An engineering workbench exposes executable dependency DAGs, retry and failure traces, model grains and contracts, and architecture decisions grounded in the implementation. The original PostgreSQL and Streamlit experiment remains in the source repository.",
+    "logoPath": "playground-icon.svg",
+    "tech_stack": [
+      "Python",
+      "SQL",
+      "SQLite",
+      "FastAPI",
+      "Pydantic",
+      "React",
+      "TypeScript",
+      "Docker"
+    ],
+    "last_commit": "October 2026",
+    "link2": "https://jckail.com/dataplayground",
+    "status": "Prototype",
+    "contribution": "Built the deterministic Python lab and its interactive portfolio explorer.",
+    "evidence": "Public engine, architecture documentation and reproducible catalogue contract.",
+    "categories": [
+      "data",
+      "knowledge",
+      "experimental"
+    ],
+    "featured": true,
+    "maturity_note": "Synthetic educational lab; no customer data or verified standalone hosted service.",
+    "link2_label": "Explore the lab",
+    "case_study": {
+      "problem": "Make data-pipeline behavior and business metrics explainable through reproducible examples rather than opaque dashboard numbers.",
+      "role": "Built the synthetic commerce engine, validation and analytics workflow, and the portfolio’s interactive explorer.",
+      "constraints": [
+        "All examples must use synthetic data.",
+        "The same configuration, scenario and engine version must reproduce the same result.",
+        "Missing observation windows must not be reported as zero retention."
+      ],
+      "architecture": "The Python repository owns event simulation, validation, analytics, the CLI, an optional FastAPI service and a reproducible catalogue export. The portfolio repository owns the React explorer. Separate graph/vector examples and executable DAG demonstrations expose their own synthetic inputs and execution boundaries; the supported lab requires no external database or credentials.",
+      "decisions": [
+        {
+          "decision": "Use deterministic generation and an exported catalogue shared with the UI.",
+          "tradeoff": "Reproducibility and inspection come before live-data realism.",
+          "evidence_url": "https://github.com/jckail/data_playground/blob/main/docs/architecture.mdx"
+        },
+        {
+          "decision": "Represent money as integer cents and unobserved retention ages as null.",
+          "tradeoff": "More explicit metric semantics prevent convenient but misleading comparisons.",
+          "evidence_url": "https://github.com/jckail/data_playground/blob/main/README.md"
+        },
+        {
+          "decision": "Keep the supported lab separate from the legacy PostgreSQL experiment.",
+          "tradeoff": "The self-contained lab is easier to reproduce but does not demonstrate a running production data warehouse.",
+          "evidence_url": "https://github.com/jckail/data_playground/blob/main/docs/service-operations.mdx"
+        }
+      ],
+      "challenges": [
+        {
+          "challenge": "Explain why a record or metric is wrong instead of silently accepting it.",
+          "resolution": "Expose lifecycle checks, quarantined records and the SQL behind the resulting metrics."
+        },
+        {
+          "challenge": "Make orchestration behavior inspectable beyond a static diagram.",
+          "resolution": "Provide executable DAG examples with callbacks, retry traces and blocked dependencies."
+        }
+      ],
+      "outcomes": [
+        {
+          "statement": "The public project documents reproducible catalogue exports and compares repeat exports in CI.",
+          "source_url": "https://github.com/jckail/data_playground/blob/main/README.md"
+        },
+        {
+          "statement": "The architecture workbench exposes executable dependency, retry and failure behavior.",
+          "source_url": "https://github.com/jckail/data_playground/blob/main/docs/architecture-workbench.md"
+        }
+      ],
+      "limitations": [
+        "Data and scenarios are synthetic.",
+        "Handcrafted feature-vector similarity is not a trained recommendation system.",
+        "The legacy PostgreSQL services are not established as functional by the supported lab."
+      ],
+      "evidence_links": [
+        {
+          "label": "Interactive explorer",
+          "url": "https://jckail.com/dataplayground"
+        },
+        {
+          "label": "Engine architecture",
+          "url": "https://github.com/jckail/data_playground/blob/main/docs/architecture.mdx"
+        },
+        {
+          "label": "Executable DAG workbench",
+          "url": "https://github.com/jckail/data_playground/blob/main/docs/architecture-workbench.md"
+        }
+      ]
+    }
   },
   "opendatacenter": {
     "title": "OpenDataCenter",
@@ -35,15 +300,22 @@
     "logoPath": "project-app.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
-    "status": "Public preview",
+    "status": "Live",
     "contribution": "Product design and engineering.",
-    "evidence": "Public product linked below; source repository is not publicly linked.",
-    "resume_description": "A research atlas for public data-center infrastructure, with source provenance and transparent uncertainty."
+    "evidence": "Public product page verified reachable on October 8, 2026. This check does not establish every product workflow.",
+    "resume_description": "A research atlas for public data-center infrastructure, with source provenance and transparent uncertainty.",
+    "categories": [
+      "data",
+      "infrastructure",
+      "knowledge"
+    ],
+    "featured": false,
+    "maturity_note": "Public preview; individual signed-in workflows have not been independently verified."
   },
   "kefi": {
     "title": "Kefi",
     "description": "A live-music companion for discovering concerts, making plans with friends, and keeping a show diary.",
-    "description_detail": "Built a product connecting concert discovery with personal plans and memories. Visitors can browse shows without an account; saved plans and memories use sign-in. The public experience includes artist and venue discovery and a show assistant. Availability of listings depends on current coverage.",
+    "description_detail": "A public live-music product connecting concert discovery with plans and show memories. Public-facing copy supports the discovery, group-planning and diary narrative. Listing coverage and signed-in workflows have separate acceptance requirements.",
     "link": "https://kefi.show/",
     "link_label": "Open product",
     "link2": "https://kefi.show/",
@@ -51,15 +323,20 @@
     "logoPath": "project-app.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
-    "status": "Public preview",
+    "status": "Live",
     "contribution": "Product design and engineering.",
-    "evidence": "Public product linked below; source repository is not publicly linked.",
-    "resume_description": "A live-music companion for discovering concerts, making plans with friends, and keeping a show diary."
+    "evidence": "Public product page verified reachable on October 8, 2026. This check does not establish every product workflow.",
+    "resume_description": "A live-music companion for discovering concerts, making plans with friends, and keeping a show diary.",
+    "categories": [
+      "experimental"
+    ],
+    "featured": false,
+    "maturity_note": "Public preview; individual signed-in workflows have not been independently verified."
   },
   "jobdog": {
-    "title": "JobDog",
+    "title": "Jobdog",
     "description": "A job-search workspace bringing job discovery, saved opportunities, and application work together.",
-    "description_detail": "Built the JobDog product around the job-search workflow. Jobbr remains accessible within the product for job and résumé work. The public entry is available; personal job-search data stays behind sign-in. This listing does not expose private repositories, candidate information, or implementation details.",
+    "description_detail": "A public job-search workspace for job discovery and career workflows. The Jobdog entry redirects to its Jobbr application. This product tile and the Jobbr entry describe the same public product family, not two independently verified deployments.",
     "link": "https://jobdog.ai/",
     "link_label": "Open product",
     "link2": "https://jobdog.ai/",
@@ -67,38 +344,43 @@
     "logoPath": "project-app.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
-    "status": "Public preview",
+    "status": "Live",
     "contribution": "Product design and engineering.",
-    "evidence": "Public product linked below; source repository is not publicly linked.",
-    "resume_description": "A job-search workspace bringing job discovery, saved opportunities, and application work together."
+    "evidence": "Public product page verified reachable on October 8, 2026. This check does not establish every product workflow.",
+    "resume_description": "A job-search workspace bringing job discovery, saved opportunities, and application work together.",
+    "categories": [
+      "agents"
+    ],
+    "featured": false,
+    "maturity_note": "Public preview; individual signed-in workflows have not been independently verified."
   },
   "jobbr": {
     "title": "Jobbr",
-    "description": "An AI-assisted job-search prototype that parses tech-company postings into structured data and matches them to resumes, using Python, LangChain, FastAPI and OpenAI.",
+    "description": "The Jobbr entry into Jobdog’s job-search and résumé workflow.",
     "link": "https://jobdog.ai/jobbr/#/",
-    "description_detail": "Built a job-search application that parses postings and helps align opportunities with résumés. Jobbr is available within JobDog. The older portfolio-hosted demo uses synthetic browser-local data; the current product link opens JobDog.",
+    "description_detail": "Jobbr is available inside Jobdog at the linked application. The older portfolio-hosted Jobbr demonstration uses synthetic browser-local data and is separate from this public product. Authenticated matching, preparation and application workflows require their own acceptance checks.",
     "logoPath": "jobbr-icon.svg",
-    "tech_stack": [
-      "Python",
-      "FastAPI",
-      "LangChain",
-      "OpenAI",
-      "Web Scraping"
-    ],
+    "tech_stack": [],
     "last_commit": "October 2026",
     "link2": "https://jobdog.ai/jobbr/#/",
     "link2_label": "Open app",
-    "resume_description": "Built an AI job-matching prototype that parses postings and matches resumes using Python, LangChain, FastAPI, and OpenAI.",
-    "status": "Public preview",
-    "contribution": "Built an AI job-matching prototype that parses postings and matches resumes using Python, LangChain, FastAPI, and OpenAI.",
+    "resume_description": "Built Jobbr, a job-search and résumé workflow within Jobdog.",
+    "status": "Live",
+    "contribution": "Developed the Jobbr job-search prototype and its résumé workflow.",
     "evidence": "Current product: jobdog.ai/jobbr/#/. Earlier synthetic demo remains a separate historical example.",
-    "link_label": "Open Jobbr"
+    "link_label": "Open Jobbr",
+    "categories": [
+      "agents",
+      "data"
+    ],
+    "featured": false,
+    "maturity_note": "Public preview; individual signed-in workflows have not been independently verified."
   },
   "ai_billing": {
-    "title": "AI Billing System",
-    "description": "A proof-of-concept application for tracking and billing AI chat thread interactions with real-time cost metrics and analytics.",
+    "title": "AI Thread Billing",
+    "description": "A prototype for per-thread AI token metering and cost reporting through an event-driven billing pipeline.",
     "link": "https://github.com/jckail/ai_chat_billing_app",
-    "description_detail": "Built a proof-of-concept for tracking AI chat usage and costs, with a React chat interface, a FastAPI backend and event collector, Kafka and Redis, SQLite storage through SQLAlchemy, and a Streamlit analytics dashboard. The design targets a 15-second analytics refresh; this is a target rather than a measured production guarantee. The portfolio demo illustrates token metering, per-thread costs and invoices with synthetic data entirely in the browser.",
+    "description_detail": "A React chat workspace connects to FastAPI over WebSocket with an HTTP send fallback. A separate collector, Kafka, Redis and SQLite support usage and billing events; Streamlit exposes cost analytics. The development workspace uses a seeded demo identity and has no authentication. Invoice creation exists in the backend but is unavailable in the React interface. The portfolio demo is a separate synthetic browser illustration; neither it nor the source establishes provider-backed billing acceptance.",
     "logoPath": "ai_billing.svg",
     "tech_stack": [
       "Python",
@@ -115,10 +397,17 @@
     "last_commit": "February 2025",
     "link2": "https://www.jckail.com/aibilling",
     "link2_label": "Interactive demo",
-    "resume_description": "Built an AI billing prototype with real-time cost tracking for chat interactions.",
+    "resume_description": "Built a prototype for per-thread AI usage metering and event-driven cost reporting.",
     "status": "Prototype",
-    "contribution": "Built an AI billing prototype with real-time cost tracking for chat interactions.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
+    "contribution": "Built the chat-usage metering prototype and event/billing workflow.",
+    "evidence": "Public README, system/data-model diagrams and implementation documentation.",
+    "categories": [
+      "data",
+      "infrastructure",
+      "agents"
+    ],
+    "featured": false,
+    "maturity_note": "Unauthenticated development prototype; no verified standalone hosted deployment."
   },
   "super_teacher": {
     "title": "Super Teacher",
@@ -143,109 +432,82 @@
     "last_commit": "October 2026",
     "link2_label": "Earlier version",
     "resume_description": "Built a classroom copilot with a streaming Claude assistant, prioritized student needs, a gradebook, and attendance.",
-    "status": "Prototype",
+    "status": "In Development",
     "contribution": "Built a classroom copilot with a streaming Claude assistant, prioritized student needs, a gradebook, and attendance.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
+    "evidence": "Public architecture, screenshot and deployment-status documentation; source features and live deployment are tracked separately.",
+    "categories": [
+      "agents",
+      "data"
+    ],
+    "featured": false,
+    "maturity_note": "Public source; the linked earlier deployment does not certify the current application."
   },
   "qr_for_groups": {
     "title": "Join Group via QR",
-    "description": "Featured on TechCrunch - Won internal hackathon and created the ability for Facebook group admins to invite users to their groups by generating a QR Code. Used by millions daily.",
+    "description": "QR-code invitations for Facebook groups, covered in TechCrunch’s announcement of group-admin tools.",
     "link": "https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/",
-    "description_detail": "",
+    "description_detail": "Contributed QR-code group invitations while at Meta. The linked public article documents the feature announcement; it does not quantify this contribution’s adoption or independently establish individual ownership.",
     "link_label": "Read coverage",
     "logoPath": "techcrunch-icon.svg",
     "last_commit": "January 2022",
-    "resume_description": "Won an internal hackathon with QR-code group invitations used by millions daily; featured in TechCrunch.",
-    "status": "Employer work",
-    "contribution": "Won an internal hackathon with QR-code group invitations used by millions daily; featured in TechCrunch.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
-  },
-  "pointup": {
-    "title": "PointUp",
-    "description": "Track airline miles, hotel points, and credit card rewards in one place. A TypeScript monorepo with a Next.js web app, PostgreSQL, Clerk accounts, and an AWS Bedrock Claude assistant.",
-    "link": "https://github.com/jckail/point_bot",
-    "link2": "https://www.pointup.io/",
-    "description_detail": "PointUp tracks airline miles, hotel points, credit card rewards, and other loyalty points in one place. It is a fully typed TypeScript monorepo built around a framework-agnostic core with a domain-driven, hexagonal architecture: a Next.js App Router web app with React and Tailwind, Drizzle ORM on PostgreSQL, Clerk for user management, a typed API client shared with a Chrome extension, a background worker for scheduled syncs and digests, and a chat bot surface. An AWS Bedrock Claude assistant is wired in, and the infrastructure is defined as code with AWS CDK. It is the modernised successor to the original Python and Selenium PointBot, which survives in the repository as legacy code.",
-    "logoPath": "pointup.svg",
-    "tech_stack": [
-      "TypeScript",
-      "Next.js",
-      "React",
-      "Tailwind CSS",
-      "PostgreSQL",
-      "Drizzle ORM",
-      "Clerk",
-      "AWS Bedrock",
-      "AWS CDK",
-      "Vitest"
+    "resume_description": "Contributed QR-code group invitations at Meta, a feature covered by TechCrunch.",
+    "status": "Employer Work",
+    "contribution": "Contributed QR-code group invitations at Meta.",
+    "evidence": "Public TechCrunch feature announcement. No project-specific usage metric is asserted here.",
+    "categories": [
+      "experimental"
     ],
-    "last_commit": "October 2026",
-    "link2_label": "Open app",
-    "resume_description": "Built a rewards-tracking app with Next.js, PostgreSQL, Clerk, and an AWS Bedrock Claude assistant.",
-    "status": "Prototype",
-    "contribution": "Built a rewards-tracking app with Next.js, PostgreSQL, Clerk, and an AWS Bedrock Claude assistant.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
-  },
-  "lit_crypto": {
-    "title": "Algo Crypto",
-    "description": "Trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS, and SageMaker.",
-    "link": "https://github.com/jckail/crypto_trader",
-    "description_detail": "Developed a Python-based data analysis tool to collect, process, and analyze real-time cryptocurrency data from APIs (CryptoCompare, CoinMarketCap, Alpha Vantage). Engineered a multithreaded data ingestion system to efficiently handle multiple data sources and ensure low-latency processing. Leveraged AWS services (S3, Glue, Athena) to create a scalable cloud-native architecture capable of handling large datasets. Applied stepwise regression and K-means clustering to detect market trends and correlations between traditional assets and cryptocurrencies. Demonstrated advanced data engineering skills by building modular components focused on data acquisition and ML-powered reporting. Highlighted problem-solving and financial technology expertise, navigating API integration challenges and delivering actionable insights into cryptocurrency trends.",
-    "logoPath": "litcrypto-icon.svg",
-    "tech_stack": [
-      "Python",
-      "Flask",
-      "Pandas",
-      "AWS",
-      "SageMaker"
-    ],
-    "last_commit": "May 2018",
-    "link2": "https://www.jckail.com/cryptotrader",
-    "link2_label": "Interactive demo",
-    "status": "Prototype",
-    "contribution": "Trading algorithm via scraped crypto, NASDAQ, and CPME rare minerals data. Made with Flask, Pandas, AWS, and SageMaker.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
+    "featured": false
   },
   "go_pilot": {
     "title": "goPilot",
-    "description": "Agentic AI developer assistant and cli tool to help debug, develop, and compile apps written in GO. Built using python and go leveraging OpenAI assistants api.",
+    "description": "Legacy Python and shell helpers for exporting Go-project context and running external lint, test and assistant workflows.",
     "link": "https://github.com/jckail/goPilot",
-    "description_detail": "Built GoPilot, a next-generation CLI tool to enhance development workflows and accelerate mastery of Go programming. Integrated GPT-4 for code insights and debugging, transforming the CLI into an intelligent development companion. Designed a modular system combining Go, Python, and Bash to manage file operations, context updates, and automated testing workflows. Implemented golangci-lint and Go’s native testing framework to streamline linting and testing operations. Added web scraping capabilities to fetch the latest Go documentation, ensuring developers stay updated on best practices. Developed a customizable CLI interface with task toggles and output path definitions to adapt to diverse workflows. Demonstrated proficiency in Go, Bash scripting, and AI-enhanced development, showcasing innovative problem-solving and productivity enhancement. ",
+    "description_detail": "goPilot exports Go source context and invokes external Go checks through Python and shell helpers. Historical provider-aware commands use legacy assistant operations; current provider compatibility is not established. The project is not a Go application and has no application frontend. Its context-export and HTML-fetch helpers have offline tests; the portfolio demo is a separate synthetic illustration.",
     "logoPath": "gopilot-icon.svg",
     "tech_stack": [
       "Python",
-      "Go",
+      "Shell",
       "OpenAI API",
       "CLI"
     ],
     "last_commit": "September 2024",
     "link2": "https://www.jckail.com/gopilot",
     "link2_label": "Interactive demo",
-    "resume_description": "Built an agentic CLI assistant for debugging, developing, and compiling Go applications with Python, Go, and OpenAI.",
-    "status": "Prototype",
-    "contribution": "Built an agentic CLI assistant for debugging, developing, and compiling Go applications with Python, Go, and OpenAI.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
+    "resume_description": "Built Python and shell helpers for Go-project context export, checks and historical assistant workflows.",
+    "status": "Archived",
+    "contribution": "Built context-export and workflow helpers for Go development.",
+    "evidence": "Public README distinguishes offline helper checks from unverified provider compatibility.",
+    "categories": [
+      "agents",
+      "devtools",
+      "experimental"
+    ],
+    "featured": false,
+    "maturity_note": "Legacy tooling; current provider-backed operation is unverified. The repository itself is not marked archived."
   },
-  "data_playground": {
-    "title": "Data Playground",
-    "description": "An interactive data-engineering lab for pipeline DAGs, data models, SQL analytics, graphs, and vector similarity.",
-    "link": "https://github.com/jckail/data_playground",
-    "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. A separate synthetic commerce dataset connects products, customers, and purchases in a relationship graph and explains cosine similarity over handcrafted product feature vectors. An engineering workbench exposes executable dependency DAGs, retry and failure traces, model grains and contracts, and architecture decisions grounded in the implementation. The original PostgreSQL and Streamlit experiment remains in the source repository.",
-    "logoPath": "playground-icon.svg",
+  "lit_crypto": {
+    "title": "Crypto Trader",
+    "description": "A historical Python project exploring market-data ingestion and query/regression experiments.",
+    "link": "https://github.com/jckail/crypto_trader",
+    "description_detail": "A 2017–2018 learning project with an alpha ingestion runner and omega query/regression experiments. The public source does not establish trade execution, a frontend or a production deployment. It is unmaintained and not runnable as-is. The portfolio’s synthetic browser demo is an explanatory illustration, not a live trading system.",
+    "logoPath": "litcrypto-icon.svg",
     "tech_stack": [
       "Python",
-      "SQL",
-      "SQLite",
-      "FastAPI",
-      "Pydantic",
-      "React",
-      "TypeScript",
-      "Docker"
+      "Pandas",
+      "AWS"
     ],
-    "last_commit": "October 2026",
-    "link2": "https://jckail.com/dataplayground",
-    "status": "Prototype",
-    "contribution": "An interactive data-engineering lab for pipeline DAGs, data models, SQL analytics, graphs, and vector similarity.",
-    "evidence": "Explore the public project and its implementation notes. Demo data and limitations are described in the project details."
+    "last_commit": "May 2018",
+    "link2": "https://www.jckail.com/cryptotrader",
+    "link2_label": "Interactive demo",
+    "status": "Archived",
+    "contribution": "Built market-data ingestion and analysis experiments.",
+    "evidence": "Public README and architecture documentation describe the preserved implementation and its limits.",
+    "categories": [
+      "data",
+      "experimental"
+    ],
+    "featured": false,
+    "maturity_note": "Historical learning project; not runnable as-is. The repository itself is not marked archived."
   }
 }

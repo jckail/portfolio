@@ -1,10 +1,53 @@
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel, UrlConstraints
+
+ProjectCategory = Literal["agents", "infrastructure", "data", "devtools", "knowledge", "experimental"]
+ProjectStatus = Literal["Live", "Prototype", "In Development", "Employer Work", "Archived"]
+EvidenceUrl = Annotated[HttpUrl, UrlConstraints(allowed_schemes=["https"])]
+
+
+class CaseDecision(BaseModel):
+    decision: str
+    tradeoff: str
+    evidence_url: EvidenceUrl | None = None
+
+
+class CaseChallenge(BaseModel):
+    challenge: str
+    resolution: str
+
+
+class CaseOutcome(BaseModel):
+    statement: str
+    source_url: EvidenceUrl | None = None
+
+
+class CaseEvidence(BaseModel):
+    label: str
+    url: EvidenceUrl
+
+
+class ProjectCaseStudy(BaseModel):
+    problem: str = ""
+    role: str = ""
+    constraints: list[str] = Field(default_factory=list)
+    architecture: str = ""
+    decisions: list[CaseDecision] = Field(default_factory=list)
+    challenges: list[CaseChallenge] = Field(default_factory=list)
+    outcomes: list[CaseOutcome] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+    evidence_links: list[CaseEvidence] = Field(default_factory=list)
 
 
 class ProjectDetail(BaseModel):
     """Model for individual project details."""
-    status: str = "Prototype"
+    status: ProjectStatus = "Prototype"
+    categories: list[ProjectCategory] = Field(default_factory=list)
+    featured: bool = False
+    maturity_note: str = ""
+    case_study: ProjectCaseStudy | None = None
     contribution: str = ""
     evidence: str = ""
     title: str = Field(..., description="Project title")

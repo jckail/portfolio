@@ -184,7 +184,7 @@
   font-size: var(--text-xs);
   font-weight: 700;
   line-height: 1.2;
-  text-transform: capitalize;
+  text-transform: none;
   transition: background-color var(--transition-fast),
               border-color var(--transition-fast),
               color var(--transition-fast);

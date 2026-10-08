@@ -7,10 +7,11 @@ for (const theme of ['dark', 'light']) {
       await page.goto(`/?theme=${theme}#about`);
       const nav = page.getByRole('navigation', { name: 'Page timeline' });
       await expect(nav).toHaveCount(0);
-      await page.getByRole('link', { name: /Explore the engineering Public projects/ }).click();
+      await page.getByRole('link', { name: 'Explore engineering case studies' }).click();
       await expect(nav).toBeVisible();
-      await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
-      for (const name of ['OpenDataCenter', 'Kefi', 'JobDog', 'Jobbr']) {
+      if (width <= 900) await expect(nav.getByRole('combobox', { name: 'Jump to section' })).toHaveValue('projects');
+      else await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
+      for (const name of ['OpenDataCenter', 'Kefi', 'Jobdog', 'Jobbr']) {
         await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
       }
       const jobbr = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Jobbr', exact: true }) });
@@ -23,8 +24,17 @@ for (const theme of ['dark', 'light']) {
       await expect(dialog.getByRole('link', { name: 'Open product' })).toHaveAttribute('href', 'https://kefi.show/');
       await page.keyboard.press('Escape');
       await expect(dialog).toHaveCount(0);
-      await nav.getByRole('link', { name: 'Experience', exact: true }).click();
-      await expect(nav.getByRole('link', { name: 'Experience', exact: true })).toHaveAttribute('aria-current', 'location');
+      if (width <= 900) await nav.getByRole('combobox', { name: 'Jump to section' }).selectOption('experience');
+      else await nav.getByRole('link', { name: 'Experience', exact: true }).click();
+      const milestones = nav.getByRole('combobox', { name: 'Jump to career milestone' });
+      await expect(milestones).toBeVisible();
+      await milestones.selectOption('experience-meta-facebook');
+      await expect(page).toHaveURL(/#experience-meta-facebook$/);
+      await expect(milestones).toHaveValue('experience-meta-facebook');
+      await page.goBack();
+      await expect(page).toHaveURL(/#experience$/);
+      await page.goForward();
+      await expect(page).toHaveURL(/#experience-meta-facebook$/);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     });
   }
@@ -41,4 +51,31 @@ test('brand kit and privacy are reachable with local assets', async ({ page }) =
   await page.goto('/privacy/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('body')).toContainText('30 days');
+});
+
+
+test('featured cases, filters, and deep links share the complete registry', async ({ page }) => {
+  await page.goto('/?theme=dark#projects');
+  const featured = page.locator('.featured-projects');
+  await expect(featured.locator('article')).toHaveCount(3);
+  const catalogue = page.locator('.project-catalogue');
+  await catalogue.getByRole('button', { name: 'Developer tools', exact: true }).click();
+  await expect(catalogue.getByRole('button', { name: 'Developer tools', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(featured.locator('article')).toHaveCount(3);
+  await page.goto('/?project=pointup&theme=dark#projects');
+  const dialog = page.getByRole('dialog', { name: 'PointUp', exact: true });
+  await expect(dialog.getByRole('heading', { name: 'Architecture', exact: true })).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Decisions and tradeoffs' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});
+
+test('brand showcase switches theme and exercises shared components without sending data', async ({ page }) => {
+  await page.goto('/brand-kit.html?theme=dark');
+  await page.getByRole('button', { name: 'Light theme', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Light theme', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('textbox', { name: 'Your email', exact: true }).fill('portfolio-uat@example.com');
+  await page.getByRole('button', { name: 'Preview confirmation' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Preview complete. Nothing was sent.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Architecture', exact: true })).toBeVisible();
 });

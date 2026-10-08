@@ -6,6 +6,7 @@ import { buttonize } from '../../../shared/utils/a11y';
 import { DataError } from '../../../shared/components/data-error';
 import { LoadingSpinner } from '../../../shared/components/loading-spinner';
 import { useDeepLink } from '../../../shared/hooks/use-deep-link';
+import { experienceAnchor, KEY_TO_SLUG, SLUG_TO_KEY } from '../../../shared/utils/timeline-targets';
 import { getOwn } from '../../../shared/utils/lookup';
 import '../../../styles/components/sections/experience.css';
 import { ExperienceMark } from './experience/ExperienceMark';
@@ -20,21 +21,6 @@ import type { SkillsData } from '../../../types/skills';
 const ExperienceModal = lazy(() => import('./modals/ExperienceModal'));
 
 const prefetchExperienceModal = () => import('./modals/ExperienceModal');
-
-// Company slug (the shareable ?company= value) <-> experience data key.
-// Maps, not object literals: the slug comes from the URL, and a plain object
-// would answer `constructor`/`__proto__` from Object.prototype.
-const SLUG_TO_KEY = new Map<string, string>([
-  ['together-ai', 'together_ai'],
-  ['prove-identity', 'prove'],
-  ['sabbatical', 'sabbatical'],
-  ['meta-facebook', 'meta'],
-  ['deloitte', 'deloitte'],
-  ['wide-open-west', 'wide_open_west'],
-  ['common-spirit-health', 'common_spirit_health'],
-  ['acustream-r1', 'acustream'],
-]);
-const KEY_TO_SLUG = new Map(Array.from(SLUG_TO_KEY, ([slug, key]) => [key, slug]));
 
 /** Resolve a ?company= value to an own key of the experience data, if any. */
 export function resolveExperienceKey(
@@ -69,7 +55,7 @@ const ExperienceTimeline = memo(({
         const highlights = item.highlights ?? [];
         const shown = isCurrent ? highlights : highlights.slice(0, OLDER_ROLE_HIGHLIGHTS);
         return (
-          <li key={key} className={`timeline-item${isCurrent ? ' is-current' : ''}`}>
+          <li key={key} id={experienceAnchor(key)} data-timeline-label={`${item.company} · ${item.date}`} className={`timeline-item${isCurrent ? ' is-current' : ''}`}>
             <div className="timeline-header-wrapper">
               {item.logoPath ? (
                 <div
