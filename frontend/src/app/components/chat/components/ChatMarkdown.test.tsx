@@ -105,6 +105,23 @@ describe('ChatMarkdown', () => {
     expect(container.textContent).toBe('GitHub');
   });
 
+  it.each([
+    ['https://www.jckail.com/skills', 'https://www.jckail.com/#skills'],
+    ['https://jckail.com/experience', 'https://jckail.com/#experience'],
+    ['https://jordankail.ai/projects/', 'https://jordankail.ai/#projects'],
+    [
+      'https://www.jordankail.ai/contact?theme=dark',
+      'https://www.jordankail.ai/?theme=dark&contact=open',
+    ],
+    ['https://jordankail.ai/?company=together_ai', 'https://jordankail.ai/?company=together_ai'],
+    ['https://jordankail.ai/context.json', 'https://jordankail.ai/context.json'],
+    ['https://other.example/skills', 'https://other.example/skills'],
+    ['https://jckail.com.evil.example/contact', 'https://jckail.com.evil.example/contact'],
+  ])('resolves only known portfolio section aliases: %s', (input, expected) => {
+    render(<ChatMarkdown text={`[Evidence](${input})`} />);
+    expect(screen.getByRole('link', { name: 'Evidence' })).toHaveAttribute('href', expected);
+  });
+
   it('renders unordered lists', () => {
     const { container } = render(<ChatMarkdown text={'- one\n- two\n- three'} />);
     const items = container.querySelectorAll('li');

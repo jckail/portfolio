@@ -11,7 +11,23 @@ import React, { useMemo } from 'react';
  * shows its real hostname next to the label instead of hiding it.
  */
 
+const PORTFOLIO_HOSTS: ReadonlySet<string> = new Set([
+  'jckail.com',
+  'www.jckail.com',
+  'jordankail.ai',
+  'www.jordankail.ai',
+]);
+
+const SECTION_PATHS = new Map([
+  ['/about', 'about'],
+  ['/experience', 'experience'],
+  ['/projects', 'projects'],
+  ['/skills', 'skills'],
+  ['/resume', 'resume'],
+]);
+
 const TRUSTED_LINK_HOSTS: ReadonlySet<string> = new Set([
+  ...PORTFOLIO_HOSTS,
   'jordan-kail.com',
   'www.jordan-kail.com',
   'jckail.com',
@@ -27,7 +43,22 @@ const TRUSTED_LINK_HOSTS: ReadonlySet<string> = new Set([
 function parseSafeUrl(href: string): URL | null {
   try {
     const url = new URL(href);
-    return url.protocol === 'https:' ? url : null;
+    if (url.protocol !== 'https:') return null;
+    // Models sometimes describe section names as routes. The portfolio is a
+    // single page: repair these known aliases without rewriting external URLs.
+    if (PORTFOLIO_HOSTS.has(url.hostname.toLowerCase())) {
+      const path = url.pathname.replace(/\/$/, '');
+      const section = SECTION_PATHS.get(path);
+      if (section) {
+        url.pathname = '/';
+        url.hash = section;
+      } else if (path === '/contact') {
+        url.pathname = '/';
+        url.hash = '';
+        url.searchParams.set('contact', 'open');
+      }
+    }
+    return url;
   } catch {
     return null;
   }
