@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 /**
  * Minimal markdown → React renderer for assistant replies.
  *
- * Supports: paragraphs, line breaks, **bold**, *italic*, `code`,
+ * Supports: headings, paragraphs, line breaks, **bold**, *italic*, `code`,
  * [links](https://...), unordered/ordered lists, and fenced ```code``` blocks.
  * Rendered as React elements (no dangerouslySetInnerHTML). Only https links
  * become anchors; anything else renders as its label. Model output can be
@@ -35,8 +35,7 @@ function parseSafeUrl(href: string): URL | null {
 
 function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   const nodes: React.ReactNode[] = [];
-  const pattern =
-    /(`[^`]+`)|(\[[^\]]+\]\([^)]+\))|(\*\*[^*]+\*\*)|(\*[^*]+\*)/g;
+  const pattern = /(`[^`]+`)|(\[[^\]]+\]\([^)]+\))|(\*\*[^*]+\*\*)|(\*[^*]+\*)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   let i = 0;
@@ -84,9 +83,7 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
         }
       }
     } else if (bold) {
-      nodes.push(
-        <strong key={key}>{renderInline(bold.slice(2, -2), key)}</strong>
-      );
+      nodes.push(<strong key={key}>{renderInline(bold.slice(2, -2), key)}</strong>);
     } else if (italic) {
       nodes.push(<em key={key}>{renderInline(italic.slice(1, -1), key)}</em>);
     } else {
@@ -102,7 +99,11 @@ function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
   return nodes;
 }
 
+// Match only ATX headings; use the same boundary in paragraph parsing.
+const HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*)|[ \t]*)$/;
+
 type Block =
+  | { type: 'heading'; level: number; text: string }
   | { type: 'paragraph'; lines: string[] }
   | { type: 'ul'; items: string[] }
   | { type: 'ol'; items: string[] }
@@ -131,6 +132,17 @@ function parseBlocks(markdown: string): Block[] {
       }
       i += 1;
       blocks.push({ type: 'code', lang, body: body.join('\n') });
+      continue;
+    }
+
+    const heading = HEADING.exec(line);
+    if (heading) {
+      blocks.push({
+        type: 'heading',
+        level: Math.max(3, heading[1].length),
+        text: (heading[2] ?? '').replace(/[ \t]+#+[ \t]*$/, '').trim(),
+      });
+      i += 1;
       continue;
     }
 
@@ -165,7 +177,8 @@ function parseBlocks(markdown: string): Block[] {
       lines[i].trim() !== '' &&
       !/^\s*[-*]\s+/.test(lines[i]) &&
       !/^\s*\d+\.\s+/.test(lines[i]) &&
-      !/^```/.test(lines[i])
+      !/^```/.test(lines[i]) &&
+      !HEADING.test(lines[i])
     ) {
       para.push(lines[i]);
       i += 1;
@@ -187,16 +200,21 @@ interface ChatMarkdownProps {
   isStreaming?: boolean;
 }
 
-export const ChatMarkdown: React.FC<ChatMarkdownProps> = ({
-  text,
-  isStreaming = false,
-}) => {
+export const ChatMarkdown: React.FC<ChatMarkdownProps> = ({ text, isStreaming = false }) => {
   const blocks = useMemo(() => parseBlocks(text), [text]);
 
   return (
     <div className="chat-md">
       {blocks.map((block, bi) => {
         const key = `b-${bi}`;
+        if (block.type === 'heading') {
+          // Replies live beneath the conversation heading, never page h1/h2.
+          return React.createElement(
+            `h${block.level}`,
+            { key, className: 'chat-md-heading' },
+            renderInline(block.text, key)
+          );
+        }
         if (block.type === 'code') {
           return (
             <pre key={key} className="chat-md-pre">

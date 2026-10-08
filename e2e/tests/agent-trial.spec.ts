@@ -90,3 +90,31 @@ test('mobile pane keeps the introduction reachable without horizontal overflow',
   await pane.getByRole('button', { name: 'Close Agent chat' }).click();
   await expect(pane).toBeHidden();
 });
+
+for (const theme of ['dark', 'light']) {
+  for (const width of [390, 1360]) {
+    test(`agent reply headings are readable in ${theme} at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.route('**/api/chat/status', route => route.fulfill({ json: { available: true } }));
+      await page.route('**/api/agent/trial', route => route.fulfill({ json: {
+        token: 'synthetic-heading-trial', mode: 'trial', remaining_messages: 2,
+        expires_at: new Date(Date.now() + 3600000).toISOString(),
+      } }));
+      await page.routeWebSocket(/\/ws\//, ws => ws.onMessage(raw => {
+        const frame = JSON.parse(String(raw));
+        if (frame.type === 'access') ws.send(JSON.stringify({ type: 'access_status', mode: 'trial', remaining_messages: 2 }));
+        if (frame.type === 'message') ws.send(JSON.stringify({
+          message: 'A portfolio-backed summary.\n### Engineering evidence\n- Agent evaluation and replay\n### Discuss an opportunity\n[Contact Jordan](https://jckail.com/?contact=open)',
+          is_chunk: false,
+        }));
+      }));
+      await page.goto(`/agent?theme=${theme}`);
+      await page.getByLabel('Message the AI assistant').fill('Summarize Jordan’s agent experience.');
+      await page.getByRole('button', { name: 'Send message', exact: true }).click();
+      await expect(page.getByRole('heading', { name: 'Engineering evidence', level: 3 })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Discuss an opportunity', level: 3 })).toBeVisible();
+      await expect(page.getByText('Agent evaluation and replay')).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    });
+  }
+}

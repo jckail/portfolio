@@ -64,6 +64,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           margin: '0 0 0.5em',
           '&:last-child': { marginBottom: 0 },
         },
+        '& .chat-md-heading': {
+          margin: '1em 0 0.4em',
+          fontFamily: 'inherit',
+          fontSize: '1.05em',
+          fontWeight: 700,
+          lineHeight: 1.4,
+          '&:first-child': { marginTop: 0 },
+        },
         '& .chat-md-list': {
           margin: '0.25em 0 0.5em',
           paddingLeft: '1.25em',
@@ -112,7 +120,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             sx={{
               p: 1.5,
               maxWidth: '95%',
-              backgroundColor: msg.type === 'user' ? 'var(--primary-border)' : 'var(--section-background)',
+              backgroundColor:
+                msg.type === 'user' ? 'var(--primary-border)' : 'var(--section-background)',
               color: msg.type === 'user' ? 'white' : 'var(--text-color)',
               borderRadius: msg.type === 'user' ? '15px 15px 5px 15px' : '15px 15px 15px 5px',
               whiteSpace: msg.type === 'user' ? 'pre-line' : 'normal',
@@ -141,7 +150,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
       {onConfirmAction &&
         onCancelAction &&
-        pendingActions.map(action => (
+        pendingActions.map((action) => (
           <ConfirmActionCard
             key={action.id}
             action={action}

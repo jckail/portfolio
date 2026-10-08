@@ -9,10 +9,51 @@ describe('ChatMarkdown', () => {
     expect(screen.getByText('Hello world')).toBeInTheDocument();
   });
 
-  it('renders bold and italic', () => {
-    const { container } = render(
-      <ChatMarkdown text="He said **bold** and *italic* words" />
+  it('renders reply headings between paragraphs and lists without literal markers', () => {
+    render(
+      <ChatMarkdown
+        text={
+          'Jordan builds agent platforms.\n### Strongest **engineering** evidence ###\n- Agent harnesses\n## Relevant links\n[Portfolio](https://jckail.com)'
+        }
+      />
     );
+    expect(
+      screen.getByRole('heading', { name: 'Strongest engineering evidence', level: 3 })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Relevant links', level: 3 })).toBeInTheDocument();
+    expect(screen.getByText('Agent harnesses')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Portfolio' })).toHaveAttribute(
+      'href',
+      'https://jckail.com/'
+    );
+  });
+
+  it('keeps heading-like text literal in code and rejects invalid heading prefixes', () => {
+    const { container } = render(
+      <ChatMarkdown
+        text={'```text\n### literal code\n```\n#hashtag\n####### not a heading\n#### Detail'}
+      />
+    );
+    expect(container.querySelector('pre code')?.textContent).toBe('### literal code');
+    expect(screen.getByText('#hashtag', { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Detail', level: 4 })).toBeInTheDocument();
+    expect(container.querySelectorAll('h1, h2, h3, h4, h5, h6')).toHaveLength(1);
+  });
+
+  it('renders untrusted heading HTML as text and tolerates partial streamed headings', () => {
+    const { container, rerender } = render(<ChatMarkdown text="###" isStreaming />);
+    expect(container.querySelector('.cursor')).toBeInTheDocument();
+    rerender(
+      <ChatMarkdown text={'### <img src=x onerror=alert(1)> [unsafe](javascript:alert(1))'} />
+    );
+    expect(container.querySelector('img, script, a')).toBeNull();
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
+      '<img src=x onerror=alert(1)>'
+    );
+  });
+
+  it('renders bold and italic', () => {
+    const { container } = render(<ChatMarkdown text="He said **bold** and *italic* words" />);
     expect(container.querySelector('strong')?.textContent).toBe('bold');
     expect(container.querySelector('em')?.textContent).toBe('italic');
   });
@@ -59,26 +100,20 @@ describe('ChatMarkdown', () => {
   });
 
   it('does not annotate links to trusted hosts', () => {
-    const { container } = render(
-      <ChatMarkdown text={'[GitHub](https://github.com/jckail)'} />
-    );
+    const { container } = render(<ChatMarkdown text={'[GitHub](https://github.com/jckail)'} />);
     expect(container.querySelector('a')).not.toBeNull();
     expect(container.textContent).toBe('GitHub');
   });
 
   it('renders unordered lists', () => {
-    const { container } = render(
-      <ChatMarkdown text={'- one\n- two\n- three'} />
-    );
+    const { container } = render(<ChatMarkdown text={'- one\n- two\n- three'} />);
     const items = container.querySelectorAll('li');
     expect(items).toHaveLength(3);
     expect(items[0].textContent).toBe('one');
   });
 
   it('renders fenced code blocks as text (escaped by React)', () => {
-    const { container } = render(
-      <ChatMarkdown text={'```\n<script>alert(1)</script>\n```'} />
-    );
+    const { container } = render(<ChatMarkdown text={'```\n<script>alert(1)</script>\n```'} />);
     const pre = container.querySelector('pre code');
     expect(pre?.textContent).toBe('<script>alert(1)</script>');
     // No actual script element injected
@@ -107,9 +142,7 @@ describe('ChatMarkdown', () => {
   });
 
   it('shows a streaming cursor when isStreaming', () => {
-    const { container } = render(
-      <ChatMarkdown text="Partial" isStreaming />
-    );
+    const { container } = render(<ChatMarkdown text="Partial" isStreaming />);
     expect(container.querySelector('.cursor')).not.toBeNull();
   });
 });
