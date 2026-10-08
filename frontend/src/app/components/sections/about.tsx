@@ -140,8 +140,12 @@ const TLDRContent = memo(
                 onContactSelect={onContactSelect}
               />
             </ErrorBoundary>
-            <button className="btn" type="button" onClick={onConnectAssistant} aria-haspopup="dialog">
-              Connect your assistant
+            <button className="btn connect-agent-button" type="button" onClick={onConnectAssistant} aria-haspopup="dialog">
+              <span className="connect-agent-brands" aria-hidden="true">
+                <span className="connect-agent-logo connect-agent-logo-openai" />
+                <span className="connect-agent-logo connect-agent-logo-claude" />
+              </span>
+              Connect your agent
             </button>
             <button
               type="button"

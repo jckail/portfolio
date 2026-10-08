@@ -7,9 +7,9 @@ for (const theme of ['dark', 'light']) {
       await page.route('**/api/chat/status', route => route.fulfill({ json: { available: true } }));
       await page.route('**/api/agent/trial', route => route.fulfill({ status: 429, json: { detail: 'Synthetic admission limit' } }));
       await page.goto(`/?theme=${theme}`);
-      const trigger = page.getByRole('button', { name: 'Connect your assistant', exact: true });
+      const trigger = page.getByRole('button', { name: 'Connect your agent', exact: true });
       await trigger.click();
-      const dialog = page.getByRole('dialog', { name: 'Connect your assistant', exact: true });
+      const dialog = page.getByRole('dialog', { name: 'Connect your agent', exact: true });
       await expect(dialog).toBeVisible();
       await expect(page).toHaveURL(new RegExp(`theme=${theme}`));
       await expect(dialog.getByRole('tab', { name: 'Claude', exact: true })).toHaveAttribute('aria-selected', 'true');
@@ -27,8 +27,8 @@ for (const theme of ['dark', 'light']) {
       await expect(dialog).not.toBeVisible();
       await expect(trigger).toBeFocused();
       await trigger.click();
-      await page.getByRole('dialog', { name: 'Connect your assistant' }).getByRole('button', { name: 'Chat with my Agent', exact: true }).click();
-      await expect(page.getByRole('dialog', { name: 'Connect your assistant' })).not.toBeVisible();
+      await page.getByRole('dialog', { name: 'Connect your agent' }).getByRole('button', { name: 'Chat with my Agent', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: 'Connect your agent' })).not.toBeVisible();
       await expect(page.getByRole('dialog', { name: 'Chat with my Agent', exact: true })).toBeVisible();
     });
   }

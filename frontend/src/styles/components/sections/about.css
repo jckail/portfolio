@@ -373,3 +373,23 @@
     margin-top: var(--spacing-lg);
   }
 }
+
+/* SVG masks inherit the themed button foreground, including hover/focus. */
+.connect-agent-button,
+.connect-agent-brands {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.connect-agent-brands { gap: 0.4rem; }
+.connect-agent-logo {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: currentColor;
+  -webkit-mask: var(--agent-logo) center / contain no-repeat;
+  mask: var(--agent-logo) center / contain no-repeat;
+}
+.connect-agent-logo-openai { --agent-logo: url('/images/icons/openai.svg'); }
+.connect-agent-logo-claude { --agent-logo: url('/images/icons/claude-mark.svg'); }
