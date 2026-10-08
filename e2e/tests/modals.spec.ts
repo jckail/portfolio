@@ -50,17 +50,14 @@ test.describe('experience modal', () => {
 });
 
 test.describe('contact dialog and phone reveal', () => {
-  test('error path shows a message; success shows a tel: link; email is required', async ({ page }) => {
+  test('email and company are required before delivery reveals a phone', async ({ page }) => {
     let calls = 0;
     let body = '';
-    await page.route('**/api/contact/phone', async route => {
+    await page.route('**/api/contact/draft', route => route.fulfill({ json: { message: 'Hi Jordan, can we connect?' } }));
+    await page.route('**/api/contact/send-email', async route => {
       calls += 1;
       body = route.request().postData() ?? '';
-      if (calls === 1) {
-        await route.fulfill({ status: 502, contentType: 'application/json', body: '{"detail":"nope"}' });
-      } else {
-        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"phone":"+1 (555) 010-0100"}' });
-      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"phone":"+1 (555) 010-0100"}' });
     });
 
     await page.goto('/');
@@ -68,21 +65,24 @@ test.describe('contact dialog and phone reveal', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    const phoneForm = dialog.getByRole('form', { name: 'Request phone number' });
-    const submit = phoneForm.getByRole('button', { name: 'Show phone number' });
+    await expect(dialog.getByText(/Recommended by my AI agent/)).toBeVisible();
+    const submit = dialog.getByRole('button', { name: 'Send message & connect' });
 
     // Required: the browser blocks an empty submit, so nothing is sent.
     await submit.click();
     expect(calls).toBe(0);
-    await expect(phoneForm.getByLabel('Your email')).toHaveJSProperty('validity.valueMissing', true);
+    expect(await dialog.getByLabel('Your email', { exact: true }).evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
 
-    await phoneForm.getByLabel('Your email').fill('visitor@example.com');
+    await dialog.getByLabel('Your email', { exact: true }).fill('visitor@example.com');
     await submit.click();
-    await expect(phoneForm.getByRole('alert')).toContainText(/Couldn.t share the phone number/);
-
+    expect(calls).toBe(0);
+    expect(await dialog.getByLabel('Company or organization').evaluate((input: HTMLInputElement) => input.validity.valueMissing)).toBe(true);
+    await expect(dialog.locator('a[href^="tel:"]')).toHaveCount(0);
+    await dialog.getByLabel('Company or organization').fill('Example Labs');
     await submit.click();
     const link = dialog.getByRole('link', { name: '+1 (555) 010-0100' });
     await expect(link).toHaveAttribute('href', 'tel:+15550100100');
-    expect(JSON.parse(body)).toEqual({ email: 'visitor@example.com' });
+    expect(JSON.parse(body)).toEqual({ from_email: 'visitor@example.com', company: 'Example Labs',
+      subject: 'Connecting via your portfolio', message: 'Hi Jordan, can we connect?\n\nMy email: visitor@example.com\nCompany: Example Labs' });
   });
 });
