@@ -157,14 +157,14 @@ const ContactModal: React.FC<ContactModalProps> = ({ email, location, onClose })
               <textarea id={`${formId}-message`} name="message" value={form.message} onChange={change}
                 required maxLength={5000} rows={6} aria-describedby={`${formId}-draft-note`} />
               <p id={`${formId}-draft-note`} className="contact-draft-note" role="status">
-                {drafting ? 'My agent is preparing a recommendation. You can start editing now.'
-                  : draftError ? 'My agent is unavailable right now. This starter message is yours to edit.'
-                  : fromAssistant ? 'Recommended by my AI agent — edit anything before sending.' : 'Make this message your own.'}
+                {drafting ? 'Preparing a suggested introduction. You can start editing now.'
+                  : draftError ? 'The suggestion is unavailable right now. This starter message is yours to edit.'
+                  : fromAssistant ? 'Suggested introduction — edit anything before sending.' : 'Make this message your own.'}
               </p>
             </div>
             {recommendation && <div className="contact-intro-recommendation">
-              <p>Your edits are safe. My agent also suggests:</p><blockquote>{recommendation}</blockquote>
-              <button type="button" onClick={applyRecommendation}>Use agent recommendation</button>
+              <p>Your edits are safe. Another suggested introduction:</p><blockquote>{recommendation}</blockquote>
+              <button type="button" onClick={applyRecommendation}>Use suggested introduction</button>
             </div>}
             <details className="contact-intro-subject"><summary>Edit subject</summary>
               <div className="contact-form-group"><label htmlFor={`${formId}-subject`}>Subject</label>
@@ -176,7 +176,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ email, location, onClose })
             <a href={`mailto:${email}?subject=${encodeURIComponent(form.subject)}&body=${encodeURIComponent(introduction(form.message, form.from_email, form.company))}`}>
               Send this draft with your email app</a>
           </div>}
-          <p className="contact-intro-submit-note">Send your message to receive Jordan’s phone number. Your details go directly to Jordan.</p>
+          <p className="contact-intro-submit-note">Send your message to receive Jordan’s phone number. Your details go directly to Jordan. <a href="/privacy/">Privacy and retention</a>.</p>
           <button type="submit" className="contact-submit-button" disabled={isLoading}>{isLoading ? 'Sending…' : 'Send message & connect'}</button>
         </form>
       )}

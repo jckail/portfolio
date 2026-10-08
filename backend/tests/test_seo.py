@@ -302,3 +302,10 @@ def test_static_shell_matches_current_identity_and_discovers_agent_interfaces():
     assert meta(page, name="keywords") is None  # avoid an unhelpful keyword list
     for path in ("/context.json", "/mcp", "/graphql"):
         assert any(link.get("href") == discovery.absolute(path) for link in page.links)
+
+
+def test_agent_utility_view_is_explicitly_not_indexed(site):
+    response = site.get('/agent', headers=HTML)
+    assert response.status_code == 200
+    assert response.headers['x-robots-tag'] == 'noindex'
+    assert meta(parse(response.text), name='robots')['content'] == 'noindex, follow'

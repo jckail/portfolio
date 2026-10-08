@@ -29,6 +29,15 @@ vi.mock('../../providers/data-provider', () => ({
 vi.mock('../../../shared/utils/analytics', () => ({ trackModalView: vi.fn() }));
 vi.mock('../../../shared/components/skill-icon/SkillIcon', () => ({ default: () => null }));
 
+
+function renderCatalogue() {
+  const result = render(<TechnicalSkills />);
+  fireEvent.click(screen.getByText('Explore the full skills catalogue'));
+  // jsdom does not implement the native summary click default action.
+  result.container.querySelector('details')?.setAttribute('open', '');
+  return result;
+}
+
 beforeEach(() => {
   window.history.replaceState({}, '', '/');
 });
@@ -37,7 +46,7 @@ afterEach(() => cleanup());
 
 describe('Skills section', () => {
   it('groups skills under a heading per category with a count', () => {
-    render(<TechnicalSkills />);
+    renderCatalogue();
     const heading = screen.getByRole('heading', { name: /Programming Languages/ });
     expect(heading).toHaveTextContent('2');
     const group = heading.parentElement as HTMLElement;
@@ -48,21 +57,21 @@ describe('Skills section', () => {
   });
 
   it('opens a skill from its chip and mirrors it into ?skill=', async () => {
-    render(<TechnicalSkills />);
+    renderCatalogue();
     fireEvent.click(screen.getByRole('button', { name: 'View Kafka details' }));
     expect(new URLSearchParams(window.location.search).get('skill')).toBe('kafka');
     expect(await screen.findByRole('dialog', { name: 'Kafka' })).toBeInTheDocument();
   });
 
   it('filters by category and reports how many are shown', () => {
-    render(<TechnicalSkills />);
+    renderCatalogue();
     fireEvent.click(screen.getByRole('button', { name: 'Data Engineering' }));
     expect(screen.queryByRole('button', { name: 'View Python details' })).toBeNull();
     expect(screen.getByText(/1 skill shown/)).toBeInTheDocument();
   });
 
   it('marks the active filter as pressed and keeps the status region mounted', () => {
-    const { container } = render(<TechnicalSkills />);
+    const { container } = renderCatalogue();
     const status = container.querySelector('.skills-filter-status');
     expect(status).toHaveAttribute('aria-live', 'polite');
     expect(status).toBeEmptyDOMElement();
@@ -77,13 +86,13 @@ describe('Skills section', () => {
   });
 
   it('lists the AI category first', () => {
-    render(<TechnicalSkills />);
-    const headings = screen.getAllByRole('heading', { level: 3 }).map(h => h.textContent);
+    renderCatalogue();
+    const headings = within(document.querySelector('.skills-grid') as HTMLElement).getAllByRole('heading', { level: 3 }).map(h => h.textContent);
     expect(headings[0]).toMatch(/^Artificial Intelligence/);
   });
 
   it('matches the names of related skills in search', () => {
-    render(<TechnicalSkills />);
+    renderCatalogue();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'python' } });
     // Kafka lists Python as related, so it matches alongside Python itself
     expect(screen.getByRole('button', { name: 'View Kafka details' })).toBeInTheDocument();
@@ -92,17 +101,17 @@ describe('Skills section', () => {
 
   it('opens a deep-linked skill and ignores a prototype key', async () => {
     window.history.replaceState({}, '', '/?skill=kafka');
-    render(<TechnicalSkills />);
+    renderCatalogue();
     expect(await screen.findByRole('dialog', { name: 'Kafka' })).toBeInTheDocument();
     cleanup();
     window.history.replaceState({}, '', '/?skill=constructor');
-    render(<TechnicalSkills />);
+    renderCatalogue();
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('keeps ?skill= in step when the dialog moves to another skill', async () => {
     window.history.replaceState({}, '', '/?skill=kafka');
-    render(<TechnicalSkills />);
+    renderCatalogue();
     const dialog = await screen.findByRole('dialog', { name: 'Kafka' });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Python' }));
     await screen.findByRole('dialog', { name: 'Python' });

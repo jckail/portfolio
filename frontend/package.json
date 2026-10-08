@@ -49,5 +49,9 @@
     "vite": "^8.3.2",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "source-map-js": "^1.2.2",
+    "postcss-selector-parser": "^7.1.6"
   }
 }

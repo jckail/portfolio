@@ -1,0 +1,44 @@
+import { test, expect } from './fixtures';
+
+for (const theme of ['dark', 'light']) {
+  for (const width of [390, 1440]) {
+    test(`public projects and scroll navigation: ${theme}, ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/?theme=${theme}#about`);
+      const nav = page.getByRole('navigation', { name: 'Page timeline' });
+      await expect(nav).toHaveCount(0);
+      await page.getByRole('link', { name: /Explore the engineering Public projects/ }).click();
+      await expect(nav).toBeVisible();
+      await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
+      for (const name of ['OpenDataCenter', 'Kefi', 'JobDog', 'Jobbr']) {
+        await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+      }
+      const jobbr = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Jobbr', exact: true }) });
+      await expect(jobbr.getByRole('link', { name: 'Open app', exact: true })).toHaveAttribute('href', 'https://jobdog.ai/jobbr/#/');
+      const kefi = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Kefi', exact: true }) });
+      await kefi.getByRole('button', { name: 'View details', exact: true }).click();
+      const dialog = page.getByRole('dialog', { name: 'Kefi', exact: true });
+      await expect(dialog.getByText('My contribution', { exact: true })).toBeVisible();
+      await expect(dialog.getByText('Evidence', { exact: true })).toBeVisible();
+      await expect(dialog.getByRole('link', { name: 'Open product' })).toHaveAttribute('href', 'https://kefi.show/');
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+      await nav.getByRole('link', { name: 'Experience', exact: true }).click();
+      await expect(nav.getByRole('link', { name: 'Experience', exact: true })).toHaveAttribute('aria-current', 'location');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    });
+  }
+}
+
+test('brand kit and privacy are reachable with local assets', async ({ page }) => {
+  const failures: string[] = [];
+  page.on('response', r => { if (r.status() >= 400) failures.push(r.url()); });
+  await page.goto('/brand-kit.html');
+  await expect(page.getByRole('heading', { name: 'Jordan Kail', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download monogram SVG' })).toHaveAttribute('href', '/brand/jordan-kail-mark.svg');
+  await page.evaluate(() => document.fonts.ready);
+  expect(failures).toEqual([]);
+  await page.goto('/privacy/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.locator('body')).toContainText('30 days');
+});

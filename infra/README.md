@@ -9,7 +9,7 @@ Terraform configuration for running the portfolio app on Google Cloud.
 | `google_project_service` | Enables the Cloud Run, Artifact Registry, Secret Manager, IAM, Logging, Vertex AI and API Keys APIs |
 | `google_artifact_registry_repository` | Docker repository for app images (keeps the 10 newest, deletes the rest after 30 days; dry-run first) |
 | `google_service_account` | Dedicated least-privilege runtime identity for Cloud Run |
-| `google_secret_manager_secret*` | Supabase keys, Anthropic API key, SendGrid API key; containers only for `contact-phone` and `vertex-api-key` |
+| `google_secret_manager_secret*` | Secret containers and runtime IAM only; values and versions are managed outside Terraform |
 | `google_service_account.vertex` | `portfolio-vertex`, the identity the Vertex API key is bound to (`vertex.tf`) |
 | `google_logging_metric`, `google_monitoring_*` | Event counters, alert policies, uptime checks and the dashboard (`observability.tf`, `dashboard.tf`) |
 | `google_billing_budget` (optional) | Monthly budgets with 50/90/100% and forecast alerts (`budget.tf`) |
@@ -27,34 +27,58 @@ Manager — they are never baked into the image or passed as plain `--set-env-va
 
 ## Usage
 
-```bash
-cd infra
+Production has existing infrastructure and configuration drift. Do not run a
+blanket apply or use Terraform to deploy an image. The Deploy workflow owns
+image digests and traffic; Terraform leaves those fields unchanged. Environment
+changes remain visible in plans and must be reconciled with the deployed revision.
 
-# One-time setup
-cp terraform.tfvars.example terraform.tfvars   # fill in real values (git-ignored)
-terraform init
+For a trusted operator review:
 
-# Review and apply
-terraform plan
-terraform apply
-```
+1. Copy `terraform.tfvars.example` to the ignored `terraform.tfvars`.
+2. Supply the currently deployed full commit SHA and **numeric secret version
+   IDs** from revision metadata. The examples are not production values.
+3. Run `terraform init` only in a trusted checkout with restricted state access.
+4. Review a saved plan locally. Do not upload its JSON or state: historical
+   secret material may still be present.
+5. Require no Cloud Run service change during state-only retirement, and no
+   secret version destruction. Do not apply unrelated observability/IAM changes.
 
-### Deploying a new image version
+### Secret value retirement (2026-10-08)
 
-1. Build and push the image (do not use `../helpers/deploy.sh`; it is unsafe, see `../HANDOFF.md`):
+The configuration no longer accepts credential values or creates
+`google_secret_manager_secret_version` resources. Terraform 1.7's `removed`
+block with `destroy = false` retires their state ownership without deleting
+the remote versions. This is **prepared configuration, not an applied migration**.
 
-   ```bash
-   GIT_COMMIT=$(git rev-parse HEAD)
-   REPO=$(terraform output -raw artifact_registry_repository)
-   docker build -t "$REPO/quickresume:$GIT_COMMIT" --platform linux/amd64 -f ../helpers/Dockerfile.prod ..
-   docker push "$REPO/quickresume:$GIT_COMMIT"
-   ```
+A trusted operator must review/apply the retirement, restrict bucket/project
+access based on effective IAM (including inherited basic roles), and rotate
+credentials previously stored in state. Old state generations and backups still
+contain old values after current-state retirement; handle those under the
+approved backup/retention policy. Never print, commit or attach state files.
 
-2. Point the service at the new tag:
+Secret rotation writes values directly to Secret Manager from an approved secret
+source. Record only numeric version IDs. Pin new revisions to reviewed versions,
+verify a zero-traffic canary, then promote. Retain the prior enabled versions
+through the rollback window. Do not use `latest` for runtime bindings.
 
-   ```bash
-   terraform apply -var "image_tag=$GIT_COMMIT"
-   ```
+The Deploy workflow pins `AGENT_ACCESS_SECRET` to the repository variable
+`AGENT_ACCESS_SECRET_VERSION` (verified initial version: 1). Update that variable
+only as part of a reviewed rotation. Other existing bindings are retained by
+`--update-secrets`; any legacy aliases must be migrated explicitly after
+checking revision metadata. The Terraform numeric map does not change live
+bindings until a reviewed operator apply.
+
+No state contents or credential values were read during this hygiene change.
+The 2026-10-08 metadata check returned no explicit bucket IAM bindings; this
+does not establish safety from inherited project roles. Historical access and
+rotation claims in HANDOFF.md require a fresh effective-IAM review.
+
+### Deploying an image
+
+Use the GitHub Actions Deploy workflow. It deploys by digest, verifies the
+zero-traffic revision, promotes, verifies production, then advances the
+convenience `latest` tag. Terraform requires a full SHA for initial creation and
+ignores image and traffic changes thereafter. It is not an emergency rollout path.
 
 ### Continuous deployment from GitHub Actions
 

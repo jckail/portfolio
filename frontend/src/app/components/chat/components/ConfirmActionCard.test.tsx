@@ -42,9 +42,10 @@ describe('ConfirmActionCard', () => {
     const onConfirm = vi.fn(() => null);
     render(<ConfirmActionCard action={card()} onConfirm={onConfirm} onCancel={vi.fn()} />);
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Edited' } });
+    fireEvent.change(screen.getByLabelText(/company or organization/i), { target: { value: 'Example Labs' } });
     fireEvent.change(screen.getByLabelText(/your email/i), { target: { value: 'me@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-    expect(onConfirm).toHaveBeenCalledWith('a1', 'me@example.com', { subject: 'Hi', message: 'Edited' });
+    expect(onConfirm).toHaveBeenCalledWith('a1', 'me@example.com', { subject: 'Hi', message: 'Edited' }, 'Example Labs');
   });
 
   it('shows validation errors returned by onConfirm', () => {

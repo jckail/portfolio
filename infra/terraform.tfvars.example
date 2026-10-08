@@ -5,7 +5,7 @@ project_id          = "portfolio-383615"
 region              = "us-central1"
 service_name        = "quickresume"
 artifact_repository = "portfolio"
-image_tag           = "latest" # usually the git commit SHA
+image_tag           = "REPLACE_WITH_CURRENT_40_CHARACTER_COMMIT_SHA"
 
 # Enables keyless GitHub Actions deploys (WIF); see DEPLOYMENT.md
 github_repository = "jckail/portfolio"
@@ -15,12 +15,17 @@ resume_file     = "JordanKailResume.pdf"
 allowed_origins = "https://www.jckail.com"
 production_url  = "https://www.jckail.com"
 
-secrets = {
-  supabase_url          = "https://YOUR-PROJECT.supabase.co"
-  supabase_anon_key     = "..."
-  supabase_service_role = "..."
-  anthropic_api_key     = "sk-ant-..."
-  sendgrid_api_key      = "SG...."
+# Read version IDs from the deployed revision. These are examples only.
+# No credential values belong in Terraform inputs or state.
+secret_versions = {
+  SUPABASE_URL          = "1"
+  SUPABASE_ANON_KEY     = "1"
+  SUPABASE_SERVICE_ROLE = "1"
+  ANTHROPIC_API_KEY     = "1"
+  SENDGRID_API_KEY      = "1"
+  CONTACT_PHONE        = "1"
+  AGENT_ACCESS_SECRET  = "1"
+  VERTEX_API_KEY       = "1"
 }
 
 # Optional: observability and spend guardrails (see infra/README.md)

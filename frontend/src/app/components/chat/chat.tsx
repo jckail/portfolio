@@ -127,7 +127,7 @@ const Chat: React.FC<ChatProps> = ({
             sx={{ color: 'var(--text-secondary)', textAlign: 'center', mb: 1, flexShrink: 0 }}
           >
             AI answers can be mistaken. Chat messages are stored; avoid confidential or sensitive
-            information.
+            information. <a href="/privacy/">Privacy and retention</a>.
           </Typography>
           <Typography
             variant="caption"

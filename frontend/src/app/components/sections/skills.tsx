@@ -41,7 +41,7 @@ const SkillItem = memo(
         onFocus={prefetchModal}
         title={
           skill.years_of_experience > 0
-            ? `${skill.years_of_experience} years${skill.professional_experience ? ' (Professional)' : ''}`
+            ? `${skill.years_of_experience} year${skill.years_of_experience === 1 ? '' : 's'}${skill.professional_experience ? ' (Professional)' : ''}`
             : 'Hands-on use'
         }
         aria-label={`View ${skill.display_name} details`}
@@ -164,6 +164,14 @@ const TechnicalSkills: React.FC = () => {
         <h2>Skills</h2>
       </div>
       <div className="section-content">
+        <div className="skills-focus">
+          <div><h3>Agent systems &amp; evaluation</h3><p>Agent harnesses, tool use, tracing, replay, and evaluations.</p><a href="#experience">See production experience</a></div>
+          <div><h3>Distributed platforms</h3><p>Data engineering, Kubernetes, cloud infrastructure, and reliable services.</p><a href="#projects">Explore engineering projects</a></div>
+          <div><h3>Knowledge &amp; graph systems</h3><p>Graph databases, Graphify, retrieval, and connected context for agents.</p><a href="#projects">Explore public work</a></div>
+          <div><h3>Software engineering</h3><p>Python, Go, Rust, and SQL. Practical systems from prototypes to production.</p><a href="#resume">Read the résumé</a></div>
+        </div>
+        <details className="skills-catalogue">
+          <summary>Explore the full skills catalogue</summary>
         <div className="skills-toolbar" role="search">
           <label className="skills-search-label" htmlFor="skills-search">
             Search skills
@@ -222,6 +230,7 @@ const TechnicalSkills: React.FC = () => {
             ))}
           </div>
         )}
+        </details>
       </div>
 
       <SkillModalHost

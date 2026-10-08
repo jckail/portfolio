@@ -170,7 +170,9 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
     assert locs == [
         "https://www.jckail.com/",
         "https://www.jckail.com/dataplayground",
-        *(f"https://www.jckail.com/{slug}" for slug in load_labs()),
+        "https://www.jckail.com/agents.html",
+        "https://www.jckail.com/privacy/",
+        *(f"https://www.jckail.com/{slug}" for slug in load_labs() if slug != "jobbr"),
     ]
     assert not any(loc.endswith((".txt", ".json")) or "/api/" in loc for loc in locs)
     for url in root.findall("s:url", ns):
@@ -225,7 +227,7 @@ def test_sabbatical_is_an_explained_gap_not_an_unknown_employer(client):
     assert "<h3>Digital nomad experiment, Sabbatical</h3>" in html
     assert "None" not in html.split('id="seo-experience"')[1].split("</section>")[0]
     full = client.get("/llms-full.txt").text
-    assert "### Digital nomad experiment, Sabbatical" in full and "10/2022 - 05/2023 | Location independent\n" in full
+    assert "### Digital nomad experiment, Sabbatical" in full and "10/2022 - 05/2023 | United States & Europe\n" in full
 
 
 def test_resume_json_preserves_approved_resume_edits(client):

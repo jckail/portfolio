@@ -18,7 +18,8 @@ def test_security_headers_present(client):
     csp = response.headers["Content-Security-Policy"]
     assert "default-src 'self'" in csp
     assert "frame-ancestors 'none'" in csp
-    assert "googletagmanager.com" in csp
+    assert "googletagmanager.com" not in csp
+    assert "google-analytics.com" not in csp
     assert response.headers["Cross-Origin-Opener-Policy"] == "same-origin"
 
 

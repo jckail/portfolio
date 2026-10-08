@@ -28,7 +28,7 @@ describe('contact introduction', () => {
   it('keeps every field editable and focused through keyboard typing', async () => {
     const user = userEvent.setup();
     renderModal();
-    await screen.findByText(/Recommended by my AI agent/);
+    await screen.findByText(/Suggested introduction/);
     await act(async () => { await user.click(screen.getByText('Edit subject')); });
     for (const [label, value] of [
       ['Your email', 'visitor@example.com'], ['Company or organization', 'Example / Labs?'],
@@ -43,7 +43,7 @@ describe('contact introduction', () => {
   });
   it('generates a public-only recommendation and adds identity locally', async () => {
     renderModal();
-    await screen.findByText(/Recommended by my AI agent/);
+    await screen.findByText(/Suggested introduction/);
     identify();
     expect(recommendContactMessage).toHaveBeenCalledWith('opportunity');
     expect(screen.getByLabelText('Send me a message')).toHaveValue(
@@ -62,7 +62,7 @@ describe('contact introduction', () => {
     fireEvent.change(screen.getByLabelText('Send me a message'), { target: { value: 'My own introduction' } });
     await act(async () => { finish('An agent recommendation'); });
     expect(screen.getByLabelText('Send me a message')).toHaveValue('My own introduction');
-    fireEvent.click(screen.getByRole('button', { name: 'Use agent recommendation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Use suggested introduction' }));
     expect(screen.getByLabelText('Send me a message')).toHaveValue(
       'An agent recommendation\n\nMy email: visitor@example.com\nCompany: Example Labs');
   });
@@ -73,17 +73,17 @@ describe('contact introduction', () => {
     expect(screen.getByLabelText('Company or organization')).toHaveValue('Example Labs');
     expect(recommendContactMessage).not.toHaveBeenCalled();
   });
-  it('shows an honest editable fallback when AI generation fails', async () => {
+  it('shows an honest editable fallback when the suggestion is unavailable', async () => {
     vi.mocked(recommendContactMessage).mockRejectedValue(new Error('Unavailable'));
     renderModal();
-    await screen.findByText(/My agent is unavailable/);
+    await screen.findByText(/The suggestion is unavailable/);
     expect((screen.getByLabelText('Send me a message') as HTMLTextAreaElement).value).toContain('Hi Jordan');
     expect(screen.getByLabelText('Your email')).toBeEnabled();
   });
   it('retains identity and message on failure and offers an encoded owner-only fallback', async () => {
     vi.mocked(postJson).mockRejectedValue(new Error('Unable to send message right now'));
     renderModal();
-    await screen.findByText(/Recommended by my AI agent/);
+    await screen.findByText(/Suggested introduction/);
     identify();
     fireEvent.change(screen.getByLabelText('Send me a message'), { target: { value: 'Hello & agents?' } });
     fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
@@ -99,7 +99,7 @@ describe('contact introduction', () => {
     let finish!: (result: { phone: string }) => void;
     vi.mocked(postJson).mockReturnValue(new Promise(resolve => { finish = resolve; }));
     renderModal();
-    await screen.findByText(/Recommended by my AI agent/);
+    await screen.findByText(/Suggested introduction/);
     identify();
     fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
     expect(screen.getByLabelText('Your email')).toBeDisabled();
@@ -113,7 +113,7 @@ describe('contact introduction', () => {
     let finish!: (result: { phone: string }) => void;
     vi.mocked(postJson).mockReturnValue(new Promise(resolve => { finish = resolve; }));
     renderModal();
-    await screen.findByText(/Recommended by my AI agent/);
+    await screen.findByText(/Suggested introduction/);
     identify();
     fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
     act(() => saveContactDraft({ message: 'A newer draft', company: 'New Labs' }));

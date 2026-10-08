@@ -1,4 +1,7 @@
 export interface Project {
+  status?: string;
+  contribution?: string;
+  evidence?: string;
   title: string;
   description: string;
   description_detail: string;

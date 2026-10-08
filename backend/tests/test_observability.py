@@ -98,7 +98,7 @@ def test_route_template_for_unmatched_and_static():
 def test_server_errors_are_logged_at_error_level(client, caplog):
     caplog.set_level(logging.INFO)
     # No sendgrid fake and a dummy key: the provider call fails with 502.
-    client.post("/api/contact/send-email", json={"from_email": "a@example.com", "subject": "s", "message": "m"})
+    client.post("/api/contact/send-email", json={"company": "Private Example Labs", "from_email": "a@example.com", "subject": "s", "message": "m"})
     assert any(r.levelno >= logging.ERROR for r in _access(caplog)) or metrics.snapshot()["requests_by_status_class"]
 
 
@@ -253,7 +253,7 @@ def test_limiter_name_is_reported(caplog):
 def test_contact_rate_limit_emits_blocked_event(client, caplog):
     caplog.set_level(logging.INFO)
     contact_routes._email_limiter.max_events = 1
-    body = {"from_email": "a@example.com", "subject": "s", "message": "m"}
+    body = {"company": "Private Example Labs", "from_email": "a@example.com", "subject": "s", "message": "m"}
     try:
         client.post("/api/contact/send-email", json=body)
         r = client.post("/api/contact/send-email", json=body)
@@ -291,7 +291,7 @@ def _payloads(caplog):
 
 def test_contact_sent_and_failed_events_carry_no_visitor_data(client, caplog, fake_mail):
     caplog.set_level(logging.INFO)
-    body = {"from_email": "visitor@example.com", "subject": "Private subject", "message": "Private body"}
+    body = {"company": "Private Example Labs", "from_email": "visitor@example.com", "subject": "Private subject", "message": "Private body"}
     assert client.post("/api/contact/send-email", json=body).status_code == 200
     fake_mail.raises = RuntimeError("down")
     assert client.post("/api/contact/send-email", json=body).status_code == 502
@@ -301,22 +301,16 @@ def test_contact_sent_and_failed_events_carry_no_visitor_data(client, caplog, fa
     assert "visitor@example.com" not in dumped and "Private" not in dumped
 
 
-def test_phone_events(client, caplog, fake_mail, monkeypatch):
-    import dataclasses
-
-    from backend.app import config
-
-    settings = dataclasses.replace(config.get_settings(), contact_phone="555-0100")
-    monkeypatch.setattr(contact_routes, "get_settings", lambda: settings)
-    monkeypatch.setattr(owner_mail, "get_settings", lambda: settings)
+def test_retired_phone_route_emits_no_delivery_events(client, caplog, fake_mail, monkeypatch):
+    from unittest.mock import Mock
+    send = Mock(side_effect=AssertionError("Retired phone route must not send mail"))
+    monkeypatch.setattr(fake_mail, "send", send)
     caplog.set_level(logging.INFO)
-    assert client.post("/api/contact/phone", json={"email": "v@example.com"}).status_code == 200
-    fake_mail.raises = RuntimeError("down")
-    assert client.post("/api/contact/phone", json={"email": "v@example.com"}).status_code == 502
-    names = [p["event"] for p in _payloads(caplog)]
-    assert names == ["phone.requested", "phone.revealed", "phone.requested", "phone.failed"]
-    assert "555-0100" not in json.dumps(_payloads(caplog))
-    assert "v@example.com" not in json.dumps(_payloads(caplog))
+    response = client.post("/api/contact/phone", json={"email": "v@example.com"})
+    assert response.status_code == 410
+    assert response.headers["cache-control"] == "no-store"
+    assert not _payloads(caplog)
+    send.assert_not_called()
 
 
 # --- auth events ----------------------------------------------------------

@@ -57,6 +57,7 @@ const ProjectCard = memo(({
           />
         </div>
         <h3>{project.title}</h3>
+        {project.status && <span className="project-status">{project.status}</span>}
         <p>{project.description}</p>
         <span className="sr-only"> (view details)</span>
       </div>

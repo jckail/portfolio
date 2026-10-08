@@ -2,7 +2,6 @@ import html
 import logging
 import re
 from collections.abc import Callable
-from datetime import UTC, datetime
 
 from fastapi import APIRouter, Body, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -11,8 +10,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from ..config import get_settings
 from ..models import Contact
-from ..models.contact import PhoneNumber
-from ..services.owner_mail import OwnerMailFailed, OwnerMailNotConfigured, owner_mail_configured, send_owner_mail
+from ..services.owner_mail import OwnerMailFailed, OwnerMailNotConfigured, send_owner_mail
 from ..utils.events import log_event
 from ..utils.rate_limit import SlidingWindowLimiter, enforce_rate_limit
 from .content import collection_payload, payload_response
@@ -53,7 +51,7 @@ _NO_STORE = {"Cache-Control": "no-store"}
 
 class EmailMessage(BaseModel):
     from_email: EmailStr
-    company: str = Field(default="", max_length=150)
+    company: str = Field(..., min_length=1, max_length=150)
     # Bounded so a single request cannot push an arbitrarily large payload
     # through SendGrid or into the logs.
     subject: str = Field(..., min_length=1, max_length=150)
@@ -141,59 +139,10 @@ async def handle_email(request: Request, email_data: EmailMessage = Body(...)) -
     return EmailSent(message="Email sent successfully", status_code=status_code, phone=get_settings().contact_phone or None)
 
 
-@router.post("/phone", response_model=PhoneNumber)
-async def request_phone(
-    request: Request, response: Response, body: PhoneRequest = Body(...)
-) -> PhoneNumber:
-    """Reveal the phone number to a visitor who leaves their email address.
-
-    The number is not in the public contact payload or in git. Each reveal
-    first notifies the site owner with the requester's address; the number is
-    returned only if that notification was accepted, so every disclosure is
-    on record.
-    """
-    # Per-visitor and must never sit in a shared or browser cache.
-    response.headers.update(_NO_STORE)
-
-    enforce_rate_limit(
-        _phone_limiter, request,
-        detail="Too many requests from this location. Please try again later.",
+@router.post("/phone", include_in_schema=False)
+async def request_phone() -> None:
+    """Retired: phone disclosure now follows a successful contact message."""
+    raise HTTPException(
+        410, "Please send a message with your email and company through the contact form.",
         headers=_NO_STORE,
     )
-
-    log_event("phone.requested")
-    settings = get_settings()
-    # Checked before anything is sent: no notification for a number we
-    # cannot hand out.
-    if not settings.contact_phone:
-        log_event("phone.failed", reason="unavailable")
-        raise HTTPException(status_code=503, detail=PHONE_UNAVAILABLE_DETAIL, headers=_NO_STORE)
-    if not owner_mail_configured():
-        logger.error("Phone reveal requested but email notification is not configured")
-        log_event("phone.failed", reason="not_configured")
-        raise HTTPException(status_code=503, detail=PHONE_UNAVAILABLE_DETAIL, headers=_NO_STORE)
-
-    requester = str(body.email)
-    requested_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
-    try:
-        await send_owner_mail(
-            subject="Phone number requested via portfolio",
-            plain_text=(
-                "Someone asked for your phone number on the portfolio site.\n\n"
-                f"Requester email: {requester}\n"
-                f"Requested at: {requested_at}\n"
-            ),
-            html=(
-                "<p>Someone asked for your phone number on the portfolio site.</p>"
-                f"<p><strong>Requester email:</strong> {html.escape(requester)}<br>"
-                f"<strong>Requested at:</strong> {html.escape(requested_at)}</p>"
-            ),
-            reply_to=requester,
-            purpose="phone request notification",
-        )
-    except (OwnerMailNotConfigured, OwnerMailFailed):
-        log_event("phone.failed", reason="send_failed")
-        raise HTTPException(status_code=502, detail=PHONE_SEND_FAILED_DETAIL, headers=_NO_STORE)
-
-    log_event("phone.revealed")
-    return PhoneNumber(phone=settings.contact_phone)

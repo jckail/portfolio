@@ -1,3 +1,14 @@
+# October 8, 2026 hygiene update
+
+The older operational notes below are dated evidence, not current live-state
+claims. The source now retires Terraform secret-value ownership with
+`removed { lifecycle { destroy = false } }`, requires numeric secret version
+IDs and a full image SHA, ignores workflow-owned traffic, and advances the
+`latest` image alias only after production verification. No Terraform migration,
+state cleanup, credential rotation or IAM change was applied in this update.
+See [the current migration procedure](infra/README.md#secret-value-retirement-2026-10-08).
+Environment drift remains visible and still requires operator review.
+
 # GCP Ops Runbook
 
 Go-live is complete. This file is kept as the ops runbook (per the original

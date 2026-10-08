@@ -1,4 +1,4 @@
-"""Public, tightly bounded AI recommendations for the contact form."""
+"""Public, reviewed introductions for the contact form."""
 from collections.abc import Callable
 
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -43,8 +43,7 @@ class ContactDraftResponse(BaseModel):
 @router.post("/draft", response_model=ContactDraftResponse)
 async def contact_draft(request: Request, body: ContactDraftRequest) -> ContactDraftResponse:
     key = client_ip(request)
-    # Charge atomically before awaiting. Limits are per process, like other
-    # public cost endpoints; no identity is logged or persisted.
+    # Bound request volume even though these templates incur no model cost.
     for limiter in (_draft_limiter, _daily_limiter):
         if not limiter.check(key):
             limiter.report_blocked()
@@ -57,6 +56,6 @@ async def contact_draft(request: Request, body: ContactDraftRequest) -> ContactD
         message = await recommend_contact_message(body.intent)
     except DraftUnavailable:
         raise HTTPException(
-            503, "AI recommendation unavailable. Please edit the starter message.", headers=_NO_STORE,
+            503, "Suggested introduction unavailable. Please edit the starter message.", headers=_NO_STORE,
         ) from None
     return ContactDraftResponse(message=message)

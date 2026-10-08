@@ -9,7 +9,7 @@ from backend.app import config
 from backend.app.api import contact_routes
 from backend.app.services import owner_mail
 
-PAYLOAD = {"from_email": "someone@example.com", "subject": "Hello", "message": "body"}
+PAYLOAD = {"company": "Example company", "from_email": "someone@example.com", "subject": "Hello", "message": "body"}
 
 
 class FakeSendGrid:
@@ -137,4 +137,15 @@ def test_blank_and_oversized_fields_send_nothing(client, extra):
     response = client.post("/api/contact/send-email", json={**PAYLOAD, **extra})
     assert response.status_code == 422
     assert response.headers["cache-control"] == "no-store"
+    assert FakeSendGrid.sent == []
+
+
+@pytest.mark.parametrize("company", [None, "", "   "])
+def test_company_required_before_mail(client, company):
+    payload = dict(PAYLOAD)
+    if company is None:
+        payload.pop("company")
+    else:
+        payload["company"] = company
+    assert client.post("/api/contact/send-email", json=payload).status_code == 422
     assert FakeSendGrid.sent == []

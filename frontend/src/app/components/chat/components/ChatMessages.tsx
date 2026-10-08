@@ -15,7 +15,7 @@ interface ChatMessagesProps {
   showSuggestions?: boolean;
   onSuggestedPrompt?: (prompt: string) => void;
   pendingActions?: PendingAction[];
-  onConfirmAction?: (id: string, email: string, args: ConfirmArgs) => Record<string, string> | null;
+  onConfirmAction?: (id: string, email: string, args: ConfirmArgs, company: string) => Record<string, string> | null;
   onCancelAction?: (id: string) => void;
 }
 

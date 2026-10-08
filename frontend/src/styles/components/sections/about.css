@@ -393,3 +393,20 @@
 }
 .connect-agent-logo-openai { --agent-logo: url('/images/icons/openai.svg'); }
 .connect-agent-logo-claude { --agent-logo: url('/images/icons/claude-mark.svg'); }
+
+
+.about-impact {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) 0 0;
+  margin: var(--spacing-lg) 0 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+.about-impact a { display: block; color: var(--text-color); text-decoration: none; }
+.about-impact strong { display: block; font-family: var(--font-display); font-size: var(--text-md); }
+.about-impact span { display: block; margin-top: 8px; color: var(--text-secondary); font-size: var(--text-sm); line-height: var(--leading-body); }
+.about-impact a:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+.about-impact a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 6px; border-radius: 2px; }
+@media (max-width: 680px) { .about-impact { grid-template-columns: 1fr; gap: var(--spacing-md); } }

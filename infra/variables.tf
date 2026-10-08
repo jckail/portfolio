@@ -23,9 +23,13 @@ variable "artifact_repository" {
 }
 
 variable "image_tag" {
-  description = "Image tag (usually the git commit SHA) to deploy"
+  description = "Immutable git commit SHA for initial creation; existing deployments are owned by the Deploy workflow."
   type        = string
-  default     = "latest"
+
+  validation {
+    condition     = can(regex("^[a-f0-9]{40}$", var.image_tag))
+    error_message = "image_tag must be a full 40-character commit SHA, never latest."
+  }
 }
 
 variable "allowed_origins" {
@@ -81,18 +85,25 @@ variable "github_repository" {
   default     = ""
 }
 
-# Secret values are provided out-of-band (TF_VAR_..., tfvars file excluded
-# from git, or a CI secret store) and written to Secret Manager.
-variable "secrets" {
-  description = "Sensitive configuration written to Secret Manager and mounted as env vars"
+# Numeric version identifiers are metadata, not credential values. Operators
+# read them from the deployed revision and explicitly approve rotations.
+variable "secret_versions" {
+  description = "Pinned Secret Manager version numbers for every runtime secret; never pass secret contents to Terraform."
   type = object({
-    supabase_url          = string
-    supabase_anon_key     = string
-    supabase_service_role = string
-    anthropic_api_key     = string
-    sendgrid_api_key      = string
+    SUPABASE_URL          = string
+    SUPABASE_ANON_KEY     = string
+    SUPABASE_SERVICE_ROLE = string
+    ANTHROPIC_API_KEY     = string
+    SENDGRID_API_KEY      = string
+    CONTACT_PHONE         = string
+    AGENT_ACCESS_SECRET   = string
+    VERTEX_API_KEY        = string
   })
-  sensitive = true
+
+  validation {
+    condition     = alltrue([for version in values(var.secret_versions) : can(regex("^[1-9][0-9]*$", version))])
+    error_message = "All secret_versions must be positive numeric version IDs; latest and other aliases are not allowed."
+  }
 }
 
 variable "github_repository_id" {

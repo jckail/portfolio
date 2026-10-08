@@ -161,6 +161,21 @@ const TLDRContent = memo(
           </div>
         </div>
 
+        <ul className="about-impact" aria-label="Selected engineering experience">
+          <li><a href="#experience">
+            <strong>Created an Agent Platform team</strong>
+            <span>Established data engineering at Together AI, then built the agent platform team.</span>
+          </a></li>
+          <li><a href="#experience">
+            <strong>Built production AI systems</strong>
+            <span>Agent harnesses, tracing, replay, and evaluation infrastructure.</span>
+          </a></li>
+          <li><a href="#projects">
+            <strong>Explore the engineering</strong>
+            <span>Public projects, architecture, and working products.</span>
+          </a></li>
+        </ul>
+
         <div className="about-details">
           <div className="brief-bio">
             {bioParagraphs.map((paragraph, index) => (

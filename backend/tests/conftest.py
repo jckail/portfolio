@@ -71,3 +71,14 @@ def client():
     # Context manager runs the lifespan (data preload, static mounts)
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture(autouse=True)
+def isolated_inference_accounting(monkeypatch):
+    """Provider tests use synthetic accounting; budget tests override this RPC."""
+    from backend.app.services import inference_budget
+
+    async def fake_rpc(name, params):
+        return {"allowed": True, "settled": True}
+
+    monkeypatch.setattr(inference_budget, "_rpc", fake_rpc)

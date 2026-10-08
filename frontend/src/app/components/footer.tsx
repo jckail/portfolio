@@ -29,6 +29,8 @@ const Footer: React.FC<FooterProps> = memo(({ onDoodleToggle, doodleClickCount, 
             </a>
           )}
 
+          <a className="footer-link" href="/privacy/">Privacy</a>
+          <a className="footer-link" href="/brand-kit.html">Brand kit</a>
           <span className="footer-link" {...buttonize(scrollToTop)}>
             Scroll to top
           </span>

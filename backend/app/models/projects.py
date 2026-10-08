@@ -4,6 +4,9 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
 
 class ProjectDetail(BaseModel):
     """Model for individual project details."""
+    status: str = "Prototype"
+    contribution: str = ""
+    evidence: str = ""
     title: str = Field(..., description="Project title")
     description: str = Field(..., description="Brief project description")
     resume_description: str | None = Field(None, description="Concise description for the generated resume")

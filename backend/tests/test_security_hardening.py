@@ -62,7 +62,7 @@ def test_contact_form_never_mails_the_submitter(client, captured_mail):
     response = client.post(
         "/api/contact/send-email",
         json={
-            "from_email": "victim@example.com",
+            "company": "Private Example Labs", "from_email": "victim@example.com",
             "subject": "Action required",
             "message": "click here",
         },
@@ -84,7 +84,7 @@ def test_contact_form_escapes_html_in_the_body(client, captured_mail):
     response = client.post(
         "/api/contact/send-email",
         json={
-            "from_email": "someone@example.com",
+            "company": "Private Example Labs", "from_email": "someone@example.com",
             "subject": "Hello",
             "message": '<a href="https://evil.tld">Re-authenticate</a>',
         },
@@ -104,7 +104,7 @@ def test_contact_form_strips_newlines_from_the_subject(client, captured_mail):
     client.post(
         "/api/contact/send-email",
         json={
-            "from_email": "someone@example.com",
+            "company": "Private Example Labs", "from_email": "someone@example.com",
             "subject": "Hi\r\nBcc: everyone@example.com",
             "message": "body",
         },
@@ -117,7 +117,7 @@ def test_contact_form_rejects_oversized_fields(client, captured_mail):
     response = client.post(
         "/api/contact/send-email",
         json={
-            "from_email": "someone@example.com",
+            "company": "Private Example Labs", "from_email": "someone@example.com",
             "subject": "x" * 200,
             "message": "body",
         },
@@ -128,7 +128,7 @@ def test_contact_form_rejects_oversized_fields(client, captured_mail):
 
 def test_contact_form_is_rate_limited(client, captured_mail):
     payload = {
-        "from_email": "someone@example.com",
+        "company": "Private Example Labs", "from_email": "someone@example.com",
         "subject": "Hello",
         "message": "body",
     }

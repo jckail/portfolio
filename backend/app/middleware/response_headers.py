@@ -45,12 +45,6 @@ ONE_DAY = "public, max-age=86400"
 # cheap 304 (see api/content.py).
 PUBLIC_CONTENT = "public, max-age=60, stale-while-revalidate=300"
 
-GA_SCRIPT_SOURCES = "https://www.googletagmanager.com https://www.google-analytics.com"
-GA_CONNECT_SOURCES = (
-    "https://www.google-analytics.com https://*.google-analytics.com "
-    "https://*.analytics.google.com https://www.googletagmanager.com"
-)
-
 _STATIC_SECURITY_HEADERS = (
     ("X-Content-Type-Options", "nosniff"),
     ("Referrer-Policy", "strict-origin-when-cross-origin"),
@@ -81,8 +75,8 @@ def build_csp(
 ) -> str:
     """Content-Security-Policy for every response.
 
-    No 'unsafe-inline' in script-src: the GA bootstrap lives in
-    /ga-init.js, and the JSON-LD block in index.html is a data block the
+    No external analytics origins or inline scripts. The JSON-LD
+    block in index.html is a data block the
     browser never executes. style-src keeps 'unsafe-inline' for Emotion/MUI
     and the inline @font-face block in index.html. Fonts are self-hosted
     under /fonts/, so no Google Fonts origins are allowed.
@@ -96,8 +90,8 @@ def build_csp(
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
         "style-src 'self' 'unsafe-inline'; "
-        f"script-src 'self' {GA_SCRIPT_SOURCES}; "
-        f"connect-src 'self' {GA_CONNECT_SOURCES}{websocket_origins(settings)}{extra_connect}; "
+        "script-src 'self'; "
+        f"connect-src 'self'{websocket_origins(settings)}{extra_connect}; "
         "frame-src 'self'; "
         "worker-src 'self' blob:; "
         "upgrade-insecure-requests"

@@ -73,11 +73,20 @@ export const useScrollSpy = () => {
       }
     }, 500);
 
+    let awaitingTarget = false;
+    let targetObserver: MutationObserver | undefined;
+    let targetTimeout: ReturnType<typeof setTimeout> | undefined;
+    const cancelPendingTarget = () => {
+      awaitingTarget = false;
+      targetObserver?.disconnect();
+      clearTimeout(targetTimeout);
+    };
+
     // Function to handle scroll events with rate limiting
     const handleScroll = () => {
       // A modal holds the scroll lock: the page behind it is not what the
       // visitor is reading, so don't rewrite the hash or log section views.
-      if (isScrollLocked()) return;
+      if (isScrollLocked() || awaitingTarget) return;
 
       const now = Date.now();
       // Limit updates to once every 50ms
@@ -88,17 +97,11 @@ export const useScrollSpy = () => {
 
       const nodeList = document.querySelectorAll<HTMLElement>('section[id]');
       const sections = Array.from<HTMLElement>(nodeList);
-      let currentSection: HTMLElement | null = null;
-      let minDistance = Infinity;
-
-      // Find the section closest to the top of the viewport
+      const header = document.querySelector<HTMLElement>('.header');
+      const threshold = (header?.getBoundingClientRect().height ?? 72) + 80;
+      let currentSection: HTMLElement | null = sections[0] ?? null;
       for (const section of sections) {
-        const rect = section.getBoundingClientRect();
-        const distance = Math.abs(rect.top);
-        if (distance < minDistance) {
-          minDistance = distance;
-          currentSection = section;
-        }
+        if (section.getBoundingClientRect().top <= threshold) currentSection = section;
       }
 
       // Update URL and track analytics if we found a section
@@ -123,53 +126,43 @@ export const useScrollSpy = () => {
 
     window.addEventListener('scroll', scrollListener, { passive: true });
 
-    // Function to handle initial scroll
-    const handleInitialScroll = () => {
-      debugLog('Handling initial scroll');
-      if (location.hash) {
-        const targetId = location.hash.slice(1); // Remove the # from the hash
-        const targetSection = document.getElementById(targetId);
-        debugLog('Initial hash section', { id: targetId });
-        
-        // Track initial anchor
-        trackAnchorChange(targetId, null);
-        lastAnchor.current = targetId;
-        
-        // Only scroll if it's a page load/refresh or resume button click
-        const navEntry = window.performance.getEntriesByType('navigation')[0] as
-          | PerformanceNavigationTiming
-          | undefined;
-        const isInitialLoad = !(navEntry?.type ?? 'navigate').includes('navigate');
-
-        if (targetSection && isInitialLoad) {
-          debugLog('Scrolling to target section', { id: targetId });
-          // section[id] carries scroll-margin-top for the fixed header, so a
-          // single scrollIntoView lands the heading below it
-          scrollToSection(targetId);
-        } else if (targetSection) {
-          // Just update the URL and store without scrolling
-          debugLog('Updating URL without scrolling', { id: targetId });
-          debouncedUpdateURL(targetId);
-          debouncedTrackSection(targetId);
+    // Native anchors can be clicked before a lazy section exists. Resolve the
+    // requested target after it mounts, rather than guessing a delay and later
+    // pulling a visitor back to the initial section. replaceState from scroll
+    // tracking deliberately does not re-run this effect (see useLocation).
+    const targetId = location.hash.slice(1);
+    if (targetId && targetId !== 'doodle') {
+      awaitingTarget = true;
+      const resolveTarget = () => {
+        if (!awaitingTarget) return;
+        if (window.location.hash !== location.hash) {
+          cancelPendingTarget();
+          return;
         }
-      } else {
-        debugLog('No hash found, defaulting to about section');
-        debouncedUpdateURL('about');
-        debouncedTrackSection('about');
+        if (!document.getElementById(targetId)) return;
+        cancelPendingTarget();
+        scrollToSection(targetId);
+        setCurrentSection(targetId);
+        debouncedTrackSection(targetId);
+      };
+      targetObserver = new MutationObserver(resolveTarget);
+      targetObserver.observe(document.body, { childList: true, subtree: true });
+      targetTimeout = setTimeout(cancelPendingTarget, 10_000);
+      resolveTarget();
+      for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+        window.addEventListener(event, cancelPendingTarget, { once: true, passive: true });
       }
-    };
-
-    // Handle initial scroll after DOM is ready
-    if (document.readyState === 'complete') {
-      handleInitialScroll();
-    } else {
-      window.addEventListener('load', handleInitialScroll);
+    } else if (!targetId) {
+      setCurrentSection('about');
     }
 
     return () => {
       debugLog('Cleaning up scroll spy');
       window.removeEventListener('scroll', scrollListener);
-      window.removeEventListener('load', handleInitialScroll);
+      cancelPendingTarget();
+      for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+        window.removeEventListener(event, cancelPendingTarget);
+      }
       debouncedUpdateURL.cancel();
       debouncedTrackSection.cancel();
     };

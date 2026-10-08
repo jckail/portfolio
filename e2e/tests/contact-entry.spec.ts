@@ -21,7 +21,7 @@ for (const theme of ['dark', 'light']) {
       });
       await page.goto(`/?theme=${theme}&contact=open#about`);
       const dialog = page.getByRole('dialog', { name: 'Connect with Jordan', exact: true });
-      await expect(dialog.getByText(/Recommended by my AI agent/)).toBeVisible();
+      await expect(dialog.getByText(/Suggested introduction/)).toBeVisible();
       await dialog.getByText('Edit subject', { exact: true }).click();
       for (const [label, value] of [
         ['Your email', 'visitor@example.com'], ['Company or organization', 'Example Labs'],
@@ -60,12 +60,12 @@ test('late AI recommendation preserves focus and manual edits', async ({ page })
   await message.clear();
   await message.pressSequentially('My own message / about agents?');
   release();
-  await expect(dialog.getByText('Your edits are safe. My agent also suggests:')).toBeVisible();
+  await expect(dialog.getByText('Your edits are safe. Another suggested introduction:')).toBeVisible();
   await expect(message).toHaveValue('My own message / about agents?');
   await expect(message).toBeFocused();
   await dialog.getByLabel('Your email', { exact: true }).fill('visitor@example.com');
   await dialog.getByLabel('Company or organization', { exact: true }).fill('Example Labs');
-  await dialog.getByRole('button', { name: 'Use agent recommendation' }).click();
+  await dialog.getByRole('button', { name: 'Use suggested introduction' }).click();
   await expect(message).toHaveValue('A different recommendation\n\nMy email: visitor@example.com\nCompany: Example Labs');
 });
 

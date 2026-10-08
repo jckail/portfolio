@@ -111,8 +111,9 @@ def test_project_link_label_defaults_and_override():
     projects = load_projects()
     root = projects.root if hasattr(projects, "root") else projects
     assert root["qr_for_groups"].link_label == "Read coverage"
-    others = [p.link_label for k, p in root.items() if k != "qr_for_groups"]
-    assert others and all(label == "View project" for label in others)
+    assert root["jobbr"].link_label == "Open Jobbr"
+    assert root["kefi"].link_label == "Open product"
+    assert root["go_pilot"].link_label == "View project"
 
 
 def test_project_secondary_links_and_labels():
