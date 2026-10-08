@@ -273,3 +273,5 @@
     margin-top: var(--spacing-sm);
   }
 }
+
+.timeline-item[id] { scroll-margin-top: calc(var(--header-height) + 88px); }

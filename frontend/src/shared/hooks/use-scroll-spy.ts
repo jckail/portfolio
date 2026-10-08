@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useSectionStore } from '../stores/section-store';
 import { trackSectionView, trackAnchorChange } from '../utils/analytics';
 import { scrollToSection } from '../utils/scroll-utils';
+import { readingMilestone } from '../utils/timeline-reading';
 import { isScrollLocked } from './use-scroll-lock';
 import { useLocation } from './use-location';
 
@@ -38,10 +39,17 @@ export const useScrollSpy = () => {
 
     // Debounced URL update function
     const debouncedUpdateURL = debounce((id: string) => {
+      if (isScrollLocked()) return;
       debugLog('Updating URL', { section: id });
       const currentPath = window.location.pathname;
       const currentSearch = window.location.search;
-      const newHash = `${currentPath}${currentSearch}#${id}`;
+      // Keep a company reading anchor while that milestone is in view. It is
+      // independent of the ?company dialog parameter and never opens a modal.
+      let anchor = id;
+      if (id === 'experience') {
+        anchor = readingMilestone(document.querySelectorAll<HTMLElement>('#experience [data-timeline-label]')) || id;
+      }
+      const newHash = `${currentPath}${currentSearch}#${anchor}`;
       
       // Track anchor change if different from last tracked
       if (lastAnchor.current !== id) {
@@ -50,7 +58,7 @@ export const useScrollSpy = () => {
       }
       
       // Use replaceState to avoid adding new history entries
-      window.history.replaceState({}, '', newHash);
+      window.history.replaceState(window.history.state, '', newHash);
       setCurrentSection(id);
     }, 200); // Debounce URL updates by 200ms
 
@@ -142,8 +150,9 @@ export const useScrollSpy = () => {
         if (!document.getElementById(targetId)) return;
         cancelPendingTarget();
         scrollToSection(targetId);
-        setCurrentSection(targetId);
-        debouncedTrackSection(targetId);
+        const sectionId = document.getElementById(targetId)?.closest('section[id]')?.id ?? targetId;
+        setCurrentSection(sectionId);
+        debouncedTrackSection(sectionId);
       };
       targetObserver = new MutationObserver(resolveTarget);
       targetObserver.observe(document.body, { childList: true, subtree: true });

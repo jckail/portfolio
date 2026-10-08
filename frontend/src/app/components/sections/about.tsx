@@ -170,11 +170,12 @@ const TLDRContent = memo(
             <strong>Built production AI systems</strong>
             <span>Agent harnesses, tracing, replay, and evaluation infrastructure.</span>
           </a></li>
-          <li><a href="#projects">
-            <strong>Explore the engineering</strong>
-            <span>Public projects, architecture, and working products.</span>
+          <li><a href="#experience-prove-identity">
+            <strong>Built model-governance agents</strong>
+            <span>Agents and harnesses for identity and fraud models at Prove.</span>
           </a></li>
         </ul>
+        <a className="btn" href="#projects">Explore engineering case studies</a>
 
         <div className="about-details">
           <div className="brief-bio">

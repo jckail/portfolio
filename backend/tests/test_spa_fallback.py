@@ -377,3 +377,20 @@ def test_lab_document_escapes_project_content(monkeypatch):
     assert "&lt;img" in html
     graph = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)[1])
     assert graph["description"] == project.description
+
+
+@pytest.mark.parametrize("path,title", [
+    ("/brand-kit.html", "Jordan Kail — Brand Kit"),
+    ("/agent", "Chat with Jordan Kail’s Agent"),
+])
+def test_utility_documents_have_distinct_metadata(document_spa, path, title):
+    client, _ = document_spa
+    response = client.get(path, headers=HTML)
+    assert response.status_code == 200
+    assert f"<title>{title}</title>" in response.text
+    assert f'<link rel="canonical" href="https://www.jckail.com{path}"' in response.text
+    assert response.headers["link"] == f'<https://www.jckail.com{path}>; rel="canonical"'
+    assert response.headers["x-robots-tag"] == "noindex"
+    assert '<meta name="robots" content="noindex, follow"' in response.text
+    assert 'id="home-snapshot"' not in response.text
+    assert response.headers["etag"] != client.get("/", headers=HTML).headers["etag"]

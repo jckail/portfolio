@@ -123,3 +123,19 @@ def test_mcp_protocol_initialization_tools_resources_and_privacy(client):
     assert client.post("/mcp", json={"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
                        headers={"Host": "evil.example", "Accept": "application/json, text/event-stream"}).status_code == 421
     client.base_url = "http://testserver"
+
+
+def test_structured_cases_are_available_through_bounded_graphql(client):
+    query = """{ projects { id featured categories maturityNote caseStudy {
+      problem architecture decisions { decision tradeoff evidence_url }
+      outcomes { statement source_url } evidence_links { label url }
+    } } }"""
+    response = client.post("/graphql", json={"query": query})
+    assert response.status_code == 200
+    projects = response.json()["data"]["projects"]
+    featured = [project for project in projects if project["featured"]]
+    assert len(featured) == 3
+    for project in featured:
+        assert project["caseStudy"]["architecture"]
+        assert project["categories"]
+        assert all(link["url"].startswith("https://") for link in project["caseStudy"]["evidence_links"])

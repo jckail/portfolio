@@ -58,3 +58,13 @@ The lockfile change is complete locally. CI must validate application build,
 frontend tests, and Lighthouse/E2E compatibility (the selector parser override
 crosses a major version). Dependabot closure is only confirmed after the
 updated default branch is rescanned.
+
+
+## Default-branch rescan receipt
+
+After PR115 deployed, GitHub's live Dependabot API returned one open alert:
+#169, sprintf-js, moderate, development scope, with no patched version listed.
+The original four patchable repository alerts are closed. This is GitHub's
+repository-alert count, distinct from npm's propagated tooling findings above;
+no claim is made that all npm advisories are resolved. CI application, image,
+browser and Lighthouse checks passed with the updated lockfiles.

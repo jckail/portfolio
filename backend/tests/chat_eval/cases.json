@@ -137,12 +137,12 @@
     "loyalty"
    ],
    "all_of": [
-    "selenium"
+    "typescript"
    ]
   },
   "grounded": [
-   "loyalty points",
-   "Selenium"
+   "loyalty portfolio",
+   "TypeScript"
   ]
  },
  {
@@ -153,15 +153,15 @@
   ],
   "expect": {
    "any_of": [
-    "developer assistant",
-    "cli"
+    "legacy",
+    "historical"
    ],
    "all_of": [
-    "go"
+    "python"
    ]
   },
   "grounded": [
-   "developer assistant"
+   "Legacy Python and shell helpers"
   ]
  },
  {

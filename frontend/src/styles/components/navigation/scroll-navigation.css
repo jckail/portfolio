@@ -8,7 +8,12 @@
   gap: 2px;
   max-width: calc(100% - 24px);
   padding: 4px;
-  overflow-x: auto;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+  transform: translate(-50%, -8px);
   scrollbar-width: none;
   background: var(--surface);
   background: color-mix(in srgb, var(--surface-opaque) 86%, transparent);
@@ -46,4 +51,25 @@
 }
 @media (forced-colors: active) {
   .scroll-navigation a[aria-current] { outline: 1px solid Highlight; }
+}
+
+.scroll-navigation.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); }
+.scroll-navigation-sentinel { position: absolute; top: 240px; left: 0; width: 1px; height: 1px; pointer-events: none; }
+.scroll-navigation-sections { display: flex; }
+.scroll-navigation-select { min-width: 0; }
+.scroll-navigation-select select {
+  min-height: 44px; max-width: 320px; width: 100%; padding: 0 28px 0 12px;
+  color: var(--text-color); background: var(--surface-opaque); border: 1px solid var(--panel-border);
+  border-radius: var(--radius-full); font: 700 var(--text-sm) var(--font-display);
+}
+.scroll-navigation-select select:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.scroll-navigation-page-select { display: none; }
+@media (max-width: 900px) {
+  .scroll-navigation-sections { display: none; }
+  .scroll-navigation-page-select { display: block; flex: 0 1 auto; }
+  .scroll-navigation-milestones { flex: 1 1 auto; }
+  .scroll-navigation-select select { max-width: 250px; font-size: var(--text-xs); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-navigation { transition: none; transform: translateX(-50%); }
 }

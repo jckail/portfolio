@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # pathname check in app/components/main-content.tsx). Other unknown paths
 # still get the SPA shell so the visitor lands on the site, but with a 404
 # status so crawlers do not index junk URLs as duplicate homepages.
-SPA_ROUTES = frozenset({"/", "/admin", "/agent", "/agent/", "/dataplayground", "/dataplayground/"})
+SPA_ROUTES = frozenset({"/", "/admin", "/agent", "/agent/", "/dataplayground", "/dataplayground/", "/brand-kit.html"})
 
 # Never answer these with index.html. /api and /ws keep JSON 404s for
 # clients; a missing /assets chunk must fail loudly rather than parse HTML
@@ -316,10 +316,10 @@ class SPAStaticFiles(StaticFiles):
                     pass
 
     def _index_entry(
-        self, stat_result: os.stat_result, home: bool = False, lab: bool = False, hosted: str | None = None
+        self, stat_result: os.stat_result, home: bool = False, lab: bool = False, hosted: str | None = None, utility: str | None = None
     ) -> IndexEntry | None:
         """index.html with the bootstrap block, rebuilt only when the file changes."""
-        variant = f"hosted:{hosted}" if hosted else "lab" if lab else "home" if home else "bare"
+        variant = f"utility:{utility}" if utility else f"hosted:{hosted}" if hosted else "lab" if lab else "home" if home else "bare"
         entry = self._index.get(variant)
         if entry is not None and (entry.mtime_ns, entry.size) == (stat_result.st_mtime_ns, stat_result.st_size):
             return entry
@@ -341,6 +341,16 @@ class SPAStaticFiles(StaticFiles):
         if not home and not lab and not hosted:
             # Agent/admin are interactive utility views, not duplicate search landing pages.
             raw = re.sub(rb'<meta name="robots" content="[^"]*"', b'<meta name="robots" content="noindex, follow"', raw)
+        if utility:
+            from .api.discovery import CANONICAL_ORIGIN
+
+            title = "Jordan Kail — Brand Kit" if utility == "/brand-kit.html" else "Chat with Jordan Kail’s Agent"
+            url = f"{CANONICAL_ORIGIN}{utility}".encode()
+            raw = re.sub(rb"<title>.*?</title>", b"<title>" + title.encode() + b"</title>", raw, flags=re.S)
+            for key in (b'property="og:title"', b'name="twitter:title"'):
+                raw = re.sub(rb'(<meta ' + key + rb' content=")[^"]*', lambda m: m[1] + title.encode(), raw)
+            raw = re.sub(rb'(<link rel="canonical" href=")[^"]*', lambda m: m[1] + url, raw)
+            raw = re.sub(rb'(<meta property="og:url" content=")[^"]*', lambda m: m[1] + url, raw)
         body = inject_bootstrap(raw, self._bootstrap())
         # A content hash, not mtime: the body depends on the data as well as
         # the file, and must not keep an old tag across a content-only deploy.
@@ -365,7 +375,9 @@ class SPAStaticFiles(StaticFiles):
         home = status_code == 200 and get_route_path(scope) in HOME_PATHS
         lab = status_code == 200 and get_route_path(scope) in LAB_PATHS
         hosted = hosted_lab_slug(get_route_path(scope)) if status_code == 200 else None
-        entry = self._index_entry(stat_result, home=home, lab=lab, hosted=hosted)
+        path = get_route_path(scope)
+        utility = "/agent" if path in {"/agent", "/agent/"} else "/brand-kit.html" if path == "/brand-kit.html" else None
+        entry = self._index_entry(stat_result, home=home, lab=lab, hosted=hosted, utility=utility)
         if entry is None:
             return None
         wants_gzip = _accepts_gzip(scope)
@@ -383,6 +395,10 @@ class SPAStaticFiles(StaticFiles):
             headers["link"] = f'<{lab_url(hosted)}>; rel="canonical"'
         else:
             headers["x-robots-tag"] = "noindex"
+            if utility:
+                from .api.discovery import CANONICAL_ORIGIN
+
+                headers["link"] = f'<{CANONICAL_ORIGIN}{utility}>; rel="canonical"'
         if status_code == 200 and self.is_not_modified(Headers(headers), Headers(scope=scope)):
             return NotModifiedResponse(Headers(headers))
         if wants_gzip:

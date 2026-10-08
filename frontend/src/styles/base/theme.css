@@ -2,6 +2,27 @@
 
 /* Theme classes for more reliable switching */
 .theme-light {
+  /* Brand v2: semantic technical-content colors; labels supplement color. */
+  --code-bg: #f3f3f7;
+  --code-text: #202033;
+  --diagram-node: #f0f0ff;
+  --diagram-edge: #535373;
+  --diagram-label: #202033;
+  --chart-series-1: #0403ff;
+  --chart-series-2: #086b58;
+  --chart-series-3: #963d00;
+  --chart-series-4: #8d237d;
+  --chart-grid: #a6a6b5;
+  --chart-axis: #535353;
+  --status-neutral-bg: #efeff5;
+  --status-neutral-text: #36364d;
+  --status-success-bg: #e3f4eb;
+  --status-success-text: #175b37;
+  --status-warning-bg: #fff0d7;
+  --status-warning-text: #774400;
+  --status-error-bg: #ffe8e8;
+  --status-error-text: #8d2020;
+
   --background-color: transparent;
   --surface-color: transparent;
   --section-background: transparent;
@@ -71,6 +92,27 @@
 }
 
 .theme-dark {
+  /* Brand v2: semantic technical-content colors; labels supplement color. */
+  --code-bg: #14142b;
+  --code-text: #ededff;
+  --diagram-node: #20203b;
+  --diagram-edge: #a8a8c9;
+  --diagram-label: #ededff;
+  --chart-series-1: #aaa9ff;
+  --chart-series-2: #6fe1bd;
+  --chart-series-3: #ffbc7a;
+  --chart-series-4: #f5a0df;
+  --chart-grid: #63637b;
+  --chart-axis: #d4d4d4;
+  --status-neutral-bg: #25253d;
+  --status-neutral-text: #ddddf3;
+  --status-success-bg: #123b2c;
+  --status-success-text: #9ae6bc;
+  --status-warning-bg: #44300e;
+  --status-warning-text: #ffda91;
+  --status-error-bg: #441e24;
+  --status-error-text: #ffb6bc;
+
   --background-color: transparent;
   --surface-color: #0303ff11;
   --section-background: #0303ff1d;
@@ -134,6 +176,27 @@
 }
 
 .theme-party {
+  /* Brand v2: semantic technical-content colors; labels supplement color. */
+  --code-bg: #14142b;
+  --code-text: #ededff;
+  --diagram-node: #20203b;
+  --diagram-edge: #a8a8c9;
+  --diagram-label: #ededff;
+  --chart-series-1: #aaa9ff;
+  --chart-series-2: #6fe1bd;
+  --chart-series-3: #ffbc7a;
+  --chart-series-4: #f5a0df;
+  --chart-grid: #63637b;
+  --chart-axis: #d4d4d4;
+  --status-neutral-bg: #25253d;
+  --status-neutral-text: #ddddf3;
+  --status-success-bg: #123b2c;
+  --status-success-text: #9ae6bc;
+  --status-warning-bg: #44300e;
+  --status-warning-text: #ffda91;
+  --status-error-bg: #441e24;
+  --status-error-text: #ffb6bc;
+
   --background-color: transparent;
   --surface-color: rgba(255, 0, 255, 0.1);
   --section-background: rgba(255, 255, 255, 0.05);

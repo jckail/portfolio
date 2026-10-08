@@ -1,11 +1,13 @@
 import React, { useEffect, useId, useMemo } from 'react';
 
 import ProjectIcon from '../../../../shared/components/project-icon/ProjectIcon';
+import { StatusBadge } from '../../../../shared/components/brand/StatusBadge';
 import { CopyLinkButton } from '../../../../shared/components/copy-link-button';
 import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackModalView } from '../../../../shared/utils/analytics';
 import { shareUrl } from '../../../../shared/utils/url-params';
 import { TechStackTags } from '../tech-stack-tags';
+import { CaseStudy } from '../projects/CaseStudy';
 
 import type { Project } from '../../../../types/resume';
 import type { SkillsData } from '../../../../types/skills';
@@ -26,10 +28,10 @@ function buildStory(project: Project) {
     steps.push({ label: 'Snapshot', text: project.description.trim() });
   }
   const detail = project.description_detail?.trim();
-  if (detail && detail !== project.description?.trim()) {
+  if (!project.case_study && detail && detail !== project.description?.trim()) {
     steps.push({ label: 'Story', text: detail });
   }
-  if (project.status) steps.push({ label: 'Status', text: project.status });
+  if (project.maturity_note) steps.push({ label: 'Maturity', text: project.maturity_note });
   if (project.contribution) steps.push({ label: 'My contribution', text: project.contribution });
   if (project.evidence) steps.push({ label: 'Evidence', text: project.evidence });
   if (project.tech_stack && project.tech_stack.length > 0) {
@@ -83,6 +85,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         </div>
       </div>
       <div className="modal-body">
+        {project.status && <StatusBadge tone={project.status === 'Live' ? 'success' : project.status === 'In Development' ? 'warning' : 'neutral'}>{project.status}</StatusBadge>}
         {story.length > 1 ? (
           <div className="project-story" aria-label="Project story">
             {story.map(step => (
@@ -95,6 +98,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         ) : (
           <p className="skill-description">{detail}</p>
         )}
+
+        {project.case_study && <CaseStudy study={project.case_study} />}
 
         {project.tech_stack && project.tech_stack.length > 0 && (
           <TechStackTags

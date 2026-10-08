@@ -1,5 +1,24 @@
+export type ProjectCategory = 'agents' | 'infrastructure' | 'data' | 'devtools' | 'knowledge' | 'experimental';
+export type ProjectStatus = 'Live' | 'Prototype' | 'In Development' | 'Employer Work' | 'Archived';
+
+export interface ProjectCaseStudy {
+  problem?: string;
+  role?: string;
+  constraints?: string[];
+  architecture?: string;
+  decisions?: { decision: string; tradeoff: string; evidence_url?: string | null }[];
+  challenges?: { challenge: string; resolution: string }[];
+  outcomes?: { statement: string; source_url?: string | null }[];
+  limitations?: string[];
+  evidence_links?: { label: string; url: string }[];
+}
+
 export interface Project {
-  status?: string;
+  status?: ProjectStatus;
+  categories?: ProjectCategory[];
+  featured?: boolean;
+  maturity_note?: string;
+  case_study?: ProjectCaseStudy | null;
   contribution?: string;
   evidence?: string;
   title: string;

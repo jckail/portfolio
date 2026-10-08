@@ -54,3 +54,21 @@ describe('ProjectModal secondary link label', () => {
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
 });
+
+
+describe('ProjectModal case studies', () => {
+  it('renders structured engineering details with maturity and legacy evidence', () => {
+    renderModal({ ...base, status: 'Prototype', maturity_note: 'Public preview; no production usage claim', contribution: 'Built the pipeline', evidence: 'Public source', description_detail: 'Legacy narrative', case_study: { problem: 'Make usage auditable', architecture: 'Events → ledger', limitations: ['No field metrics'] } });
+    expect(screen.getByText('Prototype')).toBeInTheDocument();
+    expect(screen.getByText('Public preview; no production usage claim')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Problem' })).toBeInTheDocument();
+    expect(screen.getByText('Events → ledger')).toBeInTheDocument();
+    expect(screen.queryByText('Legacy narrative')).toBeNull();
+    expect(screen.getByText('Built the pipeline')).toBeInTheDocument();
+  });
+
+  it('retains the full legacy story when no structured case is published', () => {
+    renderModal({ ...base, description_detail: 'A detailed legacy narrative' });
+    expect(screen.getByText('A detailed legacy narrative')).toBeInTheDocument();
+  });
+});

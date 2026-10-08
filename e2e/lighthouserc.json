@@ -3,7 +3,8 @@
     "collect": {
       "url": [
         "http://localhost:18080/",
-        "http://localhost:18080/agent"
+        "http://localhost:18080/agent",
+        "http://localhost:18080/brand-kit.html"
       ],
       "numberOfRuns": 3,
       "settings": {

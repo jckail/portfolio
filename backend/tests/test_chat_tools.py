@@ -260,4 +260,5 @@ def test_prompt_carries_a_skills_index_not_the_full_skill_data():
     assert "search_portfolio" in data
     assert "python: Python" in data  # index line
     assert "related" not in data.split('"skills"')[1]  # per-skill detail left to search
+    assert '"case_study"' not in data  # detailed narratives remain available through bounded search
     assert len(data) < 60_000
