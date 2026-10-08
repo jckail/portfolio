@@ -1,7 +1,10 @@
 """Real SDK tools expose free slots and book only after a consumed UI confirmation."""
 import time
 
+import pytest
+
 from backend.app.services import calendar_runtime
+from backend.app.services.calendar_service import CalendarNotConfigured, CalendarUnavailable
 from backend.app.services.chat_service import manager
 from backend.app.services.llm import TextDelta
 
@@ -57,3 +60,43 @@ def test_model_cannot_offer_an_unretrieved_calendar_slot(client, monkeypatch):
     with client.websocket_connect("/ws/calendar-invented-slot") as ws:
         frames = say(ws)
     assert not of_type(frames, "confirm_action")
+
+
+@pytest.mark.parametrize("failure, expected", [
+    (CalendarNotConfigured, "not connected"),
+    (CalendarUnavailable, "could not verify"),
+    (RuntimeError, "could not verify"),
+])
+def test_unavailable_calendar_ends_with_authoritative_notice(client, monkeypatch, failure, expected):
+    class Calendar:
+        async def available_slots(self, start, end):
+            raise failure("PRIVATE-CALENDAR-DETAIL")
+    monkeypatch.setattr(calendar_runtime, "calendar_service", lambda: Calendar())
+    provider = script(monkeypatch,
+                      round_of(call("get_meeting_availability", start=START, end="2026-10-15T16:00:00+00:00")),
+                      round_of(TextDelta("I checked the calendar and there are no slots.")))
+    with client.websocket_connect("/ws/calendar-unavailable") as ws:
+        frames = say(ws)
+    text = "".join(frame.get("message", "") for frame in frames)
+    assert len(provider.requests) == 1
+    assert expected in text
+    assert "nothing is sent without your confirmation" in text
+    assert "I checked the calendar" not in text
+    assert "PRIVATE-CALENDAR-DETAIL" not in str(frames)
+    assert not of_type(frames, "confirm_action")
+    assert frames[-1]["is_chunk"] is False
+
+
+def test_successful_empty_calendar_can_be_explained_by_model(client, monkeypatch):
+    class Calendar:
+        async def available_slots(self, start, end):
+            return {"status": "available", "slots": [], "timezone": "America/Los_Angeles"}
+    monkeypatch.setattr(calendar_runtime, "calendar_service", lambda: Calendar())
+    provider = script(monkeypatch,
+                      round_of(call("get_meeting_availability", start=START, end="2026-10-15T16:00:00+00:00")),
+                      round_of(TextDelta("There are no returned slots in this date range.")))
+    with client.websocket_connect("/ws/calendar-empty") as ws:
+        frames = say(ws)
+    assert len(provider.requests) == 2
+    assert "no returned slots" in "".join(frame.get("message", "") for frame in frames)
+    assert of_type(frames, "portfolio_card")[0]["data"]["status"] == "available"

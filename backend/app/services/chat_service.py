@@ -536,11 +536,17 @@ class ConnectionManager:
         for call in tool_calls:
             if call.name == "get_meeting_availability":
                 from backend.app.services.calendar_runtime import calendar_service
-                from backend.app.services.calendar_service import CalendarSlotUnavailable, CalendarUnavailable
+                from backend.app.services.calendar_service import (
+                    CalendarNotConfigured,
+                    CalendarSlotUnavailable,
+                    CalendarUnavailable,
+                )
                 try:
                     output = await calendar_service().available_slots(call.args.get("start"), call.args.get("end"))
+                except CalendarNotConfigured:
+                    output = {"status": "unavailable", "reason": "not_connected", "note": "Calendar is not connected. Availability was not checked; this is not an empty calendar or no available slots."}
                 except (CalendarSlotUnavailable, CalendarUnavailable):
-                    output = {"status": "unavailable", "note": "Calendar slots are unavailable. Offer a confirmed meeting request instead; do not invent times."}
+                    output = {"status": "unavailable", "reason": "lookup_failed", "note": "Calendar availability could not be verified. Do not claim the calendar was checked or that no slots exist."}
                 self.calendar_offers[client_id] = (time.monotonic(), {
                     slot["start"] for slot in output.get("slots", [])[:10]
                 })

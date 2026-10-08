@@ -89,6 +89,24 @@ class PortfolioRun:
         self.extra.append({"role": "assistant", "text": "".join(self.state.text),
                            "tool_calls": self.state.tool_calls[:self.max_tools]})
         self.extra.append({"role": "tool", "results": list(self.results)})
+        # Calendar failure is an operational fact, not a model interpretation.
+        # End this turn with trusted wording instead of asking another model
+        # round to paraphrase unavailable as an empty/free calendar.
+        unavailable = next((result for result in self.results
+                            if result["name"] == "get_meeting_availability"
+                            and result["output"].get("status") == "unavailable"), None)
+        if unavailable is not None:
+            message = (
+                "Live calendar scheduling is not connected, so I cannot check Jordan's availability."
+                if unavailable["output"].get("reason") == "not_connected" else
+                "I could not verify Jordan's calendar availability."
+            )
+            message += " You can ask me to draft a meeting request for you to review; nothing is sent without your confirmation."
+            if self.text:
+                message = "\n\n" + message
+            self.text.append(message)
+            await self.manager.send_message(message, self.client_id, is_chunk=True)
+            return ToolsToFinalOutputResult(is_final_output=True, final_output="".join(self.text))
         return ToolsToFinalOutputResult(
             is_final_output=not (self.needs_followup and self.manager.is_available()),
             final_output="".join(self.text),
