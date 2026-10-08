@@ -11,14 +11,16 @@ export default function AgentDrawer({ open, onClose }: { open: boolean; onClose:
   // Desktop is a side panel, not a second page modal. A body-level Dialog
   // otherwise covers the viewport, hides the rest of the page, and swallows
   // clicks on Contact. Mounting into this holder keeps that aria-hidden
-  // local to the panel.
+  // local to the panel. Use that holder on mobile too: otherwise MUI can
+  // aria-hide a Contact dialog that mounted before this lazy pane.
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const sidePanel = !mobile;
   // Contact owns focus above this pane. Two document-level focus traps
   // otherwise repeatedly steal focus from each other on narrow screens.
   const pageDialogOpen = useSyncExternalStore(subscribeDialogs, openDialogCount) > 0;
   return <div ref={setContainer}>{container && <Dialog open={open} onClose={onClose} keepMounted fullScreen={mobile} maxWidth={false}
-    container={sidePanel ? container : undefined}
+    container={container}
+    aria-hidden={pageDialogOpen || undefined}
     aria-labelledby="agent-drawer-title" hideBackdrop={sidePanel} disableScrollLock disableRestoreFocus
     disableEnforceFocus={sidePanel || pageDialogOpen}
     disableAutoFocus={pageDialogOpen}

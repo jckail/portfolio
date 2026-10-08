@@ -51,6 +51,9 @@ describe('agent drawer page interaction', () => {
     act(() => input.focus());
     expect(input).toHaveFocus();
     act(() => removeDialog(id));
+    act(() => screen.getByRole('button', { name: 'Close Agent chat' }).focus());
+    act(() => input.focus());
+    expect(input).not.toHaveFocus();
     modal.remove();
   });
   it('leaves Contact clickable and focused while the desktop panel is open', async () => {
@@ -68,6 +71,7 @@ describe('agent drawer page interaction', () => {
   it('keeps the phone panel modal so it covers the page', async () => {
     renderDrawer(true);
     const dialog = await screen.findByRole('dialog', { name: 'Chat with my Agent' });
-    expect(dialog.closest('.MuiModal-root')?.parentElement).toBe(document.body);
+    expect(dialog.closest('.MuiModal-root')?.parentElement).not.toBe(document.body);
+    expect(dialog.closest('.MuiDialog-root')).toHaveClass('MuiModal-root');
   });
 });

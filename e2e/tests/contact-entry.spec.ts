@@ -85,7 +85,7 @@ for (const width of [390, 1360]) {
     }));
     await page.goto('/?theme=dark&ai_chat=open&contact=open#about');
     const contact = page.getByRole('dialog', { name: 'Connect with Jordan', exact: true });
-    await expect(page.getByRole('dialog', { name: 'Chat with my Agent' })).toBeAttached();
+    await expect(page.locator('[role="dialog"][aria-labelledby="agent-drawer-title"]')).toBeAttached();
     for (const [label, value] of [['Your email', 'visitor@example.com'], ['Company or organization', 'Example / Labs?'], ['Send me a message', 'Keyboard / agents?']]) {
       const input = contact.getByLabel(label, { exact: true });
       await input.clear();
