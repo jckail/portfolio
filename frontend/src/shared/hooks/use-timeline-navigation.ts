@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { readingMilestone, timelineReadingBand } from '../utils/timeline-reading';
+
 interface TimelineTarget { id: string; label: string }
 
 /** Observe the reading band, including experience items mounted by lazy sections. */
@@ -16,30 +18,19 @@ export function useTimelineNavigation() {
     });
     visibility.observe(marker);
     const observed = new Set<HTMLElement>();
-    const readingTop = () => Math.min(140, window.innerHeight * 0.25);
-    const readingBottom = () => Math.max(readingTop() + 1, window.innerHeight * 0.45);
-    const selectMilestone: IntersectionObserverCallback = entries => {
-      const bounds = entries[0]?.rootBounds;
-      const top = bounds?.top ?? readingTop();
-      const bottom = bounds?.bottom ?? readingBottom();
-      let winner: HTMLElement | undefined;
-      let greatestOverlap = 0;
-      // Entries contain only targets that crossed a threshold. Their cached
-      // rectangles become stale while other items scroll, so measure the small
-      // observed set once per callback instead of ranking historical entries.
-      for (const item of observed) {
-        const rect = item.getBoundingClientRect();
-        const overlap = Math.max(0, Math.min(rect.bottom, bottom) - Math.max(rect.top, top));
-        if (overlap > greatestOverlap) { greatestOverlap = overlap; winner = item; }
-      }
-      if (winner) setActive(winner.id);
+    const selectMilestone: IntersectionObserverCallback = () => {
+      // Resolve from current geometry using the same rule as the URL. Observer
+      // entries only include threshold crossings and may hold stale rectangles.
+      setActive(readingMilestone(observed));
     };
-    const makeObserver = () => new IntersectionObserver(selectMilestone, {
-      // Pixel margins track viewport height. Percentage root margins use width
-      // per the IntersectionObserver spec, collapsing the band on wide screens.
-      rootMargin: `-${readingTop()}px 0px -${window.innerHeight - readingBottom()}px 0px`,
-      threshold: Array.from({ length: 51 }, (_, index) => index / 50),
-    });
+    const makeObserver = () => {
+      const { top, bottom } = timelineReadingBand();
+      return new IntersectionObserver(selectMilestone, {
+        // Percentage root margins use viewport width, so use height-based pixels.
+        rootMargin: `-${top}px 0px -${window.innerHeight - bottom}px 0px`,
+        threshold: Array.from({ length: 51 }, (_, index) => index / 50),
+      });
+    };
     let milestones = makeObserver();
     const resize = () => {
       milestones.disconnect();

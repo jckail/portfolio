@@ -44,9 +44,10 @@ const ProjectCard = memo(({
   projectKey: string;
   project: Project;
   skillsData: SkillsData;
-  onSelect: (key: string) => void;
+  onSelect: (key: string, origin: HTMLButtonElement | null) => void;
   onSelectSkill: (skillKey: string) => void;
 }) => {
+  const detailsRef = useRef<HTMLButtonElement>(null);
   const tags = project.tech_stack ?? [];
   return (
     <article className="project-card" onMouseEnter={prefetchProjectModal}>
@@ -55,7 +56,7 @@ const ProjectCard = memo(({
           (Lighthouse label-content-name-mismatch). */}
       <div
         className="project-card-main"
-        {...buttonize(() => onSelect(projectKey))}
+        {...buttonize(() => onSelect(projectKey, detailsRef.current))}
       >
         <div className="project-image">
           <ProjectIcon
@@ -82,7 +83,8 @@ const ProjectCard = memo(({
           type="button"
           className="project-link primary btn btn-sm"
           data-project-key={projectKey}
-          onClick={() => onSelect(projectKey)}
+          ref={detailsRef}
+          onClick={() => onSelect(projectKey, detailsRef.current)}
         >
           View details
         </button>
@@ -113,7 +115,12 @@ const Projects: React.FC = () => {
   const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
   // Project the skill dialog was opened from: focus returns to its card when
   // the skill closes, because the project dialog is gone by then.
-  const skillOpenedFromRef = useRef<string | null>(null);
+  const skillOpenedFromRef = useRef<HTMLElement | null>(null);
+  const projectOpenedFromRef = useRef<HTMLButtonElement | null>(null);
+  const openProject = useCallback((key: string, origin: HTMLButtonElement | null) => {
+    projectOpenedFromRef.current = origin;
+    setSelectedProject(key);
+  }, [setSelectedProject]);
   // A ref, so the callback below stays stable and the memoised cards do not
   // re-render each time a project dialog opens.
   const selectedProjectRef = useRef(selectedProject);
@@ -124,15 +131,21 @@ const Projects: React.FC = () => {
     skillOpenedFromRef.current = null;
     if (!from) return;
     requestAnimationFrame(() => {
-      Array.from(document.querySelectorAll<HTMLElement>('[data-project-key]'))
-        .find(button => button.dataset.projectKey === from)
-        ?.focus({ preventScroll: true });
+      if (from.isConnected) from.focus({ preventScroll: true });
     });
   }, []);
   // Close the project first: one dialog at a time (audit F-3)
   const openSkillFromProject = useCallback(
     (skillKey: string) => {
-      skillOpenedFromRef.current = selectedProjectRef.current;
+      // Preserve the actual originating card: featured and catalogue entries
+      // intentionally share project keys. Deep links have no clicked origin.
+      const origin = projectOpenedFromRef.current;
+      skillOpenedFromRef.current = selectedProjectRef.current
+        ? origin?.isConnected && origin.dataset.projectKey === selectedProjectRef.current
+          ? origin
+          : Array.from(document.querySelectorAll<HTMLElement>('.project-catalogue [data-project-key], .featured-projects [data-project-key]'))
+            .find(button => button.dataset.projectKey === selectedProjectRef.current) ?? null
+        : null;
       setSelectedProject(null);
       setSelectedSkill(skillKey);
     },
@@ -160,7 +173,7 @@ const Projects: React.FC = () => {
   const filtered = category === 'all' ? entries : entries.filter(([, item]) => item.categories?.includes(category));
   const renderCard = ([key, item]: [string, Project]) => (
     <ProjectCard key={key} projectKey={key} project={item}
-      skillsData={skillsData ?? EMPTY_SKILLS} onSelect={setSelectedProject}
+      skillsData={skillsData ?? EMPTY_SKILLS} onSelect={openProject}
       onSelectSkill={openSkillFromProject} />
   );
 

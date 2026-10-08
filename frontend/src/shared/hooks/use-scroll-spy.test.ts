@@ -75,6 +75,28 @@ describe('career milestone deep links', () => {
     expect(useSectionStore.getState().currentSection).toBe('experience');
     expect(window.location.search).toBe('?theme=dark');
   });
+  it('uses the rail reading band for the URL when the previous company still crosses the header threshold', async () => {
+    window.history.replaceState({ retained: true }, '', '/?theme=dark#experience');
+    mountSection('experience');
+    const section = document.getElementById('experience')!;
+    vi.spyOn(section, 'getBoundingClientRect').mockReturnValue({ top: 0, bottom: 1200 } as DOMRect);
+    for (const [id, top, bottom] of [
+      ['experience-sabbatical', -300, 155],
+      ['experience-meta-facebook', 175, 625],
+    ] as const) {
+      const item = document.createElement('li');
+      item.id = id;
+      item.dataset.timelineLabel = id;
+      section.append(item);
+      vi.spyOn(item, 'getBoundingClientRect').mockReturnValue({ top, bottom } as DOMRect);
+    }
+    renderHook(() => useScrollSpy());
+    act(() => window.dispatchEvent(new Event('scroll')));
+    await waitFor(() => expect(window.location.hash).toBe('#experience-meta-facebook'));
+    expect(window.location.search).toBe('?theme=dark');
+    expect(window.history.state).toEqual({ retained: true });
+  });
+
   it('restores an existing milestone on Back/Forward while preserving modal query state', async () => {
     window.history.replaceState(null, '', '/?theme=dark&project=portfolio#experience-together-ai');
     mountSection('experience');

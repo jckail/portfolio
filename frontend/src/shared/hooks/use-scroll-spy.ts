@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useSectionStore } from '../stores/section-store';
 import { trackSectionView, trackAnchorChange } from '../utils/analytics';
 import { scrollToSection } from '../utils/scroll-utils';
+import { readingMilestone } from '../utils/timeline-reading';
 import { isScrollLocked } from './use-scroll-lock';
 import { useLocation } from './use-location';
 
@@ -46,10 +47,7 @@ export const useScrollSpy = () => {
       // independent of the ?company dialog parameter and never opens a modal.
       let anchor = id;
       if (id === 'experience') {
-        const threshold = (document.querySelector('.header')?.getBoundingClientRect().height ?? 72) + 88;
-        for (const item of document.querySelectorAll<HTMLElement>('#experience [data-timeline-label]')) {
-          if (item.getBoundingClientRect().top <= threshold) anchor = item.id;
-        }
+        anchor = readingMilestone(document.querySelectorAll<HTMLElement>('#experience [data-timeline-label]')) || id;
       }
       const newHash = `${currentPath}${currentSearch}#${anchor}`;
       

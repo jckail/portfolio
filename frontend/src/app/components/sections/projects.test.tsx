@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, within, act } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, within, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import Projects from './projects';
 
@@ -12,6 +13,7 @@ const projectsData: ProjectsData = {
     description: 'A personal site',
     description_detail: '',
     categories: ['agents'],
+    tech_stack: ['python'],
     featured: true,
     link: 'https://example.com',
     // Not an inline icon: renders the <img> fallback, no SVG import
@@ -20,7 +22,7 @@ const projectsData: ProjectsData = {
 };
 
 vi.mock('../../providers/data-provider', () => ({
-  useData: () => ({ skillsData: {}, projectsData, isLoading: false, error: null }),
+  useData: () => ({ skillsData: { python: { display_name: 'Python', image: '', professional_experience: true, years_of_experience: 10, tags: [], description: 'Programming language', weblink: 'https://python.org', examples: {}, general_category: 'Languages' } }, projectsData, isLoading: false, error: null }),
 }));
 vi.mock('../../../shared/utils/analytics', () => ({ trackModalView: vi.fn() }));
 vi.mock('../../../shared/components/skill-icon/SkillIcon', () => ({ default: () => null }));
@@ -87,5 +89,21 @@ describe('project catalogue', () => {
     });
     expect(await screen.findByRole('dialog')).toHaveTextContent('Portfolio');
     expect(screen.getByRole('button', { name: 'Infrastructure' })).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+
+describe('project skill focus restoration', () => {
+  it.each(['featured-projects', 'project-catalogue'])('returns to the originating %s card after a project-to-skill transition', async (group) => {
+    const user = userEvent.setup();
+    const { container } = render(<Projects />);
+    const trigger = within(container.querySelector(`.${group}`) as HTMLElement).getByRole('button', { name: 'View details' });
+    await act(async () => { await user.click(trigger); });
+    const projectDialog = await screen.findByRole('dialog');
+    await act(async () => { await user.click(within(projectDialog).getByRole('button', { name: 'Python' })); });
+    await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent('Programming language'));
+    await act(async () => { await user.keyboard('{Escape}'); });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });
