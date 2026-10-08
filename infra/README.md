@@ -263,7 +263,7 @@ built-in `request_latencies` if not.
 
 A budget notifies; it never stops spend. Layers, cheapest to strongest:
 
-1. **In-app**: `CHAT_DAILY_TOKEN_BUDGET` (per instance, resets on cold start).
+1. **Durable admission**: atomic Supabase reservations enforce configurable global and hashed-receipt daily token caps across instances and restarts before provider calls. Accounting errors fail closed. `CHAT_DAILY_TOKEN_BUDGET` remains an additional process-local circuit breaker, not the shared cap. See `docs/portfolio-audit-implementation.md`.
 2. **Quota caps**: Console, IAM & Admin, Quotas, filter service
    `aiplatform.googleapis.com`, and lower the per-minute generate-content
    request and token quotas for the two Gemini models in use. Suggested
@@ -307,11 +307,12 @@ keys are owner decisions (audit GCP-05, GCP-06).
 ### IAM tightening the audit found
 
 Terraform can only add controls here; the risky grants sit on identities it
-does not manage. Compensating control shipped: the
-`secret read by unexpected principal` alert fires when anything other than
-`quickresume-run` reads a portfolio secret (needs the DATA_READ audit config in
-`audit.tf`). Owner-run, after confirming the legacy apps are retired, and
-never from an agent:
+does not manage. The source defines a proposed
+`secret read by unexpected principal` alert and DATA_READ audit configuration
+in `audit.tf`; deployment, notification verification and live enforcement were
+not established by this audit. Do not count this as an active mitigation until
+verified in Cloud Monitoring. Owner-run, after confirming the legacy apps are
+retired, and never from an agent:
 
 - remove project-wide `roles/secretmanager.secretAccessor` from the default
   compute service account and `svc-app-dev` (it can read `vertex-api-key`);
@@ -331,8 +332,11 @@ update there. Review it, because it tightens trust.
 shared-to-app boundary and undefined CSS token checks as separate steps (they
 also run inside lint and test), refuses a Terraform-managed API key or
 service-account key, and uploads Lighthouse and Playwright results. Lighthouse
-byte budgets are errors; score and timing budgets in `e2e/lighthouserc.json`
-are warnings until measured on the production image.
+byte, applicable score, LCP, CLS and TBT budgets in `e2e/lighthouserc.json`
+are blocking and were measured on the production image. Resource-count limits
+remain warnings. The intentionally noindex agent and brand utility routes do
+not use a SEO-score gate; homepage SEO is blocking. These are laboratory
+regression gates, not field Web Vitals guarantees.
 
 ## Host canonicalization
 
