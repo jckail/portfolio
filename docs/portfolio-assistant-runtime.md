@@ -26,7 +26,17 @@ Production admission also checks purpose before inference. Obvious unrelated tas
 
 `helpers/verify_agent_trial_sql.py` exercises the actual migration in an isolated local PostgreSQL container, including competing turn reservations and daily peer admissions. Run through the shared heavy-check wrapper. It never connects to Supabase, sends mail, or calls a model.
 
-## Calendar connection
+## Current scheduling decision — October 8, 2026
+
+Jordan explicitly tabled calendar integration. Google Calendar consent, credential binding, live availability, and booking are **out of scope for the current portfolio release**. Missing OAuth consent is no longer a blocker or a reason to restart authorization. Do not request consent, activate the adapter, create calendar events, or start Calendly setup until Jordan explicitly resumes this feature.
+
+The deployed service has no Google Calendar credential bindings. `CALENDAR_BOOKING_ENABLED` and `CALENDAR_POLICY_CONFIRMED` remain false by default. The retained Google adapter and its mocked tests are a dormant prototype, not a supported live feature. The agent is instructed not to call its availability or booking tools; it offers the contact form or a visitor-reviewed meeting-request email instead. Existing contact, phone-after-send, and owner notification behavior remain available. A meeting-request email does not reserve a time or create an invitation.
+
+**Future direction:** evaluate Calendly's API or an equivalent scheduling service when this feature is resumed. No provider, credentials, paid plan, or date is committed. Before implementing, choose the provider and integration approach, verify its current API/authentication and plan requirements, define visitor consent and privacy boundaries, and decide how cancellations and reschedules will work. Require duplicate-event protection and live end-to-end acceptance before describing any meeting as booked. Reconfirm scheduling preferences rather than treating the historical Google prototype policy as authorization for a new service.
+
+The historical Google setup notes below are retained solely for context. They are not active setup instructions or unfinished release acceptance. Scheduling-specific tests describe prototype behavior; current release acceptance covers the portfolio agent, evidence cards, access gate/notifications, reviewed contact flow and honest deferral of direct booking.
+
+## Deferred Calendar prototype (historical setup; do not activate)
 
 The deployed application needs its own Google OAuth client and refresh token; the Codex Calendar connector is not application authorization. Use an isolated portfolio OAuth client, not another project's client. Required scopes are `calendar.events.owned` and `calendar.events.freebusy` for the owner's calendar. Store runtime values securely as `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`, `GOOGLE_CALENDAR_REFRESH_TOKEN` and `GOOGLE_CALENDAR_ID`. Enable the Calendar API in the portfolio Cloud project.
 
