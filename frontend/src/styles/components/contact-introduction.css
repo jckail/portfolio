@@ -1,0 +1,37 @@
+.contact-introduction {
+  width: min(680px, calc(100% - 32px));
+  max-width: 680px;
+  align-items: stretch;
+  box-sizing: border-box;
+  max-height: calc(100dvh - 32px);
+  padding: 32px;
+  overflow-y: auto;
+}
+.contact-intro-header { display: block; margin: 0 32px 20px 0; }
+.contact-intro-eyebrow { color: var(--accent-text); font-size: .85rem; font-weight: 700; letter-spacing: .04em; }
+.contact-intro-header h2 { font-size: clamp(1.7rem, 4vw, 2.2rem); line-height: 1.15; margin: 8px 0 12px; }
+.contact-intro-header p { line-height: 1.5; }
+.contact-intro-meta { display: flex; flex-wrap: wrap; gap: 8px 24px; border-block: 1px solid var(--panel-border); padding: 14px 0; margin-bottom: 20px; font-size: .9rem; }
+.contact-intro-fields { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 18px; }
+.contact-intro-identity { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.contact-introduction .contact-form-group { margin: 0; min-width: 0; }
+.contact-introduction input, .contact-introduction textarea, .contact-introduction select {
+  width: 100%; box-sizing: border-box; color: var(--text-color); background: var(--section-background);
+  border: 1px solid var(--panel-border); border-radius: 8px; font: inherit; font-size: 16px; padding: 12px;
+}
+.contact-introduction label { font-size: .95rem; margin-bottom: 6px; }
+.contact-introduction textarea { min-height: 160px; resize: vertical; }
+.contact-introduction :is(input, textarea, select, button, summary, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.contact-introduction .contact-draft-note { font-size: .85rem; padding: 0; border: 0; background: transparent; margin: 8px 0 0; line-height: 1.45; }
+.contact-intro-subject summary { cursor: pointer; font-size: .85rem; margin-bottom: 8px; }
+.contact-intro-recommendation { border: 1px solid var(--panel-border); border-radius: 8px; padding: 14px; font-size: .9rem; }
+.contact-intro-recommendation blockquote { margin: 12px 0; white-space: pre-wrap; }
+.contact-intro-submit-note { font-size: .85rem; line-height: 1.45; margin: 16px 0 12px; }
+.contact-intro-sent { display: grid; gap: 12px; padding-block: 12px; }
+.contact-intro-sent p, .contact-intro-sent h3 { margin: 0; }
+.contact-intro-phone { font-size: 1.4rem; font-weight: 700; }
+@media (max-width: 600px) {
+  .contact-modal-content.contact-introduction { width: calc(100% - 20px); padding: 24px 20px; margin: 0; max-height: calc(100dvh - 20px); }
+  .contact-intro-identity { grid-template-columns: 1fr; }
+}
+

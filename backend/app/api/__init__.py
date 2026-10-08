@@ -4,6 +4,7 @@ from .admin_routes import router as admin_router
 from .agent_access_routes import router as agent_access_router
 from .chat_routes import router as chat_router
 from .chat_routes import status_router as chat_status_router
+from .contact_draft_routes import router as contact_draft_router
 from .contact_routes import router as contact_router
 from .content_routes import router as content_router
 from .custom_resolution import router as custom_resolution_router
@@ -31,6 +32,7 @@ api_router.include_router(events_router, tags=["events"])
 api_router.include_router(custom_resolution_router, tags=["custom_resolution"])
 api_router.include_router(content_router)  # aboutme, skills, experience, projects
 api_router.include_router(contact_router, tags=["contact"])
+api_router.include_router(contact_draft_router, tags=["contact"])
 api_router.include_router(zuni_router, tags=["zuni"])
 api_router.include_router(chat_status_router, tags=["chat"])
 api_router.include_router(agent_access_router, tags=["agent"])

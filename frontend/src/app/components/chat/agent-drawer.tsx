@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Dialog, DialogContent, useMediaQuery, useTheme } from '@mui/material';
 
 import { AgentConversation } from '../../agent/agent-conversation';
 import { useThemeStore } from '../../../shared/stores/theme-store';
+import { openDialogCount, subscribeDialogs } from '../../../shared/hooks/dialog-stack';
 
 export default function AgentDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const mobile = useMediaQuery(useTheme().breakpoints.down('sm'));
@@ -13,10 +14,14 @@ export default function AgentDrawer({ open, onClose }: { open: boolean; onClose:
   // local to the panel.
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const sidePanel = !mobile;
+  // Contact owns focus above this pane. Two document-level focus traps
+  // otherwise repeatedly steal focus from each other on narrow screens.
+  const pageDialogOpen = useSyncExternalStore(subscribeDialogs, openDialogCount) > 0;
   return <div ref={setContainer}>{container && <Dialog open={open} onClose={onClose} keepMounted fullScreen={mobile} maxWidth={false}
     container={sidePanel ? container : undefined}
     aria-labelledby="agent-drawer-title" hideBackdrop={sidePanel} disableScrollLock disableRestoreFocus
-    disableEnforceFocus={sidePanel}
+    disableEnforceFocus={sidePanel || pageDialogOpen}
+    disableAutoFocus={pageDialogOpen}
     sx={sidePanel ? { pointerEvents: 'none', '& .MuiDialog-container': { pointerEvents: 'none' } } : undefined}
     PaperProps={{ className: 'agent-drawer', sx: {
       pointerEvents: 'auto',

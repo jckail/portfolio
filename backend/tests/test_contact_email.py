@@ -40,6 +40,7 @@ def _isolate(monkeypatch):
 
 def _with_settings(monkeypatch, **overrides):
     settings = dataclasses.replace(config.get_settings(), **overrides)
+    monkeypatch.setattr(contact_routes, "get_settings", lambda: settings)
     monkeypatch.setattr(owner_mail, "get_settings", lambda: settings)
 
 
@@ -105,3 +106,35 @@ def test_reply_to_is_the_visitor_and_subject_is_single_line(client):
     message = FakeSendGrid.sent[0]
     assert message.subject.subject == "Jordan Kail: Hi there friend"
     assert message.reply_to.email == "someone@example.com"
+
+
+def test_company_in_notification_and_phone_after_delivery(client, monkeypatch):
+    _with_settings(monkeypatch, contact_phone="+12025550100")
+    response = client.post("/api/contact/send-email", json={**PAYLOAD, "company": " Example <Labs>\n Team "})
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json()["phone"] == "+12025550100"
+    sent = FakeSendGrid.sent[0]
+    bodies = {part.mime_type: part.content for part in sent.contents}
+    assert "Company: Example <Labs> Team" in bodies["text/plain"]
+    assert "Example &lt;Labs&gt; Team" in bodies["text/html"]
+    assert "Example <Labs>" not in bodies["text/html"]
+    assert sent.reply_to.email == PAYLOAD["from_email"]
+
+
+def test_failed_delivery_never_reveals_phone(client, monkeypatch):
+    _with_settings(monkeypatch, contact_phone="+12025550100")
+    FakeSendGrid.status_code = 500
+    response = client.post("/api/contact/send-email", json={**PAYLOAD, "company": "Example Labs"})
+    assert response.status_code == 502
+    assert response.headers["cache-control"] == "no-store"
+    assert "phone" not in response.json()
+    assert "+12025550100" not in response.text
+
+
+@pytest.mark.parametrize("extra", [{"company": " "}, {"company": "x" * 151}, {"subject": " "}, {"message": "\n "}])
+def test_blank_and_oversized_fields_send_nothing(client, extra):
+    response = client.post("/api/contact/send-email", json={**PAYLOAD, **extra})
+    assert response.status_code == 422
+    assert response.headers["cache-control"] == "no-store"
+    assert FakeSendGrid.sent == []
