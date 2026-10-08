@@ -54,7 +54,7 @@ export default function ConnectAssistantModal({ onClose, onUseAgent }: {
     labelledBy={titleId} onClose={onClose} closeButton>
     <header className="connect-assistant-header">
       <span className="connect-eyebrow">Your agent, my public context</span>
-      <h2 id={titleId}>Connect your assistant</h2>
+      <h2 id={titleId}>Connect your agent</h2>
       <p>Explore my experience, projects, and skills in the assistant you already use. Public, read-only access. No API key required.</p>
     </header>
     <div className="connect-client-tabs" role="tablist" aria-label="Choose your assistant">

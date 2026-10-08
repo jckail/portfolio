@@ -41,13 +41,13 @@ describe('About hero heading', () => {
     expect(h1s[0]).toHaveTextContent('Jordan Kail');
     expect(h1s[0]).toHaveClass('about-name');
     expect(screen.queryByText('Hi there')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Connect your assistant' })).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(screen.getByRole('button', { name: 'Connect your agent' })).toHaveAttribute('aria-haspopup', 'dialog');
   });
   it('opens the connection overlay without leaving the portfolio', async () => {
     render(<TLDR />);
     const pathname = window.location.pathname;
-    fireEvent.click(screen.getByRole('button', { name: 'Connect your assistant' }));
-    expect(await screen.findByRole('dialog', { name: 'Connect your assistant' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Connect your agent' }));
+    expect(await screen.findByRole('dialog', { name: 'Connect your agent' })).toBeInTheDocument();
     expect(window.location.pathname).toBe(pathname);
   });
 });
