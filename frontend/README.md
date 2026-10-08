@@ -2,7 +2,7 @@
 
 React single-page app for [jckail.com](https://www.jckail.com): an
 interactive resume with an AI chat assistant, theming (including a hidden
-party mode), and analytics.
+party mode), hosted labs and the Data Playground. Visitor analytics is retired.
 
 ## Technology Stack
 
@@ -18,6 +18,9 @@ party mode), and analytics.
 ```
 src/
 ├── app/                     # Application core
+│   ├── agent/               # /agent page and the shared AgentConversation (access gate, evidence cards)
+│   ├── dataplayground/      # Data Playground workbench (see docs/dataplayground.md)
+│   ├── labs/                # Hosted lab demos, lazy via LabHost (see docs/labs.md)
 │   ├── components/          # Feature components
 │   │   ├── chat/            # AI assistant (WebSocket streaming, confirmation cards)
 │   │   ├── sections/        # About, experience, projects, skills, resume
@@ -25,7 +28,7 @@ src/
 │   └── providers/           # Data, resume, particles providers
 │
 ├── shared/                  # Cross-cutting code
-│   ├── analytics/           # Consent-gated typed events (core, tracker, events list)
+│   ├── analytics/           # Retired typed-event API, kept inert (core, tracker, events list)
 │   ├── components/          # Header, navigation, command palette, etc.
 │   ├── stores/              # Zustand stores
 │   ├── hooks/               # useScrollSpy, useMediaQuery, useEscapeKey, ...
@@ -62,9 +65,14 @@ is the resume PDF download, which needs a raw `fetch` for the blob.
   `action_result` frame only.
 - The transcript is kept in `sessionStorage` and replayed to the server in a
   `history` frame after a reconnect.
-- All chat state lives in a single `useChat()` instance owned by
-  `ChatPortal`; the `Chat` component is purely presentational.
-- Deep-linkable via `?ai_chat=open`.
+- All chat state lives in a single `useChat()` instance inside the shared
+  `AgentConversation`, which is mounted by the `/agent` page and by the lazy
+  right-side pane (`AgentDrawer`). `ChatPortal` renders the bottom-right
+  launcher and owns only the pane's open state.
+- The pane is deep-linkable via `?ai_chat=open`; `?` or `/` opens it too.
+- Access is gated: a two-message anonymous preview, then an email/company
+  introduction. See
+  [docs/portfolio-assistant-runtime.md](../docs/portfolio-assistant-runtime.md).
 - `ChatPortal` checks `GET /api/chat/status` on mount and hides the chat
   button entirely when the backend reports the assistant unavailable.
 
