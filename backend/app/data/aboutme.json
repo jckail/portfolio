@@ -1,8 +1,8 @@
 {
-    "greeting": "\ud83d\udc4b Hi, I'm Jordan",
-    "description": "Staff Software Engineer with over 13 years of experience and deep expertise in AI agents, agent platforms, and distributed data systems. At Together AI, established the data engineering team and then created the Agent Platform team, building agent harnesses, an internal agents factory, and tracing, replay, and evaluation infrastructure. Previously built AI/ML classifiers at Meta and agent-based model governance at Prove Identity.",
-    "aidetails": "Ask my \u2728AI assistant below for more details about me.",
-    "brief_bio": "I'm a software engineer with a deep curiosity for technology \u2014 always exploring AI, machine learning, and data systems. I've helped build efficient, scalable platforms, complex pipelines, and production transformer-model workflows.\n\nI love collaborating with others to create technology that makes a real impact. When I'm not working, you'll likely find me building computers, hiking with my dog in the mountains, or experimenting with new ML tools.",
+    "greeting": "Jordan Kail",
+    "description": "I build production AI agent platforms. At Together AI, I established data engineering and created the Agent Platform team, building agent harnesses, tracing, replay, and evaluation infrastructure.",
+    "aidetails": "Chat with my Agent for evidence from my work and projects.",
+    "brief_bio": "My work connects AI agents with the distributed systems they depend on. I care about reliable execution, useful evaluation, and tools that make engineering teams more effective.\n\nOutside work, I explore the mountains with my dog, build computers, and experiment with new tools.",
     "full_portrait": "/images/headshot/headshot.webp",
     "resume_name": "JordanKailResume.pdf",
     "primary_skills": [

@@ -174,8 +174,14 @@ ALL_TOOLS.append({
         "required": ["start", "end"], "additionalProperties": False},
 })
 
+# Scheduling is deferred and email-only phone disclosure has been retired.
+# Keep dormant implementations for compatibility tests, but never advertise or
+# dispatch these capabilities in an active conversation.
+DISABLED_TOOL_NAMES = frozenset({"book_meeting", "get_meeting_availability", "request_phone"})
+ALL_TOOLS = [tool for tool in ALL_TOOLS if tool["name"] not in DISABLED_TOOL_NAMES]
+EXECUTE_TOOLS = [tool for tool in EXECUTE_TOOLS if tool["name"] not in DISABLED_TOOL_NAMES]
+
 TOOL_KINDS: dict[str, str] = {
-    "get_meeting_availability": KIND_READ,
     **{tool["name"]: KIND_READ for tool in CHAT_TOOLS},
     "search_portfolio": KIND_READ,
     **{tool["name"]: KIND_READ for tool in RECRUITER_TOOLS},
@@ -496,8 +502,10 @@ def _limiters():
     return contact_routes._email_limiter, contact_routes._phone_limiter
 
 
-async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str, *, confirmation_id: str = "") -> ActionOutcome:
+async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str, *, confirmation_id: str = "", company_raw: object = None) -> ActionOutcome:
     """Run an execute-type tool the visitor confirmed. Never raises."""
+    if tool in DISABLED_TOOL_NAMES:
+        return ActionOutcome(False, "Please use the contact form to send Jordan a message.", note="the capability is unavailable; nothing was sent")
     email = validate_email(email_raw)
     if email is None:
         return ActionOutcome(False, INVALID_EMAIL, note="the email address was invalid, nothing was sent")
@@ -505,6 +513,10 @@ async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str, *
     if clean is None:
         return ActionOutcome(False, INVALID_ARGS, note="the details were invalid, nothing was sent")
 
+    company = _text_field({"company": company_raw}, "company", 150, single_line=True, truncate=False, required=True)
+    if company is None:
+        return ActionOutcome(False, "Please enter your company before sending.", note="company was missing or invalid; nothing was sent")
+    clean["company"] = company
     email_limiter, phone_limiter = _limiters()
     limiter = phone_limiter if tool == "request_phone" else email_limiter
     if not limiter.allow(ip):
@@ -530,12 +542,13 @@ async def execute_confirmed(tool: str, args: dict, email_raw: object, ip: str, *
 
 
 async def _execute_mail(tool: str, args: dict, email: str) -> ActionOutcome:
+    company = args["company"]
     if tool == "contact_jordan":
         subject = f"Jordan Kail: {args['subject']}"
         body = args["message"]
-        text = f"From: {email}\n\n{body}\n\n(Sent from the portfolio AI assistant after the visitor confirmed it.)"
+        text = f"From: {email}\nCompany: {company}\n\n{body}\n\n(Sent from the portfolio AI assistant after the visitor confirmed it.)"
         markup = (
-            f"<p><strong>From:</strong> {html.escape(email)}</p><p>{html.escape(body)}</p>"
+            f"<p><strong>From:</strong> {html.escape(email)}</p><p><strong>Company:</strong> {html.escape(company)}</p><p>{html.escape(body)}</p>"
             "<p><em>Sent from the portfolio AI assistant after the visitor confirmed it.</em></p>"
         )
         purpose = "assistant contact email"
@@ -543,11 +556,11 @@ async def _execute_mail(tool: str, args: dict, email: str) -> ActionOutcome:
         topic, times = args["topic"], args["preferred_times"]
         subject = f"Meeting request via portfolio: {topic}"
         text = (
-            f"From: {email}\n\nMeeting request via the portfolio AI assistant.\n"
+            f"From: {email}\nCompany: {company}\n\nMeeting request via the portfolio AI assistant.\n"
             f"Topic: {topic}\nPreferred times: {times or 'not given'}\n"
         )
         markup = (
-            f"<p><strong>From:</strong> {html.escape(email)}</p>"
+            f"<p><strong>From:</strong> {html.escape(email)}</p><p><strong>Company:</strong> {html.escape(company)}</p>"
             f"<p>Meeting request via the portfolio AI assistant.</p>"
             f"<p><strong>Topic:</strong> {html.escape(topic)}<br>"
             f"<strong>Preferred times:</strong> {html.escape(times or 'not given')}</p>"
@@ -563,7 +576,7 @@ async def _execute_mail(tool: str, args: dict, email: str) -> ActionOutcome:
         return ActionOutcome(False, GENERIC_FAILURE, note="sending failed, nothing was sent")
     log_event("contact.sent")
     if tool == "contact_jordan":
-        return ActionOutcome(True, "Sent. Jordan will reply to the email address you gave.", note="the email was sent")
+        return ActionOutcome(True, "Sent. Jordan will reply to the email address you gave.", phone=get_settings().contact_phone or None, note="the email was sent")
     return ActionOutcome(
         True, "Sent. Jordan will reply to the email address you gave.", note="the meeting request was sent"
     )

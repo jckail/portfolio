@@ -369,6 +369,14 @@ describe('useChat', () => {
       expect(result.current.pendingActions[0].status).toBe('pending');
     });
 
+    it('requires a visitor company before sending an introduction', () => {
+      const { result, ws } = openWithCard();
+      let errors: Record<string, string> | null = null;
+      act(() => { errors = result.current.confirmAction('act_1', 'me@example.com', frame.args); });
+      expect(errors).toHaveProperty('company');
+      expect(sentTypes(ws)).not.toContain('confirm_action');
+    });
+
     it('rejects an empty subject or message', () => {
       const { result } = openWithCard();
       let errors: Record<string, string> | null = null;
@@ -383,7 +391,7 @@ describe('useChat', () => {
       const { result, ws } = openWithCard();
       let errors: Record<string, string> | null = {};
       act(() => {
-        errors = result.current.confirmAction('act_1', ' me@example.com ', { subject: 'S', message: 'Edited' });
+        errors = result.current.confirmAction('act_1', ' me@example.com ', { subject: 'S', message: 'Edited' }, 'Example Labs');
       });
       expect(errors).toBeNull();
       const sent = JSON.parse(ws.sent.at(-1) as string);
@@ -391,6 +399,7 @@ describe('useChat', () => {
         type: 'confirm_action',
         id: 'act_1',
         email: 'me@example.com',
+        company: 'Example Labs',
         args: { subject: 'S', message: 'Edited' },
       });
       expect(result.current.pendingActions[0].status).toBe('submitting');
@@ -398,7 +407,7 @@ describe('useChat', () => {
       // A second press while submitting sends nothing more.
       const count = ws.sent.length;
       act(() => {
-        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+        result.current.confirmAction('act_1', 'me@example.com', frame.args, 'Example Labs');
       });
       expect(ws.sent).toHaveLength(count);
     });
@@ -414,7 +423,7 @@ describe('useChat', () => {
     it('renders a success result and keeps the phone in memory only', () => {
       const { result, ws } = openWithCard();
       act(() => {
-        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+        result.current.confirmAction('act_1', 'me@example.com', frame.args, 'Example Labs');
       });
       act(() =>
         ws.simulateMessage({ type: 'action_result', id: 'act_1', ok: true, tool: 'request_phone', message: 'Sent.', phone: '+1 555 0100' })
@@ -426,7 +435,7 @@ describe('useChat', () => {
     it('does not take a phone number from a failed result', () => {
       const { result, ws } = openWithCard();
       act(() => {
-        result.current.confirmAction('act_1', 'me@example.com', frame.args);
+        result.current.confirmAction('act_1', 'me@example.com', frame.args, 'Example Labs');
       });
       act(() =>
         ws.simulateMessage({ type: 'action_result', id: 'act_1', ok: false, message: 'Try later.', phone: '+1 555 0100' })

@@ -11,7 +11,7 @@ test('chat confirmation card: validation, cancel, confirm and result', async ({ 
       const frame = JSON.parse(String(raw)) as Record<string, unknown>;
       received.push(frame);
       if (frame.type === 'context') {
-        ws.send(JSON.stringify({ type: 'confirm_action', id: 'act-1', tool: 'request_phone' }));
+        ws.send(JSON.stringify({ type: 'confirm_action', id: 'act-1', tool: 'request_meeting', args: { topic: 'Synthetic cancellation check', preferred_times: 'Discuss by email' } }));
         ws.send(
           JSON.stringify({
             type: 'confirm_action',
@@ -39,7 +39,7 @@ test('chat confirmation card: validation, cancel, confirm and result', async ({ 
   expect(response?.status()).toBe(200);
   await expect.poll(() => received[0]).toEqual({ type: 'access', token: 'mock-access' });
 
-  const phoneCard = page.getByRole('group', { name: "Request Jordan's phone number?" });
+  const phoneCard = page.getByRole('group', { name: 'Request a call with Jordan?' });
   const msgCard = page.getByRole('group', { name: 'Send this message to Jordan?' });
   await expect(phoneCard).toBeVisible();
   await expect(msgCard).toBeVisible();
@@ -62,8 +62,9 @@ test('chat confirmation card: validation, cancel, confirm and result', async ({ 
 
   // Confirm sends the id and trimmed email; the result renders.
   await msgCard.getByLabel(/Your email/).fill('  visitor@example.com ');
+  await msgCard.getByLabel('Company or organization').fill('Example Labs');
   await msgCard.getByRole('button', { name: 'Confirm' }).click();
   await expect(msgCard.getByText('Sent to Jordan.')).toBeVisible();
   const confirm = received.find(f => f.type === 'confirm_action');
-  expect(confirm).toMatchObject({ type: 'confirm_action', id: 'act-2', email: 'visitor@example.com' });
+  expect(confirm).toMatchObject({ type: 'confirm_action', id: 'act-2', email: 'visitor@example.com', company: 'Example Labs' });
 });

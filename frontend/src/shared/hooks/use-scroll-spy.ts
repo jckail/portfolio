@@ -88,17 +88,11 @@ export const useScrollSpy = () => {
 
       const nodeList = document.querySelectorAll<HTMLElement>('section[id]');
       const sections = Array.from<HTMLElement>(nodeList);
-      let currentSection: HTMLElement | null = null;
-      let minDistance = Infinity;
-
-      // Find the section closest to the top of the viewport
+      const header = document.querySelector<HTMLElement>('.header');
+      const threshold = (header?.getBoundingClientRect().height ?? 72) + 80;
+      let currentSection: HTMLElement | null = sections[0] ?? null;
       for (const section of sections) {
-        const rect = section.getBoundingClientRect();
-        const distance = Math.abs(rect.top);
-        if (distance < minDistance) {
-          minDistance = distance;
-          currentSection = section;
-        }
+        if (section.getBoundingClientRect().top <= threshold) currentSection = section;
       }
 
       // Update URL and track analytics if we found a section

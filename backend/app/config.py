@@ -98,6 +98,7 @@ class Settings:
     # Empty fails closed; never derive it from database/provider credentials.
     agent_access_secret: str = ""
     agent_access_required: bool = True
+    chat_receipt_daily_token_budget: int = 200000
     google_calendar_client_id: str = ""
     google_calendar_client_secret: str = ""
     google_calendar_refresh_token: str = ""
@@ -190,6 +191,7 @@ def get_settings() -> Settings:
         chat_fallback_model=os.getenv("CHAT_FALLBACK_MODEL", "").strip() or "gemini-2.5-flash",
         chat_max_tokens=int(os.getenv("CHAT_MAX_TOKENS", "1024")),
         chat_daily_token_budget=int(os.getenv("CHAT_DAILY_TOKEN_BUDGET", "") or "2000000"),
+        chat_receipt_daily_token_budget=max(1, int(os.getenv("CHAT_RECEIPT_DAILY_TOKEN_BUDGET", "200000"))),
         sendgrid_api_key=os.getenv("SENDGRID_API_KEY", ""),
         email_provider=os.getenv("EMAIL_PROVIDER", "sendgrid").strip().lower(),
         ses_region=os.getenv("SES_REGION", "").strip(),

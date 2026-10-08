@@ -28,7 +28,7 @@ function EvidenceHits({ value }: { value: unknown }) {
 export function PortfolioCards({ cards, onPrompt, disabled = false }: {
   cards: PortfolioCard[]; onPrompt?: (prompt: string) => void; disabled?: boolean;
 }) {
-  return <div className="agent-generated-cards" aria-label="Evidence selected for this conversation">
+  return <div className="agent-generated-cards" role="region" aria-label="Evidence selected for this conversation">
     {cards.map((card, index) => {
       const data = object(card.data);
       if (!Object.keys(data).length) return null;

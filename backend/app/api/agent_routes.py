@@ -35,7 +35,7 @@ limiter = SlidingWindowLimiter(60, 60, global_max_events=600, name="public_agent
 schema = build_schema("""
 type Profile { name: String! title: String! summary: String! location: String! url: String! github: String! linkedin: String! }
 type Experience { id: ID! company: String! title: String! date: String! location: String! highlights: [String!]! url: String! technologies: [String!]! }
-type Project { id: ID! title: String! description: String! url: String! technologies: [String!]! }
+type Project { id: ID! title: String! description: String! url: String! technologies: [String!]! status: String! contribution: String! evidence: String! }
 type Education { institution: String! study: String! date: String! }
 type SkillGroup { name: String! items: [String!]! }
 type Query { profile: Profile! experience: [Experience!]! projects: [Project!]! education: [Education!]! skillGroups: [SkillGroup!]! }

@@ -236,6 +236,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             if access_expires is None:
                 await websocket.close(code=1008, reason="Agent access required")
                 return
+        if get_settings().agent_access_required:
+            manager.inference_receipts[client_id] = access_frame["token"]
+
         while True:
             try:
                 data = await asyncio.wait_for(

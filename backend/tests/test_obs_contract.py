@@ -382,7 +382,7 @@ def _drive_real_events(client, cap):
     assert client.post("/api/admin/login", json={"email": "nobody@example.com", "password": "pw"}, headers=h
                        ).status_code == 401
     # contact failure (fake SendGrid raises) -> contact.failed + ERROR access line
-    body = {"from_email": "visitor@example.com", "subject": "s", "message": "m"}
+    body = {"company": "Private Example Labs", "from_email": "visitor@example.com", "subject": "s", "message": "m"}
     assert client.post("/api/contact/send-email", json=body, headers=h).status_code == 502
     # rate-limit block
     contact_routes._email_limiter.max_events = 1
@@ -535,7 +535,7 @@ def test_pii_never_reaches_any_log_line(client, capture, fake_mail):
     }
     client.post("/api/admin/login", json={"email": email, "password": "hunter2-FUZZPASS"}, headers=h)
     client.post("/api/contact/send-email", headers=h, json={
-        "from_email": email, "subject": f"FUZZSUBJECT {phone}", "message": f"FUZZBODY call {phone} {ip}"})
+        "company": "Private Example Labs", "from_email": email, "subject": f"FUZZSUBJECT {phone}", "message": f"FUZZBODY call {phone} {ip}"})
     client.post("/api/contact/phone", headers=h, json={"email": email})
     client.post("/api/events", headers=h, json={"event": "section_view", "props": {
         "section": email, "email": email, "phone": phone, "ip": ip, "project": "FUZZBODY", "token": "FUZZTOKEN"}})

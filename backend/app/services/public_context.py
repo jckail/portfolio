@@ -27,7 +27,8 @@ def public_context() -> dict[str, Any]:
         })
     projects = [
         {"id": key, "title": project.title, "description": project.description,
-         "url": str(project.link or ""), "technologies": project.tech_stack}
+         "url": str(project.link or ""), "technologies": project.tech_stack,
+         "status": project.status, "contribution": project.contribution, "evidence": project.evidence}
         for key, project in load_projects().root.items()
     ]
     education = json.loads((DATA_DIR / "education.json").read_text())["entries"]

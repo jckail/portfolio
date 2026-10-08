@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useSectionStore } from '../../stores/section-store';
 import { scrollToSection } from '../../utils/scroll-utils';
 import { useFocusTrap } from '../../hooks/use-focus-trap';
 import '../../../styles/components/navigation/side-panel.css';
@@ -11,71 +12,8 @@ interface SidePanelProps {
   returnFocusRef?: React.RefObject<HTMLElement>;
 }
 
-// Custom hook to get current section from URL and scroll position.
-// Note: the app-wide useScrollSpy (owned by MainContent) handles URL updates
-// and analytics; this hook only tracks the highlighted nav item locally.
-const useCurrentSection = () => {
-  const [currentSection, setCurrentSection] = React.useState('');
-
-  React.useEffect(() => {
-    const updateSection = () => {
-      const hash = window.location.hash.slice(1);
-      setCurrentSection(hash || 'about');
-    };
-
-    // Set initial section
-    updateSection();
-
-    // Listen for hash changes (from both scroll spy and manual navigation)
-    window.addEventListener('hashchange', updateSection);
-
-    // Listen for scroll events to update immediately
-    const handleScroll = () => {
-      const sections = document.querySelectorAll<HTMLElement>('section[id]');
-      let currentSectionId = '';
-      let minDistance = Infinity;
-
-      sections.forEach((section) => {
-        if (section.id) {
-          const rect = section.getBoundingClientRect();
-          const distance = Math.abs(rect.top);
-          if (distance < minDistance) {
-            minDistance = distance;
-            currentSectionId = section.id;
-          }
-        }
-      });
-
-      if (currentSectionId) {
-        setCurrentSection(currentSectionId);
-      }
-    };
-
-    // Add scroll event listener with throttling
-    let ticking = false;
-    const scrollListener = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', scrollListener, { passive: true });
-
-    return () => {
-      window.removeEventListener('hashchange', updateSection);
-      window.removeEventListener('scroll', scrollListener);
-    };
-  }, []);
-
-  return currentSection;
-};
-
 const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }) => {
-  const currentSection = useCurrentSection();
+  const currentSection = useSectionStore(state => state.currentSection);
   // The drawer is modal while open: useFocusTrap keeps Tab inside it, closes it
   // on Escape, locks page scroll, focuses the first item, and restores focus on
   // close. The trap strips `inert` from its container when it tears down, so
@@ -102,8 +40,8 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
 
   const sections = [
     { id: 'about', label: 'About' },
-    { id: 'experience', label: 'Experience' },
     { id: 'projects', label: 'Projects' },
+    { id: 'experience', label: 'Experience' },
     { id: 'skills', label: 'Skills' },
     { id: 'resume', label: 'Resume' },
   ];

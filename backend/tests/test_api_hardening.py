@@ -193,7 +193,7 @@ def test_spoofed_forwarded_for_does_not_reset_a_bucket_when_trust_is_off(
             return types.SimpleNamespace(status_code=202)
 
     monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGrid)
-    payload = {"from_email": "a@example.com", "subject": "Hi", "message": "body"}
+    payload = {"company": "Private Example Labs", "from_email": "a@example.com", "subject": "Hi", "message": "body"}
 
     limit = contact_routes._email_limiter.max_events
     for i in range(limit):
@@ -222,7 +222,7 @@ def test_contact_send_runs_off_the_event_loop_thread(client, monkeypatch):
     monkeypatch.setattr(owner_mail, "SendGridAPIClient", FakeSendGrid)
     response = client.post(
         "/api/contact/send-email",
-        json={"from_email": "a@example.com", "subject": "Hi", "message": "body"},
+        json={"company": "Private Example Labs", "from_email": "a@example.com", "subject": "Hi", "message": "body"},
     )
     assert response.status_code == 200
     assert seen["thread"] is not threading.main_thread()

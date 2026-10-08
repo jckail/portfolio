@@ -1,6 +1,5 @@
 locals {
-  # Keys of var.secrets; kept as a static list because for_each cannot
-  # iterate a sensitive value directly
+  # Terraform owns secret containers and IAM, never credential values.
   secret_names = [
     "supabase_url",
     "supabase_anon_key",
@@ -128,11 +127,15 @@ resource "google_secret_manager_secret" "secrets" {
   depends_on = [google_project_service.services]
 }
 
-resource "google_secret_manager_secret_version" "secret_versions" {
-  for_each = toset(local.secret_names)
+# Retire value management without destroying the existing Secret Manager versions.
+# Applying this only forgets their current state entries; historical state still
+# requires restricted access and credential rotation. See infra/README.md.
+removed {
+  from = google_secret_manager_secret_version.secret_versions
 
-  secret      = google_secret_manager_secret.secrets[each.key].id
-  secret_data = var.secrets[each.key]
+  lifecycle {
+    destroy = false
+  }
 }
 
 resource "google_secret_manager_secret_iam_member" "run_access" {
@@ -221,7 +224,7 @@ resource "google_cloud_run_v2_service" "app" {
           value_source {
             secret_key_ref {
               secret  = env.value
-              version = "latest"
+              version = var.secret_versions[env.key]
             }
           }
         }
@@ -242,7 +245,6 @@ resource "google_cloud_run_v2_service" "app" {
 
   depends_on = [
     google_project_service.services,
-    google_secret_manager_secret_version.secret_versions,
     google_secret_manager_secret_iam_member.contact_phone_run_access,
     google_secret_manager_secret_iam_member.vertex_api_key_run_access,
   ]
@@ -250,10 +252,12 @@ resource "google_cloud_run_v2_service" "app" {
   # Production is deployed by .github/workflows/deploy.yml, which ships a
   # digest and pins traffic. Terraform must never be the thing that moves the
   # image (see HANDOFF.md "terraform apply will revert production"), and the
-  # client fields are rewritten by every gcloud deploy.
+  # client fields are rewritten by every gcloud deploy. Traffic belongs to
+  # the verified canary promotion workflow. Environment drift stays visible.
   lifecycle {
     ignore_changes = [
       template[0].containers[0].image,
+      traffic,
       client,
       client_version,
     ]

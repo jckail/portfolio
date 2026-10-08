@@ -15,7 +15,7 @@ import type { ConfirmArgs, ConfirmTool, PendingAction } from '../../../../types/
 interface ConfirmActionCardProps {
   action: PendingAction;
   /** Returns field errors, or null once the confirmation was sent. */
-  onConfirm: (id: string, email: string, args: ConfirmArgs) => Record<string, string> | null;
+  onConfirm: (id: string, email: string, args: ConfirmArgs, company: string) => Record<string, string> | null;
   onCancel: (id: string) => void;
 }
 
@@ -58,6 +58,7 @@ const SETTLED_LABEL: Partial<Record<PendingAction['status'], string>> = {
 export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, onConfirm, onCancel }) => {
   const { id, tool, status } = action;
   const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
   const [args, setArgs] = useState<ConfirmArgs>(action.args);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const emailRef = useRef<HTMLInputElement>(null);
@@ -79,7 +80,7 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editable) return;
-    const result = onConfirm(id, email, args);
+    const result = onConfirm(id, email, args, company);
     if (result) {
       setErrors(result);
       if (result.email) emailRef.current?.focus();
@@ -209,6 +210,13 @@ export const ConfirmActionCard: React.FC<ConfirmActionCardProps> = ({ action, on
               sx={{ ...fieldSx, mb: 1.5 }}
             />}
           </>
+        )}
+
+        {!settled && (tool === 'contact_jordan' || tool === 'request_meeting') && (
+          <TextField fullWidth required size="small" label="Company or organization" name="company"
+            autoComplete="organization" value={company} onChange={e => setCompany(e.target.value)}
+            disabled={!editable} error={Boolean(errors.company)} helperText={errors.company || undefined}
+            inputProps={{ maxLength: 150 }} sx={{ ...fieldSx, mb: 1.5 }} />
         )}
 
         {!settled && (

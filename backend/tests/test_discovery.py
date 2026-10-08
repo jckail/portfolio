@@ -170,7 +170,9 @@ def test_sitemap_lists_the_canonical_urls_with_lastmod(client):
     assert locs == [
         "https://www.jckail.com/",
         "https://www.jckail.com/dataplayground",
-        *(f"https://www.jckail.com/{slug}" for slug in load_labs()),
+        "https://www.jckail.com/agents.html",
+        "https://www.jckail.com/privacy/",
+        *(f"https://www.jckail.com/{slug}" for slug in load_labs() if slug != "jobbr"),
     ]
     assert not any(loc.endswith((".txt", ".json")) or "/api/" in loc for loc in locs)
     for url in root.findall("s:url", ns):

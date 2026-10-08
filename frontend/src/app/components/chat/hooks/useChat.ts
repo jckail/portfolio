@@ -561,10 +561,14 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; ena
 
   /** Send the visitor's confirmation. Returns field errors, or null when sent. */
   const confirmAction = useCallback(
-    (id: string, email: string, args: ConfirmArgs): Record<string, string> | null => {
+    (id: string, email: string, args: ConfirmArgs, company = ''): Record<string, string> | null => {
       const card = pendingActions.find(p => p.id === id);
       if (!card || card.status !== 'pending') return {};
       const errors = validateArgs(card.tool, args);
+      if (card.tool === 'contact_jordan' || card.tool === 'request_meeting') {
+        if (!company.trim()) errors.company = 'Add your company or organization.';
+        else if (company.length > 150 || /[\r\n]/.test(company)) errors.company = 'Use one line, up to 150 characters.';
+      }
       const emailError = validateEmail(email);
       if (emailError) errors.email = emailError;
       if (Object.keys(errors).length > 0) return errors;
@@ -584,7 +588,7 @@ export const useChat = (options: { accessToken?: string; fullPage?: boolean; ena
         );
         return {};
       }
-      const frame: Record<string, unknown> = { type: 'confirm_action', id, email: email.trim() };
+      const frame: Record<string, unknown> = { type: 'confirm_action', id, email: email.trim(), company: company.trim() };
       if (card.tool !== 'request_phone') frame.args = args;
       ws.send(JSON.stringify(frame));
       setPendingActions(prev => prev.map(p => (p.id === id ? { ...p, status: 'submitting' } : p)));

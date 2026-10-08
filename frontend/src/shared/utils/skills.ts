@@ -32,14 +32,14 @@ export function findSkillKey(skillsData: SkillsData, tagName: string): string | 
 // Tag words whose casing CSS `text-transform: capitalize` cannot produce.
 const TAG_WORDS: Record<string, string> = {
   ai: 'AI', api: 'API', apm: 'APM', aws: 'AWS', bi: 'BI', cncf: 'CNCF', css: 'CSS',
-  dag: 'DAG', e2e: 'E2E', elk: 'ELK', elt: 'ELT', etl: 'ETL', gpt: 'GPT', hdfs: 'HDFS',
+  dag: 'DAG', e2e: 'E2E', elk: 'ELK', elt: 'ELT', etl: 'ETL', gpt: 'GPT', gcp: 'GCP', hdfs: 'HDFS',
   iaas: 'IaaS', iac: 'IaC', json: 'JSON', jvm: 'JVM', llm: 'LLM', ml: 'ML', mlops: 'MLOps',
   mvc: 'MVC', nlp: 'NLP', nosql: 'NoSQL', npm: 'npm', olap: 'OLAP', orm: 'ORM', os: 'OS',
   paas: 'PaaS', rag: 'RAG', rdbms: 'RDBMS', rest: 'REST', saas: 'SaaS', spa: 'SPA',
   sql: 'SQL', ui: 'UI', ux: 'UX', w3c: 'W3C', wsgi: 'WSGI', openapi: 'OpenAPI',
   postgresql: 'PostgreSQL', github: 'GitHub', javascript: 'JavaScript',
 };
-const TAG_PHRASES: Record<string, string> = { 'ci-cd': 'CI/CD', 'ui-ux': 'UI/UX' };
+const TAG_PHRASES: Record<string, string> = { 'ci-cd': 'CI/CD', 'ui-ux': 'UI/UX', 'next.js': 'Next.js' };
 
 /**
  * Human label for a tech-stack or descriptor tag. A tag that names a known

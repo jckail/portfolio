@@ -27,11 +27,11 @@ function buildStory(project: Project) {
   }
   const detail = project.description_detail?.trim();
   if (detail && detail !== project.description?.trim()) {
-    // Prefer a shorter "story" slice for the approach step
-    const approach =
-      detail.length > 420 ? `${detail.slice(0, 417).trimEnd()}…` : detail;
-    steps.push({ label: 'Story', text: approach });
+    steps.push({ label: 'Story', text: detail });
   }
+  if (project.status) steps.push({ label: 'Status', text: project.status });
+  if (project.contribution) steps.push({ label: 'My contribution', text: project.contribution });
+  if (project.evidence) steps.push({ label: 'Evidence', text: project.evidence });
   if (project.tech_stack && project.tech_stack.length > 0) {
     steps.push({
       label: 'Stack',
@@ -59,7 +59,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
 
   const story = useMemo(() => buildStory(project), [project]);
   const detail =
-    project.description_detail?.trim() || project.description;
+    [project.description_detail?.trim() || project.description, project.contribution && `My contribution: ${project.contribution}`, project.evidence && `Evidence: ${project.evidence}`].filter(Boolean).join('\n\n');
 
   return (
     <DialogShell
@@ -113,7 +113,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           >
             {project.link_label || 'View project'}
           </a>
-          {project.link2 && (
+          {project.link2 && project.link2 !== project.link && (
             <a
               href={project.link2}
               target="_blank"

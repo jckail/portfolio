@@ -111,13 +111,13 @@ def load_content() -> dict:
     projs = []
     for k in PROJECT_KEYS:
         p = projects[k]
-        links = [short_url(u) for u in (p.get("link"), p.get("link2")) if u]
+        links = [short_url(u) for u in dict.fromkeys((p.get("link"), p.get("link2"))) if u]
         projs.append(
             {
                 "title": p["title"].strip(),
                 "description": first_sentence(p.get("resume_description", p["description"])),
                 "links": links,
-                "urls": [u for u in (p.get("link"), p.get("link2")) if u],
+                "urls": [u for u in dict.fromkeys((p.get("link"), p.get("link2"))) if u],
             }
         )
 

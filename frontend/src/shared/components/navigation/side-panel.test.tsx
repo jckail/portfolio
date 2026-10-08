@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
+import { useSectionStore } from '../../stores/section-store';
 import SidePanel from './side-panel';
 
 vi.mock('../../utils/scroll-utils', () => ({ scrollToSection: vi.fn() }));
@@ -83,7 +84,7 @@ describe('SidePanel focus management', () => {
 
 describe('SidePanel current location', () => {
   it('announces the active section rather than relying on its highlight', () => {
-    window.history.replaceState({}, '', '/#projects');
+    useSectionStore.setState({ currentSection: 'projects' });
     render(<SidePanel isOpen onClose={() => {}} />);
     expect(screen.getByRole('button', { name: 'Projects' })).toHaveAttribute('aria-current', 'location');
     expect(screen.getByRole('button', { name: 'About' })).not.toHaveAttribute('aria-current');

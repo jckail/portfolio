@@ -123,7 +123,6 @@ jobs:
         docker load --input "$RUNNER_TEMP/image/portfolio.tar"
         IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
         docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:${GITHUB_SHA}"
-        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
         docker push "${IMAGE}:${GITHUB_SHA}"
         # --quiet prints the pushed tag, not its digest. Read the local engine's
         # registry manifest identity recorded by the successful push instead.
@@ -134,7 +133,6 @@ jobs:
           exit 1
         fi
         echo "DEPLOY_IMAGE=${IMAGE}@${DIGEST}" >> "$GITHUB_ENV"
-        docker push "${IMAGE}:latest"
 
     # Deploy the new revision with zero live traffic, verify it directly
     # via its own tagged URL, and only then promote to 100%. This closes
@@ -144,7 +142,15 @@ jobs:
     # traffic is ever shifted and the prior revision keeps serving
     # unaffected; rollback is documented in HANDOFF.md.
     - name: Deploy new revision (no traffic yet)
+      env:
+        # Version 1 verified from metadata on 2026-10-08. Rotation must explicitly
+        # update this repository variable; latest must never change old revisions.
+        AGENT_ACCESS_SECRET_VERSION: ${{ vars.AGENT_ACCESS_SECRET_VERSION || '1' }}
       run: |
+        if [[ ! "$AGENT_ACCESS_SECRET_VERSION" =~ ^[1-9][0-9]*$ ]]; then
+          echo "::error::AGENT_ACCESS_SECRET_VERSION must be a numeric Secret Manager version"
+          exit 1
+        fi
         TAG="gh-${GITHUB_SHA::7}"
         echo "TAG=$TAG" >> "$GITHUB_ENV"
         gcloud run deploy "$SERVICE" \
@@ -152,7 +158,7 @@ jobs:
           --region "$REGION" \
           --image "$DEPLOY_IMAGE" \
           --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
-          --update-secrets "AGENT_ACCESS_SECRET=portfolio-agent-access:latest" \
+          --update-secrets "AGENT_ACCESS_SECRET=portfolio-agent-access:${AGENT_ACCESS_SECRET_VERSION}" \
           --cpu-boost \
           --session-affinity \
           --startup-probe="httpGet.path=/api/health,httpGet.port=8080,initialDelaySeconds=5,periodSeconds=5,failureThreshold=24,timeoutSeconds=3" \
@@ -198,6 +204,14 @@ jobs:
         # Traffic changes can take time to reach every request. Retry with a
         # bounded probe, and accept only the immutable commit we promoted.
         python3 helpers/verify_runtime.py --url "$URL" --sha "$GITHUB_SHA"
+
+    # latest is a convenience pointer to a verified production image, never
+    # an input to deployment or Terraform.
+    - name: Publish verified production alias
+      run: |
+        IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
+        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
+        docker push "${IMAGE}:latest"
 
     - name: Remove stale automated revision tags after verified promotion
       run: python3 helpers/cleanup_revision_tags.py

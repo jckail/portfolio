@@ -173,7 +173,7 @@ def test_labs_follow_project_order(tmp_path):
     write(tmp_path / "labs" / "abc.json", lab_data("abc", project_key="go_pilot"))
     write(tmp_path / "labs" / "mid.json", lab_data("mid", project_key="ai_billing"))
     catalog = build_catalog(tmp_path / "labs", tmp_path / "forwards.json", PROJECT_KEYS)
-    assert list(catalog.labs) == ["mid", "zed", "abc"]
+    assert list(catalog.labs) == ["zed", "mid", "abc"]
 
 
 def test_real_data_is_valid_and_every_hosted_slug_has_a_frontend_folder():

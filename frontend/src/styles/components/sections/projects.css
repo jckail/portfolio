@@ -140,3 +140,5 @@
     outline: 2px solid Highlight;
   }
 }
+
+.project-status { display: inline-block; color: var(--text-secondary); font-size: .8rem; margin-bottom: .5rem; border: 1px solid var(--primary-border); border-radius: 999px; padding: .15rem .6rem; }

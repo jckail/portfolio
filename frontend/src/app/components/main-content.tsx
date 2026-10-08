@@ -4,6 +4,7 @@ import { openDoodle } from '../../shared/utils/open-doodle';
 import { Header } from './header/header';
 import { NotFound, isKnownPath } from './not-found';
 import TLDR from './sections/about';
+import ScrollNavigation from '../../shared/components/navigation/scroll-navigation';
 import Footer from './footer';
 import { useScrollSpy } from '../../shared/hooks/use-scroll-spy';
 import { useLocation } from '../../shared/hooks/use-location';
@@ -110,8 +111,18 @@ const MainContentInner: React.FC = () => {
     // Scroll once the lazy sections have had time to mount. One timer (it
     // used to be a 500ms timer nested in a 100ms one, and only the outer one
     // was cleared on unmount).
-    const timer = setTimeout(() => scrollToSection(hash.substring(1)), 600);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(() => {
+      if (window.location.hash === hash && window.scrollY < 4) scrollToSection(hash.substring(1));
+    }, 600);
+    // A visitor may navigate before lazy sections finish loading. Never let
+    // the initial deep-link timer pull them back after their own interaction.
+    const cancel = () => clearTimeout(timer);
+    const events = ['pointerdown', 'wheel', 'touchstart', 'keydown'] as const;
+    for (const event of events) window.addEventListener(event, cancel, { once: true, passive: true });
+    return () => {
+      clearTimeout(timer);
+      for (const event of events) window.removeEventListener(event, cancel);
+    };
   }, []);
 
   const handleDoodleToggle = useCallback(() => {
@@ -133,6 +144,7 @@ const MainContentInner: React.FC = () => {
   return (
     <div className="main">
       <Header />
+      <ScrollNavigation />
       <main id="main-content" tabIndex={-1}>
         <div className="main-content">
           {/* About section is eagerly loaded */}
@@ -141,12 +153,12 @@ const MainContentInner: React.FC = () => {
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
-          <SectionSlot name="experience">
-            <Experience />
-          </SectionSlot>
-
           <SectionSlot name="projects">
             <Projects />
+          </SectionSlot>
+
+          <SectionSlot name="experience">
+            <Experience />
           </SectionSlot>
 
           <SectionSlot name="skills">

@@ -289,3 +289,13 @@
     flex: 0 0 auto;
   }
 }
+
+.skills-focus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-xl); margin-bottom: var(--spacing-xl); }
+.skills-focus > div { border-left: 2px solid var(--rail-color); padding-left: var(--spacing-md); }
+.skills-focus h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: var(--text-lg); }
+.skills-focus p { max-width: 50ch; color: var(--text-secondary); line-height: var(--leading-body); }
+.skills-focus a { color: var(--accent-text); text-underline-offset: 4px; }
+.skills-catalogue > summary { cursor: pointer; padding: var(--spacing-md) 0; font-weight: 700; color: var(--accent-text); }
+.skills-catalogue > summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.skills-catalogue[open] > summary { margin-bottom: var(--spacing-md); }
+@media (max-width: 600px) { .skills-focus { grid-template-columns: 1fr; } }

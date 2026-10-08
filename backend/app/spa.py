@@ -338,6 +338,9 @@ class SPAStaticFiles(StaticFiles):
             raw = inject_jsonld(raw, self._jsonld())
         if home and self._snapshot is not None:
             raw = inject_root_content(raw, self._snapshot())
+        if not home and not lab and not hosted:
+            # Agent/admin are interactive utility views, not duplicate search landing pages.
+            raw = re.sub(rb'<meta name="robots" content="[^"]*"', b'<meta name="robots" content="noindex, follow"', raw)
         body = inject_bootstrap(raw, self._bootstrap())
         # A content hash, not mtime: the body depends on the data as well as
         # the file, and must not keep an old tag across a content-only deploy.

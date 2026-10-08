@@ -17,9 +17,11 @@ from fastapi import WebSocket
 
 from backend.app.config import get_settings
 from backend.app.models import get_all_models
+from backend.app.services import inference_budget
 from backend.app.services.chat_actions import normalize_tool_action
 from backend.app.services.chat_tools import (
     ALL_TOOLS,
+    DISABLED_TOOL_NAMES,
     EXECUTE_TOOL_NAMES,
     EXPIRED_ACTION,
     READ_TOOL_HANDLERS,
@@ -168,6 +170,7 @@ class ConnectionManager:
             global_max_events=GLOBAL_RATE_LIMIT_MAX_MESSAGES,
         )
         self.connection_ips: dict[str, str] = {}
+        self.inference_receipts: dict[str, str] = {}
         # Pending execute-type tool actions, one store per connection. Dropping
         # the store on disconnect is what binds an action id to its socket.
         self.pending_actions: dict[str, PendingActions] = {}
@@ -183,8 +186,8 @@ class ConnectionManager:
         self._portfolio_data: str | None = None
         # Process-wide circuit breaker for a rejected API key (monotonic time).
         self._auth_failed_until = 0.0
-        # Daily token budget per instance (UTC day); the kill-switch for a
-        # runaway loop. Resets at midnight UTC and on every cold start.
+        # Additional process-local circuit breaker. Durable admission below
+        # enforces the authoritative cross-instance daily budget.
         self._daily_token_budget = settings.chat_daily_token_budget
         self._budget_day = datetime.now(UTC).date()
         self._tokens_used_today = 0
@@ -232,6 +235,7 @@ class ConnectionManager:
         return True
 
     def disconnect(self, client_id: str):
+        self.inference_receipts.pop(client_id, None)
         self.active_connections.pop(client_id, None)
         self.page_contexts.pop(client_id, None)
         self.conversation_histories.pop(client_id, None)
@@ -534,23 +538,8 @@ class ConnectionManager:
         labels: list[str] = []
         needs_followup = False
         for call in tool_calls:
-            if call.name == "get_meeting_availability":
-                from backend.app.services.calendar_runtime import calendar_service
-                from backend.app.services.calendar_service import (
-                    CalendarNotConfigured,
-                    CalendarSlotUnavailable,
-                    CalendarUnavailable,
-                )
-                try:
-                    output = await calendar_service().available_slots(call.args.get("start"), call.args.get("end"))
-                except CalendarNotConfigured:
-                    output = {"status": "unavailable", "reason": "not_connected", "note": "Calendar is not connected. Availability was not checked; this is not an empty calendar or no available slots."}
-                except (CalendarSlotUnavailable, CalendarUnavailable):
-                    output = {"status": "unavailable", "reason": "lookup_failed", "note": "Calendar availability could not be verified. Do not claim the calendar was checked or that no slots exist."}
-                self.calendar_offers[client_id] = (time.monotonic(), {
-                    slot["start"] for slot in output.get("slots", [])[:10]
-                })
-                await self.send_frame(client_id, {"type": "portfolio_card", "kind": "calendar_availability", "data": output})
+            if call.name in DISABLED_TOOL_NAMES:
+                output = {"status": "unavailable", "note": "This capability is not available. Use the contact form for a reviewed introduction."}
                 needs_followup = True
             elif call.name in READ_TOOL_HANDLERS:
                 log_event("chat.tool_call", tool=call.name)
@@ -613,7 +602,7 @@ class ConnectionManager:
                 "id": action.id,
                 "tool": action.tool,
                 "args": action.args,
-                "needs": ["email"],
+                "needs": ["email", "company"],
             })
         return pending_tool_result(action)
 
@@ -654,9 +643,9 @@ class ConnectionManager:
             args = {**args, "start": action.args["start"]}
         log_event("chat.confirm_accepted", tool=action.tool)
         if action.tool == "book_meeting":
-            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip, confirmation_id=action.id)
+            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip, confirmation_id=action.id, company_raw=data.get("company"))
         else:
-            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip)
+            outcome = await execute_confirmed(action.tool, args, data.get("email"), ip, company_raw=data.get("company"))
         frame = {
             "type": "action_result",
             "id": action.id,
@@ -676,6 +665,22 @@ class ConnectionManager:
         log_event("chat.confirm_cancelled", tool=action.tool)
         self._note_outcome(client_id, f"the visitor cancelled the {action.tool} request; nothing was sent")
 
+    async def _budgeted_stream(self, client_id: str, request):
+        # Authenticated routes bind the validated receipt before accepting messages.
+        # Development without access gating still shares the durable global ceiling.
+        receipt = self.inference_receipts.get(client_id, "development:" + client_id)
+        reservation = await inference_budget.reserve(receipt, request)
+        usage = None
+        try:
+            async for event in self.provider.stream(request):
+                if isinstance(event, Usage):
+                    usage = event
+                yield event
+        finally:
+            # Missing usage or cancellation retains the reservation conservatively.
+            if usage is not None:
+                await inference_budget.settle(reservation, usage)
+
     async def _stream_with_failover(
         self, client_id: str, state: "_RoundState", extra: list[dict], tools: list[dict] | None = None
     ) -> None:
@@ -693,7 +698,7 @@ class ConnectionManager:
                 await asyncio.sleep(self._retry_delay)
             state.model = model
             try:
-                async for event in self.provider.stream(self._build_request(client_id, model, extra, tools)):
+                async for event in self._budgeted_stream(client_id, self._build_request(client_id, model, extra, tools)):
                     if isinstance(event, TextDelta):
                         if state.leading_break and not state.text:
                             await self.send_message("\n\n", client_id, is_chunk=True)

@@ -64,7 +64,7 @@ html {
 /* Hash links, nav jumps and scrollToSection() all land a section's heading
    just below the fixed header. (scroll-margin on <html> did nothing.) */
 section[id] {
-  scroll-margin-top: calc(var(--header-height) + 16px);
+  scroll-margin-top: calc(var(--header-height) + 72px);
 }
 
 @media (max-width: 768px) {

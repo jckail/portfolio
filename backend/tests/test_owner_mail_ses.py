@@ -89,7 +89,7 @@ def test_ses_missing_configuration_never_calls_provider(ses, monkeypatch, change
 
 @pytest.mark.parametrize("accepted", [True, False])
 @pytest.mark.parametrize("route,payload", [
-    ("/api/contact/send-email", {"from_email": "visitor@example.com", "subject": "Role", "message": "Hello"}),
+    ("/api/contact/send-email", {"company": "Private Example Labs", "from_email": "visitor@example.com", "subject": "Role", "message": "Hello"}),
     ("/api/agent/access", {"email": "visitor@example.com", "company": "Synthetic & Co"}),
 ])
 def test_mounted_contact_and_introduction_use_ses_and_fail_closed(client, ses, route, payload, accepted):

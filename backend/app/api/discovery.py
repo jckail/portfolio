@@ -576,7 +576,9 @@ def sitemap_xml() -> bytes:
     entries = [
         ("/", modified, "monthly", "1.0"),
         ("/dataplayground", modified, "monthly", "0.8"),
-        *((f"/{lab.slug}", lab.updated, "monthly", "0.7") for lab in load_catalog().labs.values()),
+        ("/agents.html", modified, "monthly", "0.7"),
+        ("/privacy/", modified, "yearly", "0.3"),
+        *((f"/{lab.slug}", lab.updated, "monthly", "0.7") for lab in load_catalog().labs.values() if lab.slug != "jobbr"),
     ]
     rows = [
         f"  <url>\n    <loc>{escape(absolute(path))}</loc>\n    <lastmod>{lastmod}</lastmod>\n"

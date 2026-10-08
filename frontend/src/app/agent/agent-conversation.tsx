@@ -98,7 +98,7 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
     {!embedded && <div className="agent-conversation-heading"><h2>Grounded in Jordan’s portfolio</h2>
       <a href="/?contact=open">Contact Jordan</a></div>}
     <p className="agent-disclosure">Ask about Jordan’s work, skills, or your opportunity. AI answers can be mistaken.
-      Chat messages are stored; avoid confidential information. Review and confirm any message or meeting before it is sent.</p>
+      Chat messages are stored; avoid confidential information. Review and confirm any message before it is sent. <a href="/privacy/">Privacy and retention</a>.</p>
     {receipt?.mode === 'trial' && !gate && <p className="agent-trial-status" role="status">
       {receipt.remaining_messages} introductory {receipt.remaining_messages === 1 ? 'message' : 'messages'} remaining.
       Then introduce yourself to continue.</p>}

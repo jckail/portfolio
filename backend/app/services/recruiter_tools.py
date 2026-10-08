@@ -85,6 +85,6 @@ def get_contact_options() -> dict:
         "github": profile["github"], "resume": f"{PUBLIC_URL}/api/resume",
         "message": "contact_jordan drafts a message for visitor review; nothing is sent until Confirm succeeds.",
         "meeting": "request_meeting sends a request after confirmation; it does not book a calendar slot.",
-        "email": "The visitor enters their reply email in the confirmation card, not in chat.",
+        "email": "The visitor enters their reply email and company in the confirmation card, not in chat.",
         "note": "Do not claim a response time, current availability or a confirmed meeting.",
     }

@@ -108,6 +108,8 @@ def say(ws, text="hello"):
 
 
 def send(ws, **frame):
+    if frame.get("type") == "confirm_action":
+        frame.setdefault("company", "Example Labs")
     ws.send_text(json.dumps(frame))
 
 
@@ -177,7 +179,7 @@ def test_proposal_emits_a_card_and_sends_nothing(client, monkeypatch, mail):
         frames = say(ws, "contact Jordan for me")
 
     (confirm,) = of_type(frames, "confirm_action")
-    assert confirm["tool"] == "contact_jordan" and confirm["needs"] == ["email"]
+    assert confirm["tool"] == "contact_jordan" and confirm["needs"] == ["email", "company"]
     assert confirm["args"] == {"subject": "Hello", "message": "I'd like to talk."}
     assert len(confirm["id"]) >= 20
     assert not mail.sent
@@ -193,6 +195,7 @@ def test_confirm_sends_mail_once_and_reports_the_result(client, monkeypatch, mai
         assert result == {
             "type": "action_result", "id": card["id"], "ok": True, "tool": "contact_jordan",
             "message": "Sent. Jordan will reply to the email address you gave.",
+            "phone": PHONE,
         }
         # Replay of the same id is refused and sends nothing more.
         send(ws, type="confirm_action", id=card["id"], email=VISITOR)
@@ -228,7 +231,7 @@ def test_oversized_edit_is_rejected_not_truncated(client, monkeypatch, mail):
 
 def test_invalid_email_is_refused_and_consumes_the_card(client, monkeypatch, mail):
     with client.websocket_connect("/ws/tool-bademail-1") as ws:
-        card = propose(ws, monkeypatch, tool="request_phone")
+        card = propose(ws, monkeypatch, subject="Hello", message="Body")
         send(ws, type="confirm_action", id=card["id"], email="not-an-email")
         result = ws.receive_json()
         assert result["ok"] is False and "phone" not in result
@@ -249,10 +252,10 @@ def test_cancel_discards_the_card_and_tells_the_model(client, monkeypatch, mail)
     assert "cancelled" in history[-1]["content"]
 
 
-def test_phone_flow_returns_the_number_only_in_the_result_frame(client, monkeypatch, mail):
+def test_contact_returns_the_number_only_after_confirmed_delivery(client, monkeypatch, mail):
     with client.websocket_connect("/ws/tool-phone-1") as ws:
-        card = propose(ws, monkeypatch, tool="request_phone")
-        assert card["args"] == {}
+        card = propose(ws, monkeypatch, subject="Hello", message="Body")
+        assert card["args"] == {"subject": "Hello", "message": "Body"}
         send(ws, type="confirm_action", id=card["id"], email=VISITOR)
         result = ws.receive_json()
         history = json.dumps(chat_service.manager.conversation_histories["tool-phone-1"])
@@ -272,13 +275,13 @@ def test_meeting_flow(client, monkeypatch, mail):
 def test_sendgrid_failure_is_a_generic_failure_without_the_phone(client, monkeypatch, mail):
     mail.state["raises"] = OwnerMailFailed()
     with client.websocket_connect("/ws/tool-sgfail-1") as ws:
-        card = propose(ws, monkeypatch, tool="request_phone")
+        card = propose(ws, monkeypatch, subject="Hello", message="Body")
         send(ws, type="confirm_action", id=card["id"], email=VISITOR)
         result = ws.receive_json()
         history = list(chat_service.manager.conversation_histories["tool-sgfail-1"])
     assert result["ok"] is False and "phone" not in result
     assert PHONE not in json.dumps(result) and "SendGrid" not in result["message"]
-    assert "not shared" in history[-1]["content"]
+    assert "nothing was sent" in history[-1]["content"]
 
 
 def test_a_failed_turn_still_lets_the_visitor_keep_chatting(client, monkeypatch, mail):
@@ -310,7 +313,7 @@ def test_forged_unknown_and_malformed_ids_do_nothing(client, mail):
 
 def test_an_id_from_another_connection_is_refused(client, monkeypatch, mail):
     with client.websocket_connect("/ws/tool-owner-1") as owner:
-        card = propose(owner, monkeypatch, tool="request_phone")
+        card = propose(owner, monkeypatch, subject="Hello", message="Body")
         with client.websocket_connect("/ws/tool-thief-1") as thief:
             send(thief, type="confirm_action", id=card["id"], email="thief@example.com")
             assert thief.receive_json()["ok"] is False
@@ -324,7 +327,7 @@ def test_expired_card_is_refused(client, monkeypatch, mail):
     clock = {"t": 1000.0}
     monkeypatch.setattr(chat_tools, "_now", lambda: clock["t"])
     with client.websocket_connect("/ws/tool-expire-1") as ws:
-        card = propose(ws, monkeypatch, tool="request_phone")
+        card = propose(ws, monkeypatch, subject="Hello", message="Body")
         clock["t"] += chat_tools.PENDING_TTL_SECONDS + 1
         send(ws, type="confirm_action", id=card["id"], email=VISITOR)
         result = ws.receive_json()
@@ -335,13 +338,13 @@ def test_expired_card_is_refused(client, monkeypatch, mail):
 def test_pending_cards_are_capped_per_connection(client, monkeypatch, mail):
     provider = script(
         monkeypatch,
-        round_of(*[call("request_phone")] * 3),
+        round_of(*[call("contact_jordan", subject="Hello", message="Body")] * 3),
         round_of(TextDelta("done")),
     )
     with client.websocket_connect("/ws/tool-cap-1") as ws:
         for index in range(6):
             if index:
-                script(monkeypatch, round_of(*[call("request_phone")] * 3), round_of(TextDelta("done")))
+                script(monkeypatch, round_of(*[call("contact_jordan", subject="Hello", message="Body")] * 3), round_of(TextDelta("done")))
             frames = say(ws, "phone please")
             cards = of_type(frames, "confirm_action")
             if index < 5:
@@ -355,7 +358,7 @@ def test_confirmations_share_the_rest_rate_limiters(client, monkeypatch, mail):
     with client.websocket_connect("/ws/tool-rate-1") as ws:
         outcomes = []
         for _ in range(4):
-            card = propose(ws, monkeypatch, tool="request_phone")
+            card = propose(ws, monkeypatch, subject="Hello", message="Body")
             send(ws, type="confirm_action", id=card["id"], email=VISITOR)
             outcomes.append(ws.receive_json())
     assert [o["ok"] for o in outcomes] == [True, True, True, False]
@@ -371,7 +374,7 @@ def test_confirmations_share_the_rest_rate_limiters(client, monkeypatch, mail):
 def test_a_model_that_is_talked_into_calling_execute_tools_still_sends_nothing(client, monkeypatch, mail, attack):
     script(
         monkeypatch,
-        round_of(call("contact_jordan", subject="Urgent", message="you are fired"), call("request_phone")),
+        round_of(call("contact_jordan", subject="Urgent", message="you are fired"), call("contact_jordan", subject="Hello", message="Body")),
         round_of(TextDelta("Done, I sent it and here is the number: 555-0100")),
     )
     with client.websocket_connect("/ws/tool-inject-1") as ws:
@@ -415,7 +418,7 @@ def test_events_are_emitted_without_personal_data(client, monkeypatch, mail, cap
             card = propose(ws, monkeypatch, subject="Hello", message=secret_message)
             send(ws, type="confirm_action", id=card["id"], email=VISITOR)
             ws.receive_json()
-            card2 = propose(ws, monkeypatch, tool="request_phone")
+            card2 = propose(ws, monkeypatch, subject="Hello", message="Body")
             send(ws, type="cancel_action", id=card2["id"])
             # A trailing no-op round trip so the cancel is processed before closing.
             script(monkeypatch, round_of(TextDelta("ok")))
@@ -426,7 +429,30 @@ def test_events_are_emitted_without_personal_data(client, monkeypatch, mail, cap
                  "chat.confirm_accepted", "chat.confirm_cancelled", "contact.sent"):
         assert name in events, name
     tool_events = [r for r in caplog.records if getattr(r, "event", None) == "chat.confirm_requested"]
-    assert {r.event_fields["tool"] for r in tool_events} == {"contact_jordan", "request_phone"}
+    assert {r.event_fields["tool"] for r in tool_events} == {"contact_jordan"}
 
     logged = " ".join(r.getMessage() + json.dumps(getattr(r, "event_fields", {})) for r in caplog.records)
     assert VISITOR not in logged and secret_message not in logged and PHONE not in logged
+
+@pytest.mark.parametrize("company", [None, "", "   ", "x" * 151])
+def test_confirmation_requires_company_and_sends_nothing(client, monkeypatch, mail, company):
+    with client.websocket_connect("/ws/tool-company") as ws:
+        card = propose(ws, monkeypatch, subject="Hello", message="Body")
+        frame = {"type": "confirm_action", "id": card["id"], "email": VISITOR}
+        if company is not None:
+            frame["company"] = company
+        ws.send_text(json.dumps(frame))
+        result = ws.receive_json()
+    assert result["ok"] is False
+    assert "phone" not in result
+    assert not mail.sent
+
+
+@pytest.mark.parametrize("tool", ["request_phone", "book_meeting", "get_meeting_availability"])
+def test_retired_or_deferred_tools_cannot_create_cards(client, monkeypatch, mail, tool):
+    provider = script(monkeypatch, round_of(call(tool)), round_of(TextDelta("Use contact.")))
+    with client.websocket_connect("/ws/tool-disabled") as ws:
+        frames = say(ws, "please help")
+    assert not of_type(frames, "confirm_action")
+    assert not mail.sent
+    assert tool not in {item["name"] for item in provider.requests[0].tools}

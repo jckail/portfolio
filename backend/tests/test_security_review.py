@@ -128,7 +128,7 @@ def test_contact_subject_never_contains_a_line_break(client, monkeypatch, brk):
     _Sender.sent = []
     monkeypatch.setattr(owner_mail, "SendGridAPIClient", _Sender)
     response = client.post("/api/contact/send-email", json={
-        "from_email": "visitor@example.com", "subject": f"Hi{brk}Bcc: x@evil.test", "message": "hello",
+        "company": "Private Example Labs", "from_email": "visitor@example.com", "subject": f"Hi{brk}Bcc: x@evil.test", "message": "hello",
     })
     assert response.status_code == 200
     subject = _Sender.sent[0].subject.subject
@@ -141,7 +141,7 @@ def test_contact_subject_never_contains_a_line_break(client, monkeypatch, brk):
 def test_reply_to_addresses_with_header_syntax_are_rejected(client, monkeypatch, bad):
     _Sender.sent = []
     monkeypatch.setattr(owner_mail, "SendGridAPIClient", _Sender)
-    response = client.post("/api/contact/send-email", json={"from_email": bad, "subject": "s", "message": "m"})
+    response = client.post("/api/contact/send-email", json={"company": "Private Example Labs", "from_email": bad, "subject": "s", "message": "m"})
     assert response.status_code == 422
     assert _Sender.sent == []
 
@@ -151,7 +151,7 @@ def test_reply_to_is_always_the_bare_normalised_address(client, monkeypatch, tol
     """Pydantic normalises these; what reaches SendGrid must be only the address."""
     _Sender.sent = []
     monkeypatch.setattr(owner_mail, "SendGridAPIClient", _Sender)
-    response = client.post("/api/contact/send-email", json={"from_email": tolerated, "subject": "s", "message": "m"})
+    response = client.post("/api/contact/send-email", json={"company": "Private Example Labs", "from_email": tolerated, "subject": "s", "message": "m"})
     assert response.status_code == 200
     assert _Sender.sent[0].reply_to.email == "a@b.co"
 

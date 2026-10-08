@@ -56,11 +56,12 @@ def aio(fn):
 
 def test_registry_kinds_and_strict_schemas():
     kinds = chat_tools.TOOL_KINDS
-    assert {n for n, k in kinds.items() if k == "execute"} == {"contact_jordan", "request_phone", "request_meeting", "book_meeting"}
+    assert {n for n, k in kinds.items() if k == "execute"} == {"contact_jordan", "request_meeting"}
     assert {"open_modal", "navigate_section", "set_theme", "download_resume", "search_portfolio"} <= {
         n for n, k in kinds.items() if k == "read"
     }
     assert {t["name"] for t in chat_tools.ALL_TOOLS} == set(kinds)
+    assert not {"request_phone", "book_meeting", "get_meeting_availability"} & set(kinds)
     for tool in chat_tools.ALL_TOOLS:
         assert tool["input_schema"]["additionalProperties"] is False, tool["name"]
 
@@ -148,8 +149,8 @@ def test_search_never_returns_links_or_contact_data():
 
 def test_pending_ids_are_random_single_use_and_expire(monkeypatch):
     store = chat_tools.PendingActions()
-    first = store.create("request_phone", {})
-    second = store.create("request_phone", {})
+    first = store.create("contact_jordan", {"subject": "s", "message": "m"})
+    second = store.create("contact_jordan", {"subject": "s", "message": "m"})
     assert first.id != second.id and len(first.id) >= 20
     assert store.take(first.id)[0] is first
     assert store.take(first.id) == (None, "unknown")  # replay
@@ -160,7 +161,7 @@ def test_pending_ids_are_random_single_use_and_expire(monkeypatch):
     clock = {"t": 1000.0}
     monkeypatch.setattr(chat_tools, "_now", lambda: clock["t"])
     fresh = chat_tools.PendingActions()
-    action = fresh.create("request_phone", {})
+    action = fresh.create("contact_jordan", {"subject": "s", "message": "m"})
     clock["t"] += chat_tools.PENDING_TTL_SECONDS + 1
     assert fresh.take(action.id) == (None, "expired")
 
@@ -170,11 +171,11 @@ def test_pending_store_caps_open_actions_and_purges_expired(monkeypatch):
     monkeypatch.setattr(chat_tools, "_now", lambda: clock["t"])
     store = chat_tools.PendingActions()
     for _ in range(chat_tools.MAX_PENDING_PER_CONNECTION):
-        assert store.create("request_phone", {})
-    assert store.create("request_phone", {}) is None
+        assert store.create("contact_jordan", {"subject": "s", "message": "m"})
+    assert store.create("contact_jordan", {"subject": "s", "message": "m"}) is None
     assert chat_tools.pending_tool_result(None)["status"] == "not_created"
     clock["t"] += chat_tools.PENDING_TTL_SECONDS + 1
-    assert store.create("request_phone", {}) is not None
+    assert store.create("contact_jordan", {"subject": "s", "message": "m"}) is not None
 
 
 def test_pending_result_tells_the_model_nothing_was_sent():
@@ -189,37 +190,31 @@ def test_pending_result_tells_the_model_nothing_was_sent():
 @aio
 async def test_contact_sends_to_owner_with_reply_to_and_escapes_html(mail):
     outcome = await chat_tools.execute_confirmed(
-        "contact_jordan", {"subject": "Hello", "message": "<b>hi</b>"}, "visitor@example.com", "1.1.1.1"
+        "contact_jordan", {"subject": "Hello", "message": "<b>hi</b>"}, "visitor@example.com", "1.1.1.1", company_raw="Example <Labs>"
     )
-    assert outcome.ok and outcome.phone is None
+    assert outcome.ok and outcome.phone == PHONE
     (sent,) = mail.sent
     assert sent["reply_to"] == "visitor@example.com"
     assert "<b>hi</b>" not in sent["html"] and "&lt;b&gt;" in sent["html"]
     assert sent["subject"] == "Jordan Kail: Hello"
+    assert "Company: Example <Labs>" in sent["plain_text"]
+    assert "Example &lt;Labs&gt;" in sent["html"]
+    assert PHONE not in sent["plain_text"]
 
 
 @aio
 async def test_meeting_sends_and_uses_email_limiter(mail):
     outcome = await chat_tools.execute_confirmed(
-        "request_meeting", {"topic": "Agents", "preferred_times": "Tue PM"}, "v@example.com", "1.1.1.2"
+        "request_meeting", {"topic": "Agents", "preferred_times": "Tue PM"}, "v@example.com", "1.1.1.2", company_raw="Example Labs"
     )
     assert outcome.ok
     assert "Agents" in mail.sent[0]["plain_text"] and "Tue PM" in mail.sent[0]["plain_text"]
 
 
+@pytest.mark.parametrize("tool", ["request_phone", "book_meeting", "get_meeting_availability"])
 @aio
-async def test_phone_returns_number_only_after_notification(mail):
-    outcome = await chat_tools.execute_confirmed("request_phone", {}, "v@example.com", "1.1.1.3")
-    assert outcome.ok and outcome.phone == PHONE
-    assert PHONE not in mail.sent[0]["plain_text"]  # the number never goes in the email either
-    assert "v@example.com" in mail.sent[0]["plain_text"]
-
-
-@aio
-async def test_phone_unset_fails_without_mail(mail, monkeypatch):
-    settings = dataclasses.replace(config.get_settings(), contact_phone="")
-    monkeypatch.setattr(chat_tools, "get_settings", lambda: settings)
-    outcome = await chat_tools.execute_confirmed("request_phone", {}, "v@example.com", "1.1.1.4")
+async def test_disabled_capabilities_send_nothing(mail, tool):
+    outcome = await chat_tools.execute_confirmed(tool, {}, "v@example.com", "1.1.1.3", company_raw="Example")
     assert not outcome.ok and outcome.phone is None and not mail.sent
 
 
@@ -228,33 +223,34 @@ async def test_phone_unset_fails_without_mail(mail, monkeypatch):
 async def test_send_failure_is_generic_and_never_leaks_the_phone(mail, error):
     mail.state["raises"] = error
     for tool, args in (
-        ("request_phone", {}),
         ("contact_jordan", {"subject": "s", "message": "m"}),
         ("request_meeting", {"topic": "t"}),
     ):
-        outcome = await chat_tools.execute_confirmed(tool, args, "v@example.com", "2.2.2.2")
+        outcome = await chat_tools.execute_confirmed(tool, args, "v@example.com", "2.2.2.2", company_raw="Example Labs")
         assert not outcome.ok and outcome.phone is None
         assert PHONE not in outcome.message and "SendGrid" not in outcome.message
 
 
 @aio
 async def test_invalid_email_or_args_send_nothing(mail):
-    bad_email = await chat_tools.execute_confirmed("request_phone", {}, "not-an-email", "3.3.3.3")
+    bad_email = await chat_tools.execute_confirmed("contact_jordan", {"subject": "s", "message": "m"}, "not-an-email", "3.3.3.3", company_raw="Example")
     bad_args = await chat_tools.execute_confirmed("contact_jordan", {"subject": ""}, "v@example.com", "3.3.3.3")
     assert not bad_email.ok and not bad_args.ok and not mail.sent
 
 
 @aio
 async def test_rest_limiters_are_shared_and_enforced(mail):
-    for _ in range(3):
-        assert (await chat_tools.execute_confirmed("request_phone", {}, "v@example.com", "4.4.4.4")).ok
-    blocked = await chat_tools.execute_confirmed("request_phone", {}, "v@example.com", "4.4.4.4")
-    assert not blocked.ok and blocked.phone is None and len(mail.sent) == 3
-    # The same instance the REST route uses is now exhausted for that address.
-    assert not contact_routes._phone_limiter.check("4.4.4.4")
-    # Contact and phone have separate budgets, like the REST routes.
-    assert (await chat_tools.execute_confirmed(
-        "contact_jordan", {"subject": "s", "message": "m"}, "v@example.com", "4.4.4.4")).ok
+    args = {"subject": "Hello", "message": "Body"}
+    for _ in range(contact_routes._email_limiter.max_events):
+        assert (await chat_tools.execute_confirmed(
+            "contact_jordan", args, "v@example.com", "4.4.4.4", company_raw="Example"
+        )).ok
+    blocked = await chat_tools.execute_confirmed(
+        "contact_jordan", args, "v@example.com", "4.4.4.4", company_raw="Example"
+    )
+    assert not blocked.ok and blocked.phone is None
+    assert len(mail.sent) == contact_routes._email_limiter.max_events
+    assert not contact_routes._email_limiter.check("4.4.4.4")
 
 
 def test_prompt_carries_a_skills_index_not_the_full_skill_data():

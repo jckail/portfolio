@@ -65,7 +65,7 @@ test.describe('contact dialog and phone reveal', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    await expect(dialog.getByText(/Recommended by my AI agent/)).toBeVisible();
+    await expect(dialog.getByText(/Suggested introduction/)).toBeVisible();
     const submit = dialog.getByRole('button', { name: 'Send message & connect' });
 
     // Required: the browser blocks an empty submit, so nothing is sent.
