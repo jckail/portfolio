@@ -29,7 +29,7 @@ The JK monogram is an original compact portfolio asset. Keep at least one quarte
 
 ## Product family
 
-OpenDataCenter, Kefi, JobDog and Jobbr retain their own names and marks. The portfolio provides consistent card typography, spacing, status badges and evidence links, not replacement product identities. Until an approved project mark is available, use a neutral project icon rather than inventing a logo. Separate public product links from private repository source.
+OpenDataCenter, Kefi, JobDog and Jobbr retain their own names and marks. The portfolio uses an original family of navigation glyphs for consistent project presentation. These glyphs identify catalogue entries; they do not replace or claim to be official product logos. Separate public product links from private repository source.
 
 Card contract: name, accurate maturity (Live / Prototype / Employer work / Archived), brief purpose, Jordan's verified contribution, and public evidence. Do not invent adoption, revenue, performance, employer IP or launch status. For case studies distinguish implementation from deployment and acceptance.
 
@@ -113,3 +113,9 @@ The JK monogram and social template layouts were authored for this portfolio. Th
 ## Version and verification record
 
 v1 established identity, palette, original marks and the initial static reference. v2 adds shared technical tokens, shared status and accessible loading primitives, a React component specimen, and four social templates. Source implementation and automated/browser acceptance are separate: the release owner records executed tests and rendered evidence. No field performance or visual acceptance is implied by this document alone.
+
+## Catalogue icon family
+
+Original engineering glyphs live in `frontend/src/assets/icons/project-glyphs/`. Each uses a 32 × 32 viewBox, no fill, a 1.8-unit currentColor stroke, and rounded line ends and joins. Distinct silhouettes identify the work: server rack for OpenDataCenter, linked nodes for Agent Hub, overlapping review frames for DoubleTake, and a bird-shaped star for Starling. The single `ProjectIcon` component serves catalogue cards and project dialogs, using the existing accessible accent token in every theme. Existing product marks remain available separately.
+
+Cards share the existing 56px bordered icon container with 8px padding. Keep glyphs decorative beside a visible project title; provide an accessible name when the icon conveys meaning on its own. Use `project.svg` as the neutral fallback for new catalogue entries until an original glyph is supplied. New assets must preserve the same geometry and color contract and be checked in light and dark themes. These simple portfolio glyphs were authored specifically for this site; they make no claim to third-party trademark rights.

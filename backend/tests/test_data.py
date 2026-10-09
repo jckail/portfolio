@@ -177,3 +177,49 @@ def test_project_titles_have_no_stray_whitespace():
     projects = get_all_models()["projects"].root
     for key, project in projects.items():
         assert project.title == project.title.strip(), f"{key} title has stray whitespace"
+
+
+def test_owner_authorized_project_previews_keep_source_private():
+    from backend.app.models import load_projects
+
+    projects = load_projects().root
+    for key in ("quarg", "starling", "agent_hub", "doubletake"):
+        project = projects[key]
+        assert project.status == "In Development"
+        assert not project.featured
+        assert "private" in project.evidence.lower()
+        assert "contact=open" in str(project.link)
+        assert "github.com" not in project.model_dump_json()
+        assert project.maturity_note
+    assert sum(project.featured for project in projects.values()) == 3
+
+
+def test_project_catalogue_has_distinct_local_themed_glyphs():
+    import xml.etree.ElementTree as ET
+    from pathlib import Path
+
+    from backend.app.models import load_projects
+
+    projects = load_projects().root
+    names = [project.logoPath for project in projects.values()]
+    assert len(names) == len(set(names))
+    for name in names:
+        glyph = Path(REPO_ROOT) / "frontend/src/assets/icons/project-glyphs" / name
+        root = ET.parse(glyph).getroot()
+        assert root.attrib["viewBox"] == "0 0 32 32"
+        assert root.attrib["stroke"] == "currentColor"
+
+
+def test_blog_manifest_references_nonempty_authored_files():
+    import json
+    from pathlib import Path
+
+    from backend.app.blog import Post, markdown
+
+    content = Path(REPO_ROOT) / "backend/app/data/blog"
+    entries = [Post.model_validate(item) for item in json.loads((content / "posts.json").read_text())]
+    assert len({post.slug for post in entries}) == len(entries)
+    for post in entries:
+        body = (content / f"{post.slug}.md").read_text()
+        assert body.strip(), post.slug
+        assert markdown(body).strip(), post.slug

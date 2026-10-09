@@ -2,68 +2,56 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, waitFor } from '@testing-library/react';
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import ProjectIcon, { THEMED_PROJECT_ICONS, projectIconUrl } from './ProjectIcon';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const iconDir = resolve(here, '../../../assets/icons/projects');
-
-afterEach(() => cleanup());
+const glyphDir = resolve(here, '../../../assets/icons/project-glyphs');
+afterEach(cleanup);
 
 describe('ProjectIcon', () => {
-  it('renders a bundled, non-themed icon as one sized <img>, not inline SVG', () => {
-    const { container } = render(<ProjectIcon name="gopilot-icon.svg" size={100} aria-hidden />);
-    const img = container.querySelector('img');
-    expect(img).not.toBeNull();
-    expect(container.querySelector('svg')).toBeNull();
-    expect(img).toHaveAttribute('width', '100');
-    expect(img).toHaveAttribute('height', '100');
-    expect(img).toHaveAttribute('alt', '');
-    expect(img).toHaveAttribute('aria-hidden', 'true');
-    expect(img).toHaveAttribute('loading', 'lazy');
-    // Resolved through the bundler, not the public/ fallback path.
-    expect(img?.getAttribute('src')).not.toContain('/images/projects/');
+  it('renders catalogue icons as sized themed SVGs with decorative defaults', async () => {
+    const { container } = render(<ProjectIcon name="gopilot.svg" size={48} />);
+    await waitFor(() => expect(container.querySelector('svg')).not.toBeNull());
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('width', '48');
+    expect(svg).toHaveAttribute('height', '48');
+    expect(svg).toHaveAttribute('aria-hidden', 'true');
+    expect(svg).toHaveAttribute('focusable', 'false');
+    expect(svg).toHaveClass('project-glyph');
+    expect(svg).toHaveStyle({ color: 'var(--accent-text)' });
   });
 
-  it('uses the aria-label as alt text when the caller names the icon', () => {
-    const { container } = render(<ProjectIcon name="jk-icon.svg" aria-label="Portfolio" />);
-    expect(container.querySelector('img')).toHaveAttribute('alt', 'Portfolio');
+  it('exposes a caller-provided meaningful name without hiding it', async () => {
+    const { findByRole } = render(<ProjectIcon name="portfolio.svg" aria-label="Portfolio" />);
+    expect(await findByRole('img', { name: 'Portfolio' })).toHaveAttribute('aria-hidden', 'false');
   });
 
-  it('falls back to /images/projects for names that are not bundled', () => {
-    expect(projectIconUrl('ai_billing.svg')).toBe('/images/projects/ai_billing.svg');
+  it('uses one geometry and theme contract for every original glyph', () => {
+    const files = readdirSync(glyphDir).filter(f => f.endsWith('.svg'));
+    expect(files).toHaveLength(17);
+    const silhouettes = new Set<string>();
+    for (const file of files) {
+      expect(THEMED_PROJECT_ICONS.has(file), file).toBe(true);
+      const svg = readFileSync(resolve(glyphDir, file), 'utf8');
+      expect(svg).toContain('viewBox="0 0 32 32"');
+      expect(svg).toContain('stroke="currentColor"');
+      expect(svg).toContain('stroke-width="1.8"');
+      expect(svg).toContain('fill="none"');
+      expect(svg).not.toMatch(/#[a-fA-F0-9]{3,8}|<image|<script/);
+      silhouettes.add(svg);
+    }
+    expect(silhouettes.size).toBe(files.length);
   });
 
-  it('does not treat Object.prototype keys as bundled icons', () => {
+  it('retains legacy assets and safe URL fallbacks', () => {
+    const { container } = render(<ProjectIcon name="gopilot-icon.svg" aria-label="Legacy goPilot" />);
+    expect(container.querySelector('img')).toHaveAttribute('alt', 'Legacy goPilot');
+    expect(projectIconUrl('gopilot-icon.svg')).not.toContain('/images/projects/');
     expect(projectIconUrl('constructor')).toBe('/images/projects/constructor');
-  });
-
-  it('keeps every themed icon an inline SVG in project-icon-set', () => {
-    const source = readFileSync(resolve(here, 'project-icon-set.ts'), 'utf8');
-    const listed = [...source.matchAll(/^ {2}'([^']+)': \w+,$/gm)].map(m => m[1]).sort();
-    expect(listed).toEqual([...THEMED_PROJECT_ICONS].sort());
-    const icon = readFileSync(resolve(here, 'ProjectIcon.tsx'), 'utf8');
-    for (const name of THEMED_PROJECT_ICONS) {
-      // Excluded from the URL glob, so it is not bundled twice.
-      expect(icon).toContain(`'!**/${name}'`);
-      expect(projectIconUrl(name)).toContain('/images/projects/');
-      const svg = readFileSync(resolve(iconDir, name), 'utf8');
-      // The reason it is inline: it paints with the theme's text color.
-      expect(svg).toMatch(/var\(--text-color\)|currentColor/);
-    }
-  });
-
-  it('serves every other icon as a URL because it does not depend on the theme', () => {
-    const files = readdirSync(iconDir).filter(f => f.endsWith('.svg') && f !== 'old-jk-icon.svg');
-    for (const file of files.filter(f => !THEMED_PROJECT_ICONS.has(f))) {
-      const svg = readFileSync(resolve(iconDir, file), 'utf8');
-      expect(svg, file).not.toMatch(/var\(--|currentColor/);
-      // An <img> only scales an SVG that has a viewBox.
-      expect(svg, file).toMatch(/viewBox=/);
-      expect(projectIconUrl(file), file).not.toContain('/images/projects/');
-    }
+    expect(projectIconUrl('missing.svg')).toBe('/images/projects/missing.svg');
   });
 });

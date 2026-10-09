@@ -199,7 +199,7 @@ def test_every_real_lab_file_is_valid(path):
 def _clear():
     labs.clear_caches()
     routes.clear_caches()
-    for builder in (discovery.llms_txt, discovery.llms_full_txt, discovery.sitemap_xml):
+    for builder in (discovery.llms_txt, discovery.llms_full_txt):
         builder.cache_clear()
     from backend.app.api.discovery_routes import _payload
 

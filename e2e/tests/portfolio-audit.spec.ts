@@ -12,7 +12,7 @@ for (const theme of ['dark', 'light']) {
       if (width <= 900) await expect(nav.getByRole('combobox', { name: 'Jump to section' })).toHaveValue('projects');
       else await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
       await page.getByRole('tab', { name: 'All projects', exact: true }).click();
-      for (const name of ['OpenDataCenter', 'Kefi', 'Jobdog', 'Jobbr']) {
+      for (const name of ['OpenDataCenter', 'Kefi', 'Jobdog', 'Jobbr', 'Quarg', 'Starling', 'Agent Hub', 'DoubleTake']) {
         await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
       }
       const jobbr = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Jobbr', exact: true }) });
@@ -63,14 +63,14 @@ test('featured cases, filters, and deep links share the complete registry', asyn
   await expect(catalogue.locator('article')).toHaveCount(3);
   const compactHeight = (await section.boundingBox())!.height;
   await catalogue.getByRole('tab', { name: 'All projects', exact: true }).click();
-  await expect(catalogue.locator('article')).toHaveCount(12);
+  await expect(catalogue.locator('article')).toHaveCount(16);
   expect((await section.boundingBox())!.height).toBeGreaterThan(compactHeight);
   await catalogue.getByRole('tab', { name: 'Featured', exact: true }).click();
   await expect(catalogue.locator('article')).toHaveCount(3);
   expect(Math.abs((await section.boundingBox())!.height - compactHeight)).toBeLessThan(2);
   await catalogue.getByRole('tab', { name: 'Developer tools', exact: true }).click();
   await expect(catalogue.getByRole('tab', { name: 'Developer tools', exact: true })).toHaveAttribute('aria-selected', 'true');
-  await expect(catalogue.locator('article')).toHaveCount(2);
+  await expect(catalogue.locator('article')).toHaveCount(5);
   await catalogue.getByRole('tab', { name: 'Developer tools', exact: true }).press('Home');
   await expect(catalogue.getByRole('tab', { name: 'Featured', exact: true })).toBeFocused();
   await page.goto('/?project=pointup&theme=dark#projects');

@@ -4,7 +4,7 @@
     "description": "A recruiter-facing agent with public MCP and GraphQL context, bounded tools, and reviewed contact actions.",
     "link": "https://github.com/jckail/portfolio",
     "description_detail": "Problem: make professional experience useful to recruiters and their agents. Approach: one approved content source feeds the website, résumé, MCP, GraphQL and grounded agent tools. Tradeoff: keep the public agent narrowly scoped, with signed access, durable usage budgets and reviewed contact actions instead of general execution. Verification: automated backend, frontend and browser checks plus deployment probes. Limitations: model answers can be mistaken; no calendar booking or arbitrary code execution.",
-    "logoPath": "jk-icon.svg",
+    "logoPath": "portfolio.svg",
     "tech_stack": [
       "TypeScript",
       "React",
@@ -198,7 +198,7 @@
     "description": "A reproducible synthetic commerce lab for event validation, SQL metrics, dependency DAGs, graphs and vector similarity.",
     "link": "https://github.com/jckail/data_playground",
     "description_detail": "Built a reproducible synthetic commerce pipeline with seeded event generation, deduplication, schema and lifecycle checks, and SQL analytics. Explore acquisition and retention scenarios, inspect quarantined records, and trace conversion, collected revenue, and cohort retention to the queries that compute them. The public React lab serves generated Python runs without a database; a bounded FastAPI service supports custom simulations when configured. A separate synthetic commerce dataset connects products, customers, and purchases in a relationship graph and explains cosine similarity over handcrafted product feature vectors. An engineering workbench exposes executable dependency DAGs, retry and failure traces, model grains and contracts, and architecture decisions grounded in the implementation. The original PostgreSQL and Streamlit experiment remains in the source repository.",
-    "logoPath": "playground-icon.svg",
+    "logoPath": "data-playground.svg",
     "tech_stack": [
       "Python",
       "SQL",
@@ -297,7 +297,7 @@
     "link_label": "Open product",
     "link2": "https://opendatacenter.info/",
     "link2_label": "Open app",
-    "logoPath": "project-app.svg",
+    "logoPath": "opendatacenter.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
     "status": "Live",
@@ -320,7 +320,7 @@
     "link_label": "Open product",
     "link2": "https://kefi.show/",
     "link2_label": "Open app",
-    "logoPath": "project-app.svg",
+    "logoPath": "kefi.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
     "status": "Live",
@@ -341,7 +341,7 @@
     "link_label": "Open product",
     "link2": "https://jobdog.ai/",
     "link2_label": "Open app",
-    "logoPath": "project-app.svg",
+    "logoPath": "jobdog.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
     "status": "Live",
@@ -359,7 +359,7 @@
     "description": "The Jobbr entry into Jobdog’s job-search and résumé workflow.",
     "link": "https://jobdog.ai/jobbr/#/",
     "description_detail": "Jobbr is available inside Jobdog at the linked application. The older portfolio-hosted Jobbr demonstration uses synthetic browser-local data and is separate from this public product. Authenticated matching, preparation and application workflows require their own acceptance checks.",
-    "logoPath": "jobbr-icon.svg",
+    "logoPath": "jobbr.svg",
     "tech_stack": [],
     "last_commit": "October 2026",
     "link2": "https://jobdog.ai/jobbr/#/",
@@ -381,7 +381,7 @@
     "description": "A prototype for per-thread AI token metering and cost reporting through an event-driven billing pipeline.",
     "link": "https://github.com/jckail/ai_chat_billing_app",
     "description_detail": "A React chat workspace connects to FastAPI over WebSocket with an HTTP send fallback. A separate collector, Kafka, Redis and SQLite support usage and billing events; Streamlit exposes cost analytics. The development workspace uses a seeded demo identity and has no authentication. Invoice creation exists in the backend but is unavailable in the React interface. The portfolio demo is a separate synthetic browser illustration; neither it nor the source establishes provider-backed billing acceptance.",
-    "logoPath": "ai_billing.svg",
+    "logoPath": "ai-billing.svg",
     "tech_stack": [
       "Python",
       "FastAPI",
@@ -448,7 +448,7 @@
     "link": "https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/",
     "description_detail": "Contributed QR-code group invitations while at Meta. The linked public article documents the feature announcement; it does not quantify this contribution’s adoption or independently establish individual ownership.",
     "link_label": "Read coverage",
-    "logoPath": "techcrunch-icon.svg",
+    "logoPath": "qr-groups.svg",
     "last_commit": "January 2022",
     "resume_description": "Contributed QR-code group invitations at Meta, a feature covered by TechCrunch.",
     "status": "Employer Work",
@@ -464,7 +464,7 @@
     "description": "Legacy Python and shell helpers for exporting Go-project context and running external lint, test and assistant workflows.",
     "link": "https://github.com/jckail/goPilot",
     "description_detail": "goPilot exports Go source context and invokes external Go checks through Python and shell helpers. Historical provider-aware commands use legacy assistant operations; current provider compatibility is not established. The project is not a Go application and has no application frontend. Its context-export and HTML-fetch helpers have offline tests; the portfolio demo is a separate synthetic illustration.",
-    "logoPath": "gopilot-icon.svg",
+    "logoPath": "gopilot.svg",
     "tech_stack": [
       "Python",
       "Shell",
@@ -491,7 +491,7 @@
     "description": "A historical Python project exploring market-data ingestion and query/regression experiments.",
     "link": "https://github.com/jckail/crypto_trader",
     "description_detail": "A 2017–2018 learning project with an alpha ingestion runner and omega query/regression experiments. The public source does not establish trade execution, a frontend or a production deployment. It is unmaintained and not runnable as-is. The portfolio’s synthetic browser demo is an explanatory illustration, not a live trading system.",
-    "logoPath": "litcrypto-icon.svg",
+    "logoPath": "crypto-trader.svg",
     "tech_stack": [
       "Python",
       "Pandas",
@@ -509,5 +509,104 @@
     ],
     "featured": false,
     "maturity_note": "Historical learning project; not runnable as-is. The repository itself is not marked archived."
+  },
+  "quarg": {
+    "title": "Quarg",
+    "description": "A design-stage graph database for agents, connecting knowledge, tasks, actions, and provenance in one typed model.",
+    "description_detail": "Explores a shared, event-sourced graph for agent applications, with typed entities, attributable changes, and context retrieval. Current work includes architecture research and early storage foundations.",
+    "tech_stack": [
+      "Go",
+      "TypeScript",
+      "Knowledge Graphs"
+    ],
+    "categories": [
+      "knowledge",
+      "data",
+      "experimental"
+    ],
+    "maturity_note": "Design-stage private project with early implementation work; no public database service or runnable product is offered.",
+    "contribution": "Designed the agent-oriented data model and architecture, and began the implementation foundations.",
+    "status": "In Development",
+    "featured": false,
+    "link": "https://www.jckail.com/?contact=open#projects",
+    "link_label": "Discuss this project",
+    "logoPath": "quarg.svg",
+    "last_commit": "2026-10-08",
+    "evidence": "Private development project. Ask me about its architecture, implementation, and current progress."
+  },
+  "starling": {
+    "title": "Starling",
+    "description": "A Rust coding-agent engine and embeddable SDK built around a small core and replaceable providers, tools, and hosts.",
+    "description_detail": "Developing a shared execution engine for command-line and embedded coding agents. The design emphasizes explicit tool permissions, durable sessions, and extension points for providers and MCP tools.",
+    "tech_stack": [
+      "Rust",
+      "MCP",
+      "Agent Harnesses"
+    ],
+    "categories": [
+      "agents",
+      "devtools",
+      "experimental"
+    ],
+    "maturity_note": "Private implementation preview. End-to-end native coding and broader integrations remain under qualification; no public release is offered.",
+    "contribution": "Designed and implemented the modular agent engine and embedding interfaces.",
+    "status": "In Development",
+    "featured": false,
+    "link": "https://www.jckail.com/?contact=open#projects",
+    "link_label": "Discuss this project",
+    "logoPath": "starling.svg",
+    "last_commit": "2026-10-08",
+    "evidence": "Private development project. Ask me about its architecture, implementation, and current progress."
+  },
+  "agent_hub": {
+    "title": "Agent Hub",
+    "description": "A local control plane for coordinating coding agents, shared context, tools, and task handoffs across multiple harnesses.",
+    "description_detail": "Brings agent management, task context, tool access, and execution evidence into a local workspace. A working continuity service supports cross-harness handoffs while the broader management platform is in active development.",
+    "tech_stack": [
+      "Go",
+      "Python",
+      "React",
+      "TypeScript",
+      "MCP"
+    ],
+    "categories": [
+      "agents",
+      "infrastructure",
+      "devtools",
+      "knowledge"
+    ],
+    "maturity_note": "Private, locally operated project in active development. Broader orchestration and distributed deployment are still being qualified.",
+    "contribution": "Built the continuity workflow and am developing the shared agent management platform.",
+    "status": "In Development",
+    "featured": false,
+    "link": "https://www.jckail.com/?contact=open#projects",
+    "link_label": "Discuss this project",
+    "logoPath": "agent-hub.svg",
+    "last_commit": "2026-10-08",
+    "evidence": "Private development project. Ask me about its architecture, implementation, and current progress."
+  },
+  "doubletake": {
+    "title": "DoubleTake",
+    "description": "Local task-readiness and review tools that help coding agents clarify requirements and check results against an agreed contract.",
+    "description_detail": "Helps turn a request into a cited brief, explicit review, and machine-checkable acceptance criteria. A local task desk and coding-agent adapters keep the agreed scope and verification evidence together.",
+    "tech_stack": [
+      "TypeScript",
+      "Node.js",
+      "MCP"
+    ],
+    "categories": [
+      "agents",
+      "devtools",
+      "experimental"
+    ],
+    "maturity_note": "Private local-first prototype. Native host integration and cross-platform acceptance remain in progress; no public release is offered.",
+    "contribution": "Built the task-readiness workflow, review contracts, and local agent adapters.",
+    "status": "In Development",
+    "featured": false,
+    "link": "https://www.jckail.com/?contact=open#projects",
+    "link_label": "Discuss this project",
+    "logoPath": "doubletake.svg",
+    "last_commit": "2026-10-08",
+    "evidence": "Private development project. Ask me about its architecture, implementation, and current progress."
   }
 }

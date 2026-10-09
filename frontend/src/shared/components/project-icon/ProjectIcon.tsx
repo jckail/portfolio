@@ -1,15 +1,27 @@
 import React, { lazy, Suspense } from 'react';
 
-/**
- * Names served inline from ./project-icon-set: the icons that paint with the
- * theme's text color and so cannot be an <img>. Keep this list short; every
- * inline SVG adds its paths to the DOM.
- */
+/** Original catalogue glyphs share geometry and inherit the active theme. */
 export const THEMED_PROJECT_ICONS: ReadonlySet<string> = new Set([
+  'portfolio.svg',
+  'pointup.svg',
+  'data-playground.svg',
+  'opendatacenter.svg',
+  'kefi.svg',
+  'jobdog.svg',
+  'jobbr.svg',
+  'ai-billing.svg',
+  'super-teacher.svg',
+  'qr-groups.svg',
+  'gopilot.svg',
+  'crypto-trader.svg',
+  'quarg.svg',
+  'starling.svg',
+  'agent-hub.svg',
+  'doubletake.svg',
+  'project.svg',
   'github-logo.svg',
   'jobbr-icon.svg',
   'playground-icon.svg',
-  'pointup.svg',
 ]);
 
 const InlineIcon = lazy(() =>
@@ -21,15 +33,9 @@ const InlineIcon = lazy(() =>
   }))
 );
 
-/**
- * Every other bundled project icon is a plain asset URL, rendered with <img>:
- * one DOM node per icon and no per-icon JS chunk. Vite hashes the files (so
- * they are cached as immutable /assets/) and inlines the smallest ones as
- * data: URIs, which the CSP's img-src already allows.
- */
+/** Legacy product marks remain available as assets for existing consumers. */
 const ICON_URLS: Record<string, string> = Object.create(null);
-// Glob patterns must be literals: the exclusions repeat THEMED_PROJECT_ICONS
-// (plus an unused legacy file) so those are not also bundled as URLs.
+// Exclude legacy marks that require inline theme colors.
 const modules = import.meta.glob<string>(
   [
     '../../../assets/icons/projects/*.svg',
@@ -38,6 +44,7 @@ const modules = import.meta.glob<string>(
     '!**/jobbr-icon.svg',
     '!**/playground-icon.svg',
     '!**/pointup.svg',
+    '!**/super-teacher.svg',
   ],
   { eager: true, query: '?url', import: 'default' }
 );
@@ -74,9 +81,10 @@ const ProjectIcon: React.FC<IconProps> = ({
           name={name}
           width={size}
           height={size}
-          className={className}
+          className={`${className} project-glyph`}
+          style={{ color: 'var(--accent-text)' }}
           aria-label={ariaLabel}
-          aria-hidden={ariaHidden}
+          aria-hidden={ariaHidden ?? !ariaLabel}
           role={ariaLabel ? 'img' : undefined}
           focusable="false"
         />

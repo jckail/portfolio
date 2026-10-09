@@ -76,6 +76,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
               {section.label}
             </button>
           ))}
+          <a className="nav-item" href="/blog">Writing</a>
         </div>
       </nav>
     </>

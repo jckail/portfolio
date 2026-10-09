@@ -420,14 +420,14 @@ class ConnectionManager:
             # Detailed case studies stay available through bounded search; do
             # not charge every visitor for every architectural narrative.
             serializable["projects"] = {
-                key: {field: value for field, value in project.items() if field != "case_study"}
+                key: {field: value for field, value in project.items() if field not in {"case_study", "description_detail"}}
                 for key, project in serializable.get("projects", {}).items()
             }
             self._portfolio_data = json.dumps(serializable, ensure_ascii=False)
         return [
             self._base_prompt,
             CONTEXT_HANDLING_PROMPT,
-            f"Portfolio data (source of truth for Jordan's background; `skills` is an index only, call search_portfolio for skill details and project case studies):\n{self._portfolio_data}",
+            f"Portfolio data (source of truth for Jordan's background; `skills` is an index only, call search_portfolio for skill details and project narratives):\n{self._portfolio_data}",
         ]
 
     def _visitor_context(self, client_id: str) -> str:

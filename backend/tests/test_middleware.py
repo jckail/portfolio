@@ -249,3 +249,14 @@ def test_cache_policy_table():
 def test_websocket_scopes_pass_through_untouched(client):
     with client.websocket_connect("/ws/abcdefgh-1234", headers={"origin": "http://localhost:5173"}) as ws:
         ws.send_json({"type": "context", "content": "x"})
+
+
+@pytest.mark.parametrize("path", ["/blog-assets/blog.css", "/blog-assets/theme.js"])
+@pytest.mark.skipif(not os.path.isdir(FRONTEND_DIST), reason="frontend not built")
+def test_unhashed_blog_assets_revalidate(client, path):
+    response = client.get(path)
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-cache"
+    conditional = client.get(path, headers={"If-None-Match": response.headers["etag"]})
+    assert conditional.status_code == 304
+    assert conditional.headers["Cache-Control"] == "no-cache"

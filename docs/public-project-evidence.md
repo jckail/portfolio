@@ -6,7 +6,7 @@ The central registry is `backend/app/data/projects.json`. Exactly three projects
 
 Jordan identified the products as his work. Public source and public product pages support the technical descriptions below. No private repository implementation, personal records or employer-confidential details are published. Public page availability does not prove successful authenticated workflows. Source code, tests, local acceptance and deployment evidence remain separate.
 
-The investigation covered the complete named project list in the objective. Projects without public source or a verified public product are withheld from the public catalogue rather than represented as open source or production-ready. The private investigation register remains local and is not included in this repository. Forks are not presented as original products without specific public contribution evidence.
+The investigation covered the complete named project list in the objective. Projects without public source or a verified public product were withheld in the original audit. On October 8, Jordan explicitly requested Quarg, Starling, Agent Hub and DoubleTake; these now have short owner-authorized previews, marked In Development with specific maturity limits. Their repositories remain private and no source links or internal documents are published. The private investigation register remains local and is not included in this repository. Forks are not presented as original products without specific public contribution evidence.
 
 ## Featured cases
 
@@ -22,7 +22,7 @@ All featured case-study source links were checked for reachability. Claims have 
 - [Kefi](https://kefi.show/) returned HTTP200 with concert discovery, group-plan and show-diary positioning. Signed-in workflows and listing coverage have separate acceptance requirements.
 - [Jobdog](https://jobdog.ai/) redirects to its Jobbr frontend. Preserve [the requested Jobbr entry](https://jobdog.ai/jobbr/#/). The two cards describe one product family, not two separately qualified deployments. The portfolio-hosted synthetic Jobbr demo is a separate historical illustration.
 
-These public products retain their own brands. Their private source URLs and implementation details are not published.
+These public products retain their own names and external brands. Portfolio cards use a consistent original glyph family rather than mixing product logos. Their private source URLs and implementation details are not published.
 
 ## Public source catalogue corrections
 
@@ -35,3 +35,14 @@ Current public default-branch READMEs supersede stale local descriptions:
 - [Facebook group QR invitations coverage](https://techcrunch.com/2022/03/09/facebook-rolls-out-new-tools-for-group-admins-to-manage-their-communities-and-reduce-misinformation/): public feature announcement. The project card does not infer individual adoption metrics from that article.
 
 The anonymous repository inventory also found mintlifytest and public forks. They are omitted from the curated catalogue because no additional, attributable engineering contribution was established in this bounded review. No repository permissions were changed.
+
+## Owner-authorized previews — October 8, 2026
+
+Jordan explicitly named Quarg, Starling, Agent Hub and DoubleTake for inclusion. Current default-branch README and repository structure were reviewed privately to avoid overstating readiness. Only concise product-purpose, contribution and maturity summaries are published:
+
+- **Quarg:** graph/data-model research and early foundations; design-stage, no public database service.
+- **Starling:** Rust coding-agent engine and embedding interfaces; private implementation preview with native end-to-end acceptance still open.
+- **Agent Hub:** local continuity and agent-management work; active development, not a qualified distributed service.
+- **DoubleTake:** task-readiness, review contracts and local agent adapters; private prototype with native-host and cross-platform acceptance still open.
+
+All four link to the portfolio contact flow instead of inaccessible private repositories. Their inclusion does not change repository visibility. They are not featured by default and do not claim public source, launch status, metrics, or broad production acceptance. Public forks Toolport, Graft, Codemogger and Buzz were reviewed as candidates but omitted because this pass did not establish a specific attributable contribution to present as Jordan's own project.
