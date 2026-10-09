@@ -109,7 +109,7 @@ def test_pdf_uses_concise_sabbatical_without_adventure_details(content):
 def test_updated_role_titles_and_education_appear_in_pdf(content, manifest):
     roles = {role["key"]: role for role in content["roles"]}
     assert roles["meta"]["location"] == "Menlo Park, CA"
-    assert roles["together_ai"]["title"] == "Staff Software Engineer, Agent Platform"
+    assert roles["together_ai"]["title"] == "Staff Software Engineer, Agents Platform"
     assert "after establishing data engineering" in " ".join(roles["together_ai"]["bullets"])
     assert roles["prove"]["title"] == "Staff Software Engineer"
     expected = [{"institution": "University of Colorado Boulder", "study": "Computer Science", "date": "08/2011 - 03/2013"}]

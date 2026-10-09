@@ -163,8 +163,8 @@ const TLDRContent = memo(
 
         <ul className="about-impact" aria-label="Selected engineering experience">
           <li><a href="#experience">
-            <strong>Created an Agent Platform team</strong>
-            <span>Established data engineering at Together AI, then built the agent platform team.</span>
+            <strong>Created the Agents Platform team</strong>
+            <span>Established data engineering at Together AI, then created the Agents Platform team.</span>
           </a></li>
           <li><a href="#experience">
             <strong>Built production AI systems</strong>

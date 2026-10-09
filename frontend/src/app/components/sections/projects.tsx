@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, memo, useCallback, useRef, useState } from 'react';
+import React, { Suspense, lazy, memo, useCallback, useId, useRef, useState } from 'react';
 
 import { useData } from '../../providers/data-provider';
 import ProjectIcon from '../../../shared/components/project-icon/ProjectIcon';
@@ -25,7 +25,10 @@ const EMPTY_SKILLS: SkillsData = Object.freeze(Object.create(null));
 
 /** Tags shown on a card; the modal lists the whole stack. */
 const CARD_TAG_LIMIT = 4;
-const CATEGORIES: { id: ProjectCategory; label: string }[] = [
+type CatalogueTab = ProjectCategory | 'featured' | 'all';
+const CATEGORIES: { id: CatalogueTab; label: string }[] = [
+  { id: 'featured', label: 'Featured' },
+  { id: 'all', label: 'All projects' },
   { id: 'agents', label: 'AI agents' },
   { id: 'infrastructure', label: 'Infrastructure' },
   { id: 'data', label: 'Data and reliability' },
@@ -109,7 +112,9 @@ const Projects: React.FC = () => {
   const { selectedProject, setSelectedProject } = useProject();
   // Local skill state (same pattern as Experience) so we don't fight the
   // Skills section's useSkill() owner of the ?skill= URL param.
-  const [category, setCategory] = useState<ProjectCategory | 'all'>('all');
+  const [category, setCategory] = useState<CatalogueTab>('featured');
+  const catalogueId = useId();
+  const cataloguePanelRef = useRef<HTMLDivElement>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
   const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
@@ -137,14 +142,13 @@ const Projects: React.FC = () => {
   // Close the project first: one dialog at a time (audit F-3)
   const openSkillFromProject = useCallback(
     (skillKey: string) => {
-      // Preserve the actual originating card: featured and catalogue entries
-      // intentionally share project keys. Deep links have no clicked origin.
+      // Preserve the originating card. A deep link may have no visible card.
       const origin = projectOpenedFromRef.current;
       skillOpenedFromRef.current = selectedProjectRef.current
         ? origin?.isConnected && origin.dataset.projectKey === selectedProjectRef.current
           ? origin
-          : Array.from(document.querySelectorAll<HTMLElement>('.project-catalogue [data-project-key], .featured-projects [data-project-key]'))
-            .find(button => button.dataset.projectKey === selectedProjectRef.current) ?? null
+          : Array.from(document.querySelectorAll<HTMLElement>('.project-catalogue [data-project-key]'))
+            .find(button => button.dataset.projectKey === selectedProjectRef.current) ?? cataloguePanelRef.current
         : null;
       setSelectedProject(null);
       setSelectedSkill(skillKey);
@@ -170,7 +174,17 @@ const Projects: React.FC = () => {
   const project = getOwn(projectsData, selectedProject);
   const entries = Object.entries(projectsData);
   const featured = entries.filter(([, item]) => item.featured).slice(0, 3);
-  const filtered = category === 'all' ? entries : entries.filter(([, item]) => item.categories?.includes(category));
+  const filtered = category === 'featured' ? featured : category === 'all' ? entries : entries.filter(([, item]) => item.categories?.includes(category));
+  const activeLabel = CATEGORIES.find(item => item.id === category)?.label;
+  const selectWithKeyboard = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const next = event.key === 'ArrowRight' ? (index + 1) % CATEGORIES.length
+      : event.key === 'ArrowLeft' ? (index + CATEGORIES.length - 1) % CATEGORIES.length
+      : event.key === 'Home' ? 0 : event.key === 'End' ? CATEGORIES.length - 1 : null;
+    if (next === null) return;
+    event.preventDefault();
+    setCategory(CATEGORIES[next].id);
+    document.getElementById(`${catalogueId}-tab-${CATEGORIES[next].id}`)?.focus();
+  };
   const renderCard = ([key, item]: [string, Project]) => (
     <ProjectCard key={key} projectKey={key} project={item}
       skillsData={skillsData ?? EMPTY_SKILLS} onSelect={openProject}
@@ -183,23 +197,24 @@ const Projects: React.FC = () => {
         <h2>Projects</h2>
       </div>
       <div className="section-content">
-        {featured.length > 0 && (
-          <div className="featured-projects" aria-labelledby="featured-projects-title">
-            <h3 id="featured-projects-title">Featured engineering</h3>
-            <p className="project-catalogue-intro">Selected case studies: the problem, the engineering decisions, and the evidence.</p>
-            <div className="projects-grid">{featured.map(renderCard)}</div>
+        <div className="project-catalogue">
+          <p className="project-catalogue-intro">Explore selected engineering case studies, or browse the catalogue by focus.</p>
+          <div className="project-filters" role="tablist" aria-label="Project catalogue">
+            {CATEGORIES.map((item, index) => (
+              <button key={item.id} type="button" role="tab"
+                id={`${catalogueId}-tab-${item.id}`} aria-controls={`${catalogueId}-panel`}
+                aria-selected={category === item.id} tabIndex={category === item.id ? 0 : -1}
+                onClick={() => setCategory(item.id)} onKeyDown={event => selectWithKeyboard(event, index)}>
+                {item.label}
+              </button>
+            ))}
           </div>
-        )}
-        <div className="project-catalogue" aria-labelledby="project-catalogue-title">
-          <h3 id="project-catalogue-title">Complete project catalogue</h3>
-          <div className="project-filters" role="group" aria-label="Filter project catalogue">
-            <button type="button" aria-pressed={category === 'all'} onClick={() => setCategory('all')}>All projects</button>
-            {CATEGORIES.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</button>)}
+          <div ref={cataloguePanelRef} role="tabpanel" id={`${catalogueId}-panel`} aria-labelledby={`${catalogueId}-tab-${category}`} tabIndex={0}>
+            <p className="project-count" role="status">{filtered.length} of {entries.length} projects{category !== 'all' ? ` · ${activeLabel}` : ''}</p>
+            {filtered.length > 0 ? <div className="projects-grid">{filtered.map(renderCard)}</div> : (
+              <p className="project-empty">No projects are published in this category yet. <button type="button" onClick={() => { setCategory('all'); document.getElementById(`${catalogueId}-tab-all`)?.focus(); }}>Show all projects</button></p>
+            )}
           </div>
-          <p className="project-count" role="status">{filtered.length} of {entries.length} projects{category !== 'all' ? ` in ${CATEGORIES.find(item => item.id === category)?.label}` : ''}</p>
-          {filtered.length > 0 ? <div className="projects-grid">{filtered.map(renderCard)}</div> : (
-            <p className="project-empty">No projects are published in this category yet. <button type="button" onClick={() => setCategory('all')}>Show all projects</button></p>
-          )}
         </div>
       </div>
 

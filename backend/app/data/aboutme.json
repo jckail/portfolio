@@ -1,6 +1,6 @@
 {
     "greeting": "Jordan Kail",
-    "description": "I build production AI agent platforms. At Together AI, I established data engineering and created the Agent Platform team, building agent harnesses, tracing, replay, and evaluation infrastructure.",
+    "description": "I build production AI agent platforms. At Together AI, I established data engineering and created the Agents Platform team, building agent harnesses, tracing, replay, and evaluation infrastructure.",
     "aidetails": "Chat with my Agent for evidence from my work and projects.",
     "brief_bio": "My work connects AI agents with the distributed systems they depend on. I care about reliable execution, useful evaluation, and tools that make engineering teams more effective.\n\nOutside work, I explore the mountains with my dog, build computers, and experiment with new tools.",
     "full_portrait": "/images/headshot/headshot.webp",
@@ -14,5 +14,5 @@
         "Agent Harnesses",
         "Kubernetes"
     ],
-    "resume_summary": "Staff Software Engineer with 13+ years of experience and deep expertise in AI agents and distributed data systems. Established Together AI's data engineering team, then created its Agent Platform team. Built production agent harnesses and evaluation infrastructure, AI/ML classifiers at Meta, and model governance frameworks at Prove Identity."
+    "resume_summary": "Staff Software Engineer with 13+ years of experience and deep expertise in AI agents and distributed data systems. Established Together AI's data engineering team, then created its Agents Platform team. Built production agent harnesses and evaluation infrastructure, AI/ML classifiers at Meta, and model governance frameworks at Prove Identity."
 }

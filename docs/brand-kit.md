@@ -35,7 +35,7 @@ Card contract: name, accurate maturity (Live / Prototype / Employer work / Archi
 
 ## Voice
 
-Specific and direct. “Created the Agent Platform team” is stronger than “passionate visionary.” State constraints and tradeoffs. Only publish approved metrics with a source. Use “Connect your agent” and “Chat with my Agent” consistently. Calendar scheduling remains deferred.
+Specific and direct. “Created the Agents Platform team” is stronger than “passionate visionary.” State constraints and tradeoffs. Only publish approved metrics with a source. Use “Connect your agent” and “Chat with my Agent” consistently. Calendar scheduling remains deferred.
 
 ## Accessibility and motion
 
@@ -88,7 +88,7 @@ Architecture illustrations use clean bounded boxes, consistent 2px connectors an
 Use the structured project registry rather than maintaining descriptions in the showcase. A complete case study answers: problem/context; role and ownership; constraints; architecture; decisions and tradeoffs; challenges/resolutions; verified outcomes; evidence links; maturity and limitations. Omit unverified fields. An implementation test is not evidence of real-world adoption. Prefer a reproducible diagram and text explanation over an unsupported scale claim.
 
 Examples:
-- Prefer “Created the Agent Platform team after establishing data engineering” when verified; avoid “visionary AI leader.”
+- Prefer “Created the Agents Platform team after establishing data engineering” when verified; avoid “visionary AI leader.”
 - Prefer “Reserves a durable token budget before provider calls”; avoid “unlimited scalability.”
 - Label a synthetic demonstration “Illustrative data” rather than implying customer results.
 

@@ -10,7 +10,7 @@ afterEach(cleanup);
 const evidence: PortfolioEvidence = {
   profile: { name: 'Jordan Kail', title: 'Staff Software Engineer', location: 'San Francisco, CA', github: '', linkedin: '' },
   experience: [
-    { id: 'together_ai', company: 'Together AI', title: 'Agent Platform', date: '2025–Present', highlights: ['Built an agent platform.'] },
+    { id: 'together_ai', company: 'Together AI', title: 'Agents Platform', date: '2025–Present', highlights: ['Built an agent platform.'] },
     { id: 'prove', company: 'Prove Identity', title: 'Staff Software Engineer', date: '2023–2025', highlights: ['Built model governance.'] },
     { id: 'sabbatical', company: 'Sabbatical', title: 'Digital nomad experiment', date: '2022–2023', highlights: ['Explored the world.'] },
     { id: 'meta', company: 'Meta', title: 'Software Engineer', date: '2020–2022', highlights: ['Built AI classifiers.'] },
