@@ -1,4 +1,5 @@
 [
   {"slug": "superteacher", "target": "https://www.the-super-teacher.com/", "project_key": "super_teacher"},
-  {"slug": "pointup", "target": "https://www.pointup.io/", "project_key": "pointup"}
+  {"slug": "pointup", "target": "https://www.pointup.io/", "project_key": "pointup"},
+  {"slug": "jobbr", "target": "https://jobdog.ai/jobbr/", "project_key": "jobbr"}
 ]

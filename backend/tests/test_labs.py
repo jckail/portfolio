@@ -366,10 +366,20 @@ def test_llms_full_has_the_demo_section(site):
 
 
 def test_the_real_app_forwards_before_the_spa_fallback(client):
-    for slug, target in (("superteacher", "https://www.the-super-teacher.com/"), ("pointup", "https://www.pointup.io/")):
+    for slug, target in (
+        ("superteacher", "https://www.the-super-teacher.com/"),
+        ("pointup", "https://www.pointup.io/"),
+        ("jobbr", "https://jobdog.ai/jobbr/"),
+    ):
         for path in (f"/{slug}", f"/{slug}/"):
             response = client.get(path, headers=HTML, follow_redirects=False)
             assert response.status_code == 302
             assert response.headers["location"] == target
             assert response.headers["x-robots-tag"] == "noindex"
     assert client.get("/api/labs").json() == [lab.model_dump() for lab in labs.load_labs().values()]
+
+
+def test_jobbr_is_forwarded_to_jobdog_and_is_no_longer_a_hosted_demo():
+    """A slug is a hosted lab or a forward, never both: /jobbr belongs to the live Jobdog app."""
+    assert labs.load_forwards()["jobbr"].target == "https://jobdog.ai/jobbr/"
+    assert "jobbr" not in labs.load_labs()
