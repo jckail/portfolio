@@ -19,7 +19,7 @@ for (const theme of ['dark', 'light']) {
           body: calls === 1 ? '{"detail":"Unable to send message right now"}'
             : '{"message":"Email sent successfully","status_code":202,"phone":"+12025550100"}' });
       });
-      await page.goto(`/?theme=${theme}&contact=open#about`);
+      await page.goto(`/?contact=open&theme=${theme}`);
       const dialog = page.getByRole('dialog', { name: 'Connect with Jordan', exact: true });
       await expect(dialog.getByText(/Suggested introduction/)).toBeVisible();
       await dialog.getByText('Edit subject', { exact: true }).click();
@@ -28,8 +28,10 @@ for (const theme of ['dark', 'light']) {
         ['Subject', 'Agent platforms / hiring?'], ['Send me a message', 'Hello Jordan\nCan we discuss your work?'],
       ]) {
         const field = dialog.getByLabel(label, { exact: true });
-        await field.clear();
-        await field.pressSequentially(value);
+        await field.click();
+        await expect(field).toBeFocused();
+        await page.keyboard.press('ControlOrMeta+A');
+        await page.keyboard.type(value);
         await expect(field).toHaveValue(value);
         await expect(field).toBeFocused();
       }
@@ -88,8 +90,10 @@ for (const width of [390, 1360]) {
     await expect(page.locator('[role="dialog"][aria-labelledby="agent-drawer-title"]')).toBeAttached();
     for (const [label, value] of [['Your email', 'visitor@example.com'], ['Company or organization', 'Example / Labs?'], ['Send me a message', 'Keyboard / agents?']]) {
       const input = contact.getByLabel(label, { exact: true });
-      await input.clear();
-      await input.pressSequentially(value);
+      await input.click();
+      await expect(input).toBeFocused();
+      await page.keyboard.press('ControlOrMeta+A');
+      await page.keyboard.type(value);
       await expect(input).toHaveValue(value);
       await expect(input).toBeFocused();
     }

@@ -57,11 +57,13 @@ const pressEscape = () => fireEvent.keyDown(document.body, { key: 'Escape' });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.useRealTimers();
   document.documentElement.style.overflow = '';
 });
 
 describe('useFocusTrap escaped focus', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.spyOn(HTMLElement.prototype, 'offsetParent', 'get').mockReturnValue(document.body);
   });
 
@@ -72,9 +74,22 @@ describe('useFocusTrap escaped focus', () => {
     act(() => email.blur());
     expect(document.activeElement).toBe(document.body);
 
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
     expect(document.activeElement).toBe(email);
+  });
+
+  it('allows a native blur/focus transition to finish after its microtask checkpoint', async () => {
+    render(<Dialog name="contact" onClose={() => {}}><input aria-label="Email" /><input aria-label="Company" /></Dialog>);
+    const email = screen.getByRole('textbox', { name: 'Email' });
+    const company = screen.getByRole('textbox', { name: 'Company' });
+    act(() => { email.focus(); email.blur(); });
+    // Native pointer events can yield here before the next control receives focus.
+    await act(async () => { await Promise.resolve(); });
+    expect(document.activeElement).toBe(document.body);
+    act(() => company.focus());
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
+    expect(document.activeElement).toBe(company);
   });
 
   it('preserves focus that moved to another control before recovery', async () => {
@@ -83,7 +98,7 @@ describe('useFocusTrap escaped focus', () => {
     const button = screen.getByRole('button', { name: 'admin button' });
     act(() => { email.focus(); email.blur(); button.focus(); });
 
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
     expect(document.activeElement).toBe(button);
   });
@@ -98,7 +113,7 @@ describe('useFocusTrap escaped focus', () => {
       act(() => { email.focus(); email.blur(); });
       view.unmount();
 
-      await act(async () => { await Promise.resolve(); });
+      await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
       expect(document.activeElement).toBe(opener);
       expect(openDialogCount()).toBe(0);
@@ -120,7 +135,7 @@ describe('useFocusTrap escaped focus', () => {
     view.rerender(<Fixture upper />);
     const topButton = screen.getByRole('button', { name: 'confirmation button' });
 
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
     expect(document.activeElement).toBe(topButton);
     expect(screen.getByRole('dialog', { name: 'admin' })).toHaveAttribute('inert');
@@ -135,7 +150,7 @@ describe('useFocusTrap escaped focus', () => {
     act(() => { email.focus(); email.blur(); });
     view.rerender(<Fixture input={false} />);
 
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
     expect(email.isConnected).toBe(false);
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'admin button' }));
@@ -146,7 +161,7 @@ describe('useFocusTrap escaped focus', () => {
     const email = screen.getByRole('textbox', { name: 'Email' }) as HTMLInputElement;
     act(() => { email.focus(); email.blur(); email.disabled = true; });
 
-    await act(async () => { await Promise.resolve(); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(32); });
 
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'admin button' }));
   });

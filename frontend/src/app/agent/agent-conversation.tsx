@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState
 
 import { ChatMessages } from '../components/chat/components/ChatMessages';
 import { ChatInput } from '../components/chat/components/ChatInput';
+import { SuggestedPrompts } from '../components/chat/components/SuggestedPrompts';
 import { useChat } from '../components/chat/hooks/useChat';
 import { CHAT_PREFILL_KEY } from '../components/sections/modals/skill-modal-actions';
 import { validateEmail } from '../components/chat/chat-confirm';
@@ -94,7 +95,11 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
     chat.handleSuggestedPrompt(prompt);
   };
 
-  return <section ref={conversation} tabIndex={-1} className="agent-conversation" aria-label="Conversation with Jordan's Agent" data-no-chat-context>
+  const startingConversation = !embedded && !checking && !gate && chat.showSuggestions && !chat.isLoading &&
+    chat.messages.length <= 1 && !chat.messages.some(message => message.type === 'user') &&
+    chat.pendingActions.length === 0 && chat.portfolioCards.length === 0;
+
+  return <section ref={conversation} tabIndex={-1} className={`agent-conversation${gate ? ' has-access-gate' : ''}`} aria-label="Conversation with Jordan's Agent" data-no-chat-context>
     {!embedded && <div className="agent-conversation-heading"><h2>Grounded in Jordan’s portfolio</h2>
       <a href="/?contact=open">Contact Jordan</a></div>}
     <p className="agent-disclosure">Ask about Jordan’s work, skills, or your opportunity. AI answers can be mistaken.
@@ -102,10 +107,14 @@ export function AgentConversation({ embedded = false }: { embedded?: boolean }) 
     {receipt?.mode === 'trial' && !gate && <p className="agent-trial-status" role="status">
       {receipt.remaining_messages} introductory {receipt.remaining_messages === 1 ? 'message' : 'messages'} remaining.
       Then introduce yourself to continue.</p>}
-    <ChatMessages messages={chat.messages} isLoading={chat.isLoading}
+    {startingConversation ? <div className="agent-conversation-start">
+      <h3>What would you like to explore?</h3>
+      <p>Start with a question below, or tell me what you’re looking for.</p>
+      <SuggestedPrompts onSelect={suggestedPrompt} />
+    </div> : <ChatMessages messages={chat.messages} isLoading={chat.isLoading}
       showSuggestions={!checking && !gate && chat.showSuggestions} onSuggestedPrompt={suggestedPrompt}
       pendingActions={chat.pendingActions} onConfirmAction={chat.confirmAction}
-      onCancelAction={chat.cancelAction} portfolioCards={chat.portfolioCards} />
+      onCancelAction={chat.cancelAction} portfolioCards={chat.portfolioCards} />}
     {checking ? <p role="status">Preparing your conversation…</p> : gate
       ? <form className="agent-access-form agent-inline-gate" onSubmit={submit} noValidate aria-busy={busy}>
         <h3>Let’s make an introduction</h3>
