@@ -34,7 +34,7 @@ for (const theme of ['dark', 'light']) {
   }
 }
 
-test('fullscreen mobile composer fits a short viewport and keeps the draft across evidence toggles', async ({ page }) => {
+test('fullscreen mobile composer stays reachable on a short screen and preserves the draft', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 400 });
   await page.route('**/api/agent/trial', route => route.fulfill({ json: {
     token: 'synthetic-preview', mode: 'trial', remaining_messages: 2,
@@ -43,12 +43,18 @@ test('fullscreen mobile composer fits a short viewport and keeps the draft acros
   await page.routeWebSocket(/\/ws\//, socket => socket.onMessage(() => {}));
   await page.goto('/agent?theme=light');
   const composer = page.getByRole('textbox', { name: 'Message the AI assistant', exact: true });
-  await composer.fill('Draft about an agent-platform opportunity');
+  // The landing grows in document flow; a real click must bring the composer
+  // into view before keyboard input, including at mobile-keyboard heights.
+  await composer.click();
+  await expect(composer).toBeFocused();
+  await page.keyboard.type('Draft about an agent-platform opportunity');
   const geometry = await composer.boundingBox();
   expect(geometry).not.toBeNull();
   expect(geometry!.y + geometry!.height).toBeLessThanOrEqual(400);
   await page.getByRole('button', { name: 'View portfolio evidence', exact: true }).click();
   await expect(composer).toHaveValue('Draft about an agent-platform opportunity');
   await page.getByRole('button', { name: 'Hide portfolio evidence', exact: true }).click();
-  await expect(composer).toBeVisible();
+  await composer.click();
+  await expect(composer).toBeInViewport();
+  await expect(composer).toHaveValue('Draft about an agent-platform opportunity');
 });

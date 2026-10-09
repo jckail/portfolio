@@ -16,7 +16,7 @@ const evidence = { profile: { name: 'Jordan Kail', title: 'Engineer', location: 
 const full = { token: 'full-token', expires_at: new Date(Date.now() + 3600000).toISOString() };
 const trial = { ...full, token: 'trial-token', mode: 'trial', remaining_messages: 2 };
 beforeEach(() => {
-  sessionStorage.clear(); useChat.mockClear(); getJson.mockReset(); chat.isLoading = false;
+  sessionStorage.clear(); useChat.mockClear(); getJson.mockReset(); chat.isLoading = false; chat.showSuggestions = false;
   getJson.mockImplementation((path: string) => Promise.resolve(path === '/context.json' ? evidence : path === '/api/agent/trial' ? trial : full));
 });
 afterEach(cleanup);
@@ -72,4 +72,29 @@ describe('shared assistant trial flow', () => {
     expect(screen.getByRole('region', { name: "Conversation with Jordan's Agent" })).toBe(conversation);
     expect(screen.getByRole('textbox', { name: 'Message the AI assistant' })).toHaveValue('Preserved draft');
   });
+  it('opens agent connection instructions in place and preserves the conversation draft', async () => {
+    render(<AgentPage />);
+    await screen.findByText(/2 introductory messages/);
+    const conversation = screen.getByRole('region', { name: "Conversation with Jordan's Agent" });
+    fireEvent.click(screen.getByRole('button', { name: 'Connect your agent' }));
+    expect(await screen.findByRole('dialog', { name: 'Connect your agent' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Chat with my Agent/ }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.getByRole('region', { name: "Conversation with Jordan's Agent" })).toBe(conversation);
+    expect(screen.getByRole('textbox', { name: 'Message the AI assistant' })).toHaveValue('Preserved draft');
+  });
+  it('shows an invitation before chatting and removes it when an introduction is required', async () => {
+    chat.showSuggestions = true;
+    render(<AgentPage />);
+    await screen.findByText(/2 introductory messages/);
+    expect(screen.getByRole('heading', { name: 'What would you like to explore?' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Suggested questions' }).closest('.agent-conversation-start')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Recruiter brief' }));
+    expect(chat.handleSuggestedPrompt).toHaveBeenCalledWith(expect.stringContaining('concise recruiter brief'));
+    act(() => options().onAccessRequired());
+    await screen.findByLabelText('Your email');
+    expect(screen.queryByRole('heading', { name: 'What would you like to explore?' })).toBeNull();
+    expect(screen.getByRole('region', { name: "Conversation with Jordan's Agent" })).toHaveClass('has-access-gate');
+  });
+
 });

@@ -44,16 +44,22 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     initial.focus({ preventScroll: true });
 
     let lastFocused: HTMLElement = initial;
+    let recoveryFrame: number | null = null;
     const onFocusIn = (event: FocusEvent) => {
       if (isTopDialog(id) && event.target instanceof HTMLElement && node.contains(event.target)) {
         lastFocused = event.target;
+        if (recoveryFrame !== null) cancelAnimationFrame(recoveryFrame);
+        recoveryFrame = null;
       }
     };
     const onFocusOut = (event: FocusEvent) => {
       if (!isTopDialog(id) || !(event.target instanceof Node) || !node.contains(event.target)) return;
-      // History navigation can move focus to the body without a Tab key. Wait
-      // for the destination, and never reclaim focus after teardown or stacking.
-      queueMicrotask(() => {
+      // Native pointer focus transitions can run a microtask checkpoint between
+      // blur and focus. Recover on the next frame so an ordinary field click
+      // finishes before deciding that focus escaped the dialog.
+      if (recoveryFrame !== null) cancelAnimationFrame(recoveryFrame);
+      recoveryFrame = requestAnimationFrame(() => {
+        recoveryFrame = null;
         if (!isTopDialog(id) || !node.isConnected || node.hasAttribute('inert') || node.contains(document.activeElement)) return;
         const target = lastFocused.isConnected && node.contains(lastFocused)
           && !lastFocused.matches(':disabled') && lastFocused.offsetParent !== null
@@ -102,6 +108,7 @@ export function useFocusTrap(active: boolean, onEscape?: () => void) {
     // Capture phase: runs before any bubble-phase document listener
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
+      if (recoveryFrame !== null) cancelAnimationFrame(recoveryFrame);
       document.removeEventListener('keydown', onKeyDown, true);
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('focusout', onFocusOut, true);
