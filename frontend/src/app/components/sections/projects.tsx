@@ -114,6 +114,7 @@ const Projects: React.FC = () => {
   // Skills section's useSkill() owner of the ?skill= URL param.
   const [category, setCategory] = useState<CatalogueTab>('featured');
   const catalogueId = useId();
+  const cataloguePanelRef = useRef<HTMLDivElement>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
 
   const closeProject = useCallback(() => setSelectedProject(null), [setSelectedProject]);
@@ -147,7 +148,7 @@ const Projects: React.FC = () => {
         ? origin?.isConnected && origin.dataset.projectKey === selectedProjectRef.current
           ? origin
           : Array.from(document.querySelectorAll<HTMLElement>('.project-catalogue [data-project-key]'))
-            .find(button => button.dataset.projectKey === selectedProjectRef.current) ?? null
+            .find(button => button.dataset.projectKey === selectedProjectRef.current) ?? cataloguePanelRef.current
         : null;
       setSelectedProject(null);
       setSelectedSkill(skillKey);
@@ -208,7 +209,7 @@ const Projects: React.FC = () => {
               </button>
             ))}
           </div>
-          <div role="tabpanel" id={`${catalogueId}-panel`} aria-labelledby={`${catalogueId}-tab-${category}`} tabIndex={0}>
+          <div ref={cataloguePanelRef} role="tabpanel" id={`${catalogueId}-panel`} aria-labelledby={`${catalogueId}-tab-${category}`} tabIndex={0}>
             <p className="project-count" role="status">{filtered.length} of {entries.length} projects{category !== 'all' ? ` · ${activeLabel}` : ''}</p>
             {filtered.length > 0 ? <div className="projects-grid">{filtered.map(renderCard)}</div> : (
               <p className="project-empty">No projects are published in this category yet. <button type="button" onClick={() => { setCategory('all'); document.getElementById(`${catalogueId}-tab-all`)?.focus(); }}>Show all projects</button></p>

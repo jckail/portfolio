@@ -114,6 +114,20 @@ describe('project catalogue', () => {
 
 
 describe('project skill focus restoration', () => {
+  it('returns to the catalogue panel after a hidden deep-linked project opens a skill', async () => {
+    projectsData.data = { title: 'Data service', description: 'Metered events', description_detail: '', link: 'https://example.com/data', categories: ['data'], tech_stack: ['python'] };
+    window.history.replaceState({}, '', '/?project=data#projects');
+    const user = userEvent.setup();
+    render(<Projects />);
+    const projectDialog = await screen.findByRole('dialog');
+    expect(projectDialog).toHaveTextContent('Data service');
+    await act(async () => { await user.click(within(projectDialog).getByRole('button', { name: 'Python' })); });
+    await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent('Programming language'));
+    await act(async () => { await user.keyboard('{Escape}'); });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(screen.getByRole('tabpanel', { name: 'Featured' })).toHaveFocus());
+  });
+
   it.each(['Featured', 'All projects'])('returns to the originating card in %s after a project-to-skill transition', async (tab) => {
     const user = userEvent.setup();
     const { container } = render(<Projects />);
