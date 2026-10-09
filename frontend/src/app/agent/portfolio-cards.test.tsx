@@ -7,7 +7,7 @@ afterEach(cleanup);
 
 describe('typed dynamic portfolio evidence', () => {
   it('preserves complete resume bullets longer than a skill label', () => {
-    const highlight = 'Created the Agent Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.';
+    const highlight = 'Created the Agents Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.';
     render(<PortfolioCards cards={[{ kind: 'recruiter_brief', data: {
       profile: { name: 'Jordan Kail' }, experience: [{ title: 'Staff Engineer', highlights: [highlight] }],
     } }]} />);

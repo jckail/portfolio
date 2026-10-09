@@ -3,13 +3,13 @@ Staff Software Engineer — AI, Agents, Data & Machine Learning
 San Francisco, CA | jckail13@gmail.com | linkedin.com/in/jckail | github.com/jckail | jordan-kail.com
 
 SUMMARY
-Staff Software Engineer with 13+ years of experience and deep expertise in AI agents and distributed data systems. Established Together AI's data engineering team, then created its Agent Platform team. Built production agent harnesses and evaluation infrastructure, AI/ML classifiers at Meta, and model governance frameworks at Prove Identity.
+Staff Software Engineer with 13+ years of experience and deep expertise in AI agents and distributed data systems. Established Together AI's data engineering team, then created its Agents Platform team. Built production agent harnesses and evaluation infrastructure, AI/ML classifiers at Meta, and model governance frameworks at Prove Identity.
 
 EXPERIENCE
 
-Together AI — Staff Software Engineer, Agent Platform — San Francisco, CA
+Together AI — Staff Software Engineer, Agents Platform — San Francisco, CA
 02/2025 – Present
-• Created the Agent Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.
+• Created the Agents Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.
 • Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.
 • Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.
 • Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.

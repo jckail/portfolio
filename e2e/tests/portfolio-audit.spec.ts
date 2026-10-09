@@ -11,6 +11,7 @@ for (const theme of ['dark', 'light']) {
       await expect(nav).toBeVisible();
       if (width <= 900) await expect(nav.getByRole('combobox', { name: 'Jump to section' })).toHaveValue('projects');
       else await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
+      await page.getByRole('tab', { name: 'All projects', exact: true }).click();
       for (const name of ['OpenDataCenter', 'Kefi', 'Jobdog', 'Jobbr']) {
         await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
       }
@@ -56,12 +57,22 @@ test('brand kit and privacy are reachable with local assets', async ({ page }) =
 
 test('featured cases, filters, and deep links share the complete registry', async ({ page }) => {
   await page.goto('/?theme=dark#projects');
-  const featured = page.locator('.featured-projects');
-  await expect(featured.locator('article')).toHaveCount(3);
   const catalogue = page.locator('.project-catalogue');
-  await catalogue.getByRole('button', { name: 'Developer tools', exact: true }).click();
-  await expect(catalogue.getByRole('button', { name: 'Developer tools', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(featured.locator('article')).toHaveCount(3);
+  const section = page.locator('#projects');
+  await expect(catalogue.getByRole('tab', { name: 'Featured', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(catalogue.locator('article')).toHaveCount(3);
+  const compactHeight = (await section.boundingBox())!.height;
+  await catalogue.getByRole('tab', { name: 'All projects', exact: true }).click();
+  await expect(catalogue.locator('article')).toHaveCount(12);
+  expect((await section.boundingBox())!.height).toBeGreaterThan(compactHeight);
+  await catalogue.getByRole('tab', { name: 'Featured', exact: true }).click();
+  await expect(catalogue.locator('article')).toHaveCount(3);
+  expect(Math.abs((await section.boundingBox())!.height - compactHeight)).toBeLessThan(2);
+  await catalogue.getByRole('tab', { name: 'Developer tools', exact: true }).click();
+  await expect(catalogue.getByRole('tab', { name: 'Developer tools', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(catalogue.locator('article')).toHaveCount(2);
+  await catalogue.getByRole('tab', { name: 'Developer tools', exact: true }).press('Home');
+  await expect(catalogue.getByRole('tab', { name: 'Featured', exact: true })).toBeFocused();
   await page.goto('/?project=pointup&theme=dark#projects');
   const dialog = page.getByRole('dialog', { name: 'PointUp', exact: true });
   await expect(dialog.getByRole('heading', { name: 'Architecture', exact: true })).toBeVisible();

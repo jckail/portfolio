@@ -1,6 +1,6 @@
 # Public project evidence — October 8, 2026
 
-The central registry is `backend/app/data/projects.json`. Exactly three projects are featured: Portfolio Agent Platform, PointUp and Data Playground. Filters use the categories `agents`, `infrastructure`, `data`, `devtools`, `knowledge` and `experimental`. Status is one of Live, Prototype, In Development, Employer Work or Archived. A separate maturity note qualifies public previews, deployment limits and historical projects. Archived is a portfolio maturity label; it does not imply the GitHub repository's archive flag is set.
+The central registry is `backend/app/data/projects.json`. Exactly three projects are featured: Portfolio Agent Platform, PointUp and Data Playground. One tabbed catalogue defaults to those three featured projects. All projects and category tabs replace the same grid, whose height follows its cards without a second featured row. Filters use the categories `agents`, `infrastructure`, `data`, `devtools`, `knowledge` and `experimental`. Status is one of Live, Prototype, In Development, Employer Work or Archived. A separate maturity note qualifies public previews, deployment limits and historical projects. Archived is a portfolio maturity label; it does not imply the GitHub repository's archive flag is set.
 
 ## Evidence boundaries
 

@@ -43,7 +43,7 @@ describe('project card button', () => {
     // No aria-label: the name is the visible title + description, then a
     // visually hidden suffix (Lighthouse label-content-name-mismatch).
     expect(card).not.toHaveAttribute('aria-label');
-    const button = within(container.querySelector('.featured-projects') as HTMLElement).getByRole('button', { name: /^Portfolio\s*A personal site\s*\(view details\)$/ });
+    const button = within(container.querySelector('.project-catalogue') as HTMLElement).getByRole('button', { name: /^Portfolio\s*A personal site\s*\(view details\)$/ });
     expect(button).toBe(card);
     expect(card?.querySelector('.project-icon')).toHaveAttribute('aria-hidden', 'true');
   });
@@ -57,47 +57,68 @@ describe('project card button', () => {
 
 
 describe('project catalogue', () => {
-  it('keeps featured selections visible while filtering the complete catalogue', () => {
+  it('defaults to featured and replaces cards as tabs change without duplicates', () => {
     projectsData.data = { title: 'Data service', description: 'Metered events', description_detail: '', link: 'https://example.com/data', categories: ['data'] };
-    const { container } = render(<Projects />);
-    fireEvent.click(screen.getByRole('button', { name: 'Data and reliability' }));
-    const catalogue = within(container.querySelector('.project-catalogue') as HTMLElement);
-    expect(screen.getByRole('button', { name: 'Data and reliability' })).toHaveAttribute('aria-pressed', 'true');
-    expect(catalogue.getByRole('heading', { name: 'Data service' })).toBeInTheDocument();
-    expect(catalogue.queryByRole('heading', { name: 'Portfolio' })).toBeNull();
-    expect(within(container.querySelector('.featured-projects') as HTMLElement).getByRole('heading', { name: 'Portfolio' })).toBeInTheDocument();
+    render(<Projects />);
+    expect(screen.getByRole('tab', { name: 'Featured' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getAllByRole('heading', { name: 'Portfolio' })).toHaveLength(1);
+    expect(screen.queryByRole('heading', { name: 'Data service' })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Data and reliability' }));
+    expect(screen.getByRole('tabpanel', { name: 'Data and reliability' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Data service' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Portfolio' })).toBeNull();
     expect(screen.getByRole('status')).toHaveTextContent('1 of 2 projects');
-    fireEvent.click(screen.getByRole('button', { name: 'All projects' }));
-    expect(catalogue.getByRole('heading', { name: 'Portfolio' })).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('2 of 2 projects');
+    fireEvent.click(screen.getByRole('tab', { name: 'All projects' }));
+    expect(screen.getAllByRole('article')).toHaveLength(2);
+    fireEvent.click(screen.getByRole('tab', { name: 'Featured' }));
+    expect(screen.getAllByRole('article')).toHaveLength(1);
+  });
+
+  it('supports arrow, Home and End keys with one tab stop', () => {
+    render(<Projects />);
+    const featured = screen.getByRole('tab', { name: 'Featured' });
+    featured.focus();
+    fireEvent.keyDown(featured, { key: 'ArrowRight' });
+    const all = screen.getByRole('tab', { name: 'All projects' });
+    expect(all).toHaveFocus();
+    expect(all).toHaveAttribute('aria-selected', 'true');
+    expect(featured).toHaveAttribute('tabindex', '-1');
+    fireEvent.keyDown(all, { key: 'End' });
+    expect(screen.getByRole('tab', { name: 'Open source and experiments' })).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight' });
+    expect(featured).toHaveFocus();
+    fireEvent.keyDown(featured, { key: 'ArrowLeft' });
+    fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+    expect(featured).toHaveFocus();
   });
 
   it('offers a reset for an empty category', () => {
     render(<Projects />);
-    fireEvent.click(screen.getByRole('button', { name: 'Infrastructure' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Infrastructure' }));
     expect(screen.getByRole('status')).toHaveTextContent('0 of 1 projects');
     fireEvent.click(screen.getByRole('button', { name: 'Show all projects' }));
-    expect(screen.getByRole('button', { name: 'All projects' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('tab', { name: 'All projects' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('opens a deep-linked project even when excluded by the active filter', async () => {
     render(<Projects />);
-    fireEvent.click(screen.getByRole('button', { name: 'Infrastructure' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Infrastructure' }));
     act(() => {
       window.history.pushState({}, '', '/?project=portfolio#projects');
       window.dispatchEvent(new PopStateEvent('popstate'));
     });
     expect(await screen.findByRole('dialog')).toHaveTextContent('Portfolio');
-    expect(screen.getByRole('button', { name: 'Infrastructure' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('tab', { name: 'Infrastructure' })).toHaveAttribute('aria-selected', 'true');
   });
 });
 
 
 describe('project skill focus restoration', () => {
-  it.each(['featured-projects', 'project-catalogue'])('returns to the originating %s card after a project-to-skill transition', async (group) => {
+  it.each(['Featured', 'All projects'])('returns to the originating card in %s after a project-to-skill transition', async (tab) => {
     const user = userEvent.setup();
     const { container } = render(<Projects />);
-    const trigger = within(container.querySelector(`.${group}`) as HTMLElement).getByRole('button', { name: 'View details' });
+    fireEvent.click(screen.getByRole('tab', { name: tab }));
+    const trigger = within(container.querySelector('.project-catalogue') as HTMLElement).getByRole('button', { name: 'View details' });
     await act(async () => { await user.click(trigger); });
     const projectDialog = await screen.findByRole('dialog');
     await act(async () => { await user.click(within(projectDialog).getByRole('button', { name: 'Python' })); });

@@ -9,7 +9,7 @@ from backend.app.services.chat_tools import ALL_TOOLS, READ_TOOL_HANDLERS, run_r
 def test_recruiter_brief_is_curated_and_source_backed():
     brief = run_read_tool("get_recruiter_brief", {"focus": "agent harness"})
     assert brief["profile"]["location"] == "San Francisco, CA"
-    assert brief["experience"][0]["title"] == "Staff Software Engineer, Agent Platform"
+    assert brief["experience"][0]["title"] == "Staff Software Engineer, Agents Platform"
     assert len(brief["experience"]) == 3
     assert all(len(job["highlights"]) <= 2 for job in brief["experience"])
     assert brief["relevant_evidence"]

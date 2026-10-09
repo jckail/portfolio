@@ -2,7 +2,7 @@
   "generated_by": "helpers/build_resume_pdf.py",
   "pdf": "JordanKailResume.pdf",
   "current_company": "Together AI",
-  "current_title": "Staff Software Engineer, Agent Platform",
+  "current_title": "Staff Software Engineer, Agents Platform",
   "current_dates": "02/2025 - Present",
   "companies": [
     "Together AI",
@@ -18,7 +18,7 @@
     {
       "company": "Together AI",
       "bullets": [
-        "Created the Agent Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
+        "Created the Agents Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
         "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
         "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
         "Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.",
@@ -96,5 +96,5 @@
     "Skills",
     "Projects"
   ],
-  "text_sha256": "37820e07b425bbf519825d92e76c4068835c6c368757996b4dbd5128445f8177"
+  "text_sha256": "3ad1aa6dc771ec8524e46a96448f3f9423ff0ad3e1c91f8b78ed52b8442fa12f"
 }
