@@ -62,7 +62,9 @@ def test_whole_run_timeout_cancels_provider_and_returns_completion(client, monke
             cancelled.append(True)
 
     monkeypatch.setattr(provider, "stream", hanging)
-    monkeypatch.setattr(portfolio_agent, "AGENT_TIMEOUT_SECONDS", 0.01)
+    # Allow SDK setup on loaded CI hosts before timing out the hanging provider.
+    # The test still requires provider cancellation and an empty saved history.
+    monkeypatch.setattr(portfolio_agent, "AGENT_TIMEOUT_SECONDS", 1.0)
     with client.websocket_connect("/ws/sdk-timeout") as ws:
         frames = say(ws)
     assert cancelled == [True]
