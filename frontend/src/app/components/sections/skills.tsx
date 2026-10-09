@@ -165,7 +165,7 @@ const TechnicalSkills: React.FC = () => {
       </div>
       <div className="section-content">
         <div className="skills-focus">
-          <div><h3>Agent systems &amp; evaluation</h3><p>Agent harnesses, tool use, tracing, replay, and evaluations.</p><a href="#experience">See production experience</a></div>
+          <div><h3>Agent systems &amp; evaluation</h3><p>Pi (agent harness), Claude Code, and Codex for AI-assisted software engineering. Agent harnesses, tool use, tracing, replay, and evaluations.</p><a href="#experience">See production experience</a></div>
           <div><h3>Distributed platforms</h3><p>Data engineering, Kubernetes, cloud infrastructure, and reliable services.</p><a href="#projects">Explore engineering projects</a></div>
           <div><h3>Knowledge &amp; graph systems</h3><p>Graph databases, Graphify, retrieval, and connected context for agents.</p><a href="#projects">Explore public work</a></div>
           <div><h3>Software engineering</h3><p>Python, Go, Rust, and SQL. Practical systems from prototypes to production.</p><a href="#resume">Read the résumé</a></div>
