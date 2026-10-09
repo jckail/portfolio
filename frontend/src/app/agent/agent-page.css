@@ -173,3 +173,14 @@
 .agent-page:has(.agent-conversation-start) { height: auto; min-height: 100dvh; }
 .agent-page .agent-conversation:has(.agent-conversation-start) { height: auto; min-height: 480px; }
 .agent-page .agent-conversation-start { overflow: visible; flex: 1 0 auto; }
+
+/* Keep active conversations usable in short laptop windows. The initial
+   invitation and introduction form retain their natural document height. */
+@media (min-width: 1001px) and (max-height: 720px) {
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) { min-height: 100dvh; padding-top: 12px; padding-bottom: 12px; gap: 12px; }
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) .agent-topbar { padding-bottom: 12px; }
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) .agent-page-intro { padding: 0; }
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) .agent-page-intro h1 { font-size: 1.8rem; margin: 0; }
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) .agent-lede,
+  .agent-page:not(:has(.agent-conversation-start, .has-access-gate)) .agent-intro-note { display: none; }
+}

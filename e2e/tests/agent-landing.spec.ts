@@ -50,6 +50,7 @@ for (const [theme, width, height] of [
       await composer.fill(question);
       await page.getByRole('button', { name: 'Send message', exact: true }).click();
       await expect(page.getByText('Synthetic portfolio answer.').first()).toBeVisible();
+      if (remaining === 1 && width > 1000) await expect(composer).toBeInViewport();
     }
     const email = page.getByLabel('Your email', { exact: true });
     const company = page.getByLabel('Company or organization');
