@@ -404,6 +404,7 @@ def llms_txt() -> bytes:
         f"- [Resume as JSON Resume]({absolute('/resume.json')}): structured work history, skills and projects",
         f"- [Resume as PDF]({absolute(RESUME_PDF_PATH)}): the downloadable resume",
         f"- [Portfolio website]({absolute('/')}): the interactive site",
+        f"- [Writing]({absolute('/blog')}): published articles; [RSS feed]({absolute('/blog/feed.xml')})",
         "",
         "## Agent interfaces",
         "",
@@ -440,6 +441,7 @@ def llms_txt() -> bytes:
 def llms_full_txt() -> bytes:
     contact = load_contact()
     lines = _llms_header()
+    lines += [f"Published writing: {absolute('/blog')} · RSS: {absolute('/blog/feed.xml')}", ""]
     lines += ["## About", ""]
     lines += [p + "\n" for p in _bio_paragraphs()]
     lines += ["## Experience", ""]
@@ -568,12 +570,15 @@ def resume_json() -> bytes:
 # --- sitemap.xml -----------------------------------------------------------------
 
 
-@cache
 def sitemap_xml() -> bytes:
+    from ..blog import posts
+
     # HTML pages only. llms.txt, resume.json and the PDF stay discoverable via
     # robots.txt, llms.txt and the Link header on the home page.
     modified = last_modified_date()
     entries = [
+        ("/blog", modified, "weekly", "0.8"),
+        *((f"/blog/{post.slug}", str(post.published), "monthly", "0.7") for post in posts() if not post.source_url),
         ("/", modified, "monthly", "1.0"),
         ("/dataplayground", modified, "monthly", "0.8"),
         ("/agents.html", modified, "monthly", "0.7"),

@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from .admin_routes import router as admin_router
 from .agent_access_routes import router as agent_access_router
+from .blog_routes import router as blog_router
 from .chat_routes import router as chat_router
 from .chat_routes import status_router as chat_status_router
 from .contact_draft_routes import router as contact_draft_router
@@ -41,6 +42,7 @@ api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 # Appending the routes (rather than include_router, which would prefix them)
 # keeps their paths as declared when main.py includes api_router.
 api_router.routes.extend(discovery_router.routes)
+api_router.routes.extend(blog_router.routes)
 api_router.routes.extend(forwards_router.routes)  # /<slug> 302s to apps hosted elsewhere
 
 # The chat socket is mounted under /ws.

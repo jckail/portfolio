@@ -51,11 +51,12 @@ describe('SidePanel focus management', () => {
   it('wraps Tab and Shift+Tab inside the open drawer', () => {
     render(<Harness />);
     openDrawer();
-    screen.getByText('Resume').focus();
+    screen.getByRole('link', { name: 'Writing' }).focus();
+    expect(screen.getByRole('link', { name: 'Writing' })).toHaveAttribute('href', '/blog');
     fireEvent.keyDown(document, { key: 'Tab' });
     expect(document.activeElement).toBe(screen.getByText('About'));
     fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
-    expect(document.activeElement).toBe(screen.getByText('Resume'));
+    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Writing' }));
   });
 
   it('pulls focus back in when it is outside the drawer', () => {
