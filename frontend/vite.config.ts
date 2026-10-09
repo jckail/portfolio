@@ -39,6 +39,11 @@ export default defineConfig({
       overlay: true,
     },
     proxy: {
+      // Server-rendered writing routes; blog-assets stays served from public/.
+      '^/blog(?:[/?]|$)': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,

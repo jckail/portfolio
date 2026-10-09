@@ -23,8 +23,8 @@ from ..utils.request_context import clear_request_id, set_request_id
 # actively harmful.
 PRIVATE_API_PREFIXES = ("/api/admin", "/api/logs")
 NEVER_CACHE_PREFIXES = ("/api/health", "/api/dataplayground/runtime", "/api/dataplayground/copilot")
-# Scripts served from the dist root without a content hash in the filename.
-UNHASHED_SCRIPTS = frozenset({"/ga-init.js"})
+# Assets served without a content hash must revalidate after deployments.
+UNHASHED_ASSETS = frozenset({"/ga-init.js", "/blog-assets/theme.js", "/blog-assets/blog.css"})
 ATLAS_PREFIX = "/opendatacenter"
 ATLAS_MAP_CONNECT = "https://demotiles.maplibre.org"
 
@@ -123,13 +123,12 @@ def cache_control_for(path: str, method: str, status: int, content_type: str) ->
     if (
         path == "/"
         or path.endswith(".html")
-        or path in UNHASHED_SCRIPTS
+        or path in UNHASHED_ASSETS
         # SPA history fallback: /admin and unknown paths get index.html
         or content_type.startswith("text/html")
     ):
-        # Unhashed root scripts (the GA consent bootstrap) revalidate like the
-        # HTML that loads them; otherwise browsers cache them heuristically and
-        # keep running a stale consent default.
+        # Unhashed assets revalidate with the HTML that loads them so a
+        # deployment cannot leave a stale stylesheet or script in use.
         return "no-cache"
     if path.startswith(NEVER_CACHE_PREFIXES):
         # Health must never be served from a cache. A stale "healthy" 200 held
