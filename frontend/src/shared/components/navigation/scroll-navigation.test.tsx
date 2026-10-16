@@ -18,6 +18,7 @@ describe('scroll navigation', () => {
   });
   it('uses native anchors so section jumps participate in browser history', () => {
     render(<ScrollNavigation />);
+    expect(screen.getAllByRole('link').map(link => link.textContent)).toEqual(['About', 'Experience', 'Projects', 'Skills', 'Résumé']);
     expect(screen.getByRole('link', { name: 'Projects' })).toHaveAttribute('href', '#projects');
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'location');
   });

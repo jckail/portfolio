@@ -100,7 +100,7 @@ def test_experience_tech_stack_tags_name_known_skills():
 def test_ai_work_leads_the_recent_roles():
     """The AI/agents bullets come first: older roles only show two bullets."""
     experience = get_all_models()["experience"].root
-    assert "agents platform" in experience["together_ai"].highlights[1].lower()
+    assert "agents platform" in experience["together_ai"].highlights[0].lower()
     assert "govern" in experience["prove"].highlights[0].lower()
     assert "classifiers" in experience["meta"].highlights[0].lower()
 

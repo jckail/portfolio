@@ -18,12 +18,11 @@
     {
       "company": "Together AI",
       "bullets": [
-        "Created the Agents Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
-        "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+        "Created the Agents Platform team; built agent harnesses and an internal agents factory for production workflows.",
         "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
-        "Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.",
-        "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions.",
-        "Contributed to multiple patent-pending innovations in agent systems."
+        "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+        "Contributed to multiple patent-pending innovations in agent systems.",
+        "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Together’s AI cloud."
       ]
     },
     {
@@ -96,5 +95,5 @@
     "Skills",
     "Projects"
   ],
-  "text_sha256": "3ad1aa6dc771ec8524e46a96448f3f9423ff0ad3e1c91f8b78ed52b8442fa12f"
+  "text_sha256": "dec7ecae4356452de321772aa08d0f3c6f4fb01d71a6a01b0eadee69e6250b77"
 }

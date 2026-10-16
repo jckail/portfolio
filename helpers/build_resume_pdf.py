@@ -130,7 +130,7 @@ def load_content() -> dict:
         "links": [
             (bare_url(contact["linkedin"]), contact["linkedin"]),
             (bare_url(contact["github"]), contact["github"]),
-            (bare_url(contact["website"]), contact["website"]),
+            (contact["website"].rstrip("/"), contact["website"]),
         ],
         "summary": " ".join(about.get("resume_summary", about["description"]).split()),
         "roles": roles,
@@ -215,7 +215,7 @@ def build_pdf(c: dict, out: Path) -> None:
     s_name = style("name", fontName="Roboto-Bold", fontSize=22, leading=26, textColor=accent)
     s_head = style("headline", fontName="Roboto-Bold", fontSize=11, leading=14, textColor=ink)
     s_contact = style("contact", fontSize=9, leading=12.5, textColor=muted)
-    s_sec = style("sec", fontName="Roboto-Bold", fontSize=11.5, leading=14, textColor=accent, spaceBefore=6, spaceAfter=1)
+    s_sec = style("sec", fontName="Roboto-Bold", fontSize=11.5, leading=14, textColor=accent, spaceBefore=6, spaceAfter=1, keepWithNext=True)
     s_body = style("body", spaceAfter=2)
     s_role = style("role", fontName="Roboto-Bold", fontSize=10, leading=13, spaceBefore=4)
     s_dates = style("dates", fontSize=8.8, leading=11, textColor=muted, spaceAfter=1.2)
@@ -232,8 +232,10 @@ def build_pdf(c: dict, out: Path) -> None:
     story.append(Paragraph(" &nbsp;|&nbsp; ".join(contact_bits), s_contact))
 
     def section(title: str):
-        return [Paragraph(title, s_sec),
-                HRFlowable(width="100%", thickness=0.8, color=accent, spaceBefore=1, spaceAfter=3)]
+        rule = HRFlowable(width="100%", thickness=0.8, color=accent, spaceBefore=1, spaceAfter=3)
+        # Keep the section label and rule attached to its first content block.
+        rule.keepWithNext = True
+        return [Paragraph(title, s_sec), rule]
 
     story += section("Summary") + [Paragraph(escape(c["summary"]), s_body)]
 

@@ -5,7 +5,7 @@ import { useTimelineNavigation } from '../../hooks/use-timeline-navigation';
 import '../../../styles/components/navigation/scroll-navigation.css';
 
 const SECTIONS = [
-  ['about', 'About'], ['projects', 'Projects'], ['experience', 'Experience'],
+  ['about', 'About'], ['experience', 'Experience'], ['projects', 'Projects'],
   ['skills', 'Skills'], ['resume', 'Résumé'],
 ] as const;
 
