@@ -69,7 +69,7 @@ def test_non_html_requests_do_not_fall_back(spa):
 
 
 @pytest.mark.parametrize("accept", [{"accept": "*/*"}, {}, {"accept": "*/*;q=0.8"}])
-@pytest.mark.parametrize("path", ["/admin", "/agent", "/agent/", "/dataplayground", "/jobbr", "/gopilot", "/aibilling", "/cryptotrader"])
+@pytest.mark.parametrize("path", ["/admin", "/agent", "/agent/", "/dataplayground", "/gopilot", "/aibilling", "/cryptotrader"])
 def test_wildcard_or_missing_accept_gets_known_routes(spa, path, accept):
     """Crawlers that send */* or no Accept are served like the home page."""
     response = spa.get(path, headers={**accept, "accept-encoding": "identity"})
@@ -92,7 +92,7 @@ def test_wildcard_accept_keeps_unknown_and_api_paths_404(spa, path, accept):
 
 @pytest.mark.parametrize("accept", ["application/json", "application/json, */*", "application/json, text/plain, */*"])
 def test_explicit_json_requests_do_not_get_lab_documents(spa, accept):
-    response = spa.get("/jobbr", headers={"accept": accept})
+    response = spa.get("/gopilot", headers={"accept": accept})
     assert response.status_code == 404
     assert response.json() == {"detail": "Not Found"}
 
@@ -100,7 +100,7 @@ def test_explicit_json_requests_do_not_get_lab_documents(spa, accept):
 @pytest.mark.parametrize("method", ["GET", "HEAD"])
 @pytest.mark.parametrize("accept", ["*/*;q=0", "*/*;q=0.000", "text/plain, */*;q=0"])
 def test_refused_wildcard_does_not_enable_document_fallback(spa, method, accept):
-    response = spa.request(method, "/jobbr", headers={"accept": accept})
+    response = spa.request(method, "/gopilot", headers={"accept": accept})
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("application/json")
 
@@ -112,14 +112,14 @@ def test_refused_wildcard_does_not_enable_document_fallback(spa, method, accept)
     "APPLICATION/JSON;Q=0, */*;Q=0.001",
 ])
 def test_refused_json_does_not_veto_accepted_wildcard(spa, method, accept):
-    response = spa.request(method, "/jobbr", headers={"accept": accept})
+    response = spa.request(method, "/gopilot", headers={"accept": accept})
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
 
 
 @pytest.mark.parametrize("accept", ["application/json;q=0.001, */*", "application/problem+json;q=0.5, */*"])
 def test_positive_json_weight_keeps_json_client_out_of_spa(spa, accept):
-    response = spa.get("/jobbr", headers={"accept": accept})
+    response = spa.get("/gopilot", headers={"accept": accept})
     assert response.status_code == 404
     assert response.json() == {"detail": "Not Found"}
 
@@ -128,7 +128,7 @@ def test_genuinely_absent_accept_serves_only_known_routes(spa):
     # TestClient otherwise supplies */*, so an empty headers dict is not a
     # regression test for a truly absent Accept header.
     del spa.headers["accept"]
-    assert spa.get("/jobbr").status_code == 200
+    assert spa.get("/gopilot").status_code == 200
     response = spa.get("/does-not-exist")
     assert response.status_code == 404
     assert response.json() == {"detail": "Not Found"}
@@ -142,7 +142,7 @@ def test_refused_json_wildcard_still_never_masks_a_missing_route(spa, path):
 
 
 def test_explicit_html_navigation_keeps_its_existing_precedence(spa):
-    response = spa.get("/jobbr", headers={"accept": "application/json, text/html, */*"})
+    response = spa.get("/gopilot", headers={"accept": "application/json, text/html, */*"})
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
 
