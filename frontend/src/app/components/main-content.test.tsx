@@ -10,8 +10,8 @@ import { useThemeStore } from '../../shared/stores/theme-store';
 
 vi.mock('./header/header', () => ({ Header: () => null }));
 vi.mock('./sections/about', () => ({ default: () => null }));
-vi.mock('./sections/experience', () => ({ default: () => null }));
-vi.mock('./sections/projects', () => ({ default: () => null }));
+vi.mock('./sections/experience', () => ({ default: () => <section aria-label="Experience" /> }));
+vi.mock('./sections/projects', () => ({ default: () => <section aria-label="Projects" /> }));
 vi.mock('./sections/skills', () => ({ default: () => null }));
 vi.mock('./sections/resume', () => ({ default: () => null }));
 vi.mock('./admin/admin-handler', () => ({ default: () => null }));
@@ -65,4 +65,11 @@ describe('home doodle visibility owner', () => {
     await screen.findByLabelText('Drawing canvas');
     await waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' }));
   });
+});
+
+it('presents experience before projects in the page reading order', async () => {
+  render(<MainContent />);
+  const experience = await screen.findByRole('region', { name: 'Experience' });
+  const projects = await screen.findByRole('region', { name: 'Projects' });
+  expect(experience.compareDocumentPosition(projects) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 });

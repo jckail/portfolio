@@ -40,8 +40,8 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, returnFocusRef }
 
   const sections = [
     { id: 'about', label: 'About' },
-    { id: 'projects', label: 'Projects' },
     { id: 'experience', label: 'Experience' },
+    { id: 'projects', label: 'Projects' },
     { id: 'skills', label: 'Skills' },
     { id: 'resume', label: 'Resume' },
   ];

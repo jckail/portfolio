@@ -110,7 +110,7 @@ def test_updated_role_titles_and_education_appear_in_pdf(content, manifest):
     roles = {role["key"]: role for role in content["roles"]}
     assert roles["meta"]["location"] == "Menlo Park, CA"
     assert roles["together_ai"]["title"] == "Staff Software Engineer, Agents Platform"
-    assert "after establishing data engineering" in " ".join(roles["together_ai"]["bullets"])
+    assert roles["together_ai"]["bullets"][0].startswith("Created the Agents Platform team;")
     assert roles["prove"]["title"] == "Staff Software Engineer"
     expected = [{"institution": "University of Colorado Boulder", "study": "Computer Science", "date": "08/2011 - 03/2013"}]
     assert content["education"] == manifest["education"] == expected
@@ -141,3 +141,62 @@ def test_curated_skills_and_current_location_match_the_target_profile(content):
     assert "Studied" not in text
     for skill in ["Graphify", "Claude Code", "Pi", "Rust", "Knowledge graphs"]:
         assert skill in text
+
+
+def test_pdf_links_include_the_visible_canonical_website(content):
+    pypdf = pytest.importorskip("pypdf")
+    reader = pypdf.PdfReader(str(ASSETS / "JordanKailResume.pdf"))
+    text = " ".join(page.extract_text() or "" for page in reader.pages)
+    assert "https://www.jckail.com" in text
+    assert "jordan-kail.com" not in text
+    uris = []
+    for page in reader.pages:
+        for reference in page.get("/Annots", []):
+            annotation = reference.get_object()
+            if annotation.get("/Subtype") == "/Link":
+                action = annotation.get("/A", {})
+                assert action.get("/S") == "/URI"
+                uris.append(action["/URI"])
+                left, bottom, right, top = map(float, annotation["/Rect"])
+                assert 0 <= left < right <= 612
+                assert 0 <= bottom < top <= 792
+    expected = [f"mailto:{content['email']}"] + [url for _, url in content["links"]]
+    expected += [url for project in content["projects"] for url in project["urls"]]
+    assert all(url in uris for url in expected)
+    assert "https://www.jckail.com" in uris
+
+
+def test_pdf_has_unicode_embedded_text_and_logical_reading_order(content):
+    pypdf = pytest.importorskip("pypdf")
+    reader = pypdf.PdfReader(str(ASSETS / "JordanKailResume.pdf"))
+    assert reader.trailer["/Root"]["/Lang"] == "en-US"
+    assert not reader.is_encrypted
+    ordered = [content["name"], content["headline"], "Summary", content["summary"], "Experience"]
+    for role in content["roles"]:
+        ordered += [builder.role_heading(role), role["dates"], *role["bullets"]]
+    ordered += ["Education"]
+    for entry in content["education"]:
+        ordered += [entry["institution"], entry["study"], builder.pretty_dates(entry["date"])]
+    ordered += ["Skills"]
+    for label, items in content["skills"]:
+        ordered += [label, *items]
+    ordered += ["Projects"]
+    for project in content["projects"]:
+        ordered += [project["title"], project["description"]]
+    # Test both content-stream order and geometric layout extraction.
+    for mode in ("plain", "layout"):
+        text = _squash("\n".join(page.extract_text(extraction_mode=mode) or "" for page in reader.pages))
+        cursor = 0
+        for fragment in ordered:
+            index = text.find(_squash(fragment), cursor)
+            assert index >= 0, f"{mode}: missing or out-of-order content: {fragment}"
+            cursor = index + len(_squash(fragment))
+        assert "\ufffd" not in text
+    for page in reader.pages:
+        resources = page["/Resources"]
+        assert not resources.get("/XObject"), "resume must contain selectable text, not image scans"
+        for reference in resources["/Font"].values():
+            font = reference.get_object()
+            assert font["/Subtype"] == "/TrueType"
+            assert font.get("/ToUnicode"), "embedded fonts need Unicode maps for scanners"
+            assert font["/FontDescriptor"].get_object().get("/FontFile2")

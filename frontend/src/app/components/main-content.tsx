@@ -135,12 +135,12 @@ const MainContentInner: React.FC = () => {
           </ErrorBoundary>
 
           {/* Each section gets its own error boundary and suspense boundary for independent loading */}
-          <SectionSlot name="projects">
-            <Projects />
-          </SectionSlot>
-
           <SectionSlot name="experience">
             <Experience />
+          </SectionSlot>
+
+          <SectionSlot name="projects">
+            <Projects />
           </SectionSlot>
 
           <SectionSlot name="skills">

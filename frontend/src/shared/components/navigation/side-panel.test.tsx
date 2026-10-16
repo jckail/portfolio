@@ -45,6 +45,7 @@ describe('SidePanel focus management', () => {
     expect(nav).toHaveAttribute('inert');
     openDrawer();
     expect(nav).not.toHaveAttribute('inert');
+    expect(screen.getAllByRole('button', { name: /^(About|Experience|Projects|Skills|Resume)$/ }).map(button => button.textContent)).toEqual(['About', 'Experience', 'Projects', 'Skills', 'Resume']);
     expect(document.activeElement).toBe(screen.getByText('About'));
   });
 

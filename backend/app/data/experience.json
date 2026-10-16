@@ -5,11 +5,11 @@
     "date": "02/2025 - Present",
     "location": "San Francisco, CA",
     "highlights": [
-      "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-      "Created the agents platform team after getting the data engineering team off the ground; built the agent harness and internal agents factory to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
-      "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
-      "Build the data platform behind Together's AI acceleration cloud: the pipelines, storage, and telemetry that turn inference and training traffic into product, reliability, and capacity signals.",
-      "Build tracing, replay and evaluation harnesses so internal teams can measure and regression-test LLM agents before they ship."
+      "Created the Agents Platform team; built the agent harness and internal agents factory to deliver production agents.",
+      "Build and operate agents for infrastructure automation, finance automation, and internal workflows, extending team capacity while improving on-call response and infrastructure maintenance.",
+      "Build tracing, replay, and evaluation harnesses so internal teams can measure agent behavior and regression-test releases.",
+      "Contributed to multiple patent-pending innovations in agent systems.",
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud."
     ],
     "link": "https://www.together.ai/",
     "logoPath": "together.svg",
@@ -26,23 +26,20 @@
       "llm-evaluation"
     ],
     "more_highlights": [
-      "Tech lead for data engineering since joining: grew the team from just myself to 15+ engineers while setting technical direction for the data platform behind Together's AI acceleration cloud.",
-      "Created the agents platform team after getting the data engineering team off the ground; built the agent harness and internal agents factory to deliver production agents, and contributed to multiple patent-pending innovations in agent systems.",
-      "Built and operate agents for infrastructure automation, finance automation and other internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
+      "Created the Agents Platform team after establishing data engineering; built the agent harness and internal agents factory to deliver production agents.",
+      "Build and operate agents for infrastructure automation, finance automation, and internal workflows that augment the teams they serve, extending team capacity while improving on-call response and infrastructure maintenance.",
       "Build tracing, replay, and regression-testing harnesses for LLM agents, giving internal teams a repeatable way to evaluate agentic features before they ship.",
-      "Own core data platform services for inference, fine-tuning, and dedicated GPU cluster workloads, making platform usage measurable end to end.",
-      "Develop streaming and batch pipelines that make model-serving and GPU-fleet telemetry queryable in near real time for capacity planning and reliability engineering.",
-      "Design data infrastructure for large-scale training and inference workloads, covering dataset curation, lineage, and quality controls for open-model work.",
-      "Partner with research, infrastructure, and product teams to standardize data contracts and lineage for training-data and evaluation workflows.",
-      "Mentor engineers and set technical direction for the data platform and agents platform architecture."
+      "Contributed to multiple patent-pending innovations in agent systems.",
+      "Mentor engineers and set technical direction for agents platform architecture and the data platform.",
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud.",
+      "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions."
     ],
     "resume_highlights": [
-      "Created the Agents Platform team after establishing data engineering; built agent harnesses and an internal agents factory for production workflows.",
-      "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+      "Created the Agents Platform team; built agent harnesses and an internal agents factory for production workflows.",
       "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
-      "Established and scaled data engineering from one engineer to 15+, setting technical direction for Together's AI cloud.",
-      "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions.",
-      "Contributed to multiple patent-pending innovations in agent systems."
+      "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
+      "Contributed to multiple patent-pending innovations in agent systems.",
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Together’s AI cloud."
     ]
   },
   "prove": {
