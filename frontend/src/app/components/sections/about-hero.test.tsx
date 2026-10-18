@@ -3,7 +3,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 import TLDR from './about';
-import aboutMe from '../../../../../backend/app/data/aboutme.json';
 
 const data = {
   aboutMeData: {
@@ -38,8 +37,8 @@ afterEach(() => {
 });
 
 describe('About hero heading', () => {
-  it('renders the published meetup paragraph with a readable official event link', () => {
-    data.aboutMeData.brief_bio = aboutMe.brief_bio;
+  it('renders a meetup paragraph with a readable official event link', () => {
+    data.aboutMeData.brief_bio = 'On March 26, 2026, I spoke at the [San Francisco Apache Airflow Meetup](https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/) at Together AI, presenting “Building the AI-Native Data Platform”.\n\nOutside work, I explore the mountains.';
     render(<TLDR />);
     const link = screen.getByRole('link', { name: 'San Francisco Apache Airflow Meetup' });
     expect(link).toHaveAttribute('href', 'https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/');
