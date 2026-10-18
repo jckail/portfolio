@@ -1,7 +1,19 @@
 """Portfolio data integrity: models load and referenced files exist."""
 import os
 
+import pytest
+from pydantic import ValidationError
+
 from backend.app.models import get_all_models
+from backend.app.models.experience import ExperienceSource
+from backend.app.services.public_context import public_context
+
+AIRFLOW_MEETUP_LINE = (
+    "Speaker at the Bay Area Apache Airflow Meetup (AI-rflow) on March 26, 2026: "
+    "Building the AI-Native Data Platform: How agents reshape build, serve, and compound insights from data."
+)
+AIRFLOW_MEETUP_URL = "https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/"
+AIRFLOW_MEETUP_TITLE = "AI-rflow Meetup: Exploring AI Use Cases in Apache Airflow"
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -103,6 +115,26 @@ def test_ai_work_leads_the_recent_roles():
     assert "agents platform" in experience["together_ai"].highlights[0].lower()
     assert "govern" in experience["prove"].highlights[0].lower()
     assert "classifiers" in experience["meta"].highlights[0].lower()
+
+
+def test_airflow_meetup_is_a_sourced_speaking_credit():
+    """The March 26, 2026 meetup is on the site, linked to Meetup, and kept off the resume."""
+    role = get_all_models()["experience"].root["together_ai"]
+    assert role.highlights[-1] == AIRFLOW_MEETUP_LINE
+    assert role.more_highlights[-1] == AIRFLOW_MEETUP_LINE
+    assert AIRFLOW_MEETUP_LINE not in (role.resume_highlights or [])
+    assert [(source.label, source.url) for source in role.sources] == [
+        (AIRFLOW_MEETUP_TITLE, AIRFLOW_MEETUP_URL)
+    ]
+    jobs = {job["id"]: job for job in public_context()["experience"]}
+    assert jobs["together_ai"]["sources"] == [{"label": AIRFLOW_MEETUP_TITLE, "url": AIRFLOW_MEETUP_URL}]
+    assert AIRFLOW_MEETUP_URL not in jobs["together_ai"]["highlights"]
+    assert "sources" not in jobs["prove"]
+
+
+def test_experience_sources_are_https_only():
+    with pytest.raises(ValidationError):
+        ExperienceSource(label="Airflow meetup", url="http://example.com/event")
 
 
 def test_project_link_label_defaults_and_override():

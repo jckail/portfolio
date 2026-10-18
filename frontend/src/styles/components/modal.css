@@ -778,6 +778,15 @@
   font-size: var(--text-sm);
 }
 
+.experience-sources-list {
+  margin: var(--spacing-sm) 0 0;
+  padding-left: 1.25rem;
+}
+
+.experience-sources-list a {
+  color: var(--primary);
+}
+
 @media (max-width: 768px) {
   .experience-modal-mark.experience-modal-company-logo--mark {
     padding: 4px;

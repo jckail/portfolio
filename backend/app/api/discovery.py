@@ -237,6 +237,9 @@ def snapshot_html() -> bytes:
         parts.append(f"<p>{_date_range_html(job)} &middot; {escape(job.location)}</p>")
         parts.append(f"<p>{escape(job.company_description)}</p>")
         parts.append("<ul>" + "".join(f"<li>{escape(h)}</li>" for h in _visible_highlights(index, job)) + "</ul>")
+        source_links = [_a(source.url, source.label) for source in job.sources if source.url.startswith("https://")]
+        if source_links:
+            parts.append("<p>Sources: " + " | ".join(source_links) + "</p>")
         if job.tech_stack:
             parts.append(f"<p>Technologies: {escape(_tech_labels(job.tech_stack))}</p>")
         parts.append("</article>")
@@ -455,6 +458,11 @@ def llms_full_txt() -> bytes:
             "",
         ]
         lines += [f"- {h}" for h in _visible_highlights(index, job)]
+        lines += [
+            f"- Source: [{source.label}]({source.url})"
+            for source in job.sources
+            if source.url.startswith("https://")
+        ]
         if job.tech_stack:
             lines += ["", f"Technologies: {_tech_labels(job.tech_stack)}"]
         lines.append("")

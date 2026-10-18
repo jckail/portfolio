@@ -19,12 +19,20 @@ def public_context() -> dict[str, Any]:
     experience = []
     for key, job in load_experience().root.items():
         raw = raw_jobs[key]
-        experience.append({
+        entry = {
             "id": key, "company": job.company, "title": raw.get("resume_title", job.title),
             "date": job.date, "location": raw.get("resume_location", job.location),
             "highlights": raw.get("resume_highlights", job.highlights),
             "url": str(job.link or ""), "technologies": job.tech_stack,
-        })
+        }
+        https_sources = [
+            {"label": source.label, "url": source.url}
+            for source in job.sources
+            if source.url.startswith("https://")
+        ]
+        if https_sources:
+            entry["sources"] = https_sources
+        experience.append(entry)
     projects = [
         {"id": key, "title": project.title, "description": project.description,
          "url": str(project.link or ""), "technologies": project.tech_stack,

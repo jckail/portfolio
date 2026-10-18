@@ -210,7 +210,36 @@ describe('Experience entry without a company (sabbatical)', () => {
     }
     expect(within(dialog).getByText('10/2022 - 05/2023')).toBeInTheDocument();
     expect(within(dialog).queryByText('Photos:')).toBeNull();
+    expect(within(dialog).queryByText('Sources:')).toBeNull();
     expect(within(dialog).queryByRole('img')).toBeNull();
+  });
+
+  it('links an https source and ignores anything else', async () => {
+    const role = experienceData.together_ai;
+    role.sources = [
+      {
+        label: 'AI-rflow Meetup: Exploring AI Use Cases in Apache Airflow',
+        url: 'https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/',
+      },
+      { label: 'Insecure notes', url: 'http://example.com/notes' },
+    ];
+    try {
+      window.history.replaceState({}, '', '/?company=together-ai');
+      render(<Experience />);
+      const dialog = await screen.findByRole('dialog', { name: 'Together AI' });
+      const link = within(dialog).getByRole('link', {
+        name: 'AI-rflow Meetup: Exploring AI Use Cases in Apache Airflow',
+      });
+      expect(link).toHaveAttribute(
+        'href',
+        'https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/',
+      );
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(within(dialog).queryByRole('link', { name: 'Insecure notes' })).toBeNull();
+    } finally {
+      role.sources = undefined;
+    }
   });
 
   it('opens from ?company=sabbatical', async () => {
