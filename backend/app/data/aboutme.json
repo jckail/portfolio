@@ -2,7 +2,7 @@
     "greeting": "Jordan Kail",
     "description": "I build production AI agent platforms. At Together AI, I established data engineering and created the Agents Platform team, building agent harnesses, tracing, replay, and evaluation infrastructure.",
     "aidetails": "Chat with my Agent for evidence from my work and projects.",
-    "brief_bio": "My work connects AI agents with the distributed systems they depend on. I care about reliable execution, useful evaluation, and tools that make engineering teams more effective.\n\nOutside work, I explore the mountains with my dog, build computers, and experiment with new tools.",
+    "brief_bio": "My work connects AI agents with the distributed systems they depend on. I care about reliable execution, useful evaluation, and tools that make engineering teams more effective.\n\nOn March 26, 2026, I spoke at the [San Francisco Apache Airflow Meetup](https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/) at Together AI, presenting “Building the AI-Native Data Platform” on how agents reshape data workflows and insights.\n\nOutside work, I explore the mountains with my dog, build computers, and experiment with new tools.",
     "full_portrait": "/images/headshot/headshot.webp",
     "resume_name": "JordanKailResume.pdf",
     "primary_skills": [
