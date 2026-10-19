@@ -121,7 +121,7 @@ def test_search_finds_grounded_snippets_with_keys():
     for hit in result["results"]:
         assert len(hit["snippets"]) <= chat_tools.SEARCH_MAX_SNIPPETS
         assert all(len(s) <= chat_tools.SEARCH_SNIPPET_CHARS + 6 for s in hit["snippets"])
-    assert any(h["source"] == "experience" and h["key"] == "quarg" for h in result["results"])
+    assert any(h["source"] == "experience" and h["key"] == "together_ai" for h in result["results"])
 
 
 def test_search_covers_skills_and_projects():

@@ -148,7 +148,7 @@ def test_resume_json_matches_the_json_resume_shape(client):
             assert ISO_DATE.match(item["endDate"])
         assert all(isinstance(h, str) and h for h in item["highlights"])
     current = doc["work"][0]
-    assert current["name"] == "Quarg" and "endDate" not in current
+    assert current["name"] == "Together AI" and "endDate" not in current
 
     for project in doc["projects"]:
         assert project["name"] and project["url"].startswith("http")
@@ -240,7 +240,7 @@ def test_resume_json_preserves_approved_resume_edits(client):
     assert doc["basics"]["summary"] == discovery._resume_data("aboutme")["resume_summary"]
     by_name = {entry["name"]: entry for entry in doc["work"]}
     assert by_name["Sabbatical"]["location"] == ""
-    assert by_name["Quarg"]["highlights"] == discovery._resume_data("experience")["quarg"]["resume_highlights"]
+    assert by_name["Together AI"]["highlights"] == discovery._resume_data("experience")["together_ai"]["resume_highlights"]
     assert "Java" not in {item for group in doc["skills"] for item in group["keywords"]}
 
 

@@ -34,7 +34,7 @@ def test_validate_flags_ungrounded_and_duplicate_cases():
 
 
 def test_substring_checks_are_case_insensitive():
-    assert score(case(all_of=["Quarg"], any_of=["staff"]), res("He is a STAFF engineer at quarg")) == []
+    assert score(case(all_of=["Together AI"], any_of=["staff"]), res("He is a STAFF engineer at together ai")) == []
     fails = score(case(all_of=["kafka"]), res("nothing here"))
     assert fails and "kafka" in fails[0]
 

@@ -327,14 +327,14 @@ Contradictions **inside** `experience.json`, all fed to the chat assistant as
 title — "led" is the safer verb.
 
 ### Resume (`helpers/build_resume_pdf.py`)
-- The three Quarg bullets are deliberately metric-free. Bullet 1 needs throughput and blast radius; bullet 2 needs **adoption** (teams, agents shipped, evals/week) — it is the bullet that qualifies him for AI-infra roles and currently proves nothing was used; bullet 3 needs data scale, ideally naming a publicly released model.
+- The three Together AI bullets are deliberately metric-free. Bullet 1 needs throughput and blast radius; bullet 2 needs **adoption** (teams, agents shipped, evals/week) — it is the bullet that qualifies him for AI-infra roles and currently proves nothing was used; bullet 3 needs data scale, ideally naming a publicly released model.
 - **The AI & ML skills line names no inference or serving technology at all** — while the current role is at an inference company. Add vLLM, SGLang, TensorRT-LLM, Ray/Ray Serve, Triton; then eval/observability tooling. Drop `Json`, `HTML`, `Streamlit`, `Keras`, `Caffe`.
 - Projects order buries the TechCrunch-featured, externally verifiable Meta work at #4. Move it first. Replace the `tny.app` shortener with the real article URL.
 - Spelling on the printed page: `ProtoBuff`→Protobuf, `Llama Index`→LlamaIndex, `Cuda`→CUDA, `Neo4J`→Neo4j, `DBT`→dbt; and in `skills.json`, `"Quadrant"`→**Qdrant**.
 - `backend/assets/JordanKailResume.txt` is referenced by nothing and is the most stale of the three copies (still present-tense about Prove). Delete it or generate it alongside the PDF.
 
 ### System prompt (`backend/app/prompts/portfoliosystemprompt.md`)
-- **Never mentions Quarg, or that Jordan is currently employed**, in 226 lines. Freshness depends entirely on `experience.json` arriving in a separate block.
+- **Never mentions Together AI, or that Jordan is currently employed**, in 226 lines. Freshness depends entirely on `experience.json` arriving in a separate block.
 - **No guidance for "is he looking for a job"** — probably the most-asked question by the actual audience. The model improvises off `aboutme.open_to`, which says yes.
 - `:59` ships a literal unfilled template placeholder: `Location: "City, State"`.
 - Approves four content categories (volunteer work, athletics, music, sports) with **no backing data anywhere**, so the model declines awkwardly or confabulates.

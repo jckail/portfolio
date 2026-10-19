@@ -64,7 +64,7 @@ project doesn't cut version tags, so entries are grouped by date instead.
 - `CompanyLogo`'s `<img>` fallback pointed at `/images/projects/`.
 
 ### Changed
-- **Quarg added as the current role** (Staff Software Engineer, 02/2025);
+- **Together AI added as the current role** (Staff Software Engineer, 02/2025);
   Prove Identity closed at 01/2025. `Experience` and `Projects` became
   `RootModel`s so adding an entry is a data-only change — previously pydantic's
   default `extra="ignore"` would have silently dropped a new employer key.
