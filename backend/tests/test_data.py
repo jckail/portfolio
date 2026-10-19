@@ -92,7 +92,7 @@ def test_experience_tech_stack_tags_name_known_skills():
     models = get_all_models()
     names = {s.display_name.lower() for s in models["skills"].root.values()}
     experience = models["experience"].root
-    for role in ("together_ai", "prove", "meta"):
+    for role in ("quarg", "prove", "meta"):
         for tag in experience[role].tech_stack:
             assert tag.replace("-", " ").lower() in names, f"{role}: unknown skill tag {tag}"
 
@@ -100,7 +100,7 @@ def test_experience_tech_stack_tags_name_known_skills():
 def test_ai_work_leads_the_recent_roles():
     """The AI/agents bullets come first: older roles only show two bullets."""
     experience = get_all_models()["experience"].root
-    assert "agents platform" in experience["together_ai"].highlights[0].lower()
+    assert "agents platform" in experience["quarg"].highlights[0].lower()
     assert "govern" in experience["prove"].highlights[0].lower()
     assert "classifiers" in experience["meta"].highlights[0].lower()
 

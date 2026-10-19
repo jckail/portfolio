@@ -1,11 +1,11 @@
 {
   "generated_by": "helpers/build_resume_pdf.py",
   "pdf": "JordanKailResume.pdf",
-  "current_company": "Together AI",
+  "current_company": "Quarg",
   "current_title": "Staff Software Engineer, Agents Platform",
   "current_dates": "02/2025 - Present",
   "companies": [
-    "Together AI",
+    "Quarg",
     "Prove Identity",
     "Sabbatical",
     "Meta | Facebook",
@@ -16,13 +16,13 @@
   ],
   "roles": [
     {
-      "company": "Together AI",
+      "company": "Quarg",
       "bullets": [
         "Created the Agents Platform team; built agent harnesses and an internal agents factory for production workflows.",
         "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
         "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
         "Contributed to multiple patent-pending innovations in agent systems.",
-        "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Together’s AI cloud."
+        "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Quarg’s AI cloud."
       ]
     },
     {
@@ -95,5 +95,5 @@
     "Skills",
     "Projects"
   ],
-  "text_sha256": "dec7ecae4356452de321772aa08d0f3c6f4fb01d71a6a01b0eadee69e6250b77"
+  "text_sha256": "0a63c12888398670f9867eef463ddd6d9b7ab915d3f5e09a8de6c33cda9088a0"
 }

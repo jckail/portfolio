@@ -29,12 +29,12 @@ test.describe('skill modal', () => {
 test.describe('experience modal', () => {
   test('a skill tag swaps to the skill dialog (one at a time) and focus returns on close', async ({ page }) => {
     await page.goto('/');
-    const trigger = page.getByText('View Together AI experience details').locator('..');
+    const trigger = page.getByText('View Quarg experience details').locator('..');
     await trigger.scrollIntoViewIfNeeded();
     await trigger.click();
     const expDialog = page.getByRole('dialog');
     await expect(expDialog).toHaveCount(1);
-    await expect(expDialog).toContainText('Together AI');
+    await expect(expDialog).toContainText('Quarg');
 
     await expDialog.locator('.skill-tag', { hasText: /^Python$/ }).first().click();
     const skillDialog = page.getByRole('dialog');

@@ -7,8 +7,8 @@ import Experience, { resolveExperienceKey } from './experience';
 // Plain (prototype-carrying) objects on purpose: experience.tsx must not rely
 // on the DataProvider's null-prototype copies to reject ?company=constructor.
 const experienceData = {
-  together_ai: {
-    company: 'Together AI',
+  quarg: {
+    company: 'Quarg',
     title: 'Engineer',
     date: '2025',
     location: 'Remote',
@@ -68,8 +68,8 @@ afterEach(() => {
 
 describe('resolveExperienceKey', () => {
   it('maps a known slug to its data key', () => {
-    expect(resolveExperienceKey(experienceData, 'together-ai')).toBe('together_ai');
-    expect(resolveExperienceKey(experienceData, 'together_ai')).toBe('together_ai');
+    expect(resolveExperienceKey(experienceData, 'quarg')).toBe('quarg');
+    expect(resolveExperienceKey(experienceData, 'quarg')).toBe('quarg');
   });
 
   it.each(['constructor', '__proto__', 'hasOwnProperty', 'toString', 'nope'])(
@@ -94,10 +94,10 @@ describe('Experience deep links', () => {
   );
 
   it('opens the experience modal for a real slug, then a skill on top of it', async () => {
-    window.history.replaceState({}, '', '/?company=together-ai');
+    window.history.replaceState({}, '', '/?company=quarg');
     render(<Experience />);
 
-    const experienceDialog = await screen.findByRole('dialog', { name: 'Together AI' });
+    const experienceDialog = await screen.findByRole('dialog', { name: 'Quarg' });
     // Portaled out of #experience so it can stack above body-level layers
     expect(experienceDialog.closest('#experience')).toBeNull();
 
@@ -125,22 +125,22 @@ describe('Experience deep links', () => {
     expect(scrollIntoView).not.toHaveBeenCalled();
     unmount();
 
-    window.history.replaceState({}, '', '/?company=together-ai');
+    window.history.replaceState({}, '', '/?company=quarg');
     render(<Experience />);
-    await screen.findByRole('dialog', { name: 'Together AI' });
+    await screen.findByRole('dialog', { name: 'Quarg' });
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
-    expect(window.location.search).toBe('?company=together-ai');
+    expect(window.location.search).toBe('?company=quarg');
   });
 });
 
 describe('Experience logo button', () => {
   it('is named by text that is in the DOM, not an aria-label over the logo', () => {
-    const item = experienceData.together_ai;
+    const item = experienceData.quarg;
     const original = item.logoPath;
     item.logoPath = 'acme-logo.svg';
     try {
       render(<Experience />);
-      const button = screen.getByRole('button', { name: 'View Together AI experience details' });
+      const button = screen.getByRole('button', { name: 'View Quarg experience details' });
       // label-content-name-mismatch only applies to aria-label/labelledby names
       expect(button).not.toHaveAttribute('aria-label');
       expect(button).toHaveClass('logo-link');
@@ -150,7 +150,7 @@ describe('Experience logo button', () => {
       expect(logo).toHaveAttribute('alt', '');
 
       fireEvent.keyDown(button, { key: 'Enter' });
-      expect(new URLSearchParams(window.location.search).get('company')).toBe('together-ai');
+      expect(new URLSearchParams(window.location.search).get('company')).toBe('quarg');
     } finally {
       item.logoPath = original;
     }
@@ -159,8 +159,8 @@ describe('Experience logo button', () => {
 
 describe('Experience timeline', () => {
   it('shows every highlight for the current role, two for older roles, and opens details', async () => {
-    const data = experienceData as Record<string, (typeof experienceData)['together_ai']>;
-    const current = data.together_ai;
+    const data = experienceData as Record<string, (typeof experienceData)['quarg']>;
+    const current = data.quarg;
     const originalHighlights = current.highlights;
     const originalDate = current.date;
     current.highlights = ['now 1', 'now 2', 'now 3'];
