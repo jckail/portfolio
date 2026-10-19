@@ -7,7 +7,7 @@ import { useSectionStore } from '../../stores/section-store';
 import { useTimelineNavigation } from '../../hooks/use-timeline-navigation';
 vi.mock('../../hooks/use-timeline-navigation', () => ({ useTimelineNavigation: vi.fn() }));
 const state = { sentinel: { current: null }, visible: true, active: 'experience-meta-facebook', targets: [
-  { id: 'experience-together-ai', label: 'Together AI · 02/2025 - Present' },
+  { id: 'experience-quarg', label: 'Quarg · 02/2025 - Present' },
   { id: 'experience-meta-facebook', label: 'Meta · 2020 - 2022' },
 ] };
 describe('scroll navigation', () => {
@@ -33,9 +33,9 @@ describe('scroll navigation', () => {
     render(<ScrollNavigation />);
     const picker = screen.getByRole('combobox', { name: 'Jump to career milestone' });
     expect(picker).toHaveValue('experience-meta-facebook');
-    expect(screen.getByRole('option', { name: /Together AI/ })).toHaveTextContent('02/2025 - Present');
-    fireEvent.change(picker, { target: { value: 'experience-together-ai' } });
-    expect(window.location.hash).toBe('#experience-together-ai');
+    expect(screen.getByRole('option', { name: /Quarg/ })).toHaveTextContent('02/2025 - Present');
+    fireEvent.change(picker, { target: { value: 'experience-quarg' } });
+    expect(window.location.hash).toBe('#experience-quarg');
     expect(window.location.search).toBe('?theme=dark');
     fireEvent.change(picker, { target: { value: 'projects' } });
     expect(window.location.hash).toBe('#projects');

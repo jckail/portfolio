@@ -64,6 +64,6 @@ describe('retired product analytics', () => {
     expect(lengthBucket(0)).toBe('0');
     expect(lengthBucket(11)).toBe('11-50');
     expect(lengthBucket(5000)).toBe('201+');
-    expect(slugify('Together AI')).toBe('together-ai');
+    expect(slugify('Quarg')).toBe('quarg');
   });
 });

@@ -24,7 +24,7 @@ _PURPOSE = re.compile(
     r"company|business|team|experience|skill\w*|project\w*|career|background|"
     r"qualification\w*|education|strength\w*|weakness\w*|fit|contact|reach|"
     r"meeting|calendar|schedule|availability|salary|compensation|relocat\w*|"
-    r"remote|facebook|programming languages|together|meta|prove|jobbr|agent\w*|engineering|leadership)\b", re.I)
+    r"remote|facebook|programming languages|quarg|meta|prove|jobbr|agent\w*|engineering|leadership)\b", re.I)
 _FOLLOWUP = re.compile(
     r"^(?:hi|hello|hey|thanks|thank you|yes|no|please continue|continue|tell me more|"
     r"what else|why|how so|can you elaborate|summarize that|give me an example|"

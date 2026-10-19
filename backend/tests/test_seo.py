@@ -127,7 +127,7 @@ def test_the_home_page_carries_the_snapshot_inside_root(home):
 
 def test_the_snapshot_has_the_current_role_and_every_job_and_bullet(home):
     page = parse(home.text)
-    assert "Staff Software Engineer, Agents Platform at Together AI" in home.text
+    assert "Staff Software Engineer, Agents Platform at Quarg" in home.text
     headings = [text for tag, text in page.headings if tag == "h3"]
     for index, job in enumerate(load_experience().root.values()):
         assert f"{job.title}, {job.company}" in headings
@@ -239,7 +239,7 @@ def test_json_ld_parses_and_describes_the_person(home):
     assert set(by_type) == {"WebSite", "ProfilePage", "Person"}
     person = by_type["Person"]
     assert person["jobTitle"] == "Staff Software Engineer, Agents Platform"
-    assert person["worksFor"]["name"] == "Together AI"
+    assert person["worksFor"]["name"] == "Quarg"
     assert "https://github.com/jckail" in person["sameAs"]
     assert {"Python", "Go", "SQL"} <= set(person["knowsAbout"])
     assert len(person["knowsAbout"]) == len({k.lower() for k in person["knowsAbout"]})

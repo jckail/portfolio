@@ -113,7 +113,7 @@ describe('ChatMarkdown', () => {
       'https://www.jordankail.ai/contact?theme=dark',
       'https://www.jordankail.ai/?theme=dark&contact=open',
     ],
-    ['https://jordankail.ai/?company=together_ai', 'https://jordankail.ai/?company=together_ai'],
+    ['https://jordankail.ai/?company=quarg', 'https://jordankail.ai/?company=quarg'],
     ['https://jordankail.ai/context.json', 'https://jordankail.ai/context.json'],
     ['https://other.example/skills', 'https://other.example/skills'],
     ['https://jckail.com.evil.example/contact', 'https://jckail.com.evil.example/contact'],

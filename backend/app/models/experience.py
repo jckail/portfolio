@@ -41,17 +41,17 @@ class Experience(RootModel[dict[str, ExperienceHighlight]]):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "together_ai": {
-                    "company": "Together AI",
+                "quarg": {
+                    "company": "Quarg",
                     "title": "Staff Software Engineer",
                     "date": "02/2025 - Present",
                     "location": "San Francisco, CA",
                     "highlights": [
                         "Building the data platform and agent tooling behind an AI acceleration cloud"
                     ],
-                    "link": "https://www.together.ai/",
-                    "logoPath": "together.svg",
-                    "company_description": "Together AI is an AI acceleration cloud.",
+                    "link": "https://www.quarg.ai/",
+                    "logoPath": "quarg.svg",
+                    "company_description": "Quarg is an AI acceleration cloud.",
                     "tech_stack": ["python", "sql", "go", "kubernetes"],
                     "more_highlights": [
                         "Own core data platform services for inference, fine-tuning, and GPU cluster workloads"

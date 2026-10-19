@@ -35,8 +35,8 @@ const TRUSTED_LINK_HOSTS: ReadonlySet<string> = new Set([
   'github.com',
   'linkedin.com',
   'www.linkedin.com',
-  'together.ai',
-  'www.together.ai',
+  'quarg.ai',
+  'www.quarg.ai',
 ]);
 
 /** Parse an https URL; null for any other scheme or an unparseable href. */

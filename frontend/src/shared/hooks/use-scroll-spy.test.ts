@@ -98,9 +98,9 @@ describe('career milestone deep links', () => {
   });
 
   it('restores an existing milestone on Back/Forward while preserving modal query state', async () => {
-    window.history.replaceState(null, '', '/?theme=dark&project=portfolio#experience-together-ai');
+    window.history.replaceState(null, '', '/?theme=dark&project=portfolio#experience-quarg');
     mountSection('experience');
-    for (const id of ['experience-together-ai', 'experience-meta-facebook']) {
+    for (const id of ['experience-quarg', 'experience-meta-facebook']) {
       const item = document.createElement('li'); item.id = id;
       document.getElementById('experience')?.append(item);
     }
