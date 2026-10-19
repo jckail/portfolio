@@ -11,11 +11,11 @@ describe('findCurrentRole', () => {
   it('headlines the entry that runs to Present', () => {
     const data = {
       old: item('Prove Identity', 'Staff Software Engineer - Data', '06/2023 - 01/2025'),
-      now: item('Quarg', 'Staff Software Engineer', '02/2025 - Present'),
+      now: item('Together AI', 'Staff Software Engineer', '02/2025 - Present'),
     };
     expect(findCurrentRole(data, 'Fallback')).toEqual({
       title: 'Staff Software Engineer',
-      company: 'Quarg',
+      company: 'Together AI',
     });
   });
 

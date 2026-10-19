@@ -9,31 +9,31 @@ const ROOT = path.resolve(__dirname, '../../../..');
 const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8');
 
 const STANDALONE = [
-  'public/images/companylogos/quarg-mark-dark.svg',
-  'public/images/companylogos/quarg-mark-light.svg',
-  'public/images/companylogos/quarg-mark-mono.svg',
+  'public/images/companylogos/together-mark-dark.svg',
+  'public/images/companylogos/together-mark-light.svg',
+  'public/images/companylogos/together-mark-mono.svg',
 ];
 
-describe('Quarg mark', () => {
+describe('Together AI mark', () => {
   it('is a symbol-only logo, so it gets a tile fitted to it', () => {
-    expect(isMarkOnlyLogo('quarg.svg')).toBe(true);
+    expect(isMarkOnlyLogo('together.svg')).toBe(true);
     expect(isMarkOnlyLogo('prove.svg')).toBe(false);
   });
 
   it('has no wordmark text in the inline or standalone files', () => {
-    for (const file of ['src/assets/icons/companylogos/quarg.svg', ...STANDALONE]) {
+    for (const file of ['src/assets/icons/companylogos/together.svg', ...STANDALONE]) {
       expect(read(file), file).not.toMatch(/<text|<tspan/i);
     }
   });
 
   it('draws the three brand pieces from theme tokens, with brand fallbacks', () => {
-    const svg = read('src/assets/icons/companylogos/quarg.svg');
+    const svg = read('src/assets/icons/companylogos/together.svg');
     for (const [token, brand] of [
       ['magenta', '#ef2cc1'],
       ['lavender', '#caaef5'],
       ['orange', '#fc4c02'],
     ]) {
-      expect(svg).toContain(`var(--quarg-${token}, ${brand})`);
+      expect(svg).toContain(`var(--together-${token}, ${brand})`);
     }
   });
 
@@ -42,12 +42,12 @@ describe('Quarg mark', () => {
     const block = (name: string) => theme.slice(theme.indexOf(`.theme-${name} {`)).split('\n}')[0];
     for (const name of ['light', 'dark', 'party']) {
       for (const token of ['magenta', 'lavender', 'orange']) {
-        expect(block(name), `${name} ${token}`).toContain(`--quarg-${token}:`);
+        expect(block(name), `${name} ${token}`).toContain(`--together-${token}:`);
       }
     }
     // The brand lavender is 1.9:1 on white; light mode must not use it.
-    expect(block('light')).toContain('--quarg-lavender: #a271ed');
-    expect(block('dark')).toContain('--quarg-lavender: #caaef5');
+    expect(block('light')).toContain('--together-lavender: #a271ed');
+    expect(block('dark')).toContain('--together-lavender: #caaef5');
   });
 
   it('ships a light standalone file whose lavender is not the washed-out brand tint', () => {

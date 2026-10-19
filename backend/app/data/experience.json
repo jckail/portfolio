@@ -1,6 +1,6 @@
 {
-  "quarg": {
-    "company": "Quarg",
+  "together_ai": {
+    "company": "Together AI",
     "title": "Staff Software Engineer, Agents Platform",
     "date": "02/2025 - Present",
     "location": "San Francisco, CA",
@@ -9,11 +9,11 @@
       "Build and operate agents for infrastructure automation, finance automation, and internal workflows, extending team capacity while improving on-call response and infrastructure maintenance.",
       "Build tracing, replay, and evaluation harnesses so internal teams can measure agent behavior and regression-test releases.",
       "Contributed to multiple patent-pending innovations in agent systems.",
-      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Quarg’s AI acceleration cloud."
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud."
     ],
-    "link": "https://www.quarg.ai/",
-    "logoPath": "quarg.svg",
-    "company_description": "Quarg is an AI acceleration cloud offering fast inference, fine-tuning, and dedicated GPU clusters for open-source and custom models, backed by a research team that builds and open-sources frontier models and systems optimizations.",
+    "link": "https://www.together.ai/",
+    "logoPath": "together.svg",
+    "company_description": "Together AI is an AI acceleration cloud offering fast inference, fine-tuning, and dedicated GPU clusters for open-source and custom models, backed by a research team that builds and open-sources frontier models and systems optimizations.",
     "tech_stack": [
       "python",
       "sql",
@@ -31,7 +31,7 @@
       "Build tracing, replay, and regression-testing harnesses for LLM agents, giving internal teams a repeatable way to evaluate agentic features before they ship.",
       "Contributed to multiple patent-pending innovations in agent systems.",
       "Mentor engineers and set technical direction for agents platform architecture and the data platform.",
-      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Quarg’s AI acceleration cloud.",
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud.",
       "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions."
     ],
     "resume_highlights": [
@@ -39,7 +39,7 @@
       "Build and operate agents for infrastructure, finance, and internal workflows, improving on-call response and infrastructure maintenance.",
       "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
       "Contributed to multiple patent-pending innovations in agent systems.",
-      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Quarg’s AI cloud."
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Together’s AI cloud."
     ]
   },
   "prove": {

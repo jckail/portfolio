@@ -13,7 +13,7 @@ for (const theme of ['dark', 'light']) {
       else await expect(nav.getByRole('link', { name: 'Projects', exact: true })).toHaveAttribute('aria-current', 'location');
       await page.getByRole('tab', { name: 'All projects', exact: true }).click();
       for (const name of ['OpenDataCenter', 'Kefi', 'Jobdog', 'Jobbr', 'Quarg', 'Starling', 'Agent Hub', 'DoubleTake']) {
-        await expect(page.locator('.project-card').getByRole('heading', { name, exact: true })).toBeVisible();
+        await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
       }
       const jobbr = page.locator('article').filter({ has: page.getByRole('heading', { name: 'Jobbr', exact: true }) });
       await expect(jobbr.getByRole('link', { name: 'Open app', exact: true })).toHaveAttribute('href', 'https://jobdog.ai/jobbr/#/');

@@ -32,8 +32,8 @@ const skillsData = {
 } as unknown as SkillsData;
 
 const experienceData = {
-  quarg: {
-    company: 'Quarg',
+  together_ai: {
+    company: 'Together AI',
     title: 'Staff Engineer',
     date: '02/2025 - Present',
     tech_stack: ['python'],
@@ -101,7 +101,7 @@ describe('SkillModal', () => {
       'button'
     );
     expect(roles.map((r) => r.textContent)).toEqual([
-      'QuargStaff Engineer02/2025 - Present (opens role details)',
+      'Together AIStaff Engineer02/2025 - Present (opens role details)',
       'MetaData Engineer2019 - 2022 (opens role details)',
     ]);
     expect(within(dialog).getByRole('button', { name: /QR Project/ })).toBeInTheDocument();
@@ -125,10 +125,10 @@ describe('SkillModal', () => {
     window.history.replaceState({}, '', '/?skill=python');
     const onClose = vi.fn();
     render(<Harness onClose={onClose} />);
-    fireEvent.click(await screen.findByRole('button', { name: /Quarg/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Together AI/ }));
     expect(onClose).toHaveBeenCalled();
     const params = new URLSearchParams(window.location.search);
-    expect(params.get('company')).toBe('quarg');
+    expect(params.get('company')).toBe('together_ai');
     expect(params.get('skill')).toBeNull();
   });
 

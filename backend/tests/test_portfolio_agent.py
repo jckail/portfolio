@@ -121,5 +121,5 @@ def test_new_recruiter_tool_runs_through_sdk_and_returns_evidence(client, monkey
     with client.websocket_connect("/ws/sdk-recruiter-brief") as ws:
         frames = say(ws)
     output = provider.requests[1].messages[-1]["results"][0]["output"]
-    assert "Quarg" in str(output)
+    assert "Together" in str(output)
     assert "Jordan builds agent platforms" in "".join(f.get("message", "") for f in frames)

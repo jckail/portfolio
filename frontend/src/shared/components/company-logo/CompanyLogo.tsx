@@ -6,13 +6,13 @@ export const INLINE_COMPANY_LOGOS: ReadonlySet<string> = new Set([
   'deloitte.svg',
   'meta.svg',
   'prove.svg',
-  'quarg.svg',
+  'together.svg',
   'wow.svg',
   'r1.svg',
 ]);
 
 /** Logos that are a symbol only (no wordmark), so they get a tile fitted to them. */
-const MARK_ONLY_COMPANY_LOGOS: ReadonlySet<string> = new Set(['quarg.svg']);
+const MARK_ONLY_COMPANY_LOGOS: ReadonlySet<string> = new Set(['together.svg']);
 
 export const isMarkOnlyLogo = (name: string): boolean => MARK_ONLY_COMPANY_LOGOS.has(name);
 
