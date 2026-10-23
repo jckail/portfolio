@@ -1,9 +1,9 @@
 name: Deploy
 
-# Deploys to Cloud Run on pushes to main (or manually via workflow_dispatch).
-# Stays on GitHub Actions on purpose (JCK-2026): it uses an `environment:` and GCP WIF OIDC, which
-# Depot CI cannot run. CI itself runs on Depot CI (.depot/workflows/ci.yml); the deploy gate
-# (helpers/verify_deployment.py) requires that run's `depot-ci / ci-result` check run on this commit.
+# Manual fallback only (JCK-2034). Production deploys now run in Depot CI: the `deploy` job in
+# .depot/workflows/ci.yml, after `ci-result`, on every push to main. Dispatch this workflow only if
+# Depot CI is unavailable; its gate (helpers/verify_deployment.py) requires the `depot-ci / ci-result`
+# check run on the commit, so it still refuses an unverified main.
 #
 # Authentication uses Workload Identity Federation — no service-account keys.
 # Provision the WIF pool/provider and deployer service account with the
@@ -15,8 +15,6 @@ name: Deploy
 #   GCP_PROJECT_ID, GCP_REGION, CLOUD_RUN_SERVICE, AR_REPOSITORY
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:

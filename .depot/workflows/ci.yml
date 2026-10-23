@@ -344,3 +344,147 @@ jobs:
       run: |
         echo "job results: $RESULTS"
         for r in $RESULTS; do case "$r" in success|skipped) ;; *) exit 1 ;; esac; done
+
+  # Production deploy (JCK-2034): runs only for a push to main after every gate above passed.
+  # Same flow as the former GitHub workflow: build and scan without cloud credentials, push a digest,
+  # deploy with no traffic, verify the tagged revision, recheck that this commit is still main,
+  # promote, verify production. Authentication is the Depot CI OIDC token exchanged through the
+  # `depot-ci` workload identity pool (infra/depot.tf), which only trusts main in the Quarg Depot org.
+  # Rollback is a traffic shift to the previous revision (HANDOFF.md).
+  deploy:
+    name: Deploy to Cloud Run
+    needs: [ci-result]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.ci-result.result == 'success'
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 30
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: portfolio-383615
+      REGION: us-central1
+      SERVICE: quickresume
+      REPOSITORY: portfolio
+      WIF_PROVIDER: projects/292025398859/locations/global/workloadIdentityPools/depot-ci/providers/depot-oidc
+      DEPLOYER: quickresume-deployer@portfolio-383615.iam.gserviceaccount.com
+      # Version 1 verified from metadata on 2026-10-08. Rotation must update this explicitly.
+      AGENT_ACCESS_SECRET_VERSION: '1'
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        persist-credentials: false
+
+    - uses: depot/setup-action@91bc8495a33ebfc504ffc89e5674379ccf23c29c # v1.7.2
+
+    - name: Build image without cloud credentials
+      uses: depot/build-push-action@98e78adca7817480b8185f474a400b451d74e287 # v1.18.0
+      with:
+        project: rk7rrz6p02
+        context: .
+        file: helpers/Dockerfile.prod
+        load: true
+        tags: portfolio-deploy:${{ github.sha }}
+
+    - name: Scan image before publishing or authenticating
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        image-ref: portfolio-deploy:${{ github.sha }}
+        severity: CRITICAL,HIGH
+        exit-code: '1'
+        ignore-unfixed: true
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+      with:
+        workload_identity_provider: ${{ env.WIF_PROVIDER }}
+        service_account: ${{ env.DEPLOYER }}
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+    - name: Push this run's build
+      shell: bash
+      run: |
+        IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
+        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:${GITHUB_SHA}"
+        docker push "${IMAGE}:${GITHUB_SHA}"
+        DIGEST=$(docker image inspect --format '{{json .RepoDigests}}' "portfolio-deploy:${GITHUB_SHA}" | \
+          jq -er --arg image "$IMAGE" '[.[] | select(startswith($image + "@"))] | unique | if length == 1 then .[0] | split("@")[1] else error("Expected one pushed repository digest") end')
+        if [[ ! "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+          echo "::error::Push did not return one valid image digest"
+          exit 1
+        fi
+        echo "DEPLOY_IMAGE=${IMAGE}@${DIGEST}" >> "$GITHUB_ENV"
+
+    - name: Deploy new revision (no traffic yet)
+      run: |
+        TAG="gh-${GITHUB_SHA::7}"
+        echo "TAG=$TAG" >> "$GITHUB_ENV"
+        gcloud run deploy "$SERVICE" \
+          --project "$PROJECT_ID" \
+          --region "$REGION" \
+          --image "$DEPLOY_IMAGE" \
+          --update-env-vars "GIT_COMMIT=${GITHUB_SHA}" \
+          --update-secrets "AGENT_ACCESS_SECRET=portfolio-agent-access:${AGENT_ACCESS_SECRET_VERSION}" \
+          --cpu-boost \
+          --session-affinity \
+          --startup-probe="httpGet.path=/api/health,httpGet.port=8080,initialDelaySeconds=5,periodSeconds=5,failureThreshold=24,timeoutSeconds=3" \
+          --no-traffic \
+          --tag="$TAG" \
+          --quiet
+
+    - name: Verify new revision before promoting
+      run: |
+        SERVICE_JSON=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" --format=json)
+        CANARY_URL=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .url' <<< "$SERVICE_JSON")
+        REVISION=$(jq -er --arg TAG "$TAG" '.status.traffic[] | select(.tag == $TAG) | .revisionName' <<< "$SERVICE_JSON")
+        echo "REVISION=$REVISION" >> "$GITHUB_ENV"
+        RESOLVED_IMAGE=$(gcloud run revisions describe "$REVISION" \
+          --project "$PROJECT_ID" --region "$REGION" --format='value(status.imageDigest)')
+        if [ "$RESOLVED_IMAGE" != "$DEPLOY_IMAGE" ]; then
+          echo "::error::New revision does not match the pushed image digest"
+          exit 1
+        fi
+        python3 helpers/verify_runtime.py --url "$CANARY_URL" --sha "$GITHUB_SHA"
+
+    # Without the GitHub API (Depot's installation token is shared and rate-limited): ask git.
+    - name: Recheck that this commit is still main immediately before promotion
+      run: |
+        MAIN=$(git ls-remote https://github.com/jckail/portfolio.git refs/heads/main | cut -f1)
+        if [ "$MAIN" != "$GITHUB_SHA" ]; then
+          echo "::error::Deployment commit is no longer current main ($MAIN); a newer push will deploy"
+          exit 1
+        fi
+
+    - name: Promote new revision to 100% traffic
+      run: |
+        gcloud run services update-traffic "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" \
+          --to-revisions="${REVISION}=100" --quiet
+
+    - name: Verify production traffic
+      run: |
+        URL=$(gcloud run services describe "$SERVICE" \
+          --project "$PROJECT_ID" --region "$REGION" \
+          --format 'value(status.url)')
+        python3 helpers/verify_runtime.py --url "$URL" --sha "$GITHUB_SHA"
+
+    - name: Publish verified production alias
+      run: |
+        IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${SERVICE}"
+        docker tag "portfolio-deploy:${GITHUB_SHA}" "${IMAGE}:latest"
+        docker push "${IMAGE}:latest"
+
+    - name: Remove stale automated revision tags after verified promotion
+      run: python3 helpers/cleanup_revision_tags.py
+
+    - name: Remove this failed canary tag when its identity is known
+      if: failure() && env.TAG != '' && env.REVISION != ''
+      run: python3 helpers/cleanup_revision_tags.py --failed-canary
