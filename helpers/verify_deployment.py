@@ -1,15 +1,18 @@
-"""Fail closed unless current main has a successful Depot CI `ci-result` status."""
+"""Fail closed unless current main has a successful Depot CI `ci-result` check run."""
 import argparse
 import json
 import os
 import re
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 # CI of record is Depot CI (JCK-2026). Its `ci-result` job needs every other job, and Depot
-# publishes each job as a commit status named "<workflow> / <job>" with a depot.dev target URL.
+# publishes each job as a check run named "<workflow> / <job>" from the Depot Code Access GitHub
+# App (not as a commit status), with a depot.dev details URL.
 CI_CONTEXT = "depot-ci / ci-result"
+CI_APP_ID = 219785
 CI_URL_PREFIX = "https://depot.dev/orgs/f3bqc4vdfr/"
 
 
@@ -29,18 +32,21 @@ def verify(get, repository, sha):
             raise GateError("Deployment commit is no longer current main")
 
     current()
-    result = get(base + f"/commits/{sha}/statuses?per_page=100")
-    if len(result) >= 100:
-        raise GateError("CI status result is incomplete")
-    # Statuses are newest first; only the latest one for the context counts.
-    latest = next((item for item in result if item.get("context") == CI_CONTEXT), None)
-    if latest is None:
+    result = get(base + f"/commits/{sha}/check-runs?check_name={urllib.parse.quote(CI_CONTEXT)}"
+                 f"&app_id={CI_APP_ID}&filter=all&per_page=100")
+    runs = result.get("check_runs", [])
+    if result.get("total_count", 0) > len(runs):
+        raise GateError("CI check result is incomplete")
+    runs = [run for run in runs if run.get("name") == CI_CONTEXT and run.get("app", {}).get("id") == CI_APP_ID]
+    if not runs:
         raise Pending("Waiting for Depot CI result")
-    if not str(latest.get("target_url", "")).startswith(CI_URL_PREFIX):
+    # Only the newest run for the check counts (reruns supersede earlier attempts).
+    latest = max(runs, key=lambda run: (run.get("started_at") or "", run.get("id", 0)))
+    if not str(latest.get("details_url", "")).startswith(CI_URL_PREFIX):
         raise GateError("CI result does not come from the expected Depot organization")
-    if latest["state"] == "pending":
+    if latest.get("status") != "completed":
         raise Pending("Waiting for latest matching CI run")
-    if latest["state"] != "success":
+    if latest.get("conclusion") != "success":
         raise GateError("Latest matching CI run did not succeed")
     current()
     return latest["id"]
@@ -68,7 +74,7 @@ def main():
     while True:
         try:
             status_id = verify(get, repository, sha)
-            print(f"Verified current main and Depot CI result status {status_id}")
+            print(f"Verified current main and Depot CI result check run {status_id}")
             return
         except Pending as exc:
             if time.monotonic() >= deadline:
