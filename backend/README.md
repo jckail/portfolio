@@ -275,7 +275,7 @@ boundary. It covers the middleware, the chat protocol and tools, the provider
 layer, discovery documents, events and logging, admin auth, settings parsing
 and portfolio-data integrity (including a guard that fails on unfilled
 placeholders in published text). CI runs ruff and the tests on every push and
-pull request; coverage floors are in `pyproject.toml` and `ci.yml`.
+pull request; coverage floors are in `pyproject.toml` and `.depot/workflows/ci.yml`.
 
 ### Environment Variables
 

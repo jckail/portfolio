@@ -59,7 +59,8 @@ pip install -r requirements-dev.txt   # prod deps + pytest, ruff
 | [`infra/`](./infra) | Terraform for GCP (Cloud Run, secrets, registry, Workload Identity Federation) |
 | [`helpers/`](./helpers) | Dockerfiles, local run script, e2e-in-Docker, resume generator, deploy verification |
 | [`docs/`](./docs) | ADRs, runbooks, audits and design notes ([index](./docs/README.md)) |
-| [`.github/workflows/`](./.github/workflows) | `ci.yml` (required checks) and `deploy.yml` |
+| [`.depot/workflows/`](./.depot/workflows) | `ci.yml` (Depot CI, required check `depot-ci / ci-result`) |
+| [`.github/workflows/`](./.github/workflows) | `deploy.yml` (stays on GitHub Actions: `environment:` plus GCP OIDC) |
 
 ## Documentation
 

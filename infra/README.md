@@ -328,7 +328,7 @@ update there. Review it, because it tightens trust.
 
 ### CI
 
-`ci.yml` caches Terraform providers and Playwright browsers, names the
+`.depot/workflows/ci.yml` caches Terraform providers and Playwright browsers, names the
 shared-to-app boundary and undefined CSS token checks as separate steps (they
 also run inside lint and test), refuses a Terraform-managed API key or
 service-account key, and uploads Lighthouse and Playwright results. Lighthouse

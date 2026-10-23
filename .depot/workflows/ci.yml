@@ -1,0 +1,346 @@
+# Depot CI is this repo's CI of record (JCK-2026). It replaces .github/workflows/ci.yml.
+# Require only `depot-ci / ci-result`; it fails unless every job below succeeded.
+# helpers/verify_deployment.py (the production deploy gate) checks that same status on the pushed commit.
+name: depot-ci
+
+on:
+  push:
+    branches: [ main ]
+  # Validate stacked feature PRs as well as PRs targeting main.
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel superseded PR runs. Pushes to main are never cancelled: the deploy gate needs their result.
+concurrency:
+  group: depot-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  frontend:
+    name: Frontend (lint, type-check, test, build)
+    runs-on: depot-ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        persist-credentials: false
+
+    - name: Use Node.js 22
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    # Production dependencies only: dev tooling advisories are surfaced by
+    # Dependabot, but a high in what ships fails the build.
+    - name: Audit npm dependencies
+      run: npm audit --omit=dev --audit-level=high
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Type check
+      run: npm run type-check
+
+    # Both are also enforced inside the lint and test steps above (the ESLint
+    # import/no-restricted-paths zone, and src/styles/css-vars.test.ts). They
+    # are repeated here as their own named steps so a failure says what broke,
+    # and so someone loosening the ESLint zone or skipping the test does not
+    # silently drop the invariant.
+    - name: Boundary check (shared/ and types/ must not import app/)
+      run: |
+        if grep -rEn "from ['\"](\.\./)+app/|from ['\"]@/app/" src/shared src/types; then
+          echo "::error::shared/ and types/ must not import from app/"
+          exit 1
+        fi
+
+    - name: Undefined CSS custom property check
+      run: npx vitest run src/styles/css-vars.test.ts
+
+    - name: Test (with coverage gate)
+      run: npm run test:coverage
+
+    - name: Build
+      run: npm run build
+
+  backend:
+    name: Backend (compile, test)
+    runs-on: depot-ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        persist-credentials: false
+
+    - name: Use Python 3.12
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: requirements-dev.lock.txt
+
+    - name: Use Node.js 24 for Pi Agent SDK
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+        cache-dependency-path: copilot/package-lock.json
+
+    - name: Install and verify Data Copilot
+      working-directory: copilot
+      run: |
+        npm ci --ignore-scripts
+        npm audit --omit=dev --audit-level=high
+        npm test
+
+    # Same hash-verified pins the production image installs, plus the test
+    # tools (requirements-dev.lock.txt is constrained by the production lock,
+    # so every shared package resolves to the same version).
+    - name: Install dependencies
+      run: |
+        pip install --require-hashes -r requirements.lock.txt
+        pip install --require-hashes -r requirements-dev.lock.txt
+
+    - name: Audit Python dependencies (pip-audit)
+      run: |
+        pipx run pip-audit --disable-pip -r requirements.lock.txt
+        pipx run pip-audit --disable-pip -r requirements-dev.lock.txt
+
+    - name: Test deployment authorization guard
+      run: python3 -m unittest discover -s helpers -p test_verify_deployment.py -v
+
+    - name: Test stale revision tag cleanup
+      run: python3 -m unittest discover -s helpers -p test_cleanup_revision_tags.py -v
+
+    - name: Lint (ruff)
+      run: python -m ruff check backend
+
+    - name: Byte-compile backend
+      run: python -m compileall -q backend
+
+    - name: Test (with coverage gate)
+      run: python -m pytest backend/tests -q --cov --cov-report=term-missing
+
+    # A single global floor cannot notice a poorly-covered auth layer inside a
+    # well-covered codebase: the auth surface sat at 39.8% while the total was
+    # 69.8%, and a mutation probe confirmed the whole admin auth layer could be
+    # deleted with every test still passing. This gate watches that surface on
+    # its own. Ratchet upward only.
+    - name: Auth-surface coverage gate
+      run: |
+        python -m coverage report --fail-under=91 \
+          --include='backend/app/middleware/*,backend/app/api/admin_routes.py'
+
+  terraform:
+    name: Terraform (fmt, validate)
+    runs-on: depot-ubuntu-24.04
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        persist-credentials: false
+
+    - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+      with:
+        terraform_version: '1.9.8'
+
+    # Provider downloads dominate this job. The lock file pins versions, so it
+    # is a sound cache key.
+    - name: Cache Terraform providers
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ~/.terraform.d/plugin-cache
+        key: tf-plugins-${{ runner.os }}-${{ hashFiles('infra/.terraform.lock.hcl', 'infra/versions.tf') }}
+
+    - name: Prepare plugin cache directory
+      run: |
+        mkdir -p "$HOME/.terraform.d/plugin-cache"
+        echo "TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache" >> "$GITHUB_ENV"
+
+    # A google_apikeys_key resource writes the key string into state. Keys are
+    # created and rotated with gcloud (infra/README.md), never by Terraform.
+    - name: Guard against Terraform-managed API keys and secret values
+      run: |
+        if grep -nE 'resource +"google_apikeys_key"|google_service_account_key' *.tf; then
+          echo "::error::API keys and service-account keys must not be managed by Terraform (they land in state)"
+          exit 1
+        fi
+
+    - name: Format check
+      run: terraform fmt -check -recursive
+
+    - name: Init (no backend)
+      run: terraform init -backend=false
+
+    - name: Validate
+      run: terraform validate
+
+  docker:
+    name: Docker (build production image)
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        persist-credentials: false
+
+    - uses: depot/setup-action@91bc8495a33ebfc504ffc89e5674379ccf23c29c # v1.7.2
+
+    - name: Build image (Depot, no push)
+      uses: depot/build-push-action@98e78adca7817480b8185f474a400b451d74e287 # v1.18.0
+      with:
+        project: rk7rrz6p02
+        context: .
+        file: helpers/Dockerfile.prod
+        load: true
+        tags: portfolio-ci:latest
+
+    - name: Scan image for critical/high CVEs
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        image-ref: portfolio-ci:latest
+        severity: CRITICAL,HIGH
+        exit-code: '1'
+        ignore-unfixed: true
+
+    - name: Run container for E2E smoke test
+      run: |
+        docker run -d --name portfolio-e2e -p 18080:8080 \
+          -e PORT=8080 \
+          -e SUPABASE_URL=https://example.supabase.co \
+          -e SUPABASE_ANON_KEY=x -e SUPABASE_SERVICE_ROLE=x \
+          -e ALLOWED_ORIGINS=http://localhost:18080 -e PRODUCTION_URL=http://localhost:18080 \
+          -e ADMIN_EMAIL=test@example.com -e RESUME_FILE=JordanKailResume.pdf \
+          -e ANTHROPIC_API_KEY=x -e SENDGRID_API_KEY=x \
+          portfolio-ci:latest
+        for i in $(seq 1 20); do
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/ || true)
+          [ "$STATUS" = "200" ] && exit 0
+          sleep 1
+        done
+        echo "Container never became ready"
+        docker logs portfolio-e2e
+        exit 1
+
+    - name: Use Node.js 22
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: e2e/package-lock.json
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+    - name: Install Playwright
+      working-directory: e2e
+      timeout-minutes: 8
+      run: |
+        # The hosted runner's Azure mirror stalled package downloads during
+        # release verification. Use Ubuntu's signed archive over HTTPS instead.
+        if [ -f /etc/apt/apt-mirrors.txt ]; then
+          printf '%s\n' 'https://archive.ubuntu.com/ubuntu' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+        fi
+        printf '%s\n' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' 'Acquire::Retries "1";' |
+          sudo tee /etc/apt/apt.conf.d/99portfolio-ci-network >/dev/null
+        npm ci
+        if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+          # Browser binaries are cached; system libraries are not.
+          npx playwright install-deps chromium
+        else
+          npx playwright install --with-deps chromium
+        fi
+
+    - name: Run E2E smoke test
+      working-directory: e2e
+      run: npx playwright test
+
+    - name: Run Lighthouse CI budget assertions
+      working-directory: e2e
+      run: npx lhci autorun --config=./lighthouserc.json
+
+    - name: Upload Lighthouse and Playwright results
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: e2e-results
+        path: |
+          e2e/lhci-results
+          e2e/test-results
+          e2e/playwright-report
+        if-no-files-found: ignore
+        retention-days: 7
+
+    - name: Tear down E2E container
+      if: always()
+      run: docker rm -f portfolio-e2e || true
+
+  branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+    - name: Branch names its Linear issue (jck-<n>)
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        echo "branch: $HEAD_REF"
+        case "$HEAD_REF" in dependabot/*|renovate/*|release-please--*) exit 0 ;; esac
+        echo "$HEAD_REF" | grep -Eiq '(^|[^a-z0-9])jck-[0-9]+' || { echo "::error::Branch '$HEAD_REF' has no Linear key; use the issue's gitBranchName (jck-<n>-topic)"; exit 1; }
+
+  # Pinned gitleaks binary (gitleaks-action demands an org license on Depot CI).
+  gitleaks:
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: gitleaks (new commits; full history when there is no base)
+      env:
+        GITLEAKS_VERSION: 8.30.1
+        GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: |
+        curl -fsSLo /tmp/gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+        echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+        tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+        if [ -n "$BASE" ] && git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+          /tmp/gitleaks git --redact --no-banner --log-opts="${BASE}..HEAD" .
+        else
+          /tmp/gitleaks git --redact --no-banner .
+        fi
+
+  # Required verdict. Branch protection requires only `depot-ci / ci-result`.
+  ci-result:
+    name: ci-result
+    if: always()
+    needs: [branch-name, gitleaks, frontend, backend, terraform, docker]
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+    - name: Require every job to succeed (skipped branch-name on push is fine)
+      env:
+        RESULTS: ${{ join(needs.*.result, ' ') }}
+      run: |
+        echo "job results: $RESULTS"
+        for r in $RESULTS; do case "$r" in success|skipped) ;; *) exit 1 ;; esac; done

@@ -37,13 +37,13 @@ operational notes below stay useful.
   Terraform owns the container and the runtime binding (imported in
   `infra/main.tf`), not the value, so it is not in state. Rotate with
   `printf '%s' '<number>' | gcloud secrets versions add contact-phone --data-file=-`.
-- Branch protection on `main` requires the 4 CI checks (Backend, Docker,
-  Frontend, Terraform) before merge.
+- Branch protection on `main` should require only `depot-ci / ci-result`
+  (Depot CI, `.depot/workflows/ci.yml`) before merge.
 - **There is no `terraform-plan.yml` workflow.** It was removed as a security
   remediation (`29c45e5`): the "read-only" planner actually held
   `roles/storage.admin` on a bucket containing plaintext secrets. The
   `quickresume-planner` service account is disabled with no IAM. Only
-  `ci.yml` and `deploy.yml` exist.
+  `.depot/workflows/ci.yml` (CI) and `.github/workflows/deploy.yml` exist.
 - Cloud Monitoring uptime check on **`/api/health/ready`** (5 min interval) +
   alert policy emailing `admin_email`. `/api/health` is liveness and returns
   200 with `"status": "degraded"` when the database is unreachable, so it is

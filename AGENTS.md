@@ -7,24 +7,41 @@ The source of Jordan Kail's public site, [jckail.com](https://www.jckail.com) (`
 
 These apply unless this repo's own rules, below or in linked docs, say otherwise. Repo-specific rules always win. If a rule here would break a repo gate (hooks, CI, branch protection, a documented release process), follow the gate and say so in your summary.
 
-### Git hygiene
-- **Isolate work in a git worktree** when the checkout is dirty, on another branch, or shared with other agents: `git worktree add ../.worktrees/<repo>-<topic> -b <branch> origin/<default-branch>`. Never switch branches or reset a checkout holding someone else's uncommitted work. Remove the worktree when merged.
-- **One focused branch per change**, cut from a fresh `origin/<default-branch>`. Never commit directly to the default branch unless this repo explicitly says to.
-- **Commit early and often, push as you go.** Small, reviewable, self-consistent commits; push after each meaningful step so work is never only on this machine. Do not let a branch drift for days.
+### Worktrees and branches
+- **Every change gets its own worktree inside this repo, under `.worktrees/`** (gitignored, so all of a repo's worktrees sit at one level and none are committed): `git fetch --prune origin && git worktree add .worktrees/<topic> -b <branch> origin/<default-branch>`. Do not create worktrees anywhere else (no `../`, `~/projects/.worktrees`, or extra clones). Never switch branches or reset a checkout holding someone else's uncommitted work.
+- **One focused branch per change, and every pushed branch names its Linear issue.** Cut it from a fresh `origin/<default-branch>` and use the issue's `gitBranchName` (e.g. `jckail13/jck-123-short-topic`) or `jck-123-short-topic`. A branch without a `jck-<n>` key is rejected by the pre-push hook and by the `branch-name` CI job; bot branches (`dependabot/*`, `renovate/*`, `release-please--*`) are the only exception. No issue yet? Find or create one first (see Linear below). Never commit directly to the default branch unless this repo explicitly says to.
+- **Commit early and often, push as you go**, so no work exists only on this machine. Open a draft PR once there is a pushed commit. Don't let a branch drift for days: rebase or merge from `origin/<default-branch>` and rerun the gate before review.
 - **Stage precisely** (`git add <paths>`, never `git add -A` or `.` blindly). Read `git status` and `git diff --staged` before every commit. Never commit secrets, `.env*`, credentials, large binaries or generated build output.
 - **Never** force-push shared branches, rewrite published history, skip hooks (`--no-verify`) or bypass branch protection. If a hook or check fails, fix the cause or stop and report it.
-- Keep the working tree clean at the end of a task: nothing important left uncommitted, stashed or only local.
+- **Cleanup is automatic after merge.** GitHub deletes the head branch when a PR merges (`delete_branch_on_merge`). Locally, `git-prune-merged` (from agent-skills, run on a schedule and safe to run by hand) removes clean worktrees and local branches whose work is on `origin/<default-branch>`, whether by ancestry or by a merged PR with the same head. It never touches dirty, locked, unpushed or open-PR work. When you finish, leave your worktree clean and pushed so the sweep can remove it, or remove it yourself: `git worktree remove .worktrees/<topic> && git branch -d <branch>`.
 
 ### Commit messages
-Match the style already in `git log` for this repo (use conventional commits `type(scope): subject` if it does). Otherwise: imperative subject, 72 characters or fewer, no trailing period; blank line; a body explaining **why** and any trade-offs, not a restatement of the diff. Reference the Linear issue (`JCK-123`) when one exists. Add the attribution trailer your harness requires, if any.
+Every pushed commit must be understandable on its own. Match the style already in `git log` (conventional commits `type(scope): subject` if the repo uses them). Otherwise use an imperative subject of 72 characters or fewer with no trailing period, then a blank line, then a body. The body says **why** the change is needed, what it changes at a high level, trade-offs, and how it was verified. It doesn't restate the diff. Reference the Linear issue (`JCK-123`). "wip", "fix", "updates" and empty bodies are not acceptable on pushed commits; reword before pushing, never after. Add the attribution trailer your harness requires, if any.
 
 ### Pull requests and merging
-Open a PR for every change: what changed, why, how it was verified, risks, and the Linear link. Keep PRs small. Merge only with required checks green and using the merge method this repo prefers (some require linear history or forbid squash: check the repo's settings and history first). Delete the branch after merge. Do not merge a PR you could not verify.
+Open a PR for every change and fill in `.github/pull_request_template.md`:
+- **Summary**: what changed, in a few sentences.
+- **Why**: the problem or request, with the Linear link.
+- **Changes**: the notable parts, file by file only when that helps.
+- **Verification**: the exact commands run and their result, plus the Depot CI run link.
+- **Risk and rollback**: what could break and how to undo it.
+
+Keep PRs small and the title in commit-subject style with the issue key. Merge only when the required checks are green (`depot-ci / ci-result`), using the merge method this repo prefers (some require linear history or forbid squash: check the repo's settings and history first). Do not merge a PR you could not verify.
+
+### CI: Depot CI only
+- **CI runs on Depot CI**, defined in `.depot/workflows/` (GitHub Actions syntax). Do not add routine CI to `.github/workflows/`. The only exceptions are jobs Depot can't run (macOS/iOS or Windows runners, `release:`/`issues:` events, `environment:`-gated cloud deploys), each kept dispatch- or tag-only with a comment saying why.
+- **Workflow conventions:** `name: depot-ci`. Jobs run on `depot-ubuntu-24.04[-arm][-<cpus>]` (2 CPUs by default; size up only for measured wins) with `timeout-minutes`. Use `permissions: contents: read` and `persist-credentials: false`. Pin third-party actions to commit SHAs. Concurrency cancels superseded PR runs. A final `ci-result` job (`if: always()`, `needs:` every job) fails unless all succeeded; branch protection requires only `depot-ci / ci-result`.
+- **Run it before you push:** `depot ci run --workflow .depot/workflows/ci.yml` (add `--job <id>` for one job) uploads your uncommitted diff as a patch. That run is feedback, not proof for the commit; the proof is the PR run. Debug with `depot ci status`, `depot ci logs`, `depot ci diagnose --run <id>`, and `depot ci ssh` into a live job.
+- **Secrets and variables** live in Depot: `depot ci secrets add NAME --repo jckail/<repo>`, or `depot ci vars add`. Never echo them, and never put them in workflow files.
+- **Use Depot for everything it does, locally and in CI.** That means `depot build` / `depot bake` for container images (never plain `docker build`; the project id is in `depot.json`), and the Depot Registry (`f3bqc4vdfr.registry.depot.dev`, or `depot build --save`) for images that don't need a cloud registry. Use Depot Cache for compilers: `depot cargo` for Rust, `GOCACHEPROG="depot gocache"` for Go. Use `depot ci run` instead of waiting on a push.
 
 ### Linear (workspace `jckail`, issue keys `JCK-nnn`)
-- Track non-trivial work in Linear. Find the existing issue before creating one; do not duplicate.
-- Put the issue key in the branch name (`jck-123-short-topic`), PR title or description, and relevant commits.
-- Post status at start, on meaningful progress, on blockers and at handoff. If you have no Linear access this session, put the same information in the PR and say so.
+- **All dev work starts from a Linear issue**, because the branch name needs its key. Find and read the canonical issue, comments and relations before creating one, and do not duplicate. Create a narrowly scoped issue only when none fits. Preserve owner, project and status. Move the issue to In Progress when the branch is pushed, attach the PR, and leave Done for verified, merged work.
+- Split large outcomes into independently testable child issues with current source, scope, finite acceptance criteria, genuine `blockedBy` prerequisites (do not turn related context into blockers) and handback.
+- Put the issue key in the branch name (`jck-123-short-topic` or the issue's `gitBranchName`), PR title or description, and relevant commits.
+- Reconcile GitHub issues by exact `owner/repo/number`, body and comments. Link each issue to its canonical Linear outcome (plus backlink where writable); closed GitHub state alone does not prove Linear acceptance.
+- Sign every authored Linear or GitHub comment `— <harness>-<agent_session>-<device_id>` using actual runtime identity (e.g., `codex_cli-123456-jordan-ubuntu` or `antigravity-<conversationId>-<device_id>`). Never borrow another agent's identity or alter human comments.
+- Post status at start, on meaningful progress, on blockers and at handoff (avoid unchanged repeat posts within 25 minutes). If you have no Linear access this session, put the same information in the PR and say so. Quarg owns execution, leases and approvals; Linear is planning only.
 
 ### Quality bar
 - Read before you write: follow the surrounding code's conventions, naming and comment density. Prefer editing existing code and docs over adding new ones.
@@ -84,7 +101,7 @@ Known stale claims, so you do not "fix" the code to match them:
 - `GET /api/admin/analytics` and `GET /api/admin/health` are no longer zero stubs. They return process-local counters from `utils/metrics.py` (one instance since it started, not site totals). Do not present them as site-wide numbers.
 - The resume PDF is generated from `backend/app/data/*.json` by `helpers/build_resume_pdf.py`. It is not an Enhancv export and it is not hand-edited.
 - The system prompt is `backend/app/prompts/portfoliosystemprompt.md`, not under `backend/assets/`.
-- Do not quote a test count or a coverage number from a README. Run the suite. Floors live in `pyproject.toml`, `frontend/vitest.config.ts` and `.github/workflows/ci.yml`.
+- Do not quote a test count or a coverage number from a README. Run the suite. Floors live in `pyproject.toml`, `frontend/vitest.config.ts` and `.depot/workflows/ci.yml`.
 
 The audit backlog is not a license to fix every finding in a drive-by. If your edit touches one of those sites, do not make it worse, and fix the local case when it is in scope.
 
@@ -109,7 +126,8 @@ backend/tests/             pytest; offline
 e2e/                       Playwright smoke against the production image
 infra/                     Terraform (some of it written but not applied, see below)
 helpers/                   Dockerfiles, local run, e2e-docker.sh, resume PDF generator
-.github/workflows/         ci.yml (required checks) and deploy.yml
+.depot/workflows/          ci.yml (Depot CI, required check `depot-ci / ci-result`)
+.github/workflows/         deploy.yml (stays on GitHub Actions: environment + GCP WIF OIDC)
 ```
 
 There is no `frontend/src/features/` tree. ESLint mentions that path; do not create it. Features live under `app/`. Cross-cutting code lives under `shared/`. `shared/` must not import from `app/`.
@@ -167,7 +185,7 @@ From the repo root, Python 3.12 and Node 22 (the `copilot/` package and the prod
 pip install -r requirements-dev.txt
 python -m ruff check backend
 python -m pytest backend/tests -q --cov --cov-report=term-missing
-# CI also gates the auth surface separately; the floor is in .github/workflows/ci.yml
+# CI also gates the auth surface separately; the floor is in .depot/workflows/ci.yml
 python -m coverage report --include='backend/app/middleware/*,backend/app/api/admin_routes.py'
 
 cd frontend
@@ -245,7 +263,7 @@ All rules below come from the earlier combined `AGENTS.md`/`CLAUDE.md` (they wer
 - Blocking Supabase and filesystem calls inside `async def` routes use `asyncio.to_thread`. Ruff's `ASYNC` rules are on.
 - Do not cache `/api/health*` or authenticated responses. Public content GET 200s already get a short `Cache-Control`. Hashed `/assets/` are immutable. See the middleware in `main.py`.
 - Do not put MUI, Emotion, or tsparticles into the Vite `vendor` chunk. They must stay out of the initial graph. Read the `manualChunks` comment in `frontend/vite.config.ts` before editing the build.
-- Coverage floors only move up. They live in `pyproject.toml` (pytest `fail_under`), `.github/workflows/ci.yml` (the auth surface, `middleware/*` and `admin_routes.py`) and `frontend/vitest.config.ts` (which uses `include: ['src/**']` so untested files count as zero). Read the numbers there; do not copy them into docs.
+- Coverage floors only move up. They live in `pyproject.toml` (pytest `fail_under`), `.depot/workflows/ci.yml` (the auth surface, `middleware/*` and `admin_routes.py`) and `frontend/vitest.config.ts` (which uses `include: ['src/**']` so untested files count as zero). Read the numbers there; do not copy them into docs.
 - Do not add a dependency for something the repo already does by hand (chat markdown, focus trap, API client). Ask before a new runtime dependency. Python production deps are hash-pinned: edit `requirements.txt`, regenerate `requirements.lock.txt` with the same tool that produced the lock (do not assume `helpers/compile-requirements.sh` reproduces it; the audit notes it was `uv pip compile --universal`).
 - A new Vite chunk rule must not name MUI, Emotion or tsparticles. `manualChunks` returns `undefined` for them on purpose (a named chunk once caused a circular-chunk white screen). Chat and admin stay lazy.
 - Do not deploy from a laptop. Do not run `helpers/deploy.sh`. Do not `terraform plan` or `apply` against this project unless the user explicitly asks, and then read the "terraform apply reverts production" section of `HANDOFF.md` first. Production ships only through `.github/workflows/deploy.yml`: build, scan, push a digest, `--no-traffic`, verify the tagged revision, recheck CI, then promote.
@@ -344,12 +362,32 @@ Say what you ran and what you did not run. For a backend change that is `ruff` a
 
 Paid model attempts reserve durable global and per-receipt daily token allowances through service-only Supabase RPCs before any provider call. Accounting failure blocks inference; missing usage retains the conservative reservation. The local limiter is an additional circuit breaker, not the durable budget. Contact introductions use editable templates without paid inference. `docs/portfolio-privacy.md` records the applied 30-day transcript retention and rollout grace; calendar remains deferred. `docs/brand-kit.md` and `/brand-kit.html` define the visual system. Public project maturity and evidence are maintained in `projects.json`; do not expose private repositories.
 
+## CI and local checks
+
+CI of record is Depot CI: `.depot/workflows/ci.yml` (workflow `depot-ci`), on every pull request and on push to `main`. Branch protection should require only `depot-ci / ci-result`, which fails unless every job succeeded.
+
+| Job | What it runs | Local equivalent |
+| --- | --- | --- |
+| `branch-name` (PR only) | branch carries a `jck-<n>` key (bot branches exempt) | `git branch --show-current` |
+| `gitleaks` | pinned gitleaks binary over the new commits | `gitleaks git --redact .` |
+| `frontend` | `npm ci`, `npm audit --omit=dev`, lint, type-check, boundary and CSS-var checks, coverage-gated tests, build (in `frontend/`) | `npm run lint && npm run type-check && npm run test:coverage && npm run build` |
+| `backend` | Data Copilot tests, pip-audit, deploy-guard unit tests, ruff, compileall, pytest with coverage gates | see "Commands" above; `python -m unittest discover -s helpers -p 'test_*.py'` |
+| `terraform` | fmt, `init -backend=false`, validate, key-resource guard (in `infra/`) | `terraform fmt -check -recursive && terraform validate` |
+| `docker` | `depot build` of `helpers/Dockerfile.prod`, Trivy, container smoke test, Playwright, Lighthouse budgets | `depot build --load -f helpers/Dockerfile.prod .` then `cd e2e && npx playwright test` |
+| `ci-result` | fails unless every job above succeeded | none |
+
+Run it before pushing: `depot ci run --workflow .depot/workflows/ci.yml [--job <id>]` (uploads your uncommitted diff).
+
+GitHub remnant: `.github/workflows/deploy.yml` stays on GitHub Actions because it uses an `environment:` and GCP Workload Identity Federation OIDC, which Depot CI cannot run (phase 2: JCK-2034). Merging to `main` deploys to production. Its gate, `helpers/verify_deployment.py`, requires the `depot-ci / ci-result` commit status on the pushed commit and fails closed if Depot does not publish one within 20 minutes (Depot status publication is intermittent, JCK-2022; re-run Deploy via `workflow_dispatch` on a fresh run if so).
+
+Secrets the owner must add: none.
+
 ## Git, CI and release notes for this repo
 
-- Default branch: `main`. Branch protection requires four status checks and that the branch is up to date (`strict`): `Frontend (lint, type-check, test, build)`, `Backend (compile, test)`, `Terraform (fmt, validate)`, `Docker (build production image)`. No required reviews, no linear-history rule, admins not enforced. Squash, merge and rebase are all allowed; history is squash-style with the PR number in the subject (`... (#123)`); older history has merge commits. Prefer `gh pr merge --squash --delete-branch`.
+- Default branch: `main`. Branch protection requires that the branch is up to date (`strict`) and the status checks listed in the protection rule. The CI of record is now Depot CI, so those checks should become `depot-ci / ci-result` (the owner updates protection centrally; until then the old GitHub check names are never produced). No required reviews, no linear-history rule, admins not enforced. Squash, merge and rebase are all allowed; history is squash-style with the PR number in the subject (`... (#123)`); older history has merge commits. Prefer `gh pr merge --squash --delete-branch`.
 - Commit subjects are mixed: plain imperative sentences and some `fix(scope): ...` / `docs: ...`. Match the neighbors.
-- CI (`.github/workflows/ci.yml`) runs on every pull request and on push to `main`, with in-progress runs cancelled per ref. The Docker job (image build, Trivy, container smoke test, Playwright, Lighthouse budgets) has a 20-minute timeout and is the slowest.
-- Deploy (`.github/workflows/deploy.yml`) runs on every push to `main` (no path filter, so a docs-only merge also starts a production deploy) and on manual dispatch: build without cloud credentials, scan, push a digest, deploy `--no-traffic`, verify the tagged revision, recheck CI, promote. Authentication is Workload Identity Federation. Rollback is a traffic shift to the previous Cloud Run revision (`HANDOFF.md`).
+- CI (`.depot/workflows/ci.yml`, workflow `depot-ci`) runs on every pull request and on push to `main`; superseded PR runs are cancelled, pushes to `main` never are. The Docker job (image build, Trivy, container smoke test, Playwright, Lighthouse budgets) has a 20-minute timeout and is the slowest.
+- Deploy (`.github/workflows/deploy.yml`) runs on every push to `main` (no path filter, so a docs-only merge also starts a production deploy) and on manual dispatch: build without cloud credentials, scan, push a digest, deploy `--no-traffic`, verify the tagged revision, recheck CI (`helpers/verify_deployment.py` requires the `depot-ci / ci-result` commit status on the pushed commit), promote. Authentication is Workload Identity Federation. Rollback is a traffic shift to the previous Cloud Run revision (`HANDOFF.md`).
 - Dependabot: monthly, grouped (frontend, e2e, pip, GitHub Actions; see `.github/dependabot.yml`).
 - No local git hooks are configured in this checkout. Linear is not referenced by this repo's own docs or history.
 

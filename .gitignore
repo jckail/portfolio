@@ -119,3 +119,6 @@ openai-chatgpt-latest.vsix
 .cursor/
 .superdesign/
 copilot/node_modules/
+
+# Local worktrees (JCK-2026)
+.worktrees/
