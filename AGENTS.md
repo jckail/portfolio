@@ -1,6 +1,6 @@
 # Portfolio
 
-The source of Jordan Kail's public site, [jckail.com](https://www.jckail.com) (`github.com/jckail/portfolio`): an interactive resume (React SPA plus FastAPI API served from one Cloud Run service), an AI assistant that answers questions from the published portfolio data, and a small platform for browser-only demos of other projects. Visitors are recruiters and hiring managers; the owner maintains it through content JSON and code. `main` deploys to production through GitHub Actions.
+The source of Jordan Kail's public site, [jckail.com](https://www.jckail.com) (`github.com/jckail/portfolio`): an interactive resume (React SPA plus FastAPI API served from one Cloud Run service), an AI assistant that answers questions from the published portfolio data, and a small platform for browser-only demos of other projects. Visitors are recruiters and hiring managers; the owner maintains it through content JSON and code. `main` deploys to production through Depot CI (the `deploy` job in `.depot/workflows/ci.yml`).
 
 <!-- BEGIN SHARED ENGINEERING STANDARDS (managed block: keep it intact; repo-specific rules go outside it and win on any conflict) -->
 ## Working standards (all repos)
@@ -127,7 +127,7 @@ e2e/                       Playwright smoke against the production image
 infra/                     Terraform (some of it written but not applied, see below)
 helpers/                   Dockerfiles, local run, e2e-docker.sh, resume PDF generator
 .depot/workflows/          ci.yml (Depot CI, required check `depot-ci / ci-result`)
-.github/workflows/         deploy.yml (stays on GitHub Actions: environment + GCP WIF OIDC)
+.github/workflows/         deploy.yml (manual fallback; production deploys run in Depot CI)
 ```
 
 There is no `frontend/src/features/` tree. ESLint mentions that path; do not create it. Features live under `app/`. Cross-cutting code lives under `shared/`. `shared/` must not import from `app/`.
@@ -171,7 +171,7 @@ Other projects reach `jckail.com/<slug>` as a hosted demo (served here, syntheti
 
 ### Production boundaries
 
-Runtime secrets (`supabase_url`, `supabase_anon_key`, `supabase_service_role`, `anthropic_api_key`, `sendgrid_api_key`, `vertex-api-key`, `contact-phone`) belong in Secret Manager, mounted as `secretKeyRef`. GitHub Actions authenticates with Workload Identity Federation. There are no service-account keys.
+Runtime secrets (`supabase_url`, `supabase_anon_key`, `supabase_service_role`, `anthropic_api_key`, `sendgrid_api_key`, `vertex-api-key`, `contact-phone`) belong in Secret Manager, mounted as `secretKeyRef`. Depot CI authenticates with Workload Identity Federation (pool `depot-ci`, `infra/depot.tf`; the GitHub fallback uses pool `github-actions`). There are no service-account keys.
 
 `helpers/deploy.sh` and a casual `terraform apply` are unsafe on this project. The state bucket has been documented as readable by project Viewer, with plaintext secrets inside, and apply can roll the live image back to the mutable `:latest` tag. Treat `HANDOFF.md` as the ops runbook. Rollback is a traffic shift to the previous Cloud Run revision, not a rebuild.
 
@@ -244,7 +244,7 @@ All rules below come from the earlier combined `AGENTS.md`/`CLAUDE.md` (they wer
 ### Overrides to the shared standards
 
 - The old header said "Keep AGENTS.md and CLAUDE.md identical." That is replaced: `CLAUDE.md` is now the single line `@AGENTS.md`, so edit only this file.
-- Production deploys happen only through `.github/workflows/deploy.yml` on pushes to `main` (see "Non-negotiables"). This narrows the shared "merge, then done" flow: a merge to `main` starts a production build and canary, so treat every merge as a release.
+- Production deploys happen only through the `deploy` job in `.depot/workflows/ci.yml` on pushes to `main`, after `ci-result` (see "Non-negotiables"); `.github/workflows/deploy.yml` is a manual fallback. This narrows the shared "merge, then done" flow: a merge to `main` starts a production build and canary, so treat every merge as a release.
 - No other shared line is overridden.
 
 ### Non-negotiables
@@ -266,7 +266,7 @@ All rules below come from the earlier combined `AGENTS.md`/`CLAUDE.md` (they wer
 - Coverage floors only move up. They live in `pyproject.toml` (pytest `fail_under`), `.depot/workflows/ci.yml` (the auth surface, `middleware/*` and `admin_routes.py`) and `frontend/vitest.config.ts` (which uses `include: ['src/**']` so untested files count as zero). Read the numbers there; do not copy them into docs.
 - Do not add a dependency for something the repo already does by hand (chat markdown, focus trap, API client). Ask before a new runtime dependency. Python production deps are hash-pinned: edit `requirements.txt`, regenerate `requirements.lock.txt` with the same tool that produced the lock (do not assume `helpers/compile-requirements.sh` reproduces it; the audit notes it was `uv pip compile --universal`).
 - A new Vite chunk rule must not name MUI, Emotion or tsparticles. `manualChunks` returns `undefined` for them on purpose (a named chunk once caused a circular-chunk white screen). Chat and admin stay lazy.
-- Do not deploy from a laptop. Do not run `helpers/deploy.sh`. Do not `terraform plan` or `apply` against this project unless the user explicitly asks, and then read the "terraform apply reverts production" section of `HANDOFF.md` first. Production ships only through `.github/workflows/deploy.yml`: build, scan, push a digest, `--no-traffic`, verify the tagged revision, recheck CI, then promote.
+- Do not deploy from a laptop. Do not run `helpers/deploy.sh`. Do not `terraform plan` or `apply` against this project unless the user explicitly asks, and then read the "terraform apply reverts production" section of `HANDOFF.md` first. Production ships only through the Depot CI `deploy` job (or, if Depot is down, a manual dispatch of `.github/workflows/deploy.yml`): build, scan, push a digest, `--no-traffic`, verify the tagged revision, recheck that the commit is still main, then promote.
 
 ### Backend conventions
 
@@ -378,7 +378,9 @@ CI of record is Depot CI: `.depot/workflows/ci.yml` (workflow `depot-ci`), on ev
 
 Run it before pushing: `depot ci run --workflow .depot/workflows/ci.yml [--job <id>]` (uploads your uncommitted diff).
 
-GitHub remnant: `.github/workflows/deploy.yml` stays on GitHub Actions because it uses an `environment:` and GCP Workload Identity Federation OIDC, which Depot CI cannot run (phase 2: JCK-2034). Merging to `main` deploys to production. Its gate, `helpers/verify_deployment.py`, requires the `depot-ci / ci-result` commit status on the pushed commit and fails closed if Depot does not publish one within 20 minutes (Depot status publication is intermittent, JCK-2022; re-run Deploy via `workflow_dispatch` on a fresh run if so).
+Production deploy: the `deploy` job in the same workflow runs on every push to `main` after `ci-result` succeeds, so merging to `main` deploys to production. It authenticates through the `depot-ci` workload identity pool (`infra/depot.tf`, created with gcloud on 2026-10-23 and adopted by import blocks; JCK-2034), which trusts only `refs/heads/main` of this repo in the Quarg Depot org. It does not use the GitHub API, so Depot's intermittent GitHub check publication (JCK-2022) cannot block it.
+
+GitHub remnant: `.github/workflows/deploy.yml` is a manual (`workflow_dispatch`) fallback for when Depot CI is unavailable. Its gate, `helpers/verify_deployment.py`, requires the `depot-ci / ci-result` check run on the commit and fails closed.
 
 Secrets the owner must add: none.
 
@@ -387,7 +389,7 @@ Secrets the owner must add: none.
 - Default branch: `main`. Branch protection requires that the branch is up to date (`strict`) and the status checks listed in the protection rule. The CI of record is now Depot CI, so those checks should become `depot-ci / ci-result` (the owner updates protection centrally; until then the old GitHub check names are never produced). No required reviews, no linear-history rule, admins not enforced. Squash, merge and rebase are all allowed; history is squash-style with the PR number in the subject (`... (#123)`); older history has merge commits. Prefer `gh pr merge --squash --delete-branch`.
 - Commit subjects are mixed: plain imperative sentences and some `fix(scope): ...` / `docs: ...`. Match the neighbors.
 - CI (`.depot/workflows/ci.yml`, workflow `depot-ci`) runs on every pull request and on push to `main`; superseded PR runs are cancelled, pushes to `main` never are. The Docker job (image build, Trivy, container smoke test, Playwright, Lighthouse budgets) has a 20-minute timeout and is the slowest.
-- Deploy (`.github/workflows/deploy.yml`) runs on every push to `main` (no path filter, so a docs-only merge also starts a production deploy) and on manual dispatch: build without cloud credentials, scan, push a digest, deploy `--no-traffic`, verify the tagged revision, recheck CI (`helpers/verify_deployment.py` requires the `depot-ci / ci-result` commit status on the pushed commit), promote. Authentication is Workload Identity Federation. Rollback is a traffic shift to the previous Cloud Run revision (`HANDOFF.md`).
+- Deploy: the Depot CI `deploy` job runs on every push to `main` after `ci-result` (no path filter, so a docs-only merge also deploys): build with Depot without cloud credentials, Trivy scan, push a digest, deploy `--no-traffic`, verify the tagged revision, recheck main with `git ls-remote`, promote, verify. Authentication is Workload Identity Federation (pool `depot-ci`). `.github/workflows/deploy.yml` is a manual fallback. Rollback is a traffic shift to the previous Cloud Run revision (`HANDOFF.md`).
 - Dependabot: monthly, grouped (frontend, e2e, pip, GitHub Actions; see `.github/dependabot.yml`).
 - No local git hooks are configured in this checkout. Linear is not referenced by this repo's own docs or history.
 
