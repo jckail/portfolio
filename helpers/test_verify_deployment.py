@@ -5,7 +5,7 @@ import unittest
 import urllib.error
 from unittest import mock
 
-from verify_deployment import CI_CONTEXT, CI_URL_PREFIX, GateError, Pending, main, verify
+from verify_deployment import CI_APP_ID, CI_CONTEXT, CI_URL_PREFIX, GateError, Pending, main, verify
 from verify_runtime import RuntimeProbeError, verify_runtime
 
 SHA = "a" * 40
@@ -14,15 +14,17 @@ REPO = "jckail/portfolio"
 
 class GuardTests(unittest.TestCase):
     def setUp(self):
-        self.status = dict(id=100, context=CI_CONTEXT, state="success", target_url=CI_URL_PREFIX + "workflows/x")
+        self.status = dict(id=100, name=CI_CONTEXT, app={"id": CI_APP_ID}, status="completed", conclusion="success",
+                           started_at="2026-10-23T03:00:00Z", details_url=CI_URL_PREFIX + "workflows/x")
         self.statuses = [self.status]
+        self.total = None
         self.heads = [SHA, SHA]
 
     def get(self, path):
         if path.endswith("/git/ref/heads/main"):
             return {"object": {"sha": self.heads.pop(0)}}
-        if path.endswith(f"/commits/{SHA}/statuses?per_page=100"):
-            return self.statuses
+        if f"/commits/{SHA}/check-runs?check_name=depot-ci%20/%20ci-result&app_id={CI_APP_ID}&filter=all&per_page=100" in path:
+            return {"total_count": len(self.statuses) if self.total is None else self.total, "check_runs": self.statuses}
         self.fail("Unexpected endpoint: " + path)
 
     def test_exact_success(self):
@@ -37,33 +39,37 @@ class GuardTests(unittest.TestCase):
         with self.assertRaises(GateError): verify(self.get, REPO, SHA)
 
     def test_missing_status_waits(self):
-        self.statuses = [dict(self.status, context="depot-ci / frontend")]
+        self.statuses = [dict(self.status, name="depot-ci / frontend")]
         with self.assertRaises(Pending): verify(self.get, REPO, SHA)
 
     def test_latest_failure_not_older_success(self):
-        self.statuses = [dict(self.status, id=101, state="failure"), self.status]
+        self.statuses = [self.status, dict(self.status, id=101, conclusion="failure", started_at="2026-10-23T03:05:00Z")]
         with self.assertRaises(GateError): verify(self.get, REPO, SHA)
 
     def test_latest_pending_not_older_success(self):
-        self.statuses = [dict(self.status, id=101, state="pending"), self.status]
+        self.statuses = [self.status, dict(self.status, id=101, status="in_progress", conclusion=None, started_at="2026-10-23T03:05:00Z")]
         with self.assertRaises(Pending): verify(self.get, REPO, SHA)
 
     def test_latest_success_after_older_failure(self):
-        self.statuses = [dict(self.status, id=101), dict(self.status, id=99, state="failure")]
+        self.statuses = [dict(self.status, id=99, conclusion="failure", started_at="2026-10-23T02:00:00Z"), dict(self.status, id=101)]
         self.assertEqual(verify(self.get, REPO, SHA), 101)
 
     def test_unsuccessful_states(self):
-        for state in ["failure", "error"]:
+        for state in ["failure", "cancelled", "timed_out", "neutral", "skipped"]:
             with self.subTest(state=state):
-                self.setUp(); self.status["state"] = state
+                self.setUp(); self.status["conclusion"] = state
                 with self.assertRaises(GateError): verify(self.get, REPO, SHA)
 
     def test_foreign_status_source_rejected(self):
-        self.status["target_url"] = "https://example.com/depot"
+        self.status["details_url"] = "https://example.com/depot"
         with self.assertRaises(GateError): verify(self.get, REPO, SHA)
 
-    def test_incomplete_status_pagination(self):
-        self.statuses = [dict(self.status, context="other", id=n) for n in range(100)]
+    def test_other_app_check_ignored(self):
+        self.statuses = [dict(self.status, app={"id": 15368})]
+        with self.assertRaises(Pending): verify(self.get, REPO, SHA)
+
+    def test_incomplete_check_pagination(self):
+        self.total = 150
         with self.assertRaises(GateError): verify(self.get, REPO, SHA)
 
     def test_api_failure_does_not_authorize(self):
