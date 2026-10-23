@@ -32,6 +32,9 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
   const titleId = useId();
   const techStack = experience.tech_stack ?? [];
   const photos = experience.photos ?? [];
+  const sources = (experience.sources ?? []).filter(
+    (source) => source.label.trim() && source.url.startsWith('https://'),
+  );
 
   useEffect(() => {
     trackModalView(experienceKey || experience.company, 'experience', experience.company);
@@ -101,6 +104,20 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
             ))}
           </ul>
         </div>
+        {sources.length > 0 && (
+          <section className="experience-sources" aria-label={`${experience.company} sources`}>
+            <h3>Sources:</h3>
+            <ul className="experience-sources-list">
+              {sources.map(source => (
+                <li key={source.url}>
+                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                    {source.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {photos.length > 0 && (
           <section className="experience-photos" aria-label={`${experience.company} photos`}>
             <h3>Photos:</h3>

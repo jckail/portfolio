@@ -244,6 +244,22 @@ def test_resume_json_preserves_approved_resume_edits(client):
     assert "Java" not in {item for group in doc["skills"] for item in group["keywords"]}
 
 
+AIRFLOW_MEETUP_URL = "https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/"
+AIRFLOW_MEETUP_TITLE = "AI-rflow Meetup: Exploring AI Use Cases in Apache Airflow"
+
+
+def test_airflow_meetup_source_is_linked_outside_the_resume(client):
+    html = discovery.snapshot_html().decode()
+    assert f'href="{AIRFLOW_MEETUP_URL}" rel="noopener" tabindex="-1">{AIRFLOW_MEETUP_TITLE}</a>' in html
+    full = client.get("/llms-full.txt").text
+    assert f"- Source: [{AIRFLOW_MEETUP_TITLE}]({AIRFLOW_MEETUP_URL})" in full
+    highlights = next(
+        job["highlights"] for job in client.get("/resume.json").json()["work"] if job["name"] == "Together AI"
+    )
+    assert AIRFLOW_MEETUP_URL not in highlights
+    assert "AI-rflow" not in "\n".join(highlights)
+
+
 def test_agents_can_discover_read_only_interfaces_without_javascript(client):
     for path in ("/llms.txt", "/llms-full.txt"):
         text = client.get(path).text

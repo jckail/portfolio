@@ -9,7 +9,8 @@
       "Build and operate agents for infrastructure automation, finance automation, and internal workflows, extending team capacity while improving on-call response and infrastructure maintenance.",
       "Build tracing, replay, and evaluation harnesses so internal teams can measure agent behavior and regression-test releases.",
       "Contributed to multiple patent-pending innovations in agent systems.",
-      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud."
+      "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud.",
+      "Speaker at the Bay Area Apache Airflow Meetup (AI-rflow) on March 26, 2026: Building the AI-Native Data Platform: How agents reshape build, serve, and compound insights from data."
     ],
     "link": "https://www.together.ai/",
     "logoPath": "together.svg",
@@ -32,7 +33,8 @@
       "Contributed to multiple patent-pending innovations in agent systems.",
       "Mentor engineers and set technical direction for agents platform architecture and the data platform.",
       "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for the data platform behind Together’s AI acceleration cloud.",
-      "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions."
+      "Build pipelines, storage, and telemetry for inference and training workloads to inform product, reliability, and capacity decisions.",
+      "Speaker at the Bay Area Apache Airflow Meetup (AI-rflow) on March 26, 2026: Building the AI-Native Data Platform: How agents reshape build, serve, and compound insights from data."
     ],
     "resume_highlights": [
       "Created the Agents Platform team; built agent harnesses and an internal agents factory for production workflows.",
@@ -40,6 +42,12 @@
       "Build tracing, replay, and evaluation harnesses to measure agent behavior and regression-test releases.",
       "Contributed to multiple patent-pending innovations in agent systems.",
       "Established and scaled data engineering from one engineer to 15+ engineers, setting technical direction for Together’s AI cloud."
+    ],
+    "sources": [
+      {
+        "label": "AI-rflow Meetup: Exploring AI Use Cases in Apache Airflow",
+        "url": "https://www.meetup.com/bay-area-apache-airflow-incubating-meetup/events/313653334/"
+      }
     ]
   },
   "prove": {

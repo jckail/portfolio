@@ -73,6 +73,13 @@ export interface ExperienceItem {
   resume_title?: string | null;
   /** Optional gallery shown in the role dialog; empty or absent renders nothing. */
   photos?: ExperiencePhoto[];
+  /** Public pages that support a claim in this role. Empty or absent renders nothing. */
+  sources?: ExperienceSource[];
+}
+
+export interface ExperienceSource {
+  label: string;
+  url: string;
 }
 
 export interface ExperiencePhoto {

@@ -1,5 +1,7 @@
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel
+from urllib.parse import urlsplit
+
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, RootModel, field_validator
 
 
 class ExperiencePhoto(BaseModel):
@@ -7,6 +9,21 @@ class ExperiencePhoto(BaseModel):
     src: str = Field(..., min_length=1, pattern=r"^/images/[A-Za-z0-9._/-]+$", description="Site-relative image path")
     alt: str = Field(..., min_length=1, description="Alternative text describing the image")
     caption: str | None = Field(None, description="Optional visible caption")
+
+
+class ExperienceSource(BaseModel):
+    """A public page that supports a claim in this role. HTTPS only."""
+
+    label: str = Field(..., min_length=1, max_length=180, description="Visible link text, usually the page title")
+    url: str = Field(..., min_length=1, description="Absolute HTTPS URL of the source")
+
+    @field_validator("url")
+    @classmethod
+    def https_only(cls, value: str) -> str:
+        parts = urlsplit(value)
+        if parts.scheme != "https" or not parts.netloc:
+            raise ValueError("A source must be an absolute HTTPS URL")
+        return value
 
 
 class ExperienceHighlight(BaseModel):
@@ -27,6 +44,10 @@ class ExperienceHighlight(BaseModel):
     resume_highlights: list[str] | None = Field(None, description="Concise achievements for the generated resume")
     resume_location: str | None = Field(None, description="Resume location override; empty omits the location")
     photos: list["ExperiencePhoto"] = Field(default_factory=list, description="Optional gallery shown in the role dialog")
+    sources: list["ExperienceSource"] = Field(
+        default_factory=list,
+        description="Public pages that support a claim in this role; omitted from the generated resume",
+    )
 
 
 class Experience(RootModel[dict[str, ExperienceHighlight]]):
