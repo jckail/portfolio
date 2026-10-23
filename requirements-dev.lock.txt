@@ -52,9 +52,9 @@ botocore==1.43.109 \
     #   -c requirements.lock.txt
     #   boto3
     #   s3transfer
-certifi==2026.6.17 \
-    --hash=sha256:024c88eeec92ca068db80f02b8b07c9cef7b9fe261d1d535abfd5abd6f6af432 \
-    --hash=sha256:2227dcbaafe0d2f59279d1762ddddc37783ed4354594f194ffc31d20f41fc3db
+certifi==2026.10.19 \
+    --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae \
+    --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b
     # via
     #   -c requirements.lock.txt
     #   httpcore
@@ -564,9 +564,9 @@ fastapi==0.139.0 \
     # via
     #   -c requirements.lock.txt
     #   -r requirements.txt
-graphql-core==3.2.8 \
-    --hash=sha256:015457da5d996c924ddf57a43f4e959b0b94fb695b85ed4c29446e508ed65cf3 \
-    --hash=sha256:cbee07bee1b3ed5e531723685369039f32ff815ef60166686e0162f540f1520c
+graphql-core==3.2.12 \
+    --hash=sha256:3d8f104532070485e13caa4092c1e71cda2ba6cffd96e98f285111ee10ed1e51 \
+    --hash=sha256:4579094d5fc8a1a59555a9b18e51b320779d9bbc63e2302c519af0c4919d9543
     # via
     #   -c requirements.lock.txt
     #   -r requirements.txt
@@ -667,8 +667,8 @@ httpx==0.28.1 \
     --hash=sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad
     # via
     #   -c requirements.lock.txt
-    #   -r requirements-dev.txt
     #   -r requirements.txt
+    #   -r requirements-dev.txt
     #   anthropic
     #   mcp
     #   postgrest

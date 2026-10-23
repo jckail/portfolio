@@ -29,7 +29,7 @@ on merge to `main`.
 - ~~**P1 — Coverage gates.**~~ Done: CI runs `vitest run --coverage`
   (`include: ['src/**']` so untested files count as 0%) and `pytest --cov`,
   plus a separate floor for the auth surface. The floors are in
-  `frontend/vitest.config.ts`, `pyproject.toml` and `.github/workflows/ci.yml`;
+  `frontend/vitest.config.ts`, `pyproject.toml` and `.depot/workflows/ci.yml`;
   they only move up.
 - ~~**P1 — Python lint/format.**~~ Done: `ruff` runs in CI with
   pycodestyle/pyflakes/bugbear/pyupgrade/async rules; its first pass caught

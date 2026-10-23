@@ -17,7 +17,7 @@ Build, run, and deployment tooling for the portfolio app.
 | `Dockerfile.dev` | Same as prod but with `--reload` and dev config |
 | `test_email.py` | Post-deploy smoke test for the SendGrid contact endpoint |
 | `build_resume_pdf.py` | Regenerate the ATS-first resume (`JordanKailResume.pdf`, `.txt`, `.meta.json`) from `backend/app/data/*.json` |
-| `verify_deployment.py` | Deploy authorization gate — re-checks CI on current `main` before promoting traffic |
+| `verify_deployment.py` | Deploy authorization gate — re-checks the Depot CI `ci-result` status on current `main` before promoting traffic |
 | `compile-requirements.sh` | Regenerate the hash-pinned `requirements.lock.txt` |
 | `assets/fonts/` | Fonts the resume generator embeds |
 

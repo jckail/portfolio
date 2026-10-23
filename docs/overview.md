@@ -67,9 +67,9 @@ disagree.
 - **Google Cloud Run** behind **Artifact Registry**
 - **Terraform** for infrastructure as code, including keyless GitHub → GCP
   auth via Workload Identity Federation (see [`infra/`](../infra/README.md))
-- **GitHub Actions**: CI (lint, coverage-gated tests, Trivy image scan,
-  Docker + Terraform checks) plus verify-before-promote deploys to Cloud Run
-  on `main` (see [DEPLOYMENT.md](../DEPLOYMENT.md))
+- **Depot CI**: CI (lint, coverage-gated tests, Trivy image scan,
+  Docker + Terraform checks). **GitHub Actions**: verify-before-promote
+  deploys to Cloud Run on `main` (see [DEPLOYMENT.md](../DEPLOYMENT.md))
 - **Cloud Logging** structured logs and events; Terraform for log-based metrics, alerts and a dashboard is written in `infra/` but not yet applied to production
 - **Dependabot** for monthly grouped dependency updates
 
@@ -99,7 +99,8 @@ portfolio/
 ├── docs/              # Index in docs/README.md: ADRs (adr/), runbooks, audits, design notes
 ├── infra/             # Terraform for GCP (Cloud Run, secrets, registry, WIF)
 ├── helpers/           # Dockerfiles, local dev tooling, e2e-in-Docker, resume generator
-└── .github/workflows/ # CI + automatic Cloud Run deploys
+├── .depot/workflows/  # CI (Depot CI)
+└── .github/workflows/ # automatic Cloud Run deploys
 ```
 
 ## Architecture

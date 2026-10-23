@@ -1,6 +1,8 @@
 # Keep the Docker build context small: only frontend sources,
 # backend sources, and requirements.txt are needed for the build.
 .git
+.worktrees
+.depot
 .github
 .gitignore
 .dockerignore

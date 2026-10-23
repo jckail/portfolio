@@ -1,29 +1,33 @@
-name: CI
+# Depot CI is this repo's CI of record (JCK-2026). It replaces .github/workflows/ci.yml.
+# Require only `depot-ci / ci-result`; it fails unless every job below succeeded.
+# helpers/verify_deployment.py (the production deploy gate) checks that same status on the pushed commit.
+name: depot-ci
 
 on:
   push:
     branches: [ main ]
   # Validate stacked feature PRs as well as PRs targeting main.
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-# Cancel superseded runs on the same branch/PR
+# Cancel superseded PR runs. Pushes to main are never cancelled: the deploy gate needs their result.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: depot-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   frontend:
     name: Frontend (lint, type-check, test, build)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     defaults:
       run:
         working-directory: frontend
 
     steps:
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         persist-credentials: false
 
@@ -71,10 +75,10 @@ jobs:
 
   backend:
     name: Backend (compile, test)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         persist-credentials: false
 
@@ -139,13 +143,13 @@ jobs:
 
   terraform:
     name: Terraform (fmt, validate)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     defaults:
       run:
         working-directory: infra
 
     steps:
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         persist-credentials: false
 
@@ -186,26 +190,24 @@ jobs:
 
   docker:
     name: Docker (build production image)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     timeout-minutes: 20
 
     steps:
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         persist-credentials: false
 
-    - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+    - uses: depot/setup-action@91bc8495a33ebfc504ffc89e5674379ccf23c29c # v1.7.2
 
-    - name: Build image (no push)
-      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+    - name: Build image (Depot, no push)
+      uses: depot/build-push-action@98e78adca7817480b8185f474a400b451d74e287 # v1.18.0
       with:
+        project: rk7rrz6p02
         context: .
         file: helpers/Dockerfile.prod
-        push: false
         load: true
         tags: portfolio-ci:latest
-        cache-from: type=gha,scope=ci
-        cache-to: type=gha,mode=max,scope=ci
 
     - name: Scan image for critical/high CVEs
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -290,3 +292,55 @@ jobs:
     - name: Tear down E2E container
       if: always()
       run: docker rm -f portfolio-e2e || true
+
+  branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+    - name: Branch names its Linear issue (jck-<n>)
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        echo "branch: $HEAD_REF"
+        case "$HEAD_REF" in dependabot/*|renovate/*|release-please--*) exit 0 ;; esac
+        echo "$HEAD_REF" | grep -Eiq '(^|[^a-z0-9])jck-[0-9]+' || { echo "::error::Branch '$HEAD_REF' has no Linear key; use the issue's gitBranchName (jck-<n>-topic)"; exit 1; }
+
+  # Pinned gitleaks binary (gitleaks-action demands an org license on Depot CI).
+  gitleaks:
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: gitleaks (new commits; full history when there is no base)
+      env:
+        GITLEAKS_VERSION: 8.30.1
+        GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      run: |
+        curl -fsSLo /tmp/gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+        echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+        tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+        if [ -n "$BASE" ] && git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+          /tmp/gitleaks git --redact --no-banner --log-opts="${BASE}..HEAD" .
+        else
+          /tmp/gitleaks git --redact --no-banner .
+        fi
+
+  # Required verdict. Branch protection requires only `depot-ci / ci-result`.
+  ci-result:
+    name: ci-result
+    if: always()
+    needs: [branch-name, gitleaks, frontend, backend, terraform, docker]
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+    - name: Require every job to succeed (skipped branch-name on push is fine)
+      env:
+        RESULTS: ${{ join(needs.*.result, ' ') }}
+      run: |
+        echo "job results: $RESULTS"
+        for r in $RESULTS; do case "$r" in success|skipped) ;; *) exit 1 ;; esac; done
