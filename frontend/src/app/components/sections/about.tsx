@@ -24,6 +24,21 @@ import type { SkillsData } from '../../../types/skills';
 const ContactModal = lazy(() => import('./modals/ContactModal'));
 const ConnectAssistantModal = lazy(() => import('./modals/ConnectAssistantModal'));
 
+/** Biography copy supports inline HTTPS links; all other content stays text. */
+function renderBioParagraph(paragraph: string): React.ReactNode[] {
+  return paragraph.split(/(\[[^\]]+\]\(https:\/\/[^\s)]+\))/g).map((part, index) => {
+    const link = /^\[([^\]]+)\]\((https:\/\/[^\s)]+)\)$/.exec(part);
+    if (!link) return part;
+    try {
+      const url = new URL(link[2]);
+      if (url.protocol !== 'https:') return part;
+      return <a key={index} href={url.href} target="_blank" rel="noopener noreferrer">{link[1]}</a>;
+    } catch {
+      return part;
+    }
+  });
+}
+
 export interface CurrentRole {
   title: string;
   company?: string;
@@ -180,7 +195,7 @@ const TLDRContent = memo(
         <div className="about-details">
           <div className="brief-bio">
             {bioParagraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <p key={index}>{renderBioParagraph(paragraph)}</p>
             ))}
             {chatAvailable && (
               <p>
