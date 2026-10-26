@@ -365,11 +365,32 @@ def test_llms_full_has_the_demo_section(site):
     assert "https://www.jckail.com/demo" in text and "https://www.pointup.io/" in text
 
 
-def test_the_real_app_forwards_before_the_spa_fallback(client):
-    for slug, target in (("superteacher", "https://www.the-super-teacher.com/"), ("pointup", "https://www.pointup.io/")):
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+def test_the_real_app_forwards_before_the_spa_fallback(client, method):
+    for slug, target in (
+        ("superteacher", "https://www.the-super-teacher.com/"),
+        ("pointup", "https://www.pointup.io/"),
+        ("jobbr", "https://jobdog.ai/jobbr/"),
+    ):
         for path in (f"/{slug}", f"/{slug}/"):
-            response = client.get(path, headers=HTML, follow_redirects=False)
+            response = client.request(method, path, headers=HTML, follow_redirects=False)
             assert response.status_code == 302
             assert response.headers["location"] == target
             assert response.headers["x-robots-tag"] == "noindex"
+            assert response.headers["cache-control"] == "public, max-age=300"
     assert client.get("/api/labs").json() == [lab.model_dump() for lab in labs.load_labs().values()]
+
+
+def test_jobbr_is_forwarded_to_jobdog_and_is_no_longer_a_hosted_demo():
+    """A slug is a hosted lab or a forward, never both: /jobbr belongs to the live Jobdog app."""
+    assert labs.load_forwards()["jobbr"].target == "https://jobdog.ai/jobbr/"
+    assert "jobbr" not in labs.load_labs()
+
+
+def test_jobbr_forward_discovery_keeps_the_project_card(client):
+    assert "https://www.jckail.com/jobbr" not in client.get("/sitemap.xml").text
+    assert "https://jobdog.ai/jobbr/" in client.get("/llms.txt").text
+    project = load_projects().root["jobbr"]
+    assert str(project.link2) == "https://jobdog.ai/jobbr/#/"
+    assert project.link2_label == "Open app"
+    assert client.get("/api/labs/jobbr").status_code == 404

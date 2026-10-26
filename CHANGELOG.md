@@ -64,6 +64,11 @@ project doesn't cut version tags, so entries are grouped by date instead.
 - `CompanyLogo`'s `<img>` fallback pointed at `/images/projects/`.
 
 ### Changed
+- `jckail.com/jobbr` (and `www`) now forwards, as a 302, to the live Jobdog app at
+  `https://jobdog.ai/jobbr/` through `forwards.json`, the platform's own mechanism. The hosted
+  synthetic Jobbr demo that used to live at that slug is retired: its data, UI, tests and design
+  note are removed (they remain in git history). A slug is a hosted lab or a forward, never both.
+  The project card still links to the app.
 - **Together AI added as the current role** (Staff Software Engineer, 02/2025);
   Prove Identity closed at 01/2025. `Experience` and `Projects` became
   `RootModel`s so adding an entry is a data-only change — previously pydantic's
