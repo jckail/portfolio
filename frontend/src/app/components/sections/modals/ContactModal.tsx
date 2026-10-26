@@ -5,7 +5,7 @@ import '../../../../styles/components/contact-introduction.css';
 import { DialogShell } from '../../../../shared/components/dialog-shell';
 import { trackContactOpened, trackContactMessage } from '../../../../shared/utils/analytics';
 import { postJson, endpoints } from '../../../../shared/utils/api';
-import { CONTACT_DRAFT_EVENT, clearContactDraft, loadContactDraft, type ContactDraft } from '../../../../shared/utils/contact-draft';
+import { CONTACT_DRAFT_EVENT, captureContactDraft, clearContactDraft, loadContactDraft, type ContactDraft } from '../../../../shared/utils/contact-draft';
 import { recommendContactMessage, type ContactIntent } from '../../../../shared/utils/contact-recommendation';
 
 interface ContactModalProps { email: string; location: string; country: string; onClose: () => void }
@@ -102,6 +102,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ email, location, onClose })
       return;
     }
     const submittedRevision = revision.current;
+    const submittedDraft = captureContactDraft();
     const submitted = { ...form, from_email: form.from_email.trim(), company: form.company.trim() };
     setIsLoading(true);
     setError(null);
@@ -109,7 +110,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ email, location, onClose })
       const response = await postJson<SendResult>(endpoints.sendEmail, submitted);
       trackContactMessage(submitted.message.length);
       if (mounted.current && revision.current === submittedRevision) {
-        clearContactDraft();
+        clearContactDraft(submittedDraft);
         setSent(response ?? {});
       }
     } catch (failure) {
