@@ -22,6 +22,10 @@
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
+  /* Keep the close control and form reachable in short viewports. */
+  max-height: calc(100vh - var(--spacing-md) - var(--spacing-md));
+  max-height: calc(100dvh - var(--spacing-md) - var(--spacing-md));
+  overflow-y: auto;
   position: relative;
   box-shadow: var(--shadow-lg);
 }
