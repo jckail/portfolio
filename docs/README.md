@@ -10,7 +10,7 @@ for orientation; source and tests win when a document and the code disagree
 - [portfolio-assistant-runtime.md](./portfolio-assistant-runtime.md) — the `/agent` page and chat pane: access gating, tools, calendar, acceptance
 - [apps.md](./apps.md) — how other projects reach `jckail.com/<slug>` as hosted demos or forwards; slug rules and checklist
 - [labs.md](./labs.md) — the hosted labs and forwards platform
-- [apps/](./apps) — per-demo notes: [aibilling](./apps/aibilling.md), [cryptotrader](./apps/cryptotrader.md), [gopilot](./apps/gopilot.md), [jobbr](./apps/jobbr.md)
+- [apps/](./apps) — per-demo notes: [aibilling](./apps/aibilling.md), [cryptotrader](./apps/cryptotrader.md), [gopilot](./apps/gopilot.md)
 - [dataplayground.md](./dataplayground.md) — Data Playground integration
 - [data-operations-design.md](./data-operations-design.md) — Data Playground operations workbench design
 - [sabbatical-photos.md](./sabbatical-photos.md) — adding photos to the Sabbatical entry
