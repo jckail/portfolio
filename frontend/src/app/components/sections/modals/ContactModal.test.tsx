@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import ContactModal from './ContactModal';
 import { postJson } from '../../../../shared/utils/api';
 import { recommendContactMessage } from '../../../../shared/utils/contact-recommendation';
-import { saveContactDraft } from '../../../../shared/utils/contact-draft';
+import { CONTACT_DRAFT_KEY, loadContactDraft, saveContactDraft } from '../../../../shared/utils/contact-draft';
 
 vi.mock('../../../../shared/utils/api', async (original) => ({
   ...(await original<typeof import('../../../../shared/utils/api')>()), postJson: vi.fn(),
@@ -121,4 +121,41 @@ describe('contact introduction', () => {
     expect(screen.getByLabelText('Send me a message')).toHaveValue('A newer draft');
     expect(screen.getByRole('dialog').querySelector('a[href^="tel:"]')).toBeNull();
   });
+  it('preserves independently replaced storage when the pending submission succeeds', async () => {
+    let finish!: (result: object) => void;
+    vi.mocked(postJson).mockReturnValue(new Promise(resolve => { finish = resolve; }));
+    saveContactDraft({ from_email: 'visitor@example.com', company: 'Example Labs', subject: 'Sent', message: 'Original' });
+    renderModal();
+    fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
+    sessionStorage.setItem(CONTACT_DRAFT_KEY, JSON.stringify({ message: 'Replacement' }));
+    await act(async () => { finish({}); });
+    expect(loadContactDraft()).toEqual({ message: 'Replacement' });
+  });
+
+  it('normalizes an overlong persisted subject before sending and clears an untouched draft', async () => {
+    vi.mocked(postJson).mockResolvedValue({});
+    sessionStorage.setItem(CONTACT_DRAFT_KEY, JSON.stringify({ from_email: 'visitor@example.com', company: 'Example Labs', subject: 's'.repeat(200), message: 'Original' }));
+    renderModal();
+    expect(screen.getByLabelText('Subject')).toHaveValue('s'.repeat(150));
+    fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
+    await screen.findByRole('region', { name: 'Message delivered' });
+    expect(postJson).toHaveBeenCalledWith('/api/contact/send-email', expect.objectContaining({ subject: 's'.repeat(150) }));
+    expect(loadContactDraft()).toBeNull();
+  });
+
+  it('preserves a newer draft across unmount and reopen after a late success', async () => {
+    let finish!: (result: object) => void;
+    vi.mocked(postJson).mockReturnValue(new Promise(resolve => { finish = resolve; }));
+    saveContactDraft({ from_email: 'visitor@example.com', company: 'Example Labs', subject: 'Sent', message: 'Original' });
+    const first = renderModal();
+    fireEvent.submit(screen.getByRole('button', { name: 'Send message & connect' }).closest('form')!);
+    first.unmount();
+    saveContactDraft({ company: 'New Labs', message: 'New intent' });
+    renderModal();
+    await act(async () => { finish({}); });
+    expect(screen.getByLabelText('Send me a message')).toHaveValue('New intent');
+    expect(loadContactDraft()).toEqual({ company: 'New Labs', message: 'New intent' });
+    expect(screen.queryByRole('region', { name: 'Message delivered' })).toBeNull();
+  });
+
 });

@@ -14,6 +14,7 @@ test.describe('forwards', () => {
   for (const [slug, target] of [
     ['superteacher', 'https://www.the-super-teacher.com/'],
     ['pointup', 'https://www.pointup.io/'],
+    ['jobbr', 'https://jobdog.ai/jobbr/'],
   ] as const) {
     test(`/${slug} forwards to its own domain`, async ({ request }) => {
       for (const path of [`/${slug}`, `/${slug}/`]) {
@@ -29,9 +30,11 @@ test.describe('forwards', () => {
     const sitemap = await (await request.get(`${origin}/sitemap.xml`)).text();
     expect(sitemap).not.toContain('pointup');
     expect(sitemap).not.toContain('superteacher');
+    expect(sitemap).not.toContain('jobbr');
     const llms = await (await request.get(`${origin}/llms.txt`)).text();
     expect(llms).toContain('## Interactive demos');
     expect(llms).toContain('https://www.pointup.io/');
+    expect(llms).toContain('https://jobdog.ai/jobbr/');
   });
 });
 
@@ -42,7 +45,7 @@ test('an unknown lab slug shows the Not Found view', async ({ page }) => {
 });
 
 
-for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
+for (const slug of ['aibilling', 'gopilot', 'cryptotrader']) {
   test(`${slug} lab does not overflow horizontally at phone width`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${slug}`);
@@ -52,7 +55,7 @@ for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
   });
 }
 
-for (const slug of ['aibilling', 'jobbr', 'gopilot', 'cryptotrader']) {
+for (const slug of ['aibilling', 'gopilot', 'cryptotrader']) {
   test(`${slug} lab has exactly one main landmark and one h1`, async ({ page }) => {
     await page.goto(`/${slug}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
