@@ -4,6 +4,8 @@ import { render, screen, fireEvent, cleanup, within } from '@testing-library/rea
 
 import TechnicalSkills from './skills';
 
+const dataState = vi.hoisted(() => ({ error: null as string | null }));
+
 const skill = (display_name: string, general_category: string) => ({
   display_name,
   description: `${display_name} description`,
@@ -24,7 +26,7 @@ const skillsData = {
 };
 
 vi.mock('../../providers/data-provider', () => ({
-  useData: () => ({ skillsData, experienceData: null, projectsData: null, isLoading: false, error: null }),
+  useData: () => ({ skillsData, experienceData: null, projectsData: null, isLoading: false, error: dataState.error }),
 }));
 vi.mock('../../../shared/utils/analytics', () => ({ trackModalView: vi.fn() }));
 vi.mock('../../../shared/components/skill-icon/SkillIcon', () => ({ default: () => null }));
@@ -39,12 +41,36 @@ function renderCatalogue() {
 }
 
 beforeEach(() => {
+  dataState.error = null;
   window.history.replaceState({}, '', '/');
 });
 
 afterEach(() => cleanup());
 
 describe('Skills section', () => {
+  it('announces a loading failure and offers retry without exposing technical details', () => {
+    dataState.error = 'Synthetic fetch diagnostic: internal endpoint unavailable';
+    render(<TechnicalSkills />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not load the skills section');
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.queryByText(/Synthetic fetch diagnostic/)).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'View Python details' })).toBeNull();
+  });
+
+  it('returns to skill browsing when the provider error clears', () => {
+    dataState.error = 'Synthetic content loading failure';
+    const { rerender, container } = render(<TechnicalSkills />);
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    dataState.error = null;
+    rerender(<TechnicalSkills />);
+    expect(screen.queryByRole('alert')).toBeNull();
+    fireEvent.click(screen.getByText('Explore the full skills catalogue'));
+    container.querySelector('details')?.setAttribute('open', '');
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View Python details' })).toBeInTheDocument();
+  });
+
   it('groups skills under a heading per category with a count', () => {
     renderCatalogue();
     const heading = screen.getByRole('heading', { name: /Programming Languages/ });
