@@ -2,7 +2,7 @@
 
 A portfolio project can be reachable at `https://www.jckail.com/<slug>` in one of two ways. This page describes how
 the platform works. The step-by-step recipe for adding one is [`apps.md`](./apps.md), and each shipped lab has a
-design note in [`apps/`](./apps/) (`aibilling`, `cryptotrader`, `gopilot`, `jobbr`).
+design note in [`apps/`](./apps/) (`aibilling`, `cryptotrader`, `gopilot`).
 
 | Kind | `/<slug>` does | Data file |
 |---|---|---|
