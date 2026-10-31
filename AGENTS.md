@@ -223,7 +223,7 @@ Local app (bash, not PowerShell):
 # API + built SPA http://localhost:8080   docs at /docs
 ```
 
-On this Windows machine, run that script from Git Bash or WSL. Root `.env` is required and gitignored. Do not commit it.
+The host is the Mac Studio (the Windows machine and WSL are retired, JCK-2936): run that script from a normal macOS shell. Root `.env` is required and gitignored. Do not commit it.
 
 Browser e2e without installing Chromium libraries (needs Docker; run `npm ci` in `e2e/` once):
 
@@ -361,7 +361,7 @@ A behavior change without a test in the matching file is unfinished.
 
 ### This workstation
 
-These paths describe the owner's Windows workstation and may not exist on the current machine (the repo checkout here is on macOS under `/Users/jordankail/projects`; unverified). If a command is missing, say so and keep working from source. Do not block a code change on them.
+These paths describe the retired Windows/WSL workstation (JCK-2936) and do not exist on the Mac Studio. Treat them as a record of the old rig. If a command is missing, say so and keep working from source. Do not block a code change on them.
 
 - Shared graph: query before a wide search. Corpus root is `C:\Users\jkail\Documents\projects` (WSL `/mnt/c/Users/jkail/Documents/projects`). Omit `project_path`. Ask about `portfolio` symbols and check that returned files are under `portfolio/`, because blackbox and encore share the graph. After source edits: `wsl.exe -d Ubuntu --exec /home/jkail/.local/bin/graphify-shared update`. Never replace the shared graph with a child-repo build.
 - Agent Hub handoff: `C:/Users/jkail/.agents/agent-hub.cmd checkpoint --cwd` the portfolio repo. Memory tag `repo_portfolio__5205c8fa15194de3`. Store decisions and conventions, not secrets, transcripts, or `.env` values.
