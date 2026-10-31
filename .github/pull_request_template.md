@@ -14,5 +14,8 @@ Linear: JCK-
 <!-- Exact commands you ran and their result, plus the Depot CI run link. Say what you could not verify. -->
 - [ ] Depot CI `depot-ci / ci-result` green: <!-- https://depot.dev/orgs/f3bqc4vdfr/workflows/... -->
 
+## Decision record
+<!-- Link the ADR in docs/adr, or write 'none needed' with a reason. -->
+
 ## Risk and rollback
 <!-- What could break, who or what it affects, and how to undo it. -->
