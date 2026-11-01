@@ -3,7 +3,7 @@
 # commit gets the same bytes; Dependabot's docker ecosystem (dependabot.yml)
 # bumps the digests monthly to pick up Debian/Alpine security patches. The tag
 # stays alongside for readability and so Dependabot knows which line to track.
-FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS frontend-build
+FROM node:26-alpine@sha256:c6ad9e9c1d80f6eb607c26b4b0a132ff7a2344fad1c78ea3baa2a7d4c8de6d94 AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -14,14 +14,14 @@ COPY frontend/ ./
 ENV NODE_ENV=production
 RUN npm run build
 
-FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS copilot-build
+FROM node:26-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 AS copilot-build
 WORKDIR /app/copilot
 COPY copilot/package*.json ./
 RUN npm ci --ignore-scripts --omit=dev
 COPY copilot/*.mjs ./
 
 # Backend setup
-FROM python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+FROM python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913
 
 # The pinned base digest predates the Debian security fixes for these four
 # packages (Trivy HIGH: CVE-2026-103111 pcre2, CVE-2026-75804 and
